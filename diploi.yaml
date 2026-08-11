@@ -1,0 +1,8 @@
+diploiVersion: v1.0
+components:
+  - name: Node.js
+    identifier: game
+    package: https://github.com/diploi/component-nodejs#main
+  - name: Supabase
+    identifier: supabase
+    package: https://github.com/diploi/component-supabase#main
