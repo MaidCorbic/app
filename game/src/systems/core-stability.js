@@ -1,28 +1,11 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
-import { missions } from '../missions.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 
-// G1 startup safety: Phaser auto-starts RunnerScene before the first PLAY click.
-// Give that boot instance a valid mission instead of letting destructuring/create fail.
-const originalInit = RunnerScene.prototype.init;
+// G1 stability layer: keep recovery deterministic without rewriting the existing scene.
 const originalFail = RunnerScene.prototype.fail;
 const originalRespawnCheckpoint = RunnerScene.prototype.respawnCheckpoint;
 const originalTakeSciFiHit = RunnerScene.prototype.takeSciFiHit;
 const originalUpdate = RunnerScene.prototype.update;
-
-RunnerScene.prototype.init = function initWithSafeBoot(data = {}) {
-  const mission = data?.mission || missions[0];
-  return originalInit.call(this, {
-    ...data,
-    mission,
-    runId: Number.isFinite(data?.runId) ? data.runId : 0,
-    abilities: data?.abilities || [],
-    rain: data?.rain ?? true,
-    screenShake: data?.screenShake ?? true,
-    reducedMotion: data?.reducedMotion ?? false,
-    firstTimeTutorial: data?.firstTimeTutorial ?? false,
-  });
-};
 
 function freezePlayer(scene) {
   const body = scene.player?.body;
