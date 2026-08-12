@@ -3,13 +3,19 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js",
+    "start": "npm run build && node server.js",
     "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:progression": "node tests/progression.mjs",
+    "test:missions": "node tests/missions.mjs",
+    "test:start-flow": "node tests/start-flow.mjs",
+    "test:upgrades": "node tests/upgrades.mjs",
+    "test:build-system": "node tests/build-system.mjs",
+    "test:enemy-intel": "node tests/enemy-intel.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "dependencies": {
     "phaser": "^3.90.0",
