@@ -1,14 +1,10 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
-import { combatHitFeedback, playerDamageFeedback } from '../combat/CombatFeel.js';
 
 // G1 stability layer: keep recovery deterministic without rewriting the existing scene.
 const originalFail = RunnerScene.prototype.fail;
 const originalRespawnCheckpoint = RunnerScene.prototype.respawnCheckpoint;
 const originalTakeSciFiHit = RunnerScene.prototype.takeSciFiHit;
-const originalDefeatEnemy = RunnerScene.prototype.defeatEnemy;
-const originalUseBlaster = RunnerScene.prototype.useBlaster;
-const originalUseSword = RunnerScene.prototype.useSword;
 const originalUpdate = RunnerScene.prototype.update;
 
 function freezePlayer(scene) {
@@ -21,7 +17,6 @@ function freezePlayer(scene) {
 
 RunnerScene.prototype.takeSciFiHit = function takeSciFiHitStable(message) {
   if (this.respawning || this.finished || this.respawnGrace > 0 || this.healthInvulnerable > 0) return;
-  playerDamageFeedback(this);
   freezePlayer(this);
   originalTakeSciFiHit.call(this, message);
 };
@@ -75,33 +70,4 @@ RunnerScene.prototype.update = function updateWithMovementFeel(time, delta) {
     delta,
     maxSpeed: Number.isFinite(configuredMax) && configuredMax > 0 ? configuredMax : undefined,
   });
-};
-
-// G3 safe integration: keep the existing damage/weapon logic and add only feedback.
-RunnerScene.prototype.defeatEnemy = function defeatEnemyWithCombatFeel(enemy, method, power = 1) {
-  if (!enemy?.active) return;
-  const color = method === 'SWORD' || method === 'STOMP' ? 0xffd06e : 0x8df4ff;
-  combatHitFeedback(this, { target: enemy, color, shake: method === 'STOMP' ? 55 : 30, pause: method === 'STOMP' ? 30 : 18 });
-  originalDefeatEnemy.call(this, enemy, method, power);
-};
-
-RunnerScene.prototype.useBlaster = function useBlasterWithCombatFeel() {
-  if (this.cinematicActive) return;
-  const beforeAmmo = this.ammo;
-  originalUseBlaster.call(this);
-  if (this.ammo !== beforeAmmo && this.player?.active) {
-    const direction = this.player.flipX ? -1 : 1;
-    this.player.body?.setVelocityX(this.player.body.velocity.x - direction * 18);
-    if (!this.motionReduced) {
-      this.tweens.add({ targets: this.player, scaleX: 1.045, scaleY: .965, yoyo: true, duration: 55 });
-    }
-  }
-};
-
-RunnerScene.prototype.useSword = function useSwordWithCombatFeel() {
-  const beforeCooldown = this.swordCooldown;
-  originalUseSword.call(this);
-  if (this.swordCooldown > beforeCooldown && !this.motionReduced) {
-    this.tweens.add({ targets: this.player, scaleX: 1.06, scaleY: .94, yoyo: true, duration: 70 });
-  }
 };
