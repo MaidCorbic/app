@@ -7,10 +7,8 @@ import Phaser from 'phaser';
 export const COMBAT_FEEL = {
   damageFlashMs: 95,
   hitFlashMs: 75,
-  hitPauseMs: 45,
   playerHitShakeMs: 105,
   enemyHitShakeMs: 35,
-  projectileMaxLifetimeMs: 1200,
 };
 
 export function canAcceptCombatHit(scene, sourceId, now = 0, cooldownMs = 140) {
@@ -30,7 +28,7 @@ export function flashSprite(scene, sprite, tint, duration = COMBAT_FEEL.hitFlash
   });
 }
 
-export function combatHitFeedback(scene, { target = null, color = 0x8df4ff, shake = COMBAT_FEEL.enemyHitShakeMs, pause = COMBAT_FEEL.hitPauseMs } = {}) {
+export function combatHitFeedback(scene, { target = null, color = 0x8df4ff, shake = COMBAT_FEEL.enemyHitShakeMs } = {}) {
   if (!scene || scene.motionReduced) return;
   if (target?.active) {
     flashSprite(scene, target, color);
@@ -44,12 +42,6 @@ export function combatHitFeedback(scene, { target = null, color = 0x8df4ff, shak
     });
   }
   if (shake > 0) scene.cameras.main.shake(shake, .0012);
-  if (pause > 0 && scene.scene?.manager?.isActive?.(scene.scene.key)) {
-    scene.time.timeScale = 0.12;
-    scene.time.delayedCall(pause, () => {
-      if (scene.sys?.isActive()) scene.time.timeScale = 1;
-    });
-  }
 }
 
 export function playerDamageFeedback(scene) {
