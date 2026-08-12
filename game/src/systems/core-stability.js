@@ -1,9 +1,11 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
+import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 
 // G1 stability layer: keep recovery deterministic without rewriting the existing scene.
 const originalFail = RunnerScene.prototype.fail;
 const originalRespawnCheckpoint = RunnerScene.prototype.respawnCheckpoint;
 const originalTakeSciFiHit = RunnerScene.prototype.takeSciFiHit;
+const originalUpdate = RunnerScene.prototype.update;
 
 function freezePlayer(scene) {
   const body = scene.player?.body;
@@ -47,4 +49,25 @@ RunnerScene.prototype.respawnCheckpoint = function respawnCheckpointStable() {
     this.player.body.checkCollision.none = false;
   }
   this.respawnGrace = Math.max(this.respawnGrace || 0, 1100);
+};
+
+// G2 safe integration: keep RunnerScene's existing jump/dash/ability logic intact.
+// Only the final horizontal velocity is tuned for a smoother acceleration/turn feel.
+RunnerScene.prototype.update = function updateWithMovementFeel(time, delta) {
+  originalUpdate.call(this, time, delta);
+
+  if (this.finished || this.respawning || this.cinematicActive || this.dashTimer > 0) return;
+  if (!this.player?.body || !this.cursors || !this.keys) return;
+
+  const left = this.cursors.left.isDown || this.keys.A.isDown || this.mobileDirection === 'left';
+  const right = this.cursors.right.isDown || this.keys.D.isDown || this.mobileDirection === 'right';
+  const axis = (right ? 1 : 0) - (left ? 1 : 0);
+  const configuredMax = this.player.body.maxVelocity?.x;
+
+  applyHorizontalMovementFeel({
+    player: this.player,
+    axis,
+    delta,
+    maxSpeed: Number.isFinite(configuredMax) && configuredMax > 0 ? configuredMax : undefined,
+  });
 };
