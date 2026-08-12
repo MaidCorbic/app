@@ -1,11 +1,26 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 
-// G1 stability layer: keep recovery deterministic without rewriting the existing scene.
+// G1 startup guard: Phaser auto-constructs the configured scene before PLAY,
+// so protect the existing scene from being initialized without a mission.
+const originalInit = RunnerScene.prototype.init;
+const originalCreate = RunnerScene.prototype.create;
 const originalFail = RunnerScene.prototype.fail;
 const originalRespawnCheckpoint = RunnerScene.prototype.respawnCheckpoint;
 const originalTakeSciFiHit = RunnerScene.prototype.takeSciFiHit;
 const originalUpdate = RunnerScene.prototype.update;
+
+RunnerScene.prototype.init = function initWithSafeDefaults(data = {}) {
+  return originalInit.call(this, data || {});
+};
+
+RunnerScene.prototype.create = function createWhenReady() {
+  if (!this.mission) {
+    this.scene.stop();
+    return;
+  }
+  return originalCreate.call(this);
+};
 
 function freezePlayer(scene) {
   const body = scene.player?.body;
