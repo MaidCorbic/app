@@ -271,7 +271,9 @@ docs/
 Example:
 
 ```markdown
-![Ruunner Relay Gameplay](docs/screenshots/gameplay.png)
+![Ruunner Relay Gameplay](docs/screenshots/tutorial.jpg)
+![Ruunner Relay Gameplay](docs/screenshots/intro.jpg)
+![Ruunner Relay Gameplay](docs/screenshots/game.jpg)
 ```
 
 ---
