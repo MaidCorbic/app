@@ -255,26 +255,11 @@ Use your project's actual environment variable names when configuring the applic
 
 ## 📸 Screenshots
 
-Screenshots will be added as the application continues to develop.
-
-Recommended structure:
-
-```text
-docs/
-└── screenshots/
-    ├── dashboard.png
-    ├── gameplay.png
-    ├── profile.png
-    └── progression.png
-```
-
-Example:
-
-```markdown
-![Ruunner Relay Gameplay](docs/screenshots/tutorial.jpg)
-![Ruunner Relay Gameplay](docs/screenshots/intro.jpg)
-![Ruunner Relay Gameplay](docs/screenshots/game.jpg)
-```
+<p align="center">
+  <img src="docs/screenshots/tutorial.jpg" width="300">
+  <img src="docs/screenshots/intro.jpg" width="300">
+  <img src="docs/screenshots/game.jpg" width="300">
+</p>
 
 ---
 
