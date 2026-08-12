@@ -1,0 +1,17 @@
+.home-streak {
+  margin: 14px 0 0;
+  color: #ffd06e;
+  font: 800 8px 'DM Mono', monospace;
+  letter-spacing: 1px;
+}
+
+.finish-streak {
+  margin: 14px 0 0;
+  color: #ffd06e;
+  font: 800 9px 'DM Mono', monospace;
+  letter-spacing: .8px;
+}
+
+@media (max-width: 650px) {
+  .home-streak { margin-top: 10px; }
+}

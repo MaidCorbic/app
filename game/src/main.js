@@ -27,10 +27,21 @@ function renderMissionPreview() {
   preview.querySelector('.preview-status').textContent = allComplete ? 'ALL ROUTES COMPLETE' : hasProgress ? 'NEW ROUTE' : 'IN PROGRESS';
   preview.setAttribute('aria-label', `Current mission: ${mission.title}`);
 }
-function renderHomeProgress() { $('homeXp').textContent = String(state.xp).padStart(4, '0'); $('homeCompleted').textContent = state.completed.length; $('homeSignals').textContent = state.signals; $('continue').classList.toggle('hidden', !(state.xp || state.signals || state.completed.length)); renderMissionPreview(); }
+function renderStreak() {
+  const home = document.querySelector('.home-progress');
+  let homeStreak = home.querySelector('.home-streak');
+  if (!homeStreak) { homeStreak = document.createElement('p'); homeStreak.className = 'home-streak'; home.append(homeStreak); }
+  homeStreak.textContent = state.streak ? `${state.streak} NIGHT STREAK${state.streak === 1 ? '' : 'S'}` : 'BEGIN YOUR NIGHT STREAK';
+
+  const outcome = $('finish').querySelector('.outcome');
+  let finishStreak = outcome.querySelector('.finish-streak');
+  if (!finishStreak) { finishStreak = document.createElement('p'); finishStreak.className = 'finish-streak'; outcome.querySelector('.reward').after(finishStreak); }
+  finishStreak.textContent = state.lastStreakBonus ? `NIGHT STREAK ${state.streak} · +${state.lastStreakBonus} BONUS XP` : `NIGHT STREAK ${state.streak} · RETURN TOMORROW FOR A BONUS`;
+}
+function renderHomeProgress() { $('homeXp').textContent = String(state.xp).padStart(4, '0'); $('homeCompleted').textContent = state.completed.length; $('homeSignals').textContent = state.signals; $('continue').classList.toggle('hidden', !(state.xp || state.signals || state.completed.length)); renderMissionPreview(); renderStreak(); }
 function missionUnlocked(index) { return index === 0 || state.completed.includes(missions[index - 1].id); }
 function launch(index = missionIndex, paused = false) { missionIndex = index; const mission = missions[index]; $('intro').classList.toggle('hidden', !paused); $('play').classList.remove('hidden'); $('signalCount').textContent = '00'; $('progress').style.width = '0%'; $('hudXp').textContent = String(state.xp).padStart(4, '0'); $('district').textContent = mission.district.toUpperCase(); $('objective').textContent = mission.title.toUpperCase(); $('worldGoal').textContent = `DELIVER: ${mission.title.toUpperCase()}`; game.scene.start('runner', { mission, rain: state.rain }); if (paused) game.scene.pause('runner'); }
-function complete(signals) { const mission = missions[missionIndex]; state = completeMission(state, mission, signals); renderHomeProgress(); $('hudXp').textContent = String(state.xp).padStart(4, '0'); $('play').classList.add('hidden'); $('finishSignals').textContent = `${signals} / 18 SIGNALS`; $('finishXp').textContent = `+${mission.reward}`; $('finishLine').textContent = mission.unlocks ? `${mission.unlocks} is now available in the mission terminal.` : 'The last relay hums awake across the water.'; $('finish').classList.remove('hidden'); }
+function complete(signals) { const mission = missions[missionIndex]; state = completeMission(state, mission, signals); renderHomeProgress(); $('hudXp').textContent = String(state.xp).padStart(4, '0'); $('play').classList.add('hidden'); $('finishSignals').textContent = `${signals} / ${mission.signals.length} SIGNALS`; $('finishXp').textContent = `+${mission.reward + state.lastStreakBonus}`; $('finishLine').textContent = mission.unlocks ? `${mission.unlocks} is now available in the mission terminal.` : 'The last relay hums awake across the water.'; $('finish').classList.remove('hidden'); }
 function fail(message) { $('play').classList.add('hidden'); $('failLine').textContent = message; $('gameOver').classList.remove('hidden'); }
 function openMenu(tab = 'resume') { if (game.scene.isActive('runner')) game.scene.pause('runner'); $('pauseMenu').classList.remove('hidden'); renderPanel(tab); }
 function closeMenu() { $('pauseMenu').classList.add('hidden'); if (game.scene.isPaused('runner')) game.scene.resume('runner'); }
