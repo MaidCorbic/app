@@ -1,19 +1,16 @@
-/* Phase 1.1 - game-style title screen. Loaded after main-menu.css. */
+/* Phase 1.2 - centered game title screen. Loaded after main-menu.css. */
 #intro.intro{background:#03060c!important}
 #intro .menu-backdrop{filter:saturate(.92) contrast(1.06)}
 #intro .menu-backdrop::after{background:linear-gradient(180deg,#02050c18 0%,#02050c35 42%,#02050cd9 100%)!important}
-#intro .main-menu{padding:24px 24px 20px!important}
-#intro .main-menu-header{position:relative;z-index:5;opacity:.78}
-#intro .menu-brand{display:flex!important;color:#e9eef5!important;font-size:9px!important;letter-spacing:2px!important}
-#intro .menu-mark{width:26px!important;height:26px!important;border-color:#ffd06e!important}
-#intro .menu-version{font-size:8px!important;letter-spacing:1.6px!important;color:#8f9bad!important}
-#intro .main-menu-body{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100vh!important;display:grid!important;place-items:center!important;padding:70px 18px 30px!important;pointer-events:none!important}
-#intro .title-lockup{width:min(430px,92vw)!important;margin:0!important;padding:34px 26px 30px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:0!important;pointer-events:auto!important;border:1px solid #c9d7e51c!important;border-radius:8px!important;background:linear-gradient(180deg,#07101dcc,#040912d9)!important;box-shadow:0 28px 80px #00000070,0 0 0 1px #ffd06e08 inset,0 1px #ffffff0a inset!important;backdrop-filter:blur(8px)!important}
+#intro .main-menu{padding:0!important}
+#intro .main-menu-header{display:none!important}
+#intro .main-menu-body{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100vh!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:24px!important;box-sizing:border-box!important;pointer-events:none!important}
+#intro .title-lockup{width:min(430px,92vw)!important;margin:0!important;padding:34px 26px 30px!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:0!important;pointer-events:auto!important;border:1px solid #c9d7e51c!important;border-radius:8px!important;background:linear-gradient(180deg,#07101dcc,#040912d9)!important;box-shadow:0 28px 80px #00000070,0 0 0 1px #ffd06e08 inset,0 1px #ffffff0a inset!important;backdrop-filter:blur(8px)!important}
 #intro .title-lockup .eyebrow{margin:0 0 14px!important;color:#ffd06e!important;font-size:8px!important;letter-spacing:2.8px!important}
 #intro .title-lockup h1{margin:0!important;font-size:clamp(64px,14vw,104px)!important;line-height:.72!important;letter-spacing:-.09em!important;text-shadow:0 10px 44px #000!important}
-#intro .menu-tagline{max-width:330px!important;margin:25px auto 25px!important;color:#9eabbc!important;font-size:11px!important;line-height:1.65!important;letter-spacing:.15px!important}
+#intro .menu-tagline{max-width:330px!important;margin:25px auto 25px!important;color:#9eabbc!important;font-size:11px!important;line-height:1.65!important;letter-spacing:.15px!important;text-align:center!important}
 #intro .menu-actions{width:100%!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:10px!important}
-#intro .play-button{width:100%!important;max-width:310px!important;min-height:58px!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:22px!important;border-radius:5px!important}
+#intro .play-button{width:100%!important;max-width:310px!important;min-height:58px!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:0!important;border-radius:5px!important}
 #intro .continue-button{display:none!important}
 #intro .menu-actions>p{display:none!important}
 #intro .title-secondary{width:100%!important;max-width:310px!important;margin:0!important;padding:0!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important}
@@ -21,14 +18,13 @@
 #intro .menu-option-button span{color:#edf2f7!important;font:inherit!important}
 #intro .menu-option-button small{display:none!important}
 #intro .menu-option-button:hover,#intro .menu-option-button:focus-visible{transform:translateY(-2px)!important;border-color:#ffd06e80!important;background:#101e33f5!important;box-shadow:0 15px 34px #00000055,0 0 26px #ffd06e0d!important;outline:none!important}
-#intro .menu-option-button.exit-button{border-color:#d5deea24!important;color:#dce4ed!important}
-#intro .menu-option-button.exit-button span{color:#dce4ed!important}
-#intro .menu-option-button.exit-button:hover,#intro .menu-option-button.exit-button:focus-visible{border-color:#ff8e7d8c!important;background:#17151beF!important;color:#ffb1a4!important;box-shadow:0 15px 34px #00000055,0 0 28px #ff8e7d10!important}
+#intro .menu-option-button.exit-button{border-color:#c8d5e422!important;color:#edf2f7!important}
+#intro .menu-option-button.exit-button span{color:#edf2f7!important}
+#intro .menu-option-button.exit-button:hover,#intro .menu-option-button.exit-button:focus-visible{border-color:#ff8e7d8c!important;background:#17151bef!important;color:#ffb1a4!important;box-shadow:0 15px 34px #00000055,0 0 28px #ff8e7d10!important}
 #intro .menu-option-button.exit-button:hover span,#intro .menu-option-button.exit-button:focus-visible span{color:#ffb1a4!important}
-/* Keep mission/status HUD out of the title screen. It belongs to gameplay only. */
-#intro .home-progress,#intro .mission-preview,#intro .courier-status,#intro .courier-terminal,#intro [class*="courier-status"],#intro [id*="courier-status"]{display:none!important;visibility:hidden!important}
-#intro .main-menu-footer{display:none!important}
+/* No web-dashboard elements on the title screen. */
+#intro .home-progress,#intro .mission-preview,#intro .courier-status,#intro .courier-terminal,#intro [class*="courier-status"],#intro [id*="courier-status"],#intro .main-menu-footer{display:none!important;visibility:hidden!important}
 #intro .main-menu::after{content:'NIGHT RUN  •  CHAPTER 01';position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:4;color:#68778a;font:7px 'DM Mono',monospace;letter-spacing:2.4px;white-space:nowrap;pointer-events:none}
 #intro .title-lockup::after{content:'A / D   MOVE     •     SPACE   JUMP     •     ESC   PAUSE';display:block;margin-top:22px;color:#647287;font:7px 'DM Mono',monospace;letter-spacing:1.1px;white-space:nowrap}
 #intro .backdrop-particles{opacity:.3!important}
-@media (max-width:700px){#intro .main-menu{padding:18px 14px 16px!important}#intro .main-menu-header{display:none!important}#intro .main-menu-body{padding:28px 12px 20px!important}#intro .title-lockup{width:min(360px,94vw)!important;padding:28px 20px 24px!important}#intro .title-lockup h1{font-size:clamp(56px,18vw,84px)!important}#intro .menu-tagline{margin:21px auto 22px!important;font-size:10px!important}#intro .play-button,#intro .title-secondary{max-width:280px!important}#intro .menu-option-button{min-height:50px!important}#intro .title-lockup::after{font-size:6px!important;letter-spacing:.7px!important;margin-top:18px!important}#intro .main-menu::after{bottom:12px!important;font-size:6px!important}}
+@media (max-width:700px){#intro .main-menu-body{padding:16px 12px!important}#intro .title-lockup{width:min(360px,94vw)!important;padding:28px 20px 24px!important}#intro .title-lockup h1{font-size:clamp(56px,18vw,84px)!important}#intro .menu-tagline{margin:21px auto 22px!important;font-size:10px!important}#intro .play-button,#intro .title-secondary{max-width:280px!important}#intro .menu-option-button{min-height:50px!important}#intro .title-lockup::after{font-size:6px!important;letter-spacing:.7px!important;margin-top:18px!important}#intro .main-menu::after{bottom:12px!important;font-size:6px!important}}
