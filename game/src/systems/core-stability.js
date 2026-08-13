@@ -16,13 +16,13 @@ function freezePlayer(scene) {
 }
 
 RunnerScene.prototype.takeSciFiHit = function takeSciFiHitStable(message) {
-  if (this.respawning || this.finished || this.respawnGrace > 0 || this.healthInvulnerable > 0) return;
+  if (this.briefingProtected || this.respawning || this.finished || this.respawnGrace > 0 || this.healthInvulnerable > 0) return;
   freezePlayer(this);
   originalTakeSciFiHit.call(this, message);
 };
 
 RunnerScene.prototype.fail = function failStable(message) {
-  if (this.finished || this.respawning || this.respawnGrace > 0) return;
+  if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0) return;
   freezePlayer(this);
   originalFail.call(this, message);
 };
@@ -42,13 +42,13 @@ RunnerScene.prototype.respawnCheckpoint = function respawnCheckpointStable() {
   }
 
   originalRespawnCheckpoint.call(this);
-  freezePlayer(this);
 
   if (this.player?.body) {
     this.player.body.enable = true;
     this.player.body.checkCollision.none = false;
   }
   this.respawnGrace = Math.max(this.respawnGrace || 0, 1100);
+  this.healthInvulnerable = Math.max(this.healthInvulnerable || 0, 1100);
 };
 
 // G2 safe integration: keep RunnerScene's existing jump/dash/ability logic intact.
@@ -70,4 +70,14 @@ RunnerScene.prototype.update = function updateWithMovementFeel(time, delta) {
     delta,
     maxSpeed: Number.isFinite(configuredMax) && configuredMax > 0 ? configuredMax : undefined,
   });
+
+  const body = this.player.body;
+  const shouldDeployParachute = !body.blocked.down && this.player.y < 280 && body.velocity.y > 520;
+  if (shouldDeployParachute) {
+    body.setVelocityY(Math.min(body.velocity.y, 300));
+    if (!this.parachute) this.parachute = this.add.triangle(this.player.x, this.player.y - 54, 0, 20, 34, 0, 68, 20, 0x8df4ff, .8).setStrokeStyle(2, 0xdffcff).setDepth(12);
+    this.parachute.setPosition(this.player.x, this.player.y - 54);
+  } else if (this.parachute) {
+    this.parachute.destroy(); this.parachute = null;
+  }
 };

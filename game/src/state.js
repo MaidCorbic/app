@@ -9,6 +9,38 @@ const campaignRewards = [
   { id: 'chapter-three', missions: ['signal-storm'], xp: 200, credits: 80 },
   { id: 'chapter-four', missions: ['corporate-lockdown', 'final-relay'], xp: 350, credits: 150 },
 ];
+export const MAX_LEVEL = 100;
+export const dailyChallenges = [
+  { id: 'signals', label: 'Collect 50 Signals', target: 50, xp: 80, credits: 35 },
+  { id: 'contracts', label: 'Finish 3 Contracts', target: 3, xp: 100, credits: 50 },
+  { id: 'clean', label: 'Complete a clean run', target: 1, xp: 65, credits: 30 },
+  { id: 'dockTime', label: 'Finish Dead Drop under 90 seconds', target: 1, xp: 75, credits: 35 },
+];
+export const monthlyChallenges = [
+  { id: 'runs', label: 'Complete 20 deliveries', target: 20, xp: 450, credits: 180 },
+  { id: 'signals', label: 'Capture 400 Signals', target: 400, xp: 600, credits: 240 },
+  { id: 'bosses', label: 'Defeat 8 route bosses', target: 8, xp: 750, credits: 300 },
+];
+export const weeklyChallenges = [
+  { id: 'runs', label: 'Complete 8 deliveries', target: 8, xp: 220, credits: 90 },
+  { id: 'signals', label: 'Capture 150 Signals', target: 150, xp: 280, credits: 110 },
+  { id: 'clean', label: 'Complete 4 clean runs', target: 4, xp: 260, credits: 105 },
+];
+export const loginRewards = [25, 35, 50, 65, 85, 110, 160];
+export const seasonalChallenges = [
+  { id: 'routes', label: 'Secure every city route', target: 7, xp: 1200, credits: 500 },
+  { id: 'mastery', label: 'Earn 12 mastery badges', target: 12, xp: 1000, credits: 420 },
+  { id: 'bosses', label: 'Defeat 15 route bosses', target: 15, xp: 1400, credits: 600 },
+];
+export const achievementDefinitions = [
+  { id: 'first-hostile-down', label: 'FIRST HOSTILE DOWN', detail: 'Defeat any hostile.' },
+  { id: 'route-runner', label: 'CITY RUNNER', detail: 'Complete every city route.' },
+  { id: 'signal-hunter', label: 'SIGNAL HUNTER', detail: 'Capture 250 Signals.' },
+  { id: 'night-shift', label: 'NIGHT SHIFT', detail: 'Complete 25 deliveries.' },
+  { id: 'boss-breaker', label: 'BOSS BREAKER', detail: 'Defeat five route bosses.' },
+  { id: 'mastery-ace', label: 'MASTERY ACE', detail: 'Earn 12 mastery badges.' },
+  { id: 'relay-legend', label: 'RELAY LEGEND', detail: 'Reach level 100.' },
+];
 export const courierRanks = [
   { name: 'ROOKIE', threshold: 0, unlock: 'Rooftop route access' },
   { name: 'RUNNER', threshold: 300, unlock: 'Priority route intel' },
@@ -21,6 +53,22 @@ export function getCourierRank(xp) {
   const index = courierRanks.reduce((current, rank, rankIndex) => xp >= rank.threshold ? rankIndex : current, 0);
   const rank = courierRanks[index]; const next = courierRanks[index + 1];
   return { ...rank, index, next, progress: next ? (xp - rank.threshold) / (next.threshold - rank.threshold) : 1 };
+}
+export function xpForLevel(level) {
+  const normalizedLevel = Math.max(1, Math.min(MAX_LEVEL, Math.floor(level)));
+  const previousLevels = normalizedLevel - 1;
+  return 220 * previousLevels + 18 * previousLevels * previousLevels;
+}
+export function levelForXp(xp) {
+  let level = 1;
+  while (level < MAX_LEVEL && xp >= xpForLevel(level + 1)) level++;
+  return level;
+}
+export function getLevelProgress(xp) {
+  const level = levelForXp(xp);
+  const current = xpForLevel(level);
+  const next = level === MAX_LEVEL ? current : xpForLevel(level + 1);
+  return { level, current, next, progress: level === MAX_LEVEL ? 1 : (xp - current) / (next - current) };
 }
 const defaults = {
   signals: 0,
@@ -37,6 +85,10 @@ const defaults = {
   discoveredEnemies: [],
   activeModifier: null,
   daily: null,
+  weekly: null,
+  monthly: null,
+  seasonal: null,
+  login: { date: null, streak: 0, claimed: false },
   npcClaims: [],
   worldStory: { chapter: 1, lore: [] },
   storyProgress: { chapter: 1, lore: [] },
@@ -76,6 +128,55 @@ function today() {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
+function monthKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; }
+function weekKey(date = new Date()) { const start = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())); start.setUTCDate(start.getUTCDate() + 4 - (start.getUTCDay() || 7)); const yearStart = new Date(Date.UTC(start.getUTCFullYear(), 0, 1)); return `${start.getUTCFullYear()}-W${String(Math.ceil(((start - yearStart) / 86400000 + 1) / 7)).padStart(2, '0')}`; }
+function seasonKey(date = new Date()) { return `${date.getFullYear()}-S${Math.floor(date.getMonth() / 3) + 1}`; }
+function challengeState(current, period) { return current?.period === period ? current : { period, progress: {}, claimed: [] }; }
+function challengeProgress(state, mission, signals, cleanRun, contractComplete, bossDefeated) {
+  const daily = state.daily?.date === today() ? state.daily : { date: today(), progress: {}, claimed: [] };
+  const monthly = challengeState(state.monthly, monthKey());
+  const weekly = challengeState(state.weekly, weekKey());
+  const seasonal = challengeState(state.seasonal, seasonKey());
+  return {
+    daily: { ...daily, progress: { ...daily.progress, signals: (daily.progress.signals || 0) + signals, contracts: (daily.progress.contracts || 0) + (contractComplete ? 1 : 0), clean: (daily.progress.clean || 0) + (cleanRun ? 1 : 0), dockTime: (daily.progress.dockTime || 0) + (mission.id === 'dead-drop' && signals >= 0 ? 1 : 0) } },
+    weekly: { ...weekly, progress: { ...weekly.progress, runs: (weekly.progress.runs || 0) + 1, signals: (weekly.progress.signals || 0) + signals, clean: (weekly.progress.clean || 0) + (cleanRun ? 1 : 0) } },
+    monthly: { ...monthly, progress: { ...monthly.progress, runs: (monthly.progress.runs || 0) + 1, signals: (monthly.progress.signals || 0) + signals, bosses: (monthly.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
+    seasonal: { ...seasonal, progress: { ...seasonal.progress, routes: state.completed.includes(mission.id) ? state.completed.length : state.completed.length + 1, mastery: 0, bosses: (seasonal.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
+  };
+}
+export function earnedAchievementIds(state) {
+  const masteryCount = Object.values(state.mastery || {}).reduce((total, badges) => total + badges.length, 0);
+  const bossWins = Object.keys(state.missionStats || {}).filter(id => state.achievements?.includes(`boss-${id}`)).length;
+  return [
+    state.achievements?.includes('first-hostile-down') && 'first-hostile-down',
+    state.completed?.length >= 7 && 'route-runner',
+    state.signals >= 250 && 'signal-hunter',
+    state.totalRuns >= 25 && 'night-shift',
+    bossWins >= 5 && 'boss-breaker',
+    masteryCount >= 12 && 'mastery-ace',
+    state.level >= MAX_LEVEL && 'relay-legend',
+  ].filter(Boolean);
+}
+export function claimChallenge(state, scope, id) {
+  const definitions = { daily: dailyChallenges, weekly: weeklyChallenges, monthly: monthlyChallenges, seasonal: seasonalChallenges }[scope];
+  const progress = state[scope];
+  const challenge = definitions?.find(entry => entry.id === id);
+  if (!challenge || !progress || progress.claimed?.includes(id) || (progress.progress?.[id] || 0) < challenge.target) return state;
+  const xp = state.xp + challenge.xp;
+  const next = { ...state, xp, credits: state.credits + challenge.credits, level: levelForXp(xp), [scope]: { ...progress, claimed: [...progress.claimed, id] } };
+  next.achievements = [...new Set([...(next.achievements || []), ...earnedAchievementIds(next)])];
+  saveState(next);
+  return next;
+}
+export function claimLoginReward(state) {
+  const date = today(); const login = state.login || defaults.login;
+  if (login.date === date && login.claimed) return state;
+  const previous = login.date ? daysBetween(login.date, date) : 0;
+  const streak = previous === 1 ? Math.min(7, login.streak + 1) : 1;
+  const credits = loginRewards[streak - 1]; const xp = state.xp + credits * 2;
+  const next = { ...state, xp, credits: state.credits + credits, level: levelForXp(xp), login: { date, streak, claimed: true } };
+  next.achievements = [...new Set([...(next.achievements || []), ...earnedAchievementIds(next)])]; saveState(next); return next;
+}
 
 function daysBetween(previous, current) {
   const [previousYear, previousMonth, previousDay] = previous.split('-').map(Number);
@@ -91,7 +192,7 @@ export function loadState() {
     const completed = Array.isArray(saved.completed) ? saved.completed.map(id => legacyIds[id] || id) : [];
     const daily = saved.daily?.date === today() ? saved.daily : { date: today(), progress: {}, claimed: [] };
     const unlockedDistricts = districts.filter(district => !district.unlockMission || completed.includes(district.unlockMission)).map(district => district.id);
-    return { ...defaults, ...saved, daily, completed, storyProgress: saved.storyProgress || saved.worldStory || defaults.storyProgress, unlockedDistricts: saved.unlockedDistricts || unlockedDistricts, rank: saved.rank || getCourierRank(saved.xp || 0).name, unlockedMissions: saved.unlockedMissions || ['first-delivery'] };
+    return { ...defaults, ...saved, daily, weekly: challengeState(saved.weekly, weekKey()), monthly: challengeState(saved.monthly, monthKey()), seasonal: challengeState(saved.seasonal, seasonKey()), completed, level: levelForXp(saved.xp || 0), storyProgress: saved.storyProgress || saved.worldStory || defaults.storyProgress, unlockedDistricts: saved.unlockedDistricts || unlockedDistricts, rank: saved.rank || getCourierRank(saved.xp || 0).name, unlockedMissions: saved.unlockedMissions || ['first-delivery'] };
   } catch {
     return { ...defaults };
   }
@@ -139,9 +240,8 @@ export function completeMission(state, mission, signals, elapsedMs = 0, runStats
   const rivalCredits = newRivalVictory ? 25 : 0;
   const packageBonus = runStats.package?.condition && runStats.packageCondition === 100 ? Math.floor(mission.reward * .25) : 0;
   const credits = Math.floor(mission.reward / 10) + (runStats.secrets || 0) * 3 + rating * 5 + completedObjectives.length * 3 + (contractComplete ? contract.credits : 0) + (modifier?.credits || 0) + Math.floor(packageBonus / 10);
-  const daily = state.daily?.date === runDate ? state.daily : { date: runDate, progress: {}, claimed: [] };
-  const dailyProgress = { ...daily.progress, signals: (daily.progress.signals || 0) + signals, contracts: (daily.progress.contracts || 0) + (contractComplete ? 1 : 0), clean: (daily.progress.clean || 0) + (!runStats.collisions && !runStats.falls ? 1 : 0), dockTime: (daily.progress.dockTime || 0) + (mission.id === 'dead-drop' && elapsedMs <= 90000 ? 1 : 0) };
-  const dailyGoals = { signals: [50, 80, 35], contracts: [3, 100, 50], clean: [1, 65, 30], dockTime: [1, 75, 35] }; const newlyClaimed = Object.keys(dailyGoals).filter(id => dailyProgress[id] >= dailyGoals[id][0] && !daily.claimed.includes(id)); const dailyXp = newlyClaimed.reduce((total, id) => total + dailyGoals[id][1], 0); const dailyCredits = newlyClaimed.reduce((total, id) => total + dailyGoals[id][2], 0);
+  const challengeUpdates = challengeProgress(state, mission, signals, cleanRun, contractComplete, runStats.bossDefeated);
+  challengeUpdates.daily.progress.dockTime = (challengeUpdates.daily.progress.dockTime || 0) - (mission.id === 'dead-drop' ? 1 : 0) + (mission.id === 'dead-drop' && elapsedMs <= 90000 ? 1 : 0);
   const district = districts.find(district => district.missions.includes(mission.id));
   const previousDistrict = state.districtProgress?.[district?.id] || { missions: 0, signals: 0, secrets: 0, bestScore: 0 };
   const completedMissionIds = new Set([...state.completed, mission.id]);
@@ -149,13 +249,16 @@ export function completeMission(state, mission, signals, elapsedMs = 0, runStats
   const newCampaignRewards = campaignRewards.filter(chapter => chapter.missions.every(id => completedMissionIds.has(id)) && !claimedChapters.includes(chapter.id));
   const campaignXp = newCampaignRewards.reduce((total, chapter) => total + chapter.xp, 0);
   const campaignCredits = newCampaignRewards.reduce((total, chapter) => total + chapter.credits, 0);
+  const modifierXp = modifier?.xp || 0;
+  const contractXp = contractComplete ? contract.xp : 0;
+  const totalXp = earned + packageBonus + modifierXp + campaignXp + rivalXp + contractXp;
   const next = {
     ...state,
     signals: state.signals + signals,
-    xp: state.xp + earned + packageBonus + (modifier?.xp || 0) + dailyXp + campaignXp + rivalXp,
-    credits: state.credits + credits + dailyCredits + campaignCredits + rivalCredits,
+    xp: state.xp + totalXp,
+    credits: state.credits + credits + campaignCredits + rivalCredits,
     campaign: { claimedChapters: [...claimedChapters, ...newCampaignRewards.map(chapter => chapter.id)] },
-    daily: { ...daily, progress: dailyProgress, claimed: [...daily.claimed, ...newlyClaimed] },
+    ...challengeUpdates,
     discoveredSecrets: state.discoveredSecrets + Math.max(0, (runStats.secrets || 0) - (previousMission.bestSecrets || 0)),
     districtProgress: district ? { ...state.districtProgress, [district.id]: { missions: Math.max(previousDistrict.missions, previousMission.completed ? previousDistrict.missions : previousDistrict.missions + 1), signals: Math.max(previousDistrict.signals, signals), secrets: Math.max(previousDistrict.secrets, runStats.secrets || 0), bestScore: Math.max(previousDistrict.bestScore, score) } } : state.districtProgress,
     rivalProgress: rivalMissionIds.has(mission.id) ? { ...state.rivalProgress, encounters: [...new Set([...(state.rivalProgress?.encounters || []), mission.id])], victories: newRivalVictory ? [...previousRivalVictories, mission.id] : previousRivalVictories, wins: (state.rivalProgress?.wins || 0) + (newRivalVictory ? 1 : 0) } : state.rivalProgress,
@@ -168,16 +271,18 @@ export function completeMission(state, mission, signals, elapsedMs = 0, runStats
     bestRun: Math.max(state.bestRun, score),
     mastery: { ...state.mastery, [mission.id]: missionMastery },
     missionStats: { ...state.missionStats, [mission.id]: { completed: true, bestScore: Math.max(previousMission.bestScore, score), bestTime: !previousMission.bestTime || elapsedMs < previousMission.bestTime ? elapsedMs : previousMission.bestTime, bestRating: Math.max(previousMission.bestRating || 0, rating), bestSecrets: Math.max(previousMission.bestSecrets || 0, runStats.secrets || 0), bestSignals: Math.max(previousMission.bestSignals || 0, signals), mastery: missionMastery } },
-    lastXpBreakdown: { completion: mission.reward, signals: signalBonus, secrets: secretBonus, optional: optionalBonus, streak: streakBonus, contract: contractComplete ? contract.xp : 0, campaign: campaignXp, campaignChapters: newCampaignRewards.map(chapter => chapter.id), rival: rivalXp, credits: credits + campaignCredits + rivalCredits, total: earned + (contractComplete ? contract.xp : 0) + campaignXp + rivalXp, objectives: completedObjectives.map(objective => objective.label) },
+    lastXpBreakdown: { completion: mission.reward, signals: signalBonus, secrets: secretBonus, optional: optionalBonus, streak: streakBonus, package: packageBonus, modifier: modifierXp, daily: 0, contract: contractXp, campaign: campaignXp, campaignChapters: newCampaignRewards.map(chapter => chapter.id), rival: rivalXp, credits: credits + campaignCredits + rivalCredits, total: totalXp, objectives: completedObjectives.map(objective => objective.label) },
     tutorialSeen: true,
     achievements: [...new Set([...(state.achievements || []), `route-${mission.id}`, cleanRun && `clean-${mission.id}`, signals === mission.signals.length && `signals-${mission.id}`, runStats.enemyDefeats > 0 && 'first-hostile-down', runStats.bossDefeated && `boss-${mission.id}`].filter(Boolean))],
     abilities: newAbilities.length ? [...state.abilities, ...newAbilities] : state.abilities,
     lastAbilityUnlock: ['dash', 'doubleJump', 'wallJump'].includes(newAbilities[0]) ? newAbilities[0] : null,
   };
-  if (contractComplete) { next.xp += contract.xp; next.contractStats = { ...(state.contractStats || {}), [contract.id]: { completed: true, bestTime: elapsedMs } }; }
+  if (contractComplete) next.contractStats = { ...(state.contractStats || {}), [contract.id]: { completed: true, bestTime: elapsedMs } };
   if (!next.completed.includes(mission.id)) next.completed = [...next.completed, mission.id];
   next.unlockedDistricts = districts.filter(district => !district.unlockMission || next.completed.includes(district.unlockMission)).map(district => district.id);
-  while (next.xp >= next.level * 250) next.level++;
+  next.seasonal.progress.mastery = Object.values(next.mastery).reduce((total, badges) => total + badges.length, 0);
+  next.level = levelForXp(next.xp);
+  next.achievements = [...new Set([...next.achievements, ...earnedAchievementIds(next)])];
   const newRank = getCourierRank(next.xp); next.rank = newRank.name; next.lastRankUp = newRank.index > oldRank.index ? newRank : null;
   saveState(next);
   return next;

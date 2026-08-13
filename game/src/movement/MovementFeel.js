@@ -19,6 +19,14 @@ export const MOVEMENT_FEEL = {
   maxFallSpeed: 1180,
 };
 
+// Phaser.Math has no MoveTowards helper (that's a Unity API name), so we
+// implement the standard "move current towards target by at most maxDelta"
+// behavior locally.
+function moveTowards(current, target, maxDelta) {
+  if (Math.abs(target - current) <= maxDelta) return target;
+  return current + Math.sign(target - current) * maxDelta;
+}
+
 export function createMovementFeelState(now = 0) {
   return {
     jumpPressedAt: -Infinity,
@@ -43,7 +51,7 @@ export function applyHorizontalMovementFeel({ player, axis = 0, delta = 16, maxS
       ? MOVEMENT_FEEL.turnAcceleration
       : (grounded ? MOVEMENT_FEEL.groundAcceleration : MOVEMENT_FEEL.airAcceleration));
 
-  body.setVelocityX(Phaser.Math.MoveTowards(body.velocity.x, target, rate * (delta / 1000)));
+  body.setVelocityX(moveTowards(body.velocity.x, target, rate * (delta / 1000)));
   body.setVelocityX(Phaser.Math.Clamp(body.velocity.x, -configuredMax, configuredMax));
   if (Math.abs(body.velocity.x) > 30 && player.setFlipX) player.setFlipX(body.velocity.x < 0);
   return true;

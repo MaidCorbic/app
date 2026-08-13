@@ -12,7 +12,8 @@
     "test:start-flow": "node tests/start-flow.mjs",
     "test:upgrades": "node tests/upgrades.mjs",
     "test:build-system": "node tests/build-system.mjs",
-    "test:enemy-intel": "node tests/enemy-intel.mjs"
+    "test:enemy-intel": "node tests/enemy-intel.mjs",
+    "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
@@ -20,5 +21,8 @@
   "dependencies": {
     "phaser": "^3.90.0",
     "vite": "^8.2.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
   }
 }

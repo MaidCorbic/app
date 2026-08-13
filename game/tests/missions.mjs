@@ -21,6 +21,7 @@ for (const mission of missions) {
     assert.ok(section.start >= 800 && section.end - section.start >= 700, `${mission.id} chase section must be readable`);
     assert.ok(mission.checkpoints.some(([x]) => x >= section.start - 120 && x < section.start) || mission.checkpoints.some(([x]) => x > section.end && x <= section.end + 260), `${mission.id} chase needs a nearby recovery checkpoint`);
   }
+  if (mission.id !== 'first-delivery' && mission.id !== 'dead-drop') assert.ok(mission.boss?.type && mission.boss.health > 0 && mission.boss.name, `${mission.id} needs a distinct route boss`);
 }
 
 assert.equal(missions.map(mission => mission.difficulty.split(' ')[0]).join(','), '1/5,2/5,3/5,4/5,5/5,6/5,7/5');

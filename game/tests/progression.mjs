@@ -7,7 +7,7 @@ const importSource = async (relativePath) => {
 };
 
 const { missions } = await importSource('../src/missions.js');
-const { completeMission, getCourierRank, loadState, saveState } = await importSource('../src/state.js');
+const { MAX_LEVEL, claimChallenge, claimLoginReward, completeMission, getCourierRank, getLevelProgress, levelForXp, loadState, saveState, xpForLevel } = await importSource('../src/state.js');
 
 const store = new Map();
 globalThis.localStorage = {
@@ -76,11 +76,25 @@ assert.deepEqual(reloaded.discoveredEnemies, ['chicken'], 'Enemy Codex discoveri
 
 const credited = completeMission(reloaded, first, first.signals.length, 65000, { jumps: 6, collisions: 0, falls: 0, modifier: { id: 'noDash', xp: 35, credits: 18 } });
 assert.ok(credited.credits > reloaded.credits, 'Mission and modifier credits persist as progression currency');
+assert.equal(credited.xp - reloaded.xp, credited.lastXpBreakdown.total, 'Displayed XP total matches the XP persisted for a completed run');
 assert.ok(credited.daily?.date, 'Local daily progress is created for completed runs');
 assert.ok(credited.daily.progress.signals >= first.signals.length, 'Daily Signal challenge progress accumulates from runs');
+assert.ok(credited.weekly?.period, 'Weekly mission progress is created for completed runs');
 assert.ok(credited.unlockedDistricts.includes('industrial'), 'District unlocks persist from completed mission progression');
 assert.ok(credited.districtProgress['old-city'], 'District records persist mission progress');
 assert.ok(credited.storyProgress, 'Story framework is present in persistent state');
 assert.ok(Array.isArray(credited.rivalProgress.encounters), 'Rival framework is present in persistent state');
+
+const dailyReady = { ...credited, daily: { ...credited.daily, progress: { ...credited.daily.progress, clean: 1 }, claimed: [] } };
+const claimedDaily = claimChallenge(dailyReady, 'daily', 'clean');
+assert.equal(claimedDaily.daily.claimed.includes('clean'), true, 'Completed daily challenges are claimable exactly once');
+assert.ok(claimedDaily.xp > dailyReady.xp, 'Claiming a challenge awards XP');
+assert.equal(claimChallenge(claimedDaily, 'daily', 'clean'), claimedDaily, 'Claimed challenges cannot be rewarded twice');
+const loginClaimed = claimLoginReward(credited);
+assert.ok(loginClaimed.credits > credited.credits, 'Login rewards grant the persistent credit currency');
+assert.equal(claimLoginReward(loginClaimed), loginClaimed, 'Login rewards are claimable only once per day');
+assert.equal(levelForXp(xpForLevel(MAX_LEVEL)), MAX_LEVEL, 'The progression curve reaches level 100');
+assert.equal(levelForXp(xpForLevel(MAX_LEVEL) + 999999), MAX_LEVEL, 'The progression curve never exceeds level 100');
+assert.equal(getLevelProgress(xpForLevel(MAX_LEVEL)).progress, 1, 'Level 100 reports complete progress');
 
 console.log('Progression persistence tests passed.');

@@ -187,11 +187,7 @@
 
 #intro .title-secondary { display: grid; grid-template-columns: repeat(2, minmax(132px, 1fr)); width: min(300px, 100%); justify-content: center; gap: 10px; margin-top: 22px; }
 #intro .title-secondary .utility-play-button { width: 100%; min-height: 43px; padding: 10px 12px; display: grid; grid-template-columns: 16px 1fr 16px; align-items: center; gap: 7px; border: 1px solid #fff0be; border-radius: 3px; color: #131721; background: linear-gradient(135deg, #ffe2a2, #ffc767); box-shadow: 0 12px 36px #ffcf6a35, inset 0 1px #fff9e7b8; font: 800 8px 'DM Mono', monospace; letter-spacing: .75px; text-align: left; }
-#intro .title-secondary button::before { content: '◈'; color: #7a4b1a; font-size: 12px; }
-#intro .title-secondary button::after { content: '→'; color: #7a4b1a; font: 800 15px Manrope, sans-serif; text-align: right; transition: transform .18s ease; }
-#intro .title-secondary button[data-title-panel='credits']::before { content: '✦'; }
-#intro .title-secondary button:hover, #intro .title-secondary button:focus-visible { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 11px 25px #ffcf6a55, inset 0 1px #fff9e7b8; outline: 2px solid #f7fbff; outline-offset: 3px; }
-#intro .title-secondary button:hover::after, #intro .title-secondary button:focus-visible::after { transform: translateX(3px); }
+#intro .title-secondary button:hover, #intro .title-secondary button:focus-visible { transform: none; filter: none; box-shadow: none; outline: 2px solid #f7fbff; outline-offset: 3px; }
 #intro .title-secondary button:active { transform: translateY(0) scale(.98); }
 
 .title-panel { position: fixed; z-index: 10; inset: 0; display: grid; place-items: center; padding: 24px; background: #030711c9; backdrop-filter: blur(10px); }
@@ -200,6 +196,7 @@
 .title-panel-card h2 { margin: 0; color: #f5f0e7; font-size: clamp(30px, 6vw, 48px); line-height: .9; letter-spacing: -.06em; }
 .title-panel-card #titlePanelContent { margin: 24px auto 0; color: #c3cdd9; font-size: 14px; line-height: 1.7; }
 .title-panel-card #titlePanelContent b { color: #ffd06e; font-family: 'DM Mono', monospace; font-size: 12px; }
+.title-settings{display:grid;gap:10px;text-align:left}.title-settings label{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px;border:1px solid #b9cbe035;background:#07101c80;font:700 10px 'DM Mono',monospace;color:#dce8f1;letter-spacing:.5px}.title-settings button{min-width:58px;border:1px solid #ffd06e88;background:#ffd06e16;color:#ffd06e;padding:7px 9px;font:700 10px 'DM Mono',monospace;cursor:pointer}.title-settings input{width:130px;accent-color:#ffd06e}.title-settings p{margin:6px 0 0;font-size:12px;line-height:1.65}
 .title-panel-close { position: absolute; top: 12px; right: 14px; width: 30px; height: 30px; border: 1px solid #b9cbe052; color: #c3cdd9; background: transparent; font-size: 21px; cursor: pointer; }
 .title-panel-close:hover, .title-panel-close:focus-visible { color: #ffd06e; border-color: #ffd06e; outline: none; }
 
