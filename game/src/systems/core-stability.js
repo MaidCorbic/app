@@ -1,30 +1,66 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 
+const originalCreate = RunnerScene.prototype.create;
 const fail = RunnerScene.prototype.fail;
 const respawn = RunnerScene.prototype.respawnCheckpoint;
 const hit = RunnerScene.prototype.takeSciFiHit;
 const update = RunnerScene.prototype.update;
 const stop = scene => scene.player?.body?.setVelocity(0, 0);
 
+// Every mission owns its Phaser lifecycle. A finished/failed run is terminal; stop the
+// scene so timers, physics bodies and listeners cannot leak into the next mission.
+RunnerScene.prototype.create = function stableCreate(...args) {
+  const mission = this.mission;
+  if (!mission?.id || !mission.spawn || !mission.goal) {
+    console.error('[Relay Runner] Invalid mission data; scene will not start.', mission);
+    this.scene.stop();
+    return;
+  }
+  const runId = this.runId;
+  const stopWhenFinished = resultRunId => {
+    if (resultRunId !== runId || resultRunId !== this.runId) return;
+    if (this.scene.isActive()) this.scene.stop();
+  };
+  const completeHandler = (_signals, _elapsed, _stats, resultRunId) => stopWhenFinished(resultRunId);
+  const failHandler = (_message, _deaths, resultRunId) => stopWhenFinished(resultRunId);
+  this.game.events.on('complete', completeHandler);
+  this.game.events.on('game-over', failHandler);
+  this.events.once('shutdown', () => {
+    this.game.events.off('complete', completeHandler);
+    this.game.events.off('fail', failHandler);
+  });
+  try {
+    return originalCreate.apply(this, args);
+  } catch (error) {
+    this.game.events.off('complete', completeHandler);
+    this.game.events.off('fail', failHandler);
+    console.error('[Relay Runner] Mission scene creation failed:', error);
+    this.scene.stop();
+    throw error;
+  }
+};
+
 RunnerScene.prototype.fail = function stableFail(message) {
   if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0) return;
-  stop(this); fail.call(this, message);
+  stop(this); return fail.call(this, message);
 };
 RunnerScene.prototype.takeSciFiHit = function stableHit(message) {
-  if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0 || this.healthInvulnerable > 0) return;
-  stop(this); hit.call(this, message);
+  if (this.briefingProtected || this.respawning || this.finished || this.respawnGrace > 0 || this.healthInvulnerable > 0) return;
+  stop(this); return hit.call(this, message);
 };
 RunnerScene.prototype.respawnCheckpoint = function stableRespawn() {
   const spawn = this.mission?.spawn;
-  if ((!this.checkpoint || !Number.isFinite(this.checkpoint.x) || !Number.isFinite(this.checkpoint.y)) && spawn) this.checkpoint = { x: spawn.x, y: spawn.y, signals: new Set(), secrets: new Set() };
+  if ((!this.checkpoint || !Number.isFinite(this.checkpoint.x) || !Number.isFinite(this.checkpoint.y) || this.checkpoint.y > 760) && spawn) {
+    this.checkpoint = { x: Number.isFinite(spawn.x) ? spawn.x : 120, y: Number.isFinite(spawn.y) ? spawn.y : 520, signals: new Set(), secrets: new Set() };
+  }
   respawn.call(this);
   if (this.player?.body) { this.player.body.enable = true; this.player.body.checkCollision.none = false; }
   this.respawnGrace = Math.max(this.respawnGrace || 0, 1100);
   this.healthInvulnerable = Math.max(this.healthInvulnerable || 0, 1100);
 };
 
-// Mobile joystick: use the same A/D path as desktop, avoiding a second physics system.
+// Mobile joystick and keyboard share RunnerScene's existing movement path.
 function installTouchControls() {
   if (window.__relayTouchInstalled) return;
   window.__relayTouchInstalled = true;
@@ -45,8 +81,6 @@ function installTouchControls() {
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installTouchControls, { once: true }); else installTouchControls();
 
-// Bounded enemy behavior: patrol, chase, turn, and light evasive movement without
-// creating extra timers/tweens for every enemy.
 function enemyAI(scene, time) {
   if (!scene.enemies || !scene.player || scene.cinematicActive || scene.respawning || scene.finished || time - (scene._aiAt || 0) < 100) return;
   scene._aiAt = time;
