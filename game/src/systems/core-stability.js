@@ -23,9 +23,9 @@ RunnerScene.prototype.create = function stableCreate(...args) {
     if (this.scene.isActive()) this.scene.stop();
   };
   const completeHandler = (_signals, _elapsed, _stats, resultRunId) => stopWhenFinished(resultRunId);
-  const failHandler = (_message, resultRunId) => stopWhenFinished(resultRunId);
+  const failHandler = (_message, _deaths, resultRunId) => stopWhenFinished(resultRunId);
   this.game.events.on('complete', completeHandler);
-  this.game.events.on('fail', failHandler);
+  this.game.events.on('game-over', failHandler);
   this.events.once('shutdown', () => {
     this.game.events.off('complete', completeHandler);
     this.game.events.off('fail', failHandler);
