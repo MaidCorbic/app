@@ -1,5 +1,11 @@
 import { dailyChallenges, weeklyChallenges, monthlyChallenges, claimChallenge, loadState } from './src/state.js';
 
+// Load the isolated visual layer without touching pause-settings-v2.css.
+const challengeStyles = document.createElement('link');
+challengeStyles.rel = 'stylesheet';
+challengeStyles.href = './challenges-ui-v2.css';
+document.head.appendChild(challengeStyles);
+
 const panel = document.getElementById('panelContent');
 if (!panel) throw new Error('Pause panel not found');
 
@@ -30,7 +36,7 @@ const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&
 
 function renderChallenges() {
   const state = loadState();
-  const list = PERIODS[activePeriod];
+  const list = PERIODS[activePeriod] || [];
   const progressState = state[activePeriod] || { progress: {}, claimed: [] };
   panel.innerHTML = `<div class="pause-segment">
     <div class="challenge-tabs">${Object.keys(PERIODS).map(period => `<button type="button" class="challenge-tab ${period === activePeriod ? 'active' : ''}" data-challenge-period="${period}">${period.toUpperCase()}</button>`).join('')}</div>
@@ -47,11 +53,10 @@ function renderChallenges() {
     }).join('')}
   </div>`;
   clearInterval(countdownTimer);
-  countdownTimer = setInterval(() => { const node = panel.querySelector('[data-challenge-countdown]'); if (node) node.textContent = countdown(activePeriod); }, 1000);
-}
-
-function findButton(label) {
-  return [...panel.querySelectorAll('button')].find(button => button.textContent.trim().toLowerCase().startsWith(label.toLowerCase()));
+  countdownTimer = setInterval(() => {
+    const node = panel.querySelector('[data-challenge-countdown]');
+    if (node) node.textContent = countdown(activePeriod);
+  }, 1000);
 }
 
 function injectSegments() {
@@ -80,8 +85,8 @@ panel.addEventListener('click', event => {
   if (period) { activePeriod = period.dataset.challengePeriod; renderChallenges(); return; }
   const claim = event.target.closest('[data-claim-challenge]');
   if (claim && !claim.disabled) {
-    const next = claimChallenge(loadState(), activePeriod, claim.dataset.claimChallenge);
-    if (next) renderChallenges();
+    claimChallenge(loadState(), activePeriod, claim.dataset.claimChallenge);
+    renderChallenges();
   }
 });
 
