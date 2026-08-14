@@ -1,0 +1,55 @@
+name: Beta Stability Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test-game:
+    name: Build and test game
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: game
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Run progression tests
+        run: npm run test:progression
+
+      - name: Run mission tests
+        run: npm run test:missions
+
+      - name: Run start-flow tests
+        run: npm run test:start-flow
+
+      - name: Run upgrade tests
+        run: npm run test:upgrades
+
+      - name: Run build-system tests
+        run: npm run test:build-system
+
+      - name: Run enemy-intel tests
+        run: npm run test:enemy-intel
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run production gameplay smoke test
+        run: npm run test:gameplay-smoke
