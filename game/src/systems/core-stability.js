@@ -8,38 +8,31 @@ const hit = RunnerScene.prototype.takeSciFiHit;
 const update = RunnerScene.prototype.update;
 const stop = scene => scene.player?.body?.setVelocity(0, 0);
 
-// Mission progression remains owned by main.js. The only lifecycle protection here
-// is to serialize an active RunnerScene restart: stop -> shutdown -> start. This
-// prevents Phaser from receiving start('runner') while the previous runner is still
-// alive, which can leave the canvas without an active scene.
+// Mission progression remains owned by main.js. Phaser already provides the correct
+// lifecycle operation for replacing an active scene: restart(data). Calling stop()
+// and then start() manually creates a race with the SceneManager and was the source
+// of the intermittent blank canvas during NEXT MISSION.
 function installSafeRunnerStart(game) {
   if (!game || game.__relaySafeRunnerStart) return;
   const manager = game.scene;
   const originalStart = manager.start.bind(manager);
-  let waiting = false;
-  let queued = null;
+  let restarting = false;
 
   manager.start = function safeRunnerStart(key, data, clear) {
     if (key !== 'runner') return originalStart(key, data, clear);
-
     const runner = manager.getScene('runner');
     const active = runner?.scene?.isActive?.() || runner?.scene?.isPaused?.();
     if (!active) return originalStart(key, data, clear);
+    if (restarting) return;
 
-    queued = { data, clear };
-    if (waiting) return;
-    waiting = true;
-
-    const restart = () => {
-      runner.events.off('shutdown', restart);
-      const next = queued;
-      queued = null;
-      waiting = false;
-      if (next) originalStart('runner', next.data, next.clear);
-    };
-
-    runner.events.once('shutdown', restart);
-    runner.scene.stop();
+    restarting = true;
+    try {
+      runner.scene.restart(data);
+    } finally {
+      // restart() queues the lifecycle operation synchronously; allow the next
+      // mission request on the following turn instead of accepting duplicates.
+      window.queueMicrotask(() => { restarting = false; });
+    }
   };
 
   game.__relaySafeRunnerStart = true;
