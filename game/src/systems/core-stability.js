@@ -1,6 +1,37 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 
+// Keep the Phaser parent mounted at a real size while finish/briefing overlays are
+// shown. The game uses Scale.RESIZE + WebGL; display:none on #play makes the canvas
+// become 0x0 and Phaser 3.90 can then throw "Framebuffer status: Incomplete Attachment"
+// on the next resize. Overlays already hide gameplay visually, so hiding the canvas
+// itself is unnecessary and unsafe.
+function keepPhaserSurfaceMounted() {
+  if (window.__relaySurfaceGuardInstalled) return;
+  window.__relaySurfaceGuardInstalled = true;
+  const style = document.createElement('style');
+  style.id = 'relay-phaser-surface-guard';
+  style.textContent = '#play.hidden{display:block!important} #phaser-game{min-width:1px;min-height:1px}';
+  document.head.appendChild(style);
+}
+keepPhaserSurfaceMounted();
+
+// Resume browser audio from a real user gesture. AudioContext warnings are non-fatal,
+// but resuming here prevents mission-to-mission audio from being suspended by autoplay policy.
+function installAudioResume() {
+  if (window.__relayAudioResumeInstalled) return;
+  window.__relayAudioResumeInstalled = true;
+  const resume = () => {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) window.__relayAudioContext?.resume?.();
+    } catch { /* Audio is optional and must never interrupt gameplay. */ }
+  };
+  window.addEventListener('pointerdown', resume, { passive: true });
+  window.addEventListener('keydown', resume, { passive: true });
+}
+installAudioResume();
+
 const originalCreate = RunnerScene.prototype.create;
 const fail = RunnerScene.prototype.fail;
 const respawn = RunnerScene.prototype.respawnCheckpoint;
@@ -29,8 +60,6 @@ function installSafeRunnerStart(game) {
     try {
       runner.scene.restart(data);
     } finally {
-      // restart() queues the lifecycle operation synchronously; allow the next
-      // mission request on the following turn instead of accepting duplicates.
       window.queueMicrotask(() => { restarting = false; });
     }
   };
