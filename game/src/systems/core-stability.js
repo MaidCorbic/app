@@ -1,6 +1,37 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 
+// Keep the Phaser parent mounted at a real size while finish/briefing overlays are
+// shown. The game uses Scale.RESIZE + WebGL; display:none on #play makes the canvas
+// become 0x0 and Phaser 3.90 can then throw "Framebuffer status: Incomplete Attachment"
+// on the next resize. Overlays already hide gameplay visually, so hiding the canvas
+// itself is unnecessary and unsafe.
+function keepPhaserSurfaceMounted() {
+  if (window.__relaySurfaceGuardInstalled) return;
+  window.__relaySurfaceGuardInstalled = true;
+  const style = document.createElement('style');
+  style.id = 'relay-phaser-surface-guard';
+  style.textContent = '#play.hidden{display:block!important} #phaser-game{min-width:1px;min-height:1px}';
+  document.head.appendChild(style);
+}
+keepPhaserSurfaceMounted();
+
+// Resume browser audio from a real user gesture. AudioContext warnings are non-fatal,
+// but resuming here prevents mission-to-mission audio from being suspended by autoplay policy.
+function installAudioResume() {
+  if (window.__relayAudioResumeInstalled) return;
+  window.__relayAudioResumeInstalled = true;
+  const resume = () => {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) window.__relayAudioContext?.resume?.();
+    } catch { /* Audio is optional and must never interrupt gameplay. */ }
+  };
+  window.addEventListener('pointerdown', resume, { passive: true });
+  window.addEventListener('keydown', resume, { passive: true });
+}
+installAudioResume();
+
 const originalCreate = RunnerScene.prototype.create;
 const fail = RunnerScene.prototype.fail;
 const respawn = RunnerScene.prototype.respawnCheckpoint;
@@ -8,35 +39,45 @@ const hit = RunnerScene.prototype.takeSciFiHit;
 const update = RunnerScene.prototype.update;
 const stop = scene => scene.player?.body?.setVelocity(0, 0);
 
-// Every mission owns its Phaser lifecycle. A finished/failed run is terminal; stop the
-// scene so timers, physics bodies and listeners cannot leak into the next mission.
+// Mission progression remains owned by main.js. Phaser already provides the correct
+// lifecycle operation for replacing an active scene: restart(data). Calling stop()
+// and then start() manually creates a race with the SceneManager and was the source
+// of the intermittent blank canvas during NEXT MISSION.
+function installSafeRunnerStart(game) {
+  if (!game || game.__relaySafeRunnerStart) return;
+  const manager = game.scene;
+  const originalStart = manager.start.bind(manager);
+  let restarting = false;
+
+  manager.start = function safeRunnerStart(key, data, clear) {
+    if (key !== 'runner') return originalStart(key, data, clear);
+    const runner = manager.getScene('runner');
+    const active = runner?.scene?.isActive?.() || runner?.scene?.isPaused?.();
+    if (!active) return originalStart(key, data, clear);
+    if (restarting) return;
+
+    restarting = true;
+    try {
+      runner.scene.restart(data);
+    } finally {
+      window.queueMicrotask(() => { restarting = false; });
+    }
+  };
+
+  game.__relaySafeRunnerStart = true;
+}
+
 RunnerScene.prototype.create = function stableCreate(...args) {
   const mission = this.mission;
   if (!mission?.id || !mission.spawn || !mission.goal) {
     console.error('[Relay Runner] Invalid mission data; scene will not start.', mission);
-    this.scene.stop();
     return;
   }
-  const runId = this.runId;
-  const stopWhenFinished = resultRunId => {
-    if (resultRunId !== runId || resultRunId !== this.runId) return;
-    if (this.scene.isActive()) this.scene.stop();
-  };
-  const completeHandler = (_signals, _elapsed, _stats, resultRunId) => stopWhenFinished(resultRunId);
-  const failHandler = (_message, _deaths, resultRunId) => stopWhenFinished(resultRunId);
-  this.game.events.on('complete', completeHandler);
-  this.game.events.on('game-over', failHandler);
-  this.events.once('shutdown', () => {
-    this.game.events.off('complete', completeHandler);
-    this.game.events.off('fail', failHandler);
-  });
+  installSafeRunnerStart(this.game);
   try {
     return originalCreate.apply(this, args);
   } catch (error) {
-    this.game.events.off('complete', completeHandler);
-    this.game.events.off('fail', failHandler);
     console.error('[Relay Runner] Mission scene creation failed:', error);
-    this.scene.stop();
     throw error;
   }
 };
@@ -45,10 +86,12 @@ RunnerScene.prototype.fail = function stableFail(message) {
   if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0) return;
   stop(this); return fail.call(this, message);
 };
+
 RunnerScene.prototype.takeSciFiHit = function stableHit(message) {
   if (this.briefingProtected || this.respawning || this.finished || this.respawnGrace > 0 || this.healthInvulnerable > 0) return;
   stop(this); return hit.call(this, message);
 };
+
 RunnerScene.prototype.respawnCheckpoint = function stableRespawn() {
   const spawn = this.mission?.spawn;
   if ((!this.checkpoint || !Number.isFinite(this.checkpoint.x) || !Number.isFinite(this.checkpoint.y) || this.checkpoint.y > 760) && spawn) {
@@ -60,7 +103,6 @@ RunnerScene.prototype.respawnCheckpoint = function stableRespawn() {
   this.healthInvulnerable = Math.max(this.healthInvulnerable || 0, 1100);
 };
 
-// Mobile joystick and keyboard share RunnerScene's existing movement path.
 function installTouchControls() {
   if (window.__relayTouchInstalled) return;
   window.__relayTouchInstalled = true;
