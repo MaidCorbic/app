@@ -53,5 +53,40 @@
 #toast{pointer-events:none}
 @keyframes relayHudPulse{0%{box-shadow:0 0 0 0 rgba(56,189,248,.55)}70%{box-shadow:0 0 0 8px rgba(56,189,248,0)}100%{box-shadow:0 0 0 0 rgba(56,189,248,0)}}
 @keyframes relayHudSweep{0%,45%{transform:translateX(-100%)}75%,100%{transform:translateX(100%)}}
-@media (prefers-reduced-motion:reduce){.route-dot,.hud-progress>div::after{animation:none}.hud-route,.hud-progress,.hud-actions,.pause-button,.world-marker{transition:none}}
+@media (prefers-reduced-motion:reduce){.route-dot,.hud-progress>div::after{animation:none}.hud-route,.hud-progress,.hud-actions,.pause-button,.world-marker{transition:none}.home-v2-grid,.home-v2-scanline{animation:none!important}}
 @media (max-width:768px){.hud{gap:8px}.hud-route,.hud-progress,.hud-actions{min-width:0}.hud-route b,.hud-route small,.hud-progress small{white-space:nowrap}}
+
+/* HOME SCREEN V2 - visual-only layer. Gameplay DOM, handlers and Phaser systems remain untouched. */
+#intro .info-launcher{position:fixed!important;top:24px!important;right:24px!important;z-index:20!important;display:flex!important;align-items:center!important;gap:8px!important;pointer-events:auto!important}
+#intro .faq-launcher,#intro .info-circle{height:38px!important;border:1px solid #6f8196!important;border-radius:3px!important;color:#e8eef5!important;background:linear-gradient(180deg,#0b1624e8,#050c16e8)!important;box-shadow:0 8px 28px #0007,inset 0 1px #ffffff0a!important;backdrop-filter:blur(10px)!important;cursor:pointer!important;transition:transform .18s ease,border-color .18s ease,background .18s ease,color .18s ease,box-shadow .18s ease!important}
+#intro .faq-launcher{min-width:72px!important;padding:0 13px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;font:800 9px 'DM Mono',monospace!important;letter-spacing:1.5px!important}
+#intro .info-circle{width:38px!important;padding:0!important;display:grid!important;place-items:center!important}
+#intro .faq-glyph{display:grid!important;place-items:center!important;width:16px!important;height:16px!important;border:1px solid #ffd06e!important;border-radius:50%!important;color:#ffd06e!important;font:800 10px Manrope,sans-serif!important}
+#intro .info-glyph::before{content:'i';display:grid;place-items:center;width:16px;height:16px;border:1px solid #ffd06e;border-radius:50%;color:#ffd06e;font:800 11px Manrope,sans-serif}
+#intro .faq-launcher:hover,#intro .faq-launcher:focus-visible,#intro .info-circle:hover,#intro .info-circle:focus-visible{transform:translateY(-2px);border-color:#ffd06e!important;background:#101d2d!important;color:#fff!important;box-shadow:0 12px 34px #0009,0 0 20px #ffd06e18!important;outline:2px solid #dffcff!important;outline-offset:3px!important}
+#intro .faq-launcher:active,#intro .info-circle:active{transform:translateY(0) scale(.97)}
+#intro .title-lockup{position:relative!important;overflow:hidden!important;border-color:#9aaabd24!important;background:linear-gradient(160deg,#081522f2 0%,#030811ed 58%,#08121fe8 100%)!important;box-shadow:0 32px 100px #000b,0 0 80px #ffd06e0b,inset 0 1px #ffffff0d!important}
+#intro .title-lockup::before{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 0%,#ffffff03 42%,#ffd06e08 50%,transparent 58%);transform:translateX(-110%);animation:homeV2Sheen 7s ease-in-out infinite;pointer-events:none}
+#intro .title-lockup>*{position:relative;z-index:1}
+#intro .title-lockup h1{font-size:clamp(66px,13vw,112px)!important;text-shadow:0 12px 55px #000,0 0 22px #ffd06e0a!important}
+#intro .title-lockup h1 em{text-shadow:0 0 26px #ffd06e1c!important}
+#intro .title-lockup .eyebrow::before{content:'◈ ';color:#7ed8ff}
+#intro .play-button{position:relative!important;overflow:hidden!important;border-color:#ffe6a0!important;background:linear-gradient(135deg,#ffe6a0 0%,#ffd06e 48%,#ffbf4e 100%)!important;box-shadow:0 14px 38px #ffcf6a2e,inset 0 1px #fffbe8!important;transition:transform .18s ease,filter .18s ease,box-shadow .18s ease!important}
+#intro .play-button::after{content:'';position:absolute;inset:-60% 0;background:linear-gradient(100deg,transparent 38%,#fff8 50%,transparent 62%);transform:translateX(-120%) rotate(8deg);animation:homeV2ButtonSweep 3.8s ease-in-out infinite;pointer-events:none}
+#intro .play-button:hover,#intro .play-button:focus-visible{transform:translateY(-3px)!important;filter:brightness(1.06)!important;box-shadow:0 18px 48px #ffcf6a4a,inset 0 1px #fff!important}
+#intro .play-button:active{transform:translateY(0) scale(.985)!important}
+#intro .title-secondary{position:relative!important}
+#intro .menu-option-button{position:relative!important;overflow:hidden!important;border-color:#66788b!important;background:linear-gradient(180deg,#0a1725,#06101b)!important;box-shadow:inset 0 1px #ffffff08!important}
+#intro .menu-option-button::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:#ffd06e;transform:scaleX(0);transform-origin:left;transition:transform .18s ease}
+#intro .menu-option-button:hover::after,#intro .menu-option-button:focus-visible::after{transform:scaleX(1)}
+#intro .menu-option-button.exit-button::after{background:#ff9b8c}
+#intro .main-menu::before{content:'SYSTEM ONLINE  /  RELAY NETWORK STANDBY';position:fixed;left:24px;bottom:22px;z-index:6;color:#5f7083;font:700 7px 'DM Mono',monospace;letter-spacing:1.6px;pointer-events:none}
+#intro .main-menu::after{content:'NIGHT RUN  •  CHAPTER 01  •  v2';bottom:22px!important;color:#66788b!important}
+#intro .relay-info-panel{z-index:40!important;background:#02050ad9!important;backdrop-filter:blur(8px)!important}
+#intro .relay-info-card{border-color:#71839955!important;background:linear-gradient(160deg,#091522f7,#030810f7)!important;box-shadow:0 30px 100px #000c,0 0 60px #ffd06e0b!important}
+#intro .relay-info-close{border-color:#66788b!important;background:#07111d!important;color:#dce7ef!important}
+#intro .relay-info-close:hover,#intro .relay-info-close:focus-visible{border-color:#ffd06e!important;color:#ffd06e!important}
+@keyframes homeV2Sheen{0%,55%{transform:translateX(-110%)}78%,100%{transform:translateX(110%)}}
+@keyframes homeV2ButtonSweep{0%,55%{transform:translateX(-120%) rotate(8deg)}78%,100%{transform:translateX(120%) rotate(8deg)}}
+@media (max-width:700px){#intro .info-launcher{top:12px!important;right:12px!important;gap:6px!important}#intro .faq-launcher{height:34px!important;min-width:62px!important;padding:0 10px!important;font-size:8px!important}#intro .info-circle{width:34px!important;height:34px!important}#intro .title-lockup{width:min(360px,94vw)!important;padding:30px 20px 27px!important;border-radius:10px!important}#intro .title-lockup h1{font-size:clamp(56px,18vw,86px)!important}#intro .menu-tagline{max-width:290px!important}#intro .main-menu::before{left:12px;bottom:10px;font-size:5px;letter-spacing:1px}#intro .main-menu::after{bottom:10px!important;font-size:5px!important;letter-spacing:1.4px!important}}
+@media (max-height:650px) and (orientation:landscape){#intro .main-menu-body{padding:10px 16px!important}#intro .title-lockup{padding:18px 24px 16px!important;max-height:calc(100dvh - 30px)!important;overflow:auto!important}#intro .title-lockup .eyebrow{margin-bottom:10px!important}#intro .title-lockup h1{font-size:clamp(44px,9vw,72px)!important}#intro .menu-tagline{margin:12px auto 15px!important;font-size:8px!important}.menu-option-button{min-height:42px!important}.play-button{min-height:46px!important}.main-menu::before{display:none!important}}
