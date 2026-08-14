@@ -24,7 +24,7 @@ function installSafeRunnerStart(game) {
 
     const runner = manager.getScene('runner');
     const active = runner?.scene?.isActive?.() || runner?.scene?.isPaused?.();
-    if (!active || waiting) return originalStart(key, data, clear);
+    if (!active) return originalStart(key, data, clear);
 
     queued = { data, clear };
     if (waiting) return;
