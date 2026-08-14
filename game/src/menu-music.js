@@ -10,11 +10,11 @@
     if (!window.AudioContext && !window.webkitAudioContext) return null;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     context ||= new AudioContext();
-    if (context.state === 'suspended') context.resume().catch(() => {});
     return context;
   };
 
   const tone = (frequency, start, duration, volume, type = 'triangle') => {
+    if (!context || !master) return;
     const oscillator = context.createOscillator();
     const gain = context.createGain();
     oscillator.type = type;
@@ -51,6 +51,12 @@
     if (!intro || intro.classList.contains('hidden') || active) return;
     const ready = getContext();
     if (!ready) return;
+    if (ready.state === 'suspended') {
+      ready.resume().then(() => {
+        if (!document.hidden && !intro.classList.contains('hidden')) start();
+      }).catch(() => {});
+      return;
+    }
     stop();
     master = context.createGain();
     master.gain.value = 0.045;
@@ -59,8 +65,24 @@
     playLoop();
   };
 
-  const resumeFromGesture = () => { getContext()?.resume?.().catch(() => {}); start(); };
-  ['pointerdown', 'keydown', 'touchstart'].forEach(type => document.addEventListener(type, resumeFromGesture, { passive: true }));
+  const gestureStart = event => {
+    const intro = document.getElementById('intro');
+    if (!intro || intro.classList.contains('hidden')) return;
+    const ready = getContext();
+    if (!ready) return;
+    if (ready.state === 'suspended') {
+      ready.resume().then(() => start()).catch(() => {});
+    } else {
+      start();
+    }
+    // Keep the handler passive: it never blocks scrolling or touch controls.
+    void event;
+  };
+
+  ['pointerdown', 'touchstart', 'keydown'].forEach(type => {
+    document.addEventListener(type, gestureStart, { passive: true });
+  });
+
   window.addEventListener('blur', stop);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stop();
