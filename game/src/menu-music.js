@@ -55,7 +55,7 @@
       if (!document.getElementById('intro') || document.getElementById('intro').classList.contains('hidden')) return;
       stop();
       master = ctx.createGain();
-      master.gain.value = 0.045;
+      master.gain.value = 0.09;
       master.connect(ctx.destination);
       active = true;
       playLoop();
