@@ -8,17 +8,18 @@
 #play .hud-progress{padding:8px 11px;border-radius:10px;min-width:145px}
 #play .hud-progress>div{height:5px;border-radius:99px;background:rgba(220,232,241,.12);overflow:hidden;box-shadow:inset 0 0 5px rgba(0,0,0,.5)}
 #play .hud-progress i{border-radius:99px;box-shadow:0 0 10px rgba(141,244,255,.65);transition:width .22s ease}
-#play .hud-xp{padding:7px 10px;border-radius:9px}
+#play .hud-actions{display:flex;align-items:center;justify-content:center;gap:10px}
+#play .hud-xp{padding:7px 10px;border-radius:9px;min-width:52px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 #play .hud-xp small{color:#8ba0b8;letter-spacing:1px}
 #play .hud-xp b{color:#f7d98a;text-shadow:0 0 10px rgba(247,217,138,.3);letter-spacing:1px}
-#play .hud-actions>button{width:46px;height:42px;border-radius:10px;color:#dffcff;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
+#play .hud-actions>button{width:46px;height:42px;border-radius:10px;color:#dffcff;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;flex:0 0 auto}
 #play .hud-actions>button:hover,#play .hud-actions>button:focus-visible{transform:translateY(-1px);border-color:rgba(141,244,255,.72);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 24px rgba(0,0,0,.3),0 0 22px rgba(141,244,255,.18)}
 #play .hud-actions>button:active{transform:scale(.95)}
 #play .world-marker{padding:8px 12px;border:1px solid rgba(247,217,138,.28);border-radius:8px;background:linear-gradient(90deg,rgba(8,16,27,.9),rgba(8,16,27,.52));box-shadow:0 8px 24px rgba(0,0,0,.22)}
 #play .world-marker span{color:#f7d98a;letter-spacing:1.2px}
 #play .world-marker b{text-shadow:0 0 10px rgba(141,244,255,.2)}
 @keyframes hud-pulse{0%,100%{opacity:.7;transform:scale(.92)}50%{opacity:1;transform:scale(1)}}
-@media(max-width:880px),(hover:none) and (pointer:coarse){#play .hud{padding:12px 14px}#play .hud-route{min-width:0;padding:8px 10px;border-radius:9px}#play .hud-route b{font-size:10px}#play .hud-actions>button{width:44px;height:40px}#play .world-marker{border-radius:7px}}
-@media(max-width:430px){#play .hud-route{max-width:52vw}#play .hud-route b{display:block;max-width:36vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#play .hud-actions>button{width:42px;height:38px}#play .world-marker{max-width:72vw}}
-@media(max-height:480px) and (orientation:landscape){#play .hud{padding:8px 12px}#play .hud-route{padding:6px 9px}#play .hud-progress{padding:6px 9px;min-width:125px}#play .hud-actions>button{width:40px;height:36px}#play .world-marker{bottom:118px}}
+@media(max-width:880px),(hover:none) and (pointer:coarse){#play .hud{padding:12px 14px}#play .hud-route{min-width:0;padding:8px 10px;border-radius:9px}#play .hud-route b{font-size:10px}#play .hud-actions{gap:8px}#play .hud-xp{min-width:50px;padding:6px 8px}#play .hud-actions>button{width:44px;height:40px}#play .world-marker{border-radius:7px}}
+@media(max-width:430px){#play .hud-route{max-width:52vw}#play .hud-route b{display:block;max-width:36vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#play .hud-actions{gap:6px}#play .hud-xp{min-width:48px;padding:6px 7px}#play .hud-actions>button{width:42px;height:38px}#play .world-marker{max-width:72vw}}
+@media(max-height:480px) and (orientation:landscape){#play .hud{padding:8px 12px}#play .hud-route{padding:6px 9px}#play .hud-progress{padding:6px 9px;min-width:125px}#play .hud-xp{padding:5px 7px}#play .hud-actions>button{width:40px;height:36px}#play .world-marker{bottom:118px}}
 @media(prefers-reduced-motion:reduce){#play .hud-route .route-dot{animation:none}#play .hud-progress i,#play .hud-actions>button{transition:none}}
