@@ -8,35 +8,21 @@ const hit = RunnerScene.prototype.takeSciFiHit;
 const update = RunnerScene.prototype.update;
 const stop = scene => scene.player?.body?.setVelocity(0, 0);
 
-// Every mission owns its Phaser lifecycle. A finished/failed run is terminal; stop the
-// scene so timers, physics bodies and listeners cannot leak into the next mission.
+// Mission completion is owned by main.js. Do NOT stop RunnerScene from a global
+// complete/game-over listener: the finish UI and the existing launch() flow must
+// remain in control of the scene lifecycle. Stopping here was the source of a
+// race where NEXT MISSION could be requested while Phaser was still shutting down
+// the runner, leaving the canvas black.
 RunnerScene.prototype.create = function stableCreate(...args) {
   const mission = this.mission;
   if (!mission?.id || !mission.spawn || !mission.goal) {
     console.error('[Relay Runner] Invalid mission data; scene will not start.', mission);
-    this.scene.stop();
     return;
   }
-  const runId = this.runId;
-  const stopWhenFinished = resultRunId => {
-    if (resultRunId !== runId || resultRunId !== this.runId) return;
-    if (this.scene.isActive()) this.scene.stop();
-  };
-  const completeHandler = (_signals, _elapsed, _stats, resultRunId) => stopWhenFinished(resultRunId);
-  const failHandler = (_message, _deaths, resultRunId) => stopWhenFinished(resultRunId);
-  this.game.events.on('complete', completeHandler);
-  this.game.events.on('game-over', failHandler);
-  this.events.once('shutdown', () => {
-    this.game.events.off('complete', completeHandler);
-    this.game.events.off('fail', failHandler);
-  });
   try {
     return originalCreate.apply(this, args);
   } catch (error) {
-    this.game.events.off('complete', completeHandler);
-    this.game.events.off('fail', failHandler);
     console.error('[Relay Runner] Mission scene creation failed:', error);
-    this.scene.stop();
     throw error;
   }
 };
