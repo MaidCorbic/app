@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm --prefix game ci",
-  "buildCommand": "npm --prefix game run build",
+  "installCommand": "cd game && npm install",
+  "buildCommand": "cd game && npm run build",
   "outputDirectory": "game/dist",
   "framework": "vite"
 }
