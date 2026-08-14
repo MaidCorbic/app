@@ -54,6 +54,13 @@ assert.equal(state.missionStats[second.id].bestRating, 3, 'Perfect Mission 02 ea
 assert.ok(state.xp > 0 && state.rank !== 'ROOKIE', 'XP and persisted rank advance');
 assert.equal(state.completed.includes(missions[2].unlockRequirement), true, 'Mission 03 unlock requirement is satisfied after Mission 02');
 
+// Regression coverage for the daily Dead Drop time challenge: only a run
+// completed in under 90 seconds should advance dockTime.
+const deadDropFast = completeMission(state, second, 0, 89999, { jumps: 0, collisions: 0, falls: 0 });
+assert.equal(deadDropFast.daily.progress.dockTime, 1, 'Dead Drop under 90 seconds advances the daily time challenge');
+const deadDropSlow = completeMission(state, second, 0, 90000, { jumps: 0, collisions: 0, falls: 0 });
+assert.equal(deadDropSlow.daily.progress.dockTime, 0, 'Dead Drop at or over 90 seconds does not advance the daily time challenge');
+
 const contract = { id: 'one-shot', type: 'DELIVERY', xp: 40, credits: 5 };
 state = completeMission(state, second, 0, 90000, { jumps: 0, collisions: 1, falls: 0, contract });
 assert.equal(state.lastXpBreakdown.contract, 40, 'An unclaimed contract awards its reward once');
