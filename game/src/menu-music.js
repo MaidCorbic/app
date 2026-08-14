@@ -6,6 +6,8 @@
   let timer = null;
   let active = false;
 
+  const isMobile = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+
   const getContext = () => {
     if (!window.AudioContext && !window.webkitAudioContext) return null;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -65,19 +67,20 @@
     playLoop();
   };
 
-  const gestureStart = event => {
-    const intro = document.getElementById('intro');
-    if (!intro || intro.classList.contains('hidden')) return;
-    const ready = getContext();
-    if (!ready) return;
-    if (ready.state === 'suspended') {
-      ready.resume().then(() => start()).catch(() => {});
-    } else {
-      start();
-    }
-    // Keep the handler passive: it never blocks scrolling or touch controls.
-    void event;
+  const gestureStart = () => start();
+
+  // Desktop behavior stays exactly as before: try to start immediately, then
+  // keep the existing gesture fallback for browsers that block autoplay.
+  const boot = () => {
+    if (!isMobile()) start();
+    else start();
   };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
 
   ['pointerdown', 'touchstart', 'keydown'].forEach(type => {
     document.addEventListener(type, gestureStart, { passive: true });
