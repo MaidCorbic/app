@@ -55,7 +55,8 @@
       if (!document.getElementById('intro') || document.getElementById('intro').classList.contains('hidden')) return;
       stop();
       master = ctx.createGain();
-      master.gain.value = 0.045;
+      // Raised from 0.045 so the same menu music is clearly audible on phones.
+      master.gain.value = 0.09;
       master.connect(ctx.destination);
       active = true;
       playLoop();
@@ -67,8 +68,6 @@
     begin();
   };
 
-  // Try immediately on page load. Mobile browsers may reject this; the
-  // first real tap/click/keydown then calls start() inside the user gesture.
   const boot = () => start();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
