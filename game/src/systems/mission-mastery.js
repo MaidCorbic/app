@@ -1,5 +1,21 @@
+import Phaser from 'phaser';
 import { loadState } from '../state.js';
 import { missions } from '../missions.js';
+
+const originalSceneStart = Phaser.Scenes.SceneManager.prototype.start;
+if (!Phaser.Scenes.SceneManager.prototype.__relayRunnerStartGuard) {
+  Phaser.Scenes.SceneManager.prototype.__relayRunnerStartGuard = true;
+  Phaser.Scenes.SceneManager.prototype.start = function startWithRunnerGuard(key, data) {
+    if (key === 'runner') {
+      const runner = this.getScene(key);
+      if (runner && (this.isActive(key) || this.isPaused(key))) {
+        this.stop(key);
+        return originalSceneStart.call(this, key, data);
+      }
+    }
+    return originalSceneStart.call(this, key, data);
+  };
+}
 
 const PANEL_CLASS = 'mission-mastery-panel';
 const BADGES = [
@@ -24,7 +40,6 @@ const style = `
 .mastery-mission-progress b{font-size:9px}
 @media(max-width:700px){.${PANEL_CLASS} .mastery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.${PANEL_CLASS} .mastery-badge:last-child{grid-column:span 2}}
 `;
-
 function installStyle() {
   if (document.getElementById('mission-mastery-style')) return;
   const styleElement = document.createElement('style');
@@ -32,7 +47,6 @@ function installStyle() {
   styleElement.textContent = style;
   document.head.appendChild(styleElement);
 }
-
 function missionIdFromFinish() {
   const finish = document.getElementById('finish');
   const explicit = finish?.dataset?.missionId;
@@ -42,11 +56,7 @@ function missionIdFromFinish() {
   const match = missions.find(mission => mission.title.toLowerCase() === title || title.includes(mission.title.toLowerCase()));
   return match?.id || null;
 }
-
-function masteryForMission(missionId, state = loadState()) {
-  return new Set(state.mastery?.[missionId] || []);
-}
-
+function masteryForMission(missionId, state = loadState()) { return new Set(state.mastery?.[missionId] || []); }
 function buildMasteryPanel(missionId) {
   if (!missionId) return;
   const state = loadState();
@@ -56,15 +66,10 @@ function buildMasteryPanel(missionId) {
   const panel = document.createElement('section');
   panel.className = PANEL_CLASS;
   panel.setAttribute('aria-label', 'Mission mastery');
-  panel.innerHTML = `<div class="mastery-heading"><strong>MISSION MASTERY</strong><span class="mastery-count">${Math.min(earned.size, BADGES.length)} / ${BADGES.length} EARNED</span></div><div class="mastery-grid">${BADGES.map(badge => {
-    const isEarned = earned.has(badge.id);
-    return `<article class="mastery-badge${isEarned ? ' is-earned' : ''}"><span class="mastery-mark">${isEarned ? '✓' : '○'}</span><span class="mastery-name">${badge.label}</span><span class="mastery-detail">${badge.detail}</span></article>`;
-  }).join('')}</div>`;
+  panel.innerHTML = `<div class="mastery-heading"><strong>MISSION MASTERY</strong><span class="mastery-count">${Math.min(earned.size, BADGES.length)} / ${BADGES.length} EARNED</span></div><div class="mastery-grid">${BADGES.map(badge => { const isEarned = earned.has(badge.id); return `<article class="mastery-badge${isEarned ? ' is-earned' : ''}"><span class="mastery-mark">${isEarned ? '✓' : '○'}</span><span class="mastery-name">${badge.label}</span><span class="mastery-detail">${badge.detail}</span></article>`; }).join('')}</div>`;
   const resultPanel = document.querySelector('#finish .mission-results-panel');
-  if (resultPanel) resultPanel.insertAdjacentElement('afterend', panel);
-  else document.querySelector('#finish .outcome')?.appendChild(panel);
+  if (resultPanel) resultPanel.insertAdjacentElement('afterend', panel); else document.querySelector('#finish .outcome')?.appendChild(panel);
 }
-
 function decorateMissionCards() {
   const state = loadState();
   document.querySelectorAll('[data-world-mission]').forEach(button => {
@@ -73,25 +78,15 @@ function decorateMissionCards() {
     if (!missionId) return;
     const earned = masteryForMission(missionId, state);
     let progress = button.querySelector('.mastery-mission-progress');
-    if (!progress) {
-      progress = document.createElement('span');
-      progress.className = 'mastery-mission-progress';
-      button.appendChild(progress);
-    }
-    const label = `★ ${Math.min(earned.size, BADGES.length)}/${BADGES.length}`;
-    if (progress.textContent !== label) progress.textContent = label;
+    if (!progress) { progress = document.createElement('span'); progress.className = 'mastery-mission-progress'; button.appendChild(progress); }
+    progress.innerHTML = `★ <b>${Math.min(earned.size, BADGES.length)}</b>/${BADGES.length}`;
   });
 }
-
 if (typeof document !== 'undefined') {
   installStyle();
   const finish = document.getElementById('finish');
   const game = document.getElementById('game');
-  if (finish) {
-    new MutationObserver(() => {
-      if (!finish.classList.contains('hidden')) buildMasteryPanel(missionIdFromFinish());
-    }).observe(finish, { attributes: true, attributeFilter: ['class', 'data-mission-id'] });
-  }
+  if (finish) new MutationObserver(() => { if (!finish.classList.contains('hidden')) buildMasteryPanel(missionIdFromFinish()); }).observe(finish, { attributes: true, attributeFilter: ['class', 'data-mission-id'] });
   if (game) new MutationObserver(decorateMissionCards).observe(game, { childList: true, subtree: true });
   decorateMissionCards();
 }
