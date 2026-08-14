@@ -2,22 +2,6 @@ import Phaser from 'phaser';
 import { loadState } from '../state.js';
 import { missions } from '../missions.js';
 
-const originalSceneStart = Phaser.Scenes.SceneManager.prototype.start;
-if (!Phaser.Scenes.SceneManager.prototype.__relayRunnerStartGuard) {
-  Phaser.Scenes.SceneManager.prototype.__relayRunnerStartGuard = true;
-  Phaser.Scenes.SceneManager.prototype.start = function startWithRunnerGuard(key, data) {
-    if (key === 'runner') {
-      const runner = this.getScene(key);
-      if (runner && (this.isActive(key) || this.isPaused(key))) {
-        runner.events.once(Phaser.Scenes.Events.SHUTDOWN, () => originalSceneStart.call(this, key, data));
-        this.stop(key);
-        return this;
-      }
-    }
-    return originalSceneStart.call(this, key, data);
-  };
-}
-
 const PANEL_CLASS = 'mission-mastery-panel';
 const BADGES = [
   { id: 'SIGNAL SWEEP', label: 'SIGNAL SWEEP', detail: 'Collect every Signal' },
@@ -52,10 +36,9 @@ function missionIdFromFinish() {
   const finish = document.getElementById('finish');
   const explicit = finish?.dataset?.missionId;
   if (explicit) return explicit;
-  const title = finish?.querySelector('h1, h2, h3, .mission-title, .title')?.textContent?.trim().toLowerCase();
-  if (!title) return null;
-  const match = missions.find(mission => mission.title.toLowerCase() === title || title.includes(mission.title.toLowerCase()));
-  return match?.id || null;
+  const line = finish?.querySelector('#finishLine')?.textContent?.trim();
+  if (!line) return null;
+  return missions.find(mission => mission.story?.completion === line)?.id || null;
 }
 function masteryForMission(missionId, state = loadState()) { return new Set(state.mastery?.[missionId] || []); }
 function buildMasteryPanel(missionId) {
@@ -83,6 +66,43 @@ function decorateMissionCards() {
     progress.innerHTML = `★ <b>${Math.min(earned.size, BADGES.length)}</b>/${BADGES.length}`;
   });
 }
+
+// Minimal Next Mission fix: handle only this button and restart the existing runner scene
+// with the next mission. No SceneManager prototype patch and no gameplay/state changes.
+function installNextMissionFix() {
+  document.addEventListener('click', event => {
+    const button = event.target?.closest?.('#nextMission');
+    if (!button) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const finish = document.getElementById('finish');
+    const currentId = missionIdFromFinish();
+    const currentIndex = missions.findIndex(mission => mission.id === currentId);
+    const nextMission = missions[currentIndex + 1];
+    if (!nextMission) return;
+
+    const phaser = Phaser.GAMES?.[0];
+    const runner = phaser?.scene?.getScene('runner');
+    if (!runner || !runner.scene) return;
+
+    const state = loadState();
+    finish?.classList.add('hidden');
+    document.getElementById('gameOver')?.classList.add('hidden');
+    document.getElementById('play')?.classList.remove('hidden');
+
+    runner.scene.restart({
+      mission: nextMission,
+      runId: Number(runner.runId || 0) + 1,
+      abilities: state.abilities || [],
+      rain: state.rain,
+      screenShake: state.screenShake,
+      reducedMotion: state.reducedMotion,
+      firstTimeTutorial: !state.tutorialSeen,
+    });
+  }, true);
+}
+
 if (typeof document !== 'undefined') {
   installStyle();
   const finish = document.getElementById('finish');
@@ -90,4 +110,5 @@ if (typeof document !== 'undefined') {
   if (finish) new MutationObserver(() => { if (!finish.classList.contains('hidden')) buildMasteryPanel(missionIdFromFinish()); }).observe(finish, { attributes: true, attributeFilter: ['class', 'data-mission-id'] });
   if (game) new MutationObserver(decorateMissionCards).observe(game, { childList: true, subtree: true });
   decorateMissionCards();
+  installNextMissionFix();
 }
