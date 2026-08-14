@@ -1,0 +1,31 @@
+/* CAMPAIGN / LOADOUT / CHALLENGES V2 — isolated UI layer */
+#pauseMenu #panelContent .pause-segment,
+#pauseMenu #panelContent .challenge-card,
+#pauseMenu #panelContent .challenge-tabs,
+#pauseMenu #panelContent .reward-chip{box-sizing:border-box}
+#pauseMenu #panelContent .pause-segment{border:1px solid rgba(141,244,255,.16);border-radius:14px;background:linear-gradient(145deg,rgba(7,17,30,.96),rgba(11,28,44,.92));box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 12px 28px rgba(0,0,0,.16);padding:16px;margin-bottom:12px}
+#pauseMenu #panelContent .pause-segment-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;color:#dffcff;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+#pauseMenu #panelContent .pause-segment-title small{color:#71879d;font-size:9px;letter-spacing:1.3px}
+#pauseMenu #panelContent .pause-action-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#pauseMenu #panelContent .pause-action-grid button{min-height:58px;border:1px solid rgba(141,244,255,.14);border-radius:10px;background:linear-gradient(145deg,rgba(13,30,46,.98),rgba(6,16,28,.98));color:#ccecf2;box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 7px 18px rgba(0,0,0,.18);font:800 10px/1.2 inherit;letter-spacing:1.1px;text-align:left;padding:11px;cursor:pointer}
+#pauseMenu #panelContent .pause-action-grid button:hover,#pauseMenu #panelContent .pause-action-grid button:focus-visible{border-color:rgba(141,244,255,.5);background:linear-gradient(145deg,rgba(20,48,67,.98),rgba(8,24,38,.98));box-shadow:0 0 18px rgba(141,244,255,.09);transform:translateY(-1px)}
+#pauseMenu #panelContent .pause-action-grid button small{display:block;margin-top:5px;color:#6f879c;font-size:8px;letter-spacing:1px}
+#pauseMenu #panelContent .challenge-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:12px}
+#pauseMenu #panelContent .challenge-tab{border:1px solid rgba(141,244,255,.13);border-radius:9px;background:linear-gradient(145deg,rgba(12,28,43,.98),rgba(5,15,26,.98));color:#7890a5;padding:10px 8px;font:800 9px/1.1 inherit;letter-spacing:1.1px;cursor:pointer}
+#pauseMenu #panelContent .challenge-tab.active,#pauseMenu #panelContent .challenge-tab:hover{color:#8df4ff;border-color:rgba(141,244,255,.4);box-shadow:inset 0 -2px 0 #8df4ff,0 0 15px rgba(141,244,255,.06)}
+#pauseMenu #panelContent .challenge-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:10px}
+#pauseMenu #panelContent .challenge-head h3{margin:0}
+#pauseMenu #panelContent .challenge-countdown{font:800 10px/1 inherit;letter-spacing:1px;color:#8df4ff;white-space:nowrap}
+#pauseMenu #panelContent .challenge-card{border:1px solid rgba(141,244,255,.12);border-radius:12px;background:linear-gradient(145deg,rgba(12,28,43,.9),rgba(5,15,26,.96));padding:13px;margin:8px 0}
+#pauseMenu #panelContent .challenge-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#pauseMenu #panelContent .challenge-name{font-weight:800;color:#dceef3;font-size:12px;letter-spacing:.4px}
+#pauseMenu #panelContent .challenge-progress{color:#70879a;font-size:9px;letter-spacing:1px;margin-top:5px}
+#pauseMenu #panelContent .challenge-bar{height:5px;margin:9px 0 10px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.06)}
+#pauseMenu #panelContent .challenge-bar i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#5bcde0,#8df4ff);box-shadow:0 0 10px rgba(141,244,255,.25);transition:width .2s ease}
+#pauseMenu #panelContent .reward-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#pauseMenu #panelContent .reward-chip{display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(141,244,255,.11);border-radius:999px;padding:5px 7px;background:rgba(255,255,255,.025);color:#8da4b5;font-size:8px;font-weight:800;letter-spacing:.8px}
+#pauseMenu #panelContent .challenge-claim{border:1px solid rgba(141,244,255,.28);border-radius:8px;background:linear-gradient(145deg,rgba(28,74,88,.95),rgba(9,36,49,.98));color:#dffcff;padding:8px 10px;font:800 9px/1 inherit;letter-spacing:1px;cursor:pointer}
+#pauseMenu #panelContent .challenge-claim:disabled{opacity:.38;cursor:not-allowed;filter:saturate(.45)}
+#pauseMenu #panelContent .challenge-claimed{color:#70d5a4;border-color:rgba(112,213,164,.25);background:rgba(112,213,164,.06)}
+@media(max-width:700px){#pauseMenu #panelContent .pause-action-grid{grid-template-columns:1fr}#pauseMenu #panelContent .challenge-tabs{grid-template-columns:1fr}#pauseMenu #panelContent .challenge-row{align-items:flex-start;flex-direction:column}#pauseMenu #panelContent .challenge-claim{width:100%}}
+@media(prefers-reduced-motion:reduce){#pauseMenu #panelContent .challenge-bar i{transition:none}}
