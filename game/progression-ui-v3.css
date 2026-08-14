@@ -1,0 +1,36 @@
+/* PROGRESSION UI V3 — isolated from pause-settings-v2.css */
+#pauseMenu #panelContent .progression-v3{display:grid;gap:12px;color:#dffcff}
+#pauseMenu #panelContent .progression-v3 .v3-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid rgba(141,244,255,.12)}
+#pauseMenu #panelContent .progression-v3 h3{margin:0;color:#e9fdff;letter-spacing:1.2px;font-size:15px}
+#pauseMenu #panelContent .progression-v3 .v3-kicker{margin:0 0 4px;color:#6f879c;font-size:8px;font-weight:800;letter-spacing:1.6px}
+#pauseMenu #panelContent .progression-v3 .v3-timer{color:#8df4ff;font:800 10px/1.1 inherit;letter-spacing:1px;white-space:nowrap}
+#pauseMenu #panelContent .v3-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+#pauseMenu #panelContent .v3-tabs button{border:1px solid rgba(141,244,255,.14);border-radius:9px;background:linear-gradient(145deg,#0c1d2d,#06101b);color:#7890a5;padding:10px 8px;font:800 9px/1 inherit;letter-spacing:1px;cursor:pointer}
+#pauseMenu #panelContent .v3-tabs button.active{color:#8df4ff;border-color:rgba(141,244,255,.5);box-shadow:inset 0 -2px #8df4ff,0 0 18px rgba(141,244,255,.08)}
+#pauseMenu #panelContent .v3-card{border:1px solid rgba(141,244,255,.13);border-radius:13px;background:linear-gradient(145deg,rgba(12,29,45,.98),rgba(5,14,24,.98));padding:14px;box-shadow:inset 0 1px rgba(255,255,255,.025),0 10px 24px rgba(0,0,0,.14)}
+#pauseMenu #panelContent .v3-card.complete{border-color:rgba(112,213,164,.45);box-shadow:0 0 20px rgba(112,213,164,.08),inset 0 1px rgba(255,255,255,.025)}
+#pauseMenu #panelContent .v3-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#pauseMenu #panelContent .v3-name{font-weight:900;font-size:12px;letter-spacing:.5px}
+#pauseMenu #panelContent .v3-meta{margin-top:4px;color:#71899b;font-size:9px;letter-spacing:.4px}
+#pauseMenu #panelContent .v3-bar{height:6px;margin:11px 0 9px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.055)}
+#pauseMenu #panelContent .v3-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#58cfe1,#8df4ff);box-shadow:0 0 12px rgba(141,244,255,.25);transition:width .25s ease}
+#pauseMenu #panelContent .v3-rewards{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+#pauseMenu #panelContent .v3-reward{border:1px solid rgba(141,244,255,.12);border-radius:999px;background:rgba(255,255,255,.025);padding:5px 8px;color:#9bb1bf;font-size:8px;font-weight:900;letter-spacing:.7px}
+#pauseMenu #panelContent .v3-collect{border:1px solid rgba(141,244,255,.3);border-radius:8px;background:linear-gradient(145deg,#194957,#0a2936);color:#e8feff;padding:8px 10px;font:900 9px/1 inherit;letter-spacing:1px;cursor:pointer;white-space:nowrap}
+#pauseMenu #panelContent .v3-collect:disabled{opacity:.35;filter:saturate(.35);cursor:not-allowed}
+#pauseMenu #panelContent .v3-collect.collected{border-color:rgba(112,213,164,.3);background:rgba(112,213,164,.07);color:#70d5a4}
+#pauseMenu #panelContent .v3-feedback{position:relative;display:none;margin-top:8px;color:#8df4ff;font-weight:900;font-size:10px;letter-spacing:1px}
+#pauseMenu #panelContent .v3-feedback.show{display:block;animation:v3Reward .9s ease forwards}
+@keyframes v3Reward{0%{opacity:0;transform:translateY(6px)}25%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-10px)}}
+#pauseMenu #panelContent .v3-campaign-node{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(141,244,255,.08)}
+#pauseMenu #panelContent .v3-campaign-node:last-child{border-bottom:0}
+#pauseMenu #panelContent .v3-node-dot{width:12px;height:12px;border:2px solid #486275;border-radius:50%;justify-self:center}
+#pauseMenu #panelContent .v3-campaign-node.done .v3-node-dot{border-color:#70d5a4;background:#70d5a4;box-shadow:0 0 12px rgba(112,213,164,.35)}
+#pauseMenu #panelContent .v3-campaign-node.current .v3-node-dot{border-color:#8df4ff;box-shadow:0 0 14px rgba(141,244,255,.45)}
+#pauseMenu #panelContent .v3-campaign-node.locked{opacity:.45}
+#pauseMenu #panelContent .v3-loadout-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#pauseMenu #panelContent .v3-loadout-card{border:1px solid rgba(141,244,255,.1);border-radius:10px;background:rgba(255,255,255,.02);padding:11px}
+#pauseMenu #panelContent .v3-loadout-card b{display:block;font-size:10px;letter-spacing:.8px}
+#pauseMenu #panelContent .v3-loadout-card small{display:block;margin-top:5px;color:#71899b;font-size:8px;letter-spacing:.6px}
+@media(max-width:700px){#pauseMenu #panelContent .v3-row{align-items:flex-start;flex-direction:column}#pauseMenu #panelContent .v3-collect{width:100%}#pauseMenu #panelContent .v3-tabs{grid-template-columns:1fr}#pauseMenu #panelContent .v3-loadout-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){#pauseMenu #panelContent .v3-bar i{transition:none}#pauseMenu #panelContent .v3-feedback.show{animation:none}}
