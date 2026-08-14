@@ -9,8 +9,9 @@ if (!Phaser.Scenes.SceneManager.prototype.__relayRunnerStartGuard) {
     if (key === 'runner') {
       const runner = this.getScene(key);
       if (runner && (this.isActive(key) || this.isPaused(key))) {
+        runner.events.once(Phaser.Scenes.Events.SHUTDOWN, () => originalSceneStart.call(this, key, data));
         this.stop(key);
-        return originalSceneStart.call(this, key, data);
+        return this;
       }
     }
     return originalSceneStart.call(this, key, data);
