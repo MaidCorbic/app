@@ -8,17 +8,50 @@ const hit = RunnerScene.prototype.takeSciFiHit;
 const update = RunnerScene.prototype.update;
 const stop = scene => scene.player?.body?.setVelocity(0, 0);
 
-// Mission completion is owned by main.js. Do NOT stop RunnerScene from a global
-// complete/game-over listener: the finish UI and the existing launch() flow must
-// remain in control of the scene lifecycle. Stopping here was the source of a
-// race where NEXT MISSION could be requested while Phaser was still shutting down
-// the runner, leaving the canvas black.
+// Mission progression remains owned by main.js. The only lifecycle protection here
+// is to serialize an active RunnerScene restart: stop -> shutdown -> start. This
+// prevents Phaser from receiving start('runner') while the previous runner is still
+// alive, which can leave the canvas without an active scene.
+function installSafeRunnerStart(game) {
+  if (!game || game.__relaySafeRunnerStart) return;
+  const manager = game.scene;
+  const originalStart = manager.start.bind(manager);
+  let waiting = false;
+  let queued = null;
+
+  manager.start = function safeRunnerStart(key, data, clear) {
+    if (key !== 'runner') return originalStart(key, data, clear);
+
+    const runner = manager.getScene('runner');
+    const active = runner?.scene?.isActive?.() || runner?.scene?.isPaused?.();
+    if (!active || waiting) return originalStart(key, data, clear);
+
+    queued = { data, clear };
+    if (waiting) return;
+    waiting = true;
+
+    const restart = () => {
+      runner.events.off('shutdown', restart);
+      const next = queued;
+      queued = null;
+      waiting = false;
+      if (next) originalStart('runner', next.data, next.clear);
+    };
+
+    runner.events.once('shutdown', restart);
+    runner.scene.stop();
+  };
+
+  game.__relaySafeRunnerStart = true;
+}
+
 RunnerScene.prototype.create = function stableCreate(...args) {
   const mission = this.mission;
   if (!mission?.id || !mission.spawn || !mission.goal) {
     console.error('[Relay Runner] Invalid mission data; scene will not start.', mission);
     return;
   }
+  installSafeRunnerStart(this.game);
   try {
     return originalCreate.apply(this, args);
   } catch (error) {
@@ -31,10 +64,12 @@ RunnerScene.prototype.fail = function stableFail(message) {
   if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0) return;
   stop(this); return fail.call(this, message);
 };
+
 RunnerScene.prototype.takeSciFiHit = function stableHit(message) {
   if (this.briefingProtected || this.respawning || this.finished || this.respawnGrace > 0 || this.healthInvulnerable > 0) return;
   stop(this); return hit.call(this, message);
 };
+
 RunnerScene.prototype.respawnCheckpoint = function stableRespawn() {
   const spawn = this.mission?.spawn;
   if ((!this.checkpoint || !Number.isFinite(this.checkpoint.x) || !Number.isFinite(this.checkpoint.y) || this.checkpoint.y > 760) && spawn) {
@@ -46,7 +81,6 @@ RunnerScene.prototype.respawnCheckpoint = function stableRespawn() {
   this.healthInvulnerable = Math.max(this.healthInvulnerable || 0, 1100);
 };
 
-// Mobile joystick and keyboard share RunnerScene's existing movement path.
 function installTouchControls() {
   if (window.__relayTouchInstalled) return;
   window.__relayTouchInstalled = true;
