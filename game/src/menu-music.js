@@ -5,6 +5,10 @@
   let master = null;
   let timer = null;
   let active = false;
+  let enabled = localStorage.getItem('relay_music_enabled') !== '0';
+  let volume = Number(localStorage.getItem('relay_music_volume'));
+  if (!Number.isFinite(volume)) volume = 0.09;
+  volume = Math.max(0, Math.min(0.16, volume));
 
   const getContext = () => {
     if (!window.AudioContext && !window.webkitAudioContext) return null;
@@ -13,14 +17,14 @@
     return context;
   };
 
-  const tone = (frequency, start, duration, volume, type = 'triangle') => {
+  const tone = (frequency, start, duration, level, type = 'triangle') => {
     if (!context || !master) return;
     const oscillator = context.createOscillator();
     const gain = context.createGain();
     oscillator.type = type;
     oscillator.frequency.setValueAtTime(frequency, start);
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.linearRampToValueAtTime(volume, start + 0.015);
+    gain.gain.linearRampToValueAtTime(level, start + 0.015);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
     oscillator.connect(gain).connect(master);
     oscillator.start(start);
@@ -35,7 +39,7 @@
   };
 
   const playLoop = () => {
-    if (!active || !context || !master) return;
+    if (!active || !context || !master || !enabled) return;
     const now = context.currentTime + 0.02;
     const beat = 0.24;
     const melody = [261.63,329.63,392,523.25,493.88,392,329.63,293.66,261.63,329.63,440,523.25,587.33,523.25,440,392];
@@ -48,16 +52,14 @@
 
   const start = () => {
     const intro = document.getElementById('intro');
-    if (!intro || intro.classList.contains('hidden') || active) return;
+    if (!enabled || !intro || intro.classList.contains('hidden') || active) return;
     const ctx = getContext();
     if (!ctx) return;
     const begin = () => {
       if (!document.getElementById('intro') || document.getElementById('intro').classList.contains('hidden')) return;
       stop();
       master = ctx.createGain();
-      // Increased from 0.045 to 0.09 so the title-screen music is clearly audible
-      // while keeping the existing synth mix and playback logic unchanged.
-      master.gain.value = 0.09;
+      master.gain.value = volume;
       master.connect(ctx.destination);
       active = true;
       playLoop();
@@ -69,8 +71,23 @@
     begin();
   };
 
-  // Try immediately on page load. Mobile browsers may reject this; the
-  // first real tap/click/keydown then calls start() inside the user gesture.
+  const setEnabled = value => {
+    enabled = Boolean(value);
+    localStorage.setItem('relay_music_enabled', enabled ? '1' : '0');
+    if (!enabled) stop();
+    else start();
+    return enabled;
+  };
+
+  const setVolume = value => {
+    const next = Number(value);
+    if (!Number.isFinite(next)) return volume;
+    volume = Math.max(0, Math.min(0.16, next));
+    localStorage.setItem('relay_music_volume', String(volume));
+    if (master) master.gain.value = volume;
+    return volume;
+  };
+
   const boot = () => start();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
@@ -85,5 +102,5 @@
     if (document.hidden) stop();
   });
 
-  window.relayMenuMusic = { start, stop };
+  window.relayMenuMusic = { start, stop, setEnabled, setVolume, get enabled() { return enabled; }, get volume() { return volume; } };
 })();
