@@ -53,5 +53,21 @@
 #toast{pointer-events:none}
 @keyframes relayHudPulse{0%{box-shadow:0 0 0 0 rgba(56,189,248,.55)}70%{box-shadow:0 0 0 8px rgba(56,189,248,0)}100%{box-shadow:0 0 0 0 rgba(56,189,248,0)}}
 @keyframes relayHudSweep{0%,45%{transform:translateX(-100%)}75%,100%{transform:translateX(100%)}}
-@media (prefers-reduced-motion:reduce){.route-dot,.hud-progress>div::after{animation:none}.hud-route,.hud-progress,.hud-actions,.pause-button,.world-marker{transition:none}}
+@media (prefers-reduced-motion:reduce){.route-dot,.hud-progress>div::after{animation:none}.hud-route,.hud-progress,.hud-actions,.pause-button,.world-marker{transition:none}.relay-title-settings-card{animation:none}}
 @media (max-width:768px){.hud{gap:8px}.hud-route,.hud-progress,.hud-actions{min-width:0}.hud-route b,.hud-route small,.hud-progress small{white-space:nowrap}}
+
+/* SAFE TITLE SETTINGS - isolated UI only; no gameplay/runtime changes. */
+.relay-title-settings{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:18px;background:#02050acc;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.relay-title-settings.hidden{display:none!important}
+.relay-title-settings-card{position:relative;width:min(360px,92vw);box-sizing:border-box;padding:30px 24px 24px;border:1px solid #526173;border-radius:10px;background:linear-gradient(180deg,#0b1624f5,#03070ef7);box-shadow:0 30px 100px #000000b8,inset 0 1px #ffffff08;animation:relay-settings-in .2s ease-out both}
+.relay-title-settings-close{position:absolute;right:12px;top:12px;width:32px;height:32px;border:1px solid #526173;background:#08111d;color:#dbe4ec;cursor:pointer;font:20px/1 Manrope,sans-serif}
+.relay-title-settings-close:hover,.relay-title-settings-close:focus-visible{border-color:#ffd06e;color:#ffd06e;outline:2px solid #dffcff;outline-offset:2px}
+.relay-title-settings-eyebrow{margin:0 0 8px;color:#ffd06e;font:800 8px 'DM Mono',monospace;letter-spacing:2px}
+.relay-title-settings-card h2{margin:0 0 24px;color:#edf3f8;font:900 30px Manrope,sans-serif;letter-spacing:-.04em}
+.relay-setting-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:15px 0;border-top:1px solid #52617345;color:#edf3f8}
+.relay-setting-row span{display:grid;gap:5px}.relay-setting-row b{font:800 10px 'DM Mono',monospace;letter-spacing:1px}.relay-setting-row small{color:#8190a1;font:400 7px 'DM Mono',monospace;letter-spacing:.7px}
+.relay-setting-toggle input{width:42px;height:22px;accent-color:#ffd06e}
+.relay-setting-range{grid-template-columns:1fr;gap:10px}.relay-setting-range input{width:100%;accent-color:#ffd06e}.relay-setting-range output{color:#ffd06e;font:800 9px 'DM Mono',monospace}
+.relay-settings-note{margin:18px 0 0;color:#68778a;font:400 8px/1.6 'DM Mono',monospace}
+@keyframes relay-settings-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+@media (max-width:700px){.relay-title-settings-card{width:min(340px,94vw);padding:28px 20px 22px}}
