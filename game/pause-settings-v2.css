@@ -1,0 +1,23 @@
+/* PAUSE / SETTINGS V2 — visual + UX layer only. Gameplay logic untouched. */
+#pauseMenu .menu{width:min(940px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;border:1px solid rgba(141,244,255,.22);border-radius:18px;background:linear-gradient(145deg,rgba(5,13,24,.97),rgba(9,22,36,.94));box-shadow:0 24px 70px rgba(0,0,0,.48),0 0 36px rgba(141,244,255,.08);backdrop-filter:blur(14px)}
+#pauseMenu .menu header{padding:16px 20px;border-bottom:1px solid rgba(141,244,255,.1)}
+#pauseMenu .menu .logo{color:#8df4ff;text-shadow:0 0 14px rgba(141,244,255,.35);font-weight:800;letter-spacing:2px}
+#pauseMenu .menu .close{width:42px;height:42px;border:1px solid rgba(141,244,255,.22);border-radius:10px;background:rgba(255,255,255,.03);color:#dffcff;cursor:pointer;transition:.15s ease}
+#pauseMenu .menu .close:hover,#pauseMenu .menu .close:focus-visible{border-color:rgba(141,244,255,.7);box-shadow:0 0 18px rgba(141,244,255,.16);transform:translateY(-1px)}
+#pauseMenu .menu-grid{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:420px}
+#pauseMenu .menu-grid>aside{padding:28px 22px;border-right:1px solid rgba(141,244,255,.1);background:linear-gradient(180deg,rgba(141,244,255,.035),transparent)}
+#pauseMenu .menu-grid aside h2{margin:7px 0 24px;line-height:.95;letter-spacing:1px}
+#pauseMenu .menu-grid aside h2 em{color:#8df4ff;font-style:normal;text-shadow:0 0 16px rgba(141,244,255,.18)}
+#pauseMenu .menu-grid nav{display:grid;gap:8px}
+#pauseMenu .menu-grid .tab{width:100%;padding:12px 13px;border:1px solid transparent;border-radius:10px;background:transparent;color:#8da0b6;text-align:left;font:700 11px/1.2 inherit;letter-spacing:1.5px;cursor:pointer;transition:.15s ease}
+#pauseMenu .menu-grid .tab:hover,#pauseMenu .menu-grid .tab:focus-visible{color:#dffcff;background:rgba(141,244,255,.055);border-color:rgba(141,244,255,.18)}
+#pauseMenu .menu-grid .tab.active{color:#8df4ff;background:linear-gradient(90deg,rgba(141,244,255,.12),rgba(141,244,255,.025));border-color:rgba(141,244,255,.3);box-shadow:inset 3px 0 0 #8df4ff,0 0 18px rgba(141,244,255,.06)}
+#pauseMenu #panelContent{padding:30px;min-width:0}
+#pauseMenu #panelContent h3{margin-top:0;letter-spacing:1px}
+#pauseMenu #panelContent button{transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
+#pauseMenu #panelContent button:hover,#pauseMenu #panelContent button:focus-visible{transform:translateY(-1px)}
+#pauseMenu .menu>footer{padding:14px 20px;border-top:1px solid rgba(141,244,255,.1);display:flex;justify-content:flex-end}
+#pauseMenu .menu>footer .secondary{border-color:rgba(141,244,255,.18);background:rgba(255,255,255,.025)}
+@media(max-width:700px){#pauseMenu .menu{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);border-radius:14px}#pauseMenu .menu-grid{grid-template-columns:1fr;min-height:0}#pauseMenu .menu-grid>aside{padding:18px;border-right:0;border-bottom:1px solid rgba(141,244,255,.1)}#pauseMenu .menu-grid aside h2{font-size:24px;margin-bottom:15px}#pauseMenu .menu-grid nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#pauseMenu .menu-grid .tab{padding:10px 9px;font-size:10px}#pauseMenu #panelContent{padding:20px 18px}}
+@media(max-height:500px) and (orientation:landscape){#pauseMenu .menu-grid>aside{padding:14px 18px}#pauseMenu .menu-grid aside h2{font-size:22px;margin-bottom:12px}#pauseMenu .menu-grid nav{grid-template-columns:repeat(4,minmax(0,1fr))}#pauseMenu #panelContent{padding:18px}}
+@media(prefers-reduced-motion:reduce){#pauseMenu .menu .close,#pauseMenu .menu-grid .tab,#pauseMenu #panelContent button{transition:none}}
