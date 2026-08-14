@@ -1,4 +1,5 @@
 import { loadState } from '../state.js';
+import { missions } from '../missions.js';
 
 const PANEL_CLASS = 'mission-mastery-panel';
 const BADGES = [
@@ -32,15 +33,14 @@ function installStyle() {
   document.head.appendChild(styleElement);
 }
 
-function currentMissionId() {
-  const value = document.getElementById('finish')?.dataset?.missionId;
-  if (value) return value;
-  const title = document.querySelector('#finish h2, #finish h3')?.textContent?.trim();
+function missionIdFromFinish() {
+  const finish = document.getElementById('finish');
+  const explicit = finish?.dataset?.missionId;
+  if (explicit) return explicit;
+  const title = finish?.querySelector('h1, h2, h3, .mission-title, .title')?.textContent?.trim().toLowerCase();
   if (!title) return null;
-  const state = loadState();
-  const missions = [...document.querySelectorAll('[data-world-mission]')];
-  const match = missions.find(button => button.textContent?.includes(title));
-  return match ? null : state.lastMissionId || null;
+  const match = missions.find(mission => mission.title.toLowerCase() === title || title.includes(mission.title.toLowerCase()));
+  return match?.id || null;
 }
 
 function masteryForMission(missionId, state = loadState()) {
@@ -56,7 +56,7 @@ function buildMasteryPanel(missionId) {
   const panel = document.createElement('section');
   panel.className = PANEL_CLASS;
   panel.setAttribute('aria-label', 'Mission mastery');
-  panel.innerHTML = `<div class="mastery-heading"><strong>MISSION MASTERY</strong><span class="mastery-count">${earned.size} / ${BADGES.length} EARNED</span></div><div class="mastery-grid">${BADGES.map(badge => {
+  panel.innerHTML = `<div class="mastery-heading"><strong>MISSION MASTERY</strong><span class="mastery-count">${Math.min(earned.size, BADGES.length)} / ${BADGES.length} EARNED</span></div><div class="mastery-grid">${BADGES.map(badge => {
     const isEarned = earned.has(badge.id);
     return `<article class="mastery-badge${isEarned ? ' is-earned' : ''}"><span class="mastery-mark">${isEarned ? '✓' : '○'}</span><span class="mastery-name">${badge.label}</span><span class="mastery-detail">${badge.detail}</span></article>`;
   }).join('')}</div>`;
@@ -68,7 +68,8 @@ function buildMasteryPanel(missionId) {
 function decorateMissionCards() {
   const state = loadState();
   document.querySelectorAll('[data-world-mission]').forEach(button => {
-    const missionId = button.dataset.missionId || button.dataset.worldMissionId;
+    const index = Number(button.dataset.worldMission);
+    const missionId = Number.isInteger(index) && missions[index] ? missions[index].id : button.dataset.missionId;
     if (!missionId) return;
     const earned = masteryForMission(missionId, state);
     let progress = button.querySelector('.mastery-mission-progress');
@@ -77,13 +78,8 @@ function decorateMissionCards() {
       progress.className = 'mastery-mission-progress';
       button.appendChild(progress);
     }
-    progress.innerHTML = `★ <b>${earned.size}</b>/${BADGES.length}`;
+    progress.innerHTML = `★ <b>${Math.min(earned.size, BADGES.length)}</b>/${BADGES.length}`;
   });
-}
-
-function detectFinishMissionId() {
-  const finish = document.getElementById('finish');
-  return finish?.dataset?.missionId || loadState().lastMissionId || null;
 }
 
 if (typeof document !== 'undefined') {
@@ -92,7 +88,7 @@ if (typeof document !== 'undefined') {
   const game = document.getElementById('game');
   if (finish) {
     new MutationObserver(() => {
-      if (!finish.classList.contains('hidden')) buildMasteryPanel(detectFinishMissionId());
+      if (!finish.classList.contains('hidden')) buildMasteryPanel(missionIdFromFinish());
     }).observe(finish, { attributes: true, attributeFilter: ['class', 'data-mission-id'] });
   }
   if (game) new MutationObserver(decorateMissionCards).observe(game, { childList: true, subtree: true });
