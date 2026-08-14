@@ -19,27 +19,6 @@ export const LATEST_UPDATE = {
     'More stable WebGL resizing during mission transitions.',
     'Original arcade menu soundtrack.',
     'Improved touch controls for phones.',
-    'FAQ, language selection and update information directly from the title menu.'
+    'FAQ and update information directly from the title menu.'
   ]
 };
-
-(async () => {
-  const i18n = await import('./src/i18n.js');
-  const actions = document.querySelector('.relay-info-actions');
-  if (actions && !actions.querySelector('[data-language-open]')) {
-    const button = document.createElement('button');
-    button.type = 'button'; button.className = 'relay-info-button relay-language-button';
-    button.dataset.languageOpen = 'true'; button.setAttribute('aria-label', 'Choose language');
-    button.innerHTML = '<span class="icon icon-language" aria-hidden="true">文</span>';
-    actions.appendChild(button);
-  }
-  window.addEventListener('relay-language-change', ({ detail }) => {
-    const faqHeading = document.getElementById('relayInfoHeading');
-    const eyebrow = document.getElementById('relayInfoEyebrow');
-    if (faqHeading?.textContent === 'FAQ' || faqHeading?.textContent === 'PREGUNTAS FRECUENTES' || faqHeading?.textContent === 'FAQ') {
-      faqHeading.textContent = i18n.text('faq');
-      if (eyebrow) eyebrow.textContent = detail.lang === 'en' ? 'RELAY RUNNER // FIELD GUIDE' : i18n.text('faq');
-    }
-    document.querySelectorAll('[data-relay-info]').forEach(el => el.title = el.dataset.relayInfo === 'faq' ? i18n.text('faq') : i18n.text('info'));
-  });
-})();
