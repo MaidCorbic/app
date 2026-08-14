@@ -78,7 +78,8 @@ function decorateMissionCards() {
       progress.className = 'mastery-mission-progress';
       button.appendChild(progress);
     }
-    progress.innerHTML = `★ <b>${Math.min(earned.size, BADGES.length)}</b>/${BADGES.length}`;
+    const label = `★ ${Math.min(earned.size, BADGES.length)}/${BADGES.length}`;
+    if (progress.textContent !== label) progress.textContent = label;
   });
 }
 
