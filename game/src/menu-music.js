@@ -55,8 +55,7 @@
       if (!document.getElementById('intro') || document.getElementById('intro').classList.contains('hidden')) return;
       stop();
       master = ctx.createGain();
-      // Raised from 0.045 so the same menu music is clearly audible on phones.
-      master.gain.value = 0.09;
+      master.gain.value = 0.065;
       master.connect(ctx.destination);
       active = true;
       playLoop();
