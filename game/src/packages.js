@@ -7,3 +7,53 @@ export const packages = {
   'corporate-lockdown': { type: 'OVERSIZED', objective: 'Carry the Helix relay core through the corporate lockdown.', duration: '01:38', condition: true, speedMultiplier: .88 },
   'final-relay': { type: 'PRIME RELAY', objective: 'Deliver the city core to Apex Spine before the network closes.', duration: '01:45', condition: true, speedMultiplier: .92 },
 };
+
+// Enemy layout safety bridge. The route() builder historically injected the same
+// three enemies into every mission. Remove only those exact legacy entries at
+// runtime; authored mission enemies remain the source of truth.
+import { missions } from './missions.js';
+import { RunnerScene } from './scenes/RunnerScene.js';
+
+const LEGACY_ROUTE_ENEMIES = new Set([
+  'security:4550:430:4420:4680',
+  'guard:5250:470:5120:5420',
+  'security:5790:430:5630:5950',
+]);
+
+const enemyKey = enemy => `${enemy.type}:${enemy.x}:${enemy.y}:${enemy.min}:${enemy.max}`;
+
+for (const mission of missions) {
+  mission.enemies = (mission.enemies || []).filter(enemy => !LEGACY_ROUTE_ENEMIES.has(enemyKey(enemy)));
+}
+
+// RunnerScene still owns the legacy procedural threat generator. Let it build
+// its combat groups/projectiles, then keep only enemies authored by the mission
+// plus its configured boss. First Delivery intentionally keeps its two tutorial
+// threats because that mission teaches combat through them.
+if (!RunnerScene.prototype.__missionEnemyLayoutPatch) {
+  const originalCreateSciFiThreats = RunnerScene.prototype.createSciFiThreats;
+
+  RunnerScene.prototype.createSciFiThreats = function createMissionEnemyLayout() {
+    const authoredBefore = new Set(this.enemies?.getChildren?.() || []);
+    originalCreateSciFiThreats.call(this);
+
+    const keepTutorial = this.mission?.id === 'first-delivery';
+    const children = this.enemies?.getChildren?.() || [];
+
+    children.forEach(enemy => {
+      const isAuthored = authoredBefore.has(enemy);
+      const isBoss = enemy.getData('boss') === true;
+      const isTutorialThreat = keepTutorial && (
+        enemy.texture?.key === 'enemy-runner' || enemy.texture?.key === 'chicken'
+      );
+
+      if (isAuthored || isBoss || isTutorialThreat) return;
+
+      enemy.getData('indicator')?.destroy();
+      enemy.getData('tutorialLabel')?.destroy();
+      enemy.destroy();
+    });
+  };
+
+  RunnerScene.prototype.__missionEnemyLayoutPatch = true;
+}
