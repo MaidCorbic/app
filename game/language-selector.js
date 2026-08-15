@@ -104,7 +104,7 @@
     const panel = document.getElementById('titlePanel');
     const content = document.getElementById('titlePanelContent');
     if (!panel || !content || panel.classList.contains('hidden')) return;
-    if (!document.querySelector('[data-title-panel="controls"]')?.matches(':focus-visible') && document.getElementById('titlePanelHeading')?.textContent !== 'OPTIONS') return;
+    if (!document.querySelector('[data-title-panel="controls"]')?.matches(':focus-visible') && document.getElementById('titlePanelEyebrow')?.textContent !== 'OPTIONS') return;
     if (!content.querySelector('.home-language-setting')) content.appendChild(make());
   };
 
