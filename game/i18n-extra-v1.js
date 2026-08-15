@@ -2,6 +2,7 @@ import './i18n-extra-v1.css';
 
 (() => {
   const KEY = 'relay.runner.language';
+  const BASE_NAMES = { en:'ENGLISH', bs:'BOSANSKI', hr:'HRVATSKI', sr:'SRPSKI' };
   const LANG = {
     de:{name:'DEUTSCH',homeEyebrow:'EIN SPIEL ÜBER DACHLIEFERUNGEN',tagline:'Laufe durch die schlafende Stadt. Bringe das Signal weiter als alle vor dir.',play:'SPIELEN',cont:'FORTSETZEN',options:'OPTIONEN',optionsSub:'EINSTELLUNGEN & STEUERUNG',exit:'BEENDEN',exitSub:'SITZUNG SCHLIESSEN',faq:'FAQ',pause:'KURIER-TERMINAL',resume:'FORTSETZEN',missions:'MISSIONEN',progress:'FORTSCHRITT',settings:'EINSTELLUNGEN',complete:'LIEFERUNG ABGESCHLOSSEN',nextRun:'NÄCHSTER LAUF',nextMission:'NÄCHSTE MISSION',retry:'ERNEUT VERSUCHEN',signals:'SIGNALE',language:'SPRACHE',languageSub:'Menü- und Systemsprache sofort ändern.'},
     es:{name:'ESPAÑOL',homeEyebrow:'JUEGO DE ENTREGAS POR LOS TEJADOS',tagline:'Corre por la ciudad dormida. Lleva la señal más lejos que nadie.',play:'JUGAR',cont:'CONTINUAR',options:'OPCIONES',optionsSub:'AJUSTES Y CONTROLES',exit:'SALIR',exitSub:'CERRAR SESIÓN',faq:'FAQ',pause:'TERMINAL DEL MENSAJERO',resume:'CONTINUAR',missions:'MISIONES',progress:'PROGRESO',settings:'AJUSTES',complete:'ENTREGA COMPLETADA',nextRun:'SIGUIENTE RUN',nextMission:'SIGUIENTE MISIÓN',retry:'REINTENTAR',signals:'SEÑALES',language:'IDIOMA',languageSub:'Cambiar al instante el idioma del menú y del sistema.'},
@@ -13,22 +14,25 @@ import './i18n-extra-v1.css';
   const codes = Object.keys(LANG);
   const text = (sel,v) => { const el=document.querySelector(sel); if(el&&v) el.textContent=v; };
   const get = () => localStorage.getItem(KEY)||'en';
+  const titleFor = code => `Relay Runner // Night Shift · ${(LANG[code]?.name || BASE_NAMES[code] || code.toUpperCase())}`;
   const installFavicon = () => { let l=document.querySelector('link[data-relay-favicon]'); if(!l){l=document.createElement('link');l.rel='icon';l.type='image/svg+xml';l.dataset.relayFavicon='1';document.head.appendChild(l);} l.href='./favicon.svg'; };
-  const syncLanguageControls = () => {
+  const syncControls = () => {
     const bar=document.getElementById('relayLanguageBar');
     if(bar){ codes.forEach(code=>{ if(!bar.querySelector(`[data-extra-relay-lang="${code}"]`)){ const b=document.createElement('button'); b.type='button'; b.dataset.extraRelayLang=code; b.textContent=code.toUpperCase(); b.title=LANG[code].name; b.addEventListener('click',()=>{localStorage.setItem(KEY,code);sync();}); bar.appendChild(b);} }); }
     const select=document.querySelector('#titlePanelContent [data-relay-language]');
-    if(select){ codes.forEach(code=>{ if(!select.querySelector(`option[value="${code}"]`)){const o=document.createElement('option');o.value=code;o.textContent=LANG[code].name;select.appendChild(o);} }); select.value=codes.includes(get())?get():select.value; }
+    if(select){ codes.forEach(code=>{ if(!select.querySelector(`option[value="${code}"]`)){const o=document.createElement('option');o.value=code;o.textContent=LANG[code].name;select.appendChild(o);} }); if(codes.includes(get())) select.value=get(); }
   };
   const apply = code => {
-    const x=LANG[code]; if(!x) return;
-    document.documentElement.lang=code; document.title=`Relay Runner // Night Shift · ${x.name}`;
-    text('#intro .title-lockup .eyebrow',x.homeEyebrow); text('#intro .menu-tagline',x.tagline); text('#intro #start span',x.play); text('#intro #continue',x.cont+' →'); text('#intro [data-title-panel="controls"] span',x.options); text('#intro [data-title-panel="controls"] small',x.optionsSub); text('#intro #exitTitle span',x.exit); text('#intro #exitTitle small',x.exitSub); text('#intro .faq-launcher',x.faq);
-    text('#pauseMenu aside .eyebrow',x.pause); ['resume','missions','progress','settings'].forEach(k=>document.querySelectorAll(`#pauseMenu [data-tab="${k}"]`).forEach(b=>b.textContent=x[k]));
+    const x=LANG[code];
+    document.documentElement.lang=code; document.title=titleFor(code);
+    if(!x) return;
+    text('#intro .title-lockup .eyebrow',x.homeEyebrow); text('#intro .menu-tagline',x.tagline); text('#intro #start span',x.play); text('#intro #continue',x.cont+' →'); text('#intro [data-title-panel="controls"] span',x.options); text('#intro [data-title-panel="controls"] small',x.optionsSub); text('#intro #exitTitle span',x.exit); text('#intro #exitTitle small',x.exitSub); text('#intro .faq-launcher',x.faq); text('#pauseMenu aside .eyebrow',x.pause);
+    ['resume','missions','progress','settings'].forEach(k=>document.querySelectorAll(`#pauseMenu [data-tab="${k}"]`).forEach(b=>b.textContent=x[k])); text('#returnTitle',x.options);
     text('#finish .eyebrow',x.complete); text('#again',x.nextRun+' →'); text('#nextMission',x.nextMission); text('#retry',x.retry); text('.hud-progress small',x.signals);
     const extra=document.querySelector('.relay-options-extra'); if(extra){extra.querySelector('header p')?.replaceChildren(document.createTextNode(x.options)); extra.querySelector('[data-relay-language]')?.closest('.relay-option-row')?.querySelector('.relay-option-copy strong')?.replaceChildren(document.createTextNode(x.language)); extra.querySelector('[data-relay-language]')?.closest('.relay-option-row')?.querySelector('.relay-option-copy small')?.replaceChildren(document.createTextNode(x.languageSub));}
   };
-  const sync = () => { installFavicon(); syncLanguageControls(); const code=get(); if(LANG[code]) apply(code); };
-  const boot = () => { sync(); const obs=new MutationObserver(()=>setTimeout(sync,0)); obs.observe(document.body,{childList:true,subtree:true}); document.addEventListener('change',e=>{const s=e.target.closest('[data-relay-language]'); if(s&&LANG[s.value]){localStorage.setItem(KEY,s.value);sync();}}); window.addEventListener('pageshow',sync); };
+  let running=false;
+  const sync = () => { if(running)return; running=true; try{ installFavicon(); syncControls(); apply(get()); } finally { running=false; } };
+  const boot = () => { sync(); const obs=new MutationObserver(()=>setTimeout(sync,0)); obs.observe(document.body,{childList:true,subtree:true}); document.addEventListener('change',e=>{const s=e.target.closest('[data-relay-language]');if(s){localStorage.setItem(KEY,s.value);sync();}}); window.addEventListener('pageshow',sync); };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
 })();
