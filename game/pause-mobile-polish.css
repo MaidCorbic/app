@@ -1,0 +1,73 @@
+/* Pause mobile visual safety layer. No gameplay/state logic. */
+#pauseMenu .menu,#pauseMenu .menu *{box-sizing:border-box}
+#pauseMenu .menu{width:min(1180px,calc(100vw - 24px));margin:0 auto;color:var(--paper,#eef2f6)}
+#pauseMenu .menu-grid,#pauseMenu .menu-grid aside,#pauseMenu .menu-grid aside nav{min-width:0}
+#pauseMenu .menu-grid aside nav .tab{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+#pauseMenu #panelContent{position:relative;z-index:5;min-width:0;max-width:100%;overflow-x:hidden;overflow-y:visible;overflow-wrap:anywhere;pointer-events:auto;isolation:isolate}
+#pauseMenu #panelContent *{pointer-events:auto}
+#pauseMenu #panelContent input[type="range"],#pauseMenu #panelContent select{position:relative;z-index:6;pointer-events:auto;touch-action:manipulation}
+
+/* Non-campaign pause panels: replace browser-looking buttons with the existing game visual language. */
+#pauseMenu #panelContent > :not(.campaign-v2) button,#pauseMenu #panelContent > :not(.campaign-v2) [role="button"],#pauseMenu #panelContent .setting button,#pauseMenu #panelContent .upgrade button,#pauseMenu #panelContent .upgrade-card button,#pauseMenu #panelContent .loadout button,#pauseMenu #panelContent .loadout-card button{appearance:none;-webkit-appearance:none;min-height:44px;padding:9px 12px;border:1px solid rgba(141,244,255,.42);border-radius:8px;background:linear-gradient(145deg,rgba(8,22,37,.98),rgba(13,39,61,.96));color:#dffcff;box-shadow:0 7px 18px rgba(1,5,11,.32),inset 0 1px rgba(255,255,255,.05),0 0 12px rgba(141,244,255,.08);font:700 10px/1.2 "DM Mono",monospace;letter-spacing:.55px;text-align:center;white-space:normal;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .14s ease,border-color .14s ease,background .14s ease,box-shadow .14s ease,color .14s ease}
+#pauseMenu #panelContent > :not(.campaign-v2) button:hover,#pauseMenu #panelContent > :not(.campaign-v2) button:focus-visible,#pauseMenu #panelContent .setting button:hover,#pauseMenu #panelContent .setting button:focus-visible,#pauseMenu #panelContent .upgrade button:hover,#pauseMenu #panelContent .upgrade-card button:hover,#pauseMenu #panelContent .loadout button:hover,#pauseMenu #panelContent .loadout-card button:hover{border-color:#ffd06e;color:#fff3c8;background:linear-gradient(145deg,rgba(18,35,53,.99),rgba(35,54,72,.98));box-shadow:0 9px 22px rgba(1,5,11,.38),0 0 18px rgba(255,208,110,.12),inset 0 1px rgba(255,255,255,.06);outline:none;transform:translateY(-1px)}
+#pauseMenu #panelContent > :not(.campaign-v2) button:active,#pauseMenu #panelContent .setting button:active,#pauseMenu #panelContent .upgrade button:active,#pauseMenu #panelContent .upgrade-card button:active,#pauseMenu #panelContent .loadout button:active,#pauseMenu #panelContent .loadout-card button:active{transform:scale(.98)}
+#pauseMenu #panelContent > :not(.campaign-v2) button:disabled,#pauseMenu #panelContent .setting button:disabled,#pauseMenu #panelContent .upgrade button:disabled,#pauseMenu #panelContent .upgrade-card button:disabled,#pauseMenu #panelContent .loadout button:disabled,#pauseMenu #panelContent .loadout-card button:disabled{opacity:.55;filter:saturate(.55);cursor:not-allowed;transform:none}
+
+/* Settings controls: keep the existing JS handlers, only improve hit areas and stacking. */
+#pauseMenu #panelContent .settings{position:relative;z-index:5;display:grid;gap:10px;pointer-events:auto}
+#pauseMenu #panelContent .settings .setting{position:relative;z-index:5;min-width:0;pointer-events:auto}
+#pauseMenu #panelContent .settings .setting-toggle{position:relative;z-index:6;min-width:82px;justify-self:end;pointer-events:auto;touch-action:manipulation}
+#pauseMenu #panelContent .settings .volume-setting input[type="range"]{display:block;width:100%;height:28px;margin:3px 0 0;accent-color:#ffd06e;cursor:pointer}
+#pauseMenu #panelContent .settings .controls-card{position:relative;z-index:5;pointer-events:auto}
+#pauseMenu #panelContent #replayTutorial{position:relative;z-index:6;pointer-events:auto;touch-action:manipulation}
+
+/* Keep Pause navigation compact, centered and thumb-friendly. */
+#pauseMenu .menu-grid aside nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;position:relative;z-index:10;pointer-events:auto}
+#pauseMenu .menu-grid aside nav .tab{width:100%;min-height:44px;padding:9px 8px;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#pauseMenu .menu-grid aside nav .tab.active{border-color:#ffd06e;color:#fff3c8;box-shadow:0 0 18px rgba(255,208,110,.12),inset 0 1px rgba(255,255,255,.06)}
+#pauseMenu .campaign-v2{width:100%;max-width:980px;margin-inline:auto}
+
+@media (max-width:880px){
+  #pauseMenu{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  #pauseMenu .menu{width:min(720px,calc(100vw - 16px));padding:12px 9px 16px}
+  #pauseMenu .menu-grid{display:grid;grid-template-columns:1fr;gap:12px}
+  #pauseMenu .menu-grid aside{text-align:center}
+  #pauseMenu .menu-grid aside .eyebrow,#pauseMenu .menu-grid aside h2{text-align:center}
+  #pauseMenu .menu-grid aside nav{grid-template-columns:repeat(2,minmax(0,1fr));width:min(520px,100%);margin:9px auto 0}
+  #pauseMenu .menu-grid aside nav .tab{min-height:44px;font-size:8.5px}
+  #pauseMenu #panelContent{width:100%;max-width:100%;padding-inline:0}
+  #pauseMenu #panelContent .journal{width:100%;max-width:100%}
+  #pauseMenu #panelContent .entry{min-width:0}
+}
+
+@media (max-width:480px){
+  #pauseMenu .menu{width:calc(100vw - 8px);padding:9px 6px 14px}
+  #pauseMenu .menu-grid{gap:9px}
+  #pauseMenu .menu-grid aside h2{font-size:clamp(20px,6.6vw,28px);line-height:.95}
+  #pauseMenu .menu-grid aside nav{gap:5px;margin-top:8px}
+  #pauseMenu .menu-grid aside nav .tab{min-height:42px;padding:8px 4px;font-size:8px;letter-spacing:.3px}
+  #pauseMenu #panelContent > :not(.campaign-v2) button,#pauseMenu #panelContent .setting button,#pauseMenu #panelContent .upgrade button,#pauseMenu #panelContent .upgrade-card button,#pauseMenu #panelContent .loadout button,#pauseMenu #panelContent .loadout-card button{min-height:42px;padding:8px 9px;font-size:8.5px}
+  #pauseMenu #panelContent .settings{gap:7px}
+  #pauseMenu #panelContent .settings .setting{padding:9px!important;gap:7px!important}
+  #pauseMenu #panelContent .settings .setting-toggle{min-width:76px;min-height:40px}
+  #pauseMenu #panelContent .settings .volume-setting input[type="range"]{height:26px}
+  #pauseMenu #panelContent .controls-card{padding:10px!important}
+  #pauseMenu #panelContent #replayTutorial{width:100%;min-height:42px}
+}
+
+@media (max-width:360px){
+  #pauseMenu .menu{width:calc(100vw - 6px);padding-inline:5px}
+  #pauseMenu .menu-grid aside nav{grid-template-columns:1fr}
+  #pauseMenu .menu-grid aside nav .tab{min-height:40px}
+}
+
+@media (orientation:landscape) and (max-height:560px){
+  #pauseMenu .menu{padding:7px 11px 10px}
+  #pauseMenu .menu-grid{gap:8px}
+  #pauseMenu .menu-grid aside nav{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:6px}
+  #pauseMenu .menu-grid aside nav .tab{min-height:40px;padding:7px 5px}
+  #pauseMenu #panelContent .settings{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #pauseMenu #panelContent .settings .volume-setting,#pauseMenu #panelContent .settings .controls-card,#pauseMenu #panelContent #replayTutorial{grid-column:1/-1}
+}
+
+@media (prefers-reduced-motion:reduce){#pauseMenu #panelContent button{transition:none}}

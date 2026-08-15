@@ -1,4 +1,5 @@
 import { getCourierRank, getLevelProgress, loadState, MAX_LEVEL } from './src/state.js';
+import './campaign-v2.js';
 
 const panel = document.getElementById('panelContent');
 const profileTab = document.querySelector('#pauseMenu [data-tab="progress"]');
