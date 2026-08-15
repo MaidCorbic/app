@@ -1,3 +1,5 @@
+import '../i18n-extra-v1.js';
+
 (() => {
   if (window.__relayMenuMusicInstalled) return;
   window.__relayMenuMusicInstalled = true;
