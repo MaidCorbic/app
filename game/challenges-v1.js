@@ -103,8 +103,18 @@ if (pause && panel) {
   });
 
   const observer = new MutationObserver(() => {
-    if (active && !document.getElementById('challengeHub') && !pause.classList.contains('hidden')) renderChallenges();
+    const challengesTabActive = tab?.classList.contains('active');
+    if (
+      active &&
+      challengesTabActive &&
+      !document.getElementById('challengeHub') &&
+      !pause.classList.contains('hidden')
+    ) {
+      renderChallenges();
+    }
   });
   observer.observe(panel, { childList: true });
-  window.addEventListener('storage', () => { if (active) renderChallenges(); });
+  window.addEventListener('storage', () => {
+    if (active && tab?.classList.contains('active')) renderChallenges();
+  });
 }
