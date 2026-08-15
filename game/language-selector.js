@@ -60,7 +60,7 @@
   `;
   document.head.appendChild(css);
 
-  const clickPauseSetting = setting => {
+  const clickPauseSetting = (setting, desiredOn) => {
     const pause = document.getElementById('pauseMenu');
     const panel = document.getElementById('panelContent');
     const tab = pause?.querySelector('.tab[data-tab="settings"]');
@@ -68,7 +68,8 @@
     tab.click();
     const button = panel.querySelector(`[data-setting="${setting}"]`);
     if (!button) return false;
-    button.click();
+    const currentOn = button.classList.contains('is-on') || button.getAttribute('aria-pressed') === 'true';
+    if (currentOn !== desiredOn) button.click();
     return true;
   };
 
@@ -92,8 +93,8 @@
     if (!pause || !panel || !tab) return null;
     tab.click();
     const readToggle = name => panel.querySelector(`[data-setting="${name}"]`)?.classList.contains('is-on') || false;
-    const music = Number(panel.querySelector('[data-volume="musicVolume"]')?.value ?? 0.7);
-    const sfx = Number(panel.querySelector('[data-volume="sfxVolume"]')?.value ?? 0.8);
+    const music = Number(panel.querySelector('[data-volume="musicVolume"]')?.value ?? 0.55);
+    const sfx = Number(panel.querySelector('[data-volume="sfxVolume"]')?.value ?? 0.7);
     const audioButton = panel.querySelector('[data-setting="muted"]');
     const audioOn = audioButton ? audioButton.getAttribute('aria-pressed') === 'true' : true;
     return { screenShake: readToggle('screenShake'), reducedMotion: readToggle('reducedMotion'), rain: readToggle('rain'), audioOn, music, sfx };
@@ -102,27 +103,12 @@
   const makeToggle = (key, label, hint, state, onChange) => {
     const card = document.createElement('div');
     card.className = 'relay-option-card';
-    const copy = document.createElement('div');
-    copy.className = 'relay-option-copy';
-    copy.innerHTML = `<strong>${label}</strong><small>${hint}</small>`;
-    const control = document.createElement('div');
-    control.className = 'relay-option-control';
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = `relay-toggle${state ? ' is-on' : ''}`;
-    button.dataset.option = key;
-    button.setAttribute('aria-pressed', String(state));
-    const text = document.createElement('span');
-    text.textContent = state ? 'ON' : 'OFF';
-    button.appendChild(text);
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      onChange(!button.classList.contains('is-on'));
-    });
-    control.appendChild(button);
-    card.append(copy, control);
-    return card;
+    const copy = document.createElement('div'); copy.className = 'relay-option-copy'; copy.innerHTML = `<strong>${label}</strong><small>${hint}</small>`;
+    const control = document.createElement('div'); control.className = 'relay-option-control';
+    const button = document.createElement('button'); button.type = 'button'; button.className = `relay-toggle${state ? ' is-on' : ''}`; button.dataset.option = key; button.setAttribute('aria-pressed', String(state));
+    const text = document.createElement('span'); text.textContent = state ? 'ON' : 'OFF'; button.appendChild(text);
+    button.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); onChange(!button.classList.contains('is-on')); });
+    control.appendChild(button); card.append(copy, control); return card;
   };
 
   const buildOptions = () => {
@@ -133,102 +119,47 @@
     content.querySelector('.title-settings')?.remove();
     content.querySelector('.relay-home-options')?.remove();
 
-    const root = document.createElement('div');
-    root.className = 'relay-home-options';
+    const root = document.createElement('div'); root.className = 'relay-home-options';
+    root.appendChild(makeToggle('audio','GAME AUDIO','Master game sound and feedback.',state.audioOn,on => { clickPauseSetting('muted', !on); window.setTimeout(buildOptions, 0); }));
+    root.appendChild(makeToggle('shake','SCREEN SHAKE','Impact camera feedback during gameplay.',state.screenShake,on => { clickPauseSetting('screenShake', on); window.setTimeout(buildOptions, 0); }));
+    root.appendChild(makeToggle('motion','REDUCED MOTION','Reduce movement-heavy visual effects.',state.reducedMotion,on => { clickPauseSetting('reducedMotion', on); window.setTimeout(buildOptions, 0); }));
+    root.appendChild(makeToggle('rain','ATMOSPHERIC RAIN','Toggle the rooftop weather layer.',state.rain,on => { clickPauseSetting('rain', on); window.setTimeout(buildOptions, 0); }));
 
-    root.appendChild(makeToggle('audio', 'GAME AUDIO', 'Master game sound and feedback.', state.audioOn, on => {
-      clickPauseSetting('muted');
-      window.setTimeout(() => buildOptions(), 0);
-    }));
-    root.appendChild(makeToggle('shake', 'SCREEN SHAKE', 'Impact camera feedback during gameplay.', state.screenShake, on => {
-      clickPauseSetting('screenShake');
-      window.setTimeout(() => buildOptions(), 0);
-    }));
-    root.appendChild(makeToggle('motion', 'REDUCED MOTION', 'Reduce movement-heavy visual effects.', state.reducedMotion, on => {
-      clickPauseSetting('reducedMotion');
-      window.setTimeout(() => buildOptions(), 0);
-    }));
-    root.appendChild(makeToggle('rain', 'ATMOSPHERIC RAIN', 'Toggle the rooftop weather layer.', state.rain, on => {
-      clickPauseSetting('rain');
-      window.setTimeout(() => buildOptions(), 0);
-    }));
+    const musicCard = document.createElement('div'); musicCard.className = 'relay-option-card'; musicCard.innerHTML = '<div class="relay-option-copy"><strong>MUSIC VOLUME</strong><small>Ambient soundtrack level.</small></div>';
+    const musicControl = document.createElement('div'); musicControl.className = 'relay-option-control relay-slider-wrap';
+    const music = document.createElement('input'); music.className = 'relay-slider'; music.type = 'range'; music.min='0'; music.max='1'; music.step='.05'; music.value=state.music;
+    const musicValue = document.createElement('b'); musicValue.className='relay-slider-value'; musicValue.textContent=`${Math.round(state.music*100)}%`;
+    music.addEventListener('input',()=>{musicValue.textContent=`${Math.round(Number(music.value)*100)}%`;setPauseVolume('musicVolume',Number(music.value));});
+    musicControl.append(music,musicValue); musicCard.appendChild(musicControl); root.appendChild(musicCard);
 
-    const musicCard = document.createElement('div');
-    musicCard.className = 'relay-option-card';
-    musicCard.innerHTML = `<div class="relay-option-copy"><strong>MUSIC VOLUME</strong><small>Ambient soundtrack level.</small></div>`;
-    const musicControl = document.createElement('div');
-    musicControl.className = 'relay-option-control relay-slider-wrap';
-    const music = document.createElement('input');
-    music.className = 'relay-slider'; music.type = 'range'; music.min = '0'; music.max = '1'; music.step = '.05'; music.value = state.music;
-    const musicValue = document.createElement('b'); musicValue.className = 'relay-slider-value'; musicValue.textContent = `${Math.round(state.music * 100)}%`;
-    music.addEventListener('input', () => { musicValue.textContent = `${Math.round(Number(music.value) * 100)}%`; setPauseVolume('musicVolume', Number(music.value)); });
-    musicControl.append(music, musicValue); musicCard.appendChild(musicControl); root.appendChild(musicCard);
+    const sfxCard = document.createElement('div'); sfxCard.className='relay-option-card'; sfxCard.innerHTML='<div class="relay-option-copy"><strong>SFX VOLUME</strong><small>Gameplay and interaction sounds.</small></div>';
+    const sfxControl=document.createElement('div');sfxControl.className='relay-option-control relay-slider-wrap';
+    const sfx=document.createElement('input');sfx.className='relay-slider';sfx.type='range';sfx.min='0';sfx.max='1';sfx.step='.05';sfx.value=state.sfx;
+    const sfxValue=document.createElement('b');sfxValue.className='relay-slider-value';sfxValue.textContent=`${Math.round(state.sfx*100)}%`;
+    sfx.addEventListener('input',()=>{sfxValue.textContent=`${Math.round(Number(sfx.value)*100)}%`;setPauseVolume('sfxVolume',Number(sfx.value));});
+    sfxControl.append(sfx,sfxValue);sfxCard.appendChild(sfxControl);root.appendChild(sfxCard);
 
-    const sfxCard = document.createElement('div');
-    sfxCard.className = 'relay-option-card';
-    sfxCard.innerHTML = `<div class="relay-option-copy"><strong>SFX VOLUME</strong><small>Gameplay and interaction sounds.</small></div>`;
-    const sfxControl = document.createElement('div');
-    sfxControl.className = 'relay-option-control relay-slider-wrap';
-    const sfx = document.createElement('input'); sfx.className = 'relay-slider'; sfx.type = 'range'; sfx.min = '0'; sfx.max = '1'; sfx.step = '.05'; sfx.value = state.sfx;
-    const sfxValue = document.createElement('b'); sfxValue.className = 'relay-slider-value'; sfxValue.textContent = `${Math.round(state.sfx * 100)}%`;
-    sfx.addEventListener('input', () => { sfxValue.textContent = `${Math.round(Number(sfx.value) * 100)}%`; setPauseVolume('sfxVolume', Number(sfx.value)); });
-    sfxControl.append(sfx, sfxValue); sfxCard.appendChild(sfxControl); root.appendChild(sfxCard);
+    const languageCard=document.createElement('div');languageCard.className='relay-option-card relay-language';
+    const languageCopy=document.createElement('div');languageCopy.className='relay-option-copy';languageCopy.innerHTML='<strong>LANGUAGE</strong><small>Choose the interface language.</small>';
+    const languageControl=document.createElement('div');languageControl.className='relay-option-control';const languageWrap=document.createElement('div');languageWrap.className='relay-language';
+    const languageButton=document.createElement('button');languageButton.type='button';languageButton.className='relay-language-button';languageButton.setAttribute('aria-haspopup','listbox');
+    const languageMenu=document.createElement('div');languageMenu.className='relay-language-menu hidden';languageMenu.setAttribute('role','listbox');
+    const refreshLanguage=()=>{const current=LANGUAGES.find(([code])=>code===getLanguage())||LANGUAGES[0];languageButton.textContent=`🌐  ${current[1]}`;languageMenu.querySelectorAll('button').forEach(option=>{const active=option.dataset.lang===current[0];option.classList.toggle('active',active);option.setAttribute('aria-selected',String(active));});};
+    LANGUAGES.forEach(([code,name])=>{const option=document.createElement('button');option.type='button';option.className='relay-language-option';option.dataset.lang=code;option.textContent=name;option.setAttribute('role','option');option.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();setLanguage(code);languageMenu.classList.add('hidden');refreshLanguage();});languageMenu.appendChild(option);});
+    languageButton.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();languageMenu.classList.toggle('hidden');refreshLanguage();});
+    languageWrap.append(languageButton,languageMenu);languageControl.appendChild(languageWrap);languageCard.append(languageCopy,languageControl);root.appendChild(languageCard);
 
-    const languageCard = document.createElement('div');
-    languageCard.className = 'relay-option-card relay-language';
-    const languageCopy = document.createElement('div'); languageCopy.className = 'relay-option-copy';
-    languageCopy.innerHTML = '<strong>LANGUAGE</strong><small>Choose the interface language.</small>';
-    const languageControl = document.createElement('div'); languageControl.className = 'relay-option-control';
-    const languageWrap = document.createElement('div'); languageWrap.className = 'relay-language';
-    const languageButton = document.createElement('button'); languageButton.type = 'button'; languageButton.className = 'relay-language-button'; languageButton.setAttribute('aria-haspopup', 'listbox');
-    const languageMenu = document.createElement('div'); languageMenu.className = 'relay-language-menu hidden'; languageMenu.setAttribute('role', 'listbox');
-    const refreshLanguage = () => {
-      const current = LANGUAGES.find(([code]) => code === getLanguage()) || LANGUAGES[0];
-      languageButton.textContent = `🌐  ${current[1]}`;
-      languageMenu.querySelectorAll('button').forEach(option => {
-        const active = option.dataset.lang === current[0]; option.classList.toggle('active', active); option.setAttribute('aria-selected', String(active));
-      });
-    };
-    LANGUAGES.forEach(([code, name]) => {
-      const option = document.createElement('button'); option.type = 'button'; option.className = 'relay-language-option'; option.dataset.lang = code; option.textContent = name; option.setAttribute('role', 'option');
-      option.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); setLanguage(code); languageMenu.classList.add('hidden'); refreshLanguage(); });
-      languageMenu.appendChild(option);
-    });
-    languageButton.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); languageMenu.classList.toggle('hidden'); refreshLanguage(); });
-    languageWrap.append(languageButton, languageMenu); languageControl.appendChild(languageWrap); languageCard.append(languageCopy, languageControl); root.appendChild(languageCard);
+    const extras=document.createElement('div');extras.className='relay-extra-grid';
+    const fullscreen=document.createElement('button');fullscreen.type='button';fullscreen.className='relay-extra';fullscreen.innerHTML='<strong>FULLSCREEN</strong><small>Expand the game to the available screen.</small>';fullscreen.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.();else await document.exitFullscreen?.();}catch{}});
+    const reset=document.createElement('button');reset.type='button';reset.className='relay-extra';reset.innerHTML='<strong>RESET GAME OPTIONS</strong><small>Restore audio, motion, rain and shake defaults.</small>';
+    reset.addEventListener('click',()=>{setLanguage('en');const defaults={audioOn:true,screenShake:true,reducedMotion:false,rain:true,music:.55,sfx:.7};clickPauseSetting('muted',!defaults.audioOn);clickPauseSetting('screenShake',defaults.screenShake);clickPauseSetting('reducedMotion',defaults.reducedMotion);clickPauseSetting('rain',defaults.rain);setPauseVolume('musicVolume',defaults.music);setPauseVolume('sfxVolume',defaults.sfx);window.setTimeout(buildOptions,20);});
+    extras.append(fullscreen,reset);root.appendChild(extras);
 
-    const extras = document.createElement('div'); extras.className = 'relay-extra-grid';
-    const fullscreen = document.createElement('button'); fullscreen.type = 'button'; fullscreen.className = 'relay-extra'; fullscreen.innerHTML = '<strong>FULLSCREEN</strong><small>Expand the game to the available screen.</small>';
-    fullscreen.addEventListener('click', async () => { try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.(); else await document.exitFullscreen?.(); } catch {} });
-    const reset = document.createElement('button'); reset.type = 'button'; reset.className = 'relay-extra'; reset.innerHTML = '<strong>RESET GAME OPTIONS</strong><small>Restore audio, motion, rain and shake defaults.</small>';
-    reset.addEventListener('click', () => { localStorage.removeItem('relay-runner-language'); setLanguage('en'); const defaults = { audio: true, shake: state.screenShake, motion: false, rain: true, music: .7, sfx: .8 }; if (state.audioOn !== defaults.audio) clickPauseSetting('muted'); if (state.screenShake !== defaults.shake) clickPauseSetting('screenShake'); if (state.reducedMotion !== defaults.motion) clickPauseSetting('reducedMotion'); if (state.rain !== defaults.rain) clickPauseSetting('rain'); setPauseVolume('musicVolume', defaults.music); setPauseVolume('sfxVolume', defaults.sfx); window.setTimeout(buildOptions, 20); });
-    extras.append(fullscreen, reset); root.appendChild(extras);
-
-    const status = document.createElement('div'); status.className = 'relay-options-status'; status.textContent = 'SETTINGS SAVE AUTOMATICALLY · RESPONSIVE TOUCH CONTROLS ENABLED'; root.appendChild(status);
-    content.appendChild(root);
+    const status=document.createElement('div');status.className='relay-options-status';status.textContent='SETTINGS SAVE AUTOMATICALLY · TOUCH FRIENDLY · RESPONSIVE';root.appendChild(status);content.appendChild(root);
   };
 
-  const mount = () => {
-    const panel = document.getElementById('titlePanel');
-    const content = document.getElementById('titlePanelContent');
-    const heading = document.getElementById('titlePanelHeading');
-    if (!panel || !content || !heading || panel.classList.contains('hidden')) return;
-    const title = heading.textContent.trim().toUpperCase();
-    if (!title.startsWith('RUN SETTINGS')) return;
-    if (content.querySelector('.relay-home-options')) return;
-    window.setTimeout(buildOptions, 0);
-  };
+  const mount=()=>{const panel=document.getElementById('titlePanel');const content=document.getElementById('titlePanelContent');const heading=document.getElementById('titlePanelHeading');if(!panel||!content||!heading||panel.classList.contains('hidden'))return;const title=heading.textContent.trim().toUpperCase();if(!title.startsWith('RUN SETTINGS'))return;if(content.querySelector('.relay-home-options'))return;window.setTimeout(buildOptions,0);};
 
-  const init = () => {
-    setLanguage(getLanguage());
-    const content = document.getElementById('titlePanelContent');
-    const panel = document.getElementById('titlePanel');
-    if (!content) return;
-    new MutationObserver(mount).observe(content, { childList: true, subtree: true });
-    if (panel) new MutationObserver(mount).observe(panel, { attributes: true, attributeFilter: ['class'] });
-    document.querySelectorAll('[data-title-panel="controls"]').forEach(button => button.addEventListener('click', () => window.setTimeout(mount, 30)));
-  };
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
-  else init();
+  const init=()=>{setLanguage(getLanguage());const content=document.getElementById('titlePanelContent');const panel=document.getElementById('titlePanel');if(!content)return;new MutationObserver(mount).observe(content,{childList:true,subtree:true});if(panel)new MutationObserver(mount).observe(panel,{attributes:true,attributeFilter:['class']});document.querySelectorAll('[data-title-panel="controls"]').forEach(button=>button.addEventListener('click',()=>window.setTimeout(mount,30)));};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
