@@ -10,6 +10,7 @@
   stylesheet.href = './world-atmosphere.css';
   document.head.appendChild(stylesheet);
 
+  const backdrop = root.querySelector('.menu-backdrop');
   const moon = root.querySelector('.backdrop-moon');
   const sun = document.createElement('div');
   sun.className = 'backdrop-sun';
@@ -66,12 +67,12 @@
   };
 
   const DAYLIGHT_STOPS = [
-    { hour: 5,  skyTop: '#101b31', skyMid: '#3e5267', horizon: '#c87868', glow: '#f2a36f', cityBack: '#304258', cityFront: '#1b2d41', window: '#d9b37a', fog: '#d9a78f' },
-    { hour: 7,  skyTop: '#315878', skyMid: '#7797a8', horizon: '#d8b28d', glow: '#ffd29a', cityBack: '#536a7b', cityFront: '#344b5e', window: '#d9bc91', fog: '#d8d7d0' },
-    { hour: 10, skyTop: '#4384ad', skyMid: '#8fb5c4', horizon: '#cdd9d4', glow: '#fff0c8', cityBack: '#607a88', cityFront: '#405968', window: '#c9b995', fog: '#e2e9e8' },
-    { hour: 13, skyTop: '#5c98bf', skyMid: '#a6c8d4', horizon: '#dbe1db', glow: '#fff7dd', cityBack: '#708794', cityFront: '#526a78', window: '#b9a98c', fog: '#edf2ef' },
-    { hour: 16, skyTop: '#4e86aa', skyMid: '#9ab5bf', horizon: '#d8c9b9', glow: '#ffe1ad', cityBack: '#5f7685', cityFront: '#435b6b', window: '#cbb58e', fog: '#e1e5df' },
-    { hour: 18, skyTop: '#29243b', skyMid: '#6f4a5a', horizon: '#d47a60', glow: '#ff9a62', cityBack: '#304056', cityFront: '#1b2d42', window: '#e7ad64', fog: '#d9a095' },
+    { hour: 5,  skyTop: '#10172d', skyMid: '#4c526b', horizon: '#e08a70', glow: '#ff9b68', cityBack: '#35445a', cityFront: '#1d2d40', window: '#d8ad73', fog: '#d9a18e' },
+    { hour: 7,  skyTop: '#385a78', skyMid: '#a17f88', horizon: '#f0c092', glow: '#ffd49b', cityBack: '#596d7b', cityFront: '#394e5d', window: '#d8bd91', fog: '#ddd6cf' },
+    { hour: 10, skyTop: '#4f8fb7', skyMid: '#9ec3cf', horizon: '#d9ded6', glow: '#fff0c8', cityBack: '#647c89', cityFront: '#435b69', window: '#c9b995', fog: '#e3e9e7' },
+    { hour: 13, skyTop: '#72acd0', skyMid: '#b8d3dc', horizon: '#e7e7df', glow: '#fff8df', cityBack: '#788f9b', cityFront: '#586f7c', window: '#b9a98c', fog: '#edf2ef' },
+    { hour: 16, skyTop: '#659bbd', skyMid: '#b0c3c7', horizon: '#e2d0b9', glow: '#ffe0a6', cityBack: '#667d89', cityFront: '#485f6d', window: '#cdb48b', fog: '#e4e6df' },
+    { hour: 18, skyTop: '#352c47', skyMid: '#805263', horizon: '#e18461', glow: '#ff9a5d', cityBack: '#35465a', cityFront: '#1d2d42', window: '#e9ae62', fog: '#d9a092' },
     { hour: 20, skyTop: '#040b17', skyMid: '#0a1a2d', horizon: '#173b58', glow: '#56aae4', cityBack: '#0d2338', cityFront: '#081628', window: '#ffcf70', fog: '#6f9cc2' }
   ];
 
@@ -88,7 +89,33 @@
     return DAYLIGHT_STOPS[DAYLIGHT_STOPS.length - 1];
   };
 
+  const applySceneDirect = (hour, palette, theme) => {
+    if (!backdrop) return;
+
+    let scene;
+    if (theme === 'night') {
+      scene = { top: '#040b17', mid: '#0a1a2d', horizon: '#173b58', ground: '#04080f', glow: 'rgba(86,170,228,.18)' };
+    } else if (theme === 'deep-night') {
+      scene = { top: '#01050d', mid: '#040c18', horizon: '#0b263e', ground: '#02050a', glow: 'rgba(69,133,187,.12)' };
+    } else {
+      scene = { top: palette.skyTop, mid: palette.skyMid, horizon: palette.horizon, ground: hour < 7 ? '#17121b' : hour < 18 ? '#38484b' : '#120b14', glow: `rgb(${hexToRgb(palette.glow).r} ${hexToRgb(palette.glow).g} ${hexToRgb(palette.glow).b} / .28)` };
+    }
+
+    const sunX = root.style.getPropertyValue('--relay-sun-x').trim() || '50%';
+    const sunY = root.style.getPropertyValue('--relay-sun-y').trim() || '20%';
+    const sunGlow = theme === 'dawn' || theme === 'dusk' || theme === 'day'
+      ? `radial-gradient(circle at ${sunX} ${sunY},${scene.glow},transparent 25%)`
+      : 'none';
+    const nightGlow = theme === 'night' || theme === 'deep-night'
+      ? `radial-gradient(circle at 82% 14%,${theme === 'night' ? 'rgba(249,201,121,.18)' : 'rgba(119,168,205,.12)'},transparent 19%)`
+      : 'none';
+
+    backdrop.style.background = `${sunGlow},${nightGlow},radial-gradient(ellipse at 50% 67%,${scene.glow},transparent 48%),linear-gradient(180deg,${scene.top} 0%,${scene.mid} 48%,${scene.horizon} 76%,${scene.ground} 100%)`;
+    root.style.backgroundColor = scene.ground;
+  };
+
   const applyRealisticDaylight = hour => {
+    const theme = getTheme();
     if (hour < 5 || hour >= 20) {
       ['--atm-sky-top', '--atm-sky-mid', '--atm-horizon', '--atm-glow', '--atm-city-back', '--atm-city-front', '--atm-window', '--atm-fog'].forEach(variable => root.style.removeProperty(variable));
       return;
@@ -103,27 +130,26 @@
     root.style.setProperty('--atm-city-front', palette.cityFront);
     root.style.setProperty('--atm-window', palette.window);
     root.style.setProperty('--atm-fog', palette.fog);
+    root.style.setProperty('--atm-vignette', hour < 7 ? 'rgba(24,15,15,.22)' : hour < 18 ? 'rgba(8,15,20,.12)' : 'rgba(15,8,14,.3)');
 
     const noonDistance = Math.abs(hour - 12) / 7;
     const daylight = Math.max(0, 1 - noonDistance * 0.22);
-    root.style.setProperty('--atm-city-light', `${(0.05 + (1 - daylight) * 0.12).toFixed(3)}`);
+    root.style.setProperty('--atm-city-light', `${(0.04 + (1 - daylight) * 0.16).toFixed(3)}`);
     root.style.setProperty('--atm-rain', `${Math.max(0.01, 0.06 - daylight * 0.045).toFixed(3)}`);
+    applySceneDirect(hour, palette, theme);
   };
 
   const updateCelestialBodies = (hour, theme) => {
     const sunVisible = hour >= 5 && hour < 20;
     const moonVisible = hour >= 20 || hour < 5;
 
-    if (moon) {
-      moon.style.opacity = moonVisible ? '' : '0';
-    }
-
+    if (moon) moon.style.opacity = moonVisible ? '' : '0';
     if (!sunVisible) {
       sun.style.opacity = '0';
+      if (backdrop && (theme === 'night' || theme === 'deep-night')) applySceneDirect(hour, interpolateStop(Math.max(5, Math.min(20, hour))), theme);
       return;
     }
 
-    // Continuous sun arc: sunrise 05:00, highest point at noon, sunset 20:00.
     const progress = Math.min(1, Math.max(0, (hour - 5) / 15));
     const x = 9 + progress * 82;
     const y = 72 - Math.sin(progress * Math.PI) * 61;
@@ -131,13 +157,14 @@
     root.style.setProperty('--relay-sun-y', `${y}%`);
 
     const daylightPalette = interpolateStop(hour);
-    const sunWarmth = hour < 8 ? 0.8 : hour < 16 ? 0.05 : hour < 19 ? 0.7 : 1;
+    const sunWarmth = hour < 8 ? 0.85 : hour < 16 ? 0.05 : hour < 19 ? 0.72 : 1;
     const core = sunWarmth > 0.5 ? '#fff1cf' : '#fffdf5';
-    const edge = sunWarmth > 0.5 ? '#ffb45f' : '#ffd978';
+    const edge = sunWarmth > 0.5 ? '#ffad57' : '#ffd978';
     sun.style.background = `radial-gradient(circle at 42% 38%,${core} 0 20%,#ffe9a7 45%,${edge} 72%,rgba(255,174,62,0) 100%)`;
     sun.style.boxShadow = `0 0 35px 12px ${daylightPalette.glow}66,0 0 110px 38px ${daylightPalette.glow}33`;
     sun.style.opacity = '1';
     sun.dataset.theme = theme;
+    applySceneDirect(hour, daylightPalette, theme);
   };
 
   const update = () => {
