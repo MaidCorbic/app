@@ -28,18 +28,13 @@
     .relay-language-menu.hidden{display:none}
     .relay-language-option{display:block;width:100%;padding:11px 12px;border:0;border-radius:5px;background:transparent;color:#aebdcc;text-align:left;font:800 10px 'DM Mono',monospace;letter-spacing:.7px;cursor:pointer}
     .relay-language-option:hover,.relay-language-option.active{background:#ffd06e12;color:#ffd06e}
-    @media(max-width:600px){
-      .home-language-setting{align-items:flex-start;gap:10px}
-      .relay-language-button{min-width:118px;height:38px}
-      .relay-language-menu{width:170px}
-    }
+    @media(max-width:600px){.home-language-setting{align-items:flex-start;gap:10px}.relay-language-button{min-width:118px;height:38px}.relay-language-menu{width:170px}}
   `;
   document.head.appendChild(css);
 
   const make = () => {
     const wrap = document.createElement('div');
     wrap.className = 'home-language-setting';
-
     const copy = document.createElement('div');
     copy.className = 'home-language-copy';
     const title = document.createElement('strong');
@@ -58,8 +53,7 @@
     menu.setAttribute('role', 'listbox');
 
     const refresh = () => {
-      const current = get();
-      const language = LANGUAGES.find(([code]) => code === current) || LANGUAGES[0];
+      const language = LANGUAGES.find(([code]) => code === get()) || LANGUAGES[0];
       button.textContent = `🌐  ${language[1]}`;
       button.setAttribute('aria-label', `Language: ${language[1]}`);
       button.setAttribute('aria-expanded', String(!menu.classList.contains('hidden')));
@@ -87,13 +81,9 @@
 
     button.addEventListener('click', event => {
       event.stopPropagation();
-      document.querySelectorAll('.relay-language-menu').forEach(other => {
-        if (other !== menu) other.classList.add('hidden');
-      });
       menu.classList.toggle('hidden');
       refresh();
     });
-
     document.addEventListener('click', () => menu.classList.add('hidden'));
     wrap.append(copy, button, menu);
     refresh();
@@ -103,26 +93,26 @@
   const mountHomeSettings = () => {
     const panel = document.getElementById('titlePanel');
     const content = document.getElementById('titlePanelContent');
-    if (!panel || !content || panel.classList.contains('hidden')) return;
-    if (!document.querySelector('[data-title-panel="controls"]')?.matches(':focus-visible') && document.getElementById('titlePanelEyebrow')?.textContent !== 'OPTIONS') return;
+    const heading = document.getElementById('titlePanelHeading');
+    if (!panel || !content || !heading || panel.classList.contains('hidden')) return;
+    const title = heading.textContent.trim().toUpperCase();
+    if (!['RUN SETTINGS.', 'RUN SETTINGS', 'OPTIONS'].includes(title)) return;
     if (!content.querySelector('.home-language-setting')) content.appendChild(make());
   };
 
   const observe = () => {
     const content = document.getElementById('titlePanelContent');
+    const panel = document.getElementById('titlePanel');
     if (!content) return;
-    new MutationObserver(mountHomeSettings).observe(content, { childList: true, subtree: true });
+    new MutationObserver(() => requestAnimationFrame(mountHomeSettings)).observe(content, { childList: true, subtree: true });
+    if (panel) new MutationObserver(() => requestAnimationFrame(mountHomeSettings)).observe(panel, { attributes: true, attributeFilter: ['class'] });
     document.querySelectorAll('[data-title-panel="controls"]').forEach(button => {
-      button.addEventListener('click', () => {
-        requestAnimationFrame(() => requestAnimationFrame(mountHomeSettings));
-      });
+      button.addEventListener('click', () => requestAnimationFrame(() => requestAnimationFrame(mountHomeSettings)));
     });
+    mountHomeSettings();
   };
 
-  const init = () => {
-    set(get());
-    observe();
-  };
+  const init = () => { set(get()); observe(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
 })();
