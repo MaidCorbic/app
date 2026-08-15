@@ -1,43 +1,45 @@
-/* Dynamic title-screen atmosphere. Keeps the existing Home layout and gameplay untouched. */
-#intro.intro{isolation:isolate;--atm-sky-top:#07111f;--atm-sky-mid:#101f34;--atm-horizon:#203b55;--atm-glow:rgba(116,182,232,.12);--atm-city-back:#0a1728;--atm-city-front:#07101d;--atm-window:rgba(255,208,110,.16);--atm-fog:rgba(137,172,205,.09);--atm-rain:.68;--atm-moon:#f7dfb0;--atm-moon-glow:rgba(249,201,121,.18);--atm-star:rgba(220,238,255,.62);background:#03060b;transition:background-color 1.4s ease}
-#intro.intro .menu-backdrop{background:
- radial-gradient(circle at 50% 14%,var(--atm-moon-glow),transparent 20%),
- radial-gradient(ellipse at 50% 66%,var(--atm-glow),transparent 45%),
- linear-gradient(180deg,var(--atm-sky-top) 0%,var(--atm-sky-mid) 48%,var(--atm-horizon) 76%,#04080f 100%);
- transition:background 1.6s ease;}
-#intro.intro .menu-backdrop::before{content:"";position:absolute;z-index:2;inset:0;background:
- radial-gradient(circle at 12% 18%,var(--atm-star) 0 1px,transparent 1.7px),
- radial-gradient(circle at 26% 31%,var(--atm-star) 0 1px,transparent 1.7px),
- radial-gradient(circle at 42% 16%,var(--atm-star) 0 1px,transparent 1.7px),
- radial-gradient(circle at 63% 27%,var(--atm-star) 0 1px,transparent 1.7px),
- radial-gradient(circle at 78% 14%,var(--atm-star) 0 1px,transparent 1.7px),
- radial-gradient(circle at 91% 34%,var(--atm-star) 0 1px,transparent 1.7px),
- radial-gradient(ellipse at 24% 72%,var(--atm-fog),transparent 31%),
- radial-gradient(ellipse at 76% 64%,var(--atm-fog),transparent 34%);
- background-size:auto;filter:blur(.1px);opacity:.7;pointer-events:none;transition:background 1.6s ease,opacity 1.6s ease}
-#intro.intro .menu-backdrop::after{content:"";position:absolute;z-index:7;inset:0;background:
- radial-gradient(ellipse at 50% 43%,transparent 20%,rgba(2,5,10,.06) 58%,rgba(2,5,10,.56) 100%),
- linear-gradient(180deg,rgba(2,5,10,.05) 0%,transparent 55%,rgba(2,5,10,.7) 100%);pointer-events:none;transition:background 1.6s ease}
-#intro.intro .backdrop-moon{z-index:1;width:clamp(130px,16vw,230px);left:auto;right:clamp(9%,16vw,18%);top:10%;transform:none;background:var(--atm-moon);box-shadow:0 0 48px 18px var(--atm-moon-glow),0 0 120px 38px color-mix(in srgb,var(--atm-moon-glow) 55%,transparent);transition:background 1.6s ease,box-shadow 1.6s ease,transform 7s ease-in-out}
-#intro.intro .backdrop-orbit{z-index:1;opacity:.24;pointer-events:none;transition:border-color 1.6s ease,opacity 1.6s ease}
+/* Final dynamic title-screen atmosphere. Visual-only: Home panel, Options and gameplay remain untouched. */
+#intro.intro{isolation:isolate;position:relative;--atm-sky-top:#07111f;--atm-sky-mid:#101f34;--atm-horizon:#203b55;--atm-glow:rgba(116,182,232,.12);--atm-city-back:#0a1728;--atm-city-front:#07101d;--atm-window:rgba(255,208,110,.16);--atm-fog:rgba(137,172,205,.09);--atm-rain:.68;--atm-moon:#f7dfb0;--atm-moon-glow:rgba(249,201,121,.18);--atm-star:rgba(220,238,255,.62);background:#03060b;transition:background-color 1.6s ease,color 1.6s ease}
+#intro.intro .menu-backdrop{background:radial-gradient(circle at 50% 14%,var(--atm-moon-glow),transparent 20%),radial-gradient(ellipse at 50% 66%,var(--atm-glow),transparent 45%),linear-gradient(180deg,var(--atm-sky-top) 0%,var(--atm-sky-mid) 48%,var(--atm-horizon) 76%,#04080f 100%);transition:background 1.8s ease}
+#intro.intro .menu-backdrop::before{content:"";position:absolute;z-index:2;inset:0;background:radial-gradient(circle at 12% 18%,var(--atm-star) 0 1px,transparent 1.7px),radial-gradient(circle at 26% 31%,var(--atm-star) 0 1px,transparent 1.7px),radial-gradient(circle at 42% 16%,var(--atm-star) 0 1px,transparent 1.7px),radial-gradient(circle at 63% 27%,var(--atm-star) 0 1px,transparent 1.7px),radial-gradient(circle at 78% 14%,var(--atm-star) 0 1px,transparent 1.7px),radial-gradient(circle at 91% 34%,var(--atm-star) 0 1px,transparent 1.7px),radial-gradient(ellipse at 24% 72%,var(--atm-fog),transparent 31%),radial-gradient(ellipse at 76% 64%,var(--atm-fog),transparent 34%);opacity:.7;pointer-events:none;transition:opacity 1.8s ease,filter 1.8s ease}
+#intro.intro .menu-backdrop::after{content:"";position:absolute;z-index:7;inset:0;background:radial-gradient(ellipse at 50% 43%,transparent 20%,rgba(2,5,10,.06) 58%,rgba(2,5,10,.56) 100%),linear-gradient(180deg,rgba(2,5,10,.05) 0%,transparent 55%,rgba(2,5,10,.7) 100%);pointer-events:none;transition:background 1.8s ease}
+#intro.intro .backdrop-moon{z-index:1;width:clamp(130px,16vw,230px);left:auto;right:clamp(9%,16vw,18%);top:10%;transform:none;background:var(--atm-moon);box-shadow:0 0 48px 18px var(--atm-moon-glow),0 0 120px 38px var(--atm-moon-glow);transition:background 1.8s ease,box-shadow 1.8s ease,opacity 1.8s ease,transform 8s ease-in-out}
+#intro.intro .backdrop-orbit{z-index:1;opacity:.24;pointer-events:none;transition:border-color 1.8s ease,opacity 1.8s ease}
 #intro.intro .orbit-one{border-color:rgba(210,226,244,.18)}#intro.intro .orbit-two{border-color:var(--atm-window);opacity:.2}
-#intro.intro .city-one{z-index:4;height:38%;left:-2%;right:-2%;background-color:var(--atm-city-back);background-image:repeating-linear-gradient(90deg,transparent 0 44px,var(--atm-window) 45px 47px,transparent 48px 82px);box-shadow:inset 0 18px 42px rgba(137,180,215,.06),0 -20px 60px rgba(20,45,70,.16);transition:background-color 1.6s ease,background-image 1.6s ease,box-shadow 1.6s ease}
-#intro.intro .city-one::after{content:"";position:absolute;left:0;right:0;bottom:0;height:52%;opacity:.72;background:
- repeating-linear-gradient(90deg,transparent 0 28px,var(--atm-window) 29px 31px,transparent 32px 63px),
- repeating-linear-gradient(0deg,transparent 0 18px,rgba(255,214,145,.045) 19px 20px,transparent 21px 34px);mask-image:linear-gradient(180deg,transparent,#000 24%,#000);pointer-events:none;transition:opacity 1.6s ease}
-#intro.intro .city-two{z-index:5;height:25%;background:var(--atm-city-front);box-shadow:inset 0 18px 38px rgba(0,0,0,.28),0 -22px 55px rgba(0,0,0,.18);transition:background 1.6s ease,box-shadow 1.6s ease}
-#intro.intro .city-two::before{content:"";position:absolute;inset:18% 0 0;background:
- repeating-linear-gradient(90deg,transparent 0 38px,rgba(255,207,112,.13) 39px 42px,transparent 43px 78px),
- repeating-linear-gradient(0deg,transparent 0 15px,rgba(255,207,112,.06) 16px 18px,transparent 19px 31px);opacity:.8;mask-image:linear-gradient(180deg,transparent,#000 14%);pointer-events:none;transition:opacity 1.6s ease}
-#intro.intro .backdrop-rain{z-index:6;opacity:var(--atm-rain);mix-blend-mode:screen;transition:opacity 1.6s ease}
+#intro.intro .city-one{z-index:4;height:38%;left:-2%;right:-2%;background-color:var(--atm-city-back);background-image:repeating-linear-gradient(90deg,transparent 0 42px,var(--atm-window) 43px 46px,transparent 47px 82px),linear-gradient(180deg,transparent 0 8%,rgba(160,195,220,.08) 9%,transparent 11%);box-shadow:inset 0 18px 42px rgba(137,180,215,.06),0 -20px 60px rgba(20,45,70,.16);transition:background-color 1.8s ease,background-image 1.8s ease,box-shadow 1.8s ease,height 1.8s ease}
+#intro.intro .city-one::after{content:"";position:absolute;left:0;right:0;bottom:0;height:58%;opacity:.78;background:repeating-linear-gradient(90deg,transparent 0 28px,var(--atm-window) 29px 31px,transparent 32px 63px),repeating-linear-gradient(0deg,transparent 0 18px,rgba(255,214,145,.045) 19px 20px,transparent 21px 34px);mask-image:linear-gradient(180deg,transparent,#000 24%,#000);-webkit-mask-image:linear-gradient(180deg,transparent,#000 24%,#000);pointer-events:none;transition:opacity 1.8s ease}
+#intro.intro .city-two{z-index:5;height:25%;background:var(--atm-city-front);box-shadow:inset 0 18px 38px rgba(0,0,0,.28),0 -22px 55px rgba(0,0,0,.18);transition:background 1.8s ease,box-shadow 1.8s ease,height 1.8s ease}
+#intro.intro .city-two::before{content:"";position:absolute;inset:18% 0 0;background:repeating-linear-gradient(90deg,transparent 0 38px,rgba(255,207,112,.13) 39px 42px,transparent 43px 78px),repeating-linear-gradient(0deg,transparent 0 15px,rgba(255,207,112,.06) 16px 18px,transparent 19px 31px);opacity:.8;mask-image:linear-gradient(180deg,transparent,#000 14%);-webkit-mask-image:linear-gradient(180deg,transparent,#000 14%);pointer-events:none;transition:opacity 1.8s ease}
+#intro.intro .backdrop-rain{z-index:6;opacity:var(--atm-rain);mix-blend-mode:screen;transition:opacity 1.8s ease}
 #intro.intro.atmosphere-shift .menu-backdrop::before{animation:relay-atmosphere-breathe 1.5s ease both}
-@keyframes relay-atmosphere-breathe{0%{opacity:.42}45%{opacity:1}100%{opacity:.72}}
-#intro.intro[data-atmosphere=dawn]{--atm-sky-top:#162238;--atm-sky-mid:#5a5262;--atm-horizon:#b87e68;--atm-glow:rgba(255,167,108,.24);--atm-city-back:#25334a;--atm-city-front:#152438;--atm-window:rgba(255,205,133,.22);--atm-fog:rgba(255,196,157,.13);--atm-rain:.16;--atm-moon:#ffe2b0;--atm-moon-glow:rgba(255,190,126,.18);--atm-star:rgba(255,232,206,.32)}
-#intro.intro[data-atmosphere=day]{--atm-sky-top:#28506f;--atm-sky-mid:#66849a;--atm-horizon:#91a8af;--atm-glow:rgba(255,220,171,.2);--atm-city-back:#2d4557;--atm-city-front:#1a2d3f;--atm-window:rgba(255,220,159,.14);--atm-fog:rgba(225,239,242,.1);--atm-rain:.03;--atm-moon:#f1eee4;--atm-moon-glow:rgba(255,245,218,.08);--atm-star:rgba(255,255,255,.16)}
-#intro.intro[data-atmosphere=dusk]{--atm-sky-top:#1a1d31;--atm-sky-mid:#533e55;--atm-horizon:#9a5b5b;--atm-glow:rgba(255,139,96,.25);--atm-city-back:#1b2a40;--atm-city-front:#101d31;--atm-window:rgba(255,190,111,.23);--atm-fog:rgba(224,158,151,.1);--atm-rain:.22;--atm-moon:#ffe0ad;--atm-moon-glow:rgba(255,165,107,.16);--atm-star:rgba(255,220,200,.4)}
-#intro.intro[data-atmosphere=night]{--atm-sky-top:#040b17;--atm-sky-mid:#0a1a2d;--atm-horizon:#173550;--atm-glow:rgba(86,170,228,.14);--atm-city-back:#0c1c2e;--atm-city-front:#071322;--atm-window:rgba(255,207,112,.2);--atm-fog:rgba(111,156,194,.08);--atm-rain:.58;--atm-moon:#f6dfb2;--atm-moon-glow:rgba(249,201,121,.19);--atm-star:rgba(212,235,255,.68)}
-#intro.intro[data-atmosphere=deep-night]{--atm-sky-top:#01050d;--atm-sky-mid:#040c18;--atm-horizon:#0b2034;--atm-glow:rgba(69,133,187,.1);--atm-city-back:#06111e;--atm-city-front:#030b15;--atm-window:rgba(131,191,232,.1);--atm-fog:rgba(72,117,155,.07);--atm-rain:.76;--atm-moon:#dce7ef;--atm-moon-glow:rgba(119,168,205,.13);--atm-star:rgba(197,224,247,.52)}
+@keyframes relay-atmosphere-breathe{0%{opacity:.3}45%{opacity:1}100%{opacity:.7}}
+
+/* Dawn: visible sunrise, warmer horizon, fading city lights. */
+#intro.intro[data-atmosphere=dawn]{--atm-sky-top:#142039;--atm-sky-mid:#62546a;--atm-horizon:#d08b6e;--atm-glow:rgba(255,166,106,.3);--atm-city-back:#31435a;--atm-city-front:#1c2e43;--atm-window:rgba(255,205,133,.11);--atm-fog:rgba(255,196,157,.18);--atm-rain:.1;--atm-moon:#ffe2b0;--atm-moon-glow:rgba(255,190,126,.11);--atm-star:rgba(255,232,206,.18)}
+/* Day: brighter sky, lifted city silhouettes, almost no rain/stars. */
+#intro.intro[data-atmosphere=day]{--atm-sky-top:#2e6388;--atm-sky-mid:#7199aa;--atm-horizon:#b9c8c5;--atm-glow:rgba(255,224,180,.27);--atm-city-back:#466276;--atm-city-front:#2b4357;--atm-window:rgba(255,224,159,.055);--atm-fog:rgba(225,239,242,.14);--atm-rain:.015;--atm-moon:#f1eee4;--atm-moon-glow:rgba(255,245,218,.035);--atm-star:rgba(255,255,255,.04)}
+/* Dusk: strongest warm transition and city lights beginning to return. */
+#intro.intro[data-atmosphere=dusk]{--atm-sky-top:#1b1d32;--atm-sky-mid:#5b4158;--atm-horizon:#b6675d;--atm-glow:rgba(255,139,96,.31);--atm-city-back:#24344a;--atm-city-front:#14243a;--atm-window:rgba(255,190,111,.3);--atm-fog:rgba(224,158,151,.14);--atm-rain:.16;--atm-moon:#ffe0ad;--atm-moon-glow:rgba(255,165,107,.1);--atm-star:rgba(255,220,200,.24)}
+/* Night: cold blue city, warm windows and moonlight. */
+#intro.intro[data-atmosphere=night]{--atm-sky-top:#040b17;--atm-sky-mid:#0a1a2d;--atm-horizon:#173b58;--atm-glow:rgba(86,170,228,.18);--atm-city-back:#0d2338;--atm-city-front:#081628;--atm-window:rgba(255,207,112,.24);--atm-fog:rgba(111,156,194,.1);--atm-rain:.58;--atm-moon:#f6dfb2;--atm-moon-glow:rgba(249,201,121,.2);--atm-star:rgba(212,235,255,.68)}
+/* Deep night: darkest skyline, colder lights and heavier rain. */
+#intro.intro[data-atmosphere=deep-night]{--atm-sky-top:#01050d;--atm-sky-mid:#040c18;--atm-horizon:#0b263e;--atm-glow:rgba(69,133,187,.12);--atm-city-back:#071522;--atm-city-front:#030c17;--atm-window:rgba(131,191,232,.13);--atm-fog:rgba(72,117,155,.09);--atm-rain:.76;--atm-moon:#dce7ef;--atm-moon-glow:rgba(119,168,205,.14);--atm-star:rgba(197,224,247,.52)}
+
+/* Make the sun/moon feel part of the scene rather than a panel backdrop. */
+#intro.intro[data-atmosphere=day] .backdrop-moon{opacity:.28;transform:translateY(3px)}
+#intro.intro[data-atmosphere=dawn] .backdrop-moon{opacity:.7;transform:translateY(4px)}
+#intro.intro[data-atmosphere=dusk] .backdrop-moon{opacity:.86;transform:translateY(2px)}
+#intro.intro[data-atmosphere=night] .backdrop-moon,#intro.intro[data-atmosphere=deep-night] .backdrop-moon{opacity:1}
+#intro.intro[data-atmosphere=day] .backdrop-orbit{opacity:.08}
+#intro.intro[data-atmosphere=day] .menu-backdrop::before{opacity:.3}
+#intro.intro[data-atmosphere=dawn] .menu-backdrop::after{background:radial-gradient(ellipse at 50% 55%,transparent 18%,rgba(36,25,25,.03) 62%,rgba(24,15,15,.38) 100%),linear-gradient(180deg,rgba(255,160,100,.04),transparent 58%,rgba(20,18,22,.42))}
+#intro.intro[data-atmosphere=day] .menu-backdrop::after{background:radial-gradient(ellipse at 50% 45%,transparent 18%,rgba(20,35,45,.02) 62%,rgba(10,20,28,.28) 100%),linear-gradient(180deg,rgba(255,255,255,.04),transparent 60%,rgba(8,15,20,.34))}
+#intro.intro[data-atmosphere=dusk] .menu-backdrop::after{background:radial-gradient(ellipse at 50% 45%,transparent 20%,rgba(25,12,20,.04) 60%,rgba(15,8,14,.5) 100%),linear-gradient(180deg,rgba(255,122,82,.05),transparent 54%,rgba(9,8,15,.58))}
+#intro.intro[data-atmosphere=night] .menu-backdrop::after{background:radial-gradient(ellipse at 50% 43%,transparent 20%,rgba(2,5,10,.06) 58%,rgba(2,5,10,.56) 100%),linear-gradient(180deg,rgba(2,5,10,.05),transparent 55%,rgba(2,5,10,.7))}
+#intro.intro[data-atmosphere=deep-night] .menu-backdrop::after{background:radial-gradient(ellipse at 50% 43%,transparent 16%,rgba(1,3,7,.12) 58%,rgba(1,3,7,.72) 100%),linear-gradient(180deg,rgba(0,2,6,.08),transparent 52%,rgba(0,2,6,.82))}
+
 @media(max-width:900px){#intro.intro .backdrop-moon{width:clamp(105px,19vw,175px);right:8%;top:9%}#intro.intro .backdrop-orbit{opacity:.14}#intro.intro .city-one{height:34%}#intro.intro .city-two{height:23%}#intro.intro .menu-backdrop::before{opacity:.5}}
-@media(max-width:700px){#intro.intro .backdrop-moon{width:108px;right:6%;top:8%;box-shadow:0 0 34px 12px var(--atm-moon-glow),0 0 80px 26px color-mix(in srgb,var(--atm-moon-glow) 55%,transparent)}#intro.intro .city-one{height:31%}#intro.intro .city-two{height:20%}#intro.intro .city-one::after{opacity:.48}#intro.intro .city-two::before{opacity:.52}#intro.intro .backdrop-rain{opacity:calc(var(--atm-rain)*.58)}#intro.intro .menu-backdrop::before{filter:blur(.2px);opacity:.38}}
+@media(max-width:700px){#intro.intro .backdrop-moon{width:108px;right:6%;top:8%;box-shadow:0 0 34px 12px var(--atm-moon-glow),0 0 80px 26px var(--atm-moon-glow)}#intro.intro .city-one{height:31%}#intro.intro .city-two{height:20%}#intro.intro .city-one::after{opacity:.52}#intro.intro .city-two::before{opacity:.56}#intro.intro .backdrop-rain{opacity:calc(var(--atm-rain)*.58)}#intro.intro .menu-backdrop::before{filter:blur(.2px);opacity:.38}#intro.intro[data-atmosphere=day] .backdrop-moon{opacity:.2}}
 @media(max-width:420px){#intro.intro .backdrop-moon{width:84px;right:5%;top:7%}#intro.intro .city-one{height:28%}#intro.intro .city-two{height:18%}}
+@media(orientation:landscape) and (max-height:560px){#intro.intro .backdrop-moon{top:6%;width:clamp(70px,15vw,140px)}#intro.intro .city-one{height:34%}#intro.intro .city-two{height:22%}}
 @media(prefers-reduced-motion:reduce){#intro.intro *{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}#intro.intro .menu-backdrop,#intro.intro .menu-backdrop::before,#intro.intro .menu-backdrop::after,#intro.intro .backdrop-moon,#intro.intro .city-one,#intro.intro .city-two,#intro.intro .backdrop-rain{transition:none!important}}
