@@ -1,0 +1,271 @@
+#relayLanguageBar {
+  position: absolute;
+  z-index: 12;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(141, 244, 255, .22);
+  border-radius: 8px;
+  background: rgba(3, 10, 18, .68);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .24), inset 0 1px rgba(255, 255, 255, .04);
+  backdrop-filter: blur(10px);
+}
+
+#relayLanguageBar .relay-lang-label {
+  padding: 0 5px;
+  color: #8fa8b6;
+  font: 800 7px 'DM Mono', monospace;
+  letter-spacing: .12em;
+}
+
+#relayLanguageBar button {
+  min-width: 34px;
+  min-height: 28px;
+  padding: 0 7px;
+  border: 1px solid rgba(141, 244, 255, .16);
+  border-radius: 5px;
+  color: #b9ced8;
+  background: rgba(7, 20, 32, .8);
+  font: 900 8px 'DM Mono', monospace;
+  letter-spacing: .08em;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .16s ease, color .16s ease, transform .16s ease, background .16s ease;
+}
+
+#relayLanguageBar button:hover,
+#relayLanguageBar button:focus-visible {
+  border-color: rgba(141, 244, 255, .62);
+  color: #ecfbff;
+  background: rgba(56, 189, 248, .12);
+  outline: none;
+}
+
+#relayLanguageBar button.is-active {
+  border-color: #8df4ff;
+  color: #05101a;
+  background: #8df4ff;
+  box-shadow: 0 0 16px rgba(141, 244, 255, .22);
+}
+
+#titlePanelContent .relay-options-extra {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(141, 244, 255, .18);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(4, 13, 23, .96), rgba(8, 25, 40, .92));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .035), 0 10px 26px rgba(0, 0, 0, .18);
+}
+
+#titlePanelContent .relay-options-extra > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+#titlePanelContent .relay-options-extra > header p {
+  margin: 0;
+  color: #8df4ff;
+  font: 900 8px 'DM Mono', monospace;
+  letter-spacing: .16em;
+}
+
+#titlePanelContent .relay-options-extra > header small {
+  color: #8ea5b1;
+  font: 700 7px 'DM Mono', monospace;
+  letter-spacing: .08em;
+}
+
+#titlePanelContent .relay-option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+#titlePanelContent .relay-option-card {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(173, 209, 225, .13);
+  border-radius: 9px;
+  background: rgba(5, 17, 28, .84);
+}
+
+#titlePanelContent .relay-option-card--wide {
+  grid-column: 1 / -1;
+}
+
+#titlePanelContent .relay-option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  min-width: 0;
+}
+
+#titlePanelContent .relay-option-copy {
+  min-width: 0;
+}
+
+#titlePanelContent .relay-option-copy strong {
+  display: block;
+  color: #effbff;
+  font: 900 8px 'DM Mono', monospace;
+  letter-spacing: .1em;
+}
+
+#titlePanelContent .relay-option-copy small {
+  display: block;
+  margin-top: 3px;
+  color: #94aab6;
+  font: 700 7px/1.4 'DM Mono', monospace;
+}
+
+#titlePanelContent .relay-option-button,
+#titlePanelContent .relay-select,
+#titlePanelContent .relay-range-button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  min-width: 78px;
+  padding: 0 9px;
+  border: 1px solid rgba(141, 244, 255, .24);
+  border-radius: 6px;
+  color: #dff7ff;
+  background: rgba(7, 24, 38, .9);
+  font: 900 7px 'DM Mono', monospace;
+  letter-spacing: .1em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#titlePanelContent .relay-option-button:hover,
+#titlePanelContent .relay-option-button:focus-visible,
+#titlePanelContent .relay-range-button:hover,
+#titlePanelContent .relay-range-button:focus-visible {
+  border-color: #8df4ff;
+  box-shadow: 0 0 14px rgba(56, 189, 248, .12);
+  outline: none;
+}
+
+#titlePanelContent .relay-option-button.is-on {
+  color: #04121b;
+  background: #8df4ff;
+  border-color: #8df4ff;
+}
+
+#titlePanelContent .relay-select {
+  min-width: 130px;
+  color-scheme: dark;
+}
+
+#titlePanelContent .relay-option-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+#titlePanelContent .relay-option-actions .relay-option-button {
+  width: 100%;
+}
+
+#titlePanelContent .relay-reset {
+  color: #ffe7b4;
+  border-color: rgba(247, 217, 138, .28);
+}
+
+#titlePanelContent .relay-reset:hover,
+#titlePanelContent .relay-reset:focus-visible {
+  border-color: #f7d98a;
+  box-shadow: 0 0 14px rgba(247, 217, 138, .12);
+}
+
+body.relay-high-contrast #intro .menu-tagline,
+body.relay-high-contrast #intro .menu-actions p,
+body.relay-high-contrast #intro .title-secondary small,
+body.relay-high-contrast #intro .menu-version {
+  color: #ffffff !important;
+}
+
+body.relay-high-contrast .relay-info-card,
+body.relay-high-contrast .title-panel-card {
+  border-color: rgba(141, 244, 255, .55) !important;
+}
+
+body.relay-low-effects #intro .menu-backdrop > *,
+body.relay-low-effects #intro .menu-backdrop::before,
+body.relay-low-effects #intro .menu-backdrop::after {
+  animation: none !important;
+}
+
+body.relay-low-effects #intro .backdrop-rain {
+  opacity: .18 !important;
+}
+
+body.relay-no-glow * {
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+body.relay-focus-mode #intro .info-launcher,
+body.relay-focus-mode #intro .title-secondary,
+body.relay-focus-mode #intro .menu-version,
+body.relay-focus-mode #intro .chapter-brief,
+body.relay-focus-mode #intro .game-version {
+  opacity: .26;
+  transition: opacity .2s ease;
+}
+
+body.relay-hide-key-hints .input-guide {
+  display: none !important;
+}
+
+@media (max-width: 620px) {
+  #relayLanguageBar {
+    top: max(8px, env(safe-area-inset-top));
+    left: 8px;
+    gap: 3px;
+  }
+
+  #relayLanguageBar .relay-lang-label {
+    display: none;
+  }
+
+  #titlePanelContent .relay-option-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #titlePanelContent .relay-option-card--wide {
+    grid-column: auto;
+  }
+
+  #titlePanelContent .relay-option-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  #relayLanguageBar button {
+    min-width: 30px;
+    padding: 0 5px;
+    font-size: 7px;
+  }
+
+  #titlePanelContent .relay-option-card {
+    padding: 8px;
+  }
+
+  #titlePanelContent .relay-option-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  #titlePanelContent .relay-option-button,
+  #titlePanelContent .relay-select {
+    width: 100%;
+  }
+}
