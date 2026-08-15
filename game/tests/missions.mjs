@@ -24,5 +24,17 @@ for (const mission of missions) {
   if (mission.id !== 'first-delivery' && mission.id !== 'dead-drop') assert.ok(mission.boss?.type && mission.boss.health > 0 && mission.boss.name, `${mission.id} needs a distinct route boss`);
 }
 
+const genericRouteEnemyKeys = new Set([
+  'security:4550:430:4420:4680',
+  'guard:5250:470:5120:5420',
+  'security:5790:430:5630:5950',
+]);
+for (const mission of missions) {
+  for (const enemy of mission.enemies) {
+    const key = `${enemy.type}:${enemy.x}:${enemy.y}:${enemy.min}:${enemy.max}`;
+    assert.ok(!genericRouteEnemyKeys.has(key), `${mission.id} must not inherit shared route enemy ${key}`);
+  }
+}
+
 assert.equal(missions.map(mission => mission.difficulty.split(' ')[0]).join(','), '1/5,2/5,3/5,4/5,5/5,6/5,7/5');
-console.log('Mission flow and fairness checks passed.');
+console.log('Mission flow, fairness, and enemy-layout checks passed.');
