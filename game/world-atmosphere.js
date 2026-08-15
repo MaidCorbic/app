@@ -117,7 +117,7 @@
   const applyRealisticDaylight = hour => {
     const theme = getTheme();
     if (hour < 5 || hour >= 20) {
-      ['--atm-sky-top', '--atm-sky-mid', '--atm-horizon', '--atm-glow', '--atm-city-back', '--atm-city-front', '--atm-window', '--atm-fog'].forEach(variable => root.style.removeProperty(variable));
+      ['--atm-sky-top', '--atm-sky-mid', '--atm-horizon', '--atm-glow', '--atm-city-back', '--atm-city-front', '--atm-window', '--atm-fog', '--atm-city-light', '--atm-rain'].forEach(variable => root.style.removeProperty(variable));
       return;
     }
 
