@@ -1,0 +1,6 @@
+#relayLanguageBar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:5px;max-width:min(620px,calc(100vw - 24px));padding:6px 8px;box-sizing:border-box}
+#relayLanguageBar .relay-lang-label{flex:0 0 auto;margin-right:3px}
+#relayLanguageBar [data-extra-relay-lang]{min-width:42px}
+@media(max-width:560px){#relayLanguageBar{max-width:calc(100vw - 16px);gap:4px;padding:5px 6px}#relayLanguageBar .relay-lang-label{width:100%;margin:0 0 2px;text-align:center}#relayLanguageBar [data-relay-lang],#relayLanguageBar [data-extra-relay-lang]{flex:1 1 auto;min-width:38px;padding-inline:7px}}
+@media(max-width:360px){#relayLanguageBar{gap:3px}#relayLanguageBar [data-relay-lang],#relayLanguageBar [data-extra-relay-lang]{font-size:8px;letter-spacing:.05em;padding-inline:5px}}
+.relay-extra-option-list{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
