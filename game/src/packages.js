@@ -12,7 +12,6 @@ export const packages = {
 // three enemies into every mission. Remove only those exact legacy entries at
 // runtime; authored mission enemies remain the source of truth.
 import { missions } from './missions.js';
-import { RunnerScene } from './scenes/RunnerScene.js';
 
 const LEGACY_ROUTE_ENEMIES = new Set([
   'security:4550:430:4420:4680',
@@ -26,13 +25,13 @@ for (const mission of missions) {
   mission.enemies = (mission.enemies || []).filter(enemy => !LEGACY_ROUTE_ENEMIES.has(enemyKey(enemy)));
 }
 
-// RunnerScene still owns the legacy procedural threat generator. Let it build
-// its combat groups/projectiles, then keep only enemies authored by the mission
-// plus its configured boss. First Delivery intentionally keeps its two tutorial
-// threats because that mission teaches combat through them.
-if (!RunnerScene.prototype.__missionEnemyLayoutPatch) {
-  const originalCreateSciFiThreats = RunnerScene.prototype.createSciFiThreats;
+// RunnerScene owns the procedural threat generator. Apply the compatibility
+// filter after the scene module finishes evaluating so packages.js does not
+// create a circular static import at module initialization time.
+void import('./scenes/RunnerScene.js').then(({ RunnerScene }) => {
+  if (RunnerScene.prototype.__missionEnemyLayoutPatch) return;
 
+  const originalCreateSciFiThreats = RunnerScene.prototype.createSciFiThreats;
   RunnerScene.prototype.createSciFiThreats = function createMissionEnemyLayout() {
     const authoredBefore = new Set(this.enemies?.getChildren?.() || []);
     originalCreateSciFiThreats.call(this);
@@ -56,4 +55,6 @@ if (!RunnerScene.prototype.__missionEnemyLayoutPatch) {
   };
 
   RunnerScene.prototype.__missionEnemyLayoutPatch = true;
-}
+}).catch(error => {
+  console.error('[enemy-layout] compatibility patch failed to load', error);
+});
