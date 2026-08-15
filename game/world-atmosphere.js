@@ -1,40 +1,18 @@
 (() => {
   if (window.__relayWorldAtmosphereInstalled) return;
   window.__relayWorldAtmosphereInstalled = true;
-
-  const root = document.getElementById('intro');
-  if (!root) return;
-
-  const stylesheet = document.createElement('link');
-  stylesheet.rel = 'stylesheet';
-  stylesheet.href = './world-atmosphere.css';
-  document.head.appendChild(stylesheet);
-
-  const getTheme = () => {
-    const now = new Date();
-    const hour = now.getHours() + now.getMinutes() / 60;
-    if (hour >= 5 && hour < 8) return 'dawn';
-    if (hour >= 8 && hour < 18) return 'day';
-    if (hour >= 18 && hour < 20) return 'dusk';
-    if (hour >= 20 && hour < 23) return 'night';
-    return 'deep-night';
-  };
-
-  const update = () => {
-    const next = getTheme();
-    const previous = root.dataset.atmosphere;
-    root.dataset.atmosphere = next;
-    if (previous && previous !== next) {
-      root.classList.remove('atmosphere-shift');
-      void root.offsetWidth;
-      root.classList.add('atmosphere-shift');
-      window.setTimeout(() => root.classList.remove('atmosphere-shift'), 1400);
-    }
-  };
-
-  update();
-  window.setInterval(update, 60 * 1000);
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) update();
-  });
+  const root=document.getElementById('intro'),backdrop=root?.querySelector('.menu-backdrop');
+  if(!root||!backdrop)return;
+  const stylesheet=document.createElement('link');stylesheet.rel='stylesheet';stylesheet.href='./world-atmosphere.css';document.head.appendChild(stylesheet);
+  const make=(tag,c)=>{const e=document.createElement(tag);e.className=c;e.setAttribute('aria-hidden','true');return e};
+  backdrop.append(make('span','world-stars'),make('span','world-sun'),make('span','world-moon'));
+  const points=[[5,['#100f2a','#352548','#d8785a','#0b0a12','#ffb86b','rgba(255,143,87,.30)','#19253c','#0d1523','rgba(214,168,150,.13)',.18,.34]],[7,['#27426a','#6289a5','#f2a56e','#101722','#ffd08a','rgba(255,190,108,.32)','#28435a','#142235','rgba(220,190,165,.14)',.12,.24]],[10,['#5a9fd1','#8fc6e3','#c7d9e0','#182534','#ffe1a1','rgba(255,211,133,.25)','#35566b','#1b2d3c','rgba(205,218,222,.12)',.06,.16]],[13,['#70b5e0','#a9d9ed','#d5e7ea','#1b2a34','#fff0bd','rgba(255,224,154,.22)','#3c6071','#213846','rgba(220,225,220,.10)',.04,.14]],[16,['#4c89b8','#9ebbc8','#e6b47d','#1b2730','#ffd38a','rgba(255,187,100,.28)','#3d5968','#202f3a','rgba(210,190,170,.11)',.07,.18]],[18,['#4c476b','#b56e5e','#f2a45e','#171624','#ffbd70','rgba(255,135,72,.34)','#423849','#201d2a','rgba(226,158,128,.16)',.12,.28]],[19,['#241d43','#6b4964','#e28b65','#0d0d18','#ff9e61','rgba(255,110,68,.30)','#30263a','#171521','rgba(205,130,125,.14)',.16,.34]],[20,['#07101d','#16243b','#39415b','#050912','#ffd27a','rgba(255,190,92,.18)','#172b43','#0b1729','rgba(130,155,180,.10)',.28,.48]],[23,['#02050d','#08101e','#17223b','#02040a','#c9d7ed','rgba(125,155,205,.10)','#0d1a2b','#07101b','rgba(90,120,155,.08)',.38,.62]],[29,['#100f2a','#352548','#d8785a','#0b0a12','#ffb86b','rgba(255,143,87,.30)','#19253c','#0d1523','rgba(214,168,150,.13)',.18,.34]]];
+  const lerp=(a,b,t)=>a+(b-a)*t,hex=v=>{const h=v.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]},mix=(a,b,t)=>{const x=hex(a),y=hex(b);return`rgb(${Math.round(lerp(x[0],y[0],t))},${Math.round(lerp(x[1],y[1],t))},${Math.round(lerp(x[2],y[2],t))})`};
+  const getTime=()=>Number.isFinite(window.__relayAtmosphereDebugHour)?window.__relayAtmosphereDebugHour:(()=>{const n=new Date();return n.getHours()+n.getMinutes()/60+n.getSeconds()/3600})();
+  const norm=h=>h<5?h+24:h;
+  const sample=h=>{h=norm(h);let l=points[0],r=points[1];for(let i=0;i<points.length-1;i++){if(h>=points[i][0]&&h<=points[i+1][0]){l=points[i];r=points[i+1];break}}const t=Math.max(0,Math.min(1,(h-l[0])/(r[0]-l[0])));return{hour:h,values:l[1].map((v,i)=>i<9?mix(v,r[1][i],t):lerp(v,r[1][i],t))}};
+  const themeFor=h=>{h=norm(h);if(h<8)return'dawn';if(h<18)return'day';if(h<20)return'dusk';if(h<23)return'night';return'deep-night'};
+  const apply=()=>{const s=sample(getTime()),h=s.hour,[skyTop,skyMid,horizon,ground,sunColor,sunGlow,cityFar,cityNear,fog,rain,overlay]=s.values,style=backdrop.style;[['--sky-top',skyTop],['--sky-mid',skyMid],['--sky-horizon',horizon],['--ground',ground],['--sun-color',sunColor],['--sun-glow',sunGlow],['--city-far',cityFar],['--city-near',cityNear],['--fog',fog],['--rain-opacity',rain],['--overlay-opacity',overlay]].forEach(([k,v])=>style.setProperty(k,v));const p=Math.max(0,Math.min(1,(h-5)/15)),sunOn=h>=5&&h<20;style.setProperty('--sun-x',`${15+70*p}%`);style.setProperty('--sun-y',`${72-60*Math.sin(Math.PI*p)}%`);style.setProperty('--sun-opacity',sunOn?String(Math.max(.12,Math.sin(Math.PI*p)*1.08)):'0');const mp=h>=20?(h-20)/9:h<5?(h+4)/9:0;style.setProperty('--moon-x',`${84-68*Math.min(1,mp)}%`);style.setProperty('--moon-y',`${36-18*Math.sin(Math.PI*Math.min(1,mp))}%`);style.setProperty('--moon-opacity',h>=20||h<5?'.95':'0');const theme=themeFor(h);if(root.dataset.atmosphere!==theme){root.classList.remove('atmosphere-shift');void root.offsetWidth;root.classList.add('atmosphere-shift');setTimeout(()=>root.classList.remove('atmosphere-shift'),1400)}root.dataset.atmosphere=theme;root.dataset.atmosphereHour=h.toFixed(2);const out=document.querySelector('[data-atmosphere-readout]');if(out)out.textContent=`SIMULATED ${String(Math.floor(h)%24).padStart(2,'0')}:${String(Math.floor(h%1*60)).padStart(2,'0')} · ${theme.toUpperCase()}`};
+  if(new URLSearchParams(location.search).get('debug')==='atmosphere'){const panel=document.createElement('aside');panel.className='atmosphere-debug';panel.innerHTML='<b>ATMOSPHERE TEST</b><output data-atmosphere-readout></output><div class="atmosphere-debug-grid"></div>';const grid=panel.querySelector('.atmosphere-debug-grid');[['DAWN',6.5],['DAY',12],['DUSK',19],['NIGHT',21.5],['DEEP NIGHT',1.5],['AUTO TIME',null]].forEach(([label,value])=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{if(value===null)delete window.__relayAtmosphereDebugHour;else window.__relayAtmosphereDebugHour=value;apply()};grid.append(b)});document.body.append(panel)}
+  apply();setInterval(apply,1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)apply()});
 })();
