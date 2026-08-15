@@ -1,3 +1,4 @@
+import { missions } from './missions.js';
 import { RunnerScene } from './scenes/RunnerScene.js';
 
 export const packages = {
@@ -10,33 +11,26 @@ export const packages = {
   'final-relay': { type: 'PRIME RELAY', objective: 'Deliver the city core to Apex Spine before the network closes.', duration: '01:45', condition: true, speedMultiplier: .92 },
 };
 
-// Enemy level-fix patch: authored mission enemies are authoritative.
+// These were injected by the shared route() builder and unintentionally appeared in
+// every mission. Remove only those exact authored-by-route entries; level-specific
+// enemy definitions remain untouched.
 const GENERIC_ROUTE_ENEMIES = new Set([
   'security:4550:430:4420:4680',
   'guard:5250:470:5120:5420',
   'security:5790:430:5630:5950',
 ]);
 const enemyKey = enemy => `${enemy.type}:${enemy.x}:${enemy.y}:${enemy.min}:${enemy.max}`;
+missions.forEach(mission => {
+  mission.enemies = mission.enemies.filter(enemy => !GENERIC_ROUTE_ENEMIES.has(enemyKey(enemy)));
+});
 
-const originalCreateEnemies = RunnerScene.prototype.createEnemies;
-RunnerScene.prototype.createEnemies = function createEnemiesWithLevelLayout() {
-  const mission = this.mission;
-  if (!mission?.enemies?.length) return originalCreateEnemies.call(this);
-  const authoredEnemies = mission.enemies;
-  mission.enemies = authoredEnemies.filter(enemy => !GENERIC_ROUTE_ENEMIES.has(enemyKey(enemy)));
-  try {
-    return originalCreateEnemies.call(this);
-  } finally {
-    mission.enemies = authoredEnemies;
-  }
-};
-
+// RunnerScene still builds its legacy procedural threat layer for projectiles,
+// combat overlaps and bosses. Keep authored enemies and bosses, remove only the
+// procedural normal enemies so each level owns its encounter layout.
 const originalCreateSciFiThreats = RunnerScene.prototype.createSciFiThreats;
 RunnerScene.prototype.createSciFiThreats = function createLevelEnemiesOnly() {
   const authoredBefore = new Set(this.enemies?.getChildren?.() || []);
   originalCreateSciFiThreats.call(this);
-  // Keep projectiles, combat overlaps and authored bosses, but remove the
-  // procedural normal enemies that were being injected into every level.
   this.enemies?.getChildren?.().forEach(enemy => {
     if (!enemy.active || authoredBefore.has(enemy) || enemy.getData('boss')) return;
     enemy.getData('indicator')?.destroy();
