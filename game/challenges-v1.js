@@ -1,3 +1,4 @@
+import './challenges-v1.css';
 import { claimChallenge, dailyChallenges, loadState, monthlyChallenges, seasonalChallenges, weeklyChallenges } from './src/state.js';
 
 const pause = document.getElementById('pauseMenu');
