@@ -73,9 +73,11 @@ if (panel && profileTab) {
     if (tab) openProfile(event);
   }, true);
 
+  const isProfileActive = () => active && profileTab.classList.contains('active') && !document.querySelector('#pauseMenu')?.classList.contains('hidden');
+
   const observer = new MutationObserver(() => {
-    if (active && !document.getElementById('playerProfile') && document.querySelector('#pauseMenu:not(.hidden)')) renderProfile();
+    if (isProfileActive() && !document.getElementById('playerProfile')) renderProfile();
   });
   observer.observe(panel, { childList: true });
-  window.addEventListener('storage', () => { if (active) renderProfile(); });
+  window.addEventListener('storage', () => { if (isProfileActive()) renderProfile(); });
 }
