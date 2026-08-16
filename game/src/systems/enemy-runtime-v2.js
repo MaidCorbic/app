@@ -2,7 +2,7 @@ const PROFILE = Object.freeze({
   security: { speed: 58, chase: 86, range: 220, cooldown: 2200, ability: 'SCAN BOLT', color: 0xff826e },
   guard: { speed: 44, chase: 72, range: 170, cooldown: 2700, ability: 'CHARGE', color: 0xffd06e },
   'enemy-runner': { speed: 92, chase: 154, range: 285, cooldown: 1650, ability: 'PLASMA BURST', color: 0xff826e },
-  chicken: { speed: 34, chase: 46, range: 245, cooldown: 2400, ability: 'EGG SHOT', color: 0xffd06e },
+  chicken: { speed: 34, chase: 0, range: 260, cooldown: 2100, ability: 'EGG SHOT', color: 0xffd06e },
   invader: { speed: 30, chase: 48, range: 330, cooldown: 1900, ability: 'COMET BURST', color: 0xe0a7ff, hover: true },
   dino: { speed: 62, chase: 108, range: 250, cooldown: 1800, ability: 'CHARGE', color: 0xaee37f },
   'alien-ground': { speed: 48, chase: 76, range: 360, cooldown: 1650, ability: 'ARC BOLT', color: 0xe0a7ff },
@@ -17,12 +17,15 @@ const BOSS_ABILITY = Object.freeze({
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const typeOf = enemy => enemy?.getData?.('route')?.type || enemy?.texture?.key || 'unknown';
-const makeProjectile = (scene, x, y, texture, color, vx, vy = 0) => {
+const makeProjectile = (scene, x, y, texture, color, vx, vy = 0, gravityY = 0) => {
   const group = scene.enemyProjectiles;
   if (!group) return null;
   const projectile = group.create(x, y, texture).setDepth(12).setTint(color);
-  projectile.body.setAllowGravity(false).setVelocity(vx, vy);
+  projectile.body.setAllowGravity(gravityY !== 0);
+  projectile.body.setGravityY(gravityY);
+  projectile.body.setVelocity(vx, vy);
   projectile.setData('enemyProjectile', true);
+  projectile.setData('projectileType', texture);
   return projectile;
 };
 
@@ -90,44 +93,33 @@ function spawnTutorialEnemies(scene) {
   add('chicken', scene.mission.spawn.x + 700, scene.mission.spawn.y + 10, 'EGG HAZARD · JUMP OR SHOOT');
 }
 
-function moveEnemy(scene, enemy, delta) {
-  const type = typeOf(enemy);
-  const profile = PROFILE[type];
-  if (!profile || !enemy.active) return;
-  const route = enemy.getData('route') || { min: enemy.x - 90, max: enemy.x + 90 };
-  let direction = enemy.getData('direction') || 1;
-  const distance = Math.abs(scene.player.x - enemy.x);
-  const vertical = Math.abs(scene.player.y - enemy.y);
-  const alerted = distance < profile.range && vertical < 125 && !scene.empTimer && !scene.decoyTimer;
-  const canChase = type === 'enemy-runner' || type === 'dino' || type === 'guard' || type === 'security' || type === 'alien-ground';
-  const targetDirection = scene.player.x < enemy.x ? -1 : 1;
-  if (alerted && canChase && distance < profile.range * .78) direction = targetDirection;
-  const speed = alerted && canChase ? profile.chase : profile.speed;
-  if (enemy.body?.blocked?.left) direction = 1;
-  if (enemy.body?.blocked?.right) direction = -1;
-  const nextX = enemy.x + direction * speed * delta / 1000;
-  if (nextX <= route.min || nextX >= route.max) {
-    enemy.x = clamp(nextX, route.min, route.max);
-    direction *= -1;
-  } else {
-    enemy.body.setVelocityX(direction * speed);
-  }
-  enemy.setData('direction', direction);
-  enemy.setFlipX(direction < 0);
-  if (profile.hover) {
-    enemy.y = (enemy.getData('baseY') ?? enemy.y) + Math.sin((scene.elapsedMs + enemy.x * 2) / 320) * 8;
-    enemy.body.updateFromGameObject();
-  }
-  const indicator = enemy.getData('indicator');
-  indicator?.setPosition(enemy.x, enemy.y - (type.includes('boss') ? 54 : 30));
-  enemy.getData('tutorialLabel')?.setPosition(enemy.x, enemy.y - 76);
-  enemy.getData('abilityLabel')?.setPosition(enemy.x, enemy.y - 54);
-  const alertedNow = alerted && distance < profile.range;
-  if (alertedNow && !enemy.getData('alerted')) {
-    enemy.setData('alerted', true);
-    scene.playerCue(`${type.toUpperCase()} · ${profile.ability}`, '#ffcf82');
-  }
-  if (!alertedNow) enemy.setData('alerted', false);
+function platformAt(scene, actor) {
+  const platforms = scene.mission?.platforms || [];
+  if (!actor?.active) return null;
+  const foot = actor.y + (actor.body?.height || actor.height || 40) * .5;
+  const halfW = Math.max(10, (actor.body?.width || actor.width || 40) * .5);
+  let best = null;
+  let score = Infinity;
+  platforms.forEach((p, index) => {
+    const [x, y, width] = p;
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(width)) return;
+    if (actor.x + halfW <= x || actor.x - halfW >= x + width) return;
+    const delta = Math.abs(foot - y);
+    if (delta <= 36 && delta < score) {
+      score = delta;
+      best = { index, x, y, width };
+    }
+  });
+  return best;
+}
+
+function canAttackFromCurrentLevel(scene, enemy, type) {
+  const enemyPlatform = platformAt(scene, enemy);
+  const playerPlatform = platformAt(scene, scene.player);
+  if (enemyPlatform && playerPlatform) return enemyPlatform.index === playerPlatform.index;
+  if (enemyPlatform && !playerPlatform) return Math.abs(scene.player.y - enemy.y) < 54;
+  if (!enemyPlatform && playerPlatform) return Math.abs(scene.player.y - enemy.y) < 54;
+  return Math.abs(scene.player.y - enemy.y) < (type === 'chicken' ? 180 : 70);
 }
 
 function fireEnemyAbility(scene, enemy) {
@@ -137,11 +129,13 @@ function fireEnemyAbility(scene, enemy) {
   const now = scene.elapsedMs;
   const nextShot = enemy.getData('nextShot') || 0;
   const distance = Math.abs(scene.player.x - enemy.x);
-  if (distance > profile.range || Math.abs(scene.player.y - enemy.y) > 190 || now < nextShot) return;
+  if (distance > profile.range || now < nextShot || !canAttackFromCurrentLevel(scene, enemy, type)) return;
+
   const direction = scene.player.x < enemy.x ? -1 : 1;
-  const predictedX = scene.player.x + scene.player.body.velocity.x * .18;
+  const predictedX = scene.player.x + (scene.player.body?.velocity?.x || 0) * .28;
   const dx = predictedX - enemy.x;
   const dy = scene.player.y - enemy.y;
+
   if (type === 'guard' || type === 'dino') {
     enemy.setData('chargeUntil', now + 360);
     enemy.setData('chargeTarget', predictedX);
@@ -149,10 +143,17 @@ function fireEnemyAbility(scene, enemy) {
   } else if (type === 'invader') {
     [-150, 0, 150].forEach(offset => makeProjectile(scene, enemy.x, enemy.y + 8, 'comet', profile.color, dx * .58, dy * .25 + offset));
     cueAbility(scene, enemy, profile.ability, profile.color);
+  } else if (type === 'chicken') {
+    // A real lob: strong initial lift + gravity gives the egg a readable arc.
+    const horizontal = clamp(dx * .72, -360, 360);
+    const lift = -300 - clamp(Math.abs(dy) * .22, 0, 70);
+    makeProjectile(scene, enemy.x + direction * 18, enemy.y - 8, 'egg', profile.color, horizontal, lift, 520);
+    cueAbility(scene, enemy, profile.ability, profile.color);
   } else {
-    const texture = type === 'chicken' ? 'egg' : 'comet';
+    const texture = 'comet';
     const velocity = type === 'security' ? .72 : type === 'alien-ground' ? .78 : .64;
-    makeProjectile(scene, enemy.x + direction * 14, enemy.y, texture, profile.color, dx * velocity, type === 'chicken' ? 190 : dy * .32 - 35);
+    const projectile = makeProjectile(scene, enemy.x + direction * 14, enemy.y, texture, profile.color, clamp(dx * velocity, -520, 520), clamp(dy * .32 - 35, -260, 260));
+    projectile?.setData('aimX', predictedX);
     cueAbility(scene, enemy, profile.ability, profile.color);
   }
   enemy.setData('nextShot', now + profile.cooldown);
@@ -161,6 +162,10 @@ function fireEnemyAbility(scene, enemy) {
 function applyCharge(scene, enemy) {
   const until = enemy.getData('chargeUntil') || 0;
   if (!until || scene.elapsedMs > until || !enemy.active) return;
+  if (!canAttackFromCurrentLevel(scene, enemy, typeOf(enemy))) {
+    enemy.setData('chargeUntil', 0);
+    return;
+  }
   const target = enemy.getData('chargeTarget') ?? scene.player.x;
   const direction = target < enemy.x ? -1 : 1;
   enemy.body.setVelocityX(direction * (typeOf(enemy) === 'dino' ? 230 : 190));
@@ -251,15 +256,15 @@ export function installEnemyRuntime(RunnerScene) {
       player.body.setVelocity(direction * -260, -330);
       this.takeSciFiHit('Enemy contact knocked the courier back.');
     });
-    // Keep the original method referenced for compatibility with older scenes, but do not execute it:
-    // it is the source of the duplicate/global procedural enemy spawns this fix removes.
     void originalCreateSciFiThreats;
   };
   prototype.updateEnemies = function enemyRuntimeUpdateEnemies(delta) {
     if (!this.enemies) return;
     this.enemies.getChildren().forEach(enemy => {
       if (!enemy.active) return;
-      moveEnemy(this, enemy, delta);
+      // Movement is owned by enemy-ai-movement-v4. This pass only handles
+      // abilities, telegraphs, contact state and detection so there is one
+      // writer for horizontal velocity.
       applyCharge(this, enemy);
       fireEnemyAbility(this, enemy);
       const type = typeOf(enemy);
@@ -279,12 +284,13 @@ export function installEnemyRuntime(RunnerScene) {
     updateBoss(this, delta);
     this.enemyProjectiles?.getChildren().forEach(projectile => {
       if (!projectile.active || projectile.x < -80 || projectile.x > this.worldWidth + 80 || projectile.y < -100 || projectile.y > 840) projectile.destroy();
+      else if (projectile.getData('projectileType') === 'egg') projectile.setAngle(projectile.body.velocity.x * .0025);
     });
     this.eggs?.getChildren().forEach(projectile => {
       if (!projectile.active || projectile.x < -80 || projectile.x > this.worldWidth + 80 || projectile.y > 840) projectile.destroy();
     });
     this.comets?.getChildren().forEach(projectile => {
-      if (!projectile.active || projectile.x < -80 || projectile.x > this.worldWidth + 80 || projectile.y > 840) projectile.destroy();
+      if (!projectile.active || projectile.x < -80 || projectile.x > this.worldWidth + 80 || projectile.y < -100 || projectile.y > 840) projectile.destroy();
       else projectile.setAngle(projectile.body.velocity.y * .035);
     });
   };
