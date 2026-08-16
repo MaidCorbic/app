@@ -7,3 +7,16 @@ export const packages = {
   'corporate-lockdown': { type: 'OVERSIZED', objective: 'Carry the Helix relay core through the corporate lockdown.', duration: '01:38', condition: true, speedMultiplier: .88 },
   'final-relay': { type: 'PRIME RELAY', objective: 'Deliver the city core to Apex Spine before the network closes.', duration: '01:45', condition: true, speedMultiplier: .92 },
 };
+
+void import('./scenes/RunnerScene.js')
+  .then(async ({ RunnerScene }) => {
+    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }] = await Promise.all([
+      import('./systems/enemy-runtime-v2.js'),
+      import('./systems/enemy-layout-v2.js'),
+      import('./systems/enemy-ai-awareness-v1.js'),
+    ]);
+    installEnemyLayout(RunnerScene);
+    installEnemyRuntime(RunnerScene);
+    installEnemyAIAwareness(RunnerScene);
+  })
+  .catch(error => console.error('[enemy-runtime] failed to initialize', error));
