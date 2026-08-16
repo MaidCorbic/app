@@ -1,162 +1,156 @@
-const GROUND_TYPES = new Set([
-  'security',
-  'guard',
-  'enemy-runner',
-  'chicken',
-  'dino',
-  'alien-ground',
-]);
+const GROUND_TYPES = new Set(['security', 'guard', 'enemy-runner', 'chicken', 'dino', 'alien-ground']);
+const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+const typeOf = e => e?.getData?.('route')?.type || e?.texture?.key || 'unknown';
+const halfW = e => Math.max(10, (e?.body?.width || e?.width || 40) * .5);
+const halfH = e => Math.max(12, (e?.body?.height || e?.height || 40) * .5);
 
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-const typeOf = enemy => enemy?.getData?.('route')?.type || enemy?.texture?.key || 'unknown';
-
-function platformFor(scene, actor) {
+function findPlatform(scene, actor) {
+  if (!actor?.active) return null;
   const platforms = scene.mission?.platforms || [];
-  const body = actor?.body;
-  const halfWidth = Math.max(10, (body?.width || actor?.width || 40) * .5);
-  const footY = actor.y + (body?.height || actor?.height || 40) * .5;
-  const candidates = platforms
-    .map((platform, index) => ({ platform, index }))
-    .filter(({ platform: [x, y, width] }) => {
-      return actor.x >= x - halfWidth && actor.x <= x + width + halfWidth && Math.abs(y - footY) <= 78;
-    })
-    .sort((a, b) => Math.abs(a.platform[1] - footY) - Math.abs(b.platform[1] - footY));
-  return candidates[0] || null;
+  const foot = actor.y + halfH(actor);
+  return platforms.map((p, index) => ({ p, index }))
+    .filter(({ p: [x, y, width] }) => actor.x + halfW(actor) >= x && actor.x - halfW(actor) <= x + width && Math.abs(y - foot) <= 30)
+    .sort((a, b) => Math.abs(a.p[1] - foot) - Math.abs(b.p[1] - foot))[0] || null;
 }
 
-function platformBounds(scene, enemy) {
-  const home = enemy.getData('homePlatform');
-  if (!home) return null;
-  const [x, y, width] = home;
-  const halfWidth = Math.max(14, (enemy.body?.width || enemy.width || 34) * .5);
+function rememberRoute(scene, enemy) {
+  if (enemy.getData('aiReady') || !GROUND_TYPES.has(typeOf(enemy))) return;
+  enemy.setData('aiReady', true);
   const route = enemy.getData('route') || {};
-  const routeMin = Number.isFinite(route.min) ? route.min : x;
-  const routeMax = Number.isFinite(route.max) ? route.max : x + width;
-  const min = Math.max(x + halfWidth + 4, routeMin);
-  const max = Math.min(x + width - halfWidth - 4, routeMax);
-  return min <= max ? { min, max } : { min: x + halfWidth + 4, max: x + width - halfWidth - 4 };
-}
-
-function rememberHomePlatform(scene, enemy) {
-  if (enemy.getData('aiPlatformInitialized')) return;
-  enemy.setData('aiPlatformInitialized', true);
-  if (!GROUND_TYPES.has(typeOf(enemy))) return;
-  const found = platformFor(scene, enemy);
-  if (found) enemy.setData('homePlatform', found.platform);
-  const route = enemy.getData('route') || {};
-  const bounds = platformBounds(scene, enemy);
-  if (bounds) {
-    enemy.setData('aiMin', bounds.min);
-    enemy.setData('aiMax', bounds.max);
-  } else if (Number.isFinite(route.min) && Number.isFinite(route.max)) {
-    enemy.setData('aiMin', route.min);
-    enemy.setData('aiMax', route.max);
-  }
+  const platform = findPlatform(scene, enemy);
+  const [px, py, pw] = platform?.p || [enemy.x - 120, enemy.y, 240];
+  const min = Math.max(px + halfW(enemy) + 8, Number.isFinite(route.min) ? route.min : px);
+  const max = Math.min(px + pw - halfW(enemy) - 8, Number.isFinite(route.max) ? route.max : px + pw);
+  enemy.setData('homePlatformIndex', platform?.index ?? -1);
+  enemy.setData('aiMin', min <= max ? min : enemy.x - 90);
+  enemy.setData('aiMax', min <= max ? max : enemy.x + 90);
+  enemy.setData('aiLastX', enemy.x);
+  enemy.setData('aiStuckMs', 0);
 }
 
 function samePlatform(scene, enemy) {
-  const enemyPlatform = platformFor(scene, enemy);
-  const playerPlatform = platformFor(scene, scene.player);
-  if (enemyPlatform && playerPlatform) return enemyPlatform.index === playerPlatform.index;
-  if (!enemyPlatform || !playerPlatform) return Math.abs(enemy.y - scene.player.y) < 72;
-  return false;
+  const ep = findPlatform(scene, enemy);
+  const pp = findPlatform(scene, scene.player);
+  if (ep && pp) return ep.index === pp.index;
+  return Boolean(ep && Math.abs(enemy.y - scene.player.y) <= 30);
 }
 
-function patrolDirection(enemy) {
-  let direction = enemy.getData('direction') || 1;
-  const min = enemy.getData('aiMin');
-  const max = enemy.getData('aiMax');
-  if (Number.isFinite(min) && enemy.x <= min + 1) direction = 1;
-  if (Number.isFinite(max) && enemy.x >= max - 1) direction = -1;
-  return direction;
+function obstacleAhead(scene, enemy, direction) {
+  const obstacles = scene.mission?.obstacles || [];
+  const probeX = enemy.x + direction * (halfW(enemy) + 18);
+  const bottom = enemy.y + halfH(enemy);
+  const top = enemy.y - halfH(enemy);
+  return obstacles.some(([x, y]) => Math.abs(probeX - x) < 30 && bottom >= y - 42 && top <= y + 42);
 }
 
-function stabilizeGroundEnemy(scene, enemy, delta) {
+function setMotion(enemy, direction, speed) {
+  enemy.setData('direction', direction);
+  enemy.body.setVelocityX(direction * speed);
+  enemy.setFlipX(direction < 0);
+}
+
+function stabilize(scene, enemy, delta) {
   const type = typeOf(enemy);
-  if (!GROUND_TYPES.has(type) || !enemy.active) return;
-  rememberHomePlatform(scene, enemy);
-
+  if (!GROUND_TYPES.has(type) || !enemy.active || !enemy.body) return;
+  rememberRoute(scene, enemy);
+  const now = scene.elapsedMs || 0;
   const min = enemy.getData('aiMin');
   const max = enemy.getData('aiMax');
-  const direction = patrolDirection(enemy);
-  const profileSpeed = type === 'enemy-runner' ? 92 : type === 'dino' ? 62 : type === 'guard' ? 44 : type === 'security' ? 58 : type === 'alien-ground' ? 48 : 34;
-  const chaseSpeed = type === 'enemy-runner' ? 154 : type === 'dino' ? 108 : type === 'guard' ? 72 : type === 'security' ? 86 : type === 'alien-ground' ? 76 : 46;
-  const onSamePlatform = samePlatform(scene, enemy);
-  const distance = Math.abs(scene.player.x - enemy.x);
-  const verticalDistance = Math.abs(scene.player.y - enemy.y);
-  const canTrack = onSamePlatform && distance < 300 && verticalDistance < 82 && !scene.empTimer && !scene.decoyTimer;
+  let direction = enemy.getData('direction') || 1;
+  const patrol = type === 'enemy-runner' ? 78 : type === 'dino' ? 54 : type === 'guard' ? 40 : type === 'security' ? 50 : type === 'alien-ground' ? 42 : 30;
+  const chase = type === 'enemy-runner' ? 118 : type === 'dino' ? 88 : type === 'guard' ? 60 : type === 'security' ? 72 : type === 'alien-ground' ? 64 : 38;
+  const player = scene.player;
+  const distance = Math.abs(player.x - enemy.x);
+  const vertical = Math.abs(player.y - enemy.y);
+  const same = samePlatform(scene, enemy);
+  const disabled = scene.empTimer > 0 || scene.decoyTimer > 0;
+  const blocked = (enemy.body.blocked?.left && direction < 0) || (enemy.body.blocked?.right && direction > 0);
+  const blockedUntil = enemy.getData('aiBlockedUntil') || 0;
 
-  if (!onSamePlatform) {
+  if (blocked) {
+    direction = -direction;
+    enemy.setData('aiBlockedUntil', now + 700);
+    enemy.setData('aiEscapeDirection', direction);
+    setMotion(enemy, direction, patrol);
+  } else if (blockedUntil > now) {
+    direction = enemy.getData('aiEscapeDirection') || -direction;
+    setMotion(enemy, direction, patrol);
+  } else if (!same || disabled || vertical > 42 || distance > 230) {
+    setMotion(enemy, direction, patrol);
     enemy.setData('chargeUntil', 0);
-    const patrolSpeed = profileSpeed;
-    enemy.body.setVelocityX(direction * patrolSpeed);
-    enemy.setData('direction', direction);
-  } else if (distance <= 72) {
-    enemy.body.setVelocityX(0);
-  } else if (!canTrack) {
-    enemy.body.setVelocityX(direction * profileSpeed);
   } else {
-    const targetDirection = scene.player.x < enemy.x ? -1 : 1;
-    enemy.body.setVelocityX(targetDirection * chaseSpeed);
-    enemy.setData('direction', targetDirection);
-  }
-
-  if (Number.isFinite(min) && Number.isFinite(max)) {
-    const nextX = clamp(enemy.x, min, max);
-    if (nextX !== enemy.x) {
-      enemy.x = nextX;
-      enemy.body.setVelocityX(0);
-      enemy.setData('direction', enemy.x <= min + 1 ? 1 : -1);
+    const personalSpace = halfW(enemy) + halfW(player) + 22;
+    const targetDirection = player.x < enemy.x ? -1 : 1;
+    if (distance <= personalSpace) {
+      const retreat = player.x < enemy.x ? 1 : -1;
+      if (obstacleAhead(scene, enemy, retreat)) {
+        direction = -retreat;
+        setMotion(enemy, direction, patrol);
+      } else {
+        setMotion(enemy, retreat, Math.min(patrol, 34));
+      }
+    } else if (obstacleAhead(scene, enemy, targetDirection)) {
+      direction = -targetDirection;
+      enemy.setData('aiBlockedUntil', now + 700);
+      enemy.setData('aiEscapeDirection', direction);
+      setMotion(enemy, direction, patrol);
+    } else {
+      setMotion(enemy, targetDirection, chase);
     }
   }
 
-  const currentDirection = enemy.getData('direction') || direction;
-  enemy.setFlipX(currentDirection < 0);
-  void delta;
+  if (Number.isFinite(min) && Number.isFinite(max)) {
+    if (enemy.x <= min) { enemy.x = min; direction = 1; setMotion(enemy, direction, patrol); }
+    if (enemy.x >= max) { enemy.x = max; direction = -1; setMotion(enemy, direction, patrol); }
+  }
+
+  const lastX = enemy.getData('aiLastX');
+  const moved = Math.abs(enemy.x - (lastX ?? enemy.x));
+  const stuckMs = (enemy.getData('aiStuckMs') || 0) + (moved < .35 ? delta : -Math.min(delta, 120));
+  enemy.setData('aiLastX', enemy.x);
+  enemy.setData('aiStuckMs', Math.max(0, stuckMs));
+  if (stuckMs > 280) {
+    direction = -direction;
+    enemy.setData('aiEscapeDirection', direction);
+    enemy.setData('aiBlockedUntil', now + 650);
+    enemy.setData('aiStuckMs', 0);
+    setMotion(enemy, direction, patrol);
+  }
 }
 
 function stabilizeBoss(scene, boss) {
-  if (!boss?.active) return;
+  if (!boss?.active || !boss.body) return;
   const route = boss.getData('route') || {};
   const min = Number.isFinite(route.min) ? route.min : boss.x - 180;
   const max = Number.isFinite(route.max) ? route.max : boss.x + 180;
-  const distance = Math.abs(scene.player.x - boss.x);
-  const verticalDistance = Math.abs(scene.player.y - boss.y);
-  const playerPlatform = platformFor(scene, scene.player);
-  const bossPlatform = platformFor(scene, boss);
-  const same = playerPlatform && bossPlatform ? playerPlatform.index === bossPlatform.index : verticalDistance < 82;
-  if (!same) {
-    const direction = boss.getData('direction') || 1;
-    const next = boss.x + direction * 42 * (scene.game.loop.delta / 1000);
-    if (next <= min || next >= max) boss.setData('direction', -direction);
-    boss.body.setVelocityX((boss.getData('direction') || direction) * 42);
-  } else if (distance < 110) {
-    boss.body.setVelocityX(0);
-  }
-  if (boss.x <= min || boss.x >= max) {
-    boss.x = clamp(boss.x, min, max);
-    boss.body.setVelocityX(0);
-    boss.setData('direction', boss.x <= min ? 1 : -1);
-  }
+  let direction = boss.getData('direction') || 1;
+  const bp = findPlatform(scene, boss);
+  const pp = findPlatform(scene, scene.player);
+  const same = bp && pp ? bp.index === pp.index : Math.abs(boss.y - scene.player.y) <= 42;
+  const blocked = (boss.body.blocked?.left && direction < 0) || (boss.body.blocked?.right && direction > 0);
+  if (blocked || boss.x <= min + 2 || boss.x >= max - 2) direction = boss.x <= min + 2 ? 1 : boss.x >= max - 2 ? -1 : -direction;
+  if (same && Math.abs(scene.player.x - boss.x) > 170 && !scene.empTimer && !scene.decoyTimer) direction = scene.player.x < boss.x ? -1 : 1;
+  boss.setData('direction', direction);
+  boss.body.setVelocityX(direction * (same ? 48 : 36));
+  boss.setFlipX(direction < 0);
+  if (boss.x <= min) boss.x = min;
+  if (boss.x >= max) boss.x = max;
 }
 
 export function installEnemyAIStability(RunnerScene) {
   if (!RunnerScene?.prototype || RunnerScene.prototype.__enemyAIStabilityV2) return;
-  const prototype = RunnerScene.prototype;
-  const originalUpdateEnemies = prototype.updateEnemies;
-  const originalUpdateSciFiThreats = prototype.updateSciFiThreats;
-
-  prototype.updateEnemies = function stableEnemyUpdate(delta) {
+  const p = RunnerScene.prototype;
+  const originalUpdateEnemies = p.updateEnemies;
+  const originalUpdateThreats = p.updateSciFiThreats;
+  p.updateEnemies = function stableEnemyUpdate(delta) {
     if (!this.enemies || !this.player) return originalUpdateEnemies.call(this, delta);
-    this.enemies.getChildren().forEach(enemy => rememberHomePlatform(this, enemy));
+    this.enemies.getChildren().forEach(enemy => rememberRoute(this, enemy));
     originalUpdateEnemies.call(this, delta);
-    this.enemies.getChildren().forEach(enemy => stabilizeGroundEnemy(this, enemy, delta));
+    this.enemies.getChildren().forEach(enemy => stabilize(this, enemy, delta));
   };
-
-  prototype.updateSciFiThreats = function stableThreatUpdate(delta) {
-    originalUpdateSciFiThreats.call(this, delta);
+  p.updateSciFiThreats = function stableThreatUpdate(delta) {
+    originalUpdateThreats.call(this, delta);
     stabilizeBoss(this, this.boss);
   };
-
-  prototype.__enemyAIStabilityV2 = true;
+  p.__enemyAIStabilityV2 = true;
 }
