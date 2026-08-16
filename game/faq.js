@@ -12,13 +12,14 @@ export const RELAY_FAQ = [
 ];
 
 export const LATEST_UPDATE = {
-  version: 'LATEST UPDATE',
-  title: 'MISSION SYSTEM STABILITY',
+  version: 'LATEST UPDATE // GAMEPLAY',
+  title: 'ENEMY AWARENESS',
   items: [
-    'More reliable mission transitions with protection against blank or black screens.',
-    'More stable WebGL resizing during mission transitions.',
-    'Original arcade menu soundtrack.',
-    'Improved touch controls for phones.',
-    'FAQ and update information directly from the title menu.'
+    'Enemy AI now uses one movement controller for smoother, frame-rate-safe movement.',
+    'Enemies recognize platform position and only chase when the route is physically reachable.',
+    'Enemy awareness and combat difficulty now scale progressively across all seven missions.',
+    'Platform combat, ranged attacks and enemy abilities remain active without forcing enemies through level geometry.',
+    'Egg Hazard now uses a ballistic arc with target prediction and rotation that follows its real flight direction.',
+    'Home briefing, FAQ and the latest update remain available directly from the title screen.'
   ]
 };
