@@ -1,18 +1,13 @@
 import { loadState, saveState } from './src/state.js';
 
 (() => {
-  if (window.__relayHomeOptionsV4) return;
-  window.__relayHomeOptionsV4 = true;
+  if (window.__relayHomeOptionsV5) return;
+  window.__relayHomeOptionsV5 = true;
 
   const LANGUAGES = [['en','ENGLISH'],['exyu','EX-YU'],['es','ESPAÑOL'],['de','DEUTSCH']];
   const LANGUAGE_KEY = 'relay-runner-language';
   const language = () => localStorage.getItem(LANGUAGE_KEY) || 'en';
-  const setLanguage = code => {
-    localStorage.setItem(LANGUAGE_KEY, code);
-    document.documentElement.lang = code === 'exyu' ? 'bs' : code;
-    document.documentElement.dataset.language = code;
-    window.dispatchEvent(new CustomEvent('relay-language-change', { detail: { code } }));
-  };
+  const setLanguage = code => { localStorage.setItem(LANGUAGE_KEY, code); document.documentElement.lang = code === 'exyu' ? 'bs' : code; document.documentElement.dataset.language = code; window.dispatchEvent(new CustomEvent('relay-language-change', { detail: { code } })); };
   const getState = () => loadState();
   const savePatch = patch => { const next = { ...getState(), ...patch }; saveState(next); return next; };
 
@@ -41,130 +36,82 @@ import { loadState, saveState } from './src/state.js';
     #titlePanel.home-options-exclusive .home-options-actions button:hover{color:#ffd06e;border-color:#ffd06e}
     #titlePanel.home-options-exclusive .home-controls{padding:10px 12px}
     #titlePanel.home-options-exclusive .home-controls small{display:block;color:#68798c;font:700 7px/1.6 'DM Mono',monospace;overflow-wrap:anywhere}
-    @media(max-width:700px){
-      #titlePanel.home-options-exclusive{padding:6px!important}
-      #titlePanel.home-options-exclusive .title-panel-card{width:min(94vw,430px)!important;max-height:calc(100dvh - 12px)!important;max-height:calc(100svh - 12px)!important;padding:13px!important;border-radius:12px!important}
-      #titlePanel.home-options-exclusive #titlePanelContent{max-height:calc(100dvh - 100px)!important;max-height:calc(100svh - 100px)!important;padding-right:2px!important}
-      #titlePanel.home-options-exclusive .home-options-v3{gap:6px}
-      #titlePanel.home-options-exclusive .home-section{margin-top:3px;font-size:7px;letter-spacing:1px}
-      #titlePanel.home-options-exclusive .home-opt{grid-template-columns:minmax(0,1fr) 88px;gap:8px;padding:9px 10px;border-radius:7px}
-      #titlePanel.home-options-exclusive .home-opt-copy b{font-size:8px}
-      #titlePanel.home-options-exclusive .home-opt-copy small{font-size:6.5px}
-      #titlePanel.home-options-exclusive .home-opt button{width:88px;min-width:88px;max-width:88px;height:32px}
-      #titlePanel.home-options-exclusive .home-opt input[type=range]{width:100%;height:28px;grid-column:1 / -1}
-      #titlePanel.home-options-exclusive .home-options-actions{grid-template-columns:1fr 1fr;gap:6px}
-      #titlePanel.home-options-exclusive .home-options-actions button{height:34px}
-      #titlePanel.home-options-exclusive .home-lang-menu{left:0;right:0;width:auto;max-width:none;max-height:190px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
-      #titlePanel.home-options-exclusive .home-lang-menu button{width:100%;height:36px}
-      #titlePanel.home-options-exclusive .home-controls{padding:9px 10px}
-    }
-    @media(max-width:380px){
-      #titlePanel.home-options-exclusive .title-panel-card{width:96vw!important;padding:10px!important}
-      #titlePanel.home-options-exclusive #titlePanelContent{max-height:calc(100dvh - 84px)!important;max-height:calc(100svh - 84px)!important}
-      #titlePanel.home-options-exclusive .home-options-v3{gap:5px}
-      #titlePanel.home-options-exclusive .home-opt{grid-template-columns:minmax(0,1fr) 82px;padding:8px}
-      #titlePanel.home-options-exclusive .home-opt button{width:82px;min-width:82px;max-width:82px}
-      #titlePanel.home-options-exclusive .home-opt-copy small{font-size:6px}
-      #titlePanel.home-options-exclusive .home-options-actions button{font-size:7px}
-    }
+    @media(max-width:700px){#titlePanel.home-options-exclusive{padding:6px!important}#titlePanel.home-options-exclusive .title-panel-card{width:min(94vw,430px)!important;max-height:calc(100dvh - 12px)!important;max-height:calc(100svh - 12px)!important;padding:13px!important;border-radius:12px!important}#titlePanel.home-options-exclusive #titlePanelContent{max-height:calc(100dvh - 100px)!important;max-height:calc(100svh - 100px)!important;padding-right:2px!important}#titlePanel.home-options-exclusive .home-options-v3{gap:6px}#titlePanel.home-options-exclusive .home-section{margin-top:3px;font-size:7px;letter-spacing:1px}#titlePanel.home-options-exclusive .home-opt{grid-template-columns:minmax(0,1fr) 88px;gap:8px;padding:9px 10px;border-radius:7px}#titlePanel.home-options-exclusive .home-opt-copy b{font-size:8px}#titlePanel.home-options-exclusive .home-opt-copy small{font-size:6.5px}#titlePanel.home-options-exclusive .home-opt button{width:88px;min-width:88px;max-width:88px;height:32px}#titlePanel.home-options-exclusive .home-opt input[type=range]{width:100%;height:28px;grid-column:1 / -1}#titlePanel.home-options-exclusive .home-options-actions{grid-template-columns:1fr 1fr;gap:6px}#titlePanel.home-options-exclusive .home-options-actions button{height:34px}#titlePanel.home-options-exclusive .home-lang-menu{left:0;right:0;width:auto;max-width:none;max-height:190px;overflow-y:auto}#titlePanel.home-options-exclusive .home-lang-menu button{width:100%;height:36px}}
+    @media(max-width:380px){#titlePanel.home-options-exclusive .title-panel-card{width:96vw!important;padding:10px!important}#titlePanel.home-options-exclusive #titlePanelContent{max-height:calc(100dvh - 84px)!important;max-height:calc(100svh - 84px)!important}#titlePanel.home-options-exclusive .home-options-v3{gap:5px}#titlePanel.home-options-exclusive .home-opt{grid-template-columns:minmax(0,1fr) 82px;padding:8px}#titlePanel.home-options-exclusive .home-opt button{width:82px;min-width:82px;max-width:82px}#titlePanel.home-options-exclusive .home-opt-copy small{font-size:6px}}
     @media(min-width:701px) and (max-width:1000px){#titlePanel.home-options-exclusive .title-panel-card{width:min(88vw,620px)!important}}
-    @media(orientation:landscape) and (max-height:560px){
-      #titlePanel.home-options-exclusive .title-panel-card{max-height:calc(100dvh - 8px)!important;max-height:calc(100svh - 8px)!important;padding:10px!important}
-      #titlePanel.home-options-exclusive #titlePanelContent{max-height:calc(100dvh - 72px)!important;max-height:calc(100svh - 72px)!important}
-      #titlePanel.home-options-exclusive .home-opt{padding:7px 9px}
-      #titlePanel.home-options-exclusive .home-options-v3{gap:5px}
-    }
+    @media(orientation:landscape) and (max-height:560px){#titlePanel.home-options-exclusive .title-panel-card{max-height:calc(100dvh - 8px)!important;max-height:calc(100svh - 8px)!important;padding:10px!important}#titlePanel.home-options-exclusive #titlePanelContent{max-height:calc(100dvh - 72px)!important;max-height:calc(100svh - 72px)!important}}
   `;
   document.head.appendChild(style);
 
   const optionButton = (label, name, on, detail) => `<div class="home-opt"><div class="home-opt-copy"><b>${label}</b><small>${detail}</small></div><button type="button" data-home-toggle="${name}" class="${on ? 'is-on' : ''}" aria-pressed="${on}">${on ? 'ON' : 'OFF'}</button></div>`;
-
   let rendering = false;
-  function isOptionsPanelOpen() {
-    const panel = document.getElementById('titlePanel');
-    const heading = document.getElementById('titlePanelHeading');
-    if (!panel || panel.classList.contains('hidden')) return false;
-    const title = heading?.textContent.trim().toUpperCase() || '';
-    return title.includes('RUN SETTINGS') || title === 'OPTIONS';
-  }
+  const panel = () => document.getElementById('titlePanel');
+  const content = () => document.getElementById('titlePanelContent');
+  const heading = () => document.getElementById('titlePanelHeading');
 
   function render() {
-    if (rendering || !isOptionsPanelOpen()) return;
-    const content = document.getElementById('titlePanelContent');
-    const heading = document.getElementById('titlePanelHeading');
-    const panel = document.getElementById('titlePanel');
-    if (!content || !heading || !panel) return;
+    if (rendering || !panel() || !content() || !heading()) return;
     rendering = true;
-    panel.classList.add('home-options-exclusive');
-    heading.textContent = 'OPTIONS';
+    const p = panel();
+    p.classList.remove('hidden');
+    p.classList.add('home-options-exclusive');
+    heading().textContent = 'OPTIONS';
     const eyebrow = document.getElementById('titlePanelEyebrow');
     if (eyebrow) eyebrow.textContent = 'RELAY RUNNER // SYSTEM SETTINGS';
-    content.replaceChildren();
+    content().replaceChildren();
     const s = getState();
     const lang = LANGUAGES.find(x => x[0] === language()) || LANGUAGES[0];
-    content.innerHTML = `<div class="home-options-v3">
-      <div class="home-section">GAMEPLAY</div>
-      <div class="home-section">GUIDANCE</div>
-      ${optionButton('TUTORIAL','tutorialEnabled',s.tutorialEnabled !== false,'Mission guidance and contextual lessons')}
-      ${optionButton('GAME AUDIO','muted',!s.muted,'Master game audio')}
-      ${optionButton('SCREEN SHAKE','screenShake',!!s.screenShake,'Camera impact feedback')}
-      ${optionButton('REDUCED MOTION','reducedMotion',!!s.reducedMotion,'Reduce movement effects')}
-      ${optionButton('ATMOSPHERIC RAIN','rain',!!s.rain,'City weather ambience')}
-      <div class="home-section">VOICE & AUDIO</div>
-      ${optionButton('AI VOICE','aiVoice',s.aiVoice !== false,'NIA / MARA spoken game guidance')}
-      <label class="home-opt"><span class="home-opt-copy"><b>MUSIC</b><small><span data-music-value>${Math.round((s.musicVolume ?? .55) * 100)}%</span> VOLUME</small></span><input data-home-volume="musicVolume" type="range" min="0" max="1" step=".05" value="${s.musicVolume ?? .55}"></label>
-      <label class="home-opt"><span class="home-opt-copy"><b>SFX</b><small><span data-sfx-value>${Math.round((s.sfxVolume ?? .7) * 100)}%</span> VOLUME</small></span><input data-home-volume="sfxVolume" type="range" min="0" max="1" step=".05" value="${s.sfxVolume ?? .7}"></label>
-      <div class="home-section">LANGUAGE</div>
-      <div class="home-opt home-lang"><div class="home-opt-copy"><b>GAME LANGUAGE</b><small>Choose your interface language</small></div><button type="button" data-home-language>🌐 ${lang[1]}</button><div class="home-lang-menu hidden" data-home-language-menu>${LANGUAGES.map(([code,name]) => `<button type="button" data-language="${code}" class="${code === lang[0] ? 'active' : ''}">${name}</button>`).join('')}</div></div>
-      <div class="home-section">DISPLAY</div>
-      <div class="home-options-actions"><button type="button" data-home-fullscreen>FULLSCREEN</button><button type="button" data-home-reset>RESET OPTIONS</button></div>
-      <div class="home-section">CONTROLS</div>
-      <div class="home-opt home-controls"><small>A / D MOVE · SPACE JUMP · E FIRE · Q BLADE · SHIFT DASH</small></div>
-    </div>`;
+    content().innerHTML = `<div class="home-options-v3"><div class="home-section">GAMEPLAY</div>${optionButton('TUTORIAL','tutorialEnabled',s.tutorialEnabled !== false,'Mission guidance and contextual lessons')}${optionButton('GAME AUDIO','muted',!s.muted,'Master game audio')}${optionButton('SCREEN SHAKE','screenShake',!!s.screenShake,'Camera impact feedback')}${optionButton('REDUCED MOTION','reducedMotion',!!s.reducedMotion,'Reduce movement effects')}<div class="home-section">VOICE & AUDIO</div>${optionButton('AI VOICE','aiVoice',s.aiVoice !== false,'NIA / MARA spoken game guidance')}<label class="home-opt"><span class="home-opt-copy"><b>MUSIC</b><small><span data-music-value>${Math.round((s.musicVolume ?? .55) * 100)}%</span> VOLUME</small></span><input data-home-volume="musicVolume" type="range" min="0" max="1" step=".05" value="${s.musicVolume ?? .55}"></label><label class="home-opt"><span class="home-opt-copy"><b>SFX</b><small><span data-sfx-value>${Math.round((s.sfxVolume ?? .7) * 100)}%</span> VOLUME</small></span><input data-home-volume="sfxVolume" type="range" min="0" max="1" step=".05" value="${s.sfxVolume ?? .7}"></label><div class="home-section">LANGUAGE</div><div class="home-opt home-lang"><div class="home-opt-copy"><b>GAME LANGUAGE</b><small>Choose your interface language</small></div><button type="button" data-home-language>🌐 ${lang[1]}</button><div class="home-lang-menu hidden" data-home-language-menu>${LANGUAGES.map(([code,name]) => `<button type="button" data-language="${code}" class="${code === lang[0] ? 'active' : ''}">${name}</button>`).join('')}</div></div><div class="home-section">DISPLAY</div><div class="home-options-actions"><button type="button" data-home-fullscreen>FULLSCREEN</button><button type="button" data-home-reset>RESET OPTIONS</button></div><div class="home-section">CONTROLS</div><div class="home-opt home-controls"><small>A / D MOVE · SPACE JUMP · E FIRE · Q BLADE · SHIFT DASH</small></div></div>`;
 
-    content.querySelectorAll('[data-home-toggle]').forEach(btn => btn.addEventListener('click', () => {
-      const name = btn.dataset.homeToggle;
-      const previous = getState();
-      const nextValue = name === 'muted' ? !previous.muted : !previous[name];
-      savePatch({ [name]: nextValue });
-      window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { key: name, value: nextValue } }));
-      render();
-    }));
-    content.querySelectorAll('[data-home-volume]').forEach(input => input.addEventListener('input', () => {
-      const value = Number(input.value);
-      savePatch({ [input.dataset.homeVolume]: value });
-      const label = content.querySelector(input.dataset.homeVolume === 'musicVolume' ? '[data-music-value]' : '[data-sfx-value]');
-      if (label) label.textContent = `${Math.round(value * 100)}%`;
-    }));
-    const langButton = content.querySelector('[data-home-language]');
-    const langMenu = content.querySelector('[data-home-language-menu]');
+    content().querySelectorAll('[data-home-toggle]').forEach(btn => btn.addEventListener('click', () => { const name = btn.dataset.homeToggle; const previous = getState(); const nextValue = name === 'muted' ? !previous.muted : !previous[name]; savePatch({ [name]: nextValue }); window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { key:name, value:nextValue } })); render(); }));
+    content().querySelectorAll('[data-home-volume]').forEach(input => input.addEventListener('input', () => { const value = Number(input.value); savePatch({ [input.dataset.homeVolume]: value }); const label = content().querySelector(input.dataset.homeVolume === 'musicVolume' ? '[data-music-value]' : '[data-sfx-value]'); if (label) label.textContent = `${Math.round(value * 100)}%`; }));
+    const langButton = content().querySelector('[data-home-language]'); const langMenu = content().querySelector('[data-home-language-menu]');
     langButton?.addEventListener('click', e => { e.stopPropagation(); langMenu?.classList.toggle('hidden'); });
-    content.querySelectorAll('[data-language]').forEach(btn => btn.addEventListener('click', () => { setLanguage(btn.dataset.language); render(); }));
-    content.querySelector('[data-home-fullscreen]')?.addEventListener('click', async () => { try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.(); else await document.exitFullscreen?.(); } catch {} });
-    content.querySelector('[data-home-reset]')?.addEventListener('click', () => { savePatch({ muted:false, musicVolume:.55, sfxVolume:.7, screenShake:true, reducedMotion:false, rain:true, aiVoice:true, tutorialEnabled:true }); localStorage.removeItem(LANGUAGE_KEY); setLanguage('en'); window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { reset:true } })); render(); });
+    content().querySelectorAll('[data-language]').forEach(btn => btn.addEventListener('click', () => { setLanguage(btn.dataset.language); render(); }));
+    content().querySelector('[data-home-fullscreen]')?.addEventListener('click', async () => { try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.(); else await document.exitFullscreen?.(); } catch {} });
+    content().querySelector('[data-home-reset]')?.addEventListener('click', () => { savePatch({ muted:false, musicVolume:.55, sfxVolume:.7, screenShake:true, reducedMotion:false, rain:true, aiVoice:true, tutorialEnabled:true }); localStorage.removeItem(LANGUAGE_KEY); setLanguage('en'); window.dispatchEvent(new CustomEvent('relay-settings-change', { detail:{reset:true} })); render(); });
     rendering = false;
   }
 
-  const openOptions = () => {
-    const panel = document.getElementById('titlePanel');
-    if (panel) panel.classList.add('home-options-exclusive');
-    window.setTimeout(render, 0);
-    window.setTimeout(render, 30);
-  };
+  function openOptions(event) {
+    const p = panel();
+    if (!p) return;
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    event?.stopImmediatePropagation?.();
+    p.classList.remove('hidden');
+    p.setAttribute('aria-hidden','false');
+    render();
+  }
 
-  const init = () => {
-    const panel = document.getElementById('titlePanel');
-    if (!panel) return;
-    document.querySelectorAll('[data-title-panel="controls"]').forEach(button => button.addEventListener('click', openOptions));
-    const observer = new MutationObserver(mutations => {
-      if (mutations.some(m => m.type === 'attributes' && m.attributeName === 'class')) {
-        if (!panel.classList.contains('hidden')) openOptions();
-      }
-      const content = document.getElementById('titlePanelContent');
-      if (content && mutations.some(m => m.type === 'childList' && m.target === content) && !content.querySelector('.home-options-v3')) openOptions();
-    });
-    observer.observe(panel, { attributes:true, attributeFilter:['class'], childList:true, subtree:true });
-    document.addEventListener('click', e => { if (!e.target.closest('.home-lang')) document.querySelectorAll('.home-lang-menu').forEach(menu => menu.classList.add('hidden')); });
-  };
+  function closeOptions() {
+    const p = panel();
+    if (!p) return;
+    p.classList.add('hidden');
+    p.classList.remove('home-options-exclusive');
+    p.setAttribute('aria-hidden','true');
+  }
+
+  function init() {
+    const p = panel();
+    if (!p) return;
+
+    // Capture-phase delegation guarantees that the Options button opens this
+    // panel before any legacy title-menu click handler can render old settings.
+    document.addEventListener('click', event => {
+      const button = event.target?.closest?.('[data-title-panel="controls"]');
+      if (button) openOptions(event);
+    }, true);
+
+    document.addEventListener('pointerup', event => {
+      const button = event.target?.closest?.('[data-title-panel="controls"]');
+      if (button) openOptions(event);
+    }, true);
+
+    document.addEventListener('click', event => {
+      if (event.target?.closest?.('#closeTitlePanel')) closeOptions();
+    }, true);
+  }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
 })();
