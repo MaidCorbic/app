@@ -18,7 +18,6 @@ import { loadState, saveState } from './src/state.js';
 
   const style = document.createElement('style');
   style.textContent = `
-    /* Home Options V4: this panel owns the title Options content. */
     #titlePanel.home-options-exclusive{box-sizing:border-box!important;padding:clamp(8px,2vw,24px)!important;overflow:hidden!important}
     #titlePanel.home-options-exclusive .title-panel-card{box-sizing:border-box!important;width:min(720px,92vw)!important;max-width:100%!important;max-height:calc(100dvh - 24px)!important;max-height:calc(100svh - 24px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:clamp(18px,2.4vw,28px)!important}
     #titlePanel.home-options-exclusive #titlePanelContent{box-sizing:border-box!important;min-height:0!important;width:100%!important;max-height:calc(100dvh - 175px)!important;max-height:calc(100svh - 175px)!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important;padding:0 4px 6px 0!important}
@@ -99,7 +98,6 @@ import { loadState, saveState } from './src/state.js';
     panel.classList.add('home-options-exclusive');
     heading.textContent = 'OPTIONS';
     document.getElementById('titlePanelEyebrow').textContent = 'RELAY RUNNER // SYSTEM SETTINGS';
-    // Hard replace: no legacy Options/Controls markup is allowed to survive.
     content.replaceChildren();
     const s = getState();
     const lang = LANGUAGES.find(x => x[0] === language()) || LANGUAGES[0];
@@ -114,7 +112,7 @@ import { loadState, saveState } from './src/state.js';
       <div class="home-section">VOICE & AUDIO</div>
       ${optionButton('AI VOICE','aiVoice',s.aiVoice !== false,'NIA / MARA spoken game guidance')}
       <label class="home-opt"><span class="home-opt-copy"><b>MUSIC</b><small><span data-music-value>${Math.round((s.musicVolume ?? .55) * 100)}%</span> VOLUME</small></span><input data-home-volume="musicVolume" type="range" min="0" max="1" step=".05" value="${s.musicVolume ?? .55}"></label>
-      <label class="home-opt"><span class="home-opt-copy"><b>SFX</b><small><span data-sfx-value>${Math.round((s.sfxVolume ?? .7) * 100)}%</span> VOLUME</small></span><input data-home-volume="sfxVolume" type="range" min="0" max="1" step=".05" value="${s.sfxVolume ?? .7}"></label>
+      <label class="home-opt"><span class="home-opt-copy"><b>SFX</b><small><span data-sfx-value>${Math.round((s.sfxVolume ?? .7) * 100)}%</span> VOLUME</small></label>
       <div class="home-section">LANGUAGE</div>
       <div class="home-opt home-lang"><div class="home-opt-copy"><b>GAME LANGUAGE</b><small>Choose your interface language</small></div><button type="button" data-home-language>🌐 ${lang[1]}</button><div class="home-lang-menu hidden" data-home-language-menu>${LANGUAGES.map(([code,name]) => `<button type="button" data-language="${code}" class="${code === lang[0] ? 'active' : ''}">${name}</button>`).join('')}</div></div>
       <div class="home-section">DISPLAY</div>
@@ -123,11 +121,14 @@ import { loadState, saveState } from './src/state.js';
       <div class="home-opt home-controls"><small>A / D MOVE · SPACE JUMP · E FIRE · Q BLADE · SHIFT DASH</small></div>
     </div>`;
 
+    // Re-initialize only controls belonging to this new panel.
     content.querySelectorAll('[data-home-toggle]').forEach(btn => btn.addEventListener('click', () => {
       const name = btn.dataset.homeToggle;
-      savePatch({ [name]: name === 'muted' ? !getState().muted : !getState()[name] });
+      const previous = getState();
+      const nextValue = name === 'muted' ? !previous.muted : !previous[name];
+      savePatch({ [name]: nextValue });
+      window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { key: name, value: nextValue } }));
       render();
-      window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { key: name, value: name === 'muted' ? !getState().muted : getState()[name] } }));
     }));
     content.querySelectorAll('[data-home-volume]').forEach(input => input.addEventListener('input', () => {
       const value = Number(input.value);
@@ -159,7 +160,8 @@ import { loadState, saveState } from './src/state.js';
       if (mutations.some(m => m.type === 'attributes' && m.attributeName === 'class')) {
         if (!panel.classList.contains('hidden')) openOptions();
       }
-      if (mutations.some(m => m.type === 'childList' && m.target === document.getElementById('titlePanelContent'))) openOptions();
+      const content = document.getElementById('titlePanelContent');
+      if (content && mutations.some(m => m.type === 'childList' && m.target === content) && !content.querySelector('.home-options-v3')) openOptions();
     });
     observer.observe(panel, { attributes:true, attributeFilter:['class'], childList:true, subtree:true });
     document.addEventListener('click', e => { if (!e.target.closest('.home-lang')) document.querySelectorAll('.home-lang-menu').forEach(menu => menu.classList.add('hidden')); });
