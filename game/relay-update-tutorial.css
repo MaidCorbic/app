@@ -1,0 +1,14 @@
+/* Latest update: compact in-world briefing style, gameplay untouched. */
+#relayInfoPanel.relay-update-mode .relay-info-card{position:relative;width:min(520px,calc(100vw - 32px));max-height:min(720px,calc(100dvh - 40px));overflow:hidden;padding:28px;border:1px solid #7d90a566;border-radius:3px;background:linear-gradient(180deg,#071522f5,#030912f7);box-shadow:0 28px 90px #000b,0 0 55px #ffd06e0c,inset 0 1px #ffffff0a;backdrop-filter:blur(14px)}
+#relayInfoPanel.relay-update-mode .relay-info-card::before{content:'MISSION CONTROL // FIELD BRIEF';display:block;margin:0 0 18px;color:#7ed8ff;font:800 8px 'DM Mono',monospace;letter-spacing:2.4px}
+#relayInfoPanel.relay-update-mode .relay-info-card::after{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,#ffd06e,transparent);opacity:.8}
+#relayInfoPanel.relay-update-mode .relay-info-eyebrow{margin:0 0 8px;color:#ffd06e;font:800 8px 'DM Mono',monospace;letter-spacing:2px}
+#relayInfoPanel.relay-update-mode #relayInfoHeading{margin:0 42px 18px 0;color:#eef3f7;font:900 clamp(25px,5vw,38px)/.95 Manrope,sans-serif;letter-spacing:-.055em;text-transform:uppercase}
+#relayInfoPanel.relay-update-mode .relay-update-meta{margin:0 0 14px;padding:8px 10px;border-left:2px solid #ffd06e;color:#aab8c8;background:#ffffff05;font:700 8px/1.5 'DM Mono',monospace;letter-spacing:1px}
+#relayInfoPanel.relay-update-mode .relay-update-list{display:grid;gap:8px}
+#relayInfoPanel.relay-update-mode .relay-update-item{position:relative;padding:13px 14px 13px 38px;border:1px solid #5f718426;border-radius:2px;color:#dbe5ed;background:linear-gradient(90deg,#0a1724cc,#07111dcc);font:600 10px/1.55 'DM Mono',monospace}
+#relayInfoPanel.relay-update-mode .relay-update-item::before{content:'+';position:absolute;left:13px;top:12px;width:15px;height:15px;display:grid;place-items:center;border:1px solid #ffd06e;color:#ffd06e;font:900 10px Manrope,sans-serif}
+#relayInfoPanel.relay-update-mode .relay-info-close{position:absolute;right:14px;top:14px;z-index:2;width:30px;height:30px;display:grid;place-items:center;border:1px solid #6f8196;border-radius:2px;color:#dbe5ed;background:#07111d;cursor:pointer;font:800 18px/1 Manrope,sans-serif}
+#relayInfoPanel.relay-update-mode .relay-info-close:hover,#relayInfoPanel.relay-update-mode .relay-info-close:focus-visible{border-color:#ffd06e;color:#ffd06e;outline:2px solid #dffcff;outline-offset:3px}
+@media(max-width:600px){#relayInfoPanel.relay-update-mode .relay-info-card{padding:24px 18px 18px;width:min(440px,calc(100vw - 20px));max-height:calc(100dvh - 24px)}#relayInfoPanel.relay-update-mode #relayInfoHeading{font-size:28px}#relayInfoPanel.relay-update-mode .relay-update-item{font-size:9px;padding:12px 12px 12px 35px}}
+@media(prefers-reduced-motion:reduce){#relayInfoPanel.relay-update-mode *{animation:none!important;transition:none!important}}
