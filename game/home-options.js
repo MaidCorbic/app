@@ -97,7 +97,8 @@ import { loadState, saveState } from './src/state.js';
     rendering = true;
     panel.classList.add('home-options-exclusive');
     heading.textContent = 'OPTIONS';
-    document.getElementById('titlePanelEyebrow').textContent = 'RELAY RUNNER // SYSTEM SETTINGS';
+    const eyebrow = document.getElementById('titlePanelEyebrow');
+    if (eyebrow) eyebrow.textContent = 'RELAY RUNNER // SYSTEM SETTINGS';
     content.replaceChildren();
     const s = getState();
     const lang = LANGUAGES.find(x => x[0] === language()) || LANGUAGES[0];
@@ -112,7 +113,7 @@ import { loadState, saveState } from './src/state.js';
       <div class="home-section">VOICE & AUDIO</div>
       ${optionButton('AI VOICE','aiVoice',s.aiVoice !== false,'NIA / MARA spoken game guidance')}
       <label class="home-opt"><span class="home-opt-copy"><b>MUSIC</b><small><span data-music-value>${Math.round((s.musicVolume ?? .55) * 100)}%</span> VOLUME</small></span><input data-home-volume="musicVolume" type="range" min="0" max="1" step=".05" value="${s.musicVolume ?? .55}"></label>
-      <label class="home-opt"><span class="home-opt-copy"><b>SFX</b><small><span data-sfx-value>${Math.round((s.sfxVolume ?? .7) * 100)}%</span> VOLUME</small></label>
+      <label class="home-opt"><span class="home-opt-copy"><b>SFX</b><small><span data-sfx-value>${Math.round((s.sfxVolume ?? .7) * 100)}%</span> VOLUME</small></span><input data-home-volume="sfxVolume" type="range" min="0" max="1" step=".05" value="${s.sfxVolume ?? .7}"></label>
       <div class="home-section">LANGUAGE</div>
       <div class="home-opt home-lang"><div class="home-opt-copy"><b>GAME LANGUAGE</b><small>Choose your interface language</small></div><button type="button" data-home-language>🌐 ${lang[1]}</button><div class="home-lang-menu hidden" data-home-language-menu>${LANGUAGES.map(([code,name]) => `<button type="button" data-language="${code}" class="${code === lang[0] ? 'active' : ''}">${name}</button>`).join('')}</div></div>
       <div class="home-section">DISPLAY</div>
@@ -121,7 +122,6 @@ import { loadState, saveState } from './src/state.js';
       <div class="home-opt home-controls"><small>A / D MOVE · SPACE JUMP · E FIRE · Q BLADE · SHIFT DASH</small></div>
     </div>`;
 
-    // Re-initialize only controls belonging to this new panel.
     content.querySelectorAll('[data-home-toggle]').forEach(btn => btn.addEventListener('click', () => {
       const name = btn.dataset.homeToggle;
       const previous = getState();
