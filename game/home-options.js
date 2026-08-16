@@ -1,3 +1,4 @@
+import './splash-loader.js';
 import { loadState, saveState } from './src/state.js';
 
 (() => {
