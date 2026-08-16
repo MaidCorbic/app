@@ -6,3 +6,4 @@ import './world-atmosphere-test.js';
 import './home-ai-tutorial-options.js';
 import './runtime-ai-tutorial-settings.js';
 import './home-options-final.js';
+import './home-options-click-fix.js';
