@@ -1,0 +1,1 @@
+Final gameplay smoothing follows the single-owner enemy AI controller. No legacy per-100ms enemy velocity writer.
