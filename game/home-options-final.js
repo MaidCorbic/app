@@ -13,7 +13,11 @@ import { loadState, saveState } from './src/state.js';
   css.textContent = `
     #titlePanel.relay-options-final{padding:clamp(10px,2.5vw,28px)!important;box-sizing:border-box!important}
     #titlePanel.relay-options-final .title-panel-card{width:min(680px,94vw)!important;max-width:680px!important;max-height:min(820px,calc(100dvh - 20px),calc(100svh - 20px))!important;box-sizing:border-box!important;padding:clamp(18px,3vw,28px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
-    #titlePanel.relay-options-final #titlePanelContent{width:100%!important;min-width:0!important;max-height:calc(100dvh - 175px)!important;max-height:calc(100svh - 175px)!important;margin:16px auto 0!important;overflow:auto!important;padding:0 3px 5px 0!important;box-sizing:border-box!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+    #titlePanel.relay-options-final #titlePanelContent{width:100%!important;min-width:0!important;max-height:calc(100dvh - 175px)!important;max-height:calc(100svh - 175px)!important;margin:16px auto 0!important;overflow:auto!important;padding:0 6px 5px 0!important;box-sizing:border-box!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:thin!important;scrollbar-color:rgba(255,208,110,.82) rgba(7,17,31,.76)!important}
+    #titlePanel.relay-options-final #titlePanelContent::-webkit-scrollbar{width:7px;height:7px}
+    #titlePanel.relay-options-final #titlePanelContent::-webkit-scrollbar-track{background:linear-gradient(180deg,rgba(7,17,31,.9),rgba(10,22,38,.78));border:1px solid rgba(255,255,255,.035);border-radius:999px}
+    #titlePanel.relay-options-final #titlePanelContent::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(255,208,110,.95),rgba(255,174,74,.82));border:1px solid rgba(5,12,23,.75);border-radius:999px;box-shadow:0 0 10px rgba(255,208,110,.18)}
+    #titlePanel.relay-options-final #titlePanelContent::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#ffe08b,#ffc05c);box-shadow:0 0 14px rgba(255,208,110,.28)}
     .relay-options-final-grid{display:grid;gap:8px;width:100%;text-align:left}
     .relay-options-final-section{margin:5px 2px 1px;color:#71859a;font:800 8px/1 'DM Mono',monospace;letter-spacing:1.3px}
     .relay-option-row{display:grid;grid-template-columns:minmax(0,1fr) 92px;align-items:center;gap:12px;width:100%;min-width:0;padding:10px 12px;box-sizing:border-box;border:1px solid rgba(210,226,240,.10);border-radius:8px;background:linear-gradient(145deg,rgba(12,25,43,.86),rgba(5,12,23,.94));box-shadow:inset 0 1px rgba(255,255,255,.035),0 6px 18px rgba(0,0,0,.20)}
@@ -23,8 +27,8 @@ import { loadState, saveState } from './src/state.js';
     .relay-language{position:relative}.relay-language-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:20;width:170px;max-width:calc(100vw - 32px);padding:5px;border:1px solid rgba(210,226,240,.18);border-radius:8px;background:#07111ff8;box-shadow:0 14px 40px #000b;backdrop-filter:blur(14px)}.relay-language-menu.hidden{display:none}.relay-language-menu button{display:block;width:100%;height:34px;border:0;background:transparent;color:#c9d5e0;text-align:left;font:800 8px 'DM Mono',monospace;cursor:pointer}.relay-language-menu button.active,.relay-language-menu button:hover{background:rgba(255,208,110,.08);color:#ffd06e}
     .relay-options-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.relay-options-actions button{height:36px;min-width:0;border:1px solid rgba(210,226,240,.15);border-radius:7px;background:#07111ff2;color:#aebdcc;font:800 8px 'DM Mono',monospace;letter-spacing:.6px;cursor:pointer}.relay-options-actions button:hover,.relay-options-actions button:focus-visible{border-color:#ffd06e;color:#ffd06e;outline:none}
     .relay-controls{display:block}.relay-controls small{display:block;color:#68798c;font:700 7px/1.6 'DM Mono',monospace;overflow-wrap:anywhere}
-    @media(max-width:700px){#titlePanel.relay-options-final{padding:6px!important}#titlePanel.relay-options-final .title-panel-card{width:min(94vw,430px)!important;max-height:calc(100dvh - 12px)!important;max-height:calc(100svh - 12px)!important;padding:13px!important;border-radius:12px!important}#titlePanel.relay-options-final #titlePanelContent{max-height:calc(100dvh - 102px)!important;max-height:calc(100svh - 102px)!important;margin-top:12px!important}.relay-options-final-grid{gap:6px}.relay-options-final-section{font-size:7px}.relay-option-row{grid-template-columns:minmax(0,1fr) 88px;gap:9px;padding:9px 10px}.relay-option-row>button{width:88px;height:32px}.relay-option-copy b{font-size:8px}.relay-option-copy small{font-size:6.5px}.relay-range-row{grid-template-columns:minmax(0,1fr) 110px}.relay-options-actions{gap:6px}.relay-options-actions button{height:34px}}
-    @media(max-width:380px){#titlePanel.relay-options-final .title-panel-card{width:96vw!important;padding:10px!important}#titlePanel.relay-options-final #titlePanelContent{max-height:calc(100dvh - 84px)!important;max-height:calc(100svh - 84px)!important}.relay-option-row{grid-template-columns:minmax(0,1fr) 82px;padding:8px}.relay-option-row>button{width:82px}.relay-option-copy small{font-size:6px}.relay-range-row{grid-template-columns:1fr 92px}}
+    @media(max-width:700px){#titlePanel.relay-options-final{padding:6px!important}#titlePanel.relay-options-final .title-panel-card{width:min(94vw,430px)!important;max-height:calc(100dvh - 12px)!important;max-height:calc(100svh - 12px)!important;padding:13px!important;border-radius:12px!important}#titlePanel.relay-options-final #titlePanelContent{max-height:calc(100dvh - 102px)!important;max-height:calc(100svh - 102px)!important;margin-top:12px!important;padding-right:5px!important}#titlePanel.relay-options-final #titlePanelContent::-webkit-scrollbar{width:6px}.relay-options-final-grid{gap:6px}.relay-options-final-section{font-size:7px}.relay-option-row{grid-template-columns:minmax(0,1fr) 88px;gap:9px;padding:9px 10px}.relay-option-row>button{width:88px;height:32px}.relay-option-copy b{font-size:8px}.relay-option-copy small{font-size:6.5px}.relay-range-row{grid-template-columns:minmax(0,1fr) 110px}.relay-options-actions{gap:6px}.relay-options-actions button{height:34px}}
+    @media(max-width:380px){#titlePanel.relay-options-final .title-panel-card{width:96vw!important;padding:10px!important}#titlePanel.relay-options-final #titlePanelContent{max-height:calc(100dvh - 84px)!important;max-height:calc(100svh - 84px)!important;padding-right:4px!important}#titlePanel.relay-options-final #titlePanelContent::-webkit-scrollbar{width:5px}.relay-option-row{grid-template-columns:minmax(0,1fr) 82px;padding:8px}.relay-option-row>button{width:82px}.relay-option-copy small{font-size:6px}.relay-range-row{grid-template-columns:1fr 92px}}
     @media(orientation:landscape) and (max-height:560px){#titlePanel.relay-options-final .title-panel-card{max-height:calc(100dvh - 8px)!important;max-height:calc(100svh - 8px)!important;padding:10px!important}#titlePanel.relay-options-final #titlePanelContent{max-height:calc(100dvh - 72px)!important;max-height:calc(100svh - 72px)!important}.relay-options-final-grid{gap:5px}.relay-option-row{padding:7px 9px}}
   `;
   document.head.appendChild(css);
@@ -98,8 +102,6 @@ import { loadState, saveState } from './src/state.js';
   }
 
   function init() {
-    // Capture phase wins over the legacy menu listener, so clicking OPTIONS
-    // cannot open the old Settings/Controls renderer first.
     document.addEventListener('pointerdown', event => {
       const button = event.target.closest?.('[data-title-panel="controls"]');
       if (button) openFinalOptions(event);
@@ -109,7 +111,6 @@ import { loadState, saveState } from './src/state.js';
       if (button) openFinalOptions(event);
       if (!event.target.closest?.('.relay-language')) document.querySelectorAll('.relay-language-menu').forEach(menu => menu.classList.add('hidden'));
     }, true);
-
     const close = document.querySelector('#titlePanel .title-panel-close');
     close?.addEventListener('click', closeFinalOptions, true);
   }
