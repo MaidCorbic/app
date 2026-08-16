@@ -1,54 +1,28 @@
 (() => {
   'use strict';
 
-  if (window.__relayCinematicSplashV5) return;
-  window.__relayCinematicSplashV5 = true;
+  if (window.__relayCinematicSplashV6) return;
+  window.__relayCinematicSplashV6 = true;
 
   const start = () => {
-    const legacy = document.getElementById('bootLoader');
-    legacy?.remove();
+    // The cinematic splash is rendered directly by index.html so the browser
+    // can paint the artwork before module JavaScript finishes loading.
+    const splash = document.getElementById('relaySplash');
+    if (!splash) return;
 
-    const style = document.createElement('style');
-    style.id = 'relay-cinematic-splash-v5';
-    style.textContent = `
-      .relay-splash{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;box-sizing:border-box;width:100vw;width:100dvw;height:100vh;height:100dvh;min-height:100svh;padding:max(10px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));overflow:hidden;background:#02050d;opacity:1;visibility:visible;transition:opacity .45s ease,visibility .45s ease;isolation:isolate}
-      .relay-splash.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
-      .relay-splash-art{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;user-select:none;-webkit-user-drag:none;background:#02050d}
-      .relay-splash-ui{position:absolute;z-index:2;left:max(14px,env(safe-area-inset-left,0px) + 10px);right:max(14px,env(safe-area-inset-right,0px) + 10px);bottom:max(14px,env(safe-area-inset-bottom,0px) + 10px);width:min(560px,calc(100vw - 28px));margin:auto;font:700 clamp(9px,2.5vw,12px)/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;text-shadow:0 2px 12px #000}
-      .relay-splash-meta{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px;color:#f5f7fb}
-      .relay-splash-percent{color:#19c8f5;font-variant-numeric:tabular-nums}
-      .relay-splash-track{height:5px;overflow:hidden;border:1px solid #8df4ff66;background:#030914d9;box-shadow:0 0 22px #19c8f526,inset 0 0 8px #000}
-      .relay-splash-progress{display:block;width:0;height:100%;background:linear-gradient(90deg,#19c8f5,#8df4ff);box-shadow:0 0 14px #19c8f5cc;transition:width .18s ease}
-      @media(max-width:700px){.relay-splash-ui{width:calc(100vw - 28px)}.relay-splash-meta{font-size:9px}.relay-splash-track{height:4px}}
-      @media(prefers-reduced-motion:reduce){.relay-splash,.relay-splash-progress{transition:none}}
-    `;
-    document.head.appendChild(style);
-
-    const splash = document.createElement('div');
-    splash.className = 'relay-splash';
-    splash.setAttribute('role', 'status');
-    splash.setAttribute('aria-live', 'polite');
-    splash.setAttribute('aria-busy', 'true');
-    splash.innerHTML = `
-      <img class="relay-splash-art" alt="Relay Runner" decoding="async" fetchpriority="high">
-      <div class="relay-splash-ui">
-        <div class="relay-splash-meta"><span class="relay-splash-status">INITIALIZING</span><span class="relay-splash-percent">0%</span></div>
-        <div class="relay-splash-track"><i class="relay-splash-progress"></i></div>
-      </div>
-    `;
-    document.body.prepend(splash);
-
-    const image = splash.querySelector('.relay-splash-art');
+    const style = document.getElementById('relay-splash-critical');
+    const image = document.getElementById('relaySplashArt');
     const bar = splash.querySelector('.relay-splash-progress');
     const percent = splash.querySelector('.relay-splash-percent');
     const status = splash.querySelector('.relay-splash-status');
+    if (!image || !bar || !percent || !status) return;
 
     // Keep the known-good asset resolution unchanged.
     const imageUrl = new URL('./assets/loading.jpg', import.meta.url).href;
-    image.src = imageUrl;
+    if (image.getAttribute('src') !== imageUrl) image.src = imageUrl;
 
     let progress = 0;
-    let imageReady = false;
+    let imageReady = image.complete && image.naturalWidth > 0;
     let engineReady = false;
     let pageReady = document.readyState === 'complete';
     let finishing = false;
@@ -91,25 +65,28 @@
       await animateTo(100, 'READY');
       splash.setAttribute('aria-busy', 'false');
       splash.classList.add('is-leaving');
-      window.setTimeout(() => { splash.remove(); style.remove(); }, 500);
+      window.setTimeout(() => {
+        splash.remove();
+        style?.remove();
+      }, 500);
     };
 
-    image.addEventListener('load', async () => {
+    const onImageReady = async () => {
       if (!image.naturalWidth || !image.naturalHeight) return;
       imageReady = true;
       await animateTo(25, 'LOADING INTERFACE');
       finish();
-    }, { once: true });
+    };
 
-    image.addEventListener('error', () => {
-      imageReady = false;
-      status.textContent = 'SPLASH IMAGE FAILED';
-      console.error('[Relay Runner] Splash image failed to load:', imageUrl);
-    }, { once: true });
-
-    if (image.complete && image.naturalWidth > 0) {
-      imageReady = true;
+    if (imageReady) {
       setProgress(25, 'LOADING INTERFACE');
+    } else {
+      image.addEventListener('load', onImageReady, { once: true });
+      image.addEventListener('error', () => {
+        imageReady = false;
+        status.textContent = 'SPLASH IMAGE FAILED';
+        console.error('[Relay Runner] Splash image failed to load:', imageUrl);
+      }, { once: true });
     }
 
     const onDomReady = () => animateTo(45, 'LOADING GAME SYSTEMS');
