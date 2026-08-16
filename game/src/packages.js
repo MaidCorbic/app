@@ -8,9 +8,16 @@ export const packages = {
   'final-relay': { type: 'PRIME RELAY', objective: 'Deliver the city core to Apex Spine before the network closes.', duration: '01:45', condition: true, speedMultiplier: .92 },
 };
 
-// RunnerScene imports this module, so the runtime adapter is intentionally
-// deferred until both modules have finished initializing. The adapter owns
-// enemy-only compatibility behavior and never mutates mission definitions.
+// RunnerScene imports this module, so enemy runtime modules are loaded only
+// after the scene class has finished initializing. They are isolated adapters:
+// they never mutate mission definitions or the global game state.
 void import('./scenes/RunnerScene.js')
-  .then(({ RunnerScene }) => import('./systems/enemy-runtime-v2.js').then(({ installEnemyRuntime }) => installEnemyRuntime(RunnerScene)))
+  .then(async ({ RunnerScene }) => {
+    const [{ installEnemyRuntime }, { installEnemyLayout }] = await Promise.all([
+      import('./systems/enemy-runtime-v2.js'),
+      import('./systems/enemy-layout-v2.js'),
+    ]);
+    installEnemyLayout(RunnerScene);
+    installEnemyRuntime(RunnerScene);
+  })
   .catch(error => console.error('[enemy-runtime] failed to initialize', error));
