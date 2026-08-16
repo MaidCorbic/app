@@ -27,7 +27,7 @@ import { loadState, saveState } from './src/state.js';
     .home-opt-copy{min-width:0;overflow:hidden}.home-opt-copy b{display:block;color:#e9f2f8;font:800 9px 'DM Mono',monospace;letter-spacing:.7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.home-opt-copy small{display:block;margin-top:3px;color:#68798c;font:700 7px/1.35 'DM Mono',monospace;letter-spacing:.25px;overflow-wrap:anywhere}
     .home-opt button{box-sizing:border-box;min-width:96px;height:34px;padding:0 10px;border:1px solid rgba(210,226,240,.18);border-radius:7px;background:#07111ff2;color:#e9f2f8;font:800 8px 'DM Mono',monospace;letter-spacing:.6px;cursor:pointer;touch-action:manipulation}.home-opt button.is-on{border-color:rgba(104,231,190,.55);color:#68e7be}.home-opt button:focus-visible,.home-opt button:hover{border-color:#ffd06e;color:#ffd06e;outline:none;box-shadow:0 0 14px rgba(255,208,110,.10)}
     .home-opt input[type=range]{width:clamp(120px,24vw,190px);max-width:100%;accent-color:#ffd06e;cursor:pointer;touch-action:pan-x}
-    .home-lang{position:relative}.home-lang-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:50;width:170px;max-width:calc(100vw - 32px);padding:5px;border:1px solid rgba(210,226,240,.18);border-radius:8px;background:#07111ff8;box-shadow:0 14px 40px #000b;backdrop-filter:blur(14px)}.home-lang-menu.hidden{display:none}.home-lang-menu button{display:block;width:100%;height:34px;min-width:0;text-align:left;border:0;background:transparent}.home-lang-menu button.active,.home-lang-menu button:hover{background:rgba(255,208,110,.08);color:#ffd06e}
+    .home-lang{position:relative;z-index:1000}.home-lang-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:5000;width:170px;max-width:calc(100vw - 32px);padding:5px;border:1px solid rgba(210,226,240,.18);border-radius:8px;background:#07111fff;box-shadow:0 14px 40px #000b;backdrop-filter:blur(14px)}.home-lang-menu.hidden{display:none}.home-lang-menu button{display:block;width:100%;height:34px;min-width:0!important;text-align:left;border:0;background:transparent;color:#aebdcc}.home-lang-menu button.active,.home-lang-menu button:hover{background:rgba(255,208,110,.08);color:#ffd06e}
     .home-options-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.home-options-actions button{min-width:0;height:36px;border:1px solid rgba(210,226,240,.15);border-radius:7px;background:#07111ff2;color:#aebdcc;font:800 8px 'DM Mono',monospace;letter-spacing:.6px;cursor:pointer;touch-action:manipulation}.home-options-actions button:hover{color:#ffd06e;border-color:#ffd06e}
     .home-controls{padding:10px 12px}.home-controls small{display:block;color:#68798c;font:700 7px/1.6 'DM Mono',monospace;overflow-wrap:anywhere}
     @media(max-width:700px){
@@ -66,7 +66,7 @@ import { loadState, saveState } from './src/state.js';
       <label class="home-opt"><span class="home-opt-copy"><b>MUSIC</b><small><span data-music-value>${Math.round((s.musicVolume ?? .55) * 100)}%</span> VOLUME</small></span><input data-home-volume="musicVolume" type="range" min="0" max="1" step=".05" value="${s.musicVolume ?? .55}"></label>
       <label class="home-opt"><span class="home-opt-copy"><b>SFX</b><small><span data-sfx-value>${Math.round((s.sfxVolume ?? .7) * 100)}%</span> VOLUME</small></span><input data-home-volume="sfxVolume" type="range" min="0" max="1" step=".05" value="${s.sfxVolume ?? .7}"></label>
       <div class="home-section">LANGUAGE</div>
-      <div class="home-opt home-lang"><div class="home-opt-copy"><b>GAME LANGUAGE</b><small>Choose your interface language</small></div><button type="button" data-home-language>🌐 ${lang[1]}</button><div class="home-lang-menu hidden" data-home-language-menu>${LANGUAGES.map(([code,name]) => `<button type="button" data-language="${code}" class="${code === lang[0] ? 'active' : ''}">${name}</button>`).join('')}</div></div>
+      <div class="home-opt home-lang"><div class="home-opt-copy"><b>GAME LANGUAGE</b><small>Choose your interface language</small></div><button type="button" data-home-language aria-haspopup="listbox" aria-expanded="false">🌐 ${lang[1]}</button><div class="home-lang-menu hidden" data-home-language-menu role="listbox">${LANGUAGES.map(([code,name]) => `<button type="button" data-language="${code}" role="option" aria-selected="${code === lang[0]}" class="${code === lang[0] ? 'active' : ''}">${name}</button>`).join('')}</div></div>
       <div class="home-section">DISPLAY</div>
       <div class="home-options-actions"><button type="button" data-home-fullscreen>FULLSCREEN</button><button type="button" data-home-reset>RESET OPTIONS</button></div>
       <div class="home-section">CONTROLS</div>
@@ -84,10 +84,38 @@ import { loadState, saveState } from './src/state.js';
       const label = content.querySelector(input.dataset.homeVolume === 'musicVolume' ? '[data-music-value]' : '[data-sfx-value]');
       if (label) label.textContent = `${Math.round(value * 100)}%`;
     }));
+
     const langButton = content.querySelector('[data-home-language]');
     const langMenu = content.querySelector('[data-home-language-menu]');
-    langButton?.addEventListener('click', e => { e.stopPropagation(); langMenu?.classList.toggle('hidden'); });
-    content.querySelectorAll('[data-language]').forEach(btn => btn.addEventListener('click', () => { setLanguage(btn.dataset.language); render(); }));
+    const closeLanguageMenu = () => {
+      if (!langMenu) return;
+      langMenu.classList.add('hidden');
+      langButton?.setAttribute('aria-expanded', 'false');
+    };
+    const openLanguageMenu = () => {
+      if (!langMenu) return;
+      langMenu.classList.remove('hidden');
+      langButton?.setAttribute('aria-expanded', 'true');
+    };
+    langButton?.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (langMenu?.classList.contains('hidden')) openLanguageMenu(); else closeLanguageMenu();
+    });
+    content.querySelectorAll('[data-language]').forEach(btn => btn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const code = btn.dataset.language;
+      if (!LANGUAGES.some(([id]) => id === code)) return;
+      setLanguage(code);
+      closeLanguageMenu();
+      langButton.textContent = `🌐 ${LANGUAGES.find(([id]) => id === code)?.[1] || 'ENGLISH'}`;
+      content.querySelectorAll('[data-language]').forEach(option => {
+        const active = option.dataset.language === code;
+        option.classList.toggle('active', active);
+        option.setAttribute('aria-selected', String(active));
+      });
+    }));
     content.querySelector('[data-home-fullscreen]')?.addEventListener('click', async () => { try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.(); else await document.exitFullscreen?.(); } catch {} });
     content.querySelector('[data-home-reset]')?.addEventListener('click', () => { savePatch({ muted:false, musicVolume:.55, sfxVolume:.7, screenShake:true, reducedMotion:false, rain:true }); localStorage.removeItem(LANGUAGE_KEY); setLanguage('en'); render(); });
     rendering = false;
