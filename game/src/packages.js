@@ -10,13 +10,13 @@ export const packages = {
 
 void import('./scenes/RunnerScene.js')
   .then(async ({ RunnerScene }) => {
-    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIFinal }] = await Promise.all([
+    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }] = await Promise.all([
       import('./systems/enemy-runtime-v2.js'),
       import('./systems/enemy-layout-v2.js'),
-      import('./systems/enemy-ai-final.js'),
+      import('./systems/enemy-ai-awareness-v1.js'),
     ]);
     installEnemyLayout(RunnerScene);
     installEnemyRuntime(RunnerScene);
-    installEnemyAIFinal(RunnerScene);
+    installEnemyAIAwareness(RunnerScene);
   })
   .catch(error => console.error('[enemy-runtime] failed to initialize', error));
