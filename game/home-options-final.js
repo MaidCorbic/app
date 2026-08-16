@@ -1,0 +1,119 @@
+import { loadState, saveState } from './src/state.js';
+
+(() => {
+  if (window.__relayHomeOptionsFinalV1) return;
+  window.__relayHomeOptionsFinalV1 = true;
+
+  const LANGUAGES = [['en','ENGLISH'],['exyu','EX-YU'],['es','ESPAÑOL'],['de','DEUTSCH']];
+  const LANGUAGE_KEY = 'relay-runner-language';
+  const getState = () => loadState();
+  const savePatch = patch => saveState({ ...getState(), ...patch });
+
+  const css = document.createElement('style');
+  css.textContent = `
+    #titlePanel.relay-options-final{padding:clamp(10px,2.5vw,28px)!important;box-sizing:border-box!important}
+    #titlePanel.relay-options-final .title-panel-card{width:min(680px,94vw)!important;max-width:680px!important;max-height:min(820px,calc(100dvh - 20px),calc(100svh - 20px))!important;box-sizing:border-box!important;padding:clamp(18px,3vw,28px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+    #titlePanel.relay-options-final #titlePanelContent{width:100%!important;min-width:0!important;max-height:calc(100dvh - 175px)!important;max-height:calc(100svh - 175px)!important;margin:16px auto 0!important;overflow:auto!important;padding:0 3px 5px 0!important;box-sizing:border-box!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+    .relay-options-final-grid{display:grid;gap:8px;width:100%;text-align:left}
+    .relay-options-final-section{margin:5px 2px 1px;color:#71859a;font:800 8px/1 'DM Mono',monospace;letter-spacing:1.3px}
+    .relay-option-row{display:grid;grid-template-columns:minmax(0,1fr) 92px;align-items:center;gap:12px;width:100%;min-width:0;padding:10px 12px;box-sizing:border-box;border:1px solid rgba(210,226,240,.10);border-radius:8px;background:linear-gradient(145deg,rgba(12,25,43,.86),rgba(5,12,23,.94));box-shadow:inset 0 1px rgba(255,255,255,.035),0 6px 18px rgba(0,0,0,.20)}
+    .relay-option-copy{min-width:0}.relay-option-copy b{display:block;overflow:hidden;color:#e9f2f8;font:800 9px/1.15 'DM Mono',monospace;letter-spacing:.7px;text-overflow:ellipsis;white-space:nowrap}.relay-option-copy small{display:block;margin-top:4px;color:#68798c;font:700 7px/1.4 'DM Mono',monospace;overflow-wrap:anywhere}
+    .relay-option-row>button{width:92px;height:34px;padding:0 8px;box-sizing:border-box;border:1px solid rgba(210,226,240,.18);border-radius:7px;background:#07111ff2;color:#e9f2f8;font:800 8px 'DM Mono',monospace;letter-spacing:.6px;cursor:pointer;touch-action:manipulation}.relay-option-row>button.is-on{border-color:rgba(104,231,190,.55);color:#68e7be}.relay-option-row>button:hover,.relay-option-row>button:focus-visible{border-color:#ffd06e;color:#ffd06e;outline:none;box-shadow:0 0 14px rgba(255,208,110,.10)}
+    .relay-range-row{grid-template-columns:minmax(0,1fr) minmax(110px,190px)}.relay-range-row input{width:100%;margin:0;accent-color:#ffd06e;cursor:pointer;touch-action:pan-x}.relay-range-value{color:#ffd06e}
+    .relay-language{position:relative}.relay-language-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:20;width:170px;max-width:calc(100vw - 32px);padding:5px;border:1px solid rgba(210,226,240,.18);border-radius:8px;background:#07111ff8;box-shadow:0 14px 40px #000b;backdrop-filter:blur(14px)}.relay-language-menu.hidden{display:none}.relay-language-menu button{display:block;width:100%;height:34px;border:0;background:transparent;color:#c9d5e0;text-align:left;font:800 8px 'DM Mono',monospace;cursor:pointer}.relay-language-menu button.active,.relay-language-menu button:hover{background:rgba(255,208,110,.08);color:#ffd06e}
+    .relay-options-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.relay-options-actions button{height:36px;min-width:0;border:1px solid rgba(210,226,240,.15);border-radius:7px;background:#07111ff2;color:#aebdcc;font:800 8px 'DM Mono',monospace;letter-spacing:.6px;cursor:pointer}.relay-options-actions button:hover,.relay-options-actions button:focus-visible{border-color:#ffd06e;color:#ffd06e;outline:none}
+    .relay-controls{display:block}.relay-controls small{display:block;color:#68798c;font:700 7px/1.6 'DM Mono',monospace;overflow-wrap:anywhere}
+    @media(max-width:700px){#titlePanel.relay-options-final{padding:6px!important}#titlePanel.relay-options-final .title-panel-card{width:min(94vw,430px)!important;max-height:calc(100dvh - 12px)!important;max-height:calc(100svh - 12px)!important;padding:13px!important;border-radius:12px!important}#titlePanel.relay-options-final #titlePanelContent{max-height:calc(100dvh - 102px)!important;max-height:calc(100svh - 102px)!important;margin-top:12px!important}.relay-options-final-grid{gap:6px}.relay-options-final-section{font-size:7px}.relay-option-row{grid-template-columns:minmax(0,1fr) 88px;gap:9px;padding:9px 10px}.relay-option-row>button{width:88px;height:32px}.relay-option-copy b{font-size:8px}.relay-option-copy small{font-size:6.5px}.relay-range-row{grid-template-columns:minmax(0,1fr) 110px}.relay-options-actions{gap:6px}.relay-options-actions button{height:34px}}
+    @media(max-width:380px){#titlePanel.relay-options-final .title-panel-card{width:96vw!important;padding:10px!important}#titlePanel.relay-options-final #titlePanelContent{max-height:calc(100dvh - 84px)!important;max-height:calc(100svh - 84px)!important}.relay-option-row{grid-template-columns:minmax(0,1fr) 82px;padding:8px}.relay-option-row>button{width:82px}.relay-option-copy small{font-size:6px}.relay-range-row{grid-template-columns:1fr 92px}}
+    @media(orientation:landscape) and (max-height:560px){#titlePanel.relay-options-final .title-panel-card{max-height:calc(100dvh - 8px)!important;max-height:calc(100svh - 8px)!important;padding:10px!important}#titlePanel.relay-options-final #titlePanelContent{max-height:calc(100dvh - 72px)!important;max-height:calc(100svh - 72px)!important}.relay-options-final-grid{gap:5px}.relay-option-row{padding:7px 9px}}
+  `;
+  document.head.appendChild(css);
+
+  const getLanguage = () => localStorage.getItem(LANGUAGE_KEY) || 'en';
+  const setLanguage = code => {
+    localStorage.setItem(LANGUAGE_KEY, code);
+    document.documentElement.lang = code === 'exyu' ? 'bs' : code;
+    document.documentElement.dataset.language = code;
+    window.dispatchEvent(new CustomEvent('relay-language-change', { detail: { code } }));
+  };
+
+  function openFinalOptions(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    event?.stopImmediatePropagation?.();
+    const panel = document.getElementById('titlePanel');
+    const heading = document.getElementById('titlePanelHeading');
+    if (!panel || !heading) return;
+    panel.classList.remove('hidden');
+    panel.classList.add('relay-options-final');
+    heading.textContent = 'OPTIONS';
+    render();
+  }
+
+  function closeFinalOptions() {
+    const panel = document.getElementById('titlePanel');
+    if (!panel) return;
+    panel.classList.remove('relay-options-final');
+  }
+
+  function toggle(name) {
+    const state = getState();
+    const value = name === 'muted' ? !state.muted : !state[name];
+    savePatch({ [name]: value });
+    if (name === 'aiVoice' && !value) window.speechSynthesis?.cancel?.();
+    window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { key:name, value } }));
+    render();
+  }
+
+  function render() {
+    const panel = document.getElementById('titlePanel');
+    const content = document.getElementById('titlePanelContent');
+    if (!panel || !content || !panel.classList.contains('relay-options-final')) return;
+    const state = getState();
+    const language = LANGUAGES.find(item => item[0] === getLanguage()) || LANGUAGES[0];
+    content.innerHTML = `<div class="relay-options-final-grid">
+      <div class="relay-options-final-section">GAMEPLAY</div>
+      <div class="relay-option-row"><div class="relay-option-copy"><b>TUTORIAL</b><small>Mission guidance, first-run lessons and route tips</small></div><button type="button" data-final-toggle="tutorialEnabled" class="${state.tutorialEnabled !== false ? 'is-on' : ''}" aria-pressed="${state.tutorialEnabled !== false}">${state.tutorialEnabled !== false ? 'ON' : 'OFF'}</button></div>
+      <div class="relay-option-row"><div class="relay-option-copy"><b>SCREEN SHAKE</b><small>Camera impact feedback</small></div><button type="button" data-final-toggle="screenShake" class="${state.screenShake ? 'is-on' : ''}" aria-pressed="${!!state.screenShake}">${state.screenShake ? 'ON' : 'OFF'}</button></div>
+      <div class="relay-option-row"><div class="relay-option-copy"><b>REDUCED MOTION</b><small>Reduce movement effects</small></div><button type="button" data-final-toggle="reducedMotion" class="${state.reducedMotion ? 'is-on' : ''}" aria-pressed="${!!state.reducedMotion}">${state.reducedMotion ? 'ON' : 'OFF'}</button></div>
+      <div class="relay-options-final-section">AUDIO</div>
+      <div class="relay-option-row"><div class="relay-option-copy"><b>AI VOICE</b><small>NIA / MARA spoken narration and guidance</small></div><button type="button" data-final-toggle="aiVoice" class="${state.aiVoice !== false ? 'is-on' : ''}" aria-pressed="${state.aiVoice !== false}">${state.aiVoice !== false ? 'ON' : 'OFF'}</button></div>
+      <div class="relay-option-row"><div class="relay-option-copy"><b>GAME AUDIO</b><small>Master game audio</small></div><button type="button" data-final-toggle="muted" class="${!state.muted ? 'is-on' : ''}" aria-pressed="${!state.muted}">${state.muted ? 'OFF' : 'ON'}</button></div>
+      <label class="relay-option-row relay-range-row"><div class="relay-option-copy"><b>MUSIC</b><small>VOLUME <span class="relay-range-value" data-final-value="musicVolume">${Math.round((state.musicVolume ?? .55) * 100)}%</span></small></div><input data-final-range="musicVolume" type="range" min="0" max="1" step=".05" value="${state.musicVolume ?? .55}"></label>
+      <label class="relay-option-row relay-range-row"><div class="relay-option-copy"><b>SFX</b><small>VOLUME <span class="relay-range-value" data-final-value="sfxVolume">${Math.round((state.sfxVolume ?? .7) * 100)}%</span></small></div><input data-final-range="sfxVolume" type="range" min="0" max="1" step=".05" value="${state.sfxVolume ?? .7}"></label>
+      <div class="relay-options-final-section">LANGUAGE</div>
+      <div class="relay-option-row relay-language"><div class="relay-option-copy"><b>GAME LANGUAGE</b><small>Choose your interface language</small></div><button type="button" data-final-language>🌐 ${language[1]}</button><div class="relay-language-menu hidden" data-final-language-menu>${LANGUAGES.map(([code,name]) => `<button type="button" data-final-language-code="${code}" class="${code === language[0] ? 'active' : ''}">${name}</button>`).join('')}</div></div>
+      <div class="relay-options-final-section">DISPLAY</div>
+      <div class="relay-options-actions"><button type="button" data-final-fullscreen>FULLSCREEN</button><button type="button" data-final-reset>RESET OPTIONS</button></div>
+      <div class="relay-options-final-section">CONTROLS</div>
+      <div class="relay-option-row relay-controls"><small>A / D MOVE · SPACE JUMP · E FIRE · Q BLADE · SHIFT DASH · ESC PAUSE</small></div>
+    </div>`;
+
+    content.querySelectorAll('[data-final-toggle]').forEach(button => button.addEventListener('click', () => toggle(button.dataset.finalToggle)));
+    content.querySelectorAll('[data-final-range]').forEach(input => input.addEventListener('input', () => { const value = Number(input.value); savePatch({ [input.dataset.finalRange]: value }); content.querySelector(`[data-final-value="${input.dataset.finalRange}"]`).textContent = `${Math.round(value * 100)}%`; }));
+    content.querySelector('[data-final-language]')?.addEventListener('click', event => { event.stopPropagation(); content.querySelector('[data-final-language-menu]')?.classList.toggle('hidden'); });
+    content.querySelectorAll('[data-final-language-code]').forEach(button => button.addEventListener('click', () => { setLanguage(button.dataset.finalLanguageCode); render(); }));
+    content.querySelector('[data-final-fullscreen]')?.addEventListener('click', async () => { try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.(); else await document.exitFullscreen?.(); } catch {} });
+    content.querySelector('[data-final-reset]')?.addEventListener('click', () => { savePatch({ muted:false, musicVolume:.55, sfxVolume:.7, screenShake:true, reducedMotion:false, rain:true, aiVoice:true, tutorialEnabled:true }); setLanguage('en'); window.dispatchEvent(new CustomEvent('relay-settings-change', { detail:{ reset:true } })); render(); });
+  }
+
+  function init() {
+    // Capture phase wins over the legacy menu listener, so clicking OPTIONS
+    // cannot open the old Settings/Controls renderer first.
+    document.addEventListener('pointerdown', event => {
+      const button = event.target.closest?.('[data-title-panel="controls"]');
+      if (button) openFinalOptions(event);
+    }, true);
+    document.addEventListener('click', event => {
+      const button = event.target.closest?.('[data-title-panel="controls"]');
+      if (button) openFinalOptions(event);
+      if (!event.target.closest?.('.relay-language')) document.querySelectorAll('.relay-language-menu').forEach(menu => menu.classList.add('hidden'));
+    }, true);
+
+    const close = document.querySelector('#titlePanel .title-panel-close');
+    close?.addEventListener('click', closeFinalOptions, true);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
+  else init();
+})();
