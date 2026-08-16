@@ -144,7 +144,6 @@ function fireEnemyAbility(scene, enemy) {
     [-150, 0, 150].forEach(offset => makeProjectile(scene, enemy.x, enemy.y + 8, 'comet', profile.color, dx * .58, dy * .25 + offset));
     cueAbility(scene, enemy, profile.ability, profile.color);
   } else if (type === 'chicken') {
-    // A real lob: strong initial lift + gravity gives the egg a readable arc.
     const horizontal = clamp(dx * .72, -360, 360);
     const lift = -300 - clamp(Math.abs(dy) * .22, 0, 70);
     makeProjectile(scene, enemy.x + direction * 18, enemy.y - 8, 'egg', profile.color, horizontal, lift, 520);
@@ -247,10 +246,7 @@ export function installEnemyRuntime(RunnerScene) {
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       if (!enemy.active || enemy.getData('contactLockUntil') > this.elapsedMs) return;
       const stomp = player.body.velocity.y > 130 && player.y < enemy.y - 12 && !enemy.getData('boss');
-      if (stomp) {
-        this.defeatEnemy(enemy, 'STOMP');
-        return;
-      }
+      if (stomp) { this.defeatEnemy(enemy, 'STOMP'); return; }
       enemy.setData('contactLockUntil', this.elapsedMs + 720);
       const direction = player.x < enemy.x ? -1 : 1;
       player.body.setVelocity(direction * -260, -330);
@@ -262,9 +258,6 @@ export function installEnemyRuntime(RunnerScene) {
     if (!this.enemies) return;
     this.enemies.getChildren().forEach(enemy => {
       if (!enemy.active) return;
-      // Movement is owned by enemy-ai-movement-v4. This pass only handles
-      // abilities, telegraphs, contact state and detection so there is one
-      // writer for horizontal velocity.
       applyCharge(this, enemy);
       fireEnemyAbility(this, enemy);
       const type = typeOf(enemy);
@@ -284,7 +277,14 @@ export function installEnemyRuntime(RunnerScene) {
     updateBoss(this, delta);
     this.enemyProjectiles?.getChildren().forEach(projectile => {
       if (!projectile.active || projectile.x < -80 || projectile.x > this.worldWidth + 80 || projectile.y < -100 || projectile.y > 840) projectile.destroy();
-      else if (projectile.getData('projectileType') === 'egg') projectile.setAngle(projectile.body.velocity.x * .0025);
+      else if (projectile.getData('projectileType') === 'egg') {
+        const vx = projectile.body.velocity.x || 0;
+        const vy = projectile.body.velocity.y || 0;
+        // Egg texture is drawn vertically, so rotate its long axis into the actual
+        // flight vector. While falling, this makes the egg nose point down toward
+        // the predicted landing point instead of using horizontal velocity only.
+        projectile.setAngle(Math.atan2(vy, vx) * 180 / Math.PI + 90);
+      }
     });
     this.eggs?.getChildren().forEach(projectile => {
       if (!projectile.active || projectile.x < -80 || projectile.x > this.worldWidth + 80 || projectile.y > 840) projectile.destroy();
