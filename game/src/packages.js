@@ -8,9 +8,10 @@ export const packages = {
   'final-relay': { type: 'PRIME RELAY', objective: 'Deliver the city core to Apex Spine before the network closes.', duration: '01:45', condition: true, speedMultiplier: .92 },
 };
 
-// Enemy layout safety bridge. The route() builder historically injected the same
-// three enemies into every mission. Remove only those exact legacy entries at
-// runtime; authored mission enemies remain the source of truth.
+// Enemy-layout compatibility bridge.
+// Keep mission-authored enemies as the source of truth and remove only the
+// legacy route entries plus leftover procedural normal threats. This is kept
+// here temporarily because the route builder and RunnerScene are legacy code.
 import { missions } from './missions.js';
 
 const LEGACY_ROUTE_ENEMIES = new Set([
@@ -19,37 +20,56 @@ const LEGACY_ROUTE_ENEMIES = new Set([
   'security:5790:430:5630:5950',
 ]);
 
-const enemyKey = enemy => `${enemy.type}:${enemy.x}:${enemy.y}:${enemy.min}:${enemy.max}`;
+const missionEnemyKey = enemy => (
+  `${enemy.type}:${enemy.x}:${enemy.y}:${enemy.min}:${enemy.max}`
+);
 
 for (const mission of missions) {
-  mission.enemies = (mission.enemies || []).filter(enemy => !LEGACY_ROUTE_ENEMIES.has(enemyKey(enemy)));
+  mission.enemies = (mission.enemies || []).filter(
+    enemy => !LEGACY_ROUTE_ENEMIES.has(missionEnemyKey(enemy)),
+  );
 }
 
-// RunnerScene owns the procedural threat generator. Apply the compatibility
-// filter after the scene module finishes evaluating so packages.js does not
-// create a circular static import at module initialization time.
+// RunnerScene imports packages.js, so this must remain deferred. The filter is
+// based on authored mission data rather than the current Phaser display list,
+// which makes it safe regardless of whether authored enemies are created before
+// or after the procedural threat generator runs.
 void import('./scenes/RunnerScene.js').then(({ RunnerScene }) => {
   if (RunnerScene.prototype.__missionEnemyLayoutPatch) return;
 
   const originalCreateSciFiThreats = RunnerScene.prototype.createSciFiThreats;
+  if (typeof originalCreateSciFiThreats !== 'function') {
+    console.warn('[enemy-layout] createSciFiThreats is unavailable; no patch applied');
+    return;
+  }
+
   RunnerScene.prototype.createSciFiThreats = function createMissionEnemyLayout() {
-    const authoredBefore = new Set(this.enemies?.getChildren?.() || []);
+    const missionEnemyKeys = new Set(
+      (this.mission?.enemies || []).map(missionEnemyKey),
+    );
+    const keepTutorial = this.mission?.id === 'first-delivery';
+
     originalCreateSciFiThreats.call(this);
 
-    const keepTutorial = this.mission?.id === 'first-delivery';
     const children = this.enemies?.getChildren?.() || [];
-
     children.forEach(enemy => {
-      const isAuthored = authoredBefore.has(enemy);
-      const isBoss = enemy.getData('boss') === true;
+      const data = enemy.getData?.() || {};
+      const type = data.type ?? enemy.texture?.key;
+      const x = Number.isFinite(enemy.x) ? Math.round(enemy.x) : enemy.x;
+      const y = Number.isFinite(enemy.y) ? Math.round(enemy.y) : enemy.y;
+      const min = Number.isFinite(data.min) ? data.min : undefined;
+      const max = Number.isFinite(data.max) ? data.max : undefined;
+      const authoredKey = `${type}:${x}:${y}:${min}:${max}`;
+      const isAuthored = missionEnemyKeys.has(authoredKey);
+      const isBoss = data.boss === true || enemy.getData?.('boss') === true;
       const isTutorialThreat = keepTutorial && (
         enemy.texture?.key === 'enemy-runner' || enemy.texture?.key === 'chicken'
       );
 
       if (isAuthored || isBoss || isTutorialThreat) return;
 
-      enemy.getData('indicator')?.destroy();
-      enemy.getData('tutorialLabel')?.destroy();
+      data.indicator?.destroy?.();
+      data.tutorialLabel?.destroy?.();
       enemy.destroy();
     });
   };
