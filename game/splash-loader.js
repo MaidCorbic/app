@@ -1,15 +1,15 @@
 (() => {
   'use strict';
 
-  if (window.__relayCinematicSplashV4) return;
-  window.__relayCinematicSplashV4 = true;
+  if (window.__relayCinematicSplashV5) return;
+  window.__relayCinematicSplashV5 = true;
 
   const start = () => {
     const legacy = document.getElementById('bootLoader');
     legacy?.remove();
 
     const style = document.createElement('style');
-    style.id = 'relay-cinematic-splash-v4';
+    style.id = 'relay-cinematic-splash-v5';
     style.textContent = `
       .relay-splash{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;box-sizing:border-box;width:100vw;width:100dvw;height:100vh;height:100dvh;min-height:100svh;padding:max(10px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));overflow:hidden;background:#02050d;opacity:1;visibility:visible;transition:opacity .45s ease,visibility .45s ease;isolation:isolate}
       .relay-splash.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
@@ -43,9 +43,7 @@
     const percent = splash.querySelector('.relay-splash-percent');
     const status = splash.querySelector('.relay-splash-status');
 
-    // Resolve from this module's own location. This works on Vercel previews,
-    // custom domains, /game/ deployments and local hosting without guessing
-    // the current document URL.
+    // Keep the known-good asset resolution unchanged.
     const imageUrl = new URL('./assets/loading.jpg', import.meta.url).href;
     image.src = imageUrl;
 
@@ -54,6 +52,8 @@
     let engineReady = false;
     let pageReady = document.readyState === 'complete';
     let finishing = false;
+    const MIN_SPLASH_MS = 1200;
+    const startedAt = performance.now();
 
     const setProgress = (value, label) => {
       progress = Math.max(progress, Math.min(100, Math.round(value)));
@@ -70,7 +70,7 @@
       }
       const from = progress;
       const startTime = performance.now();
-      const duration = Math.max(120, Math.min(420, (target - from) * 7));
+      const duration = Math.max(180, Math.min(700, (target - from) * 10));
       const frame = now => {
         const t = Math.min(1, (now - startTime) / duration);
         setProgress(from + (target - from) * (t * (2 - t)), label);
@@ -82,6 +82,11 @@
 
     const finish = async () => {
       if (finishing || !imageReady || !engineReady || !pageReady) return;
+      const elapsed = performance.now() - startedAt;
+      if (elapsed < MIN_SPLASH_MS) {
+        window.setTimeout(finish, MIN_SPLASH_MS - elapsed);
+        return;
+      }
       finishing = true;
       await animateTo(100, 'READY');
       splash.setAttribute('aria-busy', 'false');
