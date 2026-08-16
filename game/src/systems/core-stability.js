@@ -1,11 +1,6 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 
-// Keep the Phaser parent mounted at a real size while finish/briefing overlays are
-// shown. The game uses Scale.RESIZE + WebGL; display:none on #play makes the canvas
-// become 0x0 and Phaser 3.90 can then throw "Framebuffer status: Incomplete Attachment"
-// on the next resize. Overlays already hide gameplay visually, so hiding the canvas
-// itself is unnecessary and unsafe.
 function keepPhaserSurfaceMounted() {
   if (window.__relaySurfaceGuardInstalled) return;
   window.__relaySurfaceGuardInstalled = true;
@@ -16,17 +11,10 @@ function keepPhaserSurfaceMounted() {
 }
 keepPhaserSurfaceMounted();
 
-// Resume browser audio from a real user gesture. AudioContext warnings are non-fatal,
-// but resuming here prevents mission-to-mission audio from being suspended by autoplay policy.
 function installAudioResume() {
   if (window.__relayAudioResumeInstalled) return;
   window.__relayAudioResumeInstalled = true;
-  const resume = () => {
-    try {
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (Ctx) window.__relayAudioContext?.resume?.();
-    } catch { /* Audio is optional and must never interrupt gameplay. */ }
-  };
+  const resume = () => { try { window.__relayAudioContext?.resume?.(); } catch { /* optional */ } };
   window.addEventListener('pointerdown', resume, { passive: true });
   window.addEventListener('keydown', resume, { passive: true });
 }
@@ -39,31 +27,21 @@ const hit = RunnerScene.prototype.takeSciFiHit;
 const update = RunnerScene.prototype.update;
 const stop = scene => scene.player?.body?.setVelocity(0, 0);
 
-// Mission progression remains owned by main.js. Phaser already provides the correct
-// lifecycle operation for replacing an active scene: restart(data). Calling stop()
-// and then start() manually creates a race with the SceneManager and was the source
-// of the intermittent blank canvas during NEXT MISSION.
 function installSafeRunnerStart(game) {
   if (!game || game.__relaySafeRunnerStart) return;
   const manager = game.scene;
   const originalStart = manager.start.bind(manager);
   let restarting = false;
-
   manager.start = function safeRunnerStart(key, data, clear) {
     if (key !== 'runner') return originalStart(key, data, clear);
     const runner = manager.getScene('runner');
     const active = runner?.scene?.isActive?.() || runner?.scene?.isPaused?.();
     if (!active) return originalStart(key, data, clear);
     if (restarting) return;
-
     restarting = true;
-    try {
-      runner.scene.restart(data);
-    } finally {
-      window.queueMicrotask(() => { restarting = false; });
-    }
+    try { runner.scene.restart(data); }
+    finally { window.queueMicrotask(() => { restarting = false; }); }
   };
-
   game.__relaySafeRunnerStart = true;
 }
 
@@ -74,12 +52,8 @@ RunnerScene.prototype.create = function stableCreate(...args) {
     return;
   }
   installSafeRunnerStart(this.game);
-  try {
-    return originalCreate.apply(this, args);
-  } catch (error) {
-    console.error('[Relay Runner] Mission scene creation failed:', error);
-    throw error;
-  }
+  try { return originalCreate.apply(this, args); }
+  catch (error) { console.error('[Relay Runner] Mission scene creation failed:', error); throw error; }
 };
 
 RunnerScene.prototype.fail = function stableFail(message) {
@@ -123,21 +97,10 @@ function installTouchControls() {
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installTouchControls, { once: true }); else installTouchControls();
 
-function enemyAI(scene, time) {
-  if (!scene.enemies || !scene.player || scene.cinematicActive || scene.respawning || scene.finished || time - (scene._aiAt || 0) < 100) return;
-  scene._aiAt = time;
-  const list = scene.enemies.getChildren().filter(e => e.active);
-  for (let i = 0; i < Math.min(list.length, 14); i++) {
-    const enemy = list[i]; const route = enemy.getData('route') || {}; const type = route.type || enemy.texture?.key || '';
-    let dir = enemy.getData('aiDir') || enemy.getData('direction') || 1; const min = Number.isFinite(route.min) ? route.min : enemy.x - 110; const max = Number.isFinite(route.max) ? route.max : enemy.x + 110; const distance = Math.abs(scene.player.x - enemy.x);
-    if (distance < 330 && type !== 'chicken') dir = Math.sign(scene.player.x - enemy.x) || dir; else if (enemy.x <= min) dir = 1; else if (enemy.x >= max) dir = -1;
-    enemy.setData('aiDir', dir); enemy.setFlipX?.(dir < 0); enemy.body?.setVelocityX(dir * (type === 'enemy-runner' ? 135 : type === 'dino' ? 95 : type === 'chicken' ? 72 : type === 'invader' ? 60 : 48));
-    if (type === 'invader') { const base = enemy.getData('aiBaseY') ?? enemy.y; enemy.setData('aiBaseY', base); enemy.y = base + Math.sin(time / 330 + i) * 24; }
-  }
-}
-
+// The old 100ms enemyAI() velocity writer is intentionally gone. Enemy movement is
+// single-owner: enemy-ai-movement-v4. This removes periodic velocity snapping.
 RunnerScene.prototype.update = function stableUpdate(time, delta) {
-  update.call(this, time, delta); enemyAI(this, time);
+  update.call(this, time, delta);
   if (this.finished || this.respawning || this.cinematicActive || this.dashTimer > 0 || !this.player?.body || !this.cursors || !this.keys) return;
   const left = this.cursors.left.isDown || this.keys.A.isDown || this.mobileDirection === 'left';
   const right = this.cursors.right.isDown || this.keys.D.isDown || this.mobileDirection === 'right';
