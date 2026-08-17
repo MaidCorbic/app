@@ -1,0 +1,1 @@
+Production loader hotfix: remove imports for modules that are not present in the repository. Runtime behavior is unchanged apart from restoring a valid Vite build.
