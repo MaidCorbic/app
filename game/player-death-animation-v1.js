@@ -1,7 +1,7 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-// UPDATE 07 — player death presentation + safe fall handling.
-// The existing fail()/respawn/game-over lifecycle remains authoritative.
+// UPDATE 07 — player death presentation + reliable void/hole handling.
+// Existing fail()/respawn/game-over lifecycle remains authoritative.
 (() => {
   if (window.__relayPlayerDeathAnimationV1) return;
   window.__relayPlayerDeathAnimationV1 = true;
@@ -11,30 +11,82 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const originalRespawnCheckpoint = RunnerScene.prototype.respawnCheckpoint;
 
   const SPAWN_PROTECTION_MS = 10000;
-  const FALL_KILL_MARGIN = 90;
+  const VOID_DROP_DISTANCE = 150;
+  const SPIKE_COUNT = 9;
+  const SPIKE_WIDTH = 28;
 
-  const isFallDeath = message => /fell out|fall|void|bottom/i.test(String(message));
+  const isFallDeath = message => /fell out|fall|void|bottom|spike|hole/i.test(String(message));
 
-  // Keep the player completely frozen while the death presentation is playing.
+  const resetDeathInput = scene => {
+    scene.player?.body?.setVelocity(0, 0);
+    scene.mobileDirection = null;
+    Object.keys(scene.mobileActions || {}).forEach(key => { scene.mobileActions[key] = false; });
+  };
+
+  const drawVoidSpikes = scene => {
+    if (scene.__voidSpikeGroup) return;
+
+    const group = scene.add.container(0, 0).setDepth(16).setScrollFactor(1);
+    const baseY = scene.__lastSafeY + 92;
+    const startX = scene.player.x - (SPIKE_COUNT * SPIKE_WIDTH) / 2;
+
+    for (let i = 0; i < SPIKE_COUNT; i++) {
+      const g = scene.add.graphics();
+      const x = i * SPIKE_WIDTH;
+      g.fillStyle(0x172238, 1);
+      g.fillTriangle(x, 28, x + SPIKE_WIDTH / 2, 0, x + SPIKE_WIDTH, 28);
+      g.lineStyle(2, 0xff826e, .9);
+      g.strokeTriangle(x, 28, x + SPIKE_WIDTH / 2, 0, x + SPIKE_WIDTH, 28);
+      group.add(g);
+    }
+
+    group.setPosition(startX, baseY);
+    scene.__voidSpikeGroup = group;
+
+    scene.tweens.add({
+      targets: group,
+      alpha: 0,
+      y: baseY + 12,
+      duration: 650,
+      ease: 'Quad.out',
+      onComplete: () => {
+        group.destroy(true);
+        scene.__voidSpikeGroup = null;
+      },
+    });
+  };
+
+  // Track the last real standing surface. This is intentionally independent of
+  // camera position, so falling through a hole cannot turn into endless walking
+  // underneath the route just because the camera follows the player.
   RunnerScene.prototype.update = function playerDeathAnimationV1Update(...args) {
     if (this.__deathAnimationActive) {
-      this.player?.body?.setVelocity(0, 0);
-      this.mobileDirection = null;
-      Object.keys(this.mobileActions || {}).forEach(key => { this.mobileActions[key] = false; });
+      resetDeathInput(this);
       return;
     }
 
     if (!this.finished && !this.respawning && this.player?.active) {
-      const boundsBottom = Number(this.physics?.world?.bounds?.bottom);
-      const cameraBottom = (this.cameras.main?.scrollY || 0) + this.scale.height;
-      const killY = Number.isFinite(boundsBottom) && boundsBottom > 200
-        ? boundsBottom + FALL_KILL_MARGIN
-        : cameraBottom + FALL_KILL_MARGIN;
+      const body = this.player.body;
+      const grounded = Boolean(body?.blocked?.down || body?.touching?.down);
+      if (grounded) {
+        this.__lastSafeY = this.player.y;
+      } else if (this.__lastSafeY == null && body?.velocity?.y <= 0) {
+        this.__lastSafeY = this.player.y;
+      }
 
-      // A falling runner must die once below the playable floor. We deliberately
-      // use the physics-world bottom first; cameraBottom alone moves with the
-      // camera and was the reason the runner could continue underneath platforms.
-      if (this.player.y > killY && this.player.body?.velocity?.y > 0) {
+      const safeY = Number(this.__lastSafeY);
+      const falling = Number(body?.velocity?.y) > 0;
+      if (Number.isFinite(safeY) && falling && this.player.y > safeY + VOID_DROP_DISTANCE) {
+        drawVoidSpikes(this);
+        this.fail('The courier fell into the relay void.');
+        return;
+      }
+
+      // Hard fallback for maps with a finite physics world. This is deliberately
+      // secondary to the last-safe-ground test above.
+      const worldBottom = Number(this.physics?.world?.bounds?.bottom);
+      if (falling && Number.isFinite(worldBottom) && worldBottom > 200 && this.player.y > worldBottom + 40) {
+        drawVoidSpikes(this);
         this.fail('The courier fell out of the relay route.');
         return;
       }
@@ -43,19 +95,16 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     return originalUpdate.apply(this, args);
   };
 
-  // After any normal respawn, restore the player to a clean standing state and
-  // give the existing health/damage system a real 10-second spawn shield.
   RunnerScene.prototype.respawnCheckpoint = function playerDeathAnimationV1Respawn(...args) {
     const result = originalRespawnCheckpoint.apply(this, args);
 
+    this.__lastSafeY = this.player?.y ?? this.__lastSafeY;
     this.player?.setAngle(0).setScale(1).setAlpha(1).clearTint();
     this.player?.play('runner-idle', true);
     this.player?.body?.setVelocity(0, 0);
     this.respawnGrace = SPAWN_PROTECTION_MS;
     this.healthInvulnerable = SPAWN_PROTECTION_MS;
 
-    // Do not leave the player visually faded for ten seconds. The protection is
-    // represented by a clean shield pulse instead.
     const shield = this.add.circle(this.player.x, this.player.y, 24, 0x8df4ff, .2)
       .setStrokeStyle(2, 0xb9f5ff, .65)
       .setDepth(11);
@@ -75,9 +124,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
     this.__deathAnimationActive = true;
     this.physics.pause();
-    this.player.body?.setVelocity(0, 0);
-    this.mobileDirection = null;
-    Object.keys(this.mobileActions || {}).forEach(key => { this.mobileActions[key] = false; });
+    resetDeathInput(this);
 
     const startX = this.player.x;
     const startY = this.player.y;
@@ -88,7 +135,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     this.player.play('runner-hit', true);
     this.player.setTint(0xff826e);
 
-    const deathLabel = this.add.text(startX, startY - 62, 'SIGNAL LOST', {
+    const deathLabel = this.add.text(startX, startY - 62, falling ? 'SIGNAL LOST · VOID' : 'SIGNAL LOST', {
       fontFamily: 'DM Mono',
       fontSize: '13px',
       color: '#ff9b8b',
@@ -108,9 +155,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     };
 
     if (reduced || falling) {
-      // Falling into the void is an immediate clean death: keep the runner
-      // upright, stop all movement and do not rotate the sprite.
-      this.player.setAngle(0).setScale(1);
+      // Void/hole death is deliberately upright and clean. The player does not
+      // tumble or glitch while falling through the route.
+      this.player.setAngle(0).setScale(1).setAlpha(1);
       this.tweens.add({
         targets: deathLabel,
         y: deathLabel.y - 22,
@@ -130,8 +177,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       return;
     }
 
-    // Enemy/hazard death: impact first, then a controlled fall. This is the
-    // cinematic death presentation; falling through the route stays upright.
+    // Enemy/hazard death: impact first, then a controlled cinematic fall.
     this.tweens.add({
       targets: this.player,
       x: startX - direction * 28,
