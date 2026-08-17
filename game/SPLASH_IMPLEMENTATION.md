@@ -1,0 +1,1 @@
+The splash screen uses the supplied artwork and responsive progress UI.
