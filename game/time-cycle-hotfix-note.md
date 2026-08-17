@@ -1,1 +1,0 @@
-Temporary validation note for visible UPDATE 07 time HUD. Remove before merge if desired.
