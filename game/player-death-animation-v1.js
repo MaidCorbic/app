@@ -64,10 +64,13 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     });
   };
 
+  // Void hazards intentionally ignore the 10s damage invulnerability. The
+  // shield protects against combat damage, not falling into a lethal hazard.
   const triggerVoidDeath = scene => {
-    if (scene.__deathAnimationActive || scene.respawning || scene.finished || scene.respawnGrace > 0) return;
+    if (scene.__deathAnimationActive || scene.respawning || scene.finished) return;
     createVoidHazardVisuals(scene);
     pulseVoidImpact(scene);
+    scene.__forceVoidDeath = true;
     scene.fail('The courier fell into the relay void.');
   };
 
@@ -108,8 +111,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         ? Number(body.bottom)
         : currentY + Number(body?.height || 0) / 2;
 
-      // Only nearby legitimate route surfaces can become the last safe Y.
-      // The deep bottom hazard is never promoted into a checkpoint floor.
       if (grounded && currentY <= safeY + 100) {
         this.__lastSafeY = currentY;
       }
@@ -117,8 +118,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       const routeDrop = Number.isFinite(Number(this.__lastSafeY)) && currentY > Number(this.__lastSafeY) + VOID_DROP_DISTANCE;
       const bottomReached = Number.isFinite(worldBottom) && bodyBottom >= worldBottom - VOID_BOTTOM_MARGIN;
 
-      // Authoritative void death: velocity is irrelevant. The runner dies both
-      // while falling and after coming to rest on the bottom of the world.
       if (routeDrop || bottomReached) {
         triggerVoidDeath(this);
         return;
@@ -131,6 +130,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   RunnerScene.prototype.respawnCheckpoint = function playerDeathAnimationV1Respawn(...args) {
     const result = originalRespawnCheckpoint.apply(this, args);
 
+    this.__forceVoidDeath = false;
     this.__lastSafeY = this.player?.y ?? this.__lastSafeY;
     this.__nearCheckpointTriggered = new Set();
     this.player?.setAngle(0).setScale(1).setAlpha(1).clearTint();
@@ -156,8 +156,13 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   };
 
   RunnerScene.prototype.fail = function playerDeathAnimationV1(message) {
-    if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0 || this.__deathAnimationActive) return;
+    const forcedVoidDeath = Boolean(this.__forceVoidDeath);
+    if (this.briefingProtected || this.finished || this.respawning || (!forcedVoidDeath && this.respawnGrace > 0) || this.__deathAnimationActive) {
+      if (forcedVoidDeath && this.respawning === false && !this.finished && !this.__deathAnimationActive) this.__forceVoidDeath = false;
+      return;
+    }
 
+    this.__forceVoidDeath = false;
     this.__deathAnimationActive = true;
     this.physics.pause();
     resetDeathInput(this);
@@ -192,37 +197,15 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     };
 
     if (voidDeath || reduced) {
-      // Void death is clean and upright: no tumbling, no walking underneath.
       this.player.setAngle(0).setScale(1);
-      this.tweens.add({
-        targets: this.player,
-        alpha: 0,
-        scaleX: .86,
-        scaleY: .86,
-        duration: 240,
-        ease: 'Quad.in',
-      });
-      this.tweens.add({
-        targets: deathLabel,
-        y: deathLabel.y - 26,
-        alpha: 0,
-        duration: 300,
-      });
-      this.tweens.add({
-        targets: pulse,
-        scale: 3.2,
-        alpha: 0,
-        duration: 280,
-      });
+      this.tweens.add({ targets: this.player, alpha: 0, scaleX: .86, scaleY: .86, duration: 240, ease: 'Quad.in' });
+      this.tweens.add({ targets: deathLabel, y: deathLabel.y - 26, alpha: 0, duration: 300 });
+      this.tweens.add({ targets: pulse, scale: 3.2, alpha: 0, duration: 280 });
       if (!this.motionReduced) this.shake(130, .006);
-      this.time.delayedCall(300, () => {
-        cleanup();
-        originalFail.call(this, message);
-      });
+      this.time.delayedCall(300, () => { cleanup(); originalFail.call(this, message); });
       return;
     }
 
-    // Enemy / hazard death: impact, recoil, fall and fade.
     this.tweens.add({
       targets: this.player,
       x: startX - direction * 28,
@@ -234,28 +217,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       duration: 520,
       ease: 'Cubic.in',
     });
-    this.tweens.add({
-      targets: deathLabel,
-      y: deathLabel.y - 30,
-      alpha: 0,
-      scale: 1.08,
-      duration: 500,
-      ease: 'Quad.out',
-    });
-    this.tweens.add({
-      targets: pulse,
-      scale: 3.8,
-      alpha: 0,
-      duration: 480,
-      ease: 'Quad.out',
-    });
-
+    this.tweens.add({ targets: deathLabel, y: deathLabel.y - 30, alpha: 0, scale: 1.08, duration: 500, ease: 'Quad.out' });
+    this.tweens.add({ targets: pulse, scale: 3.8, alpha: 0, duration: 480, ease: 'Quad.out' });
     if (!this.motionReduced) this.shake(180, .008);
     this.game.events.emit('feedback', 'death');
-
-    this.time.delayedCall(540, () => {
-      cleanup();
-      originalFail.call(this, message);
-    });
+    this.time.delayedCall(540, () => { cleanup(); originalFail.call(this, message); });
   };
 })();
