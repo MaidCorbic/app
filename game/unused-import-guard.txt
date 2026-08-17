@@ -1,0 +1,2 @@
+Temporary validation marker for the UPDATE 07 hotfix branch.
+This file is intentionally harmless and contains no runtime code.
