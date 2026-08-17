@@ -17,9 +17,7 @@ if (play && !play.dataset.signalSystemV1) {
         <span>RELAY SIGNAL NETWORK</span>
         <b id="signalSystemCount">00 / 00</b>
       </div>
-      <div class="signal-system-rail" aria-hidden="true">
-        <i></i><i></i><i></i><i></i><i></i><i></i>
-      </div>
+      <div class="signal-system-rail" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="signal-system-meta">
         <span>ROUTE PROGRESS <strong id="signalSystemProgress">0%</strong></span>
         <span>CHECKPOINT <strong id="signalSystemCheckpoint">01</strong></span>
@@ -49,8 +47,6 @@ if (play && !play.dataset.signalSystemV1) {
   let comboTimer;
   let activeRun = false;
   const comboWindow = 2600;
-
-  const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const show = () => play.classList.add('signal-system-active');
   const hide = () => play.classList.remove('signal-system-active');
@@ -128,47 +124,34 @@ if (play && !play.dataset.signalSystemV1) {
     if (combo >= 4) pop(`PERFECT RELAY x${combo}`);
   };
 
+  const nodeId = node => node?.nodeType === Node.TEXT_NODE ? node.parentElement?.id : node?.id;
   const observer = new MutationObserver(mutations => {
-    if (mutations.some(mutation => mutation.target?.id === 'signalCount' || mutation.target?.id === 'signalTotal')) onSignalCountChange();
-    if (mutations.some(mutation => mutation.target?.id === 'progress')) {
+    const ids = new Set(mutations.map(mutation => nodeId(mutation.target)));
+    if (ids.has('signalCount') || ids.has('signalTotal')) onSignalCountChange();
+    if (ids.has('progress')) {
       const progress = document.getElementById('progress');
-      const width = progress?.style.width || '0%';
-      progressEl.textContent = width;
+      progressEl.textContent = progress?.style.width || '0%';
     }
-    if (mutations.some(mutation => mutation.target?.id === 'routeIntel')) {
+    if (ids.has('routeIntel')) {
       const intel = document.getElementById('routeIntel');
-      const match = intel?.textContent?.match(/(\d+)\/(\d+) CHECKPOINTS/);
+      const text = intel?.textContent || '';
+      const match = text.match(/(\d+)\/(\d+) CHECKPOINTS/);
       if (match) {
         checkpoint = Math.max(0, Number(match[1]) - 1);
         render();
-        if (/CHECKPOINTS SECURED/.test(intel.textContent || '')) pop('CHECKPOINT SECURED');
+        if (/CHECKPOINTS SECURED/.test(text)) pop('CHECKPOINT SECURED');
       }
     }
   });
 
   observer.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['style', 'class'] });
 
-  const reset = () => {
-    activeRun = false;
-    count = 0;
-    total = 0;
-    combo = 0;
-    checkpoint = 0;
-    lastSignalAt = 0;
-    clearCombo();
-    hide();
-    render();
-  };
-
   const startWatcher = () => {
     const signalTotal = document.getElementById('signalTotal');
     if (signalTotal?.textContent) {
       total = Number(signalTotal.textContent) || 0;
       activeRun = total > 0;
-      if (activeRun) {
-        show();
-        render();
-      }
+      if (activeRun) { show(); render(); }
     }
   };
 
