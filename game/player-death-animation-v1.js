@@ -12,8 +12,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   const SPAWN_PROTECTION_MS = 10000;
   const VOID_DROP_DISTANCE = 150;
+  const VOID_SENSOR_OFFSET = 170;
+  const VOID_SENSOR_HEIGHT = 44;
+  const VOID_SENSOR_WIDTH = 200000;
   const MAX_SAFE_GROUND_STEP_DOWN = 100;
-  const WORLD_BOTTOM_MARGIN = 40;
   const SPIKE_COUNT = 9;
   const SPIKE_WIDTH = 28;
 
@@ -25,44 +27,50 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     Object.keys(scene.mobileActions || {}).forEach(key => { scene.mobileActions[key] = false; });
   };
 
-  const removeVoidKillFloor = scene => {
-    if (scene.__voidKillFloor) {
-      scene.__voidKillFloor.destroy();
-      scene.__voidKillFloor = null;
-    }
+  const destroyVoidSensor = scene => {
+    if (!scene.__voidKillFloor) return;
+    scene.__voidKillFloor.destroy();
+    scene.__voidKillFloor = null;
+    scene.__voidKillFloorY = null;
   };
 
-  const ensureVoidKillFloor = scene => {
-    if (!scene.player?.active || !Number.isFinite(Number(scene.__lastSafeY))) return;
+  const installVoidSensor = scene => {
+    if (!scene.player?.active || scene.__deathAnimationActive) return;
 
-    const killY = Number(scene.__lastSafeY) + VOID_DROP_DISTANCE;
-    const width = Math.max(scene.scale.width * 4, 5000);
-    const centerX = scene.player.x;
+    const safeY = Number(scene.__lastSafeY);
+    if (!Number.isFinite(safeY)) return;
 
-    if (!scene.__voidKillFloor) {
-      // Sensor only: it never blocks the runner. It exists solely to guarantee
-      // that falling through a hole becomes a death even if the runner lands
-      // and stops on an otherwise harmless bottom layer.
-      const sensor = scene.add.rectangle(centerX, killY, width, 36, 0xff826e, 0);
-      sensor.setOrigin(.5, .5).setDepth(-5);
-      scene.physics.add.existing(sensor, true);
-      sensor.body.setSize(width, 36, true);
-      scene.__voidKillFloor = sensor;
-      scene.physics.add.overlap(scene.player, sensor, () => {
-        if (scene.__deathAnimationActive || scene.finished || scene.respawning || scene.respawnGrace > 0) return;
-        drawVoidSpikes(scene, killY);
-        scene.fail('The courier fell into the relay void.');
-      });
-    }
+    const sensorY = safeY + VOID_SENSOR_OFFSET;
+    if (scene.__voidKillFloor && Math.abs(Number(scene.__voidKillFloorY) - sensorY) < 2) return;
 
-    scene.__voidKillFloor.setPosition(centerX, killY);
-    scene.__voidKillFloor.body?.updateFromGameObject();
+    if (scene.__voidKillFloor) scene.__voidKillFloor.destroy();
+
+    // Real Arcade Physics static sensor. It has no visual geometry and cannot
+    // become a platform: its only job is to kill a runner that has fallen deep
+    // below the last legitimate route surface, even if the runner stops moving.
+    const sensor = scene.add.rectangle(0, sensorY, VOID_SENSOR_WIDTH, VOID_SENSOR_HEIGHT, 0x000000, 0)
+      .setOrigin(.5)
+      .setVisible(false)
+      .setActive(true);
+    scene.physics.add.existing(sensor, true);
+    sensor.body.setSize(VOID_SENSOR_WIDTH, VOID_SENSOR_HEIGHT, true);
+    sensor.body.setOffset(0, 0);
+
+    scene.__voidKillFloor = sensor;
+    scene.__voidKillFloorY = sensorY;
+
+    scene.physics.add.overlap(scene.player, sensor, () => {
+      if (scene.__deathAnimationActive || scene.finished || scene.respawning || scene.respawnGrace > 0) return;
+      drawVoidSpikes(scene);
+      scene.fail('The courier fell into the relay void.');
+    });
   };
 
-  const drawVoidSpikes = (scene, y = scene.player.y + 24) => {
+  const drawVoidSpikes = scene => {
     if (scene.__voidSpikeGroup) return;
 
     const group = scene.add.container(0, 0).setDepth(16).setScrollFactor(1);
+    const baseY = scene.player.y + 24;
     const startX = scene.player.x - (SPIKE_COUNT * SPIKE_WIDTH) / 2;
 
     for (let i = 0; i < SPIKE_COUNT; i++) {
@@ -75,13 +83,13 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       group.add(g);
     }
 
-    group.setPosition(startX, y);
+    group.setPosition(startX, baseY);
     scene.__voidSpikeGroup = group;
 
     scene.tweens.add({
       targets: group,
       alpha: 0,
-      y: y + 12,
+      y: baseY + 12,
       duration: 650,
       ease: 'Quad.out',
       onComplete: () => {
@@ -103,31 +111,33 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       const currentY = Number(this.player.y);
       const previousSafeY = Number(this.__lastSafeY);
 
-      if (!Number.isFinite(previousSafeY)) this.__lastSafeY = currentY;
+      if (!Number.isFinite(previousSafeY)) {
+        this.__lastSafeY = currentY;
+      }
 
       const safeY = Number(this.__lastSafeY);
       const falling = Number(body?.velocity?.y) > 0;
       const isDeepBelowSafeRoute = Number.isFinite(safeY) && currentY > safeY + VOID_DROP_DISTANCE;
 
-      // Only a reasonably close grounded surface can become the new safe route.
-      // A deep bottom layer can therefore never become the new floor.
       if (grounded && !isDeepBelowSafeRoute && currentY <= safeY + MAX_SAFE_GROUND_STEP_DOWN) {
         this.__lastSafeY = currentY;
       }
 
-      ensureVoidKillFloor(this);
+      // Keep a real physics kill floor directly below the last legitimate route.
+      // This catches both falling and standing on the bottom; velocity is irrelevant.
+      installVoidSensor(this);
 
       const routeSafeY = Number(this.__lastSafeY);
       const deepVoid = Number.isFinite(routeSafeY) && currentY > routeSafeY + VOID_DROP_DISTANCE;
-      if (deepVoid && (falling || grounded)) {
-        drawVoidSpikes(this, currentY + 24);
+      if (deepVoid) {
+        drawVoidSpikes(this);
         this.fail('The courier fell into the relay void.');
         return;
       }
 
       const worldBottom = Number(this.physics?.world?.bounds?.bottom);
-      if (Number.isFinite(worldBottom) && worldBottom > 200 && currentY > worldBottom - WORLD_BOTTOM_MARGIN) {
-        drawVoidSpikes(this, currentY + 24);
+      if (Number.isFinite(worldBottom) && worldBottom > 200 && currentY > worldBottom - 40) {
+        drawVoidSpikes(this);
         this.fail('The courier reached the relay void floor.');
         return;
       }
@@ -137,7 +147,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   };
 
   RunnerScene.prototype.respawnCheckpoint = function playerDeathAnimationV1Respawn(...args) {
-    removeVoidKillFloor(this);
+    destroyVoidSensor(this);
     const result = originalRespawnCheckpoint.apply(this, args);
 
     this.__lastSafeY = this.player?.y ?? this.__lastSafeY;
@@ -146,6 +156,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     this.player?.body?.setVelocity(0, 0);
     this.respawnGrace = SPAWN_PROTECTION_MS;
     this.healthInvulnerable = SPAWN_PROTECTION_MS;
+
+    installVoidSensor(this);
 
     const shield = this.add.circle(this.player.x, this.player.y, 24, 0x8df4ff, .2)
       .setStrokeStyle(2, 0xb9f5ff, .65)
@@ -165,6 +177,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0 || this.__deathAnimationActive) return;
 
     this.__deathAnimationActive = true;
+    destroyVoidSensor(this);
     this.physics.pause();
     resetDeathInput(this);
 
