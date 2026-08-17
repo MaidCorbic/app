@@ -57,3 +57,4 @@ document.addEventListener('keydown', event => {
 import './gameplay-core-v1.js';
 import './combat-system-v1.js';
 import './combat-enemy-integration-v1.js';
+import './player-death-animation-v1.js';
