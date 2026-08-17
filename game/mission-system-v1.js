@@ -30,7 +30,7 @@ import { loadState } from './src/state.js';
     const nextMission = nextIndex >= 0 ? missions[nextIndex] : null;
 
     panel.classList.add('mission-system-v1');
-    let journal = panel.querySelector('.journal');
+    const journal = panel.querySelector('.journal');
     if (!journal) return;
     journal.classList.add('mission-system-v1');
 
@@ -68,19 +68,16 @@ import { loadState } from './src/state.js';
   const schedule = () => {
     if (scheduled) return;
     scheduled = true;
-    queueMicrotask(() => {
+    window.setTimeout(() => {
       scheduled = false;
       render();
-    });
+    }, 0);
   };
 
   document.addEventListener('click', event => {
     const tab = event.target.closest?.('#pauseMenu .tab[data-tab="missions"]');
-    if (tab) window.setTimeout(schedule, 0);
+    if (tab) schedule();
   });
-
-  const observer = new MutationObserver(schedule);
-  observer.observe(panel, { childList: true, subtree: true });
 
   window.addEventListener('relay-mission-state-change', schedule);
 })();
