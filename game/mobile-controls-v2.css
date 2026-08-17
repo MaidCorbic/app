@@ -1,0 +1,57 @@
+/* MOBILE CONTROLS V2 — touch UX + responsive HUD. No gameplay logic changes. */
+#play .mobile-controls{z-index:45;isolation:isolate;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overscroll-behavior:none;padding-bottom:max(2px,env(safe-area-inset-bottom,0px))}
+body.is-touch #play .mobile-controls{bottom:max(16px,env(safe-area-inset-bottom,0px) + 10px);left:max(10px,env(safe-area-inset-left,0px) + 10px);right:max(10px,env(safe-area-inset-right,0px) + 10px)}
+body.is-touch #play .mobile-joystick{flex:0 0 auto;touch-action:none;will-change:transform,box-shadow;border-width:1px}
+body.is-touch #play .mobile-joystick-thumb{will-change:transform}
+body.is-touch #play .mobile-actions{align-items:end;justify-items:end;max-width:min(58vw,360px)}
+body.is-touch #play .mobile-controls button{position:relative;min-width:0;min-height:44px;contain:layout paint;user-select:none;-webkit-user-select:none}
+body.is-touch #play .mobile-controls button::after{content:"";position:absolute;inset:-5px;border-radius:inherit;pointer-events:none}
+body.is-touch #play .mobile-controls button:focus-visible{outline:2px solid rgba(141,244,255,.85);outline-offset:2px}
+body.is-touch #play .mobile-controls button.is-active{transform:scale(.9) translateY(1px)}
+body.is-touch #play .mobile-controls button.gameplay-pulse{transform:scale(1.04)}
+body.is-touch #play .mobile-controls small{display:none}
+
+/* Compact phones: keep controls clear of one another and the HUD. */
+@media(max-width:430px) and (orientation:portrait){
+  body.is-touch #play .mobile-controls{--touch-size:clamp(46px,13.2vw,56px);bottom:max(14px,env(safe-area-inset-bottom,0px) + 8px)}
+  body.is-touch #play .mobile-actions{grid-template-columns:repeat(4,var(--touch-size));gap:clamp(4px,1.3vw,7px);max-width:calc(100vw - 116px)}
+  body.is-touch #play .mobile-joystick{width:clamp(76px,22vw,94px);height:clamp(76px,22vw,94px)}
+  body.is-touch #play .mobile-joystick-thumb{width:clamp(40px,11vw,46px);height:clamp(40px,11vw,46px);margin:calc(clamp(40px,11vw,46px) / -2)}
+  body.is-touch #play .mobile-controls button{font-size:clamp(7px,2vw,9px)}
+}
+
+/* Very narrow phones: prioritize reachability over decorative spacing. */
+@media(max-width:370px) and (orientation:portrait){
+  body.is-touch #play .mobile-controls{--touch-size:44px;left:8px;right:8px;bottom:max(12px,env(safe-area-inset-bottom,0px) + 6px)}
+  body.is-touch #play .mobile-actions{gap:4px;max-width:calc(100vw - 102px)}
+  body.is-touch #play .mobile-joystick{width:72px;height:72px}
+  body.is-touch #play .mobile-joystick-thumb{width:38px;height:38px;margin:-19px}
+}
+
+/* Landscape: keep the play field open and controls in the corners. */
+@media(max-height:500px) and (orientation:landscape){
+  body.is-touch #play .mobile-controls{bottom:max(7px,env(safe-area-inset-bottom,0px) + 4px);left:max(10px,env(safe-area-inset-left,0px) + 8px);right:max(10px,env(safe-area-inset-right,0px) + 8px)}
+  body.is-touch #play .mobile-actions{grid-template-columns:repeat(4,52px);gap:6px;max-width:none}
+  body.is-touch #play .mobile-joystick{width:84px;height:84px}
+  body.is-touch #play .mobile-joystick-thumb{width:42px;height:42px;margin:-21px}
+  #play .hud{padding-top:max(7px,env(safe-area-inset-top,0px) + 4px);padding-left:max(8px,env(safe-area-inset-left,0px) + 6px);padding-right:max(8px,env(safe-area-inset-right,0px) + 6px)}
+}
+
+/* HUD V2 responsive safety: never let the route block collide with XP/menu. */
+@media(max-width:600px) and (orientation:portrait){
+  #play .hud{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"route actions" "progress progress";align-items:start;gap:7px 8px;padding:9px max(10px,env(safe-area-inset-left,0px) + 8px) 0}
+  #play .hud-route{grid-area:route;max-width:none;min-width:0}
+  #play .hud-progress{grid-area:progress;min-width:0;width:100%;box-sizing:border-box}
+  #play .hud-actions{grid-area:actions;justify-self:end}
+  #play .hud-route b{max-width:46vw}
+  #play .world-marker{max-width:70vw;box-sizing:border-box}
+}
+@media(max-width:380px) and (orientation:portrait){
+  #play .hud{gap:6px;padding-left:max(8px,env(safe-area-inset-left,0px) + 6px);padding-right:max(8px,env(safe-area-inset-right,0px) + 6px)}
+  #play .hud-xp{display:none}
+  #play .hud-actions{gap:5px}
+  #play .hud-actions>button{width:40px;height:38px}
+}
+@media(prefers-reduced-motion:reduce){
+  body.is-touch #play .mobile-controls button{transition:none!important}
+}
