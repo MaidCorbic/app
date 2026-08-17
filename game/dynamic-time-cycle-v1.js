@@ -1,7 +1,8 @@
+import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
 // UPDATE 07 — dynamic time-of-day presentation.
-// Purely visual: does not alter gameplay physics, checkpoints, combat or settings.
+// Visual only: does not alter gameplay physics, checkpoints, combat or settings.
 (() => {
   if (window.__relayDynamicTimeCycleV1) return;
   window.__relayDynamicTimeCycleV1 = true;
@@ -27,13 +28,14 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   });
 
   const samplePhase = progress => {
-    const p = progress % 1;
+    const p = ((progress % 1) + 1) % 1;
     for (let i = 0; i < PHASES.length - 1; i++) {
       const left = PHASES[i];
       const right = PHASES[i + 1];
       if (p >= left.at && p <= right.at) {
         const t = (p - left.at) / (right.at - left.at || 1);
-        return { ...mix(left, right, t), name: t < .5 ? left.name : right.name };
+        const value = mix(left, right, t);
+        return { ...value, name: t < .5 ? left.name : right.name };
       }
     }
     return PHASES[0];
@@ -46,9 +48,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const height = this.scale?.height || 720;
     this.__timeCycleOverlay = this.add.rectangle(width / 2, height / 2, width, height, PHASES[0].color, 0)
       .setScrollFactor(0)
-      .setDepth(18)
-      .setOrigin(.5);
-    this.__timeCycleOverlay.setBlendMode(Phaser.BlendModes.MULTIPLY);
+      .setDepth(1)
+      .setOrigin(.5)
+      .setBlendMode(Phaser.BlendModes.MULTIPLY);
 
     this.__timeCycleLabel = this.add.text(92, 82, 'NIGHT // 00:00', {
       fontFamily: 'DM Mono',
@@ -59,18 +61,24 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       letterSpacing: 1,
     }).setScrollFactor(0).setDepth(19).setAlpha(.52);
 
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.__timeCycleOverlay?.destroy();
+      this.__timeCycleOverlay = null;
+      this.__timeCycleLabel?.destroy();
+      this.__timeCycleLabel = null;
+    });
+
     return result;
   };
 
   RunnerScene.prototype.update = function dynamicTimeUpdate(time, delta) {
     const result = originalUpdate.apply(this, [time, delta]);
 
-    if (this.__timeCycleOverlay && !this.finished) {
+    if (this.__timeCycleOverlay) {
       const elapsed = Number(this.elapsedMs) || 0;
       const progress = (elapsed % CYCLE_MS) / CYCLE_MS;
       const phase = samplePhase(progress);
-      this.__timeCycleOverlay.fillColor = phase.color;
-      this.__timeCycleOverlay.alpha = phase.alpha;
+      this.__timeCycleOverlay.setFillStyle(phase.color, phase.alpha);
 
       const totalMinutes = Math.floor(progress * 24 * 60);
       const hours = String(Math.floor(totalMinutes / 60) % 24).padStart(2, '0');
