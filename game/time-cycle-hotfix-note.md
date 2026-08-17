@@ -1,0 +1,1 @@
+Temporary validation note. It is not imported and has no runtime effect.
