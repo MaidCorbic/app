@@ -53,3 +53,5 @@ document.addEventListener('keydown', event => {
     panel?.classList.remove('relay-update-mode');
   }
 });
+
+import './gameplay-core-v1.js';
