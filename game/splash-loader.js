@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  if (window.__relayCinematicSplashV7) return;
-  window.__relayCinematicSplashV7 = true;
+  if (window.__relayCinematicSplashV8) return;
+  window.__relayCinematicSplashV8 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
@@ -14,6 +14,14 @@
     const percent = splash.querySelector('.relay-splash-percent');
     const status = splash.querySelector('.relay-splash-status');
     if (!image || !bar || !percent || !status) return;
+
+    // Enforce intrinsic aspect ratio on every device after the critical HTML paint.
+    image.style.width = 'auto';
+    image.style.height = 'auto';
+    image.style.maxWidth = '100%';
+    image.style.maxHeight = '100%';
+    image.style.objectFit = 'contain';
+    image.style.objectPosition = 'center';
 
     // Keep the known-good asset resolution unchanged.
     const imageUrl = new URL('./assets/loading.jpg', import.meta.url).href;
@@ -42,7 +50,6 @@
       }
       const from = progress;
       const startTime = performance.now();
-      // Slow enough to be clearly visible, but bounded so it cannot stall the app.
       const duration = Math.max(320, Math.min(1000, (target - from) * 15));
       const frame = now => {
         const t = Math.min(1, (now - startTime) / duration);
