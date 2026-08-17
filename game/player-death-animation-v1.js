@@ -25,11 +25,44 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     Object.keys(scene.mobileActions || {}).forEach(key => { scene.mobileActions[key] = false; });
   };
 
-  const drawVoidSpikes = scene => {
+  const removeVoidKillFloor = scene => {
+    if (scene.__voidKillFloor) {
+      scene.__voidKillFloor.destroy();
+      scene.__voidKillFloor = null;
+    }
+  };
+
+  const ensureVoidKillFloor = scene => {
+    if (!scene.player?.active || !Number.isFinite(Number(scene.__lastSafeY))) return;
+
+    const killY = Number(scene.__lastSafeY) + VOID_DROP_DISTANCE;
+    const width = Math.max(scene.scale.width * 4, 5000);
+    const centerX = scene.player.x;
+
+    if (!scene.__voidKillFloor) {
+      // Sensor only: it never blocks the runner. It exists solely to guarantee
+      // that falling through a hole becomes a death even if the runner lands
+      // and stops on an otherwise harmless bottom layer.
+      const sensor = scene.add.rectangle(centerX, killY, width, 36, 0xff826e, 0);
+      sensor.setOrigin(.5, .5).setDepth(-5);
+      scene.physics.add.existing(sensor, true);
+      sensor.body.setSize(width, 36, true);
+      scene.__voidKillFloor = sensor;
+      scene.physics.add.overlap(scene.player, sensor, () => {
+        if (scene.__deathAnimationActive || scene.finished || scene.respawning || scene.respawnGrace > 0) return;
+        drawVoidSpikes(scene, killY);
+        scene.fail('The courier fell into the relay void.');
+      });
+    }
+
+    scene.__voidKillFloor.setPosition(centerX, killY);
+    scene.__voidKillFloor.body?.updateFromGameObject();
+  };
+
+  const drawVoidSpikes = (scene, y = scene.player.y + 24) => {
     if (scene.__voidSpikeGroup) return;
 
     const group = scene.add.container(0, 0).setDepth(16).setScrollFactor(1);
-    const baseY = scene.player.y + 24;
     const startX = scene.player.x - (SPIKE_COUNT * SPIKE_WIDTH) / 2;
 
     for (let i = 0; i < SPIKE_COUNT; i++) {
@@ -42,13 +75,13 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       group.add(g);
     }
 
-    group.setPosition(startX, baseY);
+    group.setPosition(startX, y);
     scene.__voidSpikeGroup = group;
 
     scene.tweens.add({
       targets: group,
       alpha: 0,
-      y: baseY + 12,
+      y: y + 12,
       duration: 650,
       ease: 'Quad.out',
       onComplete: () => {
@@ -58,8 +91,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     });
   };
 
-  // Track the last legitimate route surface. Camera position is deliberately
-  // ignored, so the runner cannot walk underneath the level after a hole fall.
   RunnerScene.prototype.update = function playerDeathAnimationV1Update(...args) {
     if (this.__deathAnimationActive) {
       resetDeathInput(this);
@@ -72,37 +103,31 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       const currentY = Number(this.player.y);
       const previousSafeY = Number(this.__lastSafeY);
 
-      if (!Number.isFinite(previousSafeY)) {
-        this.__lastSafeY = currentY;
-      }
+      if (!Number.isFinite(previousSafeY)) this.__lastSafeY = currentY;
 
       const safeY = Number(this.__lastSafeY);
       const falling = Number(body?.velocity?.y) > 0;
       const isDeepBelowSafeRoute = Number.isFinite(safeY) && currentY > safeY + VOID_DROP_DISTANCE;
 
-      // A player can land on the very bottom of the physics world with zero
-      // vertical velocity. That is still a void death, not a valid floor.
-      // Only accept a newly grounded surface when it is reasonably close to the
-      // previous safe route surface. This prevents a deep bottom floor from
-      // becoming the new safeY and lets the kill trigger immediately on landing.
+      // Only a reasonably close grounded surface can become the new safe route.
+      // A deep bottom layer can therefore never become the new floor.
       if (grounded && !isDeepBelowSafeRoute && currentY <= safeY + MAX_SAFE_GROUND_STEP_DOWN) {
         this.__lastSafeY = currentY;
       }
 
+      ensureVoidKillFloor(this);
+
       const routeSafeY = Number(this.__lastSafeY);
       const deepVoid = Number.isFinite(routeSafeY) && currentY > routeSafeY + VOID_DROP_DISTANCE;
-
       if (deepVoid && (falling || grounded)) {
-        drawVoidSpikes(this);
+        drawVoidSpikes(this, currentY + 24);
         this.fail('The courier fell into the relay void.');
         return;
       }
 
-      // Hard fallback for maps with a finite physics world. Do not require
-      // positive velocity: standing at the physical bottom must also kill.
       const worldBottom = Number(this.physics?.world?.bounds?.bottom);
       if (Number.isFinite(worldBottom) && worldBottom > 200 && currentY > worldBottom - WORLD_BOTTOM_MARGIN) {
-        drawVoidSpikes(this);
+        drawVoidSpikes(this, currentY + 24);
         this.fail('The courier reached the relay void floor.');
         return;
       }
@@ -112,6 +137,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   };
 
   RunnerScene.prototype.respawnCheckpoint = function playerDeathAnimationV1Respawn(...args) {
+    removeVoidKillFloor(this);
     const result = originalRespawnCheckpoint.apply(this, args);
 
     this.__lastSafeY = this.player?.y ?? this.__lastSafeY;
@@ -171,21 +197,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     };
 
     if (reduced || falling) {
-      // Void/hole death is deliberately upright and clean. The player does not
-      // tumble or glitch while falling through the route.
       this.player.setAngle(0).setScale(1).setAlpha(1);
-      this.tweens.add({
-        targets: deathLabel,
-        y: deathLabel.y - 22,
-        alpha: 0,
-        duration: reduced ? 260 : 360,
-      });
-      this.tweens.add({
-        targets: pulse,
-        scale: reduced ? 1.8 : 2.8,
-        alpha: 0,
-        duration: reduced ? 260 : 360,
-      });
+      this.tweens.add({ targets: deathLabel, y: deathLabel.y - 22, alpha: 0, duration: reduced ? 260 : 360 });
+      this.tweens.add({ targets: pulse, scale: reduced ? 1.8 : 2.8, alpha: 0, duration: reduced ? 260 : 360 });
       this.time.delayedCall(reduced ? 280 : 380, () => {
         cleanup();
         originalFail.call(this, message);
@@ -193,7 +207,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       return;
     }
 
-    // Enemy/hazard death: impact first, then a controlled cinematic fall.
     this.tweens.add({
       targets: this.player,
       x: startX - direction * 28,
@@ -205,21 +218,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       duration: 520,
       ease: 'Cubic.in',
     });
-    this.tweens.add({
-      targets: deathLabel,
-      y: deathLabel.y - 30,
-      alpha: 0,
-      scale: 1.08,
-      duration: 500,
-      ease: 'Quad.out',
-    });
-    this.tweens.add({
-      targets: pulse,
-      scale: 3.8,
-      alpha: 0,
-      duration: 480,
-      ease: 'Quad.out',
-    });
+    this.tweens.add({ targets: deathLabel, y: deathLabel.y - 30, alpha: 0, scale: 1.08, duration: 500, ease: 'Quad.out' });
+    this.tweens.add({ targets: pulse, scale: 3.8, alpha: 0, duration: 480, ease: 'Quad.out' });
 
     if (!this.motionReduced) this.shake(180, .008);
     this.game.events.emit('feedback', 'death');
