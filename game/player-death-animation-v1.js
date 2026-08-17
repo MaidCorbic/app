@@ -12,6 +12,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   const SPAWN_PROTECTION_MS = 10000;
   const VOID_DROP_DISTANCE = 150;
+  const MAX_SAFE_GROUND_STEP_DOWN = 100;
+  const WORLD_BOTTOM_MARGIN = 40;
   const SPIKE_COUNT = 9;
   const SPIKE_WIDTH = 28;
 
@@ -27,7 +29,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     if (scene.__voidSpikeGroup) return;
 
     const group = scene.add.container(0, 0).setDepth(16).setScrollFactor(1);
-    const baseY = scene.__lastSafeY + 92;
+    const baseY = scene.player.y + 24;
     const startX = scene.player.x - (SPIKE_COUNT * SPIKE_WIDTH) / 2;
 
     for (let i = 0; i < SPIKE_COUNT; i++) {
@@ -56,9 +58,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     });
   };
 
-  // Track the last real standing surface. This is intentionally independent of
-  // camera position, so falling through a hole cannot turn into endless walking
-  // underneath the route just because the camera follows the player.
+  // Track the last legitimate route surface. Camera position is deliberately
+  // ignored, so the runner cannot walk underneath the level after a hole fall.
   RunnerScene.prototype.update = function playerDeathAnimationV1Update(...args) {
     if (this.__deathAnimationActive) {
       resetDeathInput(this);
@@ -68,26 +69,41 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     if (!this.finished && !this.respawning && this.player?.active) {
       const body = this.player.body;
       const grounded = Boolean(body?.blocked?.down || body?.touching?.down);
-      if (grounded) {
-        this.__lastSafeY = this.player.y;
-      } else if (this.__lastSafeY == null && body?.velocity?.y <= 0) {
-        this.__lastSafeY = this.player.y;
+      const currentY = Number(this.player.y);
+      const previousSafeY = Number(this.__lastSafeY);
+
+      if (!Number.isFinite(previousSafeY)) {
+        this.__lastSafeY = currentY;
       }
 
       const safeY = Number(this.__lastSafeY);
       const falling = Number(body?.velocity?.y) > 0;
-      if (Number.isFinite(safeY) && falling && this.player.y > safeY + VOID_DROP_DISTANCE) {
+      const isDeepBelowSafeRoute = Number.isFinite(safeY) && currentY > safeY + VOID_DROP_DISTANCE;
+
+      // A player can land on the very bottom of the physics world with zero
+      // vertical velocity. That is still a void death, not a valid floor.
+      // Only accept a newly grounded surface when it is reasonably close to the
+      // previous safe route surface. This prevents a deep bottom floor from
+      // becoming the new safeY and lets the kill trigger immediately on landing.
+      if (grounded && !isDeepBelowSafeRoute && currentY <= safeY + MAX_SAFE_GROUND_STEP_DOWN) {
+        this.__lastSafeY = currentY;
+      }
+
+      const routeSafeY = Number(this.__lastSafeY);
+      const deepVoid = Number.isFinite(routeSafeY) && currentY > routeSafeY + VOID_DROP_DISTANCE;
+
+      if (deepVoid && (falling || grounded)) {
         drawVoidSpikes(this);
         this.fail('The courier fell into the relay void.');
         return;
       }
 
-      // Hard fallback for maps with a finite physics world. This is deliberately
-      // secondary to the last-safe-ground test above.
+      // Hard fallback for maps with a finite physics world. Do not require
+      // positive velocity: standing at the physical bottom must also kill.
       const worldBottom = Number(this.physics?.world?.bounds?.bottom);
-      if (falling && Number.isFinite(worldBottom) && worldBottom > 200 && this.player.y > worldBottom + 40) {
+      if (Number.isFinite(worldBottom) && worldBottom > 200 && currentY > worldBottom - WORLD_BOTTOM_MARGIN) {
         drawVoidSpikes(this);
-        this.fail('The courier fell out of the relay route.');
+        this.fail('The courier reached the relay void floor.');
         return;
       }
     }
