@@ -10,14 +10,15 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const originalCreate = RunnerScene.prototype.create;
   const originalUpdate = RunnerScene.prototype.update;
 
-  const CYCLE_MS = 240000;
+  // Short enough to visibly move through a full day during normal play/tests.
+  const CYCLE_MS = 90000;
   const PHASES = [
-    { at: 0.00, name: 'NIGHT', color: 0x061126, alpha: 0.24 },
-    { at: 0.18, name: 'DAWN', color: 0x5a3f66, alpha: 0.18 },
-    { at: 0.32, name: 'MORNING', color: 0x8a6f4f, alpha: 0.08 },
-    { at: 0.48, name: 'MIDDAY', color: 0xffd48a, alpha: 0.01 },
-    { at: 0.65, name: 'DUSK', color: 0x8d4e5d, alpha: 0.13 },
-    { at: 0.80, name: 'NIGHT', color: 0x061126, alpha: 0.24 },
+    { at: 0.00, name: 'NIGHT',   color: 0x061126, alpha: 0.34 },
+    { at: 0.14, name: 'DAWN',    color: 0x6d4a66, alpha: 0.28 },
+    { at: 0.28, name: 'MORNING', color: 0xa97a55, alpha: 0.16 },
+    { at: 0.46, name: 'MIDDAY',  color: 0xf4dca6, alpha: 0.03 },
+    { at: 0.64, name: 'DUSK',    color: 0x9d5862, alpha: 0.22 },
+    { at: 0.82, name: 'NIGHT',   color: 0x061126, alpha: 0.34 },
   ];
 
   const mix = (a, b, t) => ({
@@ -49,17 +50,18 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     this.__timeCycleOverlay = this.add.rectangle(width / 2, height / 2, width, height, PHASES[0].color, 0)
       .setScrollFactor(0)
       .setDepth(1)
-      .setOrigin(.5)
-      .setBlendMode(Phaser.BlendModes.MULTIPLY);
+      .setOrigin(.5);
 
-    this.__timeCycleLabel = this.add.text(92, 82, 'NIGHT // 00:00', {
+    this.__timeCycleLabel = this.add.text(92, 104, 'NIGHT // 00:00', {
       fontFamily: 'DM Mono',
-      fontSize: '9px',
+      fontSize: '10px',
       color: '#dce8f1',
       stroke: '#08101c',
-      strokeThickness: 3,
-      letterSpacing: 1,
-    }).setScrollFactor(0).setDepth(19).setAlpha(.52);
+      strokeThickness: 4,
+      letterSpacing: 1.1,
+      backgroundColor: '#08101c88',
+      padding: { left: 7, right: 7, top: 4, bottom: 4 },
+    }).setScrollFactor(0).setDepth(19).setAlpha(.82);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.__timeCycleOverlay?.destroy();
@@ -79,6 +81,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       const progress = (elapsed % CYCLE_MS) / CYCLE_MS;
       const phase = samplePhase(progress);
       this.__timeCycleOverlay.setFillStyle(phase.color, phase.alpha);
+      this.__timeCycleOverlay.setAlpha(phase.alpha);
+      this.cameras.main?.setBackgroundColor(phase.color);
 
       const totalMinutes = Math.floor(progress * 24 * 60);
       const hours = String(Math.floor(totalMinutes / 60) % 24).padStart(2, '0');
