@@ -55,3 +55,4 @@ document.addEventListener('keydown', event => {
 });
 
 import './gameplay-core-v1.js';
+import './signal-system-v1.js';
