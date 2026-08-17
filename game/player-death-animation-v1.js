@@ -1,6 +1,6 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-// UPDATE 07 — player death presentation + reliable void/hole handling.
+// UPDATE 07 — player death presentation + hard void recovery.
 // Existing fail()/respawn/game-over lifecycle remains authoritative.
 (() => {
   if (window.__relayPlayerDeathAnimationV1) return;
@@ -12,11 +12,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   const SPAWN_PROTECTION_MS = 10000;
   const VOID_DROP_DISTANCE = 150;
-  const BOTTOM_KILL_HEIGHT = 48;
-  const SPIKE_COUNT = 9;
-  const SPIKE_WIDTH = 28;
-
-  const isFallDeath = message => /fell out|fall|void|bottom|spike|hole/i.test(String(message));
+  const VOID_BOTTOM_MARGIN = 16;
+  const SPIKE_COUNT = 13;
+  const SPIKE_WIDTH = 34;
+  const CHECKPOINT_NEAR_DISTANCE = 72;
 
   const resetDeathInput = scene => {
     scene.player?.body?.setVelocity(0, 0);
@@ -24,77 +23,67 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     Object.keys(scene.mobileActions || {}).forEach(key => { scene.mobileActions[key] = false; });
   };
 
-  const destroyVoidKillFloor = scene => {
-    const floor = scene.__voidKillFloor;
-    if (!floor) return;
-    floor.destroy();
-    scene.__voidKillFloor = null;
-  };
+  const isVoidMessage = message => /fell out|fall|void|bottom|spike|hole/i.test(String(message));
 
-  // Real Arcade Physics sensor at the physical bottom of the world.
-  // Static bodies already ignore gravity/immovability; do not call dynamic-body
-  // methods here because that can throw in Phaser and blank the game canvas.
-  const installVoidKillFloor = scene => {
-    destroyVoidKillFloor(scene);
-
+  const createVoidHazardVisuals = scene => {
+    if (scene.__voidHazardVisuals || !scene.player?.active) return;
     const bounds = scene.physics?.world?.bounds;
-    if (!bounds || !scene.player?.active) return;
+    if (!bounds) return;
 
-    const width = Math.max(bounds.width, scene.scale?.width || 1280, 2400);
-    const x = bounds.x + width / 2;
-    const y = bounds.bottom - BOTTOM_KILL_HEIGHT / 2;
+    const width = Math.max(Number(bounds.width) || 0, Number(scene.worldWidth) || 2400, 2400);
+    const baseY = Number(bounds.bottom) - 5;
+    const graphics = scene.add.graphics().setDepth(2);
 
-    const floor = scene.add.rectangle(x, y, width + 400, BOTTOM_KILL_HEIGHT, 0xff0000, 0);
-    floor.setVisible(false);
-    scene.physics.add.existing(floor, true);
-    floor.body.setSize(width + 400, BOTTOM_KILL_HEIGHT, true);
+    graphics.fillStyle(0x080d18, .92);
+    graphics.fillRect(bounds.x, baseY - 6, width, 42);
 
-    scene.physics.add.overlap(scene.player, floor, () => {
-      if (scene.__deathAnimationActive || scene.respawning || scene.finished || scene.respawnGrace > 0) return;
-      drawVoidSpikes(scene);
-      scene.fail('The courier reached the relay void floor.');
-    });
-
-    scene.__voidKillFloor = floor;
-  };
-
-  const drawVoidSpikes = scene => {
-    if (scene.__voidSpikeGroup) return;
-
-    const group = scene.add.container(0, 0).setDepth(16).setScrollFactor(1);
-    const baseY = scene.player.y + 28;
-    const startX = scene.player.x - (SPIKE_COUNT * SPIKE_WIDTH) / 2;
-
-    for (let i = 0; i < SPIKE_COUNT; i++) {
-      const g = scene.add.graphics();
+    for (let i = 0; i < Math.ceil(width / SPIKE_WIDTH); i++) {
       const x = i * SPIKE_WIDTH;
-      g.fillStyle(0x172238, 1);
-      g.fillTriangle(x, 28, x + SPIKE_WIDTH / 2, 0, x + SPIKE_WIDTH, 28);
-      g.lineStyle(2, 0xff826e, .95);
-      g.strokeTriangle(x, 28, x + SPIKE_WIDTH / 2, 0, x + SPIKE_WIDTH, 28);
-      group.add(g);
+      graphics.fillStyle(0x172238, 1);
+      graphics.fillTriangle(x, baseY + 22, x + SPIKE_WIDTH / 2, baseY - 2, x + SPIKE_WIDTH, baseY + 22);
+      graphics.lineStyle(2, 0xff826e, .95);
+      graphics.strokeTriangle(x, baseY + 22, x + SPIKE_WIDTH / 2, baseY - 2, x + SPIKE_WIDTH, baseY + 22);
     }
 
-    group.setPosition(startX, baseY);
-    scene.__voidSpikeGroup = group;
+    graphics.setScrollFactor(1);
+    scene.__voidHazardVisuals = graphics;
+  };
 
+  const pulseVoidImpact = scene => {
+    if (!scene.player?.active) return;
+    const x = scene.player.x;
+    const y = scene.player.y;
+    const ring = scene.add.circle(x, y + 16, 14, 0xff826e, .22)
+      .setStrokeStyle(2, 0xff826e, .9)
+      .setDepth(18);
     scene.tweens.add({
-      targets: group,
+      targets: ring,
+      scale: 3.6,
       alpha: 0,
-      y: baseY + 12,
-      duration: 650,
+      duration: 260,
       ease: 'Quad.out',
-      onComplete: () => {
-        group.destroy(true);
-        scene.__voidSpikeGroup = null;
-      },
+      onComplete: () => ring.destroy(),
     });
   };
 
   const triggerVoidDeath = scene => {
     if (scene.__deathAnimationActive || scene.respawning || scene.finished || scene.respawnGrace > 0) return;
-    drawVoidSpikes(scene);
+    createVoidHazardVisuals(scene);
+    pulseVoidImpact(scene);
     scene.fail('The courier fell into the relay void.');
+  };
+
+  const activateNearbyCheckpoint = scene => {
+    if (!scene.checkpoints || typeof scene.activateCheckpoint !== 'function' || !scene.player?.active) return;
+    if (!scene.__nearCheckpointTriggered) scene.__nearCheckpointTriggered = new Set();
+    scene.checkpoints.getChildren().forEach(checkpoint => {
+      if (!checkpoint.active) return;
+      const index = Number(checkpoint.getData('index'));
+      if (!Number.isFinite(index) || scene.__nearCheckpointTriggered.has(index)) return;
+      if (Phaser.Math.Distance.Between(scene.player.x, scene.player.y, checkpoint.x, checkpoint.y) > CHECKPOINT_NEAR_DISTANCE) return;
+      scene.__nearCheckpointTriggered.add(index);
+      scene.activateCheckpoint(checkpoint);
+    });
   };
 
   RunnerScene.prototype.update = function playerDeathAnimationV1Update(...args) {
@@ -104,13 +93,35 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     }
 
     if (!this.finished && !this.respawning && this.player?.active) {
-      if (!this.__voidKillFloor) installVoidKillFloor(this);
+      createVoidHazardVisuals(this);
+      activateNearbyCheckpoint(this);
 
+      const body = this.player.body;
       const currentY = Number(this.player.y);
-      const safeY = Number(this.__lastSafeY);
-      const deepVoid = Number.isFinite(safeY) && currentY > safeY + VOID_DROP_DISTANCE;
+      const worldBottom = Number(this.physics?.world?.bounds?.bottom);
 
-      if (deepVoid) {
+      if (!Number.isFinite(this.__lastSafeY)) {
+        this.__lastSafeY = currentY;
+      }
+
+      const safeY = Number(this.__lastSafeY);
+      const grounded = Boolean(body?.blocked?.down || body?.touching?.down);
+      const bodyBottom = Number.isFinite(Number(body?.bottom))
+        ? Number(body.bottom)
+        : currentY + Number(body?.height || 0) / 2;
+
+      // Only nearby legitimate route surfaces can become the last safe Y.
+      // The deep bottom hazard is never promoted into a checkpoint floor.
+      if (grounded && currentY <= safeY + 100) {
+        this.__lastSafeY = currentY;
+      }
+
+      const routeDrop = Number.isFinite(Number(this.__lastSafeY)) && currentY > Number(this.__lastSafeY) + VOID_DROP_DISTANCE;
+      const bottomReached = Number.isFinite(worldBottom) && bodyBottom >= worldBottom - VOID_BOTTOM_MARGIN;
+
+      // Authoritative void death: velocity is irrelevant. The runner dies both
+      // while falling and after coming to rest on the bottom of the world.
+      if (routeDrop || bottomReached) {
         triggerVoidDeath(this);
         return;
       }
@@ -120,18 +131,17 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   };
 
   RunnerScene.prototype.respawnCheckpoint = function playerDeathAnimationV1Respawn(...args) {
-    destroyVoidKillFloor(this);
-
     const result = originalRespawnCheckpoint.apply(this, args);
 
     this.__lastSafeY = this.player?.y ?? this.__lastSafeY;
+    this.__nearCheckpointTriggered = new Set();
     this.player?.setAngle(0).setScale(1).setAlpha(1).clearTint();
     this.player?.play('runner-idle', true);
     this.player?.body?.setVelocity(0, 0);
     this.respawnGrace = SPAWN_PROTECTION_MS;
     this.healthInvulnerable = SPAWN_PROTECTION_MS;
 
-    installVoidKillFloor(this);
+    createVoidHazardVisuals(this);
 
     const shield = this.add.circle(this.player.x, this.player.y, 24, 0x8df4ff, .2)
       .setStrokeStyle(2, 0xb9f5ff, .65)
@@ -151,20 +161,20 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0 || this.__deathAnimationActive) return;
 
     this.__deathAnimationActive = true;
-    destroyVoidKillFloor(this);
     this.physics.pause();
     resetDeathInput(this);
 
     const startX = this.player.x;
     const startY = this.player.y;
     const direction = this.player.flipX ? -1 : 1;
-    const falling = isFallDeath(message);
+    const voidDeath = isVoidMessage(message);
     const reduced = Boolean(this.motionReduced);
 
+    this.player.body?.setVelocity(0, 0);
     this.player.play('runner-hit', true);
     this.player.setTint(0xff826e);
 
-    const deathLabel = this.add.text(startX, startY - 62, falling ? 'SIGNAL LOST · VOID' : 'SIGNAL LOST', {
+    const deathLabel = this.add.text(startX, startY - 62, voidDeath ? 'SIGNAL LOST · VOID' : 'SIGNAL LOST', {
       fontFamily: 'DM Mono',
       fontSize: '13px',
       color: '#ff9b8b',
@@ -183,27 +193,38 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       this.__deathAnimationActive = false;
     };
 
-    if (reduced || falling) {
-      this.player.setAngle(0).setScale(1).setAlpha(1);
+    if (voidDeath || reduced) {
+      // Void death is clean and upright: no tumbling, no walking underneath.
+      this.player.setAngle(0).setScale(1);
+      this.tweens.add({
+        targets: this.player,
+        alpha: 0,
+        scaleX: .86,
+        scaleY: .86,
+        duration: 240,
+        ease: 'Quad.in',
+      });
       this.tweens.add({
         targets: deathLabel,
-        y: deathLabel.y - 22,
+        y: deathLabel.y - 26,
         alpha: 0,
-        duration: reduced ? 260 : 360,
+        duration: 300,
       });
       this.tweens.add({
         targets: pulse,
-        scale: reduced ? 1.8 : 2.8,
+        scale: 3.2,
         alpha: 0,
-        duration: reduced ? 260 : 360,
+        duration: 280,
       });
-      this.time.delayedCall(reduced ? 280 : 380, () => {
+      if (!this.motionReduced) this.shake(130, .006);
+      this.time.delayedCall(300, () => {
         cleanup();
         originalFail.call(this, message);
       });
       return;
     }
 
+    // Enemy / hazard death: impact, recoil, fall and fade.
     this.tweens.add({
       targets: this.player,
       x: startX - direction * 28,
