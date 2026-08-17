@@ -32,7 +32,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   };
 
   // Real Arcade Physics sensor at the physical bottom of the world.
-  // This is intentionally NOT a platform and does not block the player.
+  // Static bodies already ignore gravity/immovability; do not call dynamic-body
+  // methods here because that can throw in Phaser and blank the game canvas.
   const installVoidKillFloor = scene => {
     destroyVoidKillFloor(scene);
 
@@ -47,8 +48,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     floor.setVisible(false);
     scene.physics.add.existing(floor, true);
     floor.body.setSize(width + 400, BOTTOM_KILL_HEIGHT, true);
-    floor.body.setAllowGravity(false);
-    floor.body.setImmovable(true);
 
     scene.physics.add.overlap(scene.player, floor, () => {
       if (scene.__deathAnimationActive || scene.respawning || scene.finished || scene.respawnGrace > 0) return;
@@ -105,12 +104,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     }
 
     if (!this.finished && !this.respawning && this.player?.active) {
-      // The physical bottom sensor is the authoritative kill-floor. It works
-      // even when the player has stopped moving, so standing at the bottom
-      // can never become a valid playable surface.
       if (!this.__voidKillFloor) installVoidKillFloor(this);
 
-      const body = this.player.body;
       const currentY = Number(this.player.y);
       const safeY = Number(this.__lastSafeY);
       const deepVoid = Number.isFinite(safeY) && currentY > safeY + VOID_DROP_DISTANCE;
