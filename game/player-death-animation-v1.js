@@ -47,7 +47,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     if (!scene.motionReduced) scene.shake(120, .006);
     scene.time.delayedCall(220, () => {
       scene.__finalDeathLock = false;
-      originalFail.call(scene, 'The courier fell into the relay void.');
+      scene.fail('The courier fell into the relay void.');
     });
   };
 
@@ -69,16 +69,33 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const forcedVoid = Boolean(this.__forceVoidDeath);
     if (this.briefingProtected || this.finished || this.respawning || this.__finalDeathLock) return;
     if (!forcedVoid && this.respawnGrace > 0) return;
-    this.__forceVoidDeath = false;
 
+    this.__forceVoidDeath = false;
     const isVoid = /void|fell|fall|bottom|rain/i.test(String(message));
+
     if (isVoid) {
       this.__finalDeathLock = true;
       resetInput(this);
       this.player?.setAngle(0).setScale(1).setAlpha(1).clearTint().play('runner-hit', true);
       if (!this.motionReduced) this.shake(140, .007);
       this.game.events.emit('feedback', 'death');
-      this.time.delayedCall(160, () => { this.__finalDeathLock = false; originalFail.call(this, message); });
+      this.time.delayedCall(160, () => {
+        this.__finalDeathLock = false;
+
+        // Environmental void deaths are lethal even during the combat spawn shield.
+        // Clear only the temporary shield guard for the underlying fail() call;
+        // respawnCheckpoint() immediately restores the full 10s shield afterward.
+        const savedRespawnGrace = this.respawnGrace;
+        const savedHealthInvulnerable = this.healthInvulnerable;
+        this.respawnGrace = 0;
+        this.healthInvulnerable = 0;
+        try {
+          originalFail.call(this, message);
+        } finally {
+          this.respawnGrace = savedRespawnGrace;
+          this.healthInvulnerable = savedHealthInvulnerable;
+        }
+      });
       return;
     }
 
@@ -103,9 +120,11 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     this.__finalDeathLock = false;
     this.__forceVoidDeath = false;
     resetInput(this);
-    this.player?.setPosition(this.checkpoint?.x ?? this.player.x, this.checkpoint?.y ?? this.player.y);
-    this.player?.body?.reset(this.player.x, this.player.y);
-    this.player?.body?.setVelocity(0, 0).setAcceleration(0, 0);
+    const checkpointX = Number.isFinite(Number(this.checkpoint?.x)) ? Number(this.checkpoint.x) : this.player?.x;
+    const checkpointY = Number.isFinite(Number(this.checkpoint?.y)) ? Number(this.checkpoint.y) : this.player?.y;
+    this.player?.setPosition(checkpointX, checkpointY);
+    this.player?.body?.reset(checkpointX, checkpointY);
+    this.player?.body?.setVelocity(0, 0).setAcceleration(0, 0).setMaxVelocity(460, 1120);
     this.player?.setAngle(0).setRotation(0).setScale(1).setAlpha(1).clearTint().setFlipY(false).play('runner-idle', true);
     this.healthInvulnerable = SPAWN_SHIELD_MS;
     this.respawnGrace = SPAWN_SHIELD_MS;
