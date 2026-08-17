@@ -64,8 +64,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     });
   };
 
-  // Void hazards intentionally ignore the 10s damage invulnerability. The
-  // shield protects against combat damage, not falling into a lethal hazard.
+  // Void hazards are environmental kills and intentionally ignore the
+  // 10-second combat damage shield so every fall always respawns.
   const triggerVoidDeath = scene => {
     if (scene.__deathAnimationActive || scene.respawning || scene.finished) return;
     createVoidHazardVisuals(scene);
@@ -158,7 +158,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   RunnerScene.prototype.fail = function playerDeathAnimationV1(message) {
     const forcedVoidDeath = Boolean(this.__forceVoidDeath);
     if (this.briefingProtected || this.finished || this.respawning || (!forcedVoidDeath && this.respawnGrace > 0) || this.__deathAnimationActive) {
-      if (forcedVoidDeath && this.respawning === false && !this.finished && !this.__deathAnimationActive) this.__forceVoidDeath = false;
+      if (forcedVoidDeath && !this.respawning && !this.finished && !this.__deathAnimationActive) this.__forceVoidDeath = false;
       return;
     }
 
