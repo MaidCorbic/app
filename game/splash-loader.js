@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  if (window.__relayCinematicSplashV9) return;
-  window.__relayCinematicSplashV9 = true;
+  if (window.__relayCinematicSplashV10) return;
+  window.__relayCinematicSplashV10 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
@@ -24,15 +24,14 @@
     const selectArtwork = () => {
       const targetUrl = isLandscape() ? landscapeUrl : portraitUrl;
       if (landscapeSource) landscapeSource.srcset = landscapeUrl;
-      if (image.getAttribute('src') !== targetUrl) {
-        image.src = targetUrl;
-      }
+      if (image.getAttribute('src') !== targetUrl) image.src = targetUrl;
+      splash.style.setProperty('--relay-splash-bg', `url("${targetUrl}")`);
     };
 
     selectArtwork();
 
-    image.style.width = 'auto';
-    image.style.height = 'auto';
+    image.style.width = '100%';
+    image.style.height = '100%';
     image.style.maxWidth = '100%';
     image.style.maxHeight = '100%';
     image.style.objectFit = 'contain';
@@ -101,8 +100,7 @@
       image.addEventListener('load', onImageReady, { once: true });
       image.addEventListener('error', () => {
         imageReady = false;
-        status.textContent = 'SPLASH IMAGE FAILED';
-        console.error('[Relay Runner] Splash image failed to load:', isLandscape() ? landscapeUrl : portraitUrl);
+        console.error('[Relay Runner] Splash image failed to load.');
       }, { once: true });
     }
 
@@ -136,12 +134,9 @@
     const orientationQuery = window.matchMedia('(orientation: landscape)');
     const onOrientationChange = () => {
       if (finishing) return;
-      const nextUrl = isLandscape() ? landscapeUrl : portraitUrl;
-      if (image.src !== nextUrl) {
-        imageReady = false;
-        image.addEventListener('load', onImageReady, { once: true });
-        image.src = nextUrl;
-      }
+      imageReady = false;
+      selectArtwork();
+      image.addEventListener('load', onImageReady, { once: true });
     };
     orientationQuery.addEventListener?.('change', onOrientationChange);
   };
