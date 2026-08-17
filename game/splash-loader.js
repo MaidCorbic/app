@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  if (window.__relayCinematicSplashV10) return;
-  window.__relayCinematicSplashV10 = true;
+  if (window.__relayCinematicSplashV11) return;
+  window.__relayCinematicSplashV11 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
@@ -20,6 +20,7 @@
     const portraitUrl = new URL('./assets/loading.jpg', import.meta.url).href;
     const landscapeUrl = new URL('./assets/loading-landscape.jpg', import.meta.url).href;
     const isLandscape = () => window.matchMedia('(orientation: landscape)').matches;
+    const isMobilePortrait = () => !isLandscape() && window.matchMedia('(max-width: 700px)').matches;
 
     const selectArtwork = () => {
       const targetUrl = isLandscape() ? landscapeUrl : portraitUrl;
@@ -28,14 +29,27 @@
       splash.style.setProperty('--relay-splash-bg', `url("${targetUrl}")`);
     };
 
-    selectArtwork();
+    const sizeArtwork = () => {
+      // Portrait mobile: size from the image's intrinsic ratio so the ENTIRE artwork
+      // remains visible. Do not force 100% width/height, which can make the preview
+      // feel cropped on tall phone viewports.
+      if (isMobilePortrait()) {
+        image.style.width = 'auto';
+        image.style.height = 'auto';
+        image.style.maxWidth = '100vw';
+        image.style.maxHeight = '100dvh';
+      } else {
+        image.style.width = '100%';
+        image.style.height = '100%';
+        image.style.maxWidth = '100%';
+        image.style.maxHeight = '100%';
+      }
+      image.style.objectFit = 'contain';
+      image.style.objectPosition = 'center';
+    };
 
-    image.style.width = '100%';
-    image.style.height = '100%';
-    image.style.maxWidth = '100%';
-    image.style.maxHeight = '100%';
-    image.style.objectFit = 'contain';
-    image.style.objectPosition = 'center';
+    selectArtwork();
+    sizeArtwork();
 
     let progress = 0;
     let imageReady = image.complete && image.naturalWidth > 0;
@@ -90,11 +104,13 @@
     const onImageReady = async () => {
       if (!image.naturalWidth || !image.naturalHeight) return;
       imageReady = true;
+      sizeArtwork();
       await animateTo(25, 'LOADING INTERFACE');
       finish();
     };
 
     if (imageReady) {
+      sizeArtwork();
       setProgress(25, 'LOADING INTERFACE');
     } else {
       image.addEventListener('load', onImageReady, { once: true });
@@ -136,9 +152,11 @@
       if (finishing) return;
       imageReady = false;
       selectArtwork();
+      sizeArtwork();
       image.addEventListener('load', onImageReady, { once: true });
     };
     orientationQuery.addEventListener?.('change', onOrientationChange);
+    window.addEventListener('resize', sizeArtwork, { passive: true });
   };
 
   if (document.readyState === 'loading') {
