@@ -10,12 +10,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const originalUpdate = RunnerScene.prototype.update;
 
   RunnerScene.prototype.update = function playerDeathAnimationV1Update(...args) {
-    // Once death starts, stop gameplay input/state from moving the player while
-    // Phaser tweens finish the death presentation. The real fail() lifecycle runs after it.
     if (this.__deathAnimationActive) return;
 
-    // Falling below the visible world is an immediate death condition. Do not let
-    // the runner walk/slide along the bottom edge before the death sequence starts.
     if (!this.finished && !this.respawning && this.player?.active) {
       const bottom = this.cameras.main?.worldView?.bottom ?? this.scale.height;
       if (this.player.y > bottom + 90) {
@@ -31,11 +27,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0 || this.__deathAnimationActive) return;
 
     this.__deathAnimationActive = true;
-
-    // Freeze every player input source immediately. Physics pause alone does not
-    // stop Scene.update from changing velocity, so explicitly zero the body too.
     this.physics.pause();
     this.player.body?.setVelocity(0, 0);
+    this.player.body?.setAcceleration(0, 0);
+    this.player.body?.setAllowGravity(false);
     this.mobileDirection = null;
     Object.keys(this.mobileActions || {}).forEach(key => { this.mobileActions[key] = false; });
 
@@ -43,6 +38,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const startY = this.player.y;
     const direction = this.player.flipX ? -1 : 1;
     const reduced = Boolean(this.motionReduced);
+    const isPitFall = message.includes('fell out of the relay route');
 
     this.player.play('runner-hit', true);
     this.player.setTint(0xff826e);
@@ -71,46 +67,75 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       this.tweens.add({ targets: pulse, scale: 1.8, alpha: 0, duration: 260 });
       this.time.delayedCall(280, () => {
         cleanup();
+        this.player.body?.setAllowGravity(true);
         originalFail.call(this, message);
       });
       return;
     }
 
-    // Stronger death presentation: a short recoil, controlled fall, rotation,
-    // fade and expanding impact ring. No new sprite asset is required.
-    this.player.setVelocity(0, 0);
-    this.tweens.add({
-      targets: this.player,
-      x: startX - direction * 28,
-      y: startY + 34,
-      angle: direction * 105,
-      scaleX: .82,
-      scaleY: .82,
-      alpha: 0,
-      duration: 520,
-      ease: 'Cubic.in',
-    });
-    this.tweens.add({
-      targets: deathLabel,
-      y: deathLabel.y - 30,
-      alpha: 0,
-      scale: 1.08,
-      duration: 500,
-      ease: 'Quad.out',
-    });
-    this.tweens.add({
-      targets: pulse,
-      scale: 3.8,
-      alpha: 0,
-      duration: 480,
-      ease: 'Quad.out',
-    });
+    if (isPitFall) {
+      // PIT/FALL: the runner remains upright. The route drop itself communicates the fall.
+      // No rotation, no sideways tumble, and no walking/sliding at the bottom.
+      this.tweens.add({
+        targets: this.player,
+        y: startY + 26,
+        scaleX: .94,
+        scaleY: .94,
+        alpha: 0,
+        duration: 360,
+        ease: 'Quad.in',
+      });
+      this.tweens.add({
+        targets: deathLabel,
+        y: deathLabel.y - 24,
+        alpha: 0,
+        duration: 430,
+        ease: 'Quad.out',
+      });
+      this.tweens.add({
+        targets: pulse,
+        scale: 3.2,
+        alpha: 0,
+        duration: 400,
+        ease: 'Quad.out',
+      });
+    } else {
+      // OBSTACLE/ENEMY HIT: use the stronger directional death reaction.
+      this.tweens.add({
+        targets: this.player,
+        x: startX - direction * 28,
+        y: startY - 8,
+        angle: direction * 24,
+        scaleX: .9,
+        scaleY: .9,
+        alpha: .18,
+        duration: 360,
+        ease: 'Cubic.out',
+        yoyo: true,
+        hold: 70,
+      });
+      this.tweens.add({
+        targets: deathLabel,
+        y: deathLabel.y - 30,
+        alpha: 0,
+        scale: 1.08,
+        duration: 500,
+        ease: 'Quad.out',
+      });
+      this.tweens.add({
+        targets: pulse,
+        scale: 3.8,
+        alpha: 0,
+        duration: 480,
+        ease: 'Quad.out',
+      });
+      this.shake(180, .008);
+    }
 
-    if (!this.motionReduced) this.shake(180, .008);
     this.game.events.emit('feedback', 'death');
-
-    this.time.delayedCall(540, () => {
+    this.time.delayedCall(isPitFall ? 380 : 540, () => {
       cleanup();
+      this.player.body?.setAllowGravity(true);
       originalFail.call(this, message);
     });
   };
