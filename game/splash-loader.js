@@ -1,12 +1,10 @@
 (() => {
   'use strict';
 
-  if (window.__relayCinematicSplashV6) return;
-  window.__relayCinematicSplashV6 = true;
+  if (window.__relayCinematicSplashV7) return;
+  window.__relayCinematicSplashV7 = true;
 
   const start = () => {
-    // The cinematic splash is rendered directly by index.html so the browser
-    // can paint the artwork before module JavaScript finishes loading.
     const splash = document.getElementById('relaySplash');
     if (!splash) return;
 
@@ -26,7 +24,7 @@
     let engineReady = false;
     let pageReady = document.readyState === 'complete';
     let finishing = false;
-    const MIN_SPLASH_MS = 1200;
+    const MIN_SPLASH_MS = 3000;
     const startedAt = performance.now();
 
     const setProgress = (value, label) => {
@@ -44,7 +42,8 @@
       }
       const from = progress;
       const startTime = performance.now();
-      const duration = Math.max(180, Math.min(700, (target - from) * 10));
+      // Slow enough to be clearly visible, but bounded so it cannot stall the app.
+      const duration = Math.max(320, Math.min(1000, (target - from) * 15));
       const frame = now => {
         const t = Math.min(1, (now - startTime) / duration);
         setProgress(from + (target - from) * (t * (2 - t)), label);
@@ -68,7 +67,7 @@
       window.setTimeout(() => {
         splash.remove();
         style?.remove();
-      }, 500);
+      }, 550);
     };
 
     const onImageReady = async () => {
