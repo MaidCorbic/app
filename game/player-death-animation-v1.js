@@ -13,7 +13,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const SPAWN_PROTECTION_MS = 10000;
   const VOID_DROP_DISTANCE = 150;
   const VOID_BOTTOM_MARGIN = 16;
-  const SPIKE_COUNT = 13;
   const SPIKE_WIDTH = 34;
   const CHECKPOINT_NEAR_DISTANCE = 72;
 
@@ -24,6 +23,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   };
 
   const isVoidMessage = message => /fell out|fall|void|bottom|spike|hole/i.test(String(message));
+  const distance = (ax, ay, bx, by) => Math.hypot(ax - bx, ay - by);
 
   const createVoidHazardVisuals = scene => {
     if (scene.__voidHazardVisuals || !scene.player?.active) return;
@@ -51,9 +51,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   const pulseVoidImpact = scene => {
     if (!scene.player?.active) return;
-    const x = scene.player.x;
-    const y = scene.player.y;
-    const ring = scene.add.circle(x, y + 16, 14, 0xff826e, .22)
+    const ring = scene.add.circle(scene.player.x, scene.player.y + 16, 14, 0xff826e, .22)
       .setStrokeStyle(2, 0xff826e, .9)
       .setDepth(18);
     scene.tweens.add({
@@ -80,7 +78,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       if (!checkpoint.active) return;
       const index = Number(checkpoint.getData('index'));
       if (!Number.isFinite(index) || scene.__nearCheckpointTriggered.has(index)) return;
-      if (Phaser.Math.Distance.Between(scene.player.x, scene.player.y, checkpoint.x, checkpoint.y) > CHECKPOINT_NEAR_DISTANCE) return;
+      if (distance(scene.player.x, scene.player.y, checkpoint.x, checkpoint.y) > CHECKPOINT_NEAR_DISTANCE) return;
       scene.__nearCheckpointTriggered.add(index);
       scene.activateCheckpoint(checkpoint);
     });
