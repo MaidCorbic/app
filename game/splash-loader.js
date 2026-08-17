@@ -10,37 +10,33 @@
 
     const style = document.getElementById('relay-splash-critical');
     const image = document.getElementById('relaySplashArt');
+    const picture = document.getElementById('relaySplashPicture');
+    const landscapeSource = picture?.querySelector('source');
     const bar = splash.querySelector('.relay-splash-progress');
     const percent = splash.querySelector('.relay-splash-percent');
     const status = splash.querySelector('.relay-splash-status');
     if (!image || !bar || !percent || !status) return;
 
-    // Full artwork stays visible on every aspect ratio. Never stretch or crop it.
-    image.style.setProperty('width', 'auto', 'important');
-    image.style.setProperty('height', 'auto', 'important');
-    image.style.setProperty('max-width', '100%', 'important');
-    image.style.setProperty('max-height', '100%', 'important');
-    image.style.setProperty('object-fit', 'contain', 'important');
-    image.style.setProperty('object-position', 'center', 'important');
-    image.style.setProperty('aspect-ratio', 'auto', 'important');
-    image.style.setProperty('position', 'relative', 'important');
-    image.style.setProperty('z-index', '1', 'important');
+    const portraitUrl = new URL('./assets/loading.jpg', import.meta.url).href;
+    const landscapeUrl = new URL('./assets/loading-landscape.jpg', import.meta.url).href;
+    const isLandscape = () => window.matchMedia('(orientation: landscape)').matches;
 
-    // On wide screens, fill the unused area with a subtle darkened version of
-    // the same artwork. The foreground artwork remains completely visible.
-    splash.style.setProperty('--relay-splash-image', "url('/game/assets/loading.jpg')");
-    if (style && !style.textContent.includes('relay-splash-backdrop')) {
-      style.textContent += `
-        /* relay-splash-backdrop */
-        #relaySplash::before{content:"";position:absolute;inset:-6%;z-index:0;background-image:var(--relay-splash-image);background-position:center;background-size:cover;background-repeat:no-repeat;filter:blur(22px);transform:scale(1.08);opacity:.28}
-        #relaySplash::after{content:"";position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at center,transparent 28%,rgba(2,5,13,.62) 100%);pointer-events:none}
-        #relaySplash .relay-splash-ui{z-index:3}
-      `;
-    }
+    const selectArtwork = () => {
+      const targetUrl = isLandscape() ? landscapeUrl : portraitUrl;
+      if (landscapeSource) landscapeSource.srcset = landscapeUrl;
+      if (image.getAttribute('src') !== targetUrl) {
+        image.src = targetUrl;
+      }
+    };
 
-    // Keep the known-good asset resolution unchanged.
-    const imageUrl = new URL('./assets/loading.jpg', import.meta.url).href;
-    if (image.getAttribute('src') !== imageUrl) image.src = imageUrl;
+    selectArtwork();
+
+    image.style.width = 'auto';
+    image.style.height = 'auto';
+    image.style.maxWidth = '100%';
+    image.style.maxHeight = '100%';
+    image.style.objectFit = 'contain';
+    image.style.objectPosition = 'center';
 
     let progress = 0;
     let imageReady = image.complete && image.naturalWidth > 0;
@@ -106,7 +102,7 @@
       image.addEventListener('error', () => {
         imageReady = false;
         status.textContent = 'SPLASH IMAGE FAILED';
-        console.error('[Relay Runner] Splash image failed to load:', imageUrl);
+        console.error('[Relay Runner] Splash image failed to load:', isLandscape() ? landscapeUrl : portraitUrl);
       }, { once: true });
     }
 
@@ -136,6 +132,18 @@
       window.setTimeout(checkEngine, 50);
     };
     checkEngine();
+
+    const orientationQuery = window.matchMedia('(orientation: landscape)');
+    const onOrientationChange = () => {
+      if (finishing) return;
+      const nextUrl = isLandscape() ? landscapeUrl : portraitUrl;
+      if (image.src !== nextUrl) {
+        imageReady = false;
+        image.addEventListener('load', onImageReady, { once: true });
+        image.src = nextUrl;
+      }
+    };
+    orientationQuery.addEventListener?.('change', onOrientationChange);
   };
 
   if (document.readyState === 'loading') {
