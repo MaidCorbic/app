@@ -105,12 +105,7 @@ async function syncViewport(reason = 'resize') {
 }
 
 const schedule = reason => {
-  settleToken += 1;
-  const token = settleToken;
-  requestAnimationFrame(() => {
-    if (token !== settleToken) return;
-    syncViewport(reason);
-  });
+  requestAnimationFrame(() => syncViewport(reason));
 };
 
 window.addEventListener('orientationchange', () => schedule('orientationchange'), { passive: true });
