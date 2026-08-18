@@ -1,4 +1,8 @@
-/* UPDATE 11.2 — Finish Relay Tower stability pass */
+/* UPDATE 11.3 — Finish Relay Tower completion handoff
+   Keeps the existing RunnerScene completion/progression system authoritative.
+   The tower only makes the completion event available immediately so the DOM
+   results screen can appear without waiting on the visual finish animation.
+*/
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
@@ -14,8 +18,6 @@ if (!window.__relayFinishTowerV11) {
     const baseY = Math.min(620, topY + TOWER.height);
     this.finishTower = { x, topY, baseY, climbing: false, completed: false, request: false };
 
-    // Keep goal coordinates available to existing completion/HUD code, but disable
-    // the old visible finish collider completely.
     this.goal = this.physics.add.staticImage(x, topY, 'goal').setVisible(false);
     this.goal.body.enable = false;
 
@@ -68,15 +70,42 @@ if (!window.__relayFinishTowerV11) {
     this.finishTowerTopZone.body.setAllowGravity(false).setImmovable(true);
     this.physics.add.overlap(this.player, this.finishTowerTopZone, () => {
       if (this.finishTower.completed || !this.finishTower.climbing) return;
+      if (this.boss?.active) {
+        this.complete();
+        return;
+      }
+
       this.finishTower.completed = true;
       this.finishTower.climbing = false;
       this.player.body.setAllowGravity(true);
+
+      // Hand the exact same run payload to the existing main.js completion handler
+      // immediately. main.js already guards duplicate complete events with runId.
+      // RunnerScene.complete() is still called below and remains authoritative for
+      // its normal finish animation/state, but the results screen no longer waits
+      // for the 120ms visual callback before becoming interactive.
+      const runStats = {
+        jumps: this.jumps,
+        collisions: this.collisions,
+        falls: this.falls,
+        secrets: this.secretsCollected,
+        alarms: this.alarms,
+        chaseEscapes: this.chaseEscapes,
+        enemyDefeats: this.enemyDefeats || 0,
+        bossDefeated: Boolean(this.boss && !this.boss.active),
+        package: this.package,
+        packageCondition: this.packageCondition,
+        contract: this.mission.activeContract,
+        modifier: this.loadout.modifier,
+        signalBonusExtra: this.boostedSignals * 5 + (this.loadout.upgrades?.includes('signalXp') ? this.collected : 0),
+        score: this.collected * 100 + this.secretsCollected * 250 + this.boostedSignals * 100,
+      };
+
       this.game.events.emit('finish-tower', { missionId: this.mission.id });
-      this.game.events.emit('feedback', 'complete');
+      this.game.events.emit('complete', this.collected, this.elapsedMs, runStats, this.runId);
       this.complete();
     });
 
-    // Reuse RunnerScene's input state; no extra global key listeners.
     this.finishTowerKeys = this.keys;
   };
 
@@ -87,7 +116,6 @@ if (!window.__relayFinishTowerV11) {
     const tower = this.finishTower;
     if (!tower || tower.completed || !this.player?.body) return result;
 
-    // Never let tower logic run underneath the opening tutorial.
     if (this.cinematicActive) {
       if (mobileJumpBeforeUpdate) {
         this.mobileActions.jump = false;
