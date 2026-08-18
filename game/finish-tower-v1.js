@@ -1,14 +1,14 @@
-/* UPDATE 11 — Finish Relay Tower V1
-   Replaces the old instant finish flag with a readable, climbable relay tower.
-   Mission completion remains owned by RunnerScene.complete().
+/* UPDATE 11.1 — Finish Relay Tower stability pass
+   Keeps the tower isolated from the normal RunnerScene flow.
+   Important: the opening tutorial/cinematic owns startup input until dismissed.
 */
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
 const TOWER = { height: 250, baseHeight: 28, ladderWidth: 58, climbSpeed: 170, engageRadius: 72 };
 
-if (!window.__relayFinishTowerV1) {
-  window.__relayFinishTowerV1 = true;
+if (!window.__relayFinishTowerV11) {
+  window.__relayFinishTowerV11 = true;
   const originalUpdate = RunnerScene.prototype.update;
 
   RunnerScene.prototype.createGoal = function createFinishRelayTower() {
@@ -17,8 +17,10 @@ if (!window.__relayFinishTowerV1) {
     const baseY = Math.min(620, topY + TOWER.height);
     this.finishTower = { x, topY, baseY, climbing: false, completed: false, request: false };
 
-    if (this.goal?.destroy) this.goal.destroy();
-    this.goal = null;
+    // Keep a coordinate-only goal object because RunnerScene.complete() and route hints
+    // still use this.goal.x/y. The old visible finish collider is fully disabled.
+    this.goal = this.physics.add.staticImage(x, topY, 'goal').setVisible(false);
+    this.goal.body.enable = false;
 
     const g = this.add.graphics().setDepth(5);
     g.fillStyle(0x111d2d, .98).fillRoundedRect(x - 58, baseY - 4, 116, TOWER.baseHeight, 7);
@@ -61,7 +63,7 @@ if (!window.__relayFinishTowerV1) {
     this.physics.add.existing(this.finishTowerZone);
     this.finishTowerZone.body.setAllowGravity(false).setImmovable(true);
     this.physics.add.overlap(this.player, this.finishTowerZone, () => {
-      if (!this.finishTower.completed) this.finishTower.request = true;
+      if (!this.finishTower.completed && !this.cinematicActive) this.finishTower.request = true;
     });
 
     this.finishTowerTopZone = this.add.zone(x, topY + 8, 72, 42);
@@ -77,26 +79,35 @@ if (!window.__relayFinishTowerV1) {
       this.complete();
     });
 
-    const key = code => this.input.keyboard?.addKey(code);
-    const jump = key(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    const up = key(Phaser.Input.Keyboard.KeyCodes.W);
-    const arrowUp = key(Phaser.Input.Keyboard.KeyCodes.UP);
-    const down = key(Phaser.Input.Keyboard.KeyCodes.S);
-    const arrowDown = key(Phaser.Input.Keyboard.KeyCodes.DOWN);
-    this.finishTowerKeys = { jump, up, arrowUp, down, arrowDown };
-    [jump, up, arrowUp].forEach(k => k?.on('down', () => { if (this.finishTower) this.finishTower.request = true; }));
+    // Reuse RunnerScene's already-created keyboard state. Do not register another
+    // set of global key listeners for the tower.
+    this.finishTowerKeys = this.keys;
   };
 
   RunnerScene.prototype.update = function finishTowerUpdate(time, delta) {
     const result = originalUpdate.apply(this, arguments);
     const tower = this.finishTower;
     if (!tower || tower.completed || !this.player?.body) return result;
-    const keys = this.finishTowerKeys || {};
-    const near = Math.abs(this.player.x - tower.x) <= TOWER.engageRadius && this.player.y >= tower.topY - 35 && this.player.y <= tower.baseY + 30;
-    const down = keys.down?.isDown || keys.arrowDown?.isDown;
 
-    if (!tower.climbing && near && (tower.request || this.player.body.velocity.y < -120)) {
-      tower.climbing = true; tower.request = false;
+    // The normal RunnerScene update intentionally pauses while the opening tutorial
+    // is active. Keep the tower wrapper paused too, but allow mobile jump to dismiss
+    // the tutorial because mobile has no physical Space key.
+    if (this.cinematicActive) {
+      if (this.mobileActions?.jump) {
+        this.mobileActions.jump = false;
+        this.cinematicSkipHandler?.();
+      }
+      return result;
+    }
+
+    const keys = this.finishTowerKeys || {};
+    const upPressed = Phaser.Input.Keyboard.JustDown(keys.W) || Phaser.Input.Keyboard.JustDown(keys.SPACE) || Phaser.Input.Keyboard.JustDown(this.cursors?.up);
+    const down = keys.S?.isDown || this.cursors?.down?.isDown;
+    const near = Math.abs(this.player.x - tower.x) <= TOWER.engageRadius && this.player.y >= tower.topY - 35 && this.player.y <= tower.baseY + 30;
+
+    if (!tower.climbing && near && (tower.request || upPressed || this.player.body.velocity.y < -120)) {
+      tower.climbing = true;
+      tower.request = false;
       this.player.body.setAllowGravity(false).setVelocity(0, 0);
       this.player.setTexture('runner-wall');
       this.game.events.emit('finish-tower-climb', { active: true });
@@ -108,11 +119,13 @@ if (!window.__relayFinishTowerV1) {
     const direction = down ? -1 : 1;
     this.player.y -= TOWER.climbSpeed * direction * delta / 1000;
     this.player.y = Phaser.Math.Clamp(this.player.y, tower.topY + 12, tower.baseY - 28);
+
     if (this.player.y <= tower.topY + 18) this.player.y = tower.topY + 16;
     if (this.player.y >= tower.baseY - 28 && down) {
       tower.climbing = false;
       this.player.body.setAllowGravity(true);
       this.player.setTexture('runner-idle');
+      this.game.events.emit('finish-tower-climb', { active: false });
     }
     return result;
   };
