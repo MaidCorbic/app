@@ -27,6 +27,7 @@
     state.lastKey = key; state.lastAt = now;
     const [type, title, detail, kind = 'event', duration = kind === 'danger' ? 1500 : 1100] = event;
     root.dataset.type = kind;
+    root.style.setProperty('--event-duration', `${duration}ms`);
     root.querySelector('#gameplayEventType').textContent = type;
     root.querySelector('#gameplayEventTitle').textContent = title;
     root.querySelector('#gameplayEventDetail').textContent = detail;
@@ -69,8 +70,7 @@
   function observeNode(node, source) {
     if (!node || state.observed.has(node)) return;
     state.observed.add(node); let previous = node.textContent.trim();
-    const observer = new MutationObserver(() => {
-      const next = node.textContent.trim(); if (!next || next === previous) return; previous = next;
+    const observer = new MutationObserver(() => { const next = node.textContent.trim(); if (!next || next === previous) return; previous = next;
       const value = next.toUpperCase();
       if (source === 'toast') {
         if (value.startsWith('SIGNAL CAPTURED')) return;
@@ -97,8 +97,9 @@
   }
 
   function bind() {
-    if (state.bound) return; state.bound = true; ensure(); bindAvailable(); bindGame(window.relayRunnerGame);
-    const domObserver = new MutationObserver(() => { bindAvailable(); bindGame(window.relayRunnerGame); ensure(); });
+    if (state.bound) return; state.bound = true; ensure(); bindAvailable(); bindGame(window.relayRunnerGame || window.__relayRunnerScene?.game);
+    window.addEventListener('relay:runner-scene-ready', event => bindGame(event.detail?.scene?.game), { passive: true });
+    const domObserver = new MutationObserver(() => { bindAvailable(); bindGame(window.relayRunnerGame || window.__relayRunnerScene?.game); ensure(); });
     domObserver.observe(document.body, { childList: true, subtree: true });
     const terminalObserver = new MutationObserver(() => {
       const finish = document.querySelector('#finish'); const over = document.querySelector('#gameOver');
