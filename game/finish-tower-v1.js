@@ -1,8 +1,4 @@
-/* UPDATE 11.3 — Finish Relay Tower completion handoff
-   Keeps the existing RunnerScene completion/progression system authoritative.
-   The tower only makes the completion event available immediately so the DOM
-   results screen can appear without waiting on the visual finish animation.
-*/
+/* UPDATE 11.4 — Finish Relay Tower completion handoff */
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
@@ -78,12 +74,11 @@ if (!window.__relayFinishTowerV11) {
       this.finishTower.completed = true;
       this.finishTower.climbing = false;
       this.player.body.setAllowGravity(true);
+      // Any tactical/tutorial card must disappear before the DOM result screen owns the UI.
+      this.dismissIntelCard?.();
+      this.briefingProtected = false;
+      this.cinematicActive = false;
 
-      // Hand the exact same run payload to the existing main.js completion handler
-      // immediately. main.js already guards duplicate complete events with runId.
-      // RunnerScene.complete() is still called below and remains authoritative for
-      // its normal finish animation/state, but the results screen no longer waits
-      // for the 120ms visual callback before becoming interactive.
       const runStats = {
         jumps: this.jumps,
         collisions: this.collisions,
@@ -102,6 +97,8 @@ if (!window.__relayFinishTowerV11) {
       };
 
       this.game.events.emit('finish-tower', { missionId: this.mission.id });
+      // Immediate handoff: main.js already owns progression, scoring, save and results UI.
+      // RunnerScene.complete() below remains authoritative for its normal finish animation.
       this.game.events.emit('complete', this.collected, this.elapsedMs, runStats, this.runId);
       this.complete();
     });
