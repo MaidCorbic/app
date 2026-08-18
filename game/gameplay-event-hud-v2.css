@@ -1,0 +1,61 @@
+/* UPDATE 10 — Gameplay Event HUD V3
+   In-game presentation layer. No gameplay state ownership.
+*/
+#gameplayEventHud{position:absolute;top:calc(100% + 18px);left:50%;z-index:121;width:min(360px,calc(100vw - 28px));transform:translate(-50%,-10px) scale(.97);opacity:0;visibility:hidden;pointer-events:none;box-sizing:border-box;font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;filter:drop-shadow(0 16px 34px rgba(0,0,0,.42));transition:opacity .18s ease,transform .24s cubic-bezier(.2,.95,.25,1),visibility .18s ease}
+#gameplayEventHud.is-visible{opacity:1;visibility:visible;transform:translate(-50%,0) scale(1)}
+#gameplayEventHud .gameplay-event-card{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr);gap:11px;overflow:hidden;min-height:64px;padding:10px 13px 12px;border:1px solid rgba(255,208,110,.72);border-radius:10px;background:linear-gradient(135deg,rgba(17,24,32,.98),rgba(4,9,16,.985) 62%,rgba(15,18,18,.98));box-shadow:0 0 0 1px rgba(255,255,255,.025),0 0 28px rgba(255,208,110,.13),inset 0 1px rgba(255,255,255,.1),inset 0 -16px 28px rgba(0,0,0,.18);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#gameplayEventHud .gameplay-event-card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 8% 50%,rgba(255,208,110,.12),transparent 26%),linear-gradient(115deg,transparent 0 42%,rgba(255,255,255,.025) 50%,transparent 58%);pointer-events:none}
+#gameplayEventHud .gameplay-event-scan{position:absolute;inset:-30% 0;background:linear-gradient(90deg,transparent,rgba(255,208,110,.19),transparent);transform:translateX(-120%) skewX(-14deg);pointer-events:none}
+#gameplayEventHud.is-pop .gameplay-event-scan{animation:gameplayEventScan .72s ease-out both}
+#gameplayEventHud .gameplay-event-grid{position:absolute;inset:0;opacity:.22;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:18px 18px;mask-image:linear-gradient(90deg,transparent,black 20%,black 80%,transparent);pointer-events:none}
+#gameplayEventHud .gameplay-event-icon{position:relative;align-self:center;width:32px;height:32px;border:1px solid rgba(255,208,110,.76);border-radius:7px;background:linear-gradient(145deg,rgba(255,208,110,.12),rgba(255,208,110,.025));box-shadow:0 0 18px rgba(255,208,110,.16),inset 0 0 12px rgba(255,208,110,.08)}
+#gameplayEventHud .gameplay-event-icon:before,#gameplayEventHud .gameplay-event-icon:after,#gameplayEventHud .gameplay-event-icon i:before,#gameplayEventHud .gameplay-event-icon i:after{content:"";position:absolute;background:#ffd06e;box-shadow:0 0 8px rgba(255,208,110,.85)}
+#gameplayEventHud .gameplay-event-icon:before{width:12px;height:2px;left:9px;top:15px}
+#gameplayEventHud .gameplay-event-icon:after{width:2px;height:12px;left:14px;top:10px}
+#gameplayEventHud .gameplay-event-icon i:before{width:4px;height:4px;left:4px;top:4px;box-shadow:none}
+#gameplayEventHud .gameplay-event-icon i:after{width:4px;height:4px;right:4px;bottom:4px;box-shadow:none}
+#gameplayEventHud .gameplay-event-copy{position:relative;z-index:2;min-width:0}
+#gameplayEventHud .gameplay-event-head{display:flex;align-items:center;justify-content:space-between;gap:10px;line-height:1}
+#gameplayEventHud .gameplay-event-head small{font-size:7px;font-weight:900;letter-spacing:.18em;color:#8da1b4;text-transform:uppercase}
+#gameplayEventHud .gameplay-event-head b{font-size:7px;letter-spacing:.15em;color:#ffd06e;text-shadow:0 0 10px rgba(255,208,110,.35)}
+#gameplayEventHud #gameplayEventTitle{display:block;margin-top:5px;color:#fff5d2;font-size:12px;font-weight:900;letter-spacing:.09em;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 15px rgba(255,208,110,.2)}
+#gameplayEventHud #gameplayEventDetail{display:block;margin-top:5px;color:#71889c;font-size:7px;font-weight:800;letter-spacing:.1em;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+#gameplayEventHud .gameplay-event-meter{position:absolute;right:13px;bottom:9px;width:72px;height:2px;overflow:hidden;background:rgba(255,255,255,.08);z-index:2}
+#gameplayEventHud .gameplay-event-meter i{display:block;width:100%;height:100%;transform-origin:left;background:#ffd06e;box-shadow:0 0 9px rgba(255,208,110,.8)}
+#gameplayEventHud.is-visible .gameplay-event-meter i{animation:gameplayEventMeter var(--event-duration,1.1s) linear both}
+#gameplayEventHud .gameplay-event-line{position:absolute;left:13px;right:13px;bottom:0;height:1px;background:linear-gradient(90deg,transparent,#ffd06e 20%,#ffd06e 80%,transparent);box-shadow:0 0 12px rgba(255,208,110,.8);z-index:2}
+#gameplayEventHud .gameplay-event-bracket{position:absolute;top:8px;width:7px;height:calc(100% - 16px);z-index:3;border-top:1px solid rgba(255,208,110,.8);border-bottom:1px solid rgba(255,208,110,.8);opacity:.75}
+#gameplayEventHud .gameplay-event-bracket-left{left:-1px;border-left:2px solid #ffd06e}
+#gameplayEventHud .gameplay-event-bracket-right{right:-1px;border-right:2px solid #ffd06e}
+#gameplayEventHud[data-type="danger"] .gameplay-event-card{border-color:rgba(255,130,110,.82);box-shadow:0 0 0 1px rgba(255,130,110,.04),0 0 30px rgba(255,130,110,.17),inset 0 1px rgba(255,255,255,.08)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-card:before{background:radial-gradient(circle at 8% 50%,rgba(255,130,110,.16),transparent 27%),linear-gradient(115deg,transparent 0 42%,rgba(255,130,110,.035) 50%,transparent 58%)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-icon{border-color:rgba(255,130,110,.9);box-shadow:0 0 20px rgba(255,130,110,.18),inset 0 0 12px rgba(255,130,110,.08)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-icon:before,#gameplayEventHud[data-type="danger"] .gameplay-event-icon:after,#gameplayEventHud[data-type="danger"] .gameplay-event-icon i:before,#gameplayEventHud[data-type="danger"] .gameplay-event-icon i:after{background:#ff826e;box-shadow:0 0 9px rgba(255,130,110,.9)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-head b{color:#ff9c91}
+#gameplayEventHud[data-type="danger"] .gameplay-event-meter i{background:#ff826e;box-shadow:0 0 10px rgba(255,130,110,.9)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-line{background:linear-gradient(90deg,transparent,#ff826e 20%,#ff826e 80%,transparent);box-shadow:0 0 12px rgba(255,130,110,.85)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-bracket{border-color:rgba(255,130,110,.85)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-bracket-left{border-left-color:#ff826e}
+#gameplayEventHud[data-type="danger"] .gameplay-event-bracket-right{border-right-color:#ff826e}
+#gameplayEventHud[data-type="combat"] .gameplay-event-card{border-color:rgba(141,244,255,.78);box-shadow:0 0 30px rgba(141,244,255,.16),inset 0 1px rgba(255,255,255,.09)}
+#gameplayEventHud[data-type="combat"] .gameplay-event-icon{border-color:rgba(141,244,255,.9);box-shadow:0 0 20px rgba(141,244,255,.18),inset 0 0 12px rgba(141,244,255,.08)}
+#gameplayEventHud[data-type="combat"] .gameplay-event-icon:before,#gameplayEventHud[data-type="combat"] .gameplay-event-icon:after,#gameplayEventHud[data-type="combat"] .gameplay-event-icon i:before,#gameplayEventHud[data-type="combat"] .gameplay-event-icon i:after{background:#8df4ff;box-shadow:0 0 9px rgba(141,244,255,.9)}
+#gameplayEventHud[data-type="combat"] .gameplay-event-head b{color:#8df4ff}
+#gameplayEventHud[data-type="combat"] .gameplay-event-meter i{background:#8df4ff;box-shadow:0 0 9px rgba(141,244,255,.9)}
+#gameplayEventHud[data-type="combat"] .gameplay-event-line{background:linear-gradient(90deg,transparent,#8df4ff 20%,#8df4ff 80%,transparent);box-shadow:0 0 12px rgba(141,244,255,.8)}
+#gameplayEventHud[data-type="complete"] .gameplay-event-card{border-color:rgba(174,227,127,.82);box-shadow:0 0 30px rgba(174,227,127,.17),inset 0 1px rgba(255,255,255,.09)}
+#gameplayEventHud[data-type="complete"] .gameplay-event-head b{color:#aee37f}
+#gameplayEventHud[data-type="complete"] .gameplay-event-meter i{background:#aee37f;box-shadow:0 0 10px rgba(174,227,127,.9)}
+#gameplayEventHud[data-type="complete"] .gameplay-event-line{background:linear-gradient(90deg,transparent,#aee37f 20%,#aee37f 80%,transparent);box-shadow:0 0 12px rgba(174,227,127,.8)}
+#gameplayEventHud[data-type="ready"] .gameplay-event-card{border-color:rgba(255,208,110,.86)}
+#gameplayEventHud[data-type="checkpoint"] .gameplay-event-icon:before{transform:rotate(45deg);width:9px;height:9px;left:11px;top:11px}
+#gameplayEventHud[data-type="world"] .gameplay-event-icon:before{width:14px;height:1px;left:8px;top:15px}
+#gameplayEventHud[data-type="world"] .gameplay-event-icon:after{width:1px;height:14px;left:15px;top:8px}
+#gameplayEventHud[data-type="gear"] .gameplay-event-icon:before{width:14px;height:6px;left:8px;top:13px;border-radius:2px}
+#gameplayEventHud[data-type="movement"] .gameplay-event-icon:before{width:15px;height:2px;left:8px;top:15px}
+#gameplayEventHud[data-type="movement"] .gameplay-event-icon:after{width:7px;height:7px;left:8px;top:10px;transform:rotate(45deg)}
+@keyframes gameplayEventScan{to{transform:translateX(120%) skewX(-14deg)}}
+@keyframes gameplayEventMeter{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@media(max-width:768px){#gameplayEventHud{top:calc(100% + 14px);width:min(310px,calc(100vw - 20px))}#gameplayEventHud .gameplay-event-card{min-height:57px;grid-template-columns:30px minmax(0,1fr);gap:9px;padding:8px 10px 10px;border-radius:9px}#gameplayEventHud .gameplay-event-icon{width:27px;height:27px}#gameplayEventHud .gameplay-event-icon:before{left:7px;top:13px}#gameplayEventHud .gameplay-event-icon:after{left:12px;top:8px}#gameplayEventHud #gameplayEventTitle{font-size:10px}#gameplayEventHud #gameplayEventDetail{font-size:6.2px}#gameplayEventHud .gameplay-event-meter{right:10px;width:54px}}
+@media(orientation:landscape) and (max-height:560px){#gameplayEventHud{top:calc(100% + 10px);width:min(320px,44vw)}}
+@media(prefers-reduced-motion:reduce){#gameplayEventHud,#gameplayEventHud .gameplay-event-scan,#gameplayEventHud .gameplay-event-meter i{transition:none!important;animation:none!important}}

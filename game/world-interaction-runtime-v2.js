@@ -16,6 +16,7 @@ if (!window.__relayWorldInteractionRuntimeV2) {
       try {
         setupWorldInteraction(this);
         window.__relayRunnerScene = this;
+        window.dispatchEvent(new CustomEvent('relay:runner-scene-ready', { detail: { scene: this } }));
       } catch (error) {
         console.error('[Relay Runner] World interaction setup failed:', error);
       }
