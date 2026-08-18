@@ -50,3 +50,5 @@ document.addEventListener('keydown', event => {
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
 import './dynamic-time-cycle-v1.js';
+import './game-feel-v1.js';
+import './audio-feedback-v2.js';
