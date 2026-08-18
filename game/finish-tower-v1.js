@@ -1,4 +1,4 @@
-/* UPDATE 11.2 — Finish Relay Tower stability pass */
+/* UPDATE 11.6 — Finish Relay Tower authoritative completion handoff */
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
@@ -15,7 +15,8 @@ if (!window.__relayFinishTowerV11) {
     this.finishTower = { x, topY, baseY, climbing: false, completed: false, request: false };
 
     // Keep goal coordinates available to existing completion/HUD code, but disable
-    // the old visible finish collider completely.
+    // the legacy visible finish collider. The tower owns the visual interaction;
+    // RunnerScene.complete() remains the only authoritative completion path.
     this.goal = this.physics.add.staticImage(x, topY, 'goal').setVisible(false);
     this.goal.body.enable = false;
 
@@ -67,16 +68,25 @@ if (!window.__relayFinishTowerV11) {
     this.physics.add.existing(this.finishTowerTopZone);
     this.finishTowerTopZone.body.setAllowGravity(false).setImmovable(true);
     this.physics.add.overlap(this.player, this.finishTowerTopZone, () => {
-      if (this.finishTower.completed || !this.finishTower.climbing) return;
-      this.finishTower.completed = true;
-      this.finishTower.climbing = false;
-      this.player.body.setAllowGravity(true);
-      this.game.events.emit('finish-tower', { missionId: this.mission.id });
-      this.game.events.emit('feedback', 'complete');
+      if (this.finishTower.completed || !this.finishTower.climbing || this.finished) return;
+
+      // Never bypass RunnerScene.complete(). It is responsible for checking the boss,
+      // locking gameplay, playing the finish animation, and emitting `complete` once.
+      // The tower only releases its own local interaction lock after complete() accepts it.
+      const wasFinished = this.finished;
       this.complete();
+      if (this.finished && !wasFinished) {
+        this.finishTower.completed = true;
+        this.finishTower.climbing = false;
+        this.player.body.setAllowGravity(true);
+        this.dismissIntelCard?.();
+        this.briefingProtected = false;
+        this.cinematicActive = false;
+        this.game.events.emit('finish-tower', { missionId: this.mission.id, runId: this.runId });
+        this.game.events.emit('finish-tower-climb', { active: false });
+      }
     });
 
-    // Reuse RunnerScene's input state; no extra global key listeners.
     this.finishTowerKeys = this.keys;
   };
 
@@ -87,7 +97,6 @@ if (!window.__relayFinishTowerV11) {
     const tower = this.finishTower;
     if (!tower || tower.completed || !this.player?.body) return result;
 
-    // Never let tower logic run underneath the opening tutorial.
     if (this.cinematicActive) {
       if (mobileJumpBeforeUpdate) {
         this.mobileActions.jump = false;

@@ -229,8 +229,12 @@ export function completeMission(state, mission, signals, elapsedMs = 0, runStats
   const contractComplete = Boolean(contract && runStats.contractCompleted);
   const contractXp = contractComplete ? contract.xp : 0;
   const credits = Math.floor(earned / 10) + (contractComplete ? contract.credits : 0);
+  const packageBonus = Math.max(0, Math.round((100 - Math.max(0, Math.min(100, runStats.packageCondition ?? 100))) / 10));
+  const modifierXp = runStats.modifier?.xpBonus || 0;
+  const rating = signals === mission.signals.length && cleanRun && elapsedMs <= mission.parTime ? 3 : signals === mission.signals.length || cleanRun ? 2 : 1;
   const campaignClaimed = new Set(state.campaign?.claimedChapters || []);
-  const newCampaignRewards = campaignRewards.filter(reward => !campaignClaimed.has(reward.id) && reward.missions.every(id => [...state.completed, mission.id].includes(id)));
+  const completedWithMission = [...new Set([...state.completed, mission.id])];
+  const newCampaignRewards = campaignRewards.filter(reward => !campaignClaimed.has(reward.id) && reward.missions.every(id => completedWithMission.includes(id)));
   const campaignXp = newCampaignRewards.reduce((total, reward) => total + reward.xp, 0);
   const campaignCredits = newCampaignRewards.reduce((total, reward) => total + reward.credits, 0);
   const rivalVictory = Boolean(runStats.rivalVictory && rivalMissionIds.has(mission.id));
@@ -238,13 +242,13 @@ export function completeMission(state, mission, signals, elapsedMs = 0, runStats
   const newRivalVictory = rivalVictory && !previousRivalVictories.includes(mission.id);
   const rivalXp = newRivalVictory ? 100 : 0;
   const rivalCredits = newRivalVictory ? 40 : 0;
-  const totalXp = earned + contractXp + campaignXp + rivalXp;
+  const totalXp = earned + contractXp + campaignXp + rivalXp + packageBonus + modifierXp;
   const nextXp = state.xp + totalXp;
   const newAbilities = [];
   if (state.completed.length >= 0 && !state.abilities.includes('dash')) newAbilities.push('dash');
   if (state.completed.length >= 2 && !state.abilities.includes('doubleJump')) newAbilities.push('doubleJump');
   if (state.completed.length >= 4 && !state.abilities.includes('wallJump')) newAbilities.push('wallJump');
-  const missionStat = { ...previousMission, completed: true, bestScore: Math.max(previousMission.bestScore, score), bestTime: !previousMission.bestTime || elapsedMs < previousMission.bestTime ? elapsedMs : previousMission.bestTime, bestRating: Math.max(previousMission.bestRating || 0, 1), bestSecrets: Math.max(previousMission.bestSecrets || 0, runStats.secrets || 0), bestSignals: Math.max(previousMission.bestSignals || 0, signals), mastery: missionMastery };
+  const missionStat = { ...previousMission, completed: true, bestScore: Math.max(previousMission.bestScore, score), bestTime: !previousMission.bestTime || elapsedMs < previousMission.bestTime ? elapsedMs : previousMission.bestTime, bestRating: Math.max(previousMission.bestRating || 0, rating), bestSecrets: Math.max(previousMission.bestSecrets || 0, runStats.secrets || 0), bestSignals: Math.max(previousMission.bestSignals || 0, signals), mastery: missionMastery };
   const district = districts.find(item => item.missions.includes(mission.id));
   const previousDistrict = state.districtProgress?.[district?.id] || { missions: 0, signals: 0, secrets: 0, bestScore: 0 };
   const newCompleted = state.completed.includes(mission.id) ? state.completed : [...state.completed, mission.id];
@@ -270,7 +274,6 @@ export function completeMission(state, mission, signals, elapsedMs = 0, runStats
     totalRuns: state.totalRuns + 1,
     bestRun: Math.max(state.bestRun, score),
     mastery: { ...state.mastery, [mission.id]: missionMastery },
-    missionStats: { ...state.missionStats, [mission.id]: { completed: true, bestScore: Math.max(previousMission.bestScore, score), bestTime: !previousMission.bestTime || elapsedMs < previousMission.bestTime ? elapsedMs : previousMission.bestTime, bestRating: Math.max(previousMission.bestRating || 0, rating), bestSecrets: Math.max(previousMission.bestSecrets || 0, runStats.secrets || 0), bestSignals: Math.max(previousMission.bestSignals || 0, signals), mastery: missionMastery } },
     lastXpBreakdown: { completion: mission.reward, signals: signalBonus, secrets: secretBonus, optional: optionalBonus, streak: streakBonus, package: packageBonus, modifier: modifierXp, daily: 0, contract: contractXp, campaign: campaignXp, campaignChapters: newCampaignRewards.map(chapter => chapter.id), rival: rivalXp, credits: credits + campaignCredits + rivalCredits, total: totalXp, objectives: completedObjectives.map(objective => objective.label) },
     tutorialSeen: true,
     achievements: [...new Set([...(state.achievements || []), `route-${mission.id}`, cleanRun && `clean-${mission.id}`, signals === mission.signals.length && `signals-${mission.id}`, runStats.enemyDefeats > 0 && 'first-hostile-down', runStats.bossDefeated && `boss-${mission.id}`].filter(Boolean))],
