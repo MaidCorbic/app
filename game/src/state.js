@@ -71,216 +71,110 @@ export function getLevelProgress(xp) {
   return { level, current, next, progress: level === MAX_LEVEL ? 1 : (xp - current) / (next - current) };
 }
 const defaults = {
-  signals: 0,
-  xp: 0,
-  credits: 0,
-  upgrades: [],
-  equipment: ['scanner', 'cell'],
-  ownedBuildItems: [],
-  buildLoadout: [null, null],
-  ownedWeapons: ['sidearm'],
-  equippedWeapon: 'sidearm',
-  tutorialSeen: false,
-  achievements: [],
-  discoveredEnemies: [],
-  activeModifier: null,
-  daily: null,
-  weekly: null,
-  monthly: null,
-  seasonal: null,
-  login: { date: null, streak: 0, claimed: false },
-  npcClaims: [],
-  worldStory: { chapter: 1, lore: [] },
-  storyProgress: { chapter: 1, lore: [] },
-  rivalProgress: { encounters: [], victories: [], wins: 0 },
-  campaign: { claimedChapters: [] },
-  unlockedDistricts: ['old-city'],
-  districtProgress: {},
-  loadout: { abilities: [], equipment: ['scanner', 'cell'], passive: null },
-  discoveredSecrets: 0,
-  level: 1,
-  completed: [],
-  muted: false,
-  musicVolume: 0.55,
-  sfxVolume: 0.7,
-  screenShake: true,
-  reducedMotion: false,
-  rain: true,
-  streak: 0,
-  longestStreak: 0,
-  lastRunDate: null,
-  lastStreakBonus: 0,
-  lastSignalBonus: 0,
-  totalRuns: 0,
-  bestRun: 0,
-  missionStats: {},
-  mastery: {},
-  contractStats: {},
-  lastXpBreakdown: null,
-  lastRankUp: null,
-  abilities: [],
-  lastAbilityUnlock: null,
-  rank: 'ROOKIE',
-  unlockedMissions: ['first-delivery'],
+  signals: 0, xp: 0, credits: 0, upgrades: [], equipment: ['scanner', 'cell'], ownedBuildItems: [], buildLoadout: [null, null], ownedWeapons: ['sidearm'], equippedWeapon: 'sidearm', tutorialSeen: false, achievements: [], discoveredEnemies: [], activeModifier: null, daily: null, weekly: null, monthly: null, seasonal: null, login: { date: null, streak: 0, claimed: false }, npcClaims: [], worldStory: { chapter: 1, lore: [] }, storyProgress: { chapter: 1, lore: [] }, rivalProgress: { encounters: [], victories: [], wins: 0 }, campaign: { claimedChapters: [] }, unlockedDistricts: ['old-city'], districtProgress: {}, loadout: { abilities: [], equipment: ['scanner', 'cell'], passive: null }, discoveredSecrets: 0, level: 1, completed: [], muted: false, musicVolume: 0.55, sfxVolume: 0.7, screenShake: true, reducedMotion: false, rain: true, streak: 0, longestStreak: 0, lastRunDate: null, lastStreakBonus: 0, lastSignalBonus: 0, totalRuns: 0, bestRun: 0, missionStats: {}, mastery: {}, contractStats: {}, lastXpBreakdown: null, lastRankUp: null, abilities: [], lastAbilityUnlock: null, rank: 'ROOKIE', unlockedMissions: ['first-delivery'],
 };
-
-function today() {
-  const date = new Date();
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
+function today() { const date = new Date(); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
 function monthKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; }
 function weekKey(date = new Date()) { const start = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())); start.setUTCDate(start.getUTCDate() + 4 - (start.getUTCDay() || 7)); const yearStart = new Date(Date.UTC(start.getUTCFullYear(), 0, 1)); return `${start.getUTCFullYear()}-W${String(Math.ceil(((start - yearStart) / 86400000 + 1) / 7)).padStart(2, '0')}`; }
 function seasonKey(date = new Date()) { return `${date.getFullYear()}-S${Math.floor(date.getMonth() / 3) + 1}`; }
 function challengeState(current, period) { return current?.period === period ? current : { period, progress: {}, claimed: [] }; }
 function challengeProgress(state, mission, signals, cleanRun, contractComplete, bossDefeated) {
   const daily = state.daily?.date === today() ? state.daily : { date: today(), progress: {}, claimed: [] };
-  const monthly = challengeState(state.monthly, monthKey());
-  const weekly = challengeState(state.weekly, weekKey());
-  const seasonal = challengeState(state.seasonal, seasonKey());
-  return {
-    daily: { ...daily, progress: { ...daily.progress, signals: (daily.progress.signals || 0) + signals, contracts: (daily.progress.contracts || 0) + (contractComplete ? 1 : 0), clean: (daily.progress.clean || 0) + (cleanRun ? 1 : 0), dockTime: (daily.progress.dockTime || 0) + (mission.id === 'dead-drop' && signals >= 0 ? 1 : 0) } },
-    weekly: { ...weekly, progress: { ...weekly.progress, runs: (weekly.progress.runs || 0) + 1, signals: (weekly.progress.signals || 0) + signals, clean: (weekly.progress.clean || 0) + (cleanRun ? 1 : 0) } },
-    monthly: { ...monthly, progress: { ...monthly.progress, runs: (monthly.progress.runs || 0) + 1, signals: (monthly.progress.signals || 0) + signals, bosses: (monthly.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
-    seasonal: { ...seasonal, progress: { ...seasonal.progress, routes: state.completed.includes(mission.id) ? state.completed.length : state.completed.length + 1, mastery: 0, bosses: (seasonal.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
-  };
+  const monthly = challengeState(state.monthly, monthKey()); const weekly = challengeState(state.weekly, weekKey()); const seasonal = challengeState(state.seasonal, seasonKey());
+  return { daily: { ...daily, progress: { ...daily.progress, signals: (daily.progress.signals || 0) + signals, contracts: (daily.progress.contracts || 0) + (contractComplete ? 1 : 0), clean: (daily.progress.clean || 0) + (cleanRun ? 1 : 0), dockTime: (daily.progress.dockTime || 0) + (mission.id === 'dead-drop' && signals >= 0 ? 1 : 0) } }, weekly: { ...weekly, progress: { ...weekly.progress, runs: (weekly.progress.runs || 0) + 1, signals: (weekly.progress.signals || 0) + signals, clean: (weekly.progress.clean || 0) + (cleanRun ? 1 : 0) } }, monthly: { ...monthly, progress: { ...monthly.progress, runs: (monthly.progress.runs || 0) + 1, signals: (monthly.progress.signals || 0) + signals, bosses: (monthly.progress.bosses || 0) + (bossDefeated ? 1 : 0) } }, seasonal: { ...seasonal, progress: { ...seasonal.progress, routes: state.completed.includes(mission.id) ? state.completed.length : state.completed.length + 1, mastery: 0, bosses: (seasonal.progress.bosses || 0) + (bossDefeated ? 1 : 0) } } };
 }
 export function earnedAchievementIds(state) {
   const masteryCount = Object.values(state.mastery || {}).reduce((total, badges) => total + badges.length, 0);
   const bossWins = Object.keys(state.missionStats || {}).filter(id => state.achievements?.includes(`boss-${id}`)).length;
-  return [
-    state.achievements?.includes('first-hostile-down') && 'first-hostile-down',
-    state.completed?.length >= 7 && 'route-runner',
-    state.signals >= 250 && 'signal-hunter',
-    state.totalRuns >= 25 && 'night-shift',
-    bossWins >= 5 && 'boss-breaker',
-    masteryCount >= 12 && 'mastery-ace',
-    state.level >= MAX_LEVEL && 'relay-legend',
-  ].filter(Boolean);
+  return [state.achievements?.includes('first-hostile-down') && 'first-hostile-down', state.completed?.length >= 7 && 'route-runner', state.signals >= 250 && 'signal-hunter', state.totalRuns >= 25 && 'night-shift', bossWins >= 5 && 'boss-breaker', masteryCount >= 12 && 'mastery-ace', state.level >= MAX_LEVEL && 'relay-legend'].filter(Boolean);
 }
-export function claimChallenge(state, scope, id) {
-  const definitions = { daily: dailyChallenges, weekly: weeklyChallenges, monthly: monthlyChallenges, seasonal: seasonalChallenges }[scope];
-  const progress = state[scope];
-  const challenge = definitions?.find(entry => entry.id === id);
-  if (!challenge || !progress || progress.claimed?.includes(id) || (progress.progress?.[id] || 0) < challenge.target) return state;
-  const xp = state.xp + challenge.xp;
-  state.xp = xp;
-  state.credits = state.credits + challenge.credits;
-  state.level = levelForXp(xp);
-  state[scope] = { ...progress, claimed: [...progress.claimed, id] };
-  state.achievements = [...new Set([...(state.achievements || []), ...earnedAchievementIds(state)])];
-  saveState(state);
-  return state;
-}
-export function claimLoginReward(state) {
-  const date = today(); const login = state.login || defaults.login;
-  if (login.date === date && login.claimed) return state;
-  const previous = login.date ? daysBetween(login.date, date) : 0;
-  const streak = previous === 1 ? Math.min(7, login.streak + 1) : 1;
-  const credits = loginRewards[streak - 1]; const xp = state.xp + credits * 2;
-  const next = { ...state, xp, credits: state.credits + credits, level: levelForXp(xp), login: { date, streak, claimed: true } };
-  next.achievements = [...new Set([...(next.achievements || []), ...earnedAchievementIds(next)])]; saveState(next); return next;
-}
-
-function daysBetween(previous, current) {
-  const [previousYear, previousMonth, previousDay] = previous.split('-').map(Number);
-  const [currentYear, currentMonth, currentDay] = current.split('-').map(Number);
-  return Math.round((Date.UTC(currentYear, currentMonth - 1, currentDay) - Date.UTC(previousYear, previousMonth - 1, previousDay)) / 86400000);
-}
-
-export function loadState() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(key) || 'null');
-    if (!saved || typeof saved !== 'object') return { ...defaults };
-    const legacyIds = { 'rooftop-relay': 'first-delivery', 'harbor-frequency': 'dead-drop' };
-    const completed = Array.isArray(saved.completed) ? saved.completed.map(id => legacyIds[id] || id) : [];
-    const daily = saved.daily?.date === today() ? saved.daily : { date: today(), progress: {}, claimed: [] };
-    const unlockedDistricts = districts.filter(district => !district.unlockMission || completed.includes(district.unlockMission)).map(district => district.id);
-    return { ...defaults, ...saved, daily, weekly: challengeState(saved.weekly, weekKey()), monthly: challengeState(saved.monthly, monthKey()), seasonal: challengeState(saved.seasonal, seasonKey()), completed, level: levelForXp(saved.xp || 0), storyProgress: saved.storyProgress || saved.worldStory || defaults.storyProgress, unlockedDistricts: saved.unlockedDistricts || unlockedDistricts, rank: saved.rank || getCourierRank(saved.xp || 0).name, unlockedMissions: saved.unlockedMissions || ['first-delivery'] };
-  } catch {
-    return { ...defaults };
-  }
-}
-
-export function saveState(state) {
-  localStorage.setItem(key, JSON.stringify(state));
-}
-
+export function claimChallenge(state, scope, id) { const definitions = { daily: dailyChallenges, weekly: weeklyChallenges, monthly: monthlyChallenges, seasonal: seasonalChallenges }[scope]; const progress = state[scope]; const challenge = definitions?.find(entry => entry.id === id); if (!challenge || !progress || progress.claimed?.includes(id) || (progress.progress?.[id] || 0) < challenge.target) return state; const xp = state.xp + challenge.xp; state.xp = xp; state.credits += challenge.credits; state.level = levelForXp(xp); state[scope] = { ...progress, claimed: [...progress.claimed, id] }; state.achievements = [...new Set([...(state.achievements || []), ...earnedAchievementIds(state)])]; saveState(state); return state; }
+export function claimLoginReward(state) { const date = today(); const login = state.login || defaults.login; if (login.date === date && login.claimed) return state; const previous = login.date ? daysBetween(login.date, date) : 0; const streak = previous === 1 ? Math.min(7, login.streak + 1) : 1; const credits = loginRewards[streak - 1]; const xp = state.xp + credits * 2; const next = { ...state, xp, credits: state.credits + credits, level: levelForXp(xp), login: { date, streak, claimed: true } }; next.achievements = [...new Set([...(next.achievements || []), ...earnedAchievementIds(next)])]; saveState(next); return next; }
+function daysBetween(previous, current) { const [previousYear, previousMonth, previousDay] = previous.split('-').map(Number); const [currentYear, currentMonth, currentDay] = current.split('-').map(Number); return Math.round((Date.UTC(currentYear, currentMonth - 1, currentDay) - Date.UTC(previousYear, previousMonth - 1, previousDay)) / 86400000); }
+export function loadState() { try { const saved = JSON.parse(localStorage.getItem(key) || 'null'); if (!saved || typeof saved !== 'object') return { ...defaults }; const legacyIds = { 'rooftop-relay': 'first-delivery', 'harbor-frequency': 'dead-drop' }; const completed = Array.isArray(saved.completed) ? saved.completed.map(id => legacyIds[id] || id) : []; const daily = saved.daily?.date === today() ? saved.daily : { date: today(), progress: {}, claimed: [] }; const unlockedDistricts = districts.filter(district => !district.unlockMission || completed.includes(district.unlockMission)).map(district => district.id); return { ...defaults, ...saved, daily, weekly: challengeState(saved.weekly, weekKey()), monthly: challengeState(saved.monthly, monthKey()), seasonal: challengeState(saved.seasonal, seasonKey()), completed, level: levelForXp(saved.xp || 0), storyProgress: saved.storyProgress || saved.worldStory || defaults.storyProgress, unlockedDistricts: saved.unlockedDistricts || unlockedDistricts, rank: saved.rank || getCourierRank(saved.xp || 0).name, unlockedMissions: saved.unlockedMissions || ['first-delivery'] }; } catch { return { ...defaults }; } }
+export function saveState(state) { localStorage.setItem(key, JSON.stringify(state)); }
 export function completeMission(state, mission, signals, elapsedMs = 0, runStats = {}) {
+  const safeState = state && typeof state === 'object' ? state : { ...defaults };
+  const safeMission = mission && typeof mission === 'object' ? mission : null;
+  if (!safeMission?.id) throw new Error('MISSION_COMPLETION_INVALID_MISSION');
+  const safeSignals = Math.max(0, Number(signals) || 0);
+  const safeElapsed = Math.max(0, Number(elapsedMs) || 0);
+  const stats = runStats && typeof runStats === 'object' ? runStats : {};
   const runDate = today();
-  const firstRunToday = state.lastRunDate !== runDate;
-  const streak = firstRunToday ? (state.lastRunDate && daysBetween(state.lastRunDate, runDate) === 1 ? state.streak + 1 : 1) : state.streak;
+  const firstRunToday = safeState.lastRunDate !== runDate;
+  const streak = firstRunToday ? (safeState.lastRunDate && daysBetween(safeState.lastRunDate, runDate) === 1 ? safeState.streak + 1 : 1) : safeState.streak;
   const streakBonus = firstRunToday ? Math.min(100, 25 + (streak - 1) * 10) : 0;
-  const signalBonus = signals * 5 + (runStats.signalBonusExtra || 0);
-  const secretBonus = (runStats.secrets || 0) * 25;
-  const score = runStats.score ?? signals * 100;
-  const completedObjectives = mission.optionalObjectives.filter(objective => (objective.type === 'allSignals' && signals === mission.signals.length) || (objective.type === 'fast' && elapsedMs <= mission.parTime) || (objective.type === 'jumps' && runStats.jumps >= objective.target));
-  const optionalBonus = completedObjectives.reduce((total, objective) => total + objective.bonus, 0);
-  const earned = mission.reward + signalBonus + secretBonus + streakBonus + optionalBonus;
-  const oldRank = getCourierRank(state.xp);
-  const previousMission = state.missionStats?.[mission.id] || { completed: false, bestScore: 0, bestTime: 0 };
-  const cleanRun = !(runStats.deaths > 0);
-  const mastery = state.mastery?.[mission.id] || [];
+  const signalBonus = safeSignals * 5 + (Number(stats.signalBonusExtra) || 0);
+  const secretCount = Math.max(0, Number(stats.secrets) || 0);
+  const secretBonus = secretCount * 25;
+  const score = Number.isFinite(Number(stats.score)) ? Number(stats.score) : safeSignals * 100;
+  const optionalObjectives = Array.isArray(safeMission.optionalObjectives) ? safeMission.optionalObjectives : [];
+  const signalTarget = Array.isArray(safeMission.signals) ? safeMission.signals.length : 0;
+  const completedObjectives = optionalObjectives.filter(objective => (objective.type === 'allSignals' && safeSignals === signalTarget) || (objective.type === 'fast' && safeElapsed <= Number(safeMission.parTime || Infinity)) || (objective.type === 'jumps' && Number(stats.jumps || 0) >= Number(objective.target || 0)));
+  const optionalBonus = completedObjectives.reduce((total, objective) => total + (Number(objective.bonus) || 0), 0);
+  const earned = (Number(safeMission.reward) || 0) + signalBonus + secretBonus + streakBonus + optionalBonus;
+  const oldRank = getCourierRank(Number(safeState.xp) || 0);
+  const previousMission = safeState.missionStats?.[safeMission.id] || { completed: false, bestScore: 0, bestTime: 0 };
+  const cleanRun = !(Number(stats.deaths) > 0);
+  const mastery = Array.isArray(safeState.mastery?.[safeMission.id]) ? safeState.mastery[safeMission.id] : [];
   const missionMastery = [...mastery];
-  if (signals === mission.signals.length && !missionMastery.includes('signal-hunter')) missionMastery.push('signal-hunter');
-  if (elapsedMs <= mission.parTime && !missionMastery.includes('speed-run')) missionMastery.push('speed-run');
+  if (safeSignals === signalTarget && !missionMastery.includes('signal-hunter')) missionMastery.push('signal-hunter');
+  if (safeElapsed <= Number(safeMission.parTime || Infinity) && !missionMastery.includes('speed-run')) missionMastery.push('speed-run');
   if (cleanRun && !missionMastery.includes('clean-run')) missionMastery.push('clean-run');
-  if (runStats.enemyDefeats >= 3 && !missionMastery.includes('hunter')) missionMastery.push('hunter');
-  const contract = runStats.contract;
-  const contractComplete = Boolean(contract && runStats.contractCompleted);
-  const contractXp = contractComplete ? contract.xp : 0;
-  const credits = Math.floor(earned / 10) + (contractComplete ? contract.credits : 0);
-  const campaignClaimed = new Set(state.campaign?.claimedChapters || []);
-  const newCampaignRewards = campaignRewards.filter(reward => !campaignClaimed.has(reward.id) && reward.missions.every(id => [...state.completed, mission.id].includes(id)));
+  if (Number(stats.enemyDefeats) >= 3 && !missionMastery.includes('hunter')) missionMastery.push('hunter');
+  const contract = stats.contract && typeof stats.contract === 'object' ? stats.contract : null;
+  const contractComplete = Boolean(contract && stats.contractCompleted);
+  const contractXp = contractComplete ? (Number(contract.xp) || 0) : 0;
+  const credits = Math.floor(earned / 10) + (contractComplete ? (Number(contract.credits) || 0) : 0);
+  const packageBonus = Math.max(0, Math.round((100 - Math.max(0, Math.min(100, Number(stats.packageCondition ?? 100)))) / 10));
+  const modifier = safeState.activeModifier ? null : null;
+  const modifierXp = 0;
+  const rating = safeSignals === signalTarget && cleanRun && safeElapsed <= Number(safeMission.parTime || Infinity) ? 3 : safeSignals === signalTarget || cleanRun ? 2 : 1;
+  const campaignClaimed = new Set(safeState.campaign?.claimedChapters || []);
+  const completedWithMission = [...new Set([...(Array.isArray(safeState.completed) ? safeState.completed : []), safeMission.id])];
+  const newCampaignRewards = campaignRewards.filter(reward => !campaignClaimed.has(reward.id) && reward.missions.every(id => completedWithMission.includes(id)));
   const campaignXp = newCampaignRewards.reduce((total, reward) => total + reward.xp, 0);
   const campaignCredits = newCampaignRewards.reduce((total, reward) => total + reward.credits, 0);
-  const rivalVictory = Boolean(runStats.rivalVictory && rivalMissionIds.has(mission.id));
-  const previousRivalVictories = state.rivalProgress?.victories || [];
-  const newRivalVictory = rivalVictory && !previousRivalVictories.includes(mission.id);
+  const rivalVictory = Boolean(stats.rivalVictory && rivalMissionIds.has(safeMission.id));
+  const previousRivalVictories = safeState.rivalProgress?.victories || [];
+  const newRivalVictory = rivalVictory && !previousRivalVictories.includes(safeMission.id);
   const rivalXp = newRivalVictory ? 100 : 0;
   const rivalCredits = newRivalVictory ? 40 : 0;
-  const totalXp = earned + contractXp + campaignXp + rivalXp;
-  const nextXp = state.xp + totalXp;
+  const totalXp = earned + contractXp + campaignXp + rivalXp + packageBonus + modifierXp;
+  const nextXp = (Number(safeState.xp) || 0) + totalXp;
+  const previousAbilities = Array.isArray(safeState.abilities) ? safeState.abilities : [];
   const newAbilities = [];
-  if (state.completed.length >= 0 && !state.abilities.includes('dash')) newAbilities.push('dash');
-  if (state.completed.length >= 2 && !state.abilities.includes('doubleJump')) newAbilities.push('doubleJump');
-  if (state.completed.length >= 4 && !state.abilities.includes('wallJump')) newAbilities.push('wallJump');
-  const missionStat = { ...previousMission, completed: true, bestScore: Math.max(previousMission.bestScore, score), bestTime: !previousMission.bestTime || elapsedMs < previousMission.bestTime ? elapsedMs : previousMission.bestTime, bestRating: Math.max(previousMission.bestRating || 0, 1), bestSecrets: Math.max(previousMission.bestSecrets || 0, runStats.secrets || 0), bestSignals: Math.max(previousMission.bestSignals || 0, signals), mastery: missionMastery };
-  const district = districts.find(item => item.missions.includes(mission.id));
-  const previousDistrict = state.districtProgress?.[district?.id] || { missions: 0, signals: 0, secrets: 0, bestScore: 0 };
-  const newCompleted = state.completed.includes(mission.id) ? state.completed : [...state.completed, mission.id];
-  const challengeUpdates = challengeProgress({ ...state, completed: newCompleted }, mission, signals, cleanRun, contractComplete, Boolean(runStats.bossDefeated));
+  if (!previousAbilities.includes('dash')) newAbilities.push('dash');
+  if (completedWithMission.length >= 2 && !previousAbilities.includes('doubleJump')) newAbilities.push('doubleJump');
+  if (completedWithMission.length >= 4 && !previousAbilities.includes('wallJump')) newAbilities.push('wallJump');
+  const missionStat = { ...previousMission, completed: true, bestScore: Math.max(Number(previousMission.bestScore) || 0, score), bestTime: !previousMission.bestTime || safeElapsed < previousMission.bestTime ? safeElapsed : previousMission.bestTime, bestRating: Math.max(Number(previousMission.bestRating) || 0, rating), bestSecrets: Math.max(Number(previousMission.bestSecrets) || 0, secretCount), bestSignals: Math.max(Number(previousMission.bestSignals) || 0, safeSignals), mastery: missionMastery };
+  const district = districts.find(item => item.missions.includes(safeMission.id));
+  const previousDistrict = safeState.districtProgress?.[district?.id] || { missions: 0, signals: 0, secrets: 0, bestScore: 0 };
+  const challengeUpdates = challengeProgress({ ...safeState, completed: completedWithMission }, safeMission, safeSignals, cleanRun, contractComplete, Boolean(stats.bossDefeated));
   const next = {
-    ...state,
+    ...safeState,
     xp: nextXp,
-    credits: state.credits + credits + campaignCredits + rivalCredits,
+    credits: (Number(safeState.credits) || 0) + credits + campaignCredits + rivalCredits,
     level: levelForXp(nextXp),
-    missionStats: { ...state.missionStats, [mission.id]: missionStat },
-    completed: newCompleted,
-    unlockedMissions: missions.filter((_, index) => !missions[index].unlockRequirement || newCompleted.includes(missions[index].unlockRequirement)).map(route => route.id),
+    missionStats: { ...safeState.missionStats, [safeMission.id]: missionStat },
+    completed: completedWithMission,
+    unlockedMissions: ['first-delivery'],
     campaign: { claimedChapters: [...campaignClaimed, ...newCampaignRewards.map(chapter => chapter.id)] },
     ...challengeUpdates,
-    discoveredSecrets: state.discoveredSecrets + Math.max(0, (runStats.secrets || 0) - (previousMission.bestSecrets || 0)),
-    districtProgress: district ? { ...state.districtProgress, [district.id]: { missions: Math.max(previousDistrict.missions, previousMission.completed ? previousDistrict.missions : previousDistrict.missions + 1), signals: Math.max(previousDistrict.signals, signals), secrets: Math.max(previousDistrict.secrets, runStats.secrets || 0), bestScore: Math.max(previousDistrict.bestScore, score) } } : state.districtProgress,
-    rivalProgress: rivalMissionIds.has(mission.id) ? { ...state.rivalProgress, encounters: [...new Set([...(state.rivalProgress?.encounters || []), mission.id])], victories: newRivalVictory ? [...previousRivalVictories, mission.id] : previousRivalVictories, wins: (state.rivalProgress?.wins || 0) + (newRivalVictory ? 1 : 0) } : state.rivalProgress,
-    streak,
-    longestStreak: Math.max(state.longestStreak, streak),
-    lastRunDate: firstRunToday ? runDate : state.lastRunDate,
-    lastStreakBonus: streakBonus,
-    lastSignalBonus: signalBonus,
-    totalRuns: state.totalRuns + 1,
-    bestRun: Math.max(state.bestRun, score),
-    mastery: { ...state.mastery, [mission.id]: missionMastery },
-    missionStats: { ...state.missionStats, [mission.id]: { completed: true, bestScore: Math.max(previousMission.bestScore, score), bestTime: !previousMission.bestTime || elapsedMs < previousMission.bestTime ? elapsedMs : previousMission.bestTime, bestRating: Math.max(previousMission.bestRating || 0, rating), bestSecrets: Math.max(previousMission.bestSecrets || 0, runStats.secrets || 0), bestSignals: Math.max(previousMission.bestSignals || 0, signals), mastery: missionMastery } },
-    lastXpBreakdown: { completion: mission.reward, signals: signalBonus, secrets: secretBonus, optional: optionalBonus, streak: streakBonus, package: packageBonus, modifier: modifierXp, daily: 0, contract: contractXp, campaign: campaignXp, campaignChapters: newCampaignRewards.map(chapter => chapter.id), rival: rivalXp, credits: credits + campaignCredits + rivalCredits, total: totalXp, objectives: completedObjectives.map(objective => objective.label) },
+    discoveredSecrets: (Number(safeState.discoveredSecrets) || 0) + Math.max(0, secretCount - (Number(previousMission.bestSecrets) || 0)),
+    districtProgress: district ? { ...safeState.districtProgress, [district.id]: { missions: Math.max(previousDistrict.missions, previousMission.completed ? previousDistrict.missions : previousDistrict.missions + 1), signals: Math.max(previousDistrict.signals, safeSignals), secrets: Math.max(previousDistrict.secrets, secretCount), bestScore: Math.max(previousDistrict.bestScore, score) } } : safeState.districtProgress,
+    rivalProgress: rivalMissionIds.has(safeMission.id) ? { ...safeState.rivalProgress, encounters: [...new Set([...(safeState.rivalProgress?.encounters || []), safeMission.id])], victories: newRivalVictory ? [...previousRivalVictories, safeMission.id] : previousRivalVictories, wins: (safeState.rivalProgress?.wins || 0) + (newRivalVictory ? 1 : 0) } : safeState.rivalProgress,
+    streak, longestStreak: Math.max(Number(safeState.longestStreak) || 0, streak), lastRunDate: firstRunToday ? runDate : safeState.lastRunDate, lastStreakBonus: streakBonus, lastSignalBonus: signalBonus, totalRuns: (Number(safeState.totalRuns) || 0) + 1, bestRun: Math.max(Number(safeState.bestRun) || 0, score), mastery: { ...safeState.mastery, [safeMission.id]: missionMastery },
+    lastXpBreakdown: { completion: Number(safeMission.reward) || 0, signals: signalBonus, secrets: secretBonus, optional: optionalBonus, streak: streakBonus, package: packageBonus, modifier: modifierXp, daily: 0, contract: contractXp, campaign: campaignXp, campaignChapters: newCampaignRewards.map(chapter => chapter.id), rival: rivalXp, credits: credits + campaignCredits + rivalCredits, total: totalXp, elapsedMs: safeElapsed, rating, objectives: completedObjectives.map(objective => objective.label) },
     tutorialSeen: true,
-    achievements: [...new Set([...(state.achievements || []), `route-${mission.id}`, cleanRun && `clean-${mission.id}`, signals === mission.signals.length && `signals-${mission.id}`, runStats.enemyDefeats > 0 && 'first-hostile-down', runStats.bossDefeated && `boss-${mission.id}`].filter(Boolean))],
-    abilities: newAbilities.length ? [...state.abilities, ...newAbilities] : state.abilities,
+    achievements: [...new Set([...(safeState.achievements || []), `route-${safeMission.id}`, cleanRun && `clean-${safeMission.id}`, safeSignals === signalTarget && `signals-${safeMission.id}`, Number(stats.enemyDefeats) > 0 && 'first-hostile-down', stats.bossDefeated && `boss-${safeMission.id}`].filter(Boolean))],
+    abilities: newAbilities.length ? [...previousAbilities, ...newAbilities] : previousAbilities,
     lastAbilityUnlock: ['dash', 'doubleJump', 'wallJump'].includes(newAbilities[0]) ? newAbilities[0] : null,
   };
-  if (contractComplete) next.contractStats = { ...(state.contractStats || {}), [contract.id]: { completed: true, bestTime: elapsedMs } };
-  if (!next.completed.includes(mission.id)) next.completed = [...next.completed, mission.id];
-  next.unlockedDistricts = districts.filter(district => !district.unlockMission || next.completed.includes(district.unlockMission)).map(district => district.id);
-  next.seasonal.progress.mastery = Object.values(next.mastery).reduce((total, badges) => total + badges.length, 0);
+  if (contractComplete) next.contractStats = { ...(safeState.contractStats || {}), [contract.id]: { completed: true, bestTime: safeElapsed } };
+  next.unlockedMissions = ['first-delivery', ...completedWithMission.flatMap(completedId => []), ...completedWithMission.map(completedId => completedId === 'first-delivery' ? 'dead-drop' : completedId === 'dead-drop' ? 'blackout' : completedId === 'blackout' ? 'pursuit' : completedId === 'pursuit' ? 'signal-storm' : completedId === 'signal-storm' ? 'corporate-lockdown' : completedId === 'corporate-lockdown' ? 'final-relay' : [])].filter((id, index, list) => list.indexOf(id) === index);
+  next.unlockedDistricts = districts.filter(districtItem => !districtItem.unlockMission || next.completed.includes(districtItem.unlockMission)).map(districtItem => districtItem.id);
+  next.seasonal.progress.mastery = Object.values(next.mastery || {}).reduce((total, badges) => total + badges.length, 0);
   next.level = levelForXp(next.xp);
   next.achievements = [...new Set([...next.achievements, ...earnedAchievementIds(next)])];
   const newRank = getCourierRank(next.xp); next.rank = newRank.name; next.lastRankUp = newRank.index > oldRank.index ? newRank : null;
