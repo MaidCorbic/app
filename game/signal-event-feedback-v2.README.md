@@ -1,10 +1,22 @@
-# Signal Event Feedback V2
+# Gameplay Event HUD V2
 
-This layer is intentionally presentation-only. It sits directly below the existing Signal HUD and reacts to the existing realtime event bus.
+Presentation-only HUD layer positioned directly below the existing Signal HUD.
 
-- `signal-event-feedback-v2.css` — responsive desktop/mobile presentation.
-- `signal-event-feedback-v2.js` — event listener and transient state only.
+It intentionally does **not** own Signal count, progression, combo state, save state, mission completion, or gameplay logic.
 
-Expected existing event payload: `{ amount, value, combo, relayCombo }` on `signal-collected` / `signalCollected`, or equivalent DOM/window relay events.
+The HUD reacts to existing realtime gameplay output already rendered by the game UI:
 
-No Signal count, progression, save state, mission completion, or combo ownership is created here.
+- checkpoint secured/restored
+- secret/discovery events
+- chase, security and hostile alerts
+- damage / health events
+- ability and equipment readiness/deployment
+- combat and weapon events
+- sector transitions
+- mission completion and route interruption
+
+Signal pickup feedback is excluded because the existing Signal HUD already owns that presentation.
+
+Files:
+- `gameplay-event-hud-v2.css` — responsive gaming presentation.
+- `gameplay-event-hud-v2.js` — realtime presentation controller.
