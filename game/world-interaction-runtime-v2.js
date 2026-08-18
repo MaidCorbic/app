@@ -1,7 +1,8 @@
 // UPDATE 09 FINAL RUNTIME BRIDGE
-// This module is loaded last from relay-ui-init.js, after the existing gameplay wrappers.
-// It is the single final hook for World Interaction and does not replace any gameplay/state system.
+// Loaded last from relay-ui-init.js, after the existing gameplay wrappers.
+// UPDATE 11 adds the universal finish relay tower without replacing existing state systems.
 import { RunnerScene } from './src/scenes/RunnerScene.js';
+import './finish-tower-v1.js';
 import { setupWorldInteraction, updateWorldInteraction } from './world-interaction-v1.js';
 
 if (!window.__relayWorldInteractionRuntimeV2) {
