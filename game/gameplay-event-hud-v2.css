@@ -1,0 +1,34 @@
+/* UPDATE 10 — Gameplay Event HUD V2 */
+#gameplayEventHud{position:absolute;top:calc(100% + 8px);left:50%;z-index:121;width:min(330px,calc(100vw - 28px));transform:translate(-50%,-7px);opacity:0;pointer-events:none;visibility:hidden;box-sizing:border-box;font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;transition:opacity .18s ease,transform .22s cubic-bezier(.2,.9,.25,1),visibility .18s ease}
+#gameplayEventHud.is-visible{opacity:1;visibility:visible;transform:translate(-50%,0)}
+#gameplayEventHud .gameplay-event-card{position:relative;display:grid;grid-template-columns:28px minmax(0,1fr);gap:9px;overflow:hidden;min-height:52px;padding:8px 11px;border:1px solid rgba(255,208,110,.62);border-radius:9px;background:linear-gradient(135deg,rgba(22,22,16,.97),rgba(5,12,22,.98) 68%);box-shadow:0 12px 30px rgba(0,0,0,.36),0 0 22px rgba(255,208,110,.12),inset 0 1px rgba(255,255,255,.09);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#gameplayEventHud .gameplay-event-scan{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,208,110,.16),transparent);transform:translateX(-100%);pointer-events:none}
+#gameplayEventHud.is-pop .gameplay-event-scan{animation:gameplayEventScan .75s ease-out both}
+#gameplayEventHud .gameplay-event-icon{position:relative;align-self:center;width:25px;height:25px;border:1px solid rgba(255,208,110,.72);border-radius:6px;box-shadow:0 0 12px rgba(255,208,110,.18),inset 0 0 8px rgba(255,208,110,.08)}
+#gameplayEventHud .gameplay-event-icon:before,#gameplayEventHud .gameplay-event-icon:after{content:"";position:absolute;background:#ffd06e;box-shadow:0 0 8px rgba(255,208,110,.8)}
+#gameplayEventHud .gameplay-event-icon:before{width:9px;height:2px;left:7px;top:11px}
+#gameplayEventHud .gameplay-event-icon:after{width:2px;height:9px;left:11px;top:7px}
+#gameplayEventHud .gameplay-event-copy{min-width:0;position:relative;z-index:1}
+#gameplayEventHud .gameplay-event-head{display:flex;justify-content:space-between;gap:8px;line-height:1}
+#gameplayEventHud .gameplay-event-head small{font-size:7px;font-weight:900;letter-spacing:.14em;color:#91a4b7}
+#gameplayEventHud .gameplay-event-head b{font-size:7px;letter-spacing:.12em;color:#ffd06e}
+#gameplayEventHud #gameplayEventTitle{display:block;margin-top:4px;color:#fff4cf;font-size:11px;font-weight:900;letter-spacing:.08em;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 12px rgba(255,208,110,.2)}
+#gameplayEventHud #gameplayEventDetail{display:block;margin-top:4px;color:#7890a5;font-size:7px;font-weight:800;letter-spacing:.08em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+#gameplayEventHud .gameplay-event-line{position:absolute;left:11px;right:11px;bottom:0;height:1px;background:linear-gradient(90deg,transparent,#ffd06e,transparent);box-shadow:0 0 10px rgba(255,208,110,.75)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-card{border-color:rgba(255,130,110,.78);box-shadow:0 12px 32px rgba(0,0,0,.4),0 0 24px rgba(255,130,110,.16),inset 0 1px rgba(255,255,255,.08)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-icon{border-color:rgba(255,130,110,.85)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-icon:before,#gameplayEventHud[data-type="danger"] .gameplay-event-icon:after{background:#ff826e;box-shadow:0 0 8px rgba(255,130,110,.85)}
+#gameplayEventHud[data-type="danger"] .gameplay-event-head b{color:#ff9c91}
+#gameplayEventHud[data-type="danger"] .gameplay-event-line{background:linear-gradient(90deg,transparent,#ff826e,transparent)}
+#gameplayEventHud[data-type="combat"] .gameplay-event-card{border-color:rgba(141,244,255,.72);box-shadow:0 12px 32px rgba(0,0,0,.4),0 0 24px rgba(141,244,255,.15),inset 0 1px rgba(255,255,255,.08)}
+#gameplayEventHud[data-type="combat"] .gameplay-event-icon{border-color:rgba(141,244,255,.85)}
+#gameplayEventHud[data-type="combat"] .gameplay-event-icon:before,#gameplayEventHud[data-type="combat"] .gameplay-event-icon:after{background:#8df4ff;box-shadow:0 0 8px rgba(141,244,255,.9)}
+#gameplayEventHud[data-type="combat"] .gameplay-event-head b{color:#8df4ff}
+#gameplayEventHud[data-type="combat"] .gameplay-event-line{background:linear-gradient(90deg,transparent,#8df4ff,transparent)}
+#gameplayEventHud[data-type="complete"] .gameplay-event-card{border-color:rgba(174,227,127,.78);box-shadow:0 12px 32px rgba(0,0,0,.4),0 0 24px rgba(174,227,127,.16),inset 0 1px rgba(255,255,255,.08)}
+#gameplayEventHud[data-type="complete"] .gameplay-event-head b{color:#aee37f}
+#gameplayEventHud[data-type="complete"] .gameplay-event-line{background:linear-gradient(90deg,transparent,#aee37f,transparent)}
+@keyframes gameplayEventScan{to{transform:translateX(100%)}}
+@media(max-width:768px){#gameplayEventHud{top:calc(100% + 7px);width:min(294px,calc(100vw - 24px))}#gameplayEventHud .gameplay-event-card{min-height:48px;grid-template-columns:25px minmax(0,1fr);gap:8px;padding:7px 9px;border-radius:8px}#gameplayEventHud .gameplay-event-icon{width:22px;height:22px}#gameplayEventHud .gameplay-event-icon:before{left:6px;top:9px}#gameplayEventHud .gameplay-event-icon:after{left:10px;top:6px}#gameplayEventHud #gameplayEventTitle{font-size:9.5px}#gameplayEventHud #gameplayEventDetail{font-size:6.4px}}
+@media(orientation:landscape) and (max-height:560px){#gameplayEventHud{top:calc(100% + 5px);width:min(310px,44vw)}}
+@media(prefers-reduced-motion:reduce){#gameplayEventHud,#gameplayEventHud .gameplay-event-scan{transition:none!important;animation:none!important}}
