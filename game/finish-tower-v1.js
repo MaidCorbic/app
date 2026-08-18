@@ -1,4 +1,4 @@
-/* UPDATE 11.4 — Finish Relay Tower completion handoff */
+/* UPDATE 11.5 — Finish Relay Tower single completion path */
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
@@ -74,32 +74,14 @@ if (!window.__relayFinishTowerV11) {
       this.finishTower.completed = true;
       this.finishTower.climbing = false;
       this.player.body.setAllowGravity(true);
-      // Any tactical/tutorial card must disappear before the DOM result screen owns the UI.
       this.dismissIntelCard?.();
       this.briefingProtected = false;
       this.cinematicActive = false;
 
-      const runStats = {
-        jumps: this.jumps,
-        collisions: this.collisions,
-        falls: this.falls,
-        secrets: this.secretsCollected,
-        alarms: this.alarms,
-        chaseEscapes: this.chaseEscapes,
-        enemyDefeats: this.enemyDefeats || 0,
-        bossDefeated: Boolean(this.boss && !this.boss.active),
-        package: this.package,
-        packageCondition: this.packageCondition,
-        contract: this.mission.activeContract,
-        modifier: this.loadout.modifier,
-        signalBonusExtra: this.boostedSignals * 5 + (this.loadout.upgrades?.includes('signalXp') ? this.collected : 0),
-        score: this.collected * 100 + this.secretsCollected * 250 + this.boostedSignals * 100,
-      };
-
+      // RunnerScene.complete() is the single authoritative finish path.
+      // It sets the finish state, pauses gameplay, then emits `complete` with this.runId
+      // after the finish animation delay. main.js owns scoring, persistence and Results.
       this.game.events.emit('finish-tower', { missionId: this.mission.id });
-      // Immediate handoff: main.js already owns progression, scoring, save and results UI.
-      // RunnerScene.complete() below remains authoritative for its normal finish animation.
-      this.game.events.emit('complete', this.collected, this.elapsedMs, runStats, this.runId);
       this.complete();
     });
 
