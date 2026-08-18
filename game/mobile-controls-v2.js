@@ -1,5 +1,15 @@
 /* UI-only mobile action grouping. Existing data-mobile-action handlers remain untouched. */
+function loadStyles() {
+  if (document.getElementById('mobile-controls-v2-style')) return;
+  const link = document.createElement('link');
+  link.id = 'mobile-controls-v2-style';
+  link.rel = 'stylesheet';
+  link.href = './mobile-controls-v2.css';
+  document.head.appendChild(link);
+}
+
 function installMobileControlsV2() {
+  loadStyles();
   const actions = document.querySelector('.mobile-actions');
   if (!actions || actions.dataset.controlsV2) return;
   actions.dataset.controlsV2 = 'ready';
@@ -26,23 +36,20 @@ function installMobileControlsV2() {
   more.addEventListener('pointerdown', event => {
     event.preventDefault();
     event.stopPropagation();
-    const expanded = !actions.classList.contains('is-expanded');
-    if (expanded) {
+    if (actions.classList.contains('is-expanded')) close();
+    else {
       actions.classList.add('is-expanded');
       more.classList.add('is-active');
       more.setAttribute('aria-expanded', 'true');
       more.textContent = 'LESS';
-    } else close();
+    }
   }, { passive: false });
 
   document.addEventListener('pointerdown', event => {
-    if (!actions.classList.contains('is-expanded')) return;
-    if (!actions.contains(event.target)) close();
+    if (actions.classList.contains('is-expanded') && !actions.contains(event.target)) close();
   }, { passive: true });
 
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) close();
-  }, { passive: true });
+  window.addEventListener('resize', () => { if (window.innerWidth > 768) close(); }, { passive: true });
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installMobileControlsV2, { once: true });
