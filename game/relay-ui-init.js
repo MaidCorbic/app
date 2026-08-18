@@ -54,6 +54,7 @@ import './dynamic-time-cycle-v1.js';
 import './game-feel-v1.js';
 import './audio-feedback-v2.js';
 import './gameplay-event-hud-v2.js';
+import './src/systems/viewport-sync.js';
 // MUST remain the final static import in this entry module.
 // It wraps RunnerScene after the existing gameplay wrappers so UPDATE 09 cannot be overwritten.
 import './world-interaction-runtime-v2.js';
