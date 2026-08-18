@@ -35,7 +35,8 @@
 #gameplayEventHud[data-type="danger"] .gameplay-event-meter i{background:#ff826e;box-shadow:0 0 10px rgba(255,130,110,.9)}
 #gameplayEventHud[data-type="danger"] .gameplay-event-line{background:linear-gradient(90deg,transparent,#ff826e 20%,#ff826e 80%,transparent);box-shadow:0 0 12px rgba(255,130,110,.85)}
 #gameplayEventHud[data-type="danger"] .gameplay-event-bracket{border-color:rgba(255,130,110,.85)}
-#gameplayEventHud[data-type="danger"] .gameplay-event-bracket-left{border-left-color:#ff826e}.gameplayEventHud[data-type="danger"] .gameplay-event-bracket-right{border-right-color:#ff826e}
+#gameplayEventHud[data-type="danger"] .gameplay-event-bracket-left{border-left-color:#ff826e}
+#gameplayEventHud[data-type="danger"] .gameplay-event-bracket-right{border-right-color:#ff826e}
 #gameplayEventHud[data-type="combat"] .gameplay-event-card{border-color:rgba(141,244,255,.78);box-shadow:0 0 30px rgba(141,244,255,.16),inset 0 1px rgba(255,255,255,.09)}
 #gameplayEventHud[data-type="combat"] .gameplay-event-icon{border-color:rgba(141,244,255,.9);box-shadow:0 0 20px rgba(141,244,255,.18),inset 0 0 12px rgba(141,244,255,.08)}
 #gameplayEventHud[data-type="combat"] .gameplay-event-icon:before,#gameplayEventHud[data-type="combat"] .gameplay-event-icon:after,#gameplayEventHud[data-type="combat"] .gameplay-event-icon i:before,#gameplayEventHud[data-type="combat"] .gameplay-event-icon i:after{background:#8df4ff;box-shadow:0 0 9px rgba(141,244,255,.9)}
@@ -55,6 +56,6 @@
 #gameplayEventHud[data-type="movement"] .gameplay-event-icon:after{width:7px;height:7px;left:8px;top:10px;transform:rotate(45deg)}
 @keyframes gameplayEventScan{to{transform:translateX(120%) skewX(-14deg)}}
 @keyframes gameplayEventMeter{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-@media(max-width:768px){#gameplayEventHud{top:calc(100% + 7px);width:min(310px,calc(100vw - 20px))}#gameplayEventHud .gameplay-event-card{min-height:57px;grid-template-columns:30px minmax(0,1fr);gap:9px;padding:8px 10px 10px;border-radius:9px}#gameplayEventHud .gameplay-event-icon{width:27px;height:27px}#gameplayEventHud .gameplay-event-icon:before{left:7px;top:13px}.gameplay-event-icon:after{left:12px;top:8px}#gameplayEventHud #gameplayEventTitle{font-size:10px}#gameplayEventHud #gameplayEventDetail{font-size:6.2px}#gameplayEventHud .gameplay-event-meter{right:10px;width:54px}}
+@media(max-width:768px){#gameplayEventHud{top:calc(100% + 7px);width:min(310px,calc(100vw - 20px))}#gameplayEventHud .gameplay-event-card{min-height:57px;grid-template-columns:30px minmax(0,1fr);gap:9px;padding:8px 10px 10px;border-radius:9px}#gameplayEventHud .gameplay-event-icon{width:27px;height:27px}#gameplayEventHud .gameplay-event-icon:before{left:7px;top:13px}#gameplayEventHud .gameplay-event-icon:after{left:12px;top:8px}#gameplayEventHud #gameplayEventTitle{font-size:10px}#gameplayEventHud #gameplayEventDetail{font-size:6.2px}#gameplayEventHud .gameplay-event-meter{right:10px;width:54px}}
 @media(orientation:landscape) and (max-height:560px){#gameplayEventHud{top:calc(100% + 5px);width:min(320px,44vw)}}
 @media(prefers-reduced-motion:reduce){#gameplayEventHud,#gameplayEventHud .gameplay-event-scan,#gameplayEventHud .gameplay-event-meter i{transition:none!important;animation:none!important}}
