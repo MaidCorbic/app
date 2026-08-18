@@ -1,4 +1,4 @@
-/* UPDATE 11.5 — Finish Relay Tower single completion path */
+/* UPDATE 11.6 — Finish Relay Tower authoritative completion handoff */
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
@@ -14,6 +14,9 @@ if (!window.__relayFinishTowerV11) {
     const baseY = Math.min(620, topY + TOWER.height);
     this.finishTower = { x, topY, baseY, climbing: false, completed: false, request: false };
 
+    // Keep goal coordinates available to existing completion/HUD code, but disable
+    // the legacy visible finish collider. The tower owns the visual interaction;
+    // RunnerScene.complete() remains the only authoritative completion path.
     this.goal = this.physics.add.staticImage(x, topY, 'goal').setVisible(false);
     this.goal.body.enable = false;
 
@@ -65,24 +68,23 @@ if (!window.__relayFinishTowerV11) {
     this.physics.add.existing(this.finishTowerTopZone);
     this.finishTowerTopZone.body.setAllowGravity(false).setImmovable(true);
     this.physics.add.overlap(this.player, this.finishTowerTopZone, () => {
-      if (this.finishTower.completed || !this.finishTower.climbing) return;
-      if (this.boss?.active) {
-        this.complete();
-        return;
-      }
+      if (this.finishTower.completed || !this.finishTower.climbing || this.finished) return;
 
-      this.finishTower.completed = true;
-      this.finishTower.climbing = false;
-      this.player.body.setAllowGravity(true);
-      this.dismissIntelCard?.();
-      this.briefingProtected = false;
-      this.cinematicActive = false;
-
-      // RunnerScene.complete() is the single authoritative finish path.
-      // It sets the finish state, pauses gameplay, then emits `complete` with this.runId
-      // after the finish animation delay. main.js owns scoring, persistence and Results.
-      this.game.events.emit('finish-tower', { missionId: this.mission.id });
+      // Never bypass RunnerScene.complete(). It is responsible for checking the boss,
+      // locking gameplay, playing the finish animation, and emitting `complete` once.
+      // The tower only releases its own local interaction lock after complete() accepts it.
+      const wasFinished = this.finished;
       this.complete();
+      if (this.finished && !wasFinished) {
+        this.finishTower.completed = true;
+        this.finishTower.climbing = false;
+        this.player.body.setAllowGravity(true);
+        this.dismissIntelCard?.();
+        this.briefingProtected = false;
+        this.cinematicActive = false;
+        this.game.events.emit('finish-tower', { missionId: this.mission.id, runId: this.runId });
+        this.game.events.emit('finish-tower-climb', { active: false });
+      }
     });
 
     this.finishTowerKeys = this.keys;
