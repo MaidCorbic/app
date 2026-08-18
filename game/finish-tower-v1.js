@@ -1,7 +1,4 @@
-/* UPDATE 11.1 — Finish Relay Tower stability pass
-   Keeps the tower isolated from the normal RunnerScene flow.
-   Important: the opening tutorial/cinematic owns startup input until dismissed.
-*/
+/* UPDATE 11.2 — Finish Relay Tower stability pass */
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
@@ -17,8 +14,8 @@ if (!window.__relayFinishTowerV11) {
     const baseY = Math.min(620, topY + TOWER.height);
     this.finishTower = { x, topY, baseY, climbing: false, completed: false, request: false };
 
-    // Keep a coordinate-only goal object because RunnerScene.complete() and route hints
-    // still use this.goal.x/y. The old visible finish collider is fully disabled.
+    // Keep goal coordinates available to existing completion/HUD code, but disable
+    // the old visible finish collider completely.
     this.goal = this.physics.add.staticImage(x, topY, 'goal').setVisible(false);
     this.goal.body.enable = false;
 
@@ -79,21 +76,20 @@ if (!window.__relayFinishTowerV11) {
       this.complete();
     });
 
-    // Reuse RunnerScene's already-created keyboard state. Do not register another
-    // set of global key listeners for the tower.
+    // Reuse RunnerScene's input state; no extra global key listeners.
     this.finishTowerKeys = this.keys;
   };
 
   RunnerScene.prototype.update = function finishTowerUpdate(time, delta) {
+    const mobileJumpBeforeUpdate = Boolean(this.mobileActions?.jump);
+    const jumpBeforeUpdate = Boolean(this.keys?.W?.isDown || this.keys?.SPACE?.isDown || this.cursors?.up?.isDown);
     const result = originalUpdate.apply(this, arguments);
     const tower = this.finishTower;
     if (!tower || tower.completed || !this.player?.body) return result;
 
-    // The normal RunnerScene update intentionally pauses while the opening tutorial
-    // is active. Keep the tower wrapper paused too, but allow mobile jump to dismiss
-    // the tutorial because mobile has no physical Space key.
+    // Never let tower logic run underneath the opening tutorial.
     if (this.cinematicActive) {
-      if (this.mobileActions?.jump) {
+      if (mobileJumpBeforeUpdate) {
         this.mobileActions.jump = false;
         this.cinematicSkipHandler?.();
       }
@@ -101,11 +97,10 @@ if (!window.__relayFinishTowerV11) {
     }
 
     const keys = this.finishTowerKeys || {};
-    const upPressed = Phaser.Input.Keyboard.JustDown(keys.W) || Phaser.Input.Keyboard.JustDown(keys.SPACE) || Phaser.Input.Keyboard.JustDown(this.cursors?.up);
     const down = keys.S?.isDown || this.cursors?.down?.isDown;
     const near = Math.abs(this.player.x - tower.x) <= TOWER.engageRadius && this.player.y >= tower.topY - 35 && this.player.y <= tower.baseY + 30;
 
-    if (!tower.climbing && near && (tower.request || upPressed || this.player.body.velocity.y < -120)) {
+    if (!tower.climbing && near && (tower.request || mobileJumpBeforeUpdate || jumpBeforeUpdate || this.player.body.velocity.y < -120)) {
       tower.climbing = true;
       tower.request = false;
       this.player.body.setAllowGravity(false).setVelocity(0, 0);
