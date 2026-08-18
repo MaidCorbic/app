@@ -1,4 +1,5 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
+import './gameplay-event-hud-v2.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -46,11 +47,6 @@ document.addEventListener('keydown', event => {
     panel?.classList.remove('relay-update-mode');
   }
 });
-
-const gameplayEventHudStyle = document.createElement('link');
-gameplayEventHudStyle.rel = 'stylesheet';
-gameplayEventHudStyle.href = './gameplay-event-hud-v2.css';
-document.head.appendChild(gameplayEventHudStyle);
 
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
