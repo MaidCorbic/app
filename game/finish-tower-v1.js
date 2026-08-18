@@ -5,7 +5,7 @@
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-const TOWER = { width: 150, height: 250, baseHeight: 28, ladderWidth: 58, climbSpeed: 170, engageRadius: 72 };
+const TOWER = { height: 250, baseHeight: 28, ladderWidth: 58, climbSpeed: 170, engageRadius: 72 };
 
 if (!window.__relayFinishTowerV1) {
   window.__relayFinishTowerV1 = true;
@@ -52,9 +52,10 @@ if (!window.__relayFinishTowerV1) {
     this.add.text(x, baseY + 34, 'CLIMB TO SECURE RELAY', { fontFamily: 'DM Mono', fontSize: '9px', color: '#9bb0c2', stroke: '#08101c', strokeThickness: 3 }).setOrigin(.5).setDepth(8).setAlpha(.8);
     this.add.text(x, baseY - 52, '↑ / JUMP', { fontFamily: 'DM Mono', fontSize: '8px', color: '#ffd06e', stroke: '#08101c', strokeThickness: 3 }).setOrigin(.5).setDepth(8).setAlpha(.72);
 
-    this.finishTowerBase = this.physics.add.staticImage(x, baseY + 10, null).setVisible(false);
-    this.finishTowerBase.body.setSize(116, TOWER.baseHeight); this.finishTowerBase.refreshBody();
-    this.physics.add.collider(this.player, this.finishTowerBase);
+    const base = this.add.rectangle(x, baseY + 10, 116, TOWER.baseHeight, 0x000000, 0).setVisible(false);
+    this.physics.add.existing(base, true);
+    this.finishTowerBase = base;
+    this.physics.add.collider(this.player, base);
 
     this.finishTowerZone = this.add.zone(x, (topY + baseY) / 2, TOWER.ladderWidth, baseY - topY);
     this.physics.add.existing(this.finishTowerZone);
@@ -92,7 +93,6 @@ if (!window.__relayFinishTowerV1) {
     if (!tower || tower.completed || !this.player?.body) return result;
     const keys = this.finishTowerKeys || {};
     const near = Math.abs(this.player.x - tower.x) <= TOWER.engageRadius && this.player.y >= tower.topY - 35 && this.player.y <= tower.baseY + 30;
-    const up = keys.up?.isDown || keys.arrowUp?.isDown;
     const down = keys.down?.isDown || keys.arrowDown?.isDown;
 
     if (!tower.climbing && near && (tower.request || this.player.body.velocity.y < -120)) {
@@ -110,7 +110,9 @@ if (!window.__relayFinishTowerV1) {
     this.player.y = Phaser.Math.Clamp(this.player.y, tower.topY + 12, tower.baseY - 28);
     if (this.player.y <= tower.topY + 18) this.player.y = tower.topY + 16;
     if (this.player.y >= tower.baseY - 28 && down) {
-      tower.climbing = false; this.player.body.setAllowGravity(true); this.player.setTexture('runner-idle');
+      tower.climbing = false;
+      this.player.body.setAllowGravity(true);
+      this.player.setTexture('runner-idle');
     }
     return result;
   };
