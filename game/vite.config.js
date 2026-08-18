@@ -13,9 +13,10 @@ const LEGACY_BINARY_ASSETS = [
   'assets/loading-landscape.jpg',
 ];
 
-// Keep compatibility copies for both URL shapes used by the existing runtime:
+// Keep compatibility copies for every URL shape used by the existing runtime:
 // - /game/* for legacy HTML/runtime references
 // - /assets/* for CSS files requested relative to the Vite-generated JS bundle
+// - /* for runtime scripts whose relative URLs resolve from the site root
 // This build-only aliasing does not touch gameplay, mission, input, save, or
 // progression logic.
 const FAVICON_ICO_BASE64 = 'AAABAAEAAQEAAAEAIABEAAAAFgAAAIlQTkcNChoKAAAADUlIRIAAAABAAAAAQgGAAAAHxXEiQAAAAtJREFUeJxjYAACAAAFAAF6Xqs/AAAAAElFTkSuQmCC';
@@ -35,18 +36,28 @@ function relayLegacyAssetAliases() {
       const legacyDir = path.join(outDir, 'game');
       const bundleAssetsDir = path.join(outDir, resolvedConfig.build.assetsDir || 'assets');
 
+      fs.mkdirSync(outDir, { recursive: true });
       fs.mkdirSync(legacyDir, { recursive: true });
       fs.mkdirSync(bundleAssetsDir, { recursive: true });
 
       for (const relativePath of LEGACY_TEXT_ASSETS) {
         const source = path.join(root, relativePath);
 
+        // /game/<file> — legacy HTML/runtime references.
         const legacyDestination = path.join(legacyDir, relativePath);
         fs.mkdirSync(path.dirname(legacyDestination), { recursive: true });
         fs.copyFileSync(source, legacyDestination);
 
+        // /assets/<file> — requests relative to Vite's generated JS bundle.
         const bundleDestination = path.join(bundleAssetsDir, path.basename(relativePath));
         fs.copyFileSync(source, bundleDestination);
+
+        // /<file> — the actual runtime request observed in production.
+        // The browser resolves ./<file> relative to /assets/index-*.js to the
+        // site root under the current deployment setup, so keep this explicit
+        // compatibility copy as well.
+        const rootDestination = path.join(outDir, path.basename(relativePath));
+        fs.copyFileSync(source, rootDestination);
       }
 
       for (const relativePath of LEGACY_BINARY_ASSETS) {
