@@ -1,191 +1,216 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-// UPDATE 08 FINAL AUDIO — single clean engine, no noise generator, no sci-fi menu loop.
+// FINAL AUDIO FIX
+// Home: completely silent. No menu music, no noise, no procedural loop.
+// Game: one AudioContext, unlocked by the real Play/game gesture, with direct
+// gameplay feedback + projectile polling. Keep this module self-contained.
 (() => {
-  if (window.__relayAudioFeedbackV6) return;
-  window.__relayAudioFeedbackV6 = true;
+  if (window.__relayAudioFeedbackV7) return;
+  window.__relayAudioFeedbackV7 = true;
 
-  let ctx = null, master = null, musicGain = null, musicTimer = null;
-  let unlocked = false, musicActive = false;
-  const seen = new WeakSet();
-  const lastShot = new Map();
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
 
-  const ensure = async () => {
+  let ctx = null;
+  let master = null;
+  let unlocked = false;
+  let activeScene = null;
+  let pollTimer = null;
+  const played = new WeakSet();
+  const cooldown = new Map();
+
+  const getContext = () => {
     if (!ctx) {
       ctx = new AC();
       master = ctx.createGain();
-      master.gain.value = 0.46;
+      master.gain.value = 0.78;
       master.connect(ctx.destination);
     }
-    if (ctx.state !== 'running') await ctx.resume().catch(() => {});
-    unlocked = ctx.state === 'running';
-    return unlocked;
+    return ctx;
   };
 
-  const tone = (f, start, duration, volume = .06, type = 'sine', endF = f, destination = master) => {
-    if (!ctx || !destination || !unlocked) return;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(Math.max(30, f), start);
-    osc.frequency.exponentialRampToValueAtTime(Math.max(30, endF), start + duration);
-    gain.gain.setValueAtTime(.0001, start);
-    gain.gain.exponentialRampToValueAtTime(Math.max(.0001, volume), start + Math.min(.018, duration * .15));
-    gain.gain.exponentialRampToValueAtTime(.0001, start + duration);
-    osc.connect(gain).connect(destination);
-    osc.start(start);
-    osc.stop(start + duration + .02);
-  };
-
-  const stopMusic = () => {
-    musicActive = false;
-    if (musicTimer) clearTimeout(musicTimer);
-    musicTimer = null;
-    if (musicGain) {
-      const now = ctx?.currentTime || 0;
-      try { musicGain.gain.cancelScheduledValues(now); musicGain.gain.setTargetAtTime(.0001, now, .04); } catch {}
-      try { musicGain.disconnect(); } catch {}
-      musicGain = null;
+  const unlock = async () => {
+    try {
+      const audio = getContext();
+      if (audio.state !== 'running') await audio.resume();
+      unlocked = audio.state === 'running';
+      return unlocked;
+    } catch {
+      unlocked = false;
+      return false;
     }
   };
 
-  const musicBar = () => {
-    if (!musicActive || !ctx || !musicGain || !unlocked) return;
-    const start = ctx.currentTime + .04;
-    const chords = [
-      [261.63, 329.63, 392.00],
-      [220.00, 277.18, 329.63],
-      [246.94, 293.66, 369.99],
-      [196.00, 246.94, 293.66]
-    ];
-    chords.forEach((chord, index) => {
-      const t = start + index * 1.15;
-      chord.forEach((f, i) => tone(f, t + i * .025, .9, .024, 'sine', f * .998, musicGain));
-    });
-    musicTimer = setTimeout(musicBar, 4520);
+  const beep = (frequency, duration, volume, type = 'triangle', endFrequency = frequency) => {
+    if (!unlocked || !ctx || !master) return;
+    const now = ctx.currentTime + 0.003;
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(Math.max(35, frequency), now);
+    if (endFrequency !== frequency) {
+      oscillator.frequency.exponentialRampToValueAtTime(Math.max(35, endFrequency), now + duration);
+    }
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    oscillator.connect(gain).connect(master);
+    oscillator.start(now);
+    oscillator.stop(now + duration + 0.025);
   };
 
-  const startMusic = async () => {
-    const intro = document.getElementById('intro');
-    if (!intro || intro.classList.contains('hidden')) return;
-    if (!(await ensure()) || musicActive) return;
-    musicActive = true;
-    musicGain = ctx.createGain();
-    musicGain.gain.value = .82;
-    musicGain.connect(master);
-    musicBar();
-  };
-
-  // SFX are deliberately tone-only. No noise buffers, no laser/noise generators.
   const play = kind => {
-    if (!ctx || !unlocked) return;
-    const t = ctx.currentTime + .006;
-    if (kind === 'ui') return tone(520, t, .045, .055, 'triangle', 610);
-    if (kind === 'signal') return (tone(523, t, .08, .065, 'triangle', 659), tone(784, t + .055, .09, .055, 'triangle', 988));
-    if (kind === 'checkpoint') return (tone(330, t, .1, .07, 'triangle', 392), tone(494, t + .08, .13, .06, 'triangle', 587), tone(659, t + .17, .18, .055, 'triangle', 784));
-    if (kind === 'combo') return (tone(440, t, .06, .055, 'triangle', 520), tone(660, t + .05, .07, .05, 'triangle', 780), tone(880, t + .11, .1, .045, 'triangle', 1040));
-    if (kind === 'dash') return tone(150, t, .11, .065, 'triangle', 72);
-    if (kind === 'hit') return tone(105, t, .1, .075, 'triangle', 55);
-    if (kind === 'death') return (tone(190, t, .2, .075, 'triangle', 75), tone(110, t + .07, .22, .05, 'triangle', 45));
-    if (kind === 'mission-complete') return (tone(392, t, .1, .06, 'triangle', 440), tone(523, t + .08, .11, .06, 'triangle', 587), tone(659, t + .18, .17, .055, 'triangle', 784));
-    if (kind === 'warning') return tone(180, t, .12, .065, 'triangle', 120);
-    if (kind === 'gun') return (tone(120, t, .075, .13, 'triangle', 48), tone(640, t, .022, .05, 'triangle', 210));
-    if (kind === 'egg') return (tone(430, t, .04, .075, 'triangle', 250), tone(210, t + .025, .08, .06, 'triangle', 105));
-    if (kind === 'dino') return tone(105, t, .22, .085, 'triangle', 52);
-    if (kind === 'invader') return tone(230, t, .12, .06, 'triangle', 115);
-    if (kind === 'alien') return tone(175, t, .14, .06, 'triangle', 78);
-    if (kind === 'boss') return tone(62, t, .25, .1, 'triangle', 35);
+    if (!unlocked) return;
+    switch (kind) {
+      case 'ui': beep(620, .07, .09, 'triangle', 760); break;
+      case 'jump': beep(420, .10, .10, 'triangle', 700); break;
+      case 'dash': beep(180, .13, .12, 'triangle', 70); break;
+      case 'signal': beep(520, .09, .10, 'triangle', 700); setTimeout(() => beep(820, .11, .08, 'triangle', 1020), 55); break;
+      case 'checkpoint': beep(360, .10, .10, 'triangle', 470); setTimeout(() => beep(620, .14, .09, 'triangle', 820), 80); break;
+      case 'warning': beep(180, .14, .11, 'triangle', 105); break;
+      case 'hit': beep(105, .12, .14, 'sawtooth', 55); break;
+      case 'death': beep(190, .20, .12, 'triangle', 70); setTimeout(() => beep(90, .25, .10, 'triangle', 40), 80); break;
+      case 'complete': beep(420, .10, .10, 'triangle', 520); setTimeout(() => beep(620, .12, .10, 'triangle', 760), 80); setTimeout(() => beep(820, .18, .09, 'triangle', 1040), 170); break;
+      case 'gun': beep(115, .075, .18, 'sawtooth', 48); beep(620, .025, .07, 'triangle', 180); break;
+      case 'egg': beep(430, .045, .11, 'triangle', 250); setTimeout(() => beep(190, .08, .09, 'triangle', 95), 28); break;
+      case 'dino': beep(100, .24, .13, 'sawtooth', 48); break;
+      case 'invader': beep(230, .14, .10, 'triangle', 110); break;
+      case 'alien': beep(175, .16, .10, 'triangle', 70); break;
+      case 'boss': beep(65, .28, .16, 'sawtooth', 34); break;
+    }
   };
 
-  const classify = obj => {
-    const key = String(obj?.texture?.key || obj?.name || obj?.getData?.('type') || obj?.getData?.('route')?.type || '').toLowerCase();
-    if (/egg/.test(key)) return 'egg';
-    if (/dino/.test(key)) return 'dino';
-    if (/invader|sentinel|storm/.test(key)) return 'invader';
-    if (/alien/.test(key)) return 'alien';
-    if (/boss|titan|apex/.test(key)) return 'boss';
-    if (/bullet|shot|projectile|bolt|fire|comet|kinetic/.test(key)) return 'gun';
-    return null;
+  const playCooldown = (kind, ms = 120) => {
+    const now = performance.now();
+    if (now - (cooldown.get(kind) || 0) < ms) return;
+    cooldown.set(kind, now);
+    play(kind);
   };
 
-  const enemyType = enemy => String(enemy?.getData?.('route')?.type || enemy?.texture?.key || '').toLowerCase();
-  const classifyEnemy = enemy => /chicken|egg/.test(enemyType(enemy)) ? 'egg' : /dino/.test(enemyType(enemy)) ? 'dino' : /invader|sentinel|storm/.test(enemyType(enemy)) ? 'invader' : /alien/.test(enemyType(enemy)) ? 'alien' : /boss|titan|apex/.test(enemyType(enemy)) ? 'boss' : 'gun';
+  const typeOf = object => String(
+    object?.getData?.('route')?.type || object?.texture?.key || object?.name || ''
+  ).toLowerCase();
 
-  const announceProjectiles = scene => {
-    const groups = [scene.eggs, scene.comets, scene.plasma, scene.kineticBalls];
+  const classifyEnemy = object => {
+    const type = typeOf(object);
+    if (/chicken|egg/.test(type)) return 'egg';
+    if (/dino/.test(type)) return 'dino';
+    if (/invader|sentinel/.test(type)) return 'invader';
+    if (/alien/.test(type)) return 'alien';
+    if (/boss|titan|apex|storm/.test(type)) return 'boss';
+    return 'gun';
+  };
+
+  const pollProjectiles = () => {
+    const scene = activeScene;
+    if (!scene || !scene.sys?.isActive?.() || !unlocked) return;
+
     const enemies = scene.enemies?.getChildren?.() || [];
-    for (const group of groups) {
-      for (const obj of group?.getChildren?.() || []) {
-        if (!obj?.active || seen.has(obj)) continue;
-        const direct = classify(obj);
-        if (!direct) continue;
-        seen.add(obj);
-        let sound = direct;
-        if (direct === 'gun' || direct === 'egg') {
-          let nearest = null, best = Infinity;
+    const groups = [
+      [scene.eggs, 'egg'],
+      [scene.comets, 'gun'],
+      [scene.plasma, 'gun'],
+      [scene.kineticBalls, 'gun']
+    ];
+
+    for (const [group, defaultType] of groups) {
+      for (const projectile of group?.getChildren?.() || []) {
+        if (!projectile?.active || played.has(projectile)) continue;
+        played.add(projectile);
+
+        let sound = defaultType;
+        if (defaultType === 'gun' && enemies.length) {
+          let nearest = null;
+          let distance = Infinity;
           for (const enemy of enemies) {
             if (!enemy?.active) continue;
-            const d = Math.hypot((enemy.x || 0) - (obj.x || 0), (enemy.y || 0) - (obj.y || 0));
-            if (d < best) { best = d; nearest = enemy; }
+            const d = Math.hypot((enemy.x || 0) - (projectile.x || 0), (enemy.y || 0) - (projectile.y || 0));
+            if (d < distance) { distance = d; nearest = enemy; }
           }
-          if (nearest && best < 300) sound = classifyEnemy(nearest);
+          if (nearest && distance < 330) sound = classifyEnemy(nearest);
         }
-        const now = performance.now();
-        if (now - (lastShot.get(sound) || 0) > 110) {
-          lastShot.set(sound, now);
-          ensure().then(() => play(sound));
-        }
+        playCooldown(sound, 90);
       }
     }
   };
 
   const attachScene = scene => {
-    if (!scene?.game || scene.__relayAudioAttached) return;
-    scene.__relayAudioAttached = true;
-    scene.game.events.on('feedback', feedback => {
-      if (feedback === 'warning') ensure().then(() => play('warning'));
-      else if (feedback === 'hit') ensure().then(() => play('hit'));
-      else if (feedback === 'signal') ensure().then(() => play('signal'));
-      else if (feedback === 'complete') ensure().then(() => play('mission-complete'));
-    });
-    scene.events.once('shutdown', () => { scene.game.events.off('feedback', null, scene); });
-    const poll = () => {
-      if (!scene.scene?.isActive?.() && !scene.sys?.isActive?.()) return;
-      announceProjectiles(scene);
-      scene.__relayAudioPoll = requestAnimationFrame(poll);
+    if (!scene?.game || scene.__relayAudioV7Attached) return;
+    scene.__relayAudioV7Attached = true;
+    activeScene = scene;
+
+    const onFeedback = feedback => {
+      unlock().then(() => {
+        if (feedback === 'warning') playCooldown('warning', 250);
+        if (feedback === 'hit') playCooldown('hit', 180);
+        if (feedback === 'signal') playCooldown('signal', 180);
+        if (feedback === 'complete') playCooldown('complete', 500);
+      });
     };
-    poll();
+    scene.game.events.on('feedback', onFeedback);
+
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(pollProjectiles, 45);
+
+    scene.events.once('shutdown', () => {
+      if (activeScene === scene) activeScene = null;
+      scene.game.events.off('feedback', onFeedback);
+    });
   };
 
-  const wrapCreate = () => {
-    const original = RunnerScene.prototype.create;
-    if (typeof original !== 'function' || RunnerScene.prototype.__relayAudioCreateWrapped) return;
-    RunnerScene.prototype.create = function audioCreate(...args) {
-      const result = original.apply(this, args);
+  // Wrap Phaser scene creation so audio attaches to the actual live RunnerScene.
+  const originalCreate = RunnerScene.prototype.create;
+  if (typeof originalCreate === 'function' && !RunnerScene.prototype.__relayAudioV7CreateWrapped) {
+    RunnerScene.prototype.create = function audioReadyCreate(...args) {
+      const result = originalCreate.apply(this, args);
       attachScene(this);
       return result;
     };
-    RunnerScene.prototype.__relayAudioCreateWrapped = true;
+    RunnerScene.prototype.__relayAudioV7CreateWrapped = true;
+  }
+
+  // IMPORTANT: Home stays silent. A Play click only unlocks audio; it never starts Home music.
+  const unlockOnGesture = event => {
+    const target = event.target?.closest?.('#play,[data-mobile-action],[data-action],[data-control],#pauseBtn,#settingsBtn,#resumeBtn,#restartBtn');
+    if (target) unlock();
   };
-  wrapCreate();
+  document.addEventListener('pointerdown', unlockOnGesture, { capture: true, passive: true });
+  document.addEventListener('touchstart', unlockOnGesture, { capture: true, passive: true });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.code === 'Space' || event.key === 'Shift') unlock();
+  }, { capture: true, passive: true });
 
-  const unlock = () => ensure();
-  ['pointerdown', 'touchend', 'click', 'keydown'].forEach(type => document.addEventListener(type, unlock, { passive: true, capture: true }));
-
-  const intro = document.getElementById('intro');
-  if (intro) new MutationObserver(() => {
-    if (intro.classList.contains('hidden')) stopMusic();
-  }).observe(intro, { attributes: true, attributeFilter: ['class'] });
-
+  // Direct game controls. These are independent of Phaser projectile detection,
+  // so mobile/keyboard controls always have audible feedback after unlock.
   document.addEventListener('pointerdown', event => {
-    const target = event.target.closest?.('#pauseBtn,#settingsBtn,#resumeBtn,#restartBtn,[data-action="dash"],[data-action="jump"],[data-action="attack"],[data-control="dash"],[data-control="jump"],[data-control="attack"]');
-    if (target) ensure().then(() => play('ui'));
-    if (intro && !intro.classList.contains('hidden')) startMusic();
-  }, { passive: true, capture: true });
+    const button = event.target?.closest?.('[data-mobile-action]');
+    if (!button) return;
+    unlock().then(() => {
+      const action = button.dataset.mobileAction;
+      if (action === 'jump') play('jump');
+      else if (action === 'dash') play('dash');
+      else if (action === 'fire' || action === 'sword') play('gun');
+    });
+  }, { capture: true, passive: true });
 
-  ['relay:signal', 'relay:checkpoint', 'relay:combo', 'relay:hit', 'relay:dash', 'relay:death', 'relay:mission-complete'].forEach(type => window.addEventListener(type, () => ensure().then(() => play(type.split(':')[1]))));
+  document.addEventListener('keydown', event => {
+    if (event.repeat) return;
+    unlock().then(() => {
+      if (event.code === 'Space' || /^ArrowUp$/i.test(event.key) || /^w$/i.test(event.key)) play('jump');
+      else if (event.key === 'Shift') play('dash');
+      else if (/^e$/i.test(event.key) || /^q$/i.test(event.key)) play('gun');
+    });
+  }, { capture: true, passive: true });
 
-  window.relayAudioV2 = { ensure, play, startMusic, stopMusic };
+  // Explicit public API for the game and future systems.
+  window.relayAudioV2 = {
+    ensure: unlock,
+    unlock,
+    play,
+    startMusic: () => {},
+    stopMusic: () => {}
+  };
+
+  // Defensive: if any older menu-audio API exists, make it silent.
+  window.relayMenuMusic = { start: () => {}, stop: () => {} };
 })();
