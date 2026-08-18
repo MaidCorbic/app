@@ -1,0 +1,11 @@
+/* Mobile controls v2: UI-only grouping. Existing action buttons and keyboard mappings stay unchanged. */
+.mobile-controls{z-index:1200;}
+.mobile-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:end;}
+.mobile-actions [data-mobile-secondary]{display:none;}
+.mobile-actions.is-expanded [data-mobile-secondary]{display:flex;}
+.mobile-actions.is-expanded .mobile-action-more{grid-column:1/-1;order:99;}
+.mobile-action-more{display:flex;appearance:none;border:1px solid rgba(141,244,255,.48);border-radius:12px;background:linear-gradient(145deg,rgba(6,19,33,.97),rgba(13,40,61,.96));color:#dffcff;min-height:46px;padding:8px 10px;align-items:center;justify-content:center;font:800 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 0 14px rgba(25,200,245,.12),inset 0 1px rgba(255,255,255,.05);touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.mobile-action-more.is-active{border-color:#ffd06e;color:#fff3c8;}
+@media(max-width:480px){.mobile-actions{gap:6px}.mobile-actions [data-mobile-action]{min-width:0}.mobile-actions button{font-size:8px;letter-spacing:.06em}}
+@media(max-width:360px){.mobile-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.mobile-actions.is-expanded .mobile-action-more{grid-column:1/-1}}
+@media(min-width:769px){.mobile-action-more{display:none!important}.mobile-actions [data-mobile-secondary]{display:none!important}}
