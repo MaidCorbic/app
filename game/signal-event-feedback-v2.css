@@ -1,0 +1,158 @@
+/* UPDATE 10 — Realtime Signal Event Feedback V2
+   Presentation only: reads existing Signal/Relay Flow events and state.
+   Positioned directly below the existing Signal HUD on desktop/mobile.
+*/
+#signalEventFeedback {
+  position: fixed;
+  top: clamp(74px, 10.5vh, 112px);
+  left: 50%;
+  z-index: 120;
+  width: min(320px, calc(100vw - 32px));
+  transform: translate(-50%, -10px);
+  opacity: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1), filter .22s ease;
+}
+
+#signalEventFeedback.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+#signalEventFeedback .signal-event-card {
+  position: relative;
+  overflow: hidden;
+  padding: 9px 12px 10px;
+  border: 1px solid rgba(255,208,110,.62);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(31,25,10,.96), rgba(8,15,24,.97) 65%),
+    radial-gradient(circle at 50% 0, rgba(255,208,110,.18), transparent 70%);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.34),
+    0 0 18px rgba(255,208,110,.12),
+    inset 0 1px rgba(255,255,255,.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+#signalEventFeedback .signal-event-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,208,110,.14), transparent);
+  transform: translateX(-100%);
+  animation: signalEventSweep 1.15s ease-out both;
+}
+
+#signalEventFeedback .signal-event-card::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #ffd06e, transparent);
+  box-shadow: 0 0 10px rgba(255,208,110,.7);
+}
+
+#signalEventFeedback .signal-event-main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+#signalEventFeedback .signal-event-label {
+  color: #fff4cf;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  white-space: nowrap;
+  text-shadow: 0 0 12px rgba(255,208,110,.22);
+}
+
+#signalEventFeedback .signal-event-value {
+  color: #ffd06e;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 16px rgba(255,208,110,.42);
+}
+
+#signalEventFeedback .signal-event-sub {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 5px;
+  color: #8fa2b3;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+#signalEventFeedback .signal-event-combo {
+  color: #8df4ff;
+  text-shadow: 0 0 12px rgba(141,244,255,.35);
+}
+
+#signalEventFeedback.perfect .signal-event-card {
+  border-color: rgba(141,244,255,.82);
+  box-shadow: 0 10px 35px rgba(0,0,0,.38), 0 0 25px rgba(141,244,255,.18), inset 0 1px rgba(255,255,255,.1);
+}
+
+#signalEventFeedback.perfect .signal-event-value {
+  color: #8df4ff;
+  text-shadow: 0 0 18px rgba(141,244,255,.55);
+}
+
+#signalEventFeedback.perfect .signal-event-combo {
+  color: #ffd06e;
+}
+
+#signalEventFeedback.pop .signal-event-card {
+  animation: signalEventPop .28s cubic-bezier(.2,1.5,.35,1) both;
+}
+
+@keyframes signalEventPop {
+  0% { transform: scale(.88); filter: brightness(1.5); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes signalEventSweep {
+  0% { transform: translateX(-100%); }
+  55%, 100% { transform: translateX(100%); }
+}
+
+@media (max-width: 768px) {
+  #signalEventFeedback {
+    top: calc(env(safe-area-inset-top, 0px) + clamp(70px, 13vh, 104px));
+    width: min(290px, calc(100vw - 24px));
+  }
+
+  #signalEventFeedback .signal-event-card { padding: 8px 10px 9px; border-radius: 9px; }
+  #signalEventFeedback .signal-event-label { font-size: 7.5px; }
+  #signalEventFeedback .signal-event-value { font-size: 15px; }
+  #signalEventFeedback .signal-event-sub { font-size: 6.2px; }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  #signalEventFeedback { top: calc(env(safe-area-inset-top, 0px) + 58px); width: min(300px, 42vw); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #signalEventFeedback,
+  #signalEventFeedback .signal-event-card,
+  #signalEventFeedback .signal-event-card::before { animation: none !important; transition: none !important; }
+}
