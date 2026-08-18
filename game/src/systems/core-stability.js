@@ -1,5 +1,9 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
+// Load the world-interaction patch before main.js can create/start RunnerScene.
+// This avoids the previous runtime-order bug where the feature existed in the repo
+// but RunnerScene had already been bootstrapped before its lifecycle hooks were patched.
+import '../../world-interaction-v1.js';
 
 function keepPhaserSurfaceMounted() {
   if (window.__relaySurfaceGuardInstalled) return;
