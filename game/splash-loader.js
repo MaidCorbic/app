@@ -1,3 +1,10 @@
+import { missions } from './src/missions.js';
+
+// Compatibility bridge for the legacy state module. `state.js` currently
+// references the mission catalog as a global binding during completion; expose
+// the canonical catalog before sibling application modules are evaluated.
+globalThis.missions = missions;
+
 (() => {
   'use strict';
 

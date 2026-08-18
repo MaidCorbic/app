@@ -19,7 +19,9 @@ function showRecoveredFinish(scene) {
   const missionIndex = missions.findIndex(item => item.id === mission.id);
   if (missionIndex < 0) return false;
 
-  const alreadyPersisted = state.missionStats?.[mission.id]?.completed && state.lastXpBreakdown?.elapsedMs === scene.elapsedMs && state.lastXpBreakdown?.total !== undefined;
+  // Completion is persisted by completeMission itself. Do not use elapsedMs from
+  // lastXpBreakdown as a persistence marker because that field is reward-only.
+  const alreadyPersisted = Boolean(state.missionStats?.[mission.id]?.completed);
   if (!alreadyPersisted) {
     const runStats = {
       jumps: scene.jumps || 0,
@@ -62,7 +64,13 @@ function showRecoveredFinish(scene) {
 function tick() {
   const scene = window.__relayRunnerScene;
   const finish = document.getElementById('finish');
-  if (scene?.finished && finish?.classList.contains('hidden')) showRecoveredFinish(scene);
+  if (scene?.finished && finish?.classList.contains('hidden')) {
+    try {
+      showRecoveredFinish(scene);
+    } catch (error) {
+      console.error('[Relay Runner] Mission finish recovery failed.', error);
+    }
+  }
   timer = window.setTimeout(tick, 350);
 }
 

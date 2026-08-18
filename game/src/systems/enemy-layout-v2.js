@@ -24,10 +24,11 @@ export function installEnemyLayout(RunnerScene) {
   };
 
   prototype.__enemyLayoutV2 = true;
-}
 
-// Runtime is installed immediately after layout in packages.js. Queue the
-// stability wrapper so it always wraps the final runtime methods.
-void import('./enemy-ai-stability-v2.js')
-  .then(({ installEnemyAIStability }) => queueMicrotask(() => installEnemyAIStability(RunnerScene)))
-  .catch(error => console.error('[enemy-ai-stability] failed to initialize', error));
+  // RunnerScene is a function parameter, not a module-global. Keep the
+  // stability installer inside this scope so the runtime patch receives the
+  // actual class instead of throwing `RunnerScene is not defined`.
+  void import('./enemy-ai-stability-v2.js')
+    .then(({ installEnemyAIStability }) => queueMicrotask(() => installEnemyAIStability(RunnerScene)))
+    .catch(error => console.error('[enemy-ai-stability] failed to initialize', error));
+}
