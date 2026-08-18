@@ -13,11 +13,12 @@ const LEGACY_BINARY_ASSETS = [
   'assets/loading-landscape.jpg',
 ];
 
-// The game is built by Vite from /game, while some existing production entry
-// points still address these files through legacy /game/* URLs. Keep a
-// compatibility copy in dist/game/* so those URLs resolve without touching
-// gameplay, mission, input, save, or progression logic.
-const FAVICON_ICO_BASE64 = 'AAABAAEAAQEAAAEAIABEAAAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAABAAAAAQgGAAAAHxXEiQAAAAtJREFUeJxjYAACAAAFAAF6Xqs/AAAAAElFTkSuQmCC';
+// Keep compatibility copies for both URL shapes used by the existing runtime:
+// - /game/* for legacy HTML/runtime references
+// - /assets/* for CSS files requested relative to the Vite-generated JS bundle
+// This build-only aliasing does not touch gameplay, mission, input, save, or
+// progression logic.
+const FAVICON_ICO_BASE64 = 'AAABAAEAAQEAAAEAIABEAAAAFgAAAIlQTkcNChoKAAAADUlIRIAAAABAAAAAQgGAAAAHxXEiQAAAAtJREFUeJxjYAACAAAFAAF6Xqs/AAAAAElFTkSuQmCC';
 
 function relayLegacyAssetAliases() {
   let resolvedConfig;
@@ -32,14 +33,20 @@ function relayLegacyAssetAliases() {
       const root = resolvedConfig.root;
       const outDir = path.resolve(root, resolvedConfig.build.outDir);
       const legacyDir = path.join(outDir, 'game');
+      const bundleAssetsDir = path.join(outDir, resolvedConfig.build.assetsDir || 'assets');
 
       fs.mkdirSync(legacyDir, { recursive: true });
+      fs.mkdirSync(bundleAssetsDir, { recursive: true });
 
       for (const relativePath of LEGACY_TEXT_ASSETS) {
         const source = path.join(root, relativePath);
-        const destination = path.join(legacyDir, relativePath);
-        fs.mkdirSync(path.dirname(destination), { recursive: true });
-        fs.copyFileSync(source, destination);
+
+        const legacyDestination = path.join(legacyDir, relativePath);
+        fs.mkdirSync(path.dirname(legacyDestination), { recursive: true });
+        fs.copyFileSync(source, legacyDestination);
+
+        const bundleDestination = path.join(bundleAssetsDir, path.basename(relativePath));
+        fs.copyFileSync(source, bundleDestination);
       }
 
       for (const relativePath of LEGACY_BINARY_ASSETS) {
