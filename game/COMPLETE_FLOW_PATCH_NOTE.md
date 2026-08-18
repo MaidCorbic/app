@@ -1,1 +1,0 @@
-Mission completion flow hardening is implemented on fix/mission-completion-handoff-v13.
