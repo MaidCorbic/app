@@ -1,10 +1,11 @@
+import { RunnerScene } from './src/scenes/RunnerScene.js';
+
 // UPDATE 09 — WORLD INTERACTION V1
 // Uses the real RunnerScene checkpoints. No duplicate save, mission, progression,
 // combat, or checkpoint system is created here.
-const INTERACT_DISTANCE = 100;
-const MIN_SPAWN_DISTANCE = 260;
+const INTERACT_DISTANCE = 150;
+const MIN_SPAWN_DISTANCE = 220;
 const sceneState = new WeakMap();
-let uiReady = false;
 
 const distance = (a, b) => Math.hypot((a?.x || 0) - (b?.x || 0), (a?.y || 0) - (b?.y || 0));
 
@@ -15,12 +16,12 @@ function ensureUi() {
       const style = document.createElement('style');
       style.id = 'world-interaction-style';
       style.textContent = `
-        #worldInteractButton{position:fixed;left:50%;bottom:calc(158px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:99999;display:none;min-width:170px;padding:12px 20px;border:2px solid #8df4ff;border-radius:14px;background:rgba(4,15,28,.98);box-shadow:0 0 14px rgba(141,244,255,.48),0 0 30px rgba(25,200,245,.22),inset 0 0 15px rgba(141,244,255,.08);color:#e9fdff;font:900 12px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-align:center;text-transform:uppercase;pointer-events:auto;touch-action:manipulation}
+        #worldInteractButton{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:100000;display:none;min-width:180px;padding:13px 22px;border:2px solid #8df4ff;border-radius:14px;background:rgba(4,15,28,.98);box-shadow:0 0 14px rgba(141,244,255,.48),0 0 30px rgba(25,200,245,.22),inset 0 0 15px rgba(141,244,255,.08);color:#e9fdff;font:900 13px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-align:center;text-transform:uppercase;pointer-events:auto;touch-action:manipulation}
         #worldInteractButton.is-visible{display:block;animation:relayInteractPulse 1s ease-in-out infinite alternate}
         #worldInteractButton.is-active{border-color:#aee37f;color:#efffdc}
         #worldInteractButton small{display:block;margin-top:6px;color:#8df4ff;font-size:9px;letter-spacing:.08em}
         @keyframes relayInteractPulse{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.035)}}
-        @media(min-width:769px){#worldInteractButton{bottom:30px;min-width:150px}}
+        @media(min-width:769px){#worldInteractButton{bottom:30px;min-width:160px}}
         @media(prefers-reduced-motion:reduce){#worldInteractButton{animation:none}}
       `;
       document.head.appendChild(style);
@@ -46,22 +47,10 @@ function ensureUi() {
 
 function showCheckpointSecured(scene, checkpoint) {
   if (!scene?.add || !checkpoint?.active) return;
-  const old = checkpoint.getData('securedFx');
-  old?.forEach?.(item => item?.destroy?.());
-
   checkpoint.setTint?.(0xaee37f);
-  const ring = scene.add.circle(checkpoint.x, checkpoint.y - 30, 15, 0xaee37f, .16)
-    .setStrokeStyle(2, 0xdfffc2, .95).setDepth(13);
-  const label = scene.add.text(checkpoint.x, checkpoint.y - 78, 'CHECKPOINT SECURED', {
-    fontFamily:'DM Mono', fontSize:'12px', fontStyle:'bold', color:'#dfffc2',
-    stroke:'#08101c', strokeThickness:4, align:'center'
-  }).setOrigin(.5).setDepth(14);
-  const sub = scene.add.text(checkpoint.x, checkpoint.y - 58, 'RESPAWN LINK ACTIVE', {
-    fontFamily:'DM Mono', fontSize:'8px', color:'#b9f5ff',
-    stroke:'#08101c', strokeThickness:3, align:'center'
-  }).setOrigin(.5).setDepth(14);
-  const fx = [ring, label, sub];
-  checkpoint.setData('securedFx', fx);
+  const ring = scene.add.circle(checkpoint.x, checkpoint.y - 30, 15, 0xaee37f, .16).setStrokeStyle(2, 0xdfffc2, .95).setDepth(13);
+  const label = scene.add.text(checkpoint.x, checkpoint.y - 78, 'CHECKPOINT SECURED', { fontFamily:'DM Mono', fontSize:'12px', fontStyle:'bold', color:'#dfffc2', stroke:'#08101c', strokeThickness:4, align:'center' }).setOrigin(.5).setDepth(14);
+  const sub = scene.add.text(checkpoint.x, checkpoint.y - 58, 'RESPAWN LINK ACTIVE', { fontFamily:'DM Mono', fontSize:'8px', color:'#b9f5ff', stroke:'#08101c', strokeThickness:3, align:'center' }).setOrigin(.5).setDepth(14);
   scene.tweens?.add({targets:ring,scale:2.8,alpha:0,duration:520,ease:'Quad.out',onComplete:()=>ring.destroy()});
   scene.tweens?.add({targets:label,y:label.y-18,alpha:0,delay:900,duration:520,onComplete:()=>label.destroy()});
   scene.tweens?.add({targets:sub,y:sub.y-14,alpha:0,delay:900,duration:520,onComplete:()=>sub.destroy()});
@@ -74,34 +63,18 @@ function markCheckpointSecured(scene, checkpoint) {
   showCheckpointSecured(scene, checkpoint);
 }
 
-function wrapCheckpointActivation(scene) {
-  if (!scene || scene.__worldInteractionCheckpointWrapped || typeof scene.activateCheckpoint !== 'function') return;
-  const original = scene.activateCheckpoint.bind(scene);
-  scene.activateCheckpoint = marker => {
-    const before = scene.checkpoint?.index ?? -1;
-    const result = original(marker);
-    const after = scene.checkpoint?.index ?? -1;
-    if (after > before && marker) markCheckpointSecured(scene, marker);
-    return result;
-  };
-  scene.__worldInteractionCheckpointWrapped = true;
-}
-
 function makeTerminal(scene, checkpoint, index) {
-  const terminal = scene.add.container(checkpoint.x + 52, checkpoint.y - 44).setDepth(12).setSize(44, 58);
+  const terminal = scene.add.container(checkpoint.x + 42, checkpoint.y - 58).setDepth(20).setSize(46, 62);
   terminal.setDataEnabled();
   terminal.setData('checkpoint', checkpoint);
   terminal.setData('index', index);
   terminal.setData('activated', false);
 
-  const shadow = scene.add.ellipse(0, 19, 36, 9, 0x000000, .3);
-  const body = scene.add.rectangle(0, 0, 34, 44, 0x111e32, .98).setStrokeStyle(2, 0x8df4ff, 1);
-  const screen = scene.add.rectangle(0, -9, 21, 11, 0x19c8f5, .24).setStrokeStyle(1, 0xc8fbff, 1);
-  const core = scene.add.circle(0, 9, 5, 0xffd06e, 1).setStrokeStyle(1, 0xfff0b0, .9);
-  const label = scene.add.text(0, 36, `LINK ${String(index + 1).padStart(2,'0')}`, {
-    fontFamily:'monospace', fontSize:'9px', fontStyle:'bold', color:'#dffcff',
-    stroke:'#02050d', strokeThickness:4
-  }).setOrigin(.5);
+  const shadow = scene.add.ellipse(0, 27, 40, 9, 0x000000, .34);
+  const body = scene.add.rectangle(0, 0, 34, 46, 0x101d31, 1).setStrokeStyle(2, 0x8df4ff, 1);
+  const screen = scene.add.rectangle(0, -11, 22, 12, 0x19c8f5, .42).setStrokeStyle(1, 0xc8fbff, 1);
+  const core = scene.add.circle(0, 9, 6, 0xffd06e, 1).setStrokeStyle(1, 0xfff0b0, .95);
+  const label = scene.add.text(0, 39, `LINK ${String(index + 1).padStart(2,'0')}`, { fontFamily:'monospace', fontSize:'9px', fontStyle:'bold', color:'#dffcff', stroke:'#02050d', strokeThickness:4 }).setOrigin(.5);
   terminal.add([shadow, body, screen, core, label]);
   terminal.setData('children', {body, screen, core, label});
   scene.tweens?.add({targets:core,alpha:{from:.35,to:1},scale:{from:.9,to:1.15},duration:620,yoyo:true,repeat:-1});
@@ -109,29 +82,19 @@ function makeTerminal(scene, checkpoint, index) {
   return terminal;
 }
 
-export function setupWorldInteraction(scene) {
+function setupWorldInteraction(scene) {
   if (!scene?.player || sceneState.has(scene)) return;
-  wrapCheckpointActivation(scene);
-
   const checkpoints = scene.checkpoints?.getChildren?.() || [];
+  if (!checkpoints.length) return;
+
   const spawn = scene.mission?.spawn || scene.player;
   const ordered = checkpoints
     .map((checkpoint,index)=>({checkpoint,index,spawnDistance:distance(spawn,checkpoint)}))
     .sort((a,b)=>a.checkpoint.x-b.checkpoint.x);
 
-  // The interaction console is for the next meaningful checkpoint, not the spawn itself.
-  // This prevents the generic INTERACT/E prompt from appearing immediately on level entry.
   const eligible = ordered.filter(item => item.spawnDistance >= MIN_SPAWN_DISTANCE);
   const source = eligible.length ? eligible : ordered;
   const terminals = source.map(item => makeTerminal(scene,item.checkpoint,item.index));
-
-  terminals.forEach(terminal => {
-    const checkpoint = terminal.getData('checkpoint');
-    if (checkpoint?.getData('worldInteractionSecured')) {
-      terminal.setData('activated', true);
-      terminal.getData('children')?.body?.setStrokeStyle?.(2,0xaee37f,1);
-    }
-  });
 
   sceneState.set(scene,{terminals});
   scene.worldInteractionTerminals = terminals;
@@ -150,7 +113,6 @@ function activate(scene, terminal) {
   children?.core?.setFillStyle?.(0xaee37f,1);
   children?.label?.setText?.('SECURED');
 
-  // Use the real checkpoint system. The existing physical overlap still works too.
   scene.activateCheckpoint?.(checkpoint);
   markCheckpointSecured(scene, checkpoint);
 
@@ -172,7 +134,7 @@ function activate(scene, terminal) {
   return true;
 }
 
-export function updateWorldInteraction(scene) {
+function updateWorldInteraction(scene) {
   const state = sceneState.get(scene);
   if (!scene?.player?.active || !state) return;
   window.__relayRunnerScene = scene;
@@ -191,6 +153,29 @@ export function updateWorldInteraction(scene) {
   button.innerHTML = 'INTERACT<small>E / TAP · CHECKPOINT</small>';
   button.classList.add('is-visible');
   button.classList.remove('is-active');
+}
+
+// Critical runtime hook: main.js creates the Phaser game before this module executes,
+// but RunnerScene does not start until the player launches a mission. Patch the actual
+// class now, before the first mission starts, so setup/update cannot be lost to another
+// wrapper around RunnerScene.prototype.create/update.
+const originalCreate = RunnerScene.prototype.create;
+const originalUpdate = RunnerScene.prototype.update;
+if (!RunnerScene.prototype.__worldInteractionCreatePatched) {
+  RunnerScene.prototype.create = function patchedWorldInteractionCreate(...args) {
+    const result = originalCreate.apply(this,args);
+    try { setupWorldInteraction(this); } catch (error) { console.error('[WorldInteraction] create failed', error); }
+    return result;
+  };
+  RunnerScene.prototype.__worldInteractionCreatePatched = true;
+}
+if (!RunnerScene.prototype.__worldInteractionUpdatePatched) {
+  RunnerScene.prototype.update = function patchedWorldInteractionUpdate(...args) {
+    const result = originalUpdate.apply(this,args);
+    try { updateWorldInteraction(this); } catch (error) { console.error('[WorldInteraction] update failed', error); }
+    return result;
+  };
+  RunnerScene.prototype.__worldInteractionUpdatePatched = true;
 }
 
 document.addEventListener('keydown',event=>{
