@@ -1,192 +1,206 @@
-// UPDATE 09 — WORLD INTERACTION V1 FINAL
-// Uses the existing RunnerScene lifecycle through core-stability.js.
-// No new save, mission, progression, combat, or checkpoint system is created.
-
-const INTERACT_DISTANCE = 220;
-const stateByScene = new WeakMap();
+// UPDATE 09 — WORLD INTERACTION V1
+// Uses the real RunnerScene checkpoints. No duplicate save, mission, progression,
+// combat, or checkpoint system is created here.
+const INTERACT_DISTANCE = 100;
+const MIN_SPAWN_DISTANCE = 260;
+const sceneState = new WeakMap();
+let uiReady = false;
 
 const distance = (a, b) => Math.hypot((a?.x || 0) - (b?.x || 0), (a?.y || 0) - (b?.y || 0));
 
 function ensureUi() {
   let button = document.getElementById('worldInteractButton');
   if (!button) {
-    const style = document.createElement('style');
-    style.id = 'world-interaction-style';
-    style.textContent = `
-      #worldInteractButton{
-        position:fixed;left:50%;top:55%;transform:translate(-50%,-50%);
-        z-index:99999;display:none;min-width:176px;padding:12px 20px;
-        border:2px solid #8df4ff;border-radius:14px;
-        background:linear-gradient(180deg,rgba(10,30,48,.98),rgba(3,12,24,.99));
-        box-shadow:0 0 14px rgba(141,244,255,.45),0 0 30px rgba(25,200,245,.22);
-        color:#e9fdff;font:900 12px/1.1 ui-monospace,monospace;
-        letter-spacing:.12em;text-align:center;text-transform:uppercase;
-        pointer-events:auto;touch-action:manipulation;
-      }
-      #worldInteractButton.is-visible{display:block}
-      #worldInteractButton.is-active{border-color:#aee37f;color:#efffdc}
-      #worldInteractButton small{display:block;margin-top:6px;color:#8df4ff;font-size:9px}
-      @media (min-width:769px){#worldInteractButton{top:auto;bottom:28px;transform:translateX(-50%)}}
-    `;
-    document.head.appendChild(style);
+    if (!document.getElementById('world-interaction-style')) {
+      const style = document.createElement('style');
+      style.id = 'world-interaction-style';
+      style.textContent = `
+        #worldInteractButton{position:fixed;left:50%;bottom:calc(158px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:99999;display:none;min-width:170px;padding:12px 20px;border:2px solid #8df4ff;border-radius:14px;background:rgba(4,15,28,.98);box-shadow:0 0 14px rgba(141,244,255,.48),0 0 30px rgba(25,200,245,.22),inset 0 0 15px rgba(141,244,255,.08);color:#e9fdff;font:900 12px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-align:center;text-transform:uppercase;pointer-events:auto;touch-action:manipulation}
+        #worldInteractButton.is-visible{display:block;animation:relayInteractPulse 1s ease-in-out infinite alternate}
+        #worldInteractButton.is-active{border-color:#aee37f;color:#efffdc}
+        #worldInteractButton small{display:block;margin-top:6px;color:#8df4ff;font-size:9px;letter-spacing:.08em}
+        @keyframes relayInteractPulse{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.035)}}
+        @media(min-width:769px){#worldInteractButton{bottom:30px;min-width:150px}}
+        @media(prefers-reduced-motion:reduce){#worldInteractButton{animation:none}}
+      `;
+      document.head.appendChild(style);
+    }
     button = document.createElement('button');
     button.id = 'worldInteractButton';
     button.type = 'button';
     button.innerHTML = 'INTERACT<small>E / TAP</small>';
     document.body.appendChild(button);
   }
-  if (!button.dataset.worldInteractionBound) {
-    button.dataset.worldInteractionBound = '1';
+  if (!button.dataset.bound) {
+    button.dataset.bound = '1';
     button.addEventListener('pointerdown', event => {
       event.preventDefault();
       event.stopPropagation();
       const scene = window.__relayRunnerScene;
-      if (scene) interact(scene);
+      const target = scene?.worldInteractionTarget;
+      if (scene && target) activate(scene, target);
     }, { passive:false });
   }
   return button;
 }
 
-function pulse(scene, x, y, color = 0x8df4ff) {
-  if (!scene?.add) return;
-  const ring = scene.add.circle(x, y, 12, color, .22).setDepth(200);
-  scene.tweens?.add({ targets:ring, scale:3.2, alpha:0, duration:380, onComplete:()=>ring.destroy() });
+function showCheckpointSecured(scene, checkpoint) {
+  if (!scene?.add || !checkpoint?.active) return;
+  const old = checkpoint.getData('securedFx');
+  old?.forEach?.(item => item?.destroy?.());
+
+  checkpoint.setTint?.(0xaee37f);
+  const ring = scene.add.circle(checkpoint.x, checkpoint.y - 30, 15, 0xaee37f, .16)
+    .setStrokeStyle(2, 0xdfffc2, .95).setDepth(13);
+  const label = scene.add.text(checkpoint.x, checkpoint.y - 78, 'CHECKPOINT SECURED', {
+    fontFamily:'DM Mono', fontSize:'12px', fontStyle:'bold', color:'#dfffc2',
+    stroke:'#08101c', strokeThickness:4, align:'center'
+  }).setOrigin(.5).setDepth(14);
+  const sub = scene.add.text(checkpoint.x, checkpoint.y - 58, 'RESPAWN LINK ACTIVE', {
+    fontFamily:'DM Mono', fontSize:'8px', color:'#b9f5ff',
+    stroke:'#08101c', strokeThickness:3, align:'center'
+  }).setOrigin(.5).setDepth(14);
+  const fx = [ring, label, sub];
+  checkpoint.setData('securedFx', fx);
+  scene.tweens?.add({targets:ring,scale:2.8,alpha:0,duration:520,ease:'Quad.out',onComplete:()=>ring.destroy()});
+  scene.tweens?.add({targets:label,y:label.y-18,alpha:0,delay:900,duration:520,onComplete:()=>label.destroy()});
+  scene.tweens?.add({targets:sub,y:sub.y-14,alpha:0,delay:900,duration:520,onComplete:()=>sub.destroy()});
 }
 
-function addTerminal(scene, x, y, index, checkpoint = null) {
-  const terminal = scene.add.container(x, y).setDepth(110);
+function markCheckpointSecured(scene, checkpoint) {
+  if (!scene || !checkpoint) return;
+  checkpoint.setData('worldInteractionSecured', true);
+  checkpoint.setTint?.(0xaee37f);
+  showCheckpointSecured(scene, checkpoint);
+}
+
+function wrapCheckpointActivation(scene) {
+  if (!scene || scene.__worldInteractionCheckpointWrapped || typeof scene.activateCheckpoint !== 'function') return;
+  const original = scene.activateCheckpoint.bind(scene);
+  scene.activateCheckpoint = marker => {
+    const before = scene.checkpoint?.index ?? -1;
+    const result = original(marker);
+    const after = scene.checkpoint?.index ?? -1;
+    if (after > before && marker) markCheckpointSecured(scene, marker);
+    return result;
+  };
+  scene.__worldInteractionCheckpointWrapped = true;
+}
+
+function makeTerminal(scene, checkpoint, index) {
+  const terminal = scene.add.container(checkpoint.x + 52, checkpoint.y - 44).setDepth(12).setSize(44, 58);
   terminal.setDataEnabled();
-  terminal.setData('activated', false);
-  terminal.setData('index', index);
   terminal.setData('checkpoint', checkpoint);
+  terminal.setData('index', index);
+  terminal.setData('activated', false);
 
-  const shadow = scene.add.rectangle(0, 5, 46, 62, 0x000000, .28);
-  const body = scene.add.rectangle(0, 0, 36, 50, 0x111e32, .99).setStrokeStyle(2, 0x8df4ff, 1);
-  const screen = scene.add.rectangle(0, -11, 22, 13, 0x19c8f5, .35).setStrokeStyle(1, 0xc8fbff, .95);
-  const core = scene.add.circle(0, 10, 5, 0xffd06e, 1).setStrokeStyle(1, 0xfff0b0, .9);
-  const label = scene.add.text(0, 39, `LINK ${String(index + 1).padStart(2,'0')}`, {
-    fontFamily:'monospace',fontSize:'9px',fontStyle:'bold',color:'#dffcff',stroke:'#02050d',strokeThickness:4
+  const shadow = scene.add.ellipse(0, 19, 36, 9, 0x000000, .3);
+  const body = scene.add.rectangle(0, 0, 34, 44, 0x111e32, .98).setStrokeStyle(2, 0x8df4ff, 1);
+  const screen = scene.add.rectangle(0, -9, 21, 11, 0x19c8f5, .24).setStrokeStyle(1, 0xc8fbff, 1);
+  const core = scene.add.circle(0, 9, 5, 0xffd06e, 1).setStrokeStyle(1, 0xfff0b0, .9);
+  const label = scene.add.text(0, 36, `LINK ${String(index + 1).padStart(2,'0')}`, {
+    fontFamily:'monospace', fontSize:'9px', fontStyle:'bold', color:'#dffcff',
+    stroke:'#02050d', strokeThickness:4
   }).setOrigin(.5);
-  const prompt = scene.add.text(0, -44, 'INTERACT', {
-    fontFamily:'monospace',fontSize:'10px',fontStyle:'bold',color:'#8df4ff',stroke:'#02050d',strokeThickness:4
-  }).setOrigin(.5);
-
-  terminal.add([shadow, body, screen, core, label, prompt]);
-
-  if (!scene.motionReduced) {
-    scene.tweens?.add({targets:core,alpha:{from:.35,to:1},scale:{from:.9,to:1.18},duration:620,yoyo:true,repeat:-1});
-    scene.tweens?.add({targets:screen,alpha:{from:.25,to:.85},duration:800,yoyo:true,repeat:-1});
-    scene.tweens?.add({targets:prompt,alpha:{from:.45,to:1},duration:700,yoyo:true,repeat:-1});
-  }
+  terminal.add([shadow, body, screen, core, label]);
+  terminal.setData('children', {body, screen, core, label});
+  scene.tweens?.add({targets:core,alpha:{from:.35,to:1},scale:{from:.9,to:1.15},duration:620,yoyo:true,repeat:-1});
+  scene.tweens?.add({targets:screen,alpha:{from:.25,to:.8},duration:800,yoyo:true,repeat:-1});
   return terminal;
 }
 
 export function setupWorldInteraction(scene) {
-  if (!scene?.player || stateByScene.has(scene)) return;
+  if (!scene?.player || sceneState.has(scene)) return;
+  wrapCheckpointActivation(scene);
 
-  const terminals = [];
   const checkpoints = scene.checkpoints?.getChildren?.() || [];
+  const spawn = scene.mission?.spawn || scene.player;
+  const ordered = checkpoints
+    .map((checkpoint,index)=>({checkpoint,index,spawnDistance:distance(spawn,checkpoint)}))
+    .sort((a,b)=>a.checkpoint.x-b.checkpoint.x);
 
-  // Guaranteed first interaction point: visible shortly after spawn and linked to
-  // the first real checkpoint. This makes UPDATE 09 testable in every mission.
-  const firstCheckpoint = checkpoints.find(item => item?.active) || null;
-  const spawn = scene.mission?.spawn || { x: scene.player.x, y: scene.player.y };
-  terminals.push(addTerminal(
-    scene,
-    Number.isFinite(spawn.x) ? spawn.x + 120 : scene.player.x + 120,
-    Number.isFinite(spawn.y) ? spawn.y - 54 : scene.player.y - 54,
-    0,
-    firstCheckpoint
-  ));
+  // The interaction console is for the next meaningful checkpoint, not the spawn itself.
+  // This prevents the generic INTERACT/E prompt from appearing immediately on level entry.
+  const eligible = ordered.filter(item => item.spawnDistance >= MIN_SPAWN_DISTANCE);
+  const source = eligible.length ? eligible : ordered;
+  const terminals = source.map(item => makeTerminal(scene,item.checkpoint,item.index));
 
-  // Existing checkpoints get their own linked interaction terminal.
-  checkpoints.forEach((checkpoint, index) => {
-    terminals.push(addTerminal(scene, checkpoint.x + 58, checkpoint.y - 52, index + 1, checkpoint));
+  terminals.forEach(terminal => {
+    const checkpoint = terminal.getData('checkpoint');
+    if (checkpoint?.getData('worldInteractionSecured')) {
+      terminal.setData('activated', true);
+      terminal.getData('children')?.body?.setStrokeStyle?.(2,0xaee37f,1);
+    }
   });
 
+  sceneState.set(scene,{terminals});
   scene.worldInteractionTerminals = terminals;
-  scene.worldInteractionTarget = null;
-  stateByScene.set(scene, terminals);
   window.__relayRunnerScene = scene;
   ensureUi();
 }
 
-export function updateWorldInteraction(scene) {
-  if (!scene?.player?.active) return;
-  const terminals = stateByScene.get(scene);
-  if (!terminals) return;
-
-  window.__relayRunnerScene = scene;
-  const button = ensureUi();
-
-  const nearest = terminals
-    .filter(t => t?.active && !t.getData('activated'))
-    .sort((a,b) => distance(scene.player,a) - distance(scene.player,b))[0] || null;
-
-  scene.worldInteractionTarget = nearest && distance(scene.player, nearest) <= INTERACT_DISTANCE ? nearest : null;
-
-  if (!scene.worldInteractionTarget) {
-    button.classList.remove('is-visible','is-active');
-    return;
-  }
-
-  button.innerHTML = 'INTERACT<small>E / TAP</small>';
-  button.classList.add('is-visible');
-  button.classList.remove('is-active');
-}
-
-export function activate(scene, terminal = scene?.worldInteractionTarget) {
-  if (!scene || !terminal?.active || terminal.getData('activated')) return false;
-  if (distance(scene.player, terminal) > INTERACT_DISTANCE) return false;
+function activate(scene, terminal) {
+  const checkpoint = terminal?.getData('checkpoint');
+  if (!scene || !terminal?.active || !checkpoint?.active || terminal.getData('activated')) return false;
 
   terminal.setData('activated', true);
-  terminal.list?.forEach(child => child.setTint?.(0xaee37f));
-  pulse(scene, terminal.x, terminal.y, 0xaee37f);
+  const children = terminal.getData('children');
+  children?.body?.setStrokeStyle?.(2,0xaee37f,1);
+  children?.screen?.setFillStyle?.(0xaee37f,.42);
+  children?.core?.setFillStyle?.(0xaee37f,1);
+  children?.label?.setText?.('SECURED');
 
-  const linkedCheckpoint = terminal.getData('checkpoint') || null;
-  const checkpoint = linkedCheckpoint?.active
-    ? linkedCheckpoint
-    : (scene.checkpoints?.getChildren?.() || [])
-        .filter(item => item?.active)
-        .sort((a,b) => distance(terminal,a) - distance(terminal,b))[0] || null;
+  // Use the real checkpoint system. The existing physical overlap still works too.
+  scene.activateCheckpoint?.(checkpoint);
+  markCheckpointSecured(scene, checkpoint);
 
-  if (checkpoint && typeof scene.activateCheckpoint === 'function') {
-    scene.activateCheckpoint(checkpoint);
-  }
-
-  const nearbyBarrier = (scene.barriers?.getChildren?.() || [])
-    .filter(item => item?.active)
-    .sort((a,b) => distance(terminal,a) - distance(terminal,b))[0] || null;
-
-  if (nearbyBarrier && distance(terminal, nearbyBarrier) < 220) {
-    try { nearbyBarrier.disableBody(true, true); } catch {}
-    scene.playerCue?.('ACCESS GRANTED · ROUTE OPEN', '#aee37f');
+  const barrier = (scene.barriers?.getChildren?.() || [])
+    .filter(item=>item?.active)
+    .sort((a,b)=>distance(terminal,a)-distance(terminal,b))[0];
+  if (barrier && distance(terminal,barrier) < 220) {
+    try { barrier.disableBody(true,true); } catch {}
+    scene.playerCue?.('ACCESS GRANTED · ROUTE OPEN','#aee37f');
   } else {
-    scene.playerCue?.('CHECKPOINT LINKED', '#aee37f');
+    scene.playerCue?.('CHECKPOINT SECURED','#aee37f');
   }
 
   const button = ensureUi();
   button.classList.remove('is-visible');
   button.classList.add('is-active');
-  scene.game?.events?.emit('world-interaction', {
-    type:'terminal', index:terminal.getData('index'), activated:true
-  });
+  window.setTimeout(()=>button.classList.remove('is-active'),900);
+  scene.game?.events?.emit('world-interaction',{type:'checkpoint-terminal',index:terminal.getData('index'),secured:true});
   return true;
 }
 
-function interact(scene) {
-  const target = scene?.worldInteractionTarget;
-  if (!target) return false;
-  return activate(scene, target);
+export function updateWorldInteraction(scene) {
+  const state = sceneState.get(scene);
+  if (!scene?.player?.active || !state) return;
+  window.__relayRunnerScene = scene;
+  const button = ensureUi();
+  const candidates = state.terminals
+    .filter(terminal=>terminal?.active && !terminal.getData('activated'))
+    .filter(terminal=>distance(scene.player,terminal)<=INTERACT_DISTANCE)
+    .sort((a,b)=>distance(scene.player,a)-distance(scene.player,b));
+  const nearest = candidates[0] || null;
+  scene.worldInteractionTarget = nearest;
+
+  if (!nearest) {
+    button.classList.remove('is-visible','is-active');
+    return;
+  }
+  button.innerHTML = 'INTERACT<small>E / TAP · CHECKPOINT</small>';
+  button.classList.add('is-visible');
+  button.classList.remove('is-active');
 }
 
-document.addEventListener('keydown', event => {
-  if (event.repeat || String(event.key).toLowerCase() !== 'e') return;
+document.addEventListener('keydown',event=>{
+  if (event.repeat || event.key.toLowerCase()!=='e') return;
   const scene = window.__relayRunnerScene;
-  if (scene && interact(scene)) event.preventDefault();
-}, true);
+  const target = scene?.worldInteractionTarget;
+  if (scene && target && activate(scene,target)) event.preventDefault();
+},true);
 
-document.addEventListener('visibilitychange', () => {
+document.addEventListener('visibilitychange',()=>{
   if (document.hidden) document.getElementById('worldInteractButton')?.classList.remove('is-visible','is-active');
 });
 
