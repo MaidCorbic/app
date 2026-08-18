@@ -82,7 +82,7 @@ function makeTerminal(scene, checkpoint, index) {
   return terminal;
 }
 
-function setupWorldInteraction(scene) {
+export function setupWorldInteraction(scene) {
   if (!scene?.player || sceneState.has(scene)) return;
   const checkpoints = scene.checkpoints?.getChildren?.() || [];
   if (!checkpoints.length) return;
@@ -134,7 +134,7 @@ function activate(scene, terminal) {
   return true;
 }
 
-function updateWorldInteraction(scene) {
+export function updateWorldInteraction(scene) {
   const state = sceneState.get(scene);
   if (!scene?.player?.active || !state) return;
   window.__relayRunnerScene = scene;
