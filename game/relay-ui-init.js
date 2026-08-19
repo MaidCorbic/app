@@ -55,6 +55,7 @@ import './game-feel-v1.js';
 import './audio-feedback-v2.js';
 import './gameplay-event-hud-v2.js';
 import './src/systems/mobile-controls-controller.js';
+import './src/systems/world-variation-game-feel-v1.js';
 import './src/systems/viewport-sync.js';
 // MUST remain the final static import in this entry module.
 // It wraps RunnerScene after the existing gameplay wrappers so UPDATE 09 cannot be overwritten.
