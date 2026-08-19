@@ -65,5 +65,7 @@ import './world-interaction-runtime-v2.js';
 // TEST UX — keep tutorial settings gate and isolate the player-adjacent shield visual cleanup.
 import './player-shield-visual-cleanup-v1.js';
 import './tutorial-runtime-gate-v1.js';
+// TEST UX — Home TUTORIAL button only. Existing Home layout is preserved.
+import './home-tutorial-v1.js';
 // TEST FIX — HUD spacing, visible barriers and barrier collision footprint.
 import './level-visual-stability-fix-v1.js';
