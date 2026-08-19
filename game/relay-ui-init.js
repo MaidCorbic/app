@@ -54,7 +54,7 @@ import './gameplay-event-hud-v2.js';
 import './src/systems/mobile-controls-controller.js';
 import './src/systems/world-variation-game-feel-v1.js';
 import './src/systems/city-backdrop-replacement-v1.js';
-// UPDATE 11 — Dynamic World Mechanics. Kept after RunnerScene and before the final wrapper.
-import './src/systems/dynamic-world-mechanics-v1.js';
+// UPDATE 11 — safe per-mission deployment; one interactive object per campaign mission.
+import './src/systems/dynamic-world-mechanics-v2.js';
 import './src/systems/viewport-sync.js';
 import './world-interaction-runtime-v2.js';
