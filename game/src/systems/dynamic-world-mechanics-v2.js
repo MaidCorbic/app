@@ -1,78 +1,52 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 
-// UPDATE 11 — DYNAMIC WORLD MECHANICS V3
+// UPDATE 11 — DYNAMIC WORLD MECHANICS V4
 // Exactly ONE authored world-control object per campaign mission.
-// Placement is deterministic per mission: each mission has its own manually
-// selected barrier index and fixed local offset. No nearest-object discovery.
-// Existing barrier bodies are reused for the gameplay consequence.
-// No new physics bodies, platform mutation, movement changes, or checkpoint changes.
+// Each mechanic targets a named, authored barrier coordinate from the mission data.
+// We intentionally do NOT use array indexes or nearest-object discovery.
+// If the authored target is missing/moved, the mechanic refuses to spawn instead
+// of silently attaching to the wrong gameplay object.
+// Existing barrier bodies are reused. No new physics bodies are created.
 
 const INTERACT_DISTANCE = 118;
 const COOLDOWN_MS = 300;
+const TARGET_TOLERANCE = 1;
 
 const MISSION_CONFIG = {
   'first-delivery': {
-    barrierIndex: 0,
-    offsetX: -150,
-    offsetY: -42,
-    title: 'POWER NODE',
-    hint: 'POWER ROUTE',
-    message: 'POWER ROUTE ONLINE',
-    color: '#aee37f',
+    targetId: 'old-quarter-delivery-gate', targetX: 3570, targetY: 546,
+    offsetX: -150, offsetY: -42,
+    title: 'POWER NODE', hint: 'POWER ROUTE', message: 'POWER ROUTE ONLINE', color: '#aee37f',
   },
   'dead-drop': {
-    barrierIndex: 1,
-    offsetX: -150,
-    offsetY: -42,
-    title: 'DOCK CONTROL',
-    hint: 'RELEASE DOCK GATE',
-    message: 'DOCK ROUTE RELEASED',
-    color: '#8df4ff',
+    targetId: 'salt-docks-final-gate', targetX: 3740, targetY: 546,
+    offsetX: -150, offsetY: -42,
+    title: 'DOCK CONTROL', hint: 'RELEASE DOCK GATE', message: 'DOCK ROUTE RELEASED', color: '#8df4ff',
   },
   blackout: {
-    barrierIndex: 2,
-    offsetX: -150,
-    offsetY: -42,
-    title: 'GRID CONTROL',
-    hint: 'RESTORE GRID ACCESS',
-    message: 'GRID ACCESS RESTORED',
-    color: '#8df4ff',
+    targetId: 'grid-nine-final-gate', targetX: 3830, targetY: 546,
+    offsetX: -150, offsetY: -42,
+    title: 'GRID CONTROL', hint: 'RESTORE GRID ACCESS', message: 'GRID ACCESS RESTORED', color: '#8df4ff',
   },
   pursuit: {
-    barrierIndex: 1,
-    offsetX: -150,
-    offsetY: -42,
-    title: 'RAIL CONTROL',
-    hint: 'DISABLE SECURITY',
-    message: 'RAIL SECURITY DISABLED',
-    color: '#ffbd7a',
+    targetId: 'rail-spine-exit-gate', targetX: 3790, targetY: 546,
+    offsetX: -150, offsetY: -42,
+    title: 'RAIL CONTROL', hint: 'DISABLE SECURITY', message: 'RAIL SECURITY DISABLED', color: '#ffbd7a',
   },
   'signal-storm': {
-    barrierIndex: 2,
-    offsetX: -150,
-    offsetY: -42,
-    title: 'ARRAY CONTROL',
-    hint: 'OPEN STORM ROUTE',
-    message: 'STORM ROUTE OPEN',
-    color: '#b993ff',
+    targetId: 'crown-array-final-gate', targetX: 3900, targetY: 546,
+    offsetX: -150, offsetY: -42,
+    title: 'ARRAY CONTROL', hint: 'OPEN STORM ROUTE', message: 'STORM ROUTE OPEN', color: '#b993ff',
   },
   'corporate-lockdown': {
-    barrierIndex: 1,
-    offsetX: -150,
-    offsetY: -42,
-    title: 'HELIX CONTROL',
-    hint: 'RELEASE LOCKDOWN',
-    message: 'LOCKDOWN RELEASED',
-    color: '#ff826e',
+    targetId: 'helix-tower-final-gate', targetX: 3820, targetY: 546,
+    offsetX: -150, offsetY: -42,
+    title: 'HELIX CONTROL', hint: 'RELEASE LOCKDOWN', message: 'LOCKDOWN RELEASED', color: '#ff826e',
   },
   'final-relay': {
-    barrierIndex: 2,
-    offsetX: -150,
-    offsetY: -42,
-    title: 'APEX CONTROL',
-    hint: 'OPEN FINAL ROUTE',
-    message: 'FINAL RELAY ROUTE OPEN',
-    color: '#ffd06e',
+    targetId: 'apex-spine-final-gate', targetX: 3900, targetY: 546,
+    offsetX: -150, offsetY: -42,
+    title: 'APEX CONTROL', hint: 'OPEN FINAL ROUTE', message: 'FINAL RELAY ROUTE OPEN', color: '#ffd06e',
   },
 };
 
@@ -84,6 +58,7 @@ function getMissionId(scene) {
     scene?.sys?.settings?.data?.mission,
     scene?.registry?.get?.('missionId'),
     scene?.registry?.get?.('mission'),
+    scene?.mission?.id,
     document.documentElement?.dataset?.missionId,
     document.body?.dataset?.missionId,
   ];
@@ -99,10 +74,10 @@ function ensureUi() {
   let button = document.getElementById('dynamicWorldInteractButton');
 
   if (!button) {
-    let style = document.getElementById('dynamic-world-mechanics-v3-style');
+    let style = document.getElementById('dynamic-world-mechanics-v4-style');
     if (!style) {
       style = document.createElement('style');
-      style.id = 'dynamic-world-mechanics-v3-style';
+      style.id = 'dynamic-world-mechanics-v4-style';
       style.textContent = `
         #dynamicWorldInteractButton {
           position: fixed;
@@ -128,11 +103,6 @@ function ensureUi() {
           -webkit-user-select: none;
         }
         #dynamicWorldInteractButton.is-visible { display: block; }
-        #dynamicWorldInteractButton.is-done {
-          border-color: #aee37f;
-          color: #efffdc;
-          box-shadow: 0 0 16px rgba(174,227,127,.38), inset 0 0 14px rgba(174,227,127,.08);
-        }
         #dynamicWorldInteractButton small {
           display: block;
           margin-top: 5px;
@@ -157,13 +127,13 @@ function ensureUi() {
     document.body.appendChild(button);
   }
 
-  if (!button.dataset.boundV3) {
-    button.dataset.boundV3 = '1';
+  if (!button.dataset.boundV4) {
+    button.dataset.boundV4 = '1';
     button.addEventListener('pointerdown', event => {
       event.preventDefault();
       event.stopPropagation();
-      const scene = window.__dynamicWorldSceneV3;
-      const target = scene?.dynamicWorldTargetV3;
+      const scene = window.__dynamicWorldSceneV4;
+      const target = scene?.dynamicWorldTargetV4;
       if (scene && target) interact(scene, target);
     }, { passive: false });
   }
@@ -184,42 +154,35 @@ function makeControl(scene, x, y, config, missionId) {
     .setStrokeStyle(1, 0xfff2bd, .9);
   const lever = scene.add.rectangle(0, 10, 4, 13, 0xd9faff, 1);
   const label = scene.add.text(0, 40, 'CONTROL', {
-    fontFamily: 'monospace',
-    fontSize: '7px',
-    fontStyle: 'bold',
-    color: '#dffcff',
-    stroke: '#02050d',
-    strokeThickness: 3,
+    fontFamily: 'monospace', fontSize: '7px', fontStyle: 'bold',
+    color: '#dffcff', stroke: '#02050d', strokeThickness: 3,
   }).setOrigin(.5);
   const caption = scene.add.text(0, -42, config.title, {
-    fontFamily: 'monospace',
-    fontSize: '7px',
-    fontStyle: 'bold',
-    color: '#b9f5ff',
-    stroke: '#02050d',
-    strokeThickness: 3,
+    fontFamily: 'monospace', fontSize: '7px', fontStyle: 'bold',
+    color: '#b9f5ff', stroke: '#02050d', strokeThickness: 3,
   }).setOrigin(.5);
 
   container.add([shadow, body, core, lever, label, caption]);
   container.setDataEnabled();
   container.setData('mechanicType', 'route-control');
   container.setData('missionId', missionId);
+  container.setData('targetId', config.targetId);
   container.setData('hint', config.hint);
   container.setData('used', false);
   container.setData('children', { body, core, lever, label, caption });
   return container;
 }
 
-function getAuthoredBarrier(scene, missionId) {
-  const config = MISSION_CONFIG[missionId];
-  const barriers = (scene?.barriers?.getChildren?.() || [])
-    .filter(item => item?.active && item.visible !== false)
-    .sort((a, b) => (a.x || 0) - (b.x || 0));
+function getAuthoredBarrier(scene, config) {
+  const barriers = scene?.barriers?.getChildren?.() || [];
+  const target = barriers.find(barrier => {
+    if (!barrier?.active || barrier.visible === false) return false;
+    return Math.abs((barrier.x || 0) - (config.targetX + 24)) <= TARGET_TOLERANCE
+      && Math.abs((barrier.y || 0) - (config.targetY + 32)) <= TARGET_TOLERANCE;
+  });
 
-  // The barrier index is authored per mission. There is intentionally no
-  // nearest-barrier fallback: if the level layout changes, the mechanic does
-  // not silently attach itself to an unrelated gameplay object.
-  return barriers[config.barrierIndex] || null;
+  if (target) target.setData?.('dynamicWorldTargetId', config.targetId);
+  return target || null;
 }
 
 function setup(scene) {
@@ -228,18 +191,16 @@ function setup(scene) {
   const missionId = getMissionId(scene);
   const config = missionId ? MISSION_CONFIG[missionId] : null;
   if (!missionId || !config) {
-    console.warn('[DynamicWorldV3] mission id unavailable; mechanic not spawned.');
+    console.warn('[DynamicWorldV4] mission id unavailable; mechanic not spawned.');
     return;
   }
 
-  const targetBarrier = getAuthoredBarrier(scene, missionId);
+  const targetBarrier = getAuthoredBarrier(scene, config);
   if (!targetBarrier) {
-    console.error(`[DynamicWorldV3] authored barrier ${config.barrierIndex} missing for ${missionId}; mechanic not spawned.`);
+    console.error(`[DynamicWorldV4] authored target ${config.targetId} missing at ${config.targetX},${config.targetY}; mechanic not spawned.`);
     return;
   }
 
-  // Fixed, authored placement relative to the selected level barrier.
-  // This remains deterministic and does not search for another object.
   const control = makeControl(
     scene,
     targetBarrier.x + config.offsetX,
@@ -257,14 +218,13 @@ function setup(scene) {
   };
 
   stateByScene.set(scene, state);
-  scene.dynamicWorldMechanicsV3 = state;
+  scene.dynamicWorldMechanicsV4 = state;
 }
 
 function releaseBarrier(scene, state) {
   const barrier = state?.targetBarrier;
   if (!barrier?.active || barrier.visible === false) return false;
 
-  // Reuse the existing barrier body. No new collision body is created.
   try {
     if (typeof barrier.disableBody === 'function') {
       barrier.disableBody(true, true);
@@ -272,7 +232,7 @@ function releaseBarrier(scene, state) {
       barrier.body.enable = false;
     }
   } catch (error) {
-    console.warn('[DynamicWorldV3] barrier release fallback', error);
+    console.warn('[DynamicWorldV4] barrier release fallback', error);
   }
 
   barrier.setVisible?.(false);
@@ -305,20 +265,19 @@ function update(scene) {
   const state = stateByScene.get(scene);
   if (!state || !scene?.player?.active) return;
 
-  window.__dynamicWorldSceneV3 = scene;
+  window.__dynamicWorldSceneV4 = scene;
   const button = ensureUi();
   const control = state.control;
 
   if (!control?.active || control.getData('used') || distance(scene.player, control) > INTERACT_DISTANCE) {
-    button.classList.remove('is-visible', 'is-done');
-    scene.dynamicWorldTargetV3 = null;
+    button.classList.remove('is-visible');
+    scene.dynamicWorldTargetV4 = null;
     return;
   }
 
-  scene.dynamicWorldTargetV3 = control;
+  scene.dynamicWorldTargetV4 = control;
   button.innerHTML = `INTERACT <small>E / TAP · ${state.config.hint}</small>`;
   button.classList.add('is-visible');
-  button.classList.remove('is-done');
 }
 
 function teardown(scene) {
@@ -328,44 +287,44 @@ function teardown(scene) {
     stateByScene.delete(scene);
   }
 
-  if (window.__dynamicWorldSceneV3 === scene) window.__dynamicWorldSceneV3 = null;
-  document.getElementById('dynamicWorldInteractButton')?.classList.remove('is-visible', 'is-done');
+  if (window.__dynamicWorldSceneV4 === scene) window.__dynamicWorldSceneV4 = null;
+  document.getElementById('dynamicWorldInteractButton')?.classList.remove('is-visible');
 }
 
 const originalCreate = RunnerScene.prototype.create;
 const originalUpdate = RunnerScene.prototype.update;
 const originalShutdown = RunnerScene.prototype.shutdown;
 
-if (!RunnerScene.prototype.__dynamicWorldV3CreatePatched) {
-  RunnerScene.prototype.create = function dynamicWorldV3Create(...args) {
+if (!RunnerScene.prototype.__dynamicWorldV4CreatePatched) {
+  RunnerScene.prototype.create = function dynamicWorldV4Create(...args) {
     const result = originalCreate.apply(this, args);
-    try { setup(this); } catch (error) { console.error('[DynamicWorldV3] setup failed', error); }
+    try { setup(this); } catch (error) { console.error('[DynamicWorldV4] setup failed', error); }
     return result;
   };
-  RunnerScene.prototype.__dynamicWorldV3CreatePatched = true;
+  RunnerScene.prototype.__dynamicWorldV4CreatePatched = true;
 }
 
-if (!RunnerScene.prototype.__dynamicWorldV3UpdatePatched) {
-  RunnerScene.prototype.update = function dynamicWorldV3Update(...args) {
+if (!RunnerScene.prototype.__dynamicWorldV4UpdatePatched) {
+  RunnerScene.prototype.update = function dynamicWorldV4Update(...args) {
     const result = originalUpdate.apply(this, args);
-    try { update(this); } catch (error) { console.error('[DynamicWorldV3] update failed', error); }
+    try { update(this); } catch (error) { console.error('[DynamicWorldV4] update failed', error); }
     return result;
   };
-  RunnerScene.prototype.__dynamicWorldV3UpdatePatched = true;
+  RunnerScene.prototype.__dynamicWorldV4UpdatePatched = true;
 }
 
-if (!RunnerScene.prototype.__dynamicWorldV3ShutdownPatched) {
-  RunnerScene.prototype.shutdown = function dynamicWorldV3Shutdown(...args) {
-    try { teardown(this); } catch (error) { console.error('[DynamicWorldV3] teardown failed', error); }
+if (!RunnerScene.prototype.__dynamicWorldV4ShutdownPatched) {
+  RunnerScene.prototype.shutdown = function dynamicWorldV4Shutdown(...args) {
+    try { teardown(this); } catch (error) { console.error('[DynamicWorldV4] teardown failed', error); }
     return originalShutdown.apply(this, args);
   };
-  RunnerScene.prototype.__dynamicWorldV3ShutdownPatched = true;
+  RunnerScene.prototype.__dynamicWorldV4ShutdownPatched = true;
 }
 
 document.addEventListener('keydown', event => {
   if (event.repeat || event.key.toLowerCase() !== 'e') return;
-  const scene = window.__dynamicWorldSceneV3;
-  const target = scene?.dynamicWorldTargetV3;
+  const scene = window.__dynamicWorldSceneV4;
+  const target = scene?.dynamicWorldTargetV4;
   if (scene && target && interact(scene, target)) event.preventDefault();
 }, true);
 
