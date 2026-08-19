@@ -3,6 +3,7 @@
 // - Removes the tutorial ? icon without removing the TUTORIAL entry.
 // - Gives the top OLD QUARTER HUD line enough vertical breathing room.
 // - Keeps authored barrier sprites visible.
+// - Removes only the player-adjacent checkpoint/shield visual.
 // - Tightens only the visible barrier collision footprint so the lower edge
 //   cannot catch the courier's feet and shove them into a void unexpectedly.
 // No mission data, Dynamic World targets, gate logic or progression is changed.
@@ -44,6 +45,18 @@
     body.setSize(width, height, true);
   };
 
+  const hidePlayerShieldVisual = scene => {
+    const player = scene?.player;
+    if (!player?.active) return;
+    const shieldObjects = scene.children.list.filter(child => {
+      if (!child?.active || child === player) return false;
+      const key = child.texture?.key;
+      if (key !== 'shield') return false;
+      return Math.hypot((child.x || 0) - player.x, (child.y || 0) - player.y) <= 90;
+    });
+    shieldObjects.forEach(object => object.setVisible(false));
+  };
+
   const fixScene = scene => {
     if (!scene?.children?.list) return;
 
@@ -60,6 +73,8 @@
       if (!gate?.active) return;
       if (gate.texture?.key === 'barrier') gate.setVisible(true);
     });
+
+    hidePlayerShieldVisual(scene);
 
     // If the district label is a Phaser text object in addition to the DOM HUD,
     // move only that exact label down. Never alter arbitrary world text.
