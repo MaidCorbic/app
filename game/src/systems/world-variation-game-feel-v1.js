@@ -70,32 +70,104 @@ function addBarrierVisual(scene, barrier, index, style) {
 
 function addDistrictVariation(scene, style) {
   if (!scene?.add || !scene.worldWidth) return null;
+
+  // One batched Graphics object keeps the skyline cheap: no building sprites,
+  // no per-building tweens, and no update-loop work. The depth comes from
+  // layered silhouettes, facade framing, windows, rooftop equipment and signs.
   const g = scene.add.graphics().setScrollFactor(.5).setDepth(1);
   const id = scene.mission?.id || '';
-  const spacing = 210;
+  const spacing = 238;
+  const base = 610;
+  const hash = n => Math.abs((n * 1103515245 + 12345) | 0);
 
-  // One batched Graphics object per scene: no per-building display objects or timers.
-  for (let x = -120, i = 0; x < scene.worldWidth + 260; x += spacing, i += 1) {
-    const h = 100 + (i % 4) * 38;
-    const w = 118 + (i % 3) * 28;
-    const base = 610;
-    g.fillStyle(style.dark, .58).fillRect(x, base - h, w, h);
-    g.fillStyle(style.accent, .12).fillRect(x + 10, base - h + 12, w - 20, 5);
+  for (let x = -180, i = 0; x < scene.worldWidth + 320; x += spacing, i += 1) {
+    const seed = hash(i + id.length * 17);
+    const w = 128 + (seed % 92);
+    const h = 118 + ((seed >>> 4) % 170);
+    const roof = base - h;
+    const left = x;
+    const right = x + w;
+    const isTower = i % 5 === 2;
+    const isBlock = i % 5 !== 1;
 
+    // Far silhouette: irregular skyline instead of a repeated rectangle wall.
+    g.fillStyle(style.dark, .54).fillRect(left, roof, w, h);
+    g.fillStyle(style.dark, .34).fillRect(left - 22, roof + 22, 18, h - 22);
+    if (isTower) g.fillStyle(style.dark, .46).fillRect(left + w * .35, roof - 52, w * .3, 52);
+
+    // Architectural framing gives each building a recognizable facade.
+    g.fillStyle(style.accent, .08).fillRect(left + 8, roof + 12, Math.max(16, w - 16), 5);
+    g.fillStyle(style.bright, .035).fillRect(left + 12, roof + 22, Math.max(12, w - 24), h - 34);
+    g.lineStyle(1, style.edge, .12).lineBetween(left + w * .5, roof + 8, left + w * .5, base);
+    if (isBlock) g.lineStyle(1, style.edge, .08).lineBetween(left + 18, roof + 8, left + 18, base);
+
+    // Windows are grouped into a single draw call per row, keeping them cheap.
+    const cols = Math.max(2, Math.floor(w / 34));
+    const rows = Math.max(2, Math.floor(h / 48));
+    for (let row = 0; row < rows; row += 1) {
+      const y = roof + 34 + row * 42;
+      if (y > base - 18) break;
+      for (let col = 0; col < cols; col += 1) {
+        const lit = ((seed + row * 7 + col * 11) % 9) < (id === 'blackout' ? 2 : 4);
+        if (!lit) continue;
+        const wx = left + 16 + col * ((w - 32) / Math.max(1, cols - 1));
+        const glow = id === 'signal-storm' ? style.bright : style.accent;
+        g.fillStyle(glow, id === 'blackout' ? .11 : .17).fillRect(wx, y, 9, 5);
+      }
+    }
+
+    // Rooftop machinery: vents, antennae, relay dishes and neon strips.
+    const center = left + w * .5;
+    g.fillStyle(style.edge, .12).fillRect(left + 14, roof - 6, Math.max(20, w - 28), 5);
+    g.fillStyle(style.bright, .14).fillRect(left + 24, roof - 12, 24, 4);
+    g.lineStyle(2, style.edge, .22).lineBetween(center, roof - 6, center, roof - 38 - (seed % 20));
+    g.fillStyle(style.edge, .25).fillCircle(center, roof - 42 - (seed % 20), 2);
+
+    if (isTower) {
+      g.lineStyle(2, style.accent, .16).lineBetween(center - 28, roof - 4, center + 28, roof - 4);
+      g.lineStyle(1, style.bright, .18).lineBetween(center, roof - 34, center + 38, roof - 64);
+      g.fillStyle(style.edge, .14).fillRect(left + w * .18, roof + 16, w * .64, 4);
+    }
+
+    // District-specific visual language.
     if (id === 'dead-drop') {
-      g.fillStyle(style.accent, .12).fillRect(x + w * .2, base - h - 18, w * .6, 18);
-      g.lineStyle(2, style.edge, .16).lineBetween(x + w * .5, base - h - 18, x + w * .5, base - h - 62);
-    } else if (id === 'blackout' || id === 'signal-storm') {
-      g.lineStyle(2, style.edge, .14).lineBetween(x + 18, base - h, x + w - 18, base - h - 24);
-      g.lineStyle(1, style.bright, .13).lineBetween(x + 26, base - h + 28, x + w - 26, base - h + 28);
+      g.fillStyle(style.accent, .13).fillRect(left + w * .18, roof - 18, w * .64, 18);
+      g.lineStyle(2, style.edge, .16).lineBetween(center, roof - 18, center, roof - 68);
+      g.lineStyle(1, style.bright, .12).lineBetween(left - 8, roof + 30, right + 18, roof + 30);
+    } else if (id === 'blackout') {
+      g.lineStyle(2, style.edge, .16).lineBetween(left + 14, roof, right - 14, roof - 28);
+      g.fillStyle(style.edge, .1).fillRect(left + 20, roof + 18, Math.max(20, w - 40), 3);
+    } else if (id === 'signal-storm') {
+      g.lineStyle(2, style.edge, .13).lineBetween(left + 12, roof + 8, right - 12, roof - 34);
+      g.lineStyle(1, style.bright, .14).lineBetween(left + 20, roof + 32, right - 20, roof + 32);
+      g.fillStyle(style.bright, .12).fillCircle(center, roof + 8, Math.min(22, w * .12));
     } else if (id === 'corporate-lockdown' || id === 'final-relay') {
-      g.fillStyle(style.edge, .08).fillRect(x + 14, base - h + 26, w - 28, 34);
-      g.fillStyle(style.bright, .13).fillRect(x + 22, base - h + 34, Math.max(18, w - 44), 4);
+      g.fillStyle(style.edge, .09).fillRect(left + 16, roof + 24, w - 32, 38);
+      g.fillStyle(style.bright, .16).fillRect(left + 24, roof + 34, Math.max(20, w - 48), 4);
+      g.lineStyle(1, style.edge, .13).strokeRect(left + 12, roof + 14, w - 24, 64);
     } else {
-      g.fillStyle(style.edge, .1).fillRect(x + 18, base - h + 24, 10, 8).fillRect(x + w - 30, base - h + 24, 10, 8);
+      // Old-quarter / pursuit language: awnings, cables and roof rails.
+      g.fillStyle(style.accent, .1).fillRect(left + 16, roof + 34, Math.max(18, w * .28), 10);
+      g.lineStyle(1, style.edge, .13).lineBetween(left + 10, roof + 18, right - 10, roof + 18);
     }
   }
-  return g;
+
+  // A second, very distant contour layer makes the skyline feel deeper without
+  // adding another object per building. It sits behind the main facade layer.
+  const far = scene.add.graphics().setScrollFactor(.24).setDepth(0);
+  for (let x = -260, i = 0; x < scene.worldWidth + 420; x += 170, i += 1) {
+    const h = 78 + ((i * 37) % 96);
+    const w = 92 + ((i * 29) % 76);
+    far.fillStyle(style.dark, .28).fillRect(x, base - h + 22, w, h);
+    far.fillStyle(style.edge, .055).fillRect(x + 12, base - h + 36, w - 24, 3);
+  }
+
+  // Atmospheric horizon bands: static, subtle and cheap.
+  const haze = scene.add.graphics().setScrollFactor(.35).setDepth(2);
+  haze.fillStyle(style.edge, .025).fillRect(-200, 470, scene.worldWidth + 500, 105);
+  haze.fillStyle(style.bright, .018).fillRect(-200, 525, scene.worldWidth + 500, 52);
+
+  return { main: g, far, haze };
 }
 
 function comboFeedback(scene, combo) {
@@ -146,7 +218,9 @@ function setup(scene) {
     state.cleanup?.();
     state.platforms.forEach(item => item?.destroy?.());
     state.barriers.forEach(item => item?.destroy?.());
-    state.background?.destroy?.();
+    if (state.background?.main) state.background.main.destroy();
+    if (state.background?.far) state.background.far.destroy();
+    if (state.background?.haze) state.background.haze.destroy();
     stateByScene.delete(scene);
   });
 }
