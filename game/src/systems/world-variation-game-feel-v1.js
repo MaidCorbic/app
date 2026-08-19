@@ -28,6 +28,7 @@ function addPlatformVisual(scene, platform, index, style) {
   const type = platform.getData?.('relayPlatformType') || (index % 3 === 0 ? 'roof' : 'street');
   const g = scene.add.graphics().setDepth(4);
 
+  // Clear gameplay silhouette: bright upper lip, darker underside and end caps.
   g.fillStyle(style.dark, .82).fillRect(left, top + 5, width, Math.max(4, height - 5));
   g.fillStyle(style.edge, .92).fillRect(left, top, width, 4);
   g.fillStyle(style.bright, .42).fillRect(left + 5, top + 4, Math.max(8, width - 10), 2);
@@ -38,6 +39,7 @@ function addPlatformVisual(scene, platform, index, style) {
     g.fillStyle(style.accent, type === 'roof' ? .24 : .13).fillRect(x, top + 9, Math.min(18, step - 8), 3);
   }
 
+  // Small ledge markers improve jump/readability without adding UI clutter.
   g.fillStyle(style.bright, .72).fillRect(left + 7, top - 2, 8, 2).fillRect(left + width - 15, top - 2, 8, 2);
   return g;
 }
@@ -50,6 +52,7 @@ function addBarrierVisual(scene, barrier, index, style) {
   const y = barrier.y;
   const g = scene.add.graphics().setDepth(7);
 
+  // Strong obstacle silhouette so a vault target cannot visually merge with scenery.
   g.fillStyle(0x030914, .38).fillEllipse(x, y + h * .48, w * 1.15, 8);
   g.fillStyle(style.dark, .94).fillRoundedRect(x - w / 2 - 3, y - h / 2 - 3, w + 6, h + 6, 7);
   g.lineStyle(2, style.edge, .95).strokeRoundedRect(x - w / 2 - 3, y - h / 2 - 3, w + 6, h + 6, 7);
@@ -71,6 +74,7 @@ function addDistrictVariation(scene, style) {
   const id = scene.mission?.id || '';
   const spacing = 210;
 
+  // One batched Graphics object per scene: no per-building display objects or timers.
   for (let x = -120, i = 0; x < scene.worldWidth + 260; x += spacing, i += 1) {
     const h = 100 + (i % 4) * 38;
     const w = 118 + (i % 3) * 28;
@@ -94,12 +98,6 @@ function addDistrictVariation(scene, style) {
   return g;
 }
 
-function platformLandFeedback(scene) {
-  if (reduced(scene) || !scene.player?.body) return;
-  const ring = scene.add.circle(scene.player.x, scene.player.y + 27, 9, getStyle(scene).edge, .22).setDepth(11);
-  scene.tweens.add({ targets: ring, scale: 2.2, alpha: 0, duration: 180, onComplete: () => ring.destroy() });
-}
-
 function comboFeedback(scene, combo) {
   if (!scene.add || !combo || combo < 2) return;
   const style = getStyle(scene);
@@ -113,7 +111,7 @@ function comboFeedback(scene, combo) {
 function setup(scene) {
   if (!scene || stateByScene.has(scene)) return;
   const style = getStyle(scene);
-  const state = { style, platforms: [], barriers: [], background: null, lastGrounded: Boolean(scene.wasGrounded) };
+  const state = { style, platforms: [], barriers: [], background: null };
   stateByScene.set(scene, state);
 
   state.background = addDistrictVariation(scene, style);
@@ -128,7 +126,7 @@ function setup(scene) {
   const events = scene.game?.events;
   if (events) {
     const onFeedback = kind => {
-      if (!scene.active) return;
+      if (!scene.active || !scene.player?.active) return;
       if (kind === 'gadget') scene.gadgetPulse?.(style.edge, 13, 190);
       if (kind === 'hit') {
         const pulse = scene.add.circle(scene.player.x, scene.player.y, 18, style.edge, .12).setDepth(11);
@@ -153,14 +151,6 @@ function setup(scene) {
   });
 }
 
-function update(scene) {
-  const state = stateByScene.get(scene);
-  if (!state || !scene.player?.active) return;
-  const grounded = Boolean(scene.wasGrounded);
-  if (grounded && !state.lastGrounded) platformLandFeedback(scene);
-  state.lastGrounded = grounded;
-}
-
 function install() {
   if (window.__relayUpdate10WorldVariation) return;
   window.__relayUpdate10WorldVariation = true;
@@ -171,6 +161,7 @@ function install() {
   };
   window.addEventListener('relay:runner-scene-ready', ready);
 
+  // Defensive fallback for environments that expose the scene before the custom event.
   if (window.__relayRunnerScene) setup(window.__relayRunnerScene);
 }
 
