@@ -9,6 +9,17 @@ const ACTION_KEYS = {
   gadget2: '4'
 };
 
+const ACTION_LABELS = {
+  jump: 'JUMP — SPACE',
+  fire: 'FIRE — E',
+  sword: 'SWORD — Q',
+  dash: 'DASH — SHIFT',
+  build1: 'BUILD — 1',
+  build2: 'BUILD — 2',
+  gadget1: 'GEAR — 3',
+  gadget2: 'GEAR — 4'
+};
+
 const emitKey = (key, type) => {
   window.dispatchEvent(new KeyboardEvent(type, {
     key,
@@ -34,6 +45,12 @@ style.textContent = `
   body.relay-mobile-controls-active .mobile-actions {
     pointer-events: none;
   }
+  body.is-touch .mobile-controls button small {
+    display: block !important;
+    font-size: 6px !important;
+    line-height: 1 !important;
+    letter-spacing: .7px !important;
+  }
 `;
 document.head.appendChild(style);
 
@@ -55,8 +72,9 @@ function install() {
   let controls = document.querySelector('.mobile-controls');
   if (!controls) return;
 
-  // Replace the existing nodes once. This intentionally removes every listener
-  // previously attached by main.js/core-stability.js without touching the viewport system.
+  // Replace the existing controls once. cloneNode() does not copy addEventListener()
+  // handlers, so this removes the older main.js/core-stability.js touch listeners without
+  // changing the viewport/canvas implementation.
   const cleanControls = controls.cloneNode(true);
   cleanControls.dataset.mobileControlsOwner = 'controller';
   controls.replaceWith(cleanControls);
@@ -74,7 +92,6 @@ function install() {
 
   let pointerId = null;
   let direction = null;
-  let hideTimer = 0;
 
   const setDirection = next => {
     if (next === direction) return;
@@ -121,13 +138,14 @@ function install() {
   };
 
   buttons.forEach(button => {
+    const action = button.dataset.mobileAction;
+    if (ACTION_LABELS[action]) button.setAttribute('aria-label', ACTION_LABELS[action]);
     button.addEventListener('pointerdown', event => {
       event.preventDefault();
       event.stopPropagation();
-      const key = ACTION_KEYS[button.dataset.mobileAction];
+      const key = ACTION_KEYS[action];
       if (!key) return;
       emitKey(key, 'keydown');
-      window.clearTimeout(hideTimer);
       button.classList.add('is-active');
       window.setTimeout(() => {
         emitKey(key, 'keyup');
