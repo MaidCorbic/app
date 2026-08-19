@@ -59,7 +59,7 @@ import { missions } from './src/missions.js';
       elapsedMs,
       signals,
       totalSignals,
-      checkpoints: state.checkpoints,
+      checkpoints: Math.min(state.checkpoints, Array.isArray(mission.checkpoints) ? mission.checkpoints.length : state.checkpoints),
       checkpointTotal: Array.isArray(mission.checkpoints) ? mission.checkpoints.length : 0,
       deaths: state.deaths,
       falls,
@@ -154,14 +154,9 @@ import { missions } from './src/missions.js';
     if (!result || state.settled) return;
     state.settled = true;
     window.__missionFlowPerformanceV1.latest = result;
+    // UPDATE 12 must not rewrite the existing RUN SCORE element. That score belongs
+    // to the existing Results/progression flow; Performance V1 is displayed separately.
     window.dispatchEvent(new CustomEvent('relay:mission-performance-complete', { detail: result }));
-
-    // Reuse the existing Results element. No new DOM structure is created.
-    const scoreElement = document.getElementById('finishScore');
-    if (scoreElement && result.completed) {
-      const base = scoreElement.textContent.replace(/\s*·\s*PERFORMANCE\s+[A-Z+]+\s+\(\d+\)$/i, '');
-      scoreElement.textContent = `${base} · PERFORMANCE ${result.rating} (${result.score})`;
-    }
   }
 
   function settle(completed) {
