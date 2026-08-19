@@ -53,6 +53,8 @@ import './audio-feedback-v2.js';
 import './gameplay-event-hud-v2.js';
 import './src/systems/mobile-controls-controller.js';
 import './src/systems/world-variation-game-feel-v1.js';
+// UPDATE 11.7 — remove only the intrusive barrier Graphics overlay after world variation renders it.
+import './src/systems/barrier-visual-cleanup-v1.js';
 import './src/systems/city-backdrop-replacement-v1.js';
 // UPDATE 11 — safe per-mission deployment; one interactive object per campaign mission.
 import './src/systems/dynamic-world-mechanics-v2.js';
