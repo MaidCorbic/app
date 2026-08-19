@@ -4,9 +4,7 @@ const ACTION_KEYS = {
   sword: 'q',
   dash: 'Shift',
   build1: '1',
-  build2: '2',
-  gadget1: '3',
-  gadget2: '4'
+  gadget1: '3'
 };
 
 const ACTION_LABELS = {
@@ -15,9 +13,7 @@ const ACTION_LABELS = {
   sword: 'SWORD — Q',
   dash: 'DASH — SHIFT',
   build1: 'BUILD — 1',
-  build2: 'BUILD — 2',
-  gadget1: 'GEAR — 3',
-  gadget2: 'GEAR — 4'
+  gadget1: 'GEAR — 3'
 };
 
 const emitKey = (key, type) => {
@@ -32,25 +28,7 @@ const emitKey = (key, type) => {
 const style = document.createElement('style');
 style.id = 'relay-mobile-controls-controller-style';
 style.textContent = `
-  /* Mobile-controls owns only the touch HUD. Viewport/canvas rules stay untouched. */
-  body.relay-mobile-controls-hidden .mobile-controls {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-
-  body.relay-mobile-controls-active .mobile-controls {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  body.relay-mobile-controls-active .mobile-actions {
-    pointer-events: none;
-  }
-
-  /* Compact, deterministic touch layout. The existing viewport CSS is not changed. */
+  /* Touch-control layer only. Viewport/canvas scaling is intentionally untouched. */
   body.is-touch .mobile-controls {
     --relay-touch-size: clamp(46px, 12.5vw, 58px);
     left: max(10px, env(safe-area-inset-left, 0px) + 8px) !important;
@@ -58,12 +36,16 @@ style.textContent = `
     bottom: max(12px, env(safe-area-inset-bottom, 0px) + 10px) !important;
     align-items: flex-end !important;
     gap: 10px !important;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   body.is-touch .mobile-joystick {
     flex: 0 0 clamp(76px, 20vw, 92px) !important;
     width: clamp(76px, 20vw, 92px) !important;
     height: clamp(76px, 20vw, 92px) !important;
+    pointer-events: auto !important;
   }
 
   body.is-touch .mobile-joystick-thumb {
@@ -76,11 +58,11 @@ style.textContent = `
     flex: 0 1 auto !important;
     display: grid !important;
     grid-template-columns: repeat(4, var(--relay-touch-size)) !important;
-    grid-template-rows: repeat(2, var(--relay-touch-size)) !important;
+    grid-template-rows: 1fr !important;
     gap: 4px !important;
     width: calc(var(--relay-touch-size) * 4 + 12px) !important;
     max-width: calc(100vw - 110px) !important;
-    pointer-events: none !important;
+    pointer-events: auto !important;
   }
 
   body.is-touch .mobile-controls button {
@@ -94,14 +76,15 @@ style.textContent = `
     line-height: 1 !important;
     font-size: clamp(8px, 2.15vw, 10px) !important;
     letter-spacing: .2px !important;
+    pointer-events: auto !important;
   }
 
   body.is-touch .mobile-controls button small {
-    display: block !important;
-    margin: 0 !important;
-    font-size: clamp(5px, 1.35vw, 6px) !important;
-    line-height: 1 !important;
-    letter-spacing: .55px !important;
+    display: block;
+    margin: 0;
+    font-size: clamp(5px, 1.35vw, 6px);
+    line-height: 1;
+    letter-spacing: .55px;
   }
 
   @media (max-width: 380px) {
@@ -181,95 +164,38 @@ function isTouchDevice() {
     || matchMedia('(hover: none)').matches;
 }
 
-function isVisible(element) {
-  return !!element && !element.classList.contains('hidden') && getComputedStyle(element).display !== 'none';
-}
-
 function install() {
   if (window.__relayMobileControlsController) return;
   window.__relayMobileControlsController = true;
 
   let controls = document.querySelector('.mobile-controls');
-  if (!controls) return;
+  if (!controls || !isTouchDevice()) return;
 
-  // Remove listeners installed by older touch-control implementations while keeping
-  // the DOM/CSS/viewport implementation intact. cloneNode() does not copy listeners.
+  // Clone once to remove pointer listeners installed by older touch-control modules.
+  // The existing joystick and action-button DOM is preserved.
   const cleanControls = controls.cloneNode(true);
   cleanControls.dataset.mobileControlsOwner = 'controller';
   controls.replaceWith(cleanControls);
   controls = cleanControls;
 
-  // There is one BUILD button and one GEAR button in the mobile HUD.
-  // BUILD 2 / GEAR 4 remain keyboard actions in the game, but their duplicate
-  // touch buttons are removed from the HUD so the mobile layout has no duplicates.
+  // ONLY remove the duplicate mobile buttons requested by the user.
+  // Keyboard actions 2 and 4 remain fully available in the game.
   controls.querySelector('[data-mobile-action="build2"]')?.remove();
   controls.querySelector('[data-mobile-action="gadget2"]')?.remove();
 
   const joystick = controls.querySelector('[data-mobile-joystick]');
   const thumb = joystick?.querySelector('.mobile-joystick-thumb');
   const buttons = [...controls.querySelectorAll('[data-mobile-action]')];
-  const intro = document.getElementById('intro');
-  const pause = document.getElementById('pauseMenu');
-  const finish = document.getElementById('finish');
-  const gameOver = document.getElementById('gameOver');
-  const preflight = document.getElementById('preflight');
-  const rotatePrompt = document.querySelector('.rotate-prompt');
-
-  let pointerId = null;
-  let direction = null;
-
-  const setDirection = next => {
-    if (next === direction) return;
-    if (direction === 'left') emitKey('a', 'keyup');
-    if (direction === 'right') emitKey('d', 'keyup');
-    direction = next;
-    if (next === 'left') emitKey('a', 'keydown');
-    if (next === 'right') emitKey('d', 'keydown');
-  };
-
-  const resetJoystick = () => {
-    setDirection(null);
-    pointerId = null;
-    joystick?.classList.remove('is-active');
-    if (thumb) thumb.style.transform = 'translate(0,0)';
-  };
-
-  const updateJoystick = (x, y) => {
-    if (!joystick || !thumb) return;
-    const rect = joystick.getBoundingClientRect();
-    const dx = x - rect.left - rect.width / 2;
-    const dy = y - rect.top - rect.height / 2;
-    const distance = Math.min(Math.hypot(dx, dy), 32);
-    const angle = Math.atan2(dy, dx);
-    thumb.style.transform = `translate(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px)`;
-    setDirection(Math.abs(dx) < 9 ? null : dx < 0 ? 'left' : 'right');
-  };
-
-  const syncVisibility = () => {
-    const mobile = isTouchDevice();
-    const gameplayActive = mobile
-      && isVisible(document.getElementById('play'))
-      && !isVisible(intro)
-      && !isVisible(pause)
-      && !isVisible(finish)
-      && !isVisible(gameOver)
-      && !isVisible(preflight)
-      && !isVisible(rotatePrompt)
-      && !document.body.classList.contains('rotate-prompt-visible');
-
-    document.body.classList.toggle('relay-mobile-controls-active', gameplayActive);
-    document.body.classList.toggle('relay-mobile-controls-hidden', !gameplayActive);
-    if (!gameplayActive) resetJoystick();
-  };
 
   buttons.forEach(button => {
     const action = button.dataset.mobileAction;
+    const key = ACTION_KEYS[action];
+    if (!key) return;
     if (ACTION_LABELS[action]) button.setAttribute('aria-label', ACTION_LABELS[action]);
+
     button.addEventListener('pointerdown', event => {
       event.preventDefault();
       event.stopPropagation();
-      const key = ACTION_KEYS[action];
-      if (!key) return;
       emitKey(key, 'keydown');
       button.classList.add('is-active');
       window.setTimeout(() => {
@@ -280,6 +206,35 @@ function install() {
   });
 
   if (joystick && thumb) {
+    let pointerId = null;
+    let direction = null;
+
+    const setDirection = next => {
+      if (next === direction) return;
+      if (direction === 'left') emitKey('a', 'keyup');
+      if (direction === 'right') emitKey('d', 'keyup');
+      direction = next;
+      if (next === 'left') emitKey('a', 'keydown');
+      if (next === 'right') emitKey('d', 'keydown');
+    };
+
+    const resetJoystick = () => {
+      setDirection(null);
+      pointerId = null;
+      joystick.classList.remove('is-active');
+      thumb.style.transform = 'translate(0,0)';
+    };
+
+    const updateJoystick = (x, y) => {
+      const rect = joystick.getBoundingClientRect();
+      const dx = x - rect.left - rect.width / 2;
+      const dy = y - rect.top - rect.height / 2;
+      const distance = Math.min(Math.hypot(dx, dy), 32);
+      const angle = Math.atan2(dy, dx);
+      thumb.style.transform = `translate(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px)`;
+      setDirection(Math.abs(dx) < 9 ? null : dx < 0 ? 'left' : 'right');
+    };
+
     joystick.addEventListener('pointerdown', event => {
       event.preventDefault();
       event.stopPropagation();
@@ -299,23 +254,16 @@ function install() {
       if (event && event.pointerId !== pointerId) return;
       resetJoystick();
     };
+
     joystick.addEventListener('pointerup', end);
     joystick.addEventListener('pointercancel', end);
     joystick.addEventListener('lostpointercapture', resetJoystick);
     window.addEventListener('blur', resetJoystick);
   }
-
-  const observer = new MutationObserver(syncVisibility);
-  observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-  [intro, pause, finish, gameOver, preflight, rotatePrompt].filter(Boolean).forEach(element => {
-    observer.observe(element, { attributes: true, attributeFilter: ['class', 'style'] });
-  });
-
-  window.addEventListener('resize', syncVisibility, { passive: true });
-  window.addEventListener('orientationchange', () => window.setTimeout(syncVisibility, 80), { passive: true });
-  document.addEventListener('visibilitychange', syncVisibility);
-  syncVisibility();
 }
 
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
-else install();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', install, { once: true });
+} else {
+  install();
+}
