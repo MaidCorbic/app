@@ -2,18 +2,42 @@ import { loadState } from '../state.js';
 
 const RESULT_CLASS = 'mission-results-panel';
 const style = `
-#finish{z-index:70!important;background:radial-gradient(circle at 50% 24%,rgba(255,208,110,.10),rgba(3,8,16,.96) 48%,rgba(1,4,9,.99))!important;overflow:auto!important}
-#finish .outcome{position:relative;z-index:71;width:min(720px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;padding:clamp(20px,4vw,34px)!important;border:1px solid rgba(255,208,110,.22);background:linear-gradient(145deg,rgba(8,18,32,.98),rgba(3,8,15,.98));box-shadow:0 28px 90px rgba(0,0,0,.55),0 0 55px rgba(255,208,110,.07);box-sizing:border-box}
+#finish{z-index:70!important;background:radial-gradient(circle at 50% 24%,rgba(25,200,245,.08),rgba(3,8,16,.96) 48%,rgba(1,4,9,.99))!important;overflow:auto!important}
+#finish .outcome{position:relative;z-index:71;width:min(720px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;padding:clamp(20px,4vw,34px)!important;border:1px solid rgba(25,200,245,.16);background:linear-gradient(145deg,rgba(8,18,32,.98),rgba(3,8,15,.98));box-shadow:0 28px 90px rgba(0,0,0,.55),0 0 55px rgba(25,200,245,.045);box-sizing:border-box}
 .${RESULT_CLASS}{margin:18px auto 14px;width:min(100%,620px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:left}
 .${RESULT_CLASS} .mission-result-card{padding:10px 12px;border:1px solid rgba(150,190,255,.18);background:rgba(8,18,38,.58);border-radius:10px;min-width:0}
 .${RESULT_CLASS} .mission-result-label{display:block;font-size:9px;letter-spacing:.16em;opacity:.62;margin-bottom:4px}
 .${RESULT_CLASS} .mission-result-value{display:block;font-size:16px;font-weight:800;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .${RESULT_CLASS} .mission-result-sub{display:block;font-size:9px;opacity:.52;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .${RESULT_CLASS} .mission-result-wide{grid-column:span 2}
-.${RESULT_CLASS} .mission-result-total{border-color:rgba(255,208,110,.34);background:rgba(255,208,110,.07)}
-.${RESULT_CLASS} .mission-result-performance{border-color:rgba(255,208,110,.34);background:linear-gradient(145deg,rgba(255,208,110,.10),rgba(8,18,38,.68))}
+.${RESULT_CLASS} .mission-result-total{border-color:rgba(25,200,245,.28);background:rgba(25,200,245,.055)}
+.${RESULT_CLASS} .mission-result-performance{border-color:rgba(25,200,245,.28);background:linear-gradient(145deg,rgba(25,200,245,.075),rgba(8,18,38,.68))}
+
+/* Finish actions: replay is a secondary violet action, progression is cyan. */
 #finish .outcome .primary{position:relative;z-index:72;touch-action:manipulation}
-@media (max-width:700px){#finish .outcome{width:calc(100vw - 18px);max-height:calc(100dvh - 18px);padding:18px 14px!important}.${RESULT_CLASS}{grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:6px;margin:12px auto}.${RESULT_CLASS} .mission-result-wide{grid-column:span 2}}
+#finish #again,
+#finish #nextMission{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:10px 18px!important;margin:5px 4px 0!important;border-radius:10px!important;border:1px solid transparent!important;font-family:inherit;font-weight:800;letter-spacing:.10em;text-transform:uppercase;line-height:1.05;vertical-align:middle;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease,filter .16s ease}
+#finish #again{width:min(190px,calc(50% - 12px));color:#efeaff!important;border-color:rgba(139,124,255,.48)!important;background:linear-gradient(145deg,rgba(139,124,255,.22),rgba(67,48,145,.18))!important;box-shadow:0 0 20px rgba(139,124,255,.08),inset 0 1px 0 rgba(255,255,255,.04)!important}
+#finish #again:hover{border-color:rgba(167,155,255,.75)!important;background:linear-gradient(145deg,rgba(139,124,255,.30),rgba(67,48,145,.24))!important;box-shadow:0 0 28px rgba(139,124,255,.18),inset 0 1px 0 rgba(255,255,255,.06)!important;transform:translateY(-1px)}
+#finish #again:active{transform:scale(.985)}
+#finish #nextMission{width:min(250px,calc(50% - 12px));color:#eaffff!important;border-color:rgba(25,200,245,.72)!important;background:linear-gradient(145deg,rgba(25,200,245,.28),rgba(17,103,143,.22))!important;box-shadow:0 0 24px rgba(25,200,245,.14),inset 0 1px 0 rgba(255,255,255,.05)!important}
+#finish #nextMission:hover{border-color:rgba(141,244,255,.95)!important;background:linear-gradient(145deg,rgba(25,200,245,.40),rgba(17,103,143,.30))!important;box-shadow:0 0 34px rgba(25,200,245,.24),inset 0 1px 0 rgba(255,255,255,.07)!important;transform:translateY(-1px)}
+#finish #nextMission:active{transform:scale(.985)}
+#finish #again::before{content:'↻';font-size:18px;line-height:1;opacity:.95}
+#finish #nextMission::after{content:'→';font-size:18px;line-height:1;opacity:.95}
+#finish #again b,
+#finish #nextMission b{display:none}
+
+@media (max-width:700px){
+  #finish .outcome{width:calc(100vw - 18px);max-height:calc(100dvh - 18px);padding:18px 14px!important}
+  .${RESULT_CLASS}{grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:6px;margin:12px auto}
+  .${RESULT_CLASS} .mission-result-wide{grid-column:span 2}
+  #finish #again,#finish #nextMission{width:calc(50% - 8px);min-height:54px;padding:9px 10px!important;font-size:11px;letter-spacing:.08em}
+}
+
+@media (max-width:430px){
+  #finish #again,#finish #nextMission{width:100%;margin:4px 0 0!important}
+}
 `;
 
 export const formatResultTime = ms => {
@@ -52,17 +76,31 @@ function getPerformanceResult() {
   return result;
 }
 
+function polishFinishActions() {
+  const again = document.getElementById('again');
+  const next = document.getElementById('nextMission');
+  if (again) {
+    again.classList.add('finish-replay-action');
+    again.setAttribute('aria-label', 'Replay this mission');
+    again.innerHTML = 'REPLAY RUN <b aria-hidden="true">↻</b>';
+  }
+  if (next) {
+    next.classList.add('finish-next-action');
+    next.setAttribute('aria-label', 'Continue to the next mission');
+    next.innerHTML = 'NEXT MISSION <b aria-hidden="true">→</b>';
+  }
+}
+
 export function buildMissionResults() {
   const finish = document.getElementById('finish');
   if (!finish || finish.classList.contains('hidden')) return;
   installStyle();
+  polishFinishActions();
 
   const state = loadState();
   const breakdown = state.lastXpBreakdown || {};
   const performance = getPerformanceResult();
 
-  // UPDATE 12: Performance V1 is authoritative for its own grade/metrics.
-  // Existing Run Score remains untouched and continues to come from the existing Results flow.
   const existingRatingText = document.getElementById('finishRating')?.textContent || '';
   const grade = performance?.rating || resultGrade(existingRatingText);
 
@@ -114,6 +152,5 @@ if (typeof document !== 'undefined') {
     refreshIfVisible();
   }
   window.addEventListener('relay:mission-complete', () => window.requestAnimationFrame(buildMissionResults));
-  // Performance V1 publishes after mission completion; refresh once its authoritative result exists.
   window.addEventListener('relay:mission-performance-complete', () => window.requestAnimationFrame(buildMissionResults));
 }
