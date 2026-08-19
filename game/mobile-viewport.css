@@ -1,0 +1,54 @@
+/* Final mobile rotation guard: keep the Phaser host and game area truly full-screen. */
+html, body, #game, #play {
+  width: 100%;
+  min-width: 100%;
+}
+
+html, body {
+  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#game, #play {
+  height: 100%;
+  min-height: 100dvh;
+}
+
+#phaser-game {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+#phaser-game > canvas {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+@media (orientation: landscape) and (pointer: coarse) {
+  #play {
+    width: 100vw !important;
+    width: 100dvw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100svh !important;
+  }
+}
+
+@media (orientation: portrait) and (pointer: coarse) {
+  #play {
+    width: 100vw !important;
+    width: 100dvw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100svh !important;
+  }
+}
