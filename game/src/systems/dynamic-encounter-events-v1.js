@@ -3,6 +3,8 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
 // UPDATE 14 — DYNAMIC ENCOUNTER EVENTS V1
 // One deterministic encounter per run. Reads existing scene/enemy state only.
 // No progression, score, Performance V1, mission completion, or save ownership.
+// Existing mission-specific encounters always win. A safe Signal Anomaly fallback
+// is used only for a mission that has no encounter configured yet.
 const CONFIG = {
   'first-delivery': { type: 'signal-anomaly', triggerX: 1780, radius: 210, title: 'SIGNAL ANOMALY', message: 'SIGNAL FIELD UNSTABLE', duration: 6500 },
   'dead-drop': { type: 'ambush', triggerX: 2050, radius: 230, title: 'AMBUSH', message: 'HOSTILES INBOUND', duration: 7000 },
@@ -11,6 +13,14 @@ const CONFIG = {
   'signal-storm': { type: 'signal-anomaly', triggerX: 2350, radius: 250, title: 'SIGNAL STORM', message: 'SIGNAL FIELD DESTABILIZED', duration: 8000 },
   'corporate-lockdown': { type: 'ambush', triggerX: 2450, radius: 250, title: 'LOCKDOWN', message: 'SECURITY RESPONSE ACTIVE', duration: 8000 },
   'final-relay': { type: 'pursuit', triggerX: 2500, radius: 260, title: 'FINAL PURSUIT', message: 'INTERCEPTOR DEPLOYED', duration: 9000 },
+};
+
+const DEFAULT_SIGNAL_ANOMALY = {
+  type: 'signal-anomaly',
+  radius: 220,
+  title: 'SIGNAL ANOMALY',
+  message: 'SIGNAL FIELD UNSTABLE',
+  duration: 6500,
 };
 
 const states = new WeakMap();
@@ -24,7 +34,25 @@ function missionId(scene) {
     scene?.mission?.id,
     document.documentElement?.dataset?.missionId,
     document.body?.dataset?.missionId,
-  ].find(value => typeof value === 'string' && CONFIG[value]) || null;
+  ].find(value => typeof value === 'string') || null;
+}
+
+function fallbackTriggerX(scene) {
+  const bounds = scene?.physics?.world?.bounds;
+  const width = Number(bounds?.width);
+  const left = Number(bounds?.x);
+  if (Number.isFinite(width) && width > 600 && Number.isFinite(left)) {
+    return left + width * .55;
+  }
+  return Number(scene?.player?.x || 0) + 900;
+}
+
+function getConfig(scene, id) {
+  if (!id) return null;
+  if (CONFIG[id]) return CONFIG[id];
+  // Future/new missions get a single lightweight anomaly instead of no encounter.
+  // This is deliberately fallback-only so existing authored encounters are untouched.
+  return { ...DEFAULT_SIGNAL_ANOMALY, triggerX: fallbackTriggerX(scene) };
 }
 
 function getEnemies(scene) {
@@ -81,7 +109,7 @@ function createWorldCue(scene, state) {
   try {
     if (config.type === 'signal-anomaly') {
       const signals = getNearbySignals(scene);
-      state.affectedSignals = signals.map(signal => ({ signal, scale: signal.scaleX || 1, alpha: signal.alpha ?? 1, tint: signal.tintTopLeft }));
+      state.affectedSignals = signals.map(signal => ({ signal, scale: signal.scaleX || 1, alpha: signal.alpha ?? 1 }));
       signals.forEach(signal => {
         signal.setTint?.(0x8df4ff);
         signal.setAlpha?.(.72);
@@ -147,8 +175,19 @@ function activate(scene, state) {
 function setup(scene) {
   if (!scene || states.has(scene)) return;
   const id = missionId(scene);
-  const config = id ? CONFIG[id] : null;
-  if (config && scene.player) states.set(scene, { missionId: id, config, triggered: false, completed: false, expiresAt: 0, affectedSignals: [], pulseUntil: 0 });
+  const config = getConfig(scene, id);
+  if (config && scene.player) {
+    states.set(scene, {
+      missionId: id,
+      config,
+      fallback: !CONFIG[id],
+      triggered: false,
+      completed: false,
+      expiresAt: 0,
+      affectedSignals: [],
+      pulseUntil: 0,
+    });
+  }
 }
 
 function update(scene) {
