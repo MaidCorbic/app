@@ -1,9 +1,9 @@
 // UPDATE 10 — WORLD VARIATION + GAME FEEL + PLATFORM CLARITY
-// UPDATE 10.2 — CLEAN CITY BACKDROP
+// UPDATE 10.3 — BUILDING SILHOUETTE + HERO ARCHITECTURE
 // Visual/feedback-only layer. It never creates or changes physics bodies, collision rules,
 // player movement, mobile controls, viewport policy, mission state, or progression.
 // IMPORTANT: platform and barrier visuals below are intentionally preserved exactly.
-// UPDATE 10.2 changes ONLY the background city presentation.
+// UPDATE 10.3 changes ONLY the background city presentation.
 
 const STYLE = {
   'first-delivery': { edge: 0xffd06e, bright: 0xffe7a6, dark: 0x162338, accent: 0xffa85d },
@@ -71,10 +71,10 @@ function addBarrierVisual(scene, barrier, index, style) {
 function addDistrictVariation(scene, style) {
   if (!scene?.add || !scene.worldWidth) return null;
 
-  // UPDATE 10.2: clean replacement for the previous skyline.
-  // There is intentionally NO old/second city painted underneath this one.
-  // Each depth uses opaque-ish silhouettes with restrained detail, so buildings
-  // read as architecture instead of transparent ghost rectangles.
+  // UPDATE 10.3: clean architectural pass.
+  // The old city is not rendered underneath this layer. We use one main skyline,
+  // a quiet distant horizon, and a small number of foreground architectural accents.
+  // No per-frame generation, no particles, no physics, no gameplay objects.
   const id = scene.mission?.id || '';
   const worldWidth = Math.max(800, scene.worldWidth || 0);
   const base = 610;
@@ -87,186 +87,232 @@ function addDistrictVariation(scene, style) {
   };
   const pick = (value, max) => hash(value) % max;
 
-  const far = scene.add.graphics().setScrollFactor(.18).setDepth(0);
+  const far = scene.add.graphics().setScrollFactor(.16).setDepth(0);
   const mid = scene.add.graphics().setScrollFactor(.30).setDepth(.55);
   const near = scene.add.graphics().setScrollFactor(.44).setDepth(1);
   const haze = scene.add.graphics().setScrollFactor(.36).setDepth(2);
 
-  // ---------- FAR CITY: quiet horizon, not a second foreground ----------
-  // Low contrast and lower silhouette density prevent the old "shadow copy" effect.
-  for (let x = -260, i = 0; x < worldWidth + 420; x += 155, i += 1) {
-    const w = 92 + pick(i * 19 + 3, 76);
-    const h = 82 + pick(i * 31 + 11, 105);
+  // ---------- FAR CITY: skyline mass only ----------
+  // Quiet silhouettes establish distance without creating ghost duplicates.
+  for (let x = -260, i = 0; x < worldWidth + 420; x += 175, i += 1) {
+    const w = 90 + pick(i * 19 + 3, 70);
+    const h = 76 + pick(i * 31 + 11, 96);
     const roof = base - h;
     const cx = x + w * .5;
 
-    far.fillStyle(style.dark, .62).fillRect(x, roof, w, h);
-    if (pick(i + 41, 4) === 0) {
-      far.fillStyle(style.dark, .78).fillRect(x + w * .35, roof - 28, w * .3, 28);
-      far.lineStyle(1, style.edge, .16).lineBetween(cx, roof - 28, cx, roof - 58);
-      far.fillStyle(style.edge, .18).fillCircle(cx, roof - 61, 2);
+    far.fillStyle(style.dark, .42).fillRect(x, roof, w, h);
+    if (pick(i + 41, 5) === 0) {
+      far.fillStyle(style.dark, .58).fillRect(x + w * .38, roof - 24, w * .24, 24);
+      far.lineStyle(1, style.edge, .10).lineBetween(cx, roof - 24, cx, roof - 54);
     }
 
-    // Very sparse windows; far buildings are intentionally quiet.
+    // Only a handful of windows; far architecture should read as atmosphere.
     if (pick(i + 77, 3) !== 0) {
-      for (let row = 0; row < 2; row += 1) {
-        const wy = roof + 30 + row * 34;
-        const count = Math.max(2, Math.floor(w / 36));
-        for (let col = 0; col < count; col += 1) {
-          if (pick(i * 100 + row * 17 + col * 7, 6) > 1) continue;
-          far.fillStyle(style.bright, .07).fillRect(x + 16 + col * 30, wy, 6, 3);
+      for (let col = 0; col < Math.max(2, Math.floor(w / 42)); col += 1) {
+        if (pick(i * 17 + col * 13, 5) > 1) continue;
+        far.fillStyle(style.bright, .045).fillRect(x + 18 + col * 36, roof + 32, 7, 3);
+        if (pick(i * 23 + col * 19, 4) === 0) {
+          far.fillStyle(style.bright, .04).fillRect(x + 18 + col * 36, roof + 68, 7, 3);
         }
       }
     }
   }
 
-  // ---------- MID CITY: the main skyline ----------
-  // This is the primary readable architecture layer. Buildings have distinct
-  // silhouettes rather than a transparent stack of rectangles.
-  for (let x = -180, i = 0; x < worldWidth + 340; x += 205, i += 1) {
+  // ---------- MID CITY: primary readable architecture ----------
+  // Seven deterministic building families prevent the repetitive rectangle look.
+  for (let x = -190, i = 0; x < worldWidth + 360; x += 215, i += 1) {
     const archetype = pick(i * 37 + 5, 7);
-    const w = 128 + pick(i * 13 + 8, 82);
-    const h = 142 + pick(i * 23 + 2, 158);
+    const w = 130 + pick(i * 13 + 8, 78);
+    const h = 138 + pick(i * 23 + 2, 164);
     const roof = base - h;
     const left = x;
     const right = x + w;
     const cx = left + w * .5;
 
-    // Solid main mass. No translucent duplicate facade behind it.
-    mid.fillStyle(style.dark, .90).fillRect(left, roof, w, h);
+    // Solid main mass. This is the only primary facade; no transparent copy behind it.
+    mid.fillStyle(style.dark, .94).fillRect(left, roof, w, h);
 
-    // Distinctive silhouettes: tower crown, stepped block, side wing, or notch.
+    // Building silhouette pass: crowns, shoulders, setbacks and service wings.
     if (archetype === 0) {
-      mid.fillStyle(style.dark, .96).fillRect(left + w * .20, roof - 34, w * .60, 34);
-      mid.fillStyle(style.dark, .96).fillRect(left + w * .34, roof - 50, w * .32, 16);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .20, roof - 34, w * .60, 34);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .35, roof - 52, w * .30, 18);
+      mid.lineStyle(2, style.edge, .14).lineBetween(cx, roof - 52, cx, roof - 78);
     } else if (archetype === 1) {
-      mid.fillStyle(style.dark, .96).fillRect(left + w * .58, roof + 20, w * .42, h - 20);
-      mid.fillStyle(style.dark, .96).fillRect(left - 12, roof + 52, 12, h - 52);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .58, roof + 18, w * .42, h - 18);
+      mid.fillStyle(style.dark, .98).fillRect(left - 14, roof + 54, 14, h - 54);
+      mid.fillStyle(style.edge, .11).fillRect(left + w * .58, roof + 18, 3, h - 18);
     } else if (archetype === 2) {
-      mid.fillStyle(style.dark, .96).fillRect(left - 18, roof + 38, 18, h - 38);
-      mid.fillStyle(style.dark, .96).fillRect(right, roof + 18, 16, h - 18);
-      mid.fillStyle(style.edge, .10).fillRect(left + 14, roof + 22, w - 28, 4);
+      mid.fillStyle(style.dark, .98).fillRect(left - 18, roof + 40, 18, h - 40);
+      mid.fillStyle(style.dark, .98).fillRect(right, roof + 22, 17, h - 22);
+      mid.fillStyle(style.edge, .12).fillRect(left + 12, roof + 22, w - 24, 5);
     } else if (archetype === 3) {
-      mid.fillStyle(style.dark, .96).fillRect(left + w * .15, roof - 22, w * .70, 22);
-      mid.fillStyle(style.dark, .96).fillRect(left + w * .34, roof - 42, w * .32, 20);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .12, roof - 22, w * .76, 22);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .34, roof - 44, w * .32, 22);
+      mid.lineStyle(2, style.bright, .12).lineBetween(left + w * .34, roof - 44, left + w * .66, roof - 44);
     } else if (archetype === 4) {
-      mid.fillStyle(style.dark, .96).fillRect(left + w * .12, roof + 24, w * .24, h - 24);
-      mid.fillStyle(style.dark, .96).fillRect(right - w * .24, roof + 48, w * .24, h - 48);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .10, roof + 26, w * .25, h - 26);
+      mid.fillStyle(style.dark, .98).fillRect(right - w * .25, roof + 48, w * .25, h - 48);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .34, roof - 12, w * .32, 12);
     } else if (archetype === 5) {
-      mid.fillStyle(style.dark, .96).fillRect(left + w * .24, roof - 16, w * .52, 16);
-      mid.fillStyle(style.dark, .96).fillRect(left + w * .40, roof - 36, w * .20, 20);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .22, roof - 16, w * .56, 16);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .39, roof - 38, w * .22, 22);
+      mid.fillStyle(style.edge, .13).fillRect(left + w * .31, roof - 10, w * .38, 4);
     } else {
-      mid.fillStyle(style.dark, .96).fillRect(left + w * .68, roof + 34, w * .32, h - 34);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .66, roof + 34, w * .34, h - 34);
+      mid.fillStyle(style.dark, .98).fillRect(left + w * .16, roof + 18, w * .20, h - 18);
     }
 
-    // Facade structure: subtle, deliberate, and aligned with the building mass.
-    mid.fillStyle(style.edge, .085).fillRect(left + 10, roof + 12, w - 20, 4);
-    mid.lineStyle(1, style.edge, .12).lineBetween(left + w * .25, roof + 12, left + w * .25, base);
-    mid.lineStyle(1, style.edge, .08).lineBetween(left + w * .75, roof + 12, left + w * .75, base);
+    // Facade framing: a few large architectural planes, not a grid.
+    mid.fillStyle(style.edge, .09).fillRect(left + 10, roof + 12, w - 20, 4);
+    mid.lineStyle(1, style.edge, .10).lineBetween(left + w * .27, roof + 14, left + w * .27, base);
+    mid.lineStyle(1, style.edge, .07).lineBetween(left + w * .73, roof + 14, left + w * .73, base);
 
-    // Sparse window groups, not a repetitive grid.
-    const rows = Math.max(2, Math.floor((h - 60) / 46));
-    const cols = Math.max(2, Math.floor((w - 34) / 34));
+    // Sparse window clusters with deterministic gaps.
+    const rows = Math.max(2, Math.floor((h - 58) / 48));
+    const cols = Math.max(2, Math.floor((w - 38) / 36));
     for (let row = 0; row < rows; row += 1) {
       for (let col = 0; col < cols; col += 1) {
         const chance = pick(i * 1000 + row * 41 + col * 17, 10);
         if (chance > (id === 'blackout' ? 1 : 3)) continue;
-        const wx = left + 18 + col * ((w - 36) / Math.max(1, cols - 1));
-        const wy = roof + 38 + row * 46;
-        const windowColor = id === 'signal-storm' ? style.bright : style.accent;
-        mid.fillStyle(windowColor, id === 'blackout' ? .10 : .17).fillRect(wx, wy, 8, 5);
+        const wx = left + 19 + col * ((w - 38) / Math.max(1, cols - 1));
+        const wy = roof + 40 + row * 48;
+        const ww = archetype === 4 ? 6 : 8;
+        mid.fillStyle(id === 'signal-storm' ? style.bright : style.accent, id === 'blackout' ? .09 : .15).fillRect(wx, wy, ww, 5);
       }
     }
 
-    // Rooftop equipment changes the silhouette instead of adding a shadow layer.
+    // Rooftop identity: one strong piece per building.
     mid.fillStyle(style.edge, .18).fillRect(left + 12, roof - 5, w - 24, 5);
     if (archetype === 0 || archetype === 5) {
-      mid.fillStyle(style.bright, .12).fillRect(cx - 22, roof - 13, 44, 8);
-      mid.lineStyle(2, style.edge, .22).lineBetween(cx, roof - 5, cx, roof - 50);
-      mid.fillStyle(style.edge, .32).fillCircle(cx, roof - 53, 2);
+      mid.fillStyle(style.bright, .11).fillRect(cx - 22, roof - 13, 44, 8);
+      mid.lineStyle(2, style.edge, .22).lineBetween(cx, roof - 5, cx, roof - 48);
+      mid.fillStyle(style.edge, .30).fillCircle(cx, roof - 51, 2);
     } else if (archetype === 1 || archetype === 4) {
-      mid.fillStyle(style.edge, .14).fillRect(left + 20, roof - 12, 34, 8);
-      mid.lineStyle(1, style.bright, .18).lineBetween(left + 37, roof - 12, left + 37, roof - 42);
+      mid.fillStyle(style.edge, .13).fillRect(left + 20, roof - 12, 36, 8);
+      mid.lineStyle(1, style.bright, .17).lineBetween(left + 38, roof - 12, left + 38, roof - 40);
     } else if (archetype === 2) {
-      mid.fillStyle(style.accent, .12).fillRect(left + 18, roof - 17, 38, 12);
-      mid.fillStyle(style.edge, .22).fillCircle(left + 37, roof - 23, 6);
+      mid.fillStyle(style.accent, .11).fillRect(left + 18, roof - 17, 40, 12);
+      mid.fillStyle(style.edge, .22).fillCircle(left + 38, roof - 23, 6);
     }
 
-    // Mission-specific visual language without changing gameplay objects.
+    // Mission-specific accents stay subtle and do not touch gameplay.
     if (id === 'corporate-lockdown' || id === 'final-relay') {
-      mid.fillStyle(style.edge, .10).fillRect(left + 16, roof + 24, w - 32, 46);
-      mid.fillStyle(style.bright, .18).fillRect(left + 25, roof + 35, Math.max(26, w - 50), 4);
-      mid.lineStyle(1, style.edge, .16).strokeRect(left + 12, roof + 16, w - 24, 64);
+      mid.fillStyle(style.edge, .08).fillRect(left + 16, roof + 24, w - 32, 46);
+      mid.fillStyle(style.bright, .14).fillRect(left + 25, roof + 35, Math.max(26, w - 50), 4);
+      mid.lineStyle(1, style.edge, .12).strokeRect(left + 12, roof + 16, w - 24, 64);
     } else if (id === 'dead-drop') {
-      mid.fillStyle(style.accent, .13).fillRect(left + w * .18, roof - 16, w * .64, 12);
-      mid.lineStyle(1, style.edge, .18).lineBetween(cx, roof - 16, cx, roof - 60);
+      mid.fillStyle(style.accent, .11).fillRect(left + w * .20, roof - 16, w * .60, 11);
+      mid.lineStyle(1, style.edge, .16).lineBetween(cx, roof - 16, cx, roof - 58);
     } else if (id === 'signal-storm') {
-      mid.lineStyle(2, style.edge, .15).lineBetween(left + 14, roof + 10, right - 14, roof - 22);
-      mid.fillStyle(style.bright, .12).fillCircle(cx, roof + 10, Math.min(16, w * .09));
+      mid.lineStyle(2, style.edge, .13).lineBetween(left + 14, roof + 10, right - 14, roof - 22);
+      mid.fillStyle(style.bright, .10).fillCircle(cx, roof + 10, Math.min(15, w * .08));
     } else if (id === 'blackout') {
-      mid.fillStyle(style.edge, .08).fillRect(left + 18, roof + 20, w - 36, 3);
+      mid.fillStyle(style.edge, .06).fillRect(left + 18, roof + 20, w - 36, 3);
     } else {
-      mid.fillStyle(style.accent, .10).fillRect(left + 18, roof + 30, Math.max(24, w * .26), 8);
+      mid.fillStyle(style.accent, .08).fillRect(left + 18, roof + 30, Math.max(24, w * .24), 8);
     }
   }
 
-  // ---------- NEAR CITY: only a few foreground architectural accents ----------
-  // IMPORTANT: near layer no longer paints full translucent building blocks.
-  // It adds depth with rooftop machinery, billboards, rails and ducts only.
-  for (let x = 70, i = 0; x < worldWidth + 260; x += 410, i += 1) {
-    const w = 180 + pick(i * 47 + 19, 80);
-    const h = 150 + pick(i * 23 + 29, 90);
+  // ---------- HERO ARCHITECTURE: three dominant landmarks ----------
+  // These are large, opaque silhouettes with deliberate identity. They are part of
+  // the backdrop only and never become collision or gameplay objects.
+  const heroSpacing = Math.max(520, Math.floor(worldWidth / 3));
+  const heroPositions = [heroSpacing * .65, heroSpacing * 1.55, heroSpacing * 2.45];
+  heroPositions.forEach((center, heroIndex) => {
+    if (center > worldWidth + 260) return;
+    const hero = pick(heroIndex * 73 + id.length * 11, 4);
+    const w = 210 + pick(heroIndex * 29 + 17, 70);
+    const h = 250 + pick(heroIndex * 43 + 23, 105);
+    const left = center - w / 2;
+    const right = center + w / 2;
     const roof = base - h;
-    const left = x;
-    const right = x + w;
-    const cx = left + w * .5;
-    const accentType = pick(i + id.length * 3, 5);
 
-    // A dark, opaque rooftop silhouette only — never a ghost facade.
-    near.fillStyle(style.dark, .96).fillRect(left, roof + 72, w, h - 72);
-    near.fillStyle(style.edge, .20).fillRect(left, roof + 68, w, 6);
+    // Main silhouette.
+    mid.fillStyle(style.dark, .98).fillRect(left, roof + 34, w, h - 34);
 
-    // Hero rooftop structures.
-    if (accentType === 0) {
-      near.fillStyle(style.dark, .98).fillRect(cx - 36, roof + 34, 72, 34);
-      near.lineStyle(2, style.edge, .25).strokeRect(cx - 36, roof + 34, 72, 34);
-      near.lineStyle(2, style.edge, .25).lineBetween(cx, roof + 34, cx, roof - 10);
-      near.fillStyle(style.edge, .34).fillCircle(cx, roof - 13, 3);
-    } else if (accentType === 1) {
-      near.fillStyle(style.dark, .98).fillRect(left + 24, roof + 42, 48, 26);
-      near.fillStyle(style.accent, .18).fillRect(left + 30, roof + 48, 36, 5);
-      near.lineStyle(1, style.bright, .22).lineBetween(left + 48, roof + 42, left + 48, roof + 8);
-    } else if (accentType === 2) {
-      near.fillStyle(style.dark, .98).fillRect(right - 76, roof + 36, 50, 32);
-      near.fillStyle(style.edge, .18).fillCircle(right - 51, roof + 52, 13);
-      near.lineStyle(1, style.bright, .20).lineBetween(right - 51, roof + 39, right - 51, roof + 8);
-    } else if (accentType === 3) {
-      near.lineStyle(2, style.edge, .22).lineBetween(left + 22, roof + 64, right - 22, roof + 64);
-      near.lineStyle(1, style.bright, .16).lineBetween(left + 34, roof + 54, left + 34, roof + 22);
-      near.lineStyle(1, style.bright, .16).lineBetween(right - 34, roof + 54, right - 34, roof + 22);
+    if (hero === 0) {
+      // Relay tower / communications crown.
+      mid.fillStyle(style.dark, .99).fillRect(left + w * .20, roof, w * .60, 34);
+      mid.fillStyle(style.dark, .99).fillRect(left + w * .37, roof - 28, w * .26, 28);
+      mid.lineStyle(3, style.edge, .18).lineBetween(center, roof - 28, center, roof - 92);
+      mid.lineStyle(1, style.bright, .16).lineBetween(center - 18, roof - 56, center + 18, roof - 56);
+      mid.fillStyle(style.edge, .28).fillCircle(center, roof - 96, 3);
+    } else if (hero === 1) {
+      // Corporate monolith with a large inset face.
+      mid.fillStyle(style.dark, .99).fillRect(left + w * .16, roof, w * .68, 34);
+      mid.fillStyle(style.edge, .12).fillRect(left + w * .24, roof + 62, w * .52, 92);
+      mid.lineStyle(2, style.bright, .12).strokeRect(left + w * .24, roof + 62, w * .52, 92);
+      mid.fillStyle(style.accent, .14).fillRect(left + w * .31, roof + 82, w * .38, 8);
+      mid.fillStyle(style.bright, .10).fillRect(left + w * .31, roof + 104, w * .24, 5);
+    } else if (hero === 2) {
+      // Industrial tower with stepped shoulders and a service mast.
+      mid.fillStyle(style.dark, .99).fillRect(left - 18, roof + 62, 18, h - 62);
+      mid.fillStyle(style.dark, .99).fillRect(right, roof + 28, 20, h - 28);
+      mid.fillStyle(style.dark, .99).fillRect(left + w * .24, roof, w * .52, 32);
+      mid.fillStyle(style.edge, .13).fillRect(left + 20, roof + 74, w - 40, 6);
+      mid.lineStyle(2, style.edge, .18).lineBetween(left + 32, roof + 74, left + 32, base);
+      mid.lineStyle(2, style.edge, .12).lineBetween(right - 32, roof + 74, right - 32, base);
     } else {
-      near.fillStyle(style.dark, .98).fillRect(cx - 28, roof + 24, 56, 44);
-      near.fillStyle(style.bright, .12).fillRect(cx - 20, roof + 34, 40, 5);
-      near.fillStyle(style.accent, .16).fillRect(cx - 14, roof + 48, 28, 4);
+      // Narrow neon spire with a stepped crown.
+      mid.fillStyle(style.dark, .99).fillRect(left + w * .16, roof + 42, w * .68, h - 42);
+      mid.fillStyle(style.dark, .99).fillRect(left + w * .28, roof + 12, w * .44, 30);
+      mid.fillStyle(style.dark, .99).fillRect(left + w * .40, roof - 12, w * .20, 24);
+      mid.fillStyle(style.accent, .18).fillRect(left + w * .25, roof + 92, 6, Math.min(150, h - 120));
+      mid.lineStyle(2, style.bright, .15).lineBetween(center, roof - 12, center, roof - 62);
+    }
+
+    // Hero facade windows: grouped bands instead of repetitive grids.
+    for (let band = roof + 70; band < base - 40; band += 54) {
+      if (pick(heroIndex * 200 + band, 5) > 2) continue;
+      mid.fillStyle(style.bright, .10).fillRect(left + 24, band, w - 48, 5);
+      mid.fillStyle(style.accent, .08).fillRect(left + 24, band + 10, Math.max(30, (w - 48) * .42), 4);
+    }
+
+    // Hero rooftop rail and equipment line.
+    mid.fillStyle(style.edge, .22).fillRect(left + 16, roof - 4, w - 32, 4);
+  });
+
+  // ---------- NEAR CITY: accents only, never full building duplicates ----------
+  // Foreground depth is created by a few large ducts, signs and rooftop machines.
+  for (let x = 150, i = 0; x < worldWidth + 300; x += 620, i += 1) {
+    const accent = pick(i * 51 + id.length, 4);
+    const y = 300 + pick(i * 17 + 9, 100);
+    const w = 90 + pick(i * 31 + 3, 70);
+
+    if (accent === 0) {
+      near.lineStyle(4, style.edge, .16).lineBetween(x, y, x + w, y);
+      near.lineStyle(1, style.bright, .12).lineBetween(x + 10, y + 8, x + w - 10, y + 8);
+      near.fillStyle(style.edge, .22).fillCircle(x, y, 3);
+      near.fillStyle(style.edge, .22).fillCircle(x + w, y, 3);
+    } else if (accent === 1) {
+      near.fillStyle(style.dark, .92).fillRoundedRect(x, y, w, 34, 4);
+      near.lineStyle(2, style.edge, .20).strokeRoundedRect(x, y, w, 34, 4);
+      near.fillStyle(style.accent, .16).fillRect(x + 12, y + 11, w - 24, 5);
+    } else if (accent === 2) {
+      near.fillStyle(style.dark, .94).fillRect(x, y, 46, 38);
+      near.fillStyle(style.edge, .22).fillCircle(x + 23, y + 19, 13);
+      near.lineStyle(1, style.bright, .16).lineBetween(x + 23, y, x + 23, y - 32);
+    } else {
+      near.lineStyle(2, style.edge, .16).lineBetween(x, y + 40, x + w, y - 8);
+      near.lineStyle(1, style.bright, .10).lineBetween(x + 24, y + 30, x + 24, y - 6);
+      near.lineStyle(1, style.bright, .10).lineBetween(x + w - 24, y + 6, x + w - 24, y - 20);
     }
   }
 
-  // ---------- CITY INFRASTRUCTURE: sparse cables and relay links ----------
-  // Lines are intentionally few so they add scale without creating visual noise.
-  for (let i = 0; i < Math.ceil(worldWidth / 500); i += 1) {
-    const x1 = 110 + i * 500;
-    const x2 = Math.min(worldWidth + 180, x1 + 300 + pick(i * 17 + 77, 70));
-    const y = 286 + pick(i * 29 + 9, 82);
-    near.lineStyle(2, style.edge, .13).lineBetween(x1, y, (x1 + x2) / 2, y + 26);
-    near.lineStyle(1, style.bright, .09).lineBetween((x1 + x2) / 2, y + 26, x2, y + 5);
-    near.fillStyle(style.edge, .18).fillCircle(x1, y, 2);
-    near.fillStyle(style.edge, .18).fillCircle(x2, y + 5, 2);
+  // ---------- CITY INFRASTRUCTURE ----------
+  // Very sparse links add scale without drawing a wireframe over the scene.
+  for (let i = 0; i < Math.ceil(worldWidth / 560); i += 1) {
+    const x1 = 120 + i * 560;
+    const x2 = Math.min(worldWidth + 160, x1 + 260 + pick(i * 17 + 77, 80));
+    const y = 258 + pick(i * 29 + 9, 78);
+    near.lineStyle(2, style.edge, .10).lineBetween(x1, y, (x1 + x2) / 2, y + 22);
+    near.lineStyle(1, style.bright, .07).lineBetween((x1 + x2) / 2, y + 22, x2, y + 4);
   }
 
   // ---------- ATMOSPHERE ----------
-  // Very subtle bands only. No large transparent building overlays.
-  haze.fillStyle(style.dark, .018).fillRect(-240, 430, worldWidth + 520, 80);
-  haze.fillStyle(style.bright, .010).fillRect(-240, 505, worldWidth + 520, 48);
+  // Minimal haze only. It must not create a second skyline silhouette.
+  haze.fillStyle(style.dark, .014).fillRect(-240, 438, worldWidth + 520, 72);
+  haze.fillStyle(style.bright, .008).fillRect(-240, 510, worldWidth + 520, 44);
 
   return { far, mid, near, haze };
 }
