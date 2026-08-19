@@ -7,7 +7,38 @@ import './runtime-ai-tutorial-settings.js';
 
   const style = document.createElement('style');
   style.textContent = `
-    .home-tutorial-button .tutorial-menu-icon{display:none!important}
+    /* Home-only: keep the existing menu geometry and make TUTORIAL readable on every viewport. */
+    #intro .title-secondary .home-tutorial-button{
+      width:100%;
+      min-height:43px;
+      padding:10px 12px;
+      display:grid;
+      align-content:center;
+      justify-items:start;
+      gap:4px;
+      box-sizing:border-box;
+      overflow:hidden;
+      text-align:left;
+      white-space:nowrap;
+    }
+    #intro .title-secondary .home-tutorial-button > span{
+      display:block;
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      color:#dbe5ed;
+      font:800 10px/1.15 'DM Mono',monospace;
+      letter-spacing:.8px;
+    }
+    #intro .title-secondary .home-tutorial-button > small{
+      display:block;
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      color:#74879a;
+      font:700 7px/1.1 'DM Mono',monospace;
+      letter-spacing:.55px;
+    }
     .home-tutorial-content{display:grid;gap:12px;padding:2px 0 8px}
     .tutorial-intro{padding:12px;border:1px solid rgba(141,244,255,.15);border-radius:10px;background:linear-gradient(145deg,rgba(12,28,48,.9),rgba(4,10,20,.96));box-shadow:inset 0 1px rgba(255,255,255,.04)}
     .tutorial-intro b{display:block;color:#8df4ff;font:900 11px/1.2 'DM Mono',monospace;letter-spacing:1px}
@@ -19,7 +50,13 @@ import './runtime-ai-tutorial-settings.js';
     .tutorial-key{display:inline-block;padding:1px 4px;border:1px solid rgba(210,226,240,.2);border-radius:4px;color:#e9f2f8;background:#081321;font-size:7px}
     .tutorial-note{color:#71859a!important}
     .tutorial-foot{padding:10px 12px;border-left:2px solid #8df4ff;color:#8fa5b8;font:700 7px/1.6 'DM Mono',monospace;background:rgba(141,244,255,.035)}
-    @media(max-width:700px){.tutorial-category ul{font-size:7px;line-height:1.6}.tutorial-intro p{font-size:7px}}
+    @media(max-width:700px){
+      #intro .title-secondary .home-tutorial-button{min-height:44px;padding:9px 10px}
+      #intro .title-secondary .home-tutorial-button > span{font-size:9px;letter-spacing:.65px}
+      #intro .title-secondary .home-tutorial-button > small{font-size:6.5px;letter-spacing:.4px}
+      .tutorial-category ul{font-size:7px;line-height:1.6}
+      .tutorial-intro p{font-size:7px}
+    }
   `;
   document.head.appendChild(style);
 
