@@ -56,14 +56,18 @@ try {
     objective: document.querySelector('#objective')?.textContent || '',
     playHidden: document.querySelector('#play')?.classList.contains('hidden'),
     introHidden: document.querySelector('#intro')?.classList.contains('hidden'),
+    performanceVersion: window.__missionFlowPerformanceV1?.version || '',
+    performanceReady: typeof window.__missionFlowPerformanceV1?.scoreRun === 'function',
   }));
 
   assert.equal(errors.length, 0, `Expected zero page errors, got: ${errors.join(', ')}`);
   assert.ok(hud.objective.length > 0, 'Mission objective HUD should be populated during gameplay');
   assert.equal(hud.playHidden, false, 'Play HUD should be visible during gameplay');
   assert.equal(hud.introHidden, true, 'Intro screen should be hidden during gameplay');
+  assert.equal(hud.performanceVersion, '1.0', 'Mission Performance V1 should be installed');
+  assert.equal(hud.performanceReady, true, 'Mission Performance V1 should expose its scoring API');
 
-  console.log('Gameplay smoke test passed: home -> chapter intro -> live gameplay, zero errors.');
+  console.log('Gameplay smoke test passed: home -> chapter intro -> live gameplay, zero errors, Performance V1 loaded.');
 } finally {
   if (browser) await browser.close();
   server.kill();
