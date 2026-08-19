@@ -37,6 +37,25 @@ import { missions } from './src/missions.js';
     return missions.find(item => item.id === missionId) || null;
   };
 
+  // Some older gameplay builds do not expose a checkpoint counter on RunnerScene.
+  // In that case, derive the progress from the authoritative player position and
+  // the mission checkpoint coordinates. This is read-only and never changes gameplay.
+  function deriveCheckpointProgress(scene, mission) {
+    const total = Array.isArray(mission?.checkpoints) ? mission.checkpoints.length : 0;
+    if (!scene || total === 0) return 0;
+    if (state.checkpoints > 0) return Math.min(state.checkpoints, total);
+
+    const playerX = Number(scene.player?.x ?? scene.playerSprite?.x ?? scene.courier?.x);
+    if (!Number.isFinite(playerX)) return 0;
+
+    let reached = 0;
+    for (const checkpoint of mission.checkpoints) {
+      const checkpointX = Number(Array.isArray(checkpoint) ? checkpoint[0] : checkpoint?.x);
+      if (Number.isFinite(checkpointX) && playerX >= checkpointX) reached += 1;
+    }
+    return Math.min(reached, total);
+  }
+
   function sceneStats(sceneOverride = null) {
     const scene = sceneOverride || getScene();
     const mission = scene?.mission || getMission(scene);
@@ -51,6 +70,7 @@ import { missions } from './src/missions.js';
     const jumps = integer(scene.jumps);
     const secrets = integer(scene.secretsCollected);
     const checkpointTotal = Array.isArray(mission.checkpoints) ? mission.checkpoints.length : 0;
+    const checkpoints = deriveCheckpointProgress(scene, mission);
 
     return {
       missionId: mission.id,
@@ -59,7 +79,7 @@ import { missions } from './src/missions.js';
       elapsedMs,
       signals,
       totalSignals,
-      checkpoints: Math.min(state.checkpoints, checkpointTotal || state.checkpoints),
+      checkpoints,
       checkpointTotal,
       deaths: state.deaths,
       falls,
@@ -84,8 +104,6 @@ import { missions } from './src/missions.js';
     state.checkpoints = 0;
     state.lastScene = scene;
 
-    // A new RunnerScene is a new performance run. Never leak the previous
-    // mission's completed result into the new Results screen.
     window.__missionFlowPerformanceV1.latest = null;
     window.__missionFlowPerformanceV1.current = sceneStats;
 
@@ -176,8 +194,6 @@ import { missions } from './src/missions.js';
     return result;
   }
 
-  // UPDATE 12 authoritative finalization API. The finish/recovery layer calls
-  // this directly before opening Results, eliminating event-order races.
   function finalize(sceneOverride = null) {
     const scene = sceneOverride || getScene();
     if (!scene?.mission?.id) return null;
