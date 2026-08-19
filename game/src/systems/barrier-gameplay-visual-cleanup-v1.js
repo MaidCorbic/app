@@ -1,13 +1,7 @@
-// UPDATE 11.9 — BARRIER GAMEPLAY VISUAL CLEANUP
-// Gameplay barriers remain functional collision objects, but their intrusive
-// authored placeholder sprite and "BARRIER · VAULT" labels are never rendered.
+// UPDATE 11.8 — BARRIER GAMEPLAY VISUAL CLEANUP
+// Barriers remain fully functional physics/collision objects, but their authored
+// red placeholder texture and barrier warning labels are hidden in every level.
 // This is intentionally visual-only: no bodies are disabled or removed.
-//
-// The previous cleanup ran only once on the scene-ready event. RunnerScene can
-// finish creating hazards after that event, which allowed the barrier sprite and
-// label to reappear. This version performs a small post-create cleanup window.
-
-const CLEANUP_PASSES = [0, 40, 120, 300, 700];
 
 function hideBarrierVisuals(scene) {
   if (!scene) return;
@@ -24,28 +18,20 @@ function hideBarrierVisuals(scene) {
 
   scene.children?.list?.slice().forEach(child => {
     if (!child?.active || child.type !== 'Text') return;
-    const value = String(child.text || '').toUpperCase();
-    if (value.includes('BARRIER · VAULT') || value.includes('BARRIER - VAULT')) child.destroy();
-  });
-}
-
-function cleanupWindow(scene) {
-  if (!scene) return;
-  CLEANUP_PASSES.forEach(delay => {
-    window.setTimeout(() => {
-      if (scene?.sys?.isActive?.() !== false) hideBarrierVisuals(scene);
-    }, delay);
+    if (String(child.text || '').includes('BARRIER · VAULT')) child.destroy();
   });
 }
 
 function install() {
-  if (window.__relayBarrierGameplayVisualCleanupV119) return;
-  window.__relayBarrierGameplayVisualCleanupV119 = true;
+  if (window.__relayBarrierGameplayVisualCleanupV118) return;
+  window.__relayBarrierGameplayVisualCleanupV118 = true;
 
   const ready = event => {
     const scene = event?.detail?.scene || window.__relayRunnerScene;
     if (!scene) return;
-    cleanupWindow(scene);
+
+    hideBarrierVisuals(scene);
+    window.setTimeout(() => hideBarrierVisuals(scene), 0);
   };
 
   window.addEventListener('relay:runner-scene-ready', ready);
