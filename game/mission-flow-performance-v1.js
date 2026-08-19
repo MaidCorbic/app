@@ -6,7 +6,6 @@ import { missions } from './src/missions.js';
 
 (() => {
   if (window.__missionFlowPerformanceV1) return;
-  window.__missionFlowPerformanceV1 = true;
 
   const CONFIG = Object.freeze({
     weights: Object.freeze({ completion: 30, speed: 25, signals: 20, route: 15, survival: 10 }),
@@ -58,7 +57,6 @@ import { missions } from './src/missions.js';
     maxCheckpoint: 0,
     checkpointTotal: 0,
     observer: null,
-    finishObserver: null,
   };
 
   function reset() {
@@ -99,9 +97,7 @@ import { missions } from './src/missions.js';
     const parTime = Math.max(CONFIG.minimumTimeMs, Number(mission.parTime) || 90000);
     const speed = completed ? clamp((parTime / Math.max(CONFIG.minimumTimeMs, elapsedMs)) * 100) : 0;
     const signalScore = totalSignals > 0 ? clamp((signals / totalSignals) * 100) : 100;
-    const routeScore = checkpointTotal > 0
-      ? clamp((checkpoint / checkpointTotal) * 100)
-      : clamp(progress);
+    const routeScore = checkpointTotal > 0 ? clamp((checkpoint / checkpointTotal) * 100) : clamp(progress);
     const survival = clamp(100 - recoveries * CONFIG.recoveryPenalty - damageTaken * CONFIG.damagePenalty);
 
     const weighted =
@@ -206,9 +202,7 @@ import { missions } from './src/missions.js';
     const data = snapshot();
     const result = scoreRun({ completed, ...data });
     if (result) publish(result);
-    if (!completed) {
-      window.__missionFlowPerformanceV1.lastFailedRun = result;
-    }
+    if (!completed) window.__missionFlowPerformanceV1.lastFailedRun = result;
   }
 
   function inspectLifecycle() {
@@ -219,32 +213,38 @@ import { missions } from './src/missions.js';
 
     const introHidden = Boolean(intro && intro.classList.contains('hidden'));
     const playVisible = Boolean(play && !play.classList.contains('hidden'));
+    const finishVisible = Boolean(finish && !finish.classList.contains('hidden'));
+    const gameOverVisible = Boolean(gameOver && !gameOver.classList.contains('hidden'));
     const runTime = readElapsed();
 
-    if (!state.active && introHidden && playVisible && runTime <= 1000) beginRun();
+    // A new launch resets the existing HUD timer to zero. That is our safe, non-invasive
+    // run boundary and avoids touching RunnerScene or main.js lifecycle ownership.
+    if ((!state.active || state.settled) && introHidden && playVisible && !finishVisible && !gameOverVisible && runTime <= 1000) {
+      beginRun();
+    }
 
     updateLiveMetrics();
 
-    if (state.active && finish && !finish.classList.contains('hidden')) settle(true);
-    else if (state.active && gameOver && !gameOver.classList.contains('hidden')) settle(false);
+    if (state.active && finishVisible) settle(true);
+    else if (state.active && gameOverVisible) settle(false);
   }
 
   function install() {
     if (state.observer) return;
-    const root = document.getElementById('game') || document.body;
-    if (!root) return;
 
-    state.observer = new MutationObserver(() => inspectLifecycle());
-    state.observer.observe(root, { subtree: true, childList: false, attributes: true, attributeFilter: ['class'], characterData: true });
+    const play = document.getElementById('play');
+    if (!play) return;
 
-    // The existing game already updates runTime/progress/signal/health text from its event bus.
-    // A lightweight observer reads those values without adding a second gameplay loop.
-    const textTargets = ['runTime', 'signalCount', 'progressValue', 'healthValue', 'routeIntel', 'finish', 'gameOver', 'intro', 'play'];
-    textTargets.forEach(id => {
+    // One observer over the existing gameplay shell is enough. Phaser renders into a canvas,
+    // so this does not observe the game's internal display list or frame loop.
+    state.observer = new MutationObserver(inspectLifecycle);
+    state.observer.observe(play, { subtree: true, childList: true, attributes: true, characterData: true });
+
+    ['intro', 'finish', 'gameOver'].forEach(id => {
       const element = document.getElementById(id);
-      if (!element || element === root) return;
+      if (!element) return;
       const observer = new MutationObserver(inspectLifecycle);
-      observer.observe(element, { subtree: true, childList: true, attributes: true, characterData: true });
+      observer.observe(element, { childList: true, attributes: true, characterData: true });
     });
 
     inspectLifecycle();
