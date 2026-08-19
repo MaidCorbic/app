@@ -14,7 +14,6 @@ const panel = document.getElementById('relayInfoPanel');
 const eyebrow = document.getElementById('relayInfoEyebrow');
 const heading = document.getElementById('relayInfoHeading');
 const content = document.getElementById('relayInfoContent');
-
 const open = kind => {
   if (!panel) return;
   panel.classList.remove('hidden');
@@ -29,9 +28,7 @@ const open = kind => {
     content.innerHTML = '<p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT</p><div class="relay-update-list">' + LATEST_UPDATE.items.map(item => `<div class="relay-update-item">${item}</div>`).join('');
   }
 };
-
 document.querySelectorAll('[data-relay-info]').forEach(button => button.addEventListener('click', () => open(button.dataset.relayInfo)));
-
 document.addEventListener('click', event => {
   const question = event.target.closest('.relay-faq-question');
   if (question) question.closest('.relay-faq-item')?.classList.toggle('open');
@@ -40,7 +37,6 @@ document.addEventListener('click', event => {
     panel?.classList.remove('relay-update-mode');
   }
 });
-
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
     panel?.classList.add('hidden');
@@ -51,16 +47,14 @@ document.addEventListener('keydown', event => {
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
 import './dynamic-time-cycle-v1.js';
-// UPDATE 10.5: remove the large central sky disk without changing the dynamic sky system.
 import './src/systems/city-atmosphere-cleanup-v1.js';
 import './game-feel-v1.js';
 import './audio-feedback-v2.js';
 import './gameplay-event-hud-v2.js';
 import './src/systems/mobile-controls-controller.js';
 import './src/systems/world-variation-game-feel-v1.js';
-// UPDATE 10.4/10.5: hard-replace legacy city and apply the architecture detail pass.
 import './src/systems/city-backdrop-replacement-v1.js';
+// UPDATE 11 — safe per-mission deployment; one interactive object per campaign mission.
+import './src/systems/dynamic-world-mechanics-v2.js';
 import './src/systems/viewport-sync.js';
-// MUST remain the final static import in this entry module.
-// It wraps RunnerScene after the existing gameplay wrappers so UPDATE 09 cannot be overwritten.
 import './world-interaction-runtime-v2.js';
