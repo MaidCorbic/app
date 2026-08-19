@@ -55,7 +55,7 @@ import './src/systems/mobile-controls-controller.js';
 import './src/systems/world-variation-game-feel-v1.js';
 // UPDATE 11.7 — remove only the intrusive barrier Graphics overlay after world variation renders it.
 import './src/systems/barrier-visual-cleanup-v1.js';
-// UPDATE 11.8 — hide the red barrier placeholder and barrier warning labels on every level.
+// UPDATE 11.8 — keep the authored gameplay barrier visible and remove only its warning label.
 import './src/systems/barrier-gameplay-visual-cleanup-v1.js';
 import './src/systems/city-backdrop-replacement-v1.js';
 // UPDATE 11 — safe per-mission deployment; one interactive object per campaign mission.
@@ -65,3 +65,5 @@ import './world-interaction-runtime-v2.js';
 // TEST UX — isolated home tutorial, tutorial settings gate and player shield visual cleanup.
 import './home-tutorial-v1.js';
 import './tutorial-runtime-gate-v1.js';
+// TEST FIX — tutorial icon, HUD spacing, visible barriers and barrier collision footprint.
+import './level-visual-stability-fix-v1.js';
