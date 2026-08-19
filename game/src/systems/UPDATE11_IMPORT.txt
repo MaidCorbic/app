@@ -1,0 +1,1 @@
+UPDATE 11 integration note: import `./dynamic-world-mechanics-v1.js` from the game's existing browser entrypoint after RunnerScene is loaded and before a mission is launched. This file is intentionally a marker until the actual entrypoint is patched on the branch.
