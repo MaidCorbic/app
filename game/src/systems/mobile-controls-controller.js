@@ -32,24 +32,146 @@ const emitKey = (key, type) => {
 const style = document.createElement('style');
 style.id = 'relay-mobile-controls-controller-style';
 style.textContent = `
+  /* Mobile-controls owns only the touch HUD. Viewport/canvas rules stay untouched. */
   body.relay-mobile-controls-hidden .mobile-controls {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
   }
+
   body.relay-mobile-controls-active .mobile-controls {
-    visibility: visible;
-    opacity: 1;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
+
   body.relay-mobile-controls-active .mobile-actions {
     pointer-events: none;
   }
+
+  /* Compact, deterministic touch layout. The existing viewport CSS is not changed. */
+  body.is-touch .mobile-controls {
+    --relay-touch-size: clamp(46px, 12.5vw, 58px);
+    left: max(10px, env(safe-area-inset-left, 0px) + 8px) !important;
+    right: max(10px, env(safe-area-inset-right, 0px) + 8px) !important;
+    bottom: max(12px, env(safe-area-inset-bottom, 0px) + 10px) !important;
+    align-items: flex-end !important;
+    gap: 10px !important;
+  }
+
+  body.is-touch .mobile-joystick {
+    flex: 0 0 clamp(76px, 20vw, 92px) !important;
+    width: clamp(76px, 20vw, 92px) !important;
+    height: clamp(76px, 20vw, 92px) !important;
+  }
+
+  body.is-touch .mobile-joystick-thumb {
+    width: 42px !important;
+    height: 42px !important;
+    margin: -21px 0 0 -21px !important;
+  }
+
+  body.is-touch .mobile-actions {
+    flex: 0 1 auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, var(--relay-touch-size)) !important;
+    grid-template-rows: repeat(2, var(--relay-touch-size)) !important;
+    gap: 4px !important;
+    width: calc(var(--relay-touch-size) * 4 + 12px) !important;
+    max-width: calc(100vw - 110px) !important;
+    pointer-events: none !important;
+  }
+
+  body.is-touch .mobile-controls button {
+    width: var(--relay-touch-size) !important;
+    height: var(--relay-touch-size) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 1px !important;
+    line-height: 1 !important;
+    font-size: clamp(8px, 2.15vw, 10px) !important;
+    letter-spacing: .2px !important;
+  }
+
   body.is-touch .mobile-controls button small {
     display: block !important;
-    font-size: 6px !important;
+    margin: 0 !important;
+    font-size: clamp(5px, 1.35vw, 6px) !important;
     line-height: 1 !important;
-    letter-spacing: .7px !important;
+    letter-spacing: .55px !important;
+  }
+
+  /* Keep the 8 controls readable on very narrow phones without changing the game surface. */
+  @media (max-width: 380px) {
+    body.is-touch .mobile-controls {
+      --relay-touch-size: 43px;
+      gap: 7px !important;
+      left: 8px !important;
+      right: 8px !important;
+      bottom: max(10px, env(safe-area-inset-bottom, 0px) + 8px) !important;
+    }
+    body.is-touch .mobile-joystick {
+      flex-basis: 72px !important;
+      width: 72px !important;
+      height: 72px !important;
+    }
+    body.is-touch .mobile-joystick-thumb {
+      width: 38px !important;
+      height: 38px !important;
+      margin: -19px 0 0 -19px !important;
+    }
+    body.is-touch .mobile-actions {
+      gap: 3px !important;
+      width: calc(var(--relay-touch-size) * 4 + 9px) !important;
+      max-width: calc(100vw - 88px) !important;
+    }
+  }
+
+  /* Landscape phones: keep controls low and compact instead of consuming the play area. */
+  @media (max-height: 480px) and (orientation: landscape) {
+    body.is-touch .mobile-controls {
+      --relay-touch-size: 46px;
+      bottom: max(7px, env(safe-area-inset-bottom, 0px) + 5px) !important;
+      gap: 8px !important;
+    }
+    body.is-touch .mobile-joystick {
+      flex-basis: 76px !important;
+      width: 76px !important;
+      height: 76px !important;
+    }
+    body.is-touch .mobile-joystick-thumb {
+      width: 40px !important;
+      height: 40px !important;
+      margin: -20px 0 0 -20px !important;
+    }
+    body.is-touch .mobile-actions {
+      gap: 3px !important;
+      width: calc(var(--relay-touch-size) * 4 + 9px) !important;
+    }
+  }
+
+  @media (max-height: 360px) and (orientation: landscape) {
+    body.is-touch .mobile-controls {
+      --relay-touch-size: 40px;
+      gap: 6px !important;
+    }
+    body.is-touch .mobile-joystick {
+      flex-basis: 66px !important;
+      width: 66px !important;
+      height: 66px !important;
+    }
+    body.is-touch .mobile-joystick-thumb {
+      width: 34px !important;
+      height: 34px !important;
+      margin: -17px 0 0 -17px !important;
+    }
+    body.is-touch .mobile-actions {
+      gap: 2px !important;
+      width: calc(var(--relay-touch-size) * 4 + 6px) !important;
+    }
   }
 `;
 document.head.appendChild(style);
@@ -72,9 +194,8 @@ function install() {
   let controls = document.querySelector('.mobile-controls');
   if (!controls) return;
 
-  // Replace the existing controls once. cloneNode() does not copy addEventListener()
-  // handlers, so this removes the older main.js/core-stability.js touch listeners without
-  // changing the viewport/canvas implementation.
+  // Remove listeners installed by older touch-control implementations while keeping
+  // the DOM/CSS/viewport implementation intact. cloneNode() does not copy listeners.
   const cleanControls = controls.cloneNode(true);
   cleanControls.dataset.mobileControlsOwner = 'controller';
   controls.replaceWith(cleanControls);
@@ -114,7 +235,7 @@ function install() {
     const rect = joystick.getBoundingClientRect();
     const dx = x - rect.left - rect.width / 2;
     const dy = y - rect.top - rect.height / 2;
-    const distance = Math.min(Math.hypot(dx, dy), 38);
+    const distance = Math.min(Math.hypot(dx, dy), 32);
     const angle = Math.atan2(dy, dx);
     thumb.style.transform = `translate(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px)`;
     setDirection(Math.abs(dx) < 9 ? null : dx < 0 ? 'left' : 'right');
@@ -176,6 +297,7 @@ function install() {
     };
     joystick.addEventListener('pointerup', end);
     joystick.addEventListener('pointercancel', end);
+    joystick.addEventListener('lostpointercapture', resetJoystick);
     window.addEventListener('blur', resetJoystick);
   }
 
