@@ -1,5 +1,5 @@
-// UPDATE 10.4 — CITY BACKDROP REPLACEMENT
-// Removes the legacy RunnerScene skyline and previous UPDATE 10 city layers.
+// UPDATE 10.5 — ARCHITECTURE DETAIL PASS
+// Refines the existing clean city backdrop without adding a second skyline.
 // Does not touch platforms, barriers, physics, player, mobile controls, or gameplay state.
 
 const STYLE = {
@@ -15,18 +15,98 @@ const FALLBACK = { dark: 0x142235, mid: 0x27364f, glow: 0x8df4ff, window: 0xb9e9
 const states = new WeakMap();
 
 function cleanOldCity(scene) {
-  // RunnerScene's original distant/middle/foreground city.
   scene.parallaxLayers?.forEach(entry => entry?.layer?.destroy?.());
   scene.parallaxLayers = [];
 
-  // UPDATE 10.x city graphics used dedicated parallax factors.
-  // World landmarks normally use scrollFactor 1 and are intentionally preserved.
   const legacyFactors = [0.12, 0.38, 0.72, 0.16, 0.30, 0.44, 0.36];
   scene.children?.list?.slice?.().forEach(child => {
     if (!child?.destroy || child.type !== 'Graphics' || child.getData?.('relayCityLayer')) return;
     const sf = child.scrollFactorX;
     if (legacyFactors.some(value => Math.abs(sf - value) < 0.001)) child.destroy();
   });
+}
+
+function addArchitectureDetails(g, x, base, w, h, type, s, seed) {
+  const roof = base - h;
+  const right = x + w;
+
+  // Large architectural planes: restrained so the skyline remains readable.
+  g.fillStyle(s.dark, .72).fillRect(x + 14, roof + 24, Math.max(30, w * .22), Math.min(74, h * .22));
+  if (type === 1 || type === 4) {
+    g.fillStyle(s.dark, .82).fillRect(right - Math.max(32, w * .24) - 14, roof + 42, Math.max(32, w * .24), Math.min(88, h * .26));
+  }
+
+  // HVAC / rooftop service equipment.
+  if (seed % 3 !== 1) {
+    const unitW = Math.max(18, Math.min(34, w * .18));
+    const unitX = x + w * (seed % 2 ? .18 : .62);
+    const unitY = roof - 14;
+    g.fillStyle(s.dark, .98).fillRect(unitX, unitY, unitW, 10);
+    g.lineStyle(1, s.glow, .22).strokeRect(unitX, unitY, unitW, 10);
+    g.lineStyle(2, s.glow, .16).lineBetween(unitX + 5, unitY + 4, unitX + unitW - 5, unitY + 4);
+  }
+
+  // Selective balcony / maintenance rail. Never reaches gameplay depth.
+  if (seed % 4 === 0 || type === 3) {
+    const bx = x + w * .56;
+    const by = roof + Math.min(92, h * .28);
+    const bw = Math.max(34, w * .26);
+    g.lineStyle(2, s.glow, .18).strokeRect(bx, by, bw, 22);
+    g.lineStyle(1, s.glow, .13).lineBetween(bx + 8, by, bx + 8, by + 22);
+    g.lineBetween(bx + bw - 8, by, bx + bw - 8, by + 22);
+  }
+
+  // Fire-escape / service ladder on a small subset of buildings.
+  if (seed % 5 === 2) {
+    const ex = x + w * .78;
+    const ey = roof + 74;
+    const eh = Math.min(130, h * .42);
+    g.lineStyle(2, s.glow, .14).lineBetween(ex, ey, ex, ey + eh);
+    g.lineBetween(ex + 22, ey, ex + 22, ey + eh);
+    for (let y = ey + 12; y < ey + eh; y += 18) g.lineBetween(ex, y, ex + 22, y);
+  }
+
+  // Vertical neon/service spine: one strong architectural signature, not a grid.
+  if (seed % 4 === 1) {
+    const sx = x + w * .12;
+    const sy = roof + 34;
+    g.fillStyle(s.glow, .10).fillRect(sx, sy, 5, Math.min(118, h * .42));
+    g.fillStyle(s.window, .18).fillRect(sx + 8, sy + 10, 16, 4);
+    g.fillStyle(s.window, .12).fillRect(sx + 8, sy + 28, 28, 4);
+  }
+
+  // One facade sign / billboard on selected buildings.
+  if (seed % 6 === 0) {
+    const signW = Math.max(42, Math.min(92, w * .42));
+    const signX = x + (w - signW) * .5;
+    const signY = roof + Math.min(104, h * .30);
+    g.fillStyle(s.dark, .98).fillRect(signX, signY, signW, 24);
+    g.lineStyle(2, s.glow, .30).strokeRect(signX, signY, signW, 24);
+    g.fillStyle(s.glow, .24).fillRect(signX + 9, signY + 9, signW - 18, 4);
+    g.fillStyle(s.window, .16).fillRect(signX + 12, signY + 15, Math.max(12, signW * .28), 3);
+  }
+
+  // Sparse window clusters with deliberate gaps to avoid a procedural grid look.
+  if (seed % 3 === 0) {
+    const clusterX = x + w * .40;
+    const clusterY = roof + 58;
+    for (let row = 0; row < 3; row += 1) {
+      for (let col = 0; col < 2; col += 1) {
+        const chance = (seed + row * 3 + col * 5) % 4;
+        if (chance === 0) continue;
+        g.fillStyle(s.window, .11 + chance * .025).fillRect(clusterX + col * 18, clusterY + row * 18, 10, 5);
+      }
+    }
+  }
+
+  // Rooftop pipe / dish detail for hero silhouettes.
+  if (seed % 7 === 1) {
+    const px = x + w * .70;
+    const py = roof - 5;
+    g.lineStyle(2, s.glow, .18).lineBetween(px, py, px, py - 30);
+    g.lineStyle(1, s.window, .16).lineBetween(px - 10, py - 24, px + 10, py - 24);
+    g.lineStyle(2, s.glow, .14).lineBetween(px - 10, py - 24, px + 6, py - 32);
+  }
 }
 
 function drawBuilding(g, x, base, w, h, type, s, seed) {
@@ -82,6 +162,8 @@ function drawBuilding(g, x, base, w, h, type, s, seed) {
     g.fillStyle(s.glow, .18).fillCircle(x + 34, roof - 20, 8);
     g.lineStyle(1, s.window, .22).lineBetween(x + 34, roof - 20, x + 34, roof - 48);
   }
+
+  addArchitectureDetails(g, x, base, w, h, type, s, seed);
 }
 
 function createCity(scene) {
@@ -96,7 +178,6 @@ function createCity(scene) {
   const haze = scene.add.graphics().setScrollFactor(.38).setDepth(-14);
   [far, mid, near, haze].forEach(g => g.setData('relayCityLayer', true));
 
-  // FAR: broad skyline masses, intentionally quiet.
   for (let x = -240, i = 0; x < width + 400; x += 170, i += 1) {
     const w = 90 + ((i * 43) % 80);
     const h = 75 + ((i * 61) % 100);
@@ -105,29 +186,31 @@ function createCity(scene) {
     if (i % 4 === 0) far.fillRect(x + w * .38, roof - 25, w * .24, 25);
   }
 
-  // MID: main city. Distinct silhouettes and hero architecture, never a second facade.
   for (let x = -180, i = 0; x < width + 360; x += 235, i += 1) {
     const type = (i * 7 + id.length * 3) % 6;
     const w = 135 + ((i * 29) % 75);
     const h = 145 + ((i * 47) % 165);
     drawBuilding(mid, x, base, w, h, type, s, i + id.length);
 
+    // Hero architecture: a few distinct landmarks, never a second facade.
     if (i % 4 === 1) {
       const hx = x + w * .58;
       mid.fillStyle(s.dark, .99).fillRect(hx, base - h - 62, 58, 62);
       mid.lineStyle(2, s.glow, .30).strokeRect(hx, base - h - 62, 58, 62);
       mid.lineStyle(3, s.glow, .25).lineBetween(hx + 29, base - h - 62, hx + 29, base - h - 120);
       mid.fillStyle(s.window, .24).fillRect(hx + 9, base - h - 48, 40, 5);
+      mid.fillStyle(s.glow, .16).fillRect(hx + 4, base - h - 78, 50, 4);
     }
     if (i % 5 === 3) {
       const bx = x + w * .18;
       mid.fillStyle(s.dark, .99).fillRect(bx, base - h + 20, 82, 34);
       mid.lineStyle(2, s.glow, .22).strokeRect(bx, base - h + 20, 82, 34);
       mid.fillStyle(s.glow, .20).fillRect(bx + 10, base - h + 32, 62, 5);
+      mid.fillStyle(s.window, .12).fillRect(bx + 14, base - h + 43, 30, 3);
     }
   }
 
-  // NEAR: infrastructure only. No full foreground buildings that can hide gameplay.
+  // NEAR: infrastructure only. It never becomes a foreground wall.
   for (let x = 120, i = 0; x < width + 300; x += 520, i += 1) {
     const roof = 350 - (i % 2) * 35;
     near.fillStyle(s.dark, .98).fillRect(x, roof, 180, 8);
