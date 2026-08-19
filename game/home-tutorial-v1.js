@@ -7,7 +7,7 @@ import './runtime-ai-tutorial-settings.js';
 
   const style = document.createElement('style');
   style.textContent = `
-    .home-tutorial-button .tutorial-menu-icon{display:inline-grid;place-items:center;width:24px;height:24px;margin-right:8px;border:1px solid rgba(141,244,255,.45);border-radius:7px;color:#8df4ff;font:900 12px/1 'DM Mono',monospace;box-shadow:0 0 14px rgba(56,189,248,.12)}
+    .home-tutorial-button .tutorial-menu-icon{display:none!important}
     .home-tutorial-content{display:grid;gap:12px;padding:2px 0 8px}
     .tutorial-intro{padding:12px;border:1px solid rgba(141,244,255,.15);border-radius:10px;background:linear-gradient(145deg,rgba(12,28,48,.9),rgba(4,10,20,.96));box-shadow:inset 0 1px rgba(255,255,255,.04)}
     .tutorial-intro b{display:block;color:#8df4ff;font:900 11px/1.2 'DM Mono',monospace;letter-spacing:1px}
@@ -104,7 +104,7 @@ import './runtime-ai-tutorial-settings.js';
     button.type = 'button';
     button.className = 'menu-option-button home-tutorial-button';
     button.dataset.titlePanel = 'tutorial';
-    button.innerHTML = '<span><span class="tutorial-menu-icon" aria-hidden="true">?</span>TUTORIAL</span><small>HOW TO PLAY</small>';
+    button.innerHTML = '<span>TUTORIAL</span><small>HOW TO PLAY</small>';
     nav.insertBefore(button, nav.querySelector('[data-title-panel="controls"]') || nav.firstChild);
   }
 
@@ -151,7 +151,6 @@ import './runtime-ai-tutorial-settings.js';
 
     document.getElementById('intro')?.style.setProperty('user-select', 'none');
     document.getElementById('intro')?.style.setProperty('-webkit-user-select', 'none');
-    document.querySelector('.menu-tagline')?.remove();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
