@@ -51,14 +51,21 @@ import './src/systems/city-atmosphere-cleanup-v1.js';
 import './game-feel-v1.js';
 import './audio-feedback-v2.js';
 import './gameplay-event-hud-v2.js';
-import './src/systems/mobile-controls-controller.js';
+// Keep the original mobile input path from src/main.js. The test controller
+// emitted synthetic keyboard events and interfered with the working game.events
+// mobile-action/mobile-move path.
 import './src/systems/world-variation-game-feel-v1.js';
-// UPDATE 11.7 — remove only the intrusive barrier Graphics overlay after world variation renders it.
-import './src/systems/barrier-visual-cleanup-v1.js';
-// UPDATE 11.8 — hide the red barrier placeholder and barrier warning labels on every level.
+// UPDATE 11.8 — keep the authored gameplay barrier visible and remove only its warning label.
 import './src/systems/barrier-gameplay-visual-cleanup-v1.js';
 import './src/systems/city-backdrop-replacement-v1.js';
 // UPDATE 11 — safe per-mission deployment; one interactive object per campaign mission.
 import './src/systems/dynamic-world-mechanics-v2.js';
 import './src/systems/viewport-sync.js';
 import './world-interaction-runtime-v2.js';
+// TEST UX — keep tutorial settings gate and isolate the player-adjacent shield visual cleanup.
+import './player-shield-visual-cleanup-v1.js';
+import './tutorial-runtime-gate-v1.js';
+// TEST UX — Home TUTORIAL button only. Existing Home layout is preserved.
+import './home-tutorial-v1.js';
+// TEST FIX — HUD spacing, visible barriers and barrier collision footprint.
+import './level-visual-stability-fix-v1.js';

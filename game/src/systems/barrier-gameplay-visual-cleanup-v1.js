@@ -1,20 +1,21 @@
 // UPDATE 11.8 — BARRIER GAMEPLAY VISUAL CLEANUP
-// Barriers remain fully functional physics/collision objects, but their authored
-// red placeholder texture and barrier warning labels are hidden in every level.
-// This is intentionally visual-only: no bodies are disabled or removed.
+// Barriers remain fully functional physics/collision objects.
+// Their authored gameplay barrier is intentionally visible so the courier can
+// clearly read vault obstacles instead of seeing only the red world overlay.
+// Barrier warning labels are still removed. No bodies are disabled or removed.
 
-function hideBarrierVisuals(scene) {
+function keepBarrierVisuals(scene) {
   if (!scene) return;
 
-  const hideGroup = group => {
+  const keepGroup = group => {
     group?.getChildren?.().forEach(object => {
       if (!object?.active) return;
-      if (object.texture?.key === 'barrier') object.setVisible(false);
+      if (object.texture?.key === 'barrier') object.setVisible(true);
     });
   };
 
-  hideGroup(scene.barriers);
-  hideGroup(scene.movingGates);
+  keepGroup(scene.barriers);
+  keepGroup(scene.movingGates);
 
   scene.children?.list?.slice().forEach(child => {
     if (!child?.active || child.type !== 'Text') return;
@@ -30,8 +31,8 @@ function install() {
     const scene = event?.detail?.scene || window.__relayRunnerScene;
     if (!scene) return;
 
-    hideBarrierVisuals(scene);
-    window.setTimeout(() => hideBarrierVisuals(scene), 0);
+    keepBarrierVisuals(scene);
+    window.setTimeout(() => keepBarrierVisuals(scene), 0);
   };
 
   window.addEventListener('relay:runner-scene-ready', ready);
