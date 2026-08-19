@@ -1,8 +1,9 @@
 // TEST ONLY — LEVEL VISUAL / BARRIER STABILITY FIX
 // Strictly isolated from Dynamic World Mechanics.
 // - Removes the tutorial ? icon without removing the TUTORIAL entry.
-// - Gives the top OLD QUARTER HUD line enough vertical breathing room.
-// - Keeps authored barrier sprites visible.
+// - Gives the Home title enough vertical breathing room so the tagline is clearly
+//   below RELAY RUNNER and never collides with PLAY NOW.
+// - Keeps authored gameplay barrier sprites visible on every level.
 // - Removes only the player-adjacent checkpoint/shield visual.
 // - Tightens only the visible barrier collision footprint so the lower edge
 //   cannot catch the courier's feet and shove them into a void unexpectedly.
@@ -15,19 +16,54 @@
   const style = document.createElement('style');
   style.id = 'relay-level-visual-stability-fix-v1';
   style.textContent = `
-    /* Home tutorial: keep the button, remove only the decorative ? icon. */
-    .home-tutorial-button .tutorial-menu-icon { display: none !important; }
+    /* Home tutorial: the menu entry is text-only. No icon/question mark. */
+    .home-tutorial-button .tutorial-menu-icon,
+    .home-tutorial-button svg,
+    .home-tutorial-button i { display:none !important; }
+
+    /* Home title: establish a real vertical stack. The tagline must sit below
+       the RUNNER word, with a stable gap before PLAY NOW. */
+    #intro .title-lockup {
+      width:min(610px,100%) !important;
+      display:grid !important;
+      justify-items:center !important;
+      align-content:center !important;
+      row-gap:0 !important;
+    }
+    #intro .title-lockup h1 {
+      display:block !important;
+      width:100% !important;
+      margin:0 !important;
+      line-height:.82 !important;
+      letter-spacing:-.105em !important;
+    }
+    #intro .title-lockup .menu-tagline {
+      position:relative !important;
+      z-index:4 !important;
+      max-width:390px !important;
+      margin:28px auto 28px !important;
+      line-height:1.55 !important;
+    }
+    #intro .title-lockup .menu-actions {
+      position:relative !important;
+      z-index:5 !important;
+      margin-top:0 !important;
+    }
+    #intro .title-lockup .title-secondary {
+      position:relative !important;
+      z-index:5 !important;
+    }
 
     /* HUD: separate district name from the objective so OLD QUARTER never collides with it. */
     .hud-route #district {
-      display: block !important;
-      margin-bottom: 5px !important;
-      line-height: 1.2 !important;
+      display:block !important;
+      margin-bottom:5px !important;
+      line-height:1.2 !important;
     }
 
     /* Campaign/briefing header: give the upper copy a little more breathing room. */
     #pauseMenu .campaign-v2-head {
-      padding-top: 10px !important;
+      padding-top:10px !important;
     }
   `;
   document.head.appendChild(style);
@@ -47,20 +83,21 @@
 
   const hidePlayerShieldVisual = scene => {
     const player = scene?.player;
-    if (!player?.active) return;
+    if (!player?.active || !scene?.children?.list) return;
     const shieldObjects = scene.children.list.filter(child => {
       if (!child?.active || child === player) return false;
-      const key = child.texture?.key;
-      if (key !== 'shield') return false;
+      if (child.texture?.key !== 'shield') return false;
       return Math.hypot((child.x || 0) - player.x, (child.y || 0) - player.y) <= 90;
     });
     shieldObjects.forEach(object => object.setVisible(false));
   };
 
-  const fixScene = scene => {
-    if (!scene?.children?.list) return;
+  const restoreGameplayBarrierVisuals = scene => {
+    if (!scene) return;
 
-    // Restore the authored barrier visual if any previous visual cleanup hid it.
+    // The authored barrier sprite is the actual gameplay readability layer.
+    // Restore it after every scene-ready pass so no cleanup layer can leave the
+    // player with only the red placeholder/overlay or an invisible obstacle.
     scene.barriers?.getChildren?.().forEach(barrier => {
       if (!barrier?.active) return;
       if (barrier.texture?.key === 'barrier') {
@@ -73,7 +110,12 @@
       if (!gate?.active) return;
       if (gate.texture?.key === 'barrier') gate.setVisible(true);
     });
+  };
 
+  const fixScene = scene => {
+    if (!scene?.children?.list) return;
+
+    restoreGameplayBarrierVisuals(scene);
     hidePlayerShieldVisual(scene);
 
     // If the district label is a Phaser text object in addition to the DOM HUD,
@@ -94,6 +136,7 @@
     fixScene(scene);
     window.setTimeout(() => fixScene(scene), 0);
     window.setTimeout(() => fixScene(scene), 120);
+    window.setTimeout(() => fixScene(scene), 300);
   };
 
   window.addEventListener('relay:runner-scene-ready', ready);
