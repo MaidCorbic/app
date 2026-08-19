@@ -9,40 +9,11 @@ exitTitle?.addEventListener('click', () => {
     Object.assign(document.createElement('p'), { className: 'menu-tagline', textContent: 'The relay is offline. You can close this browser tab.' })
   );
 });
-
-const panel = document.getElementById('relayInfoPanel');
-const eyebrow = document.getElementById('relayInfoEyebrow');
-const heading = document.getElementById('relayInfoHeading');
-const content = document.getElementById('relayInfoContent');
-const open = kind => {
-  if (!panel) return;
-  panel.classList.remove('hidden');
-  panel.classList.toggle('relay-update-mode', kind === 'update');
-  if (kind === 'faq') {
-    eyebrow.textContent = 'RELAY RUNNER // FIELD GUIDE';
-    heading.textContent = 'FAQ';
-    content.innerHTML = '<div class="relay-faq-list">' + RELAY_FAQ.map(item => `<article class="relay-faq-item"><button class="relay-faq-question" type="button">${item[0]}</button><div class="relay-faq-answer">${item[1]}</div></article>`).join('');
-  } else {
-    eyebrow.textContent = LATEST_UPDATE.version;
-    heading.textContent = LATEST_UPDATE.title;
-    content.innerHTML = '<p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT</p><div class="relay-update-list">' + LATEST_UPDATE.items.map(item => `<div class="relay-update-item">${item}</div>`).join('');
-  }
-};
-document.querySelectorAll('[data-relay-info]').forEach(button => button.addEventListener('click', () => open(button.dataset.relayInfo)));
-document.addEventListener('click', event => {
-  const question = event.target.closest('.relay-faq-question');
-  if (question) question.closest('.relay-faq-item')?.classList.toggle('open');
-  if (event.target.closest('[data-relay-close]') || event.target === panel) {
-    panel?.classList.add('hidden');
-    panel?.classList.remove('relay-update-mode');
-  }
-});
-document.addEventListener('keydown', event => {
-  if (event.key === 'Escape') {
-    panel?.classList.add('hidden');
-    panel?.classList.remove('relay-update-mode');
-  }
-});
+const panel=document.getElementById('relayInfoPanel');const eyebrow=document.getElementById('relayInfoEyebrow');const heading=document.getElementById('relayInfoHeading');const content=document.getElementById('relayInfoContent');
+const open=kind=>{if(!panel)return;panel.classList.remove('hidden');panel.classList.toggle('relay-update-mode',kind==='update');if(kind==='faq'){eyebrow.textContent='RELAY RUNNER // FIELD GUIDE';heading.textContent='FAQ';content.innerHTML='<div class="relay-faq-list">'+RELAY_FAQ.map(item=>`<article class="relay-faq-item"><button class="relay-faq-question" type="button">${item[0]}</button><div class="relay-faq-answer">${item[1]}</div></article>`).join('');}else{eyebrow.textContent=LATEST_UPDATE.version;heading.textContent=LATEST_UPDATE.title;content.innerHTML='<p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT</p><div class="relay-update-list">'+LATEST_UPDATE.items.map(item=>`<div class="relay-update-item">${item}</div>`).join('');}};
+document.querySelectorAll('[data-relay-info]').forEach(button=>button.addEventListener('click',()=>open(button.dataset.relayInfo)));
+document.addEventListener('click',event=>{const question=event.target.closest('.relay-faq-question');if(question)question.closest('.relay-faq-item')?.classList.toggle('open');if(event.target.closest('[data-relay-close]')||event.target===panel){panel?.classList.add('hidden');panel?.classList.remove('relay-update-mode')}});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'){panel?.classList.add('hidden');panel?.classList.remove('relay-update-mode')}});
 
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
@@ -51,25 +22,17 @@ import './src/systems/city-atmosphere-cleanup-v1.js';
 import './game-feel-v1.js';
 import './audio-feedback-v2.js';
 import './gameplay-event-hud-v2.js';
-// Keep the original mobile input path from src/main.js. The test controller
-// emitted synthetic keyboard events and interfered with the working game.events
-// mobile-action/mobile-move path.
 import './src/systems/world-variation-game-feel-v1.js';
-// UPDATE 11.8 — keep the authored gameplay barrier visible and remove only its warning label.
 import './src/systems/barrier-gameplay-visual-cleanup-v1.js';
 import './src/systems/city-backdrop-replacement-v1.js';
-// UPDATE 11 — safe per-mission deployment; one interactive object per campaign mission.
 import './src/systems/dynamic-world-mechanics-v2.js';
 import './src/systems/viewport-sync.js';
 import './world-interaction-runtime-v2.js';
-// TEST UX — keep tutorial settings gate and isolate the player-adjacent shield visual cleanup.
 import './player-shield-visual-cleanup-v1.js';
 import './tutorial-runtime-gate-v1.js';
-// TEST UX — Home TUTORIAL button only. Existing Home layout is preserved.
 import './home-tutorial-v1.js';
-// TEST FIX — HUD spacing, visible barriers and barrier collision footprint.
 import './level-visual-stability-fix-v1.js';
-// UPDATE 12 — additive mission performance observer. It does not alter gameplay ownership.
 import './mission-flow-performance-v1.js';
-// UPDATE 12 FIX — deterministic handoff so Performance is finalized before Results render.
 import './mission-performance-results-bridge-v1.js';
+// UPDATE 14 — dynamic encounter events; transient gameplay layer only.
+import './src/systems/dynamic-encounter-events-v1.js';
