@@ -69,3 +69,5 @@ import './tutorial-runtime-gate-v1.js';
 import './home-tutorial-v1.js';
 // TEST FIX — HUD spacing, visible barriers and barrier collision footprint.
 import './level-visual-stability-fix-v1.js';
+// UPDATE 12 — additive mission performance observer. It does not alter gameplay ownership.
+import './mission-flow-performance-v1.js';
