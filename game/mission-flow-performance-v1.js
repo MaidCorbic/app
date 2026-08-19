@@ -31,15 +31,15 @@ import { missions } from './src/missions.js';
   };
 
   const getScene = () => window.__relayRunnerScene || state.lastScene || null;
-  const getMission = () => {
-    const scene = getScene();
+  const getMission = (sceneOverride = null) => {
+    const scene = sceneOverride || getScene();
     const missionId = state.missionId || scene?.mission?.id;
     return missions.find(item => item.id === missionId) || null;
   };
 
   function sceneStats(sceneOverride = null) {
     const scene = sceneOverride || getScene();
-    const mission = scene?.mission || getMission();
+    const mission = scene?.mission || getMission(scene);
     if (!scene || !mission?.id) return null;
 
     const signals = integer(scene.collected);
@@ -84,6 +84,11 @@ import { missions } from './src/missions.js';
     state.checkpoints = 0;
     state.lastScene = scene;
 
+    // A new RunnerScene is a new performance run. Never leak the previous
+    // mission's completed result into the new Results screen.
+    window.__missionFlowPerformanceV1.latest = null;
+    window.__missionFlowPerformanceV1.current = sceneStats;
+
     scene.events?.once?.('shutdown', () => {
       if (state.lastScene === scene && !state.settled) {
         state.active = false;
@@ -91,12 +96,11 @@ import { missions } from './src/missions.js';
       }
     });
 
-    window.__missionFlowPerformanceV1.current = sceneStats;
     return true;
   }
 
-  function scoreRun({ completed, elapsedMs, signals, totalSignals, checkpoints, checkpointTotal, deaths, falls, collisions }) {
-    const mission = getMission();
+  function scoreRun({ completed, elapsedMs, signals, totalSignals, checkpoints, checkpointTotal, deaths, falls, collisions, missionId }) {
+    const mission = getMission({ mission: { id: missionId } });
     if (!mission) return null;
 
     const completion = completed ? 100 : 0;
@@ -152,27 +156,46 @@ import { missions } from './src/missions.js';
   }
 
   function publish(result) {
-    if (!result || state.settled) return;
+    if (!result || state.settled) return null;
     state.settled = true;
     window.__missionFlowPerformanceV1.latest = result;
     window.dispatchEvent(new CustomEvent('relay:mission-performance-complete', { detail: result }));
+    return result;
   }
 
   function settle(completed, sceneOverride = null) {
-    if (!state.active || state.settled) return;
+    if (!state.active || state.settled) return window.__missionFlowPerformanceV1.latest || null;
     const data = sceneStats(sceneOverride);
-    if (!data) return;
+    if (!data) return null;
 
-    const result = scoreRun({ completed, ...data });
-    if (!result) return;
+    const result = scoreRun({ completed, ...data, missionId: data.missionId });
+    if (!result) return null;
 
     publish(result);
     if (!completed) window.__missionFlowPerformanceV1.lastFailedRun = result;
+    return result;
+  }
+
+  // UPDATE 12 authoritative finalization API. The finish/recovery layer calls
+  // this directly before opening Results, eliminating event-order races.
+  function finalize(sceneOverride = null) {
+    const scene = sceneOverride || getScene();
+    if (!scene?.mission?.id) return null;
+
+    if (!state.active || state.missionId !== scene.mission.id || state.lastScene !== scene) {
+      resetForScene(scene);
+    }
+
+    return settle(true, scene);
   }
 
   function onSceneReady(event) {
     const scene = event?.detail?.scene || window.__relayRunnerScene;
-    if (scene) resetForScene(scene);
+    if (scene) {
+      if (!state.active || state.missionId !== scene.mission?.id || state.lastScene !== scene) {
+        resetForScene(scene);
+      }
+    }
   }
 
   function onDeath() {
@@ -184,11 +207,8 @@ import { missions } from './src/missions.js';
   }
 
   function onMissionComplete(event) {
-    // The existing finish/recovery flow is authoritative. It supplies the exact
-    // RunnerScene so Performance V1 cannot lose the state during scene handoff.
     const scene = event?.detail?.scene || window.__relayRunnerScene || state.lastScene;
-    if (scene && (!state.active || state.missionId !== scene.mission?.id)) resetForScene(scene);
-    settle(true, scene);
+    if (scene) finalize(scene);
   }
 
   function listen(type, handler) {
@@ -214,6 +234,7 @@ import { missions } from './src/missions.js';
     state.checkpoints = 0;
     state.lastScene = null;
     window.__missionFlowPerformanceV1.current = null;
+    window.__missionFlowPerformanceV1.latest = null;
   }
 
   window.__missionFlowPerformanceV1 = {
@@ -224,6 +245,7 @@ import { missions } from './src/missions.js';
     reset,
     snapshot: sceneStats,
     scoreRun,
+    finalize,
   };
 
   install();
