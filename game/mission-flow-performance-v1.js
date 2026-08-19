@@ -28,7 +28,6 @@ import { missions } from './src/missions.js';
     deaths: 0,
     checkpoints: 0,
     lastScene: null,
-    listeners: [],
   };
 
   const getScene = () => window.__relayRunnerScene || state.lastScene || null;
@@ -38,10 +37,10 @@ import { missions } from './src/missions.js';
     return missions.find(item => item.id === missionId) || null;
   };
 
-  function sceneStats() {
-    const scene = getScene();
-    const mission = getMission();
-    if (!scene || !mission) return null;
+  function sceneStats(sceneOverride = null) {
+    const scene = sceneOverride || getScene();
+    const mission = scene?.mission || getMission();
+    if (!scene || !mission?.id) return null;
 
     const signals = integer(scene.collected);
     const totalSignals = Array.isArray(mission.signals) ? mission.signals.length : 0;
@@ -51,16 +50,17 @@ import { missions } from './src/missions.js';
     const enemyDefeats = integer(scene.enemyDefeats);
     const jumps = integer(scene.jumps);
     const secrets = integer(scene.secretsCollected);
+    const checkpointTotal = Array.isArray(mission.checkpoints) ? mission.checkpoints.length : 0;
 
     return {
       missionId: mission.id,
-      missionIndex: state.missionIndex,
+      missionIndex: state.missionIndex >= 0 ? state.missionIndex : missions.findIndex(item => item.id === mission.id),
       runSequence: state.runSequence,
       elapsedMs,
       signals,
       totalSignals,
-      checkpoints: Math.min(state.checkpoints, Array.isArray(mission.checkpoints) ? mission.checkpoints.length : state.checkpoints),
-      checkpointTotal: Array.isArray(mission.checkpoints) ? mission.checkpoints.length : 0,
+      checkpoints: Math.min(state.checkpoints, checkpointTotal || state.checkpoints),
+      checkpointTotal,
       deaths: state.deaths,
       falls,
       collisions,
@@ -72,7 +72,7 @@ import { missions } from './src/missions.js';
 
   function resetForScene(scene) {
     const mission = scene?.mission;
-    if (!mission?.id) return;
+    if (!mission?.id) return false;
 
     state.active = true;
     state.settled = false;
@@ -85,13 +85,14 @@ import { missions } from './src/missions.js';
     state.lastScene = scene;
 
     scene.events?.once?.('shutdown', () => {
-      if (state.lastScene === scene) {
+      if (state.lastScene === scene && !state.settled) {
         state.active = false;
         state.lastScene = null;
       }
     });
 
     window.__missionFlowPerformanceV1.current = sceneStats;
+    return true;
   }
 
   function scoreRun({ completed, elapsedMs, signals, totalSignals, checkpoints, checkpointTotal, deaths, falls, collisions }) {
@@ -154,14 +155,12 @@ import { missions } from './src/missions.js';
     if (!result || state.settled) return;
     state.settled = true;
     window.__missionFlowPerformanceV1.latest = result;
-    // UPDATE 12 must not rewrite the existing RUN SCORE element. That score belongs
-    // to the existing Results/progression flow; Performance V1 is displayed separately.
     window.dispatchEvent(new CustomEvent('relay:mission-performance-complete', { detail: result }));
   }
 
-  function settle(completed) {
+  function settle(completed, sceneOverride = null) {
     if (!state.active || state.settled) return;
-    const data = sceneStats();
+    const data = sceneStats(sceneOverride);
     if (!data) return;
 
     const result = scoreRun({ completed, ...data });
@@ -184,14 +183,16 @@ import { missions } from './src/missions.js';
     if (state.active && !state.settled) state.checkpoints += 1;
   }
 
-  function onMissionComplete() {
-    // Existing mission completion remains authoritative. We only capture its final state.
-    settle(true);
+  function onMissionComplete(event) {
+    // The existing finish/recovery flow is authoritative. It supplies the exact
+    // RunnerScene so Performance V1 cannot lose the state during scene handoff.
+    const scene = event?.detail?.scene || window.__relayRunnerScene || state.lastScene;
+    if (scene && (!state.active || state.missionId !== scene.mission?.id)) resetForScene(scene);
+    settle(true, scene);
   }
 
   function listen(type, handler) {
     window.addEventListener(type, handler);
-    state.listeners.push([type, handler]);
   }
 
   function install() {
