@@ -44,6 +44,11 @@ function showRecoveredFinish(scene) {
     saveState(state);
   }
 
+  // UPDATE 12 integration point: this is the authoritative completion handoff.
+  // Pass the live RunnerScene so the Performance observer cannot lose the run
+  // during the finish/recovery transition. No gameplay ownership is changed.
+  window.dispatchEvent(new CustomEvent('relay:mission-complete', { detail: { scene, missionId: mission.id } }));
+
   const stat = state.missionStats?.[mission.id] || { bestRating: 1, bestScore: scene.collected * 100, bestTime: scene.elapsedMs };
   const breakdown = state.lastXpBreakdown || {};
   document.getElementById('finishRating').textContent = '★'.repeat(Math.max(1, stat.bestRating || 1));
