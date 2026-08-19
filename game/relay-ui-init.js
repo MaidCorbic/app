@@ -51,10 +51,15 @@ document.addEventListener('keydown', event => {
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
 import './dynamic-time-cycle-v1.js';
+// UPDATE 10.5: remove the large central sky disk without changing the dynamic sky system.
+import './src/systems/city-atmosphere-cleanup-v1.js';
 import './game-feel-v1.js';
 import './audio-feedback-v2.js';
 import './gameplay-event-hud-v2.js';
 import './src/systems/mobile-controls-controller.js';
+import './src/systems/world-variation-game-feel-v1.js';
+// UPDATE 10.4/10.5: hard-replace legacy city and apply the architecture detail pass.
+import './src/systems/city-backdrop-replacement-v1.js';
 import './src/systems/viewport-sync.js';
 // MUST remain the final static import in this entry module.
 // It wraps RunnerScene after the existing gameplay wrappers so UPDATE 09 cannot be overwritten.
