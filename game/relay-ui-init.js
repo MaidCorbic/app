@@ -73,3 +73,5 @@ import './level-visual-stability-fix-v1.js';
 import './mission-flow-performance-v1.js';
 // UPDATE 12 FIX — deterministic handoff so Performance is finalized before Results render.
 import './mission-performance-results-bridge-v1.js';
+// UPDATE 14 — dynamic encounter events. Additive and isolated from scoring/progression.
+import './src/systems/dynamic-encounter-events-v1.js';
