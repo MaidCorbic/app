@@ -1,7 +1,7 @@
-/* Cinematic Arrival V2 — presentation-only. It never starts, pauses or changes Phaser gameplay. */
+/* Cinematic Arrival V3 — slower, longer and more active presentation layer. Gameplay remains untouched. */
 (() => {
-  if (window.__relayCinematicArrivalV2) return;
-  window.__relayCinematicArrivalV2 = true;
+  if (window.__relayCinematicArrivalV3) return;
+  window.__relayCinematicArrivalV3 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
@@ -23,16 +23,20 @@
     status.className = 'arrival-status';
     status.textContent = 'RELAY NETWORK // SECURE CHANNEL';
 
+    const signal = document.createElement('div');
+    signal.className = 'arrival-signal';
+    signal.innerHTML = '<i></i><i></i><i></i><span>SYNC</span>';
+
     const particles = document.createElement('div');
     particles.className = 'arrival-particles';
-    particles.innerHTML = '<i></i>'.repeat(6);
+    particles.innerHTML = '<i></i>'.repeat(10);
 
     const copy = document.createElement('div');
     copy.className = 'arrival-copy';
     copy.innerHTML = `
       <div class="arrival-center">
         <p class="arrival-kicker">CHAPTER 01 // NIGHT SHIFT</p>
-        <h1 class="arrival-title">THE NIGHT<br><em>IS ONLINE.</em></h1>
+        <h1 class="arrival-title"><span>THE NIGHT</span><br><em>IS ONLINE.</em></h1>
         <div class="arrival-line"></div>
         <p class="arrival-message">THE CITY IS SLEEPING. THE NETWORK IS NOT.<br>ONE RUNNER. ONE SIGNAL. NO SECOND CHANCE.</p>
         <div class="arrival-mission">
@@ -43,38 +47,39 @@
       </div>`;
 
     const ui = splash.querySelector('.relay-splash-ui');
-    splash.append(status, particles, copy);
+    splash.append(status, signal, particles, copy);
 
-    // Keep the existing loader's progress bar. This layer only makes its pacing cinematic.
-    if (ui) {
-      ui.querySelector('.relay-splash-status')?.setAttribute('data-original-status', 'true');
-      ui.querySelector('.relay-splash-status').textContent = 'ESTABLISHING RELAY';
-    }
+    if (ui) ui.querySelector('.relay-splash-status')?.setAttribute('data-original-status', 'true');
+    const label = ui?.querySelector('.relay-splash-status');
+    if (label) label.textContent = 'INITIALIZING RELAY';
 
     const stages = [
-      [700, 'ESTABLISHING RELAY'],
-      [2200, 'SIGNAL ACQUIRED // OLD QUARTER'],
-      [3900, 'ROUTE LOCKED // ROOFTOP RELAY'],
-      [5400, 'DELIVERY WINDOW OPEN'],
-      [6800, 'MISSION LINK STABLE'],
-      [8200, 'PREPARING RUN'],
+      [900, 'INITIALIZING RELAY'],
+      [2600, 'SEARCHING FOR SIGNAL'],
+      [4400, 'SIGNAL ACQUIRED // OLD QUARTER'],
+      [6500, 'ROUTE LOCKED // ROOFTOP RELAY'],
+      [8400, 'DELIVERY WINDOW OPEN'],
+      [10600, 'MISSION LINK STABLE'],
+      [12800, 'PREPARING RUN'],
+      [14500, 'LAUNCHING INTO THE NIGHT'],
     ];
-    const label = ui?.querySelector('.relay-splash-status');
-    stages.forEach(([delay, text]) => window.setTimeout(() => { if (!splash.classList.contains('is-leaving')) { if (label) label.textContent = text; } }, delay));
+    stages.forEach(([delay, text]) => window.setTimeout(() => {
+      if (!splash.classList.contains('is-leaving') && label) label.textContent = text;
+    }, delay));
 
-    // Never interfere with the engine. Only release the existing splash after the cinematic has had time to play.
+    // Presentation only: never starts, pauses, resets or changes Phaser.
     const release = () => {
       if (splash.dataset.cinematicReleased === 'true') return;
       splash.dataset.cinematicReleased = 'true';
       splash.classList.add('is-leaving');
       splash.setAttribute('aria-busy', 'false');
-      window.setTimeout(() => splash.remove(), 850);
+      window.setTimeout(() => splash.remove(), 1100);
     };
 
-    window.setTimeout(release, 9200);
+    window.setTimeout(release, 15800);
     window.setTimeout(() => {
       if (!splash.dataset.cinematicReleased) release();
-    }, 12000);
+    }, 18500);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
