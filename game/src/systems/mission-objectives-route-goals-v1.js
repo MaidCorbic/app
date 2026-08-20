@@ -37,37 +37,36 @@ function tutorialBounds(scene) {
   const explicit = scene?.firstTimeTutorial === true || (scene?.routeTutorials?.size || 0) > 0 || !!scene?.intelCard?.visible;
   if (!matches.length && !explicit) return null;
   if (!Number.isFinite(minY)) return { x: 40, y: 340, right: 500, bottom: 540 };
-  // Existing tutorial cards include background padding around their text.
   return { x: Math.max(0, minX - 24), y: Math.max(0, minY - 24), right: maxX + 24, bottom: maxY + 86 };
 }
 function buildPanel(scene, objective) {
   const c = scene.add.container(0, 0).setScrollFactor(0).setDepth(9200).setAlpha(0);
-  const bg = scene.add.rectangle(0, 0, 426, 166, 0x07111f, .95).setOrigin(0).setStrokeStyle(1, 0x38bdf8, .65);
-  const kicker = scene.add.text(20, 18, 'MISSION OBJECTIVE', { fontFamily:'monospace', fontSize:'10px', color:'#8ecae6', letterSpacing:1.3 });
-  const title = scene.add.text(20, 42, objective.title, { fontFamily:'monospace', fontSize:'16px', fontStyle:'bold', color:'#e8f8ff', wordWrap:{width:382} });
-  const label = scene.add.text(20, 88, objective.label, { fontFamily:'monospace', fontSize:'9px', color:'#8fa6bb', letterSpacing:1.1 });
-  const progress = scene.add.text(20, 108, 'ROUTE PROGRESS  0%', { fontFamily:'monospace', fontSize:'11px', color:'#d6efff' });
-  const track = scene.add.rectangle(20, 140, 386, 5, 0x13243a, 1).setOrigin(0,.5);
-  const fill = scene.add.rectangle(20, 140, 0, 5, 0x38bdf8, 1).setOrigin(0,.5);
-  c.add([bg,kicker,title,label,progress,track,fill]);
-  return { c, bg, kicker, title, label, progress, track, fill };
+  // Compact objective card: same dark/cyan visual language as the existing mission and signal HUD.
+  const bg = scene.add.rectangle(0, 0, 372, 148, 0x07111f, .94).setOrigin(0).setStrokeStyle(1, 0x38bdf8, .72);
+  const accent = scene.add.rectangle(0, 0, 4, 148, 0x38bdf8, .9).setOrigin(0);
+  const kicker = scene.add.text(22, 16, 'MISSION OBJECTIVE', { fontFamily:'monospace', fontSize:'9px', color:'#8ecae6', letterSpacing:1.5 });
+  const title = scene.add.text(22, 36, objective.title, { fontFamily:'monospace', fontSize:'15px', fontStyle:'bold', color:'#e8f8ff', wordWrap:{width:326} });
+  const label = scene.add.text(22, 78, objective.label, { fontFamily:'monospace', fontSize:'8px', color:'#8fa6bb', letterSpacing:1.2 });
+  const progress = scene.add.text(22, 96, 'ROUTE PROGRESS  0%', { fontFamily:'monospace', fontSize:'10px', color:'#d6efff' });
+  const track = scene.add.rectangle(22, 126, 328, 5, 0x13243a, 1).setOrigin(0,.5);
+  const fill = scene.add.rectangle(22, 126, 0, 5, 0x38bdf8, 1).setOrigin(0,.5);
+  const status = scene.add.text(22, 136, 'OBJECTIVE IN PROGRESS', { fontFamily:'monospace', fontSize:'7px', color:'#6ebfe8', letterSpacing:1.2 });
+  c.add([bg,accent,kicker,title,label,progress,track,fill,status]);
+  return { c, bg, accent, kicker, title, label, progress, track, fill, status };
 }
 function layout(state, scene, force = false) {
   const { w, h, mobile } = viewport(scene);
   const tutorial = tutorialBounds(scene);
-  const pw = mobile ? Math.min(300, w - 24) : Math.min(426, Math.max(280, w - 72));
-  const scale = pw / 426;
-  let x = mobile ? 12 : 42;
-  let y = mobile ? 112 : 104;
-  if (tutorial) {
-    if (mobile) {
-      // Mobile stacks objective below the tutorial instead of sharing the same coordinates.
-      y = Math.min(Math.max(12, h - 172), Math.max(112, tutorial.bottom + 16));
-    } else {
-      // Desktop docks objective on the opposite side while contextual guidance owns the left lane.
-      x = Math.max(18, w - pw - 32);
-      y = Math.max(96, Math.min(h - 178, 122));
-    }
+  const baseW = 372, baseH = 148;
+  const pw = mobile ? Math.min(300, w - 24) : Math.min(372, Math.max(286, w - 56));
+  const scale = pw / baseW;
+  const actualH = baseH * scale;
+  // Bottom-right docking keeps the top status/atmosphere lane completely clear.
+  let x = Math.max(12, w - pw - (mobile ? 12 : 28));
+  let y = Math.max(88, h - actualH - (mobile ? 18 : 28));
+  // If a tutorial reaches unusually far into the bottom lane, keep a visible gap instead of overlap.
+  if (tutorial && tutorial.right > x - 8 && tutorial.bottom > y - 8) {
+    y = Math.max(88, tutorial.y - actualH - 16);
   }
   if (!force && state.x === x && state.y === y && state.scale === scale && state.tutorial === !!tutorial) return;
   state.x = x; state.y = y; state.scale = scale; state.tutorial = !!tutorial;
@@ -83,7 +82,6 @@ function reveal(state, scene) {
 export function applyMissionObjective(scene, id = missionId(scene)) {
   clearMissionObjective(scene);
   if (!scene?.add) return null;
-  // Unknown or future campaign missions still receive the common objective lifecycle.
   const objective = MISSION_OBJECTIVES[id] || { ...FALLBACK_OBJECTIVE, id: id || 'active-mission' };
   const ui = buildPanel(scene, objective);
   const state = { objective, ...ui, completed:false, last:-1, visible:false, x:null, y:null, scale:null, tutorial:null };
@@ -98,13 +96,14 @@ export function updateMissionObjective(scene) {
   if (Math.abs(p - s.last) < .002) return;
   s.last = p;
   const pct = Math.round(p * 100);
-  s.fill.width = 386 * p;
+  s.fill.width = 328 * p;
   s.progress.setText(`ROUTE PROGRESS  ${pct}%`);
   if (!s.completed && p >= s.objective.completeAt) {
     s.completed = true;
-    s.fill.width = 386;
+    s.fill.width = 328;
     s.progress.setText('OBJECTIVE COMPLETE');
     s.kicker.setText('OBJECTIVE COMPLETE');
+    s.status.setText('ROUTE GOAL SECURED');
     scene.tweens?.add?.({ targets:s.c, scaleX:{from:s.scale,to:s.scale*1.025}, scaleY:{from:s.scale,to:s.scale*1.025}, yoyo:true, duration:140, repeat:1 });
     scene.events?.emit?.('mission-objective-complete',{ id:missionId(scene), objective:s.objective });
   }
