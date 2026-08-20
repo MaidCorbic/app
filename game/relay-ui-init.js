@@ -44,9 +44,8 @@ document.addEventListener('keydown', event => {
   }
 });
 
-// UPDATE 17 — cinematic first-person world arrival. Capture-phase start interception keeps
-// the proven mission/pre-flight launch path untouched; after the sequence it replays the same click.
-import './cinematic-arrival-v1.js';
+// UPDATE 17 V2 — slower cinematic first-person world arrival.
+import './cinematic-arrival-v2.js';
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
 import './dynamic-time-cycle-v1.js';
