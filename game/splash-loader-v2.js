@@ -1,70 +1,161 @@
-/* Production cinematic splash. It owns the first-load screen and never exposes the legacy loader. */
+/* Production cinematic splash V3. Owns first-load presentation and fails open safely. */
 (() => {
-  if (window.__relaySplashV2) return;
-  window.__relaySplashV2 = true;
-  document.getElementById('bootLoader')?.remove();
+  if (window.__relaySplashV3) return;
+  window.__relaySplashV3 = true;
 
-  const css = document.createElement('link');
-  css.rel = 'stylesheet';
-  css.href = './cinematic-splash.css';
-  document.head.appendChild(css);
+  const boot = () => {
+    document.getElementById('bootLoader')?.remove();
+    const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
+    if (!splash) return;
 
-  const splash = document.createElement('div');
-  splash.className = 'relay-splash';
-  splash.setAttribute('role', 'status');
-  splash.setAttribute('aria-live', 'polite');
-  splash.setAttribute('aria-busy', 'true');
-  splash.innerHTML = '<img class="relay-splash-art" src="./assets/relay-runner-splash.jpg" alt="Relay Runner" decoding="async" fetchpriority="high"><div class="relay-splash-ui"><div class="relay-splash-meta"><span class="relay-splash-status">INITIALIZING RELAY</span><span class="relay-splash-percent">0%</span></div><div class="relay-splash-track"><i class="relay-splash-progress"></i></div></div>';
-  document.body.prepend(splash);
+    if (!splash.classList.contains('relay-splash')) splash.classList.add('relay-splash');
 
-  const bar = splash.querySelector('.relay-splash-progress');
-  const pct = splash.querySelector('.relay-splash-percent');
-  const label = splash.querySelector('.relay-splash-status');
-  const image = splash.querySelector('.relay-splash-art');
-  let current = 0;
-  let imageReady = false;
-  let appReady = false;
-  let pageReady = false;
-  let finishing = false;
+    if (!document.querySelector('link[data-relay-cinematic-v3]')) {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = './cinematic-splash.css';
+      css.dataset.relayCinematicV3 = 'true';
+      document.head.appendChild(css);
+    }
 
-  const set = (n, text) => {
-    current = Math.max(current, Math.min(100, Math.round(n)));
-    bar.style.width = `${current}%`;
-    pct.textContent = `${current}%`;
-    if (text) label.textContent = text;
-  };
+    const image = splash.querySelector('.relay-splash-art, #relaySplashArt');
+    const bar = splash.querySelector('.relay-splash-progress');
+    const pct = splash.querySelector('.relay-splash-percent');
+    const label = splash.querySelector('.relay-splash-status');
+    if (!image || !bar || !pct || !label) return;
 
-  const tween = (target, text) => new Promise(resolve => {
-    const from = current;
-    if (target <= from) { set(target, text); resolve(); return; }
-    const start = performance.now();
-    const duration = Math.max(160, Math.min(500, (target - from) * 12));
-    const frame = now => {
-      const t = Math.min(1, (now - start) / duration);
-      set(from + (target - from) * (t * (2 - t)), text);
-      if (t < 1) requestAnimationFrame(frame); else resolve();
+    if (!splash.querySelector('.relay-splash-brand')) {
+      const brand = document.createElement('div');
+      brand.className = 'relay-splash-brand';
+      brand.innerHTML = '<b>R/</b><span>RELAY RUNNER</span>';
+      splash.appendChild(brand);
+    }
+
+    const stages = [
+      [8, 'INITIALIZING RELAY'],
+      [26, 'LOADING INTERFACE'],
+      [48, 'LOADING GAME SYSTEMS'],
+      [68, 'CONNECTING WORLD'],
+      [86, 'PREPARING HOME'],
+    ];
+
+    let progress = 0;
+    let imageReady = image.complete && image.naturalWidth > 0;
+    let pageReady = document.readyState === 'complete';
+    let engineReady = false;
+    let finishing = false;
+    let timedOut = false;
+    const startedAt = performance.now();
+    const MIN_SPLASH_MS = 2200;
+    const MAX_SPLASH_MS = 7000;
+
+    const setProgress = (value, text) => {
+      progress = Math.max(progress, Math.min(100, Math.round(value)));
+      bar.style.width = `${progress}%`;
+      pct.textContent = `${progress}%`;
+      if (text) label.textContent = text;
     };
-    requestAnimationFrame(frame);
-  });
 
-  const finish = async () => {
-    if (finishing || !imageReady || !appReady || !pageReady) return;
-    finishing = true;
-    await tween(100, 'READY');
-    splash.setAttribute('aria-busy', 'false');
-    splash.classList.add('is-hidden');
-    window.setTimeout(() => splash.remove(), 700);
+    const animateTo = (target, text) => new Promise(resolve => {
+      if (target <= progress) {
+        setProgress(target, text);
+        resolve();
+        return;
+      }
+      const from = progress;
+      const started = performance.now();
+      const duration = Math.max(180, Math.min(650, (target - from) * 10));
+      const frame = now => {
+        const t = Math.min(1, (now - started) / duration);
+        const eased = t * (2 - t);
+        setProgress(from + (target - from) * eased, text);
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      };
+      requestAnimationFrame(frame);
+    });
+
+    const finish = async (forced = false) => {
+      if (finishing) return;
+      const elapsed = performance.now() - startedAt;
+      if (!forced && (!imageReady || !pageReady || !engineReady)) return;
+      if (!forced && elapsed < MIN_SPLASH_MS) {
+        window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed);
+        return;
+      }
+      finishing = true;
+      await animateTo(100, 'READY');
+      splash.setAttribute('aria-busy', 'false');
+      splash.classList.add('is-hidden');
+      window.setTimeout(() => splash.remove(), 700);
+    };
+
+    const markImageReady = () => {
+      if (imageReady) return;
+      imageReady = true;
+      animateTo(26, 'LOADING INTERFACE').then(() => finish());
+    };
+
+    if (imageReady) setProgress(26, 'LOADING INTERFACE');
+    else {
+      image.addEventListener('load', markImageReady, { once: true });
+      image.addEventListener('error', () => {
+        imageReady = true;
+        setProgress(22, 'USING SAFE MODE');
+        finish();
+      }, { once: true });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        animateTo(48, 'LOADING GAME SYSTEMS');
+      }, { once: true });
+    } else {
+      animateTo(48, 'LOADING GAME SYSTEMS');
+    }
+
+    if (!pageReady) {
+      window.addEventListener('load', () => {
+        pageReady = true;
+        animateTo(68, 'CONNECTING WORLD').then(finish);
+      }, { once: true });
+    } else {
+      setProgress(68, 'CONNECTING WORLD');
+    }
+
+    const checkEngine = () => {
+      const canvas = document.querySelector('#phaser-game canvas');
+      if (canvas) {
+        engineReady = true;
+        animateTo(86, 'PREPARING HOME').then(finish);
+        return;
+      }
+      if (!finishing) window.setTimeout(checkEngine, 60);
+    };
+    checkEngine();
+
+    const orientation = window.matchMedia('(orientation: landscape)');
+    const onOrientation = () => {
+      if (finishing) return;
+      imageReady = image.complete && image.naturalWidth > 0;
+    };
+    orientation.addEventListener?.('change', onOrientation);
+    window.addEventListener('resize', onOrientation, { passive: true });
+
+    window.setTimeout(() => {
+      if (finishing || timedOut) return;
+      timedOut = true;
+      label.textContent = 'STARTING HOME';
+      finish(true);
+    }, MAX_SPLASH_MS);
+
+    stages.forEach(([value, text], index) => {
+      window.setTimeout(() => {
+        if (!finishing && !timedOut) setProgress(value, text);
+      }, 220 + index * 360);
+    });
   };
 
-  image.addEventListener('load', () => { imageReady = true; set(20, 'LOADING INTERFACE'); finish(); }, { once: true });
-  image.addEventListener('error', () => { imageReady = true; set(20, 'LOADING INTERFACE'); finish(); }, { once: true });
-  if (image.complete && image.naturalWidth) { imageReady = true; set(20, 'LOADING INTERFACE'); }
-
-  window.addEventListener('relay:app-ready', () => { appReady = true; set(82, 'PREPARING HOME'); finish(); }, { once: true });
-  window.addEventListener('load', () => { pageReady = true; set(94, 'FINALIZING'); finish(); }, { once: true });
-
-  tween(8, 'INITIALIZING RELAY')
-    .then(() => tween(28, 'LOADING INTERFACE'))
-    .then(() => tween(48, 'LOADING GAME SYSTEMS'))
-    .then(() => tween(65, 'CONNECTING WORLD'));
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })();
