@@ -15,6 +15,7 @@
   let runner = null;
   let originalCanvas = null;
   let watchdog = 0;
+  let originalFirstTimeTutorial = null;
 
   const wait = ms => new Promise(resolve => {
     const id = window.setTimeout(resolve, reduced() ? Math.min(ms, 220) : ms);
@@ -25,13 +26,7 @@
   root.id = 'relayGameplayIntroV3';
   root.hidden = true;
   root.setAttribute('aria-live', 'polite');
-  root.innerHTML = `
-    <div class="vignette"></div>
-    <div class="letterbox top"></div>
-    <div class="letterbox bottom"></div>
-    <div class="copy"></div>
-    <button class="skip" type="button">SKIP INTRO · ENTER</button>
-  `;
+  root.innerHTML = `<div class="vignette"></div><div class="letterbox top"></div><div class="letterbox bottom"></div><div class="copy"></div><button class="skip" type="button">SKIP INTRO · ENTER</button>`;
   document.body.appendChild(root);
 
   const style = document.createElement('style');
@@ -66,7 +61,6 @@
     try { window.speechSynthesis.cancel(); voice = new SpeechSynthesisUtterance(text); const voices = window.speechSynthesis.getVoices?.() || []; voice.voice = voices.find(v => /Daniel|George|David|Guy|James/i.test(v.name)) || null; voice.lang = 'en-US'; voice.rate = .78; voice.pitch = .74; voice.volume = .72; window.speechSynthesis.speak(voice); } catch {}
   };
   const stopVoice = () => { try { window.speechSynthesis?.cancel(); } catch {} };
-
   const getCanvas = () => document.querySelector('#phaser-game canvas');
   const getRunner = () => window.__relayRunnerScene || window.game?.scene?.getScene?.('runner') || null;
   const getMissionText = () => ({ district: (document.getElementById('district')?.textContent || 'OLD QUARTER').trim(), title: (document.getElementById('objective')?.textContent || 'FIRST DELIVERY').trim(), objective: (document.getElementById('worldGoal')?.textContent || 'FOLLOW THE RELAY').trim() });
@@ -78,91 +72,49 @@
   const tutorialText = value => /TUTORIAL|RUNNER LESSON|PRACTICE IT NOW|BOOST PAD|DOUBLE JUMP|BLACKOUT|WALL ROUTES|CHASE|AIR DASH|STORM|COMBINE|LOCKDOWN|ELITE|FINAL RUN|CITYSPINE|CHECKPOINT/i.test(String(value || ''));
 
   function hideSceneUi(){
-    runner = getRunner();
-    if(!runner) return;
+    runner = getRunner(); if(!runner) return;
+    if(originalFirstTimeTutorial === null) originalFirstTimeTutorial = runner.firstTimeTutorial;
     hiddenSceneObjects=[];
     runner.firstTimeTutorial=false;
-    runner.routeTutorials?.clear?.();
-    runner.dismissIntelCard?.();
-    runner.guides?.setVisible?.(false);
-    runner.guideCompanions?.setVisible?.(false);
+    runner.routeTutorials?.clear?.(); runner.dismissIntelCard?.(); runner.guides?.setVisible?.(false); runner.guideCompanions?.setVisible?.(false);
     runner.children?.list?.forEach(child=>{
       if(!child?.active) return;
-      const name=String(child.name||'').toLowerCase();
-      const text=child.type==='Text'?String(child.text||''):'';
+      const name=String(child.name||'').toLowerCase(); const text=child.type==='Text'?String(child.text||''):'';
       if((child.type==='Text' && tutorialText(text)) || /hud|objective|tutorial|guide|lesson|signal.?panel/i.test(name)){
-        hiddenSceneObjects.push({child,visible:child.visible,active:child.active});
-        child.setVisible?.(false); child.setActive?.(false);
+        hiddenSceneObjects.push({child,visible:child.visible,active:child.active}); child.setVisible?.(false); child.setActive?.(false);
       }
     });
     const objectiveState=runner.__missionObjectiveState;
-    if(objectiveState?.c){hiddenSceneObjects.push({child:objectiveState.c,visible:objectiveState.c.visible,active:objectiveState.c.active}); objectiveState.c.setVisible(false); objectiveState.c.setActive?.(false);}
+    if(objectiveState?.c){ hiddenSceneObjects.push({child:objectiveState.c,visible:objectiveState.c.visible,active:objectiveState.c.active}); objectiveState.c.setVisible(false); objectiveState.c.setActive?.(false); }
     runner.infoCard?.setVisible?.(false); runner.infoCard?.setActive?.(false);
   }
 
-  function restoreSceneUi(){ hiddenSceneObjects.forEach(({child,visible,active})=>{child?.setVisible?.(visible);child?.setActive?.(active);}); hiddenSceneObjects=[]; }
+  function restoreSceneUi(){
+    hiddenSceneObjects.forEach(({child,visible,active})=>{child?.setVisible?.(visible);child?.setActive?.(active);}); hiddenSceneObjects=[];
+    if(runner && originalFirstTimeTutorial !== null) runner.firstTimeTutorial = originalFirstTimeTutorial;
+    originalFirstTimeTutorial=null;
+  }
   function restoreDom(){ hiddenNodes.forEach(({node,visibility,opacity,pointerEvents})=>{node.style.visibility=visibility;node.style.opacity=opacity;node.style.pointerEvents=pointerEvents;}); hiddenNodes=[]; }
-
   function maintainCinematicLock(){ if(!active) return; hideDomGameplay(); hideSceneUi(); }
 
-  async function waitForWorld(){
-    for(let i=0;i<80;i+=1){ const canvas=getCanvas(); if(canvas && !document.getElementById('play')?.classList.contains('hidden')) return canvas; await wait(80); }
-    return getCanvas();
-  }
-
-  async function startUnderlyingGameplay(){
-    window.__relayCinematicLock = true;
-    start.click();
-    await wait(140);
-    for(let i=0;i<30;i+=1){ runner=getRunner(); if(runner) break; await wait(90); }
-    return waitForWorld();
-  }
-
-  function panCanvas(canvas, x, y, scale, duration){
-    if(!canvas) return wait(duration);
-    const parent=canvas.parentElement||canvas;
-    if(!originalCanvas) originalCanvas={transform:parent.style.transform,origin:parent.style.transformOrigin,transition:parent.style.transition,filter:parent.style.filter,parent};
-    parent.style.transformOrigin='50% 50%';
-    parent.style.transition=`transform ${duration}ms cubic-bezier(.22,.72,.18,1), filter 1200ms ease`;
-    parent.style.transform=`translate3d(${x}px,${y}px,0) scale(${scale})`;
-    return wait(duration);
-  }
-
-  function clearCanvas(){ if(!originalCanvas)return; originalCanvas.parent.style.transform=originalCanvas.transform||''; originalCanvas.parent.style.transformOrigin=originalCanvas.origin||''; originalCanvas.parent.style.transition=originalCanvas.transition||''; originalCanvas.parent.style.filter=originalCanvas.filter||''; originalCanvas=null; }
+  async function waitForWorld(){ for(let i=0;i<80;i+=1){ const canvas=getCanvas(); if(canvas && !document.getElementById('play')?.classList.contains('hidden')) return canvas; await wait(80); } return getCanvas(); }
+  async function startUnderlyingGameplay(){ window.__relayCinematicLock=true; window.dispatchEvent(new Event('relay:cinematic-lock')); start.click(); await wait(140); for(let i=0;i<30;i+=1){runner=getRunner();if(runner)break;await wait(90);} return waitForWorld(); }
+  function panCanvas(canvas,x,y,scale,duration){ if(!canvas)return wait(duration); const parent=canvas.parentElement||canvas; if(!originalCanvas) originalCanvas={transform:parent.style.transform,origin:parent.style.transformOrigin,transition:parent.style.transition,filter:parent.style.filter,parent}; parent.style.transformOrigin='50% 50%'; parent.style.transition=`transform ${duration}ms cubic-bezier(.22,.72,.18,1), filter 1200ms ease`; parent.style.transform=`translate3d(${x}px,${y}px,0) scale(${scale})`; return wait(duration); }
+  function clearCanvas(){if(!originalCanvas)return;originalCanvas.parent.style.transform=originalCanvas.transform||'';originalCanvas.parent.style.transformOrigin=originalCanvas.origin||'';originalCanvas.parent.style.transition=originalCanvas.transition||'';originalCanvas.parent.style.filter=originalCanvas.filter||'';originalCanvas=null;}
 
   async function play(){
-    if(active)return;
-    active=true; root.hidden=false; root.classList.add('playing');
-    const mission=getMissionText();
-    const canvas=await startUnderlyingGameplay();
-    if(!canvas){finish();return;}
-    hideDomGameplay(); hideSceneUi();
-    const scene=runner;
-    try{scene?.scene?.pause?.();}catch{}
-    const parent=canvas.parentElement||canvas;
-    if(!originalCanvas) originalCanvas={transform:parent.style.transform,origin:parent.style.transformOrigin,transition:parent.style.transition,filter:parent.style.filter,parent};
-    parent.style.filter='brightness(.70) saturate(.88)';
-    parent.style.transformOrigin='50% 50%';
-    watchdog=window.setInterval(maintainCinematicLock,240);
-
+    if(active)return; active=true; root.hidden=false; root.classList.add('playing'); const mission=getMissionText(); const canvas=await startUnderlyingGameplay(); if(!canvas){finish();return;}
+    hideDomGameplay(); hideSceneUi(); try{runner?.scene?.pause?.();}catch{}
+    const parent=canvas.parentElement||canvas; if(!originalCanvas) originalCanvas={transform:parent.style.transform,origin:parent.style.transformOrigin,transition:parent.style.transition,filter:parent.style.filter,parent}; parent.style.filter='brightness(.70) saturate(.88)'; parent.style.transformOrigin='50% 50%'; watchdog=window.setInterval(maintainCinematicLock,240);
     await wait(700);
-    caption('OLD QUARTER // NIGHT SHIFT',mission.title,'NIA: First contact. Keep the route lit.','THE CITY IS LISTENING NOW.');
-    speak('First contact. Keep the route lit.');
-    await panCanvas(canvas,-10,2,1.015,5200); await wait(2400); await clearCaption();
-
-    caption('THE RELAY STILL ANSWERS','CARRY THE SIGNAL','A silent relay ping reaches Old Quarter. Deliver it before the signal dies.','FOLLOW THE ROUTE. KEEP THE CITY CONNECTED.');
-    speak('A silent relay ping reaches Old Quarter. Deliver it before the signal dies.');
-    await panCanvas(canvas,12,-1,1.012,7200); await wait(2800); await clearCaption();
-
-    caption('COURIER CLEARANCE','YOUR RUN BEGINS','NIA: Beacon ahead. Make the handoff.','CARRY THE SIGNAL. KEEP THE CITY CONNECTED.');
-    speak('Beacon ahead. Make the handoff. Carry the signal. Keep the city connected.');
-    await panCanvas(canvas,0,0,1,4000); await wait(3000); finish();
+    caption('OLD QUARTER // NIGHT SHIFT',mission.title,'NIA: First contact. Keep the route lit.','THE CITY IS LISTENING NOW.'); speak('First contact. Keep the route lit.'); await panCanvas(canvas,-10,2,1.015,5200); await wait(2400); await clearCaption();
+    caption('THE RELAY STILL ANSWERS','CARRY THE SIGNAL','A silent relay ping reaches Old Quarter. Deliver it before the signal dies.','FOLLOW THE ROUTE. KEEP THE CITY CONNECTED.'); speak('A silent relay ping reaches Old Quarter. Deliver it before the signal dies.'); await panCanvas(canvas,12,-1,1.012,7200); await wait(2800); await clearCaption();
+    caption('COURIER CLEARANCE','YOUR RUN BEGINS','NIA: Beacon ahead. Make the handoff.','CARRY THE SIGNAL. KEEP THE CITY CONNECTED.'); speak('Beacon ahead. Make the handoff. Carry the signal. Keep the city connected.'); await panCanvas(canvas,0,0,1,4000); await wait(3000); finish();
   }
 
-  function finish(){ timers.forEach(clearTimeout);timers=[];window.clearInterval(watchdog);watchdog=0;stopVoice();clearCanvas();restoreSceneUi();restoreDom();try{runner?.scene?.resume?.();runner?.cameras?.main?.startFollow?.(runner.player,true,.08,.08);}catch{} window.__relayCinematicLock=false;root.classList.remove('playing');root.hidden=true;active=false;sessionStorage.setItem(KEY,'1'); }
-  function skip(){if(!active)return;timers.forEach(clearTimeout);timers=[];window.clearInterval(watchdog);watchdog=0;stopVoice();clearCanvas();restoreSceneUi();restoreDom();try{runner?.scene?.resume?.();runner?.cameras?.main?.startFollow?.(runner.player,true,.08,.08);}catch{} window.__relayCinematicLock=false;root.classList.remove('playing');root.hidden=true;active=false;sessionStorage.setItem(KEY,'1');}
-
-  start.addEventListener('click',event=>{ if(active || sessionStorage.getItem(KEY)==='1' || window.__relayCinematicLaunch) return; event.preventDefault(); event.stopImmediatePropagation(); window.__relayCinematicLaunch=true; window.setTimeout(()=>{window.__relayCinematicLaunch=false; play();},0); },true);
-  root.querySelector('.skip').addEventListener('click',skip);
-  document.addEventListener('keydown',event=>{if(active&&event.key==='Enter'){event.preventDefault();skip();}},{capture:true});
+  function releaseLock(){ window.clearInterval(watchdog);watchdog=0;window.__relayCinematicLock=false;window.dispatchEvent(new Event('relay:cinematic-unlock')); }
+  function finish(){timers.forEach(clearTimeout);timers=[];stopVoice();clearCanvas();restoreSceneUi();restoreDom();try{runner?.scene?.resume?.();runner?.cameras?.main?.startFollow?.(runner.player,true,.08,.08);}catch{}releaseLock();root.classList.remove('playing');root.hidden=true;active=false;sessionStorage.setItem(KEY,'1');}
+  function skip(){if(!active)return;timers.forEach(clearTimeout);timers=[];stopVoice();clearCanvas();restoreSceneUi();restoreDom();try{runner?.scene?.resume?.();runner?.cameras?.main?.startFollow?.(runner.player,true,.08,.08);}catch{}releaseLock();root.classList.remove('playing');root.hidden=true;active=false;sessionStorage.setItem(KEY,'1');}
+  start.addEventListener('click',event=>{if(active||sessionStorage.getItem(KEY)==='1'||window.__relayCinematicLaunch)return;event.preventDefault();event.stopImmediatePropagation();window.__relayCinematicLaunch=true;window.setTimeout(()=>{window.__relayCinematicLaunch=false;play();},0);},true);
+  root.querySelector('.skip').addEventListener('click',skip); document.addEventListener('keydown',event=>{if(active&&event.key==='Enter'){event.preventDefault();skip();}},{capture:true});
 })();
