@@ -67,7 +67,6 @@
       if (!splash.classList.contains('is-leaving') && label) label.textContent = text;
     }, delay));
 
-    // Presentation only: never starts, pauses, resets or changes Phaser.
     const release = () => {
       if (splash.dataset.cinematicReleased === 'true') return;
       splash.dataset.cinematicReleased = 'true';
@@ -84,4 +83,11 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
+
+  // Load the isolated Play cinematic without changing gameplay ownership.
+  const playScript = document.createElement('script');
+  playScript.src = './play-intro-cinematic-v2.js';
+  playScript.defer = true;
+  playScript.dataset.relayPlayIntroV2 = 'true';
+  document.head.appendChild(playScript);
 })();
