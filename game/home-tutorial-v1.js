@@ -2,136 +2,88 @@ import './player-shield-visual-cleanup-v1.js';
 import './runtime-ai-tutorial-settings.js';
 
 (() => {
-  if (window.__relayHomeTutorialV1) return;
-  window.__relayHomeTutorialV1 = true;
+  if (window.__relayHomeTutorialV2) return;
+  window.__relayHomeTutorialV2 = true;
 
   const style = document.createElement('style');
   style.textContent = `
-    /* Home-only: keep the existing menu geometry and make TUTORIAL readable on every viewport. */
-    #intro .title-secondary .home-tutorial-button{
-      width:100%;
-      min-height:43px;
-      padding:10px 12px;
-      display:grid;
-      align-content:center;
-      justify-items:start;
-      gap:4px;
-      box-sizing:border-box;
-      overflow:hidden;
-      text-align:left;
-      white-space:nowrap;
-    }
-    #intro .title-secondary .home-tutorial-button > span{
-      display:block;
-      max-width:100%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      color:#dbe5ed;
-      font:800 10px/1.15 'DM Mono',monospace;
-      letter-spacing:.8px;
-    }
-    #intro .title-secondary .home-tutorial-button > small{
-      display:block;
-      max-width:100%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      color:#74879a;
-      font:700 7px/1.1 'DM Mono',monospace;
-      letter-spacing:.55px;
-    }
-    .home-tutorial-content{display:grid;gap:12px;padding:2px 0 8px}
-    .tutorial-intro{padding:12px;border:1px solid rgba(141,244,255,.15);border-radius:10px;background:linear-gradient(145deg,rgba(12,28,48,.9),rgba(4,10,20,.96));box-shadow:inset 0 1px rgba(255,255,255,.04)}
-    .tutorial-intro b{display:block;color:#8df4ff;font:900 11px/1.2 'DM Mono',monospace;letter-spacing:1px}
-    .tutorial-intro p{margin:6px 0 0;color:#9aabba;font:700 8px/1.6 'DM Mono',monospace}
-    .tutorial-category{padding:11px 12px;border:1px solid rgba(210,226,240,.10);border-radius:8px;background:rgba(7,16,29,.82)}
-    .tutorial-category h3{margin:0;color:#ffd06e;font:900 9px/1.2 'DM Mono',monospace;letter-spacing:1px}
-    .tutorial-category ul{margin:7px 0 0;padding-left:17px;color:#aebdcc;font:700 7.5px/1.65 'DM Mono',monospace}
+    #intro .title-secondary .home-tutorial-button{width:100%;min-height:46px;padding:10px 12px;display:grid;align-content:center;gap:4px;box-sizing:border-box;text-align:left;white-space:nowrap;overflow:hidden}
+    #intro .title-secondary .home-tutorial-button>span{display:block;overflow:hidden;text-overflow:ellipsis;color:#e8f7fb;font:900 10px/1.15 'DM Mono',monospace;letter-spacing:.9px}
+    #intro .title-secondary .home-tutorial-button>small{display:block;overflow:hidden;text-overflow:ellipsis;color:#6f8798;font:700 7px/1.1 'DM Mono',monospace;letter-spacing:.6px}
+    .home-tutorial-content{display:grid;gap:10px;padding:2px 0 8px}
+    .tutorial-hero{padding:14px;border:1px solid rgba(141,244,255,.20);border-radius:11px;background:radial-gradient(circle at 80% 0%,rgba(25,200,245,.12),transparent 42%),linear-gradient(145deg,rgba(10,28,47,.96),rgba(3,9,18,.99));box-shadow:inset 0 1px rgba(255,255,255,.05),0 12px 30px rgba(0,0,0,.18)}
+    .tutorial-hero b{display:block;color:#8df4ff;font:900 12px/1.2 'DM Mono',monospace;letter-spacing:1.2px}
+    .tutorial-hero p{margin:6px 0 0;color:#a8b9c8;font:700 8px/1.55 'DM Mono',monospace}
+    .tutorial-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+    .tutorial-step{min-width:0;padding:10px;border:1px solid rgba(210,226,240,.09);border-radius:9px;background:rgba(6,15,27,.88)}
+    .tutorial-step b{display:block;color:#ffd06e;font:900 8px/1.2 'DM Mono',monospace;letter-spacing:.8px}
+    .tutorial-step p{margin:5px 0 0;color:#9aaebe;font:700 7px/1.45 'DM Mono',monospace}
+    .tutorial-category{padding:10px 11px;border:1px solid rgba(210,226,240,.09);border-radius:9px;background:rgba(7,16,29,.82)}
+    .tutorial-category summary{cursor:pointer;list-style:none;color:#e8f4f8;font:900 8.5px/1.2 'DM Mono',monospace;letter-spacing:.7px;touch-action:manipulation}
+    .tutorial-category summary::-webkit-details-marker{display:none}
+    .tutorial-category summary::after{content:'+';float:right;color:#6f8798;font-size:12px}
+    .tutorial-category[open] summary{color:#8df4ff}
+    .tutorial-category[open] summary::after{content:'−';color:#ffd06e}
+    .tutorial-category ul{margin:8px 0 0;padding-left:17px;color:#aebdcc;font:700 7.5px/1.6 'DM Mono',monospace}
     .tutorial-category li{margin:2px 0}
-    .tutorial-key{display:inline-block;padding:1px 4px;border:1px solid rgba(210,226,240,.2);border-radius:4px;color:#e9f2f8;background:#081321;font-size:7px}
+    .tutorial-key{display:inline-block;min-width:16px;padding:2px 4px;border:1px solid rgba(141,244,255,.18);border-radius:4px;color:#e9f7fb;background:#081321;font:800 7px/1 'DM Mono',monospace;text-align:center}
     .tutorial-note{color:#71859a!important}
-    .tutorial-foot{padding:10px 12px;border-left:2px solid #8df4ff;color:#8fa5b8;font:700 7px/1.6 'DM Mono',monospace;background:rgba(141,244,255,.035)}
-    @media(max-width:700px){
-      #intro .title-secondary .home-tutorial-button{min-height:44px;padding:9px 10px}
-      #intro .title-secondary .home-tutorial-button > span{font-size:9px;letter-spacing:.65px}
-      #intro .title-secondary .home-tutorial-button > small{font-size:6.5px;letter-spacing:.4px}
-      .tutorial-category ul{font-size:7px;line-height:1.6}
-      .tutorial-intro p{font-size:7px}
-    }
+    .tutorial-foot{padding:10px 11px;border-left:2px solid #8df4ff;color:#8fa5b8;font:700 7px/1.55 'DM Mono',monospace;background:rgba(141,244,255,.035)}
+    @media(max-width:700px){.tutorial-steps{grid-template-columns:1fr}.tutorial-hero{padding:12px}.tutorial-category ul{font-size:7px}.tutorial-hero p{font-size:7px}}
   `;
   document.head.appendChild(style);
 
   const tutorialMarkup = `
     <div class="home-tutorial-content">
-      <div class="tutorial-intro">
-        <b>HOW TO PLAY · RELAY RUNNER</b>
-        <p>Run the route, carry the Signal, survive the district and deliver the relay. Learn the essentials below before your first run.</p>
+      <div class="tutorial-hero"><b>RELAY RUNNER · QUICK START</b><p>Learn the three things you need for your first run. Open the advanced sections only when you need them.</p></div>
+      <div class="tutorial-steps">
+        <div class="tutorial-step"><b>01 · MOVE</b><p><span class="tutorial-key">A</span> <span class="tutorial-key">D</span> run · <span class="tutorial-key">SPACE</span> jump · <span class="tutorial-key">SHIFT</span> dash</p></div>
+        <div class="tutorial-step"><b>02 · FIGHT</b><p><span class="tutorial-key">E</span> fire · <span class="tutorial-key">Q</span> blade · stomp enemies from above</p></div>
+        <div class="tutorial-step"><b>03 · DELIVER</b><p>Collect Signals, use checkpoints and reach the delivery beacon.</p></div>
       </div>
-
-      <section class="tutorial-category"><h3>01 · MOVEMENT</h3><ul>
+      <details class="tutorial-category" open><summary>CONTROLS & MOVEMENT</summary><ul>
         <li><span class="tutorial-key">A</span> / <span class="tutorial-key">D</span> Move left and right.</li>
-        <li><span class="tutorial-key">SPACE</span> Jump. Release early for a shorter jump.</li>
+        <li><span class="tutorial-key">SPACE</span> Jump; release early for a shorter jump.</li>
         <li><span class="tutorial-key">SHIFT</span> Dash through gaps and danger.</li>
-        <li><span class="tutorial-key">S</span> Hold while running to slide under hazards.</li>
-        <li>Advanced missions unlock double jump, wall jump, wall run, air dash, ledge grab and other movement routes.</li>
-      </ul></section>
-
-      <section class="tutorial-category"><h3>02 · COMBAT</h3><ul>
-        <li><span class="tutorial-key">E</span> Fire your equipped plasma weapon.</li>
+        <li><span class="tutorial-key">S</span> Slide under hazards while running.</li>
+        <li>Advanced routes can unlock double jump, wall jump, wall run, air dash and ledge grab.</li>
+      </ul></details>
+      <details class="tutorial-category"><summary>COMBAT</summary><ul>
+        <li><span class="tutorial-key">E</span> Fire the equipped plasma weapon.</li>
         <li><span class="tutorial-key">Q</span> Use the blade for close combat.</li>
-        <li>Jump onto enemies from above to perform a stomp and keep momentum.</li>
-        <li>Watch enemy cues, projectiles and boss health indicators. Do not stop moving when a chase starts.</li>
-      </ul></section>
-
-      <section class="tutorial-category"><h3>03 · SIGNALS & OBJECTIVES</h3><ul>
-        <li>Collect the gold Signals along the route for score, XP and mastery progress.</li>
-        <li>Follow route markers, beacon text and district guidance to find the main objective.</li>
-        <li>Optional objectives reward complete Signal collection, fast finishes and movement challenges.</li>
-        <li>Use the route profile mentally: low routes are safer, high routes are usually faster or richer in Signals.</li>
-      </ul></section>
-
-      <section class="tutorial-category"><h3>04 · BUILDS & GEAR</h3><ul>
-        <li><span class="tutorial-key">1</span> / <span class="tutorial-key">2</span> Use equipped build tools.</li>
-        <li><span class="tutorial-key">3</span> / <span class="tutorial-key">4</span> Use equipped gadgets.</li>
-        <li>Build tools include Relay Shield, Kinetic Ball, Arc Turret and Spring Pad.</li>
-        <li>Gadgets can scan routes, disrupt threats, create decoys, boost Signal score or restore Energy.</li>
-        <li>Energy is a resource: spend it deliberately and use checkpoints to recover safely.</li>
-      </ul></section>
-
-      <section class="tutorial-category"><h3>05 · CHECKPOINTS & RECOVERY</h3><ul>
-        <li>Reach checkpoints to secure your route progress.</li>
-        <li>If you fail, the run can recover from the latest checkpoint instead of restarting the entire mission.</li>
-        <li>After a recovery, the game gives the courier a short protection window so the route can be re-entered safely.</li>
-        <li>Checkpoints also reduce the cost of mistakes by preserving collected progress in the current run.</li>
-      </ul></section>
-
-      <section class="tutorial-category"><h3>06 · DYNAMIC WORLD</h3><ul>
-        <li>Some routes contain interactive world elements such as power switches, security gates, cargo lifts and reactive props.</li>
-        <li>Look for interaction prompts and environmental changes instead of treating every object as decoration.</li>
-        <li>World interactions can open alternate lines, create timing windows or change how you approach a section.</li>
-        <li class="tutorial-note">These systems are part of the existing Dynamic World Mechanics and do not replace the core movement or barrier rules.</li>
-      </ul></section>
-
-      <section class="tutorial-category"><h3>07 · MISSION FLOW</h3><ul>
-        <li>Start the mission, read the opening route cue and build momentum.</li>
-        <li>Use checkpoints, Signals, movement abilities and combat tools together instead of relying on one mechanic.</li>
-        <li>Reach the delivery beacon or mission goal to complete the run.</li>
-        <li>Higher ranks reward speed, clean routes, combat efficiency and optional objectives.</li>
-      </ul></section>
-
-      <section class="tutorial-category"><h3>08 · MOBILE CONTROLS</h3><ul>
+        <li>Stomp enemies from above to keep momentum.</li>
+        <li>Read enemy cues and projectiles; movement is your main defense.</li>
+      </ul></details>
+      <details class="tutorial-category"><summary>SIGNALS, OBJECTIVES & CHECKPOINTS</summary><ul>
+        <li>Gold Signals grant score, XP and mastery progress.</li>
+        <li>Follow route markers and beacon guidance to the main objective.</li>
+        <li>Checkpoints preserve route progress and reduce the cost of mistakes.</li>
+        <li>Optional objectives reward clean routes, fast finishes and full Signal collection.</li>
+      </ul></details>
+      <details class="tutorial-category"><summary>BUILD & GEAR</summary><ul>
+        <li><span class="tutorial-key">1</span> / <span class="tutorial-key">2</span> Build tools · <span class="tutorial-key">3</span> / <span class="tutorial-key">4</span> Gear.</li>
+        <li>Tools include Relay Shield, Kinetic Ball, Arc Turret and Spring Pad.</li>
+        <li>Gadgets can scan, disrupt, decoy, boost Signal score or restore Energy.</li>
+        <li>Spend Energy deliberately and recover safely at checkpoints.</li>
+      </ul></details>
+      <details class="tutorial-category"><summary>DYNAMIC WORLD & ADVANCED PLAY</summary><ul>
+        <li>Power switches, security gates, cargo lifts and reactive props can alter routes.</li>
+        <li>Low routes are often safer; high routes can be faster or richer in Signals.</li>
+        <li>Combine movement, combat and gadgets instead of relying on one mechanic.</li>
+        <li class="tutorial-note">Advanced movement lessons should appear contextually after the relevant ability is available.</li>
+      </ul></details>
+      <details class="tutorial-category"><summary>MOBILE CONTROLS</summary><ul>
         <li>Use the virtual joystick for movement.</li>
-        <li>Use JUMP, SWORD and DASH as your primary actions.</li>
-        <li>BUILD 1 / BUILD 2 and GEAR 3 / GEAR 4 access the same abilities as keyboard shortcuts.</li>
-        <li>Landscape orientation provides the clearest route view and the full control layout.</li>
-      </ul></section>
-
-      <section class="tutorial-category"><h3>09 · OPTIONS</h3><ul>
-        <li>The <b>TUTORIAL</b> option in Options controls contextual mission guidance and first-run lessons.</li>
-        <li>Turn it <b>OFF</b> for a clean run with no tutorial guidance. Turn it back <b>ON</b> whenever you want help.</li>
-        <li>AI VOICE can be disabled separately from tutorial text and route guidance.</li>
-      </ul></section>
-
-      <div class="tutorial-foot">PRO TIP · Learn the safe route first. Then replay the mission and use the high line, movement chain and optional objectives to improve your time.</div>
+        <li>JUMP, SWORD and DASH are your primary actions.</li>
+        <li>BUILD 1 / BUILD 2 and GEAR 3 / GEAR 4 mirror keyboard abilities.</li>
+        <li>Landscape orientation gives the clearest route view.</li>
+      </ul></details>
+      <details class="tutorial-category"><summary>TUTORIAL OPTIONS</summary><ul>
+        <li>TUTORIAL controls contextual lessons and mission guidance.</li>
+        <li>Turn it OFF for a clean run; turn it ON again whenever you want help.</li>
+        <li>AI VOICE is independent and can be disabled separately.</li>
+      </ul></details>
+      <div class="tutorial-foot">PRO TIP · Learn the safe route first. On the next run, take the high line, chain movement and chase the optional objectives for a faster rank.</div>
     </div>`;
 
   function addButton() {
@@ -141,7 +93,7 @@ import './runtime-ai-tutorial-settings.js';
     button.type = 'button';
     button.className = 'menu-option-button home-tutorial-button';
     button.dataset.titlePanel = 'tutorial';
-    button.innerHTML = '<span>TUTORIAL</span><small>HOW TO PLAY</small>';
+    button.innerHTML = '<span>TUTORIAL</span><small>QUICK START · FIELD GUIDE</small>';
     nav.insertBefore(button, nav.querySelector('[data-title-panel="controls"]') || nav.firstChild);
   }
 
@@ -152,22 +104,15 @@ import './runtime-ai-tutorial-settings.js';
     const content = document.getElementById('titlePanelContent');
     if (!panel || !heading || !content) return;
     panel.classList.remove('hidden');
-    if (eyebrow) eyebrow.textContent = 'RUNNER FIELD MANUAL';
+    if (eyebrow) eyebrow.textContent = 'RUNNER FIELD MANUAL · QUICK START';
     heading.textContent = 'TUTORIAL';
     content.innerHTML = tutorialMarkup;
   }
-
-  const protectHome = event => {
-    const intro = document.getElementById('intro');
-    if (!intro || !intro.contains(event.target)) return;
-    event.preventDefault();
-  };
 
   function install() {
     addButton();
     const observer = new MutationObserver(addButton);
     if (document.body) observer.observe(document.body, { childList: true, subtree: true });
-
     document.addEventListener('click', event => {
       const button = event.target.closest?.('[data-title-panel="tutorial"]');
       if (!button) return;
@@ -175,19 +120,6 @@ import './runtime-ai-tutorial-settings.js';
       event.stopImmediatePropagation();
       openTutorial();
     }, true);
-
-    document.addEventListener('copy', protectHome, true);
-    document.addEventListener('cut', protectHome, true);
-    document.addEventListener('selectstart', protectHome, true);
-    document.addEventListener('dragstart', protectHome, true);
-    document.addEventListener('contextmenu', protectHome, true);
-    document.addEventListener('keydown', event => {
-      if (!document.getElementById('intro')?.contains(event.target)) return;
-      if ((event.ctrlKey || event.metaKey) && ['c', 'x', 'a'].includes(event.key.toLowerCase())) event.preventDefault();
-    }, true);
-
-    document.getElementById('intro')?.style.setProperty('user-select', 'none');
-    document.getElementById('intro')?.style.setProperty('-webkit-user-select', 'none');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
