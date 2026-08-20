@@ -14,9 +14,7 @@ const states = new WeakMap();
 const TUTORIAL_TEXT = /TUTORIAL|RUNNER LESSON|PRACTICE IT NOW|BOOST PAD|DOUBLE JUMP|HOLD S|BLACKOUT|WALL ROUTES|CHASE|AIR DASH|STORM|COMBINE|LOCKDOWN|ELITE|FINAL RUN|CITYSPINE|CHECKPOINT/i;
 const FALLBACK_OBJECTIVE = { title: 'COMPLETE THE ACTIVE ROUTE', label: 'MISSION ROUTE', completeAt: .78 };
 
-function missionId(scene) {
-  return scene?.mission?.id || scene?.sys?.settings?.data?.missionId || scene?.registry?.get?.('missionId') || scene?.registry?.get?.('activeMission')?.id || null;
-}
+function missionId(scene) { return scene?.mission?.id || scene?.sys?.settings?.data?.missionId || scene?.registry?.get?.('missionId') || scene?.registry?.get?.('activeMission')?.id || null; }
 function worldWidth(scene) { return scene?.physics?.world?.bounds?.width || scene?.scale?.width || 1; }
 function clamp(v, min = 0, max = 1) { return Math.max(min, Math.min(max, v || 0)); }
 function viewport(scene) {
@@ -28,11 +26,7 @@ function tutorialBounds(scene) {
   const list = scene?.children?.list || [];
   const matches = list.filter(child => child?.active && child.visible !== false && child.type === 'Text' && TUTORIAL_TEXT.test(String(child.text || '')));
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  matches.forEach(child => {
-    const b = child.getBounds?.(); if (!b) return;
-    minX = Math.min(minX, b.x); minY = Math.min(minY, b.y);
-    maxX = Math.max(maxX, b.right); maxY = Math.max(maxY, b.bottom);
-  });
+  matches.forEach(child => { const b = child.getBounds?.(); if (!b) return; minX = Math.min(minX, b.x); minY = Math.min(minY, b.y); maxX = Math.max(maxX, b.right); maxY = Math.max(maxY, b.bottom); });
   const explicit = scene?.firstTimeTutorial === true || (scene?.routeTutorials?.size || 0) > 0 || !!scene?.intelCard?.visible;
   if (!matches.length && !explicit) return null;
   if (!Number.isFinite(minY)) return { x: 40, y: 340, right: 500, bottom: 540 };
@@ -41,7 +35,6 @@ function tutorialBounds(scene) {
 
 function buildPanel(scene, objective) {
   const c = scene.add.container(0, 0).setScrollFactor(0).setDepth(9200).setAlpha(0);
-  // Restore the larger desktop card while keeping the same HUD language.
   const bg = scene.add.rectangle(0, 0, 426, 166, 0x07111f, .95).setOrigin(0).setStrokeStyle(1, 0x38bdf8, .72);
   const accent = scene.add.rectangle(0, 0, 4, 166, 0x38bdf8, .92).setOrigin(0);
   const kicker = scene.add.text(22, 18, 'MISSION OBJECTIVE', { fontFamily:'monospace', fontSize:'10px', color:'#8ecae6', letterSpacing:1.5 });
@@ -59,11 +52,11 @@ function layout(state, scene, force = false) {
   const { w, h, mobile } = viewport(scene);
   const tutorial = tutorialBounds(scene);
   const baseW = 426, baseH = 166;
-  const pw = mobile ? Math.min(338, w - 24) : Math.min(426, Math.max(330, w - 64));
+  // Desktop only: slightly larger for readability. Mobile remains unchanged.
+  const pw = mobile ? Math.min(338, w - 24) : Math.min(470, Math.max(360, w - 64));
   const scale = pw / baseW;
   const actualH = baseH * scale;
   let x = Math.max(12, w - pw - (mobile ? 12 : 30));
-  // Mobile reserves the entire bottom action lane; desktop keeps the clean bottom-right dock.
   const bottomReserve = mobile ? Math.max(112, Math.round(h * .16)) : 28;
   let y = Math.max(82, h - actualH - bottomReserve);
   if (tutorial && tutorial.right > x - 8 && tutorial.bottom > y - 8) y = Math.max(82, tutorial.y - actualH - 18);
@@ -72,15 +65,13 @@ function layout(state, scene, force = false) {
   state.c.setPosition(x, y).setScale(scale);
 }
 
-// Visual-only skin behind existing top-left mission and top-center signal text.
-// Existing text objects, counters and their update ownership remain untouched.
 function skinExistingHud(scene, state) {
   if (state.hudSkinned || !scene?.add) return;
   const { w } = viewport(scene);
   const texts = (scene.children?.list || []).filter(child => child?.active && child.visible !== false && child.type === 'Text' && child.getBounds && child.scrollFactorX === 0);
   const groups = {
     mission: texts.filter(t => { const b=t.getBounds(); return b.x < w * .26 && b.y < 125; }),
-    signal: texts.filter(t => { const b=t.getBounds(); const s=String(t.text||''); return b.x > w*.30 && b.x < w*.70 && b.y < 120 && (/SIGNAL|ENERGY|^\\d+$|\\d+\\s*SIGNALS/i.test(s)); }),
+    signal: texts.filter(t => { const b=t.getBounds(); const s=String(t.text||''); return b.x > w*.30 && b.x < w*.70 && b.y < 120 && (/SIGNAL|ENERGY|^\d+$|\d+\s*SIGNALS/i.test(s)); }),
   };
   state.hudSkins = [];
   for (const [kind, items] of Object.entries(groups)) {
@@ -88,10 +79,8 @@ function skinExistingHud(scene, state) {
     let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,minDepth=Infinity;
     items.forEach(item => { const b=item.getBounds(); minX=Math.min(minX,b.x); minY=Math.min(minY,b.y); maxX=Math.max(maxX,b.right); maxY=Math.max(maxY,b.bottom); minDepth=Math.min(minDepth, Number.isFinite(item.depth)?item.depth:9100); });
     const padX = kind === 'mission' ? 18 : 16, padY = 14;
-    const bg = scene.add.rectangle(minX-padX, minY-padY, (maxX-minX)+padX*2, (maxY-minY)+padY*2, 0x07111f, .88)
-      .setOrigin(0).setScrollFactor(0).setStrokeStyle(1, 0x38bdf8, .55).setDepth(minDepth - .01);
-    const rail = scene.add.rectangle(minX-padX, minY-padY, 3, (maxY-minY)+padY*2, 0x38bdf8, .8)
-      .setOrigin(0).setScrollFactor(0).setDepth(minDepth);
+    const bg = scene.add.rectangle(minX-padX, minY-padY, (maxX-minX)+padX*2, (maxY-minY)+padY*2, 0x07111f, .88).setOrigin(0).setScrollFactor(0).setStrokeStyle(1, 0x38bdf8, .55).setDepth(minDepth - .01);
+    const rail = scene.add.rectangle(minX-padX, minY-padY, 3, (maxY-minY)+padY*2, 0x38bdf8, .8).setOrigin(0).setScrollFactor(0).setDepth(minDepth);
     state.hudSkins.push(bg, rail);
   }
   state.hudSkinned = true;
