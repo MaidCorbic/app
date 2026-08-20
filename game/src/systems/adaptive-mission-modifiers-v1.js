@@ -1,7 +1,7 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 
 // UPDATE 15 — Adaptive Mission Modifiers V1
-// One additive modifier per mission. Existing mission flow, scoring, results and saves stay untouched.
+// Additive only: never replaces or mutates player creation/physics configuration.
 export const MISSION_MODIFIERS = Object.freeze({
   'first-delivery': { id: 'low-gravity', title: 'LOW GRAVITY', subtitle: 'VERTICAL ASSIST ACTIVE', tuning: { jumpVelocity: -775, fallGravity: 500, maxFallSpeed: 860 } },
   'dead-drop': { id: 'security-alert', title: 'SECURITY ALERT', subtitle: 'THREAT RESPONSE ELEVATED', enemySpeedMultiplier: 1.16 },
@@ -15,36 +15,27 @@ export const MISSION_MODIFIERS = Object.freeze({
 const BASE_TUNING = Object.freeze({ maxRunSpeed: 460, groundAcceleration: 4200, airAcceleration: 2350, turnAcceleration: 5600, groundDeceleration: 3300, jumpVelocity: -705, jumpCutMultiplier: .48, coyoteMs: 115, jumpBufferMs: 120, fallGravity: 720, maxFallSpeed: 1120, dashSpeed: 670, dashDurationMs: 145, dashCooldownMs: 620 });
 const states = new WeakMap();
 
-export function getMissionModifier(missionId) { return MISSION_MODIFIERS[missionId] || null; }
+export function getMissionModifier(id) { return MISSION_MODIFIERS[id] || null; }
 
-function missionId(scene) {
-  return [scene?.sys?.settings?.data?.missionId, scene?.sys?.settings?.data?.mission, scene?.registry?.get?.('missionId'), scene?.mission?.id, document.documentElement?.dataset?.missionId, document.body?.dataset?.missionId].find(value => typeof value === 'string') || null;
+function resolveMissionId(scene) {
+  const sources = [scene?.sys?.settings?.data?.missionId, scene?.sys?.settings?.data?.mission, scene?.registry?.get?.('missionId'), scene?.mission?.id, document.documentElement?.dataset?.missionId, document.body?.dataset?.missionId];
+  return sources.find(value => typeof value === 'string') || null;
 }
 
-export function applyMissionModifier(scene, id = missionId(scene)) {
+export function applyMissionModifier(scene, id = resolveMissionId(scene)) {
   clearMissionModifier(scene);
   const modifier = getMissionModifier(id);
   scene.missionTuning = { ...BASE_TUNING, ...(modifier?.tuning || {}) };
   if (!modifier) return null;
 
-  const state = { modifier, overlay: null, darkness: null, signalTweens: [], enemyVelocity: new WeakMap(), boostedAt: 0, lowGravityLifted: false };
+  const state = { modifier, overlay: null, darkness: null, signalTweens: [], boostedAt: 0, lowGravityLifted: false };
   states.set(scene, state);
   scene.__missionModifier = modifier;
   scene.__missionModifierState = state;
 
-  if (modifier.darkness && scene.cameras?.main) {
-    const overlay = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x050914, modifier.darkness).setOrigin(0).setScrollFactor(0).setDepth(9000);
-    state.darkness = overlay;
-    scene.scale?.on?.('resize', gameSize => overlay.active && overlay.setSize(gameSize.width, gameSize.height));
-  }
-
-  if (modifier.tuning && scene.player?.body) {
-    const body = scene.player.body;
-    if (modifier.id === 'low-gravity') {
-      body.setGravityY?.(-220);
-      body.setMaxVelocity?.(undefined, modifier.tuning.maxFallSpeed);
-    }
-    if (modifier.id === 'overclock') body.setMaxVelocityX?.(modifier.tuning.maxRunSpeed);
+  if (modifier.darkness && scene.add && scene.scale) {
+    state.darkness = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x050914, modifier.darkness)
+      .setOrigin(0).setScrollFactor(0).setDepth(9000);
   }
 
   showModifierBanner(scene, modifier, state);
@@ -53,17 +44,9 @@ export function applyMissionModifier(scene, id = missionId(scene)) {
 
 export function clearMissionModifier(scene) {
   const state = states.get(scene) || scene.__missionModifierState;
-  if (state) {
-    state.signalTweens?.forEach(tween => tween?.stop?.());
-    state.darkness?.destroy?.();
-    state.overlay?.destroy?.();
-  }
-  const body = scene?.player?.body;
-  if (body) {
-    body.setGravityY?.(0);
-    body.setMaxVelocity?.(undefined, BASE_TUNING.maxFallSpeed);
-    body.setMaxVelocityX?.(BASE_TUNING.maxRunSpeed);
-  }
+  state?.signalTweens?.forEach(tween => tween?.stop?.());
+  state?.darkness?.destroy?.();
+  state?.overlay?.destroy?.();
   scene.missionTuning = { ...BASE_TUNING };
   scene.__missionModifier = null;
   scene.__missionModifierState = null;
@@ -73,8 +56,7 @@ export function clearMissionModifier(scene) {
 export function pulseMissionSignals(scene) {
   const state = states.get(scene);
   if (!state?.modifier?.signalPulse) return;
-  const nodes = scene.children?.list || [];
-  nodes.filter(node => node?.active && node.texture?.key === 'signal').forEach(signal => {
+  (scene.children?.list || []).filter(node => node?.active && node.texture?.key === 'signal').forEach(signal => {
     const tween = scene.tweens.add({ targets: signal, alpha: { from: .42, to: 1 }, scale: { from: .92, to: 1.12 }, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     state.signalTweens.push(tween);
   });
@@ -91,39 +73,35 @@ function getEnemies(scene) {
 function updateModifier(scene) {
   const state = states.get(scene);
   const modifier = state?.modifier;
-  if (!modifier || !scene.player?.body) return;
-  const body = scene.player.body;
+  const body = scene.player?.body;
+  if (!modifier || !body) return;
 
+  // LOW GRAVITY is additive and only touches active airborne velocity.
+  // No setGravityY/setMaxVelocity calls: player physics setup remains owned by RunnerScene.
   if (modifier.id === 'low-gravity') {
-    // The scene keeps its original jump code; once a real jump starts, extend it once per airtime.
     if (body.blocked?.down || body.touching?.down) state.lowGravityLifted = false;
-    if (!state.lowGravityLifted && body.velocity.y < -500) {
-      body.setVelocityY?.(Math.min(body.velocity.y, modifier.tuning.jumpVelocity));
+    if (!state.lowGravityLifted && body.velocity?.y < -500) {
+      body.velocity.y = Math.min(body.velocity.y, modifier.tuning.jumpVelocity);
       state.lowGravityLifted = true;
     }
   }
 
-  if (modifier.id === 'overclock') {
+  if (modifier.id === 'overclock' && body.velocity) {
     const vx = body.velocity.x || 0;
-    if (Math.abs(vx) > BASE_TUNING.maxRunSpeed - 1) body.velocity.x = Math.sign(vx) * Math.min(Math.abs(vx) * 1.035, modifier.tuning.maxRunSpeed);
+    if (Math.abs(vx) > BASE_TUNING.maxRunSpeed - 1) body.velocity.x = Math.sign(vx) * Math.min(Math.abs(vx) * 1.02, modifier.tuning.maxRunSpeed);
   }
 
   if (modifier.enemySpeedMultiplier) {
     getEnemies(scene).forEach(enemy => {
-      const enemyBody = enemy.body;
-      if (!enemyBody?.velocity) return;
-      const vx = enemyBody.velocity.x || 0;
-      const vy = enemyBody.velocity.y || 0;
-      if (Math.abs(vx) > .1) enemyBody.velocity.x = Math.sign(vx) * Math.min(Math.abs(vx) * modifier.enemySpeedMultiplier, 900);
-      state.enemyVelocity.set(enemy, { vx, vy });
+      const velocity = enemy.body?.velocity;
+      if (velocity && Math.abs(velocity.x) > .1) velocity.x = Math.sign(velocity.x) * Math.min(Math.abs(velocity.x) * modifier.enemySpeedMultiplier, 900);
     });
   }
 
-  if (modifier.kineticMultiplier) {
+  if (modifier.kineticMultiplier && body.velocity) {
     const now = performance.now();
-    const vx = body.velocity.x || 0;
-    if (now - state.boostedAt > 420 && Math.abs(vx) > 610) {
-      body.velocity.x = Math.sign(vx) * Math.min(Math.abs(vx) * modifier.kineticMultiplier, 920);
+    if (now - state.boostedAt > 420 && Math.abs(body.velocity.x || 0) > 610) {
+      body.velocity.x = Math.sign(body.velocity.x) * Math.min(Math.abs(body.velocity.x) * modifier.kineticMultiplier, 920);
       state.boostedAt = now;
     }
   }
@@ -140,7 +118,6 @@ function showModifierBanner(scene, modifier, state) {
   scene.tweens.add({ targets: container, alpha: 1, y: 105, duration: 220, ease: 'Quad.easeOut', yoyo: true, hold: 2100, onComplete: () => { container.destroy(); if (state.overlay === container) state.overlay = null; } });
 }
 
-// Lifecycle patch: apply after the real scene create, run after gameplay update, and always clear before shutdown.
 const originalCreate = RunnerScene.prototype.create;
 const originalUpdate = RunnerScene.prototype.update;
 const originalShutdown = RunnerScene.prototype.shutdown;
@@ -148,10 +125,7 @@ const originalShutdown = RunnerScene.prototype.shutdown;
 if (!RunnerScene.prototype.__adaptiveMissionModifiersV1Patched) {
   RunnerScene.prototype.create = function adaptiveMissionModifiersCreate(...args) {
     const result = originalCreate.apply(this, args);
-    try {
-      applyMissionModifier(this);
-      pulseMissionSignals(this);
-    } catch (error) { console.error('[AdaptiveMissionModifiersV1] create failed', error); }
+    try { applyMissionModifier(this); pulseMissionSignals(this); } catch (error) { console.error('[AdaptiveMissionModifiersV1] create failed', error); }
     return result;
   };
 
