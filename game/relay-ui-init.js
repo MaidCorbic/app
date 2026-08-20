@@ -77,3 +77,5 @@ import './mission-performance-results-bridge-v1.js';
 import './src/systems/dynamic-encounter-events-v1.js';
 // UPDATE 15 — adaptive mission modifiers patch RunnerScene after the base scene is loaded.
 import './src/systems/adaptive-mission-modifiers-v1.js';
+// UPDATE 16 — mission objective HUD and progress tracking.
+import './src/systems/mission-objectives-route-goals-v1.js';
