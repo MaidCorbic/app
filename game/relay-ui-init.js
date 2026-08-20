@@ -44,8 +44,8 @@ document.addEventListener('keydown', event => {
   }
 });
 
-// UPDATE 17 — single professional real-world 2D gameplay intro.
-import './gameplay-intro-v3.js';
+// UPDATE 17 — one authoritative gameplay intro runtime.
+import './gameplay-intro-final-v1.js';
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
 import './dynamic-time-cycle-v1.js';
