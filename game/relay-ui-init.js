@@ -75,3 +75,5 @@ import './mission-flow-performance-v1.js';
 import './mission-performance-results-bridge-v1.js';
 // UPDATE 14 — dynamic encounter events. Additive and isolated from scoring/progression.
 import './src/systems/dynamic-encounter-events-v1.js';
+// UPDATE 15 — adaptive mission modifiers patch RunnerScene after the base scene is loaded.
+import './src/systems/adaptive-mission-modifiers-v1.js';
