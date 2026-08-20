@@ -52,7 +52,6 @@ function layout(state, scene, force = false) {
   const { w, h, mobile } = viewport(scene);
   const tutorial = tutorialBounds(scene);
   const baseW = 426, baseH = 166;
-  // Desktop only: slightly larger for readability. Mobile remains unchanged.
   const pw = mobile ? Math.min(338, w - 24) : Math.min(470, Math.max(360, w - 64));
   const scale = pw / baseW;
   const actualH = baseH * scale;
@@ -66,7 +65,7 @@ function layout(state, scene, force = false) {
 }
 
 function skinExistingHud(scene, state) {
-  if (state.hudSkinned || !scene?.add) return;
+  if (state.hudSkinned || !scene?.add || window.__relayCinematicLock) return;
   const { w } = viewport(scene);
   const texts = (scene.children?.list || []).filter(child => child?.active && child.visible !== false && child.type === 'Text' && child.getBounds && child.scrollFactorX === 0);
   const groups = {
@@ -87,8 +86,10 @@ function skinExistingHud(scene, state) {
 }
 
 function reveal(state, scene) {
+  if (window.__relayCinematicLock) { state.pendingReveal = true; state.visible = false; state.c.setVisible(false); return; }
   if (state.visible) return;
   state.visible = true;
+  state.pendingReveal = false;
   layout(state, scene, true);
   state.c.setVisible(true);
   skinExistingHud(scene, state);
@@ -100,7 +101,7 @@ export function applyMissionObjective(scene, id = missionId(scene)) {
   if (!scene?.add) return null;
   const objective = MISSION_OBJECTIVES[id] || { ...FALLBACK_OBJECTIVE, id: id || 'active-mission' };
   const ui = buildPanel(scene, objective);
-  const state = { objective, ...ui, completed:false, last:-1, visible:false, x:null, y:null, scale:null, tutorial:null, hudSkinned:false, hudSkins:[] };
+  const state = { objective, ...ui, completed:false, last:-1, visible:false, pendingReveal:false, x:null, y:null, scale:null, tutorial:null, hudSkinned:false, hudSkins:[] };
   states.set(scene,state); scene.__missionObjectiveState=state; scene.__missionObjective=objective;
   reveal(state, scene);
   return objective;
@@ -108,6 +109,8 @@ export function applyMissionObjective(scene, id = missionId(scene)) {
 
 export function updateMissionObjective(scene) {
   const s = states.get(scene); if (!s || !scene.player) return;
+  if (window.__relayCinematicLock) { s.c.setVisible(false); return; }
+  if (s.pendingReveal) reveal(s, scene);
   layout(s, scene);
   skinExistingHud(scene, s);
   const p = clamp(scene.player.x / worldWidth(scene));
