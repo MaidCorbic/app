@@ -44,8 +44,8 @@ document.addEventListener('keydown', event => {
   }
 });
 
-// UPDATE 17 — extended cinematic first-person world arrival.
-import './cinematic-arrival-v4.js';
+// UPDATE 17 — final 2D gameplay intro. Single runtime entry point.
+import './cinematic-arrival-v3.js';
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
 import './dynamic-time-cycle-v1.js';
