@@ -69,4 +69,5 @@ import './mission-performance-results-bridge-v1.js';
 import './src/systems/dynamic-encounter-events-v1.js';
 import './src/systems/adaptive-mission-modifiers-v1.js';
 import './src/systems/mission-objectives-route-goals-v1.js';
+import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
