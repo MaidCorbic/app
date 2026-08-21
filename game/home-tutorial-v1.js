@@ -11,14 +11,16 @@ import './runtime-ai-tutorial-settings.js';
     #intro .title-secondary .home-tutorial-button>span{display:block;overflow:hidden;text-overflow:ellipsis;color:#e8f7fb;font:900 10px/1.15 'DM Mono',monospace;letter-spacing:.9px}
     #intro .title-secondary .home-tutorial-button>small{display:block;overflow:hidden;text-overflow:ellipsis;color:#6f8798;font:700 7px/1.1 'DM Mono',monospace;letter-spacing:.6px}
     .home-tutorial-content{display:grid;gap:10px;padding:2px 0 8px}
-    .tutorial-hero{padding:14px;border:1px solid rgba(141,244,255,.20);border-radius:11px;background:radial-gradient(circle at 80% 0%,rgba(25,200,245,.12),transparent 42%),linear-gradient(145deg,rgba(10,28,47,.96),rgba(3,9,18,.99));box-shadow:inset 0 1px rgba(255,255,255,.05),0 12px 30px rgba(0,0,0,.18)}
+    .tutorial-hero{padding:14px;border:1px solid rgba(141,244,255,.20);border-radius:11px;background:radial-gradient(circle at 80% 0%,rgba(25,200,245,.12),transparent 42%),linear-gradient(145deg,rgba(10,28,47,.96),rgba(3,9,18,.99));box-shadow:inset 0 1px rgba(255,255,255,.05),0 12px 30px rgba(0,0,0,.18);opacity:0;transform:translateY(8px);animation:tutorialReveal .7s .08s ease both}
     .tutorial-hero b{display:block;color:#8df4ff;font:900 12px/1.2 'DM Mono',monospace;letter-spacing:1.2px}
     .tutorial-hero p{margin:6px 0 0;color:#a8b9c8;font:700 8px/1.55 'DM Mono',monospace}
     .tutorial-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-    .tutorial-step{min-width:0;padding:10px;border:1px solid rgba(210,226,240,.09);border-radius:9px;background:rgba(6,15,27,.88)}
+    .tutorial-step{min-width:0;padding:10px;border:1px solid rgba(210,226,240,.09);border-radius:9px;background:rgba(6,15,27,.88);opacity:0;transform:translateY(8px);animation:tutorialReveal .65s ease both}
+    .tutorial-step:nth-child(1){animation-delay:.18s}.tutorial-step:nth-child(2){animation-delay:.26s}.tutorial-step:nth-child(3){animation-delay:.34s}
     .tutorial-step b{display:block;color:#ffd06e;font:900 8px/1.2 'DM Mono',monospace;letter-spacing:.8px}
     .tutorial-step p{margin:5px 0 0;color:#9aaebe;font:700 7px/1.45 'DM Mono',monospace}
-    .tutorial-category{padding:10px 11px;border:1px solid rgba(210,226,240,.09);border-radius:9px;background:rgba(7,16,29,.82)}
+    .tutorial-category{padding:10px 11px;border:1px solid rgba(210,226,240,.09);border-radius:9px;background:rgba(7,16,29,.82);opacity:0;transform:translateY(8px);animation:tutorialReveal .65s ease both}
+    .tutorial-category:nth-of-type(1){animation-delay:.42s}.tutorial-category:nth-of-type(2){animation-delay:.49s}.tutorial-category:nth-of-type(3){animation-delay:.56s}.tutorial-category:nth-of-type(4){animation-delay:.63s}.tutorial-category:nth-of-type(5){animation-delay:.70s}.tutorial-category:nth-of-type(6){animation-delay:.77s}.tutorial-category:nth-of-type(7){animation-delay:.84s}
     .tutorial-category summary{cursor:pointer;list-style:none;color:#e8f4f8;font:900 8.5px/1.2 'DM Mono',monospace;letter-spacing:.7px;touch-action:manipulation}
     .tutorial-category summary::-webkit-details-marker{display:none}
     .tutorial-category summary::after{content:'+';float:right;color:#6f8798;font-size:12px}
@@ -28,8 +30,10 @@ import './runtime-ai-tutorial-settings.js';
     .tutorial-category li{margin:2px 0}
     .tutorial-key{display:inline-block;min-width:16px;padding:2px 4px;border:1px solid rgba(141,244,255,.18);border-radius:4px;color:#e9f7fb;background:#081321;font:800 7px/1 'DM Mono',monospace;text-align:center}
     .tutorial-note{color:#71859a!important}
-    .tutorial-foot{padding:10px 11px;border-left:2px solid #8df4ff;color:#8fa5b8;font:700 7px/1.55 'DM Mono',monospace;background:rgba(141,244,255,.035)}
+    .tutorial-foot{padding:10px 11px;border-left:2px solid #8df4ff;color:#8fa5b8;font:700 7px/1.55 'DM Mono',monospace;background:rgba(141,244,255,.035);opacity:0;transform:translateY(8px);animation:tutorialReveal .7s .92s ease both}
+    @keyframes tutorialReveal{to{opacity:1;transform:none}}
     @media(max-width:700px){.tutorial-steps{grid-template-columns:1fr}.tutorial-hero{padding:12px}.tutorial-category ul{font-size:7px}.tutorial-hero p{font-size:7px}}
+    @media(prefers-reduced-motion:reduce){.tutorial-hero,.tutorial-step,.tutorial-category,.tutorial-foot{animation:none;opacity:1;transform:none}}
   `;
   document.head.appendChild(style);
 
