@@ -16,7 +16,7 @@ if (count(relayInit, "./src/systems/mobile-controls-controller.js") !== 1) {
 if (relayInit.includes("./src/systems/touch-controls.js")) {
   failures.push('legacy touch-controls.js must not be loaded alongside the authoritative controller');
 }
-if (!mobile.includes("data-mobile-controls-owner = 'controller'".replace(' = ', '='))) {
+if (!mobile.includes("mobileControlsOwner = 'controller'")) {
   failures.push('mobile controller must mark the DOM it owns to prevent duplicate binding');
 }
 if (!mobile.includes('MutationObserver')) {
