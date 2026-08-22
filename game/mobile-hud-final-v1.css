@@ -41,7 +41,7 @@
   #finish .outcome h2,#gameOver .outcome h2 { font-size:clamp(28px,9vw,42px);line-height:.92; }
   #finish .primary,#gameOver .primary { width:100%;min-height:44px; }
   #pauseMenu .menu { width:100%;box-sizing:border-box;padding:max(14px,env(safe-area-inset-top,0px) + 8px) 12px max(14px,env(safe-area-inset-bottom,0px) + 8px); }
-  #pauseMenu .menu-grid { display:block!important; }.#pauseMenu .menu-grid aside{margin-bottom:10px}
+  #pauseMenu .menu-grid { display:block!important; } #pauseMenu .menu-grid aside{margin-bottom:10px}
   #pauseMenu nav{scrollbar-width:none;padding:2px 1px 7px}#pauseMenu nav::-webkit-scrollbar{display:none}
   #pauseMenu .tab{min-height:36px;padding:8px 11px;font-size:8px}#panelContent{max-height:calc(100dvh - 210px);overflow:auto;padding-right:2px}#panelContent .entry{padding:11px}#panelContent .entry small{line-height:1.4}
 }
