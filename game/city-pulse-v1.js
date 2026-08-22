@@ -2,14 +2,12 @@ import {
   CITY_PULSE_CONFIG,
   CITY_PULSE_MISSION_TARGET_X,
   phaseAt,
-  openStartAt,
   isPerfectWindow,
 } from './city-pulse-core-v1.js';
 
 /* UPDATE 23 — CITY PULSE // FULL IMPLEMENTATION
    Additive environment timing layer.
    Existing player physics, missions, barriers, score and save state remain authoritative.
-   City Pulse creates non-physical timing gates that reward reading the city's rhythm.
 */
 (() => {
   if (typeof window === 'undefined' || window.__relayCityPulseV1) return;
@@ -29,10 +27,11 @@ import {
       scene?.sys?.settings?.data?.missionId,
       scene?.sys?.settings?.data?.mission,
       scene?.registry?.get?.('missionId'),
+      scene?.registry?.get?.('mission'),
       document.documentElement?.dataset?.missionId,
       document.body?.dataset?.missionId,
     ];
-    return candidates.find(value => Object.prototype.hasOwnProperty.call(MISSION_TARGET_X, value)) || null;
+    return candidates.find(value => typeof value === 'string' && Object.prototype.hasOwnProperty.call(MISSION_TARGET_X, value)) || null;
   };
 
   const gameplayEnabled = scene => !!scene?.player?.active
@@ -40,18 +39,19 @@ import {
     && !scene?.cinematicActive;
 
   const makeGate = (scene, x, index) => {
-    const y = 558;
+    const baseY = Number.isFinite(scene?.player?.y) ? scene.player.y + 10 : 556;
+    const y = Math.max(420, Math.min(600, baseY));
     const c = scene.add.container(x, y).setDepth(9);
-    const glow = scene.add.rectangle(0, -26, 6, 76, 0x8df4ff, .12).setStrokeStyle(1, 0x8df4ff, .45);
-    const beam = scene.add.rectangle(0, -26, 3, 68, 0xdffcff, .45);
-    const left = scene.add.rectangle(-26, 0, 4, 58, 0x8df4ff, .7);
-    const right = scene.add.rectangle(26, 0, 4, 58, 0x8df4ff, .7);
-    const cap = scene.add.rectangle(0, -55, 58, 3, 0x8df4ff, .75);
-    const label = scene.add.text(0, -70, `PULSE ${String(index + 1).padStart(2, '0')}`, {
-      fontFamily: 'monospace', fontSize: '7px', fontStyle: 'bold', color: '#dffcff', stroke: '#02050d', strokeThickness: 3,
+    const glow = scene.add.rectangle(0, -26, 8, 78, 0x8df4ff, .12).setStrokeStyle(1, 0x8df4ff, .45);
+    const beam = scene.add.rectangle(0, -26, 4, 70, 0xdffcff, .45);
+    const left = scene.add.rectangle(-26, 0, 5, 60, 0x8df4ff, .7);
+    const right = scene.add.rectangle(26, 0, 5, 60, 0x8df4ff, .7);
+    const cap = scene.add.rectangle(0, -56, 60, 3, 0x8df4ff, .75);
+    const label = scene.add.text(0, -72, `PULSE ${String(index + 1).padStart(2, '0')}`, {
+      fontFamily: 'monospace', fontSize: '8px', fontStyle: 'bold', color: '#dffcff', stroke: '#02050d', strokeThickness: 3,
     }).setOrigin(.5);
-    const stateText = scene.add.text(0, 18, 'SYNC', {
-      fontFamily: 'monospace', fontSize: '6px', fontStyle: 'bold', color: '#8df4ff', stroke: '#02050d', strokeThickness: 2,
+    const stateText = scene.add.text(0, 20, 'SYNC', {
+      fontFamily: 'monospace', fontSize: '7px', fontStyle: 'bold', color: '#8df4ff', stroke: '#02050d', strokeThickness: 2,
     }).setOrigin(.5);
     c.add([glow, beam, left, right, cap, label, stateText]);
     c.setDataEnabled();
@@ -78,7 +78,7 @@ import {
     parts.glow.setFillStyle(color, reducedMotion ? .08 : open ? .22 : warning ? .13 : .05);
     parts.beam.setFillStyle(color, beamAlpha);
     stateText.setColor(open ? '#aee37f' : warning ? '#ffd06e' : '#8df4ff');
-    stateText.setText(open ? 'OPEN' : warning ? 'SYNC' : 'CLOSED');
+    stateText.setText(open ? 'OPEN' : warning ? 'WARNING' : 'CLOSED');
     parts.beam.setScaleX(!reducedMotion && open ? 1.25 : 1);
   };
 
@@ -96,7 +96,8 @@ import {
     el.classList.remove('is-visible');
     void el.offsetWidth;
     el.classList.add('is-visible');
-    window.setTimeout(() => el.classList.remove('is-visible'), 1050);
+    window.clearTimeout(Number(el.dataset.cityPulseTimer) || 0);
+    el.dataset.cityPulseTimer = String(window.setTimeout(() => el.classList.remove('is-visible'), 1050));
     scene?.playerCue?.(title, success ? '#aee37f' : '#ffd06e');
   };
 
@@ -106,10 +107,10 @@ import {
   };
 
   const setup = scene => {
-    if (!scene?.add || !scene?.player || stateByScene.has(scene)) return;
+    if (!scene?.add || !scene?.player || stateByScene.has(scene)) return false;
     const missionId = missionIdOf(scene);
     const targetX = missionId ? MISSION_TARGET_X[missionId] : null;
-    if (!missionId || !Number.isFinite(targetX)) return;
+    if (!missionId || !Number.isFinite(targetX)) return false;
     const offsets = [-900, -600, -300];
     const gates = offsets.map((offset, index) => makeGate(scene, targetX + offset, index));
     const state = {
@@ -122,11 +123,19 @@ import {
     stateByScene.set(scene, state);
     scene.cityPulseV1 = state;
     gates.forEach(gate => gate.setVisible(false));
+    return true;
   };
 
   const update = (scene, delta = 16.67) => {
-    const state = stateByScene.get(scene);
-    if (!state) return;
+    // Scene-ready can happen before mission data/player activation. Retry setup from
+    // the existing Phaser update loop rather than using a second timer/polling loop.
+    let state = stateByScene.get(scene);
+    if (!state) {
+      setup(scene);
+      state = stateByScene.get(scene);
+      if (!state) return;
+    }
+
     const active = gameplayEnabled(scene);
     state.elapsed += Math.max(0, Math.min(Number(delta) || 16.67, 100));
     const reducedMotion = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -137,12 +146,16 @@ import {
       const localElapsed = state.elapsed + gate.getData('index') * 420;
       const phase = phaseAt(localElapsed);
       applyVisualState(gate, phase, reducedMotion);
+
       const x = gate.getData('triggerX');
-      const crossed = state.previousX < x && scene.player.x >= x;
+      const previousX = state.previousX;
+      const currentX = scene.player.x;
+      const tolerance = CONFIG.gateHalfWidth;
+      const crossed = previousX < x - tolerance && currentX >= x - tolerance;
       if (!crossed) return;
 
       gate.setData('triggered', true);
-      const perfect = isPerfectWindow(localElapsed);
+      const perfect = phase === 'OPEN' && isPerfectWindow(localElapsed);
       if (perfect) {
         state.flowStreak += 1;
         const streak = state.flowStreak;
@@ -174,12 +187,12 @@ import {
     stateByScene.delete(scene);
     if (scene.cityPulseV1 === state) delete scene.cityPulseV1;
     if (window.__relayCityPulseScene === scene) window.__relayCityPulseScene = null;
+    document.getElementById('cityPulseCueV1')?.classList.remove('is-visible');
   };
 
   runtimeModule.onSceneReady(scene => {
     setup(scene);
-    const state = stateByScene.get(scene);
-    if (!state) return;
+    if (!stateByScene.has(scene)) return;
     window.__relayCityPulseScene = scene;
     const onUpdate = (_time, delta) => update(scene, delta);
     scene.events?.on?.('update', onUpdate);
@@ -195,12 +208,14 @@ import {
     const result = {
       runtimeLoaded: true,
       sceneLoaded: !!scene,
-      mission: state?.missionId ?? scene?.mission?.id ?? 'NONE',
+      mission: state?.missionId ?? missionIdOf(scene) ?? scene?.mission?.id ?? 'NONE',
       tutorial: !!scene?.firstTimeTutorial,
       cinematic: !!scene?.cinematicActive,
       gates: state?.gates?.length ?? 0,
+      visible: state?.gates?.filter(g => g.visible).length ?? 0,
       triggered: state?.gates?.filter(g => g.getData('triggered')).length ?? 0,
       flowStreak: state?.flowStreak ?? 0,
+      playerX: Number.isFinite(scene?.player?.x) ? Math.round(scene.player.x) : null,
     };
     console.table(result);
     return result;
