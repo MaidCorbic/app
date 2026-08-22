@@ -19,8 +19,6 @@ function showRecoveredFinish(scene) {
   const missionIndex = missions.findIndex(item => item.id === mission.id);
   if (missionIndex < 0) return false;
 
-  // Completion is persisted by completeMission itself. Do not use elapsedMs from
-  // lastXpBreakdown as a persistence marker because that field is reward-only.
   const alreadyPersisted = Boolean(state.missionStats?.[mission.id]?.completed);
   if (!alreadyPersisted) {
     const runStats = {
@@ -44,14 +42,9 @@ function showRecoveredFinish(scene) {
     saveState(state);
   }
 
-  // UPDATE 12 integration point: publish the authoritative mission completion.
-  // Performance V1 also exposes a synchronous finalize() API; call it directly
-  // before the finish overlay becomes visible so Results can never race it.
   window.dispatchEvent(new CustomEvent('relay:mission-complete', { detail: { scene, missionId: mission.id } }));
   const performanceResult = window.__missionFlowPerformanceV1?.finalize?.(scene) || window.__missionFlowPerformanceV1?.latest || null;
-  if (!performanceResult) {
-    console.warn('[Relay Runner] Performance V1 did not produce a completion result.', mission.id);
-  }
+  if (!performanceResult) console.warn('[Relay Runner] Performance V1 did not produce a completion result.', mission.id);
 
   const stat = state.missionStats?.[mission.id] || { bestRating: 1, bestScore: scene.collected * 100, bestTime: scene.elapsedMs };
   const breakdown = state.lastXpBreakdown || {};
@@ -70,7 +63,35 @@ function showRecoveredFinish(scene) {
   return true;
 }
 
+// One authoritative click gate for mission-result transitions. The existing
+// main.js handlers still own launch/retry semantics; this layer only prevents
+// pointerup/click double-fires from starting overlapping scene transitions.
+const transitionLocks = new WeakSet();
+function installTransitionGate() {
+  ['again', 'nextMission', 'retry'].forEach(id => {
+    const button = document.getElementById(id);
+    if (!button || button.dataset.relayTransitionGate === '1') return;
+    button.dataset.relayTransitionGate = '1';
+    button.addEventListener('click', event => {
+      if (transitionLocks.has(button)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+      }
+      transitionLocks.add(button);
+      button.disabled = true;
+      // Keep the lock through the current click and the next animation frame;
+      // main.js remains the sole owner of the actual mission launch.
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        transitionLocks.delete(button);
+        if (button.isConnected) button.disabled = false;
+      }));
+    }, true);
+  });
+}
+
 function tick() {
+  installTransitionGate();
   const scene = window.__relayRunnerScene;
   const finish = document.getElementById('finish');
   if (scene?.finished && finish?.classList.contains('hidden')) {
@@ -85,5 +106,6 @@ function tick() {
 
 if (!window.__relayMissionFinishRecovery) {
   window.__relayMissionFinishRecovery = true;
+  installTransitionGate();
   timer = window.setTimeout(tick, RECOVERY_DELAY);
 }
