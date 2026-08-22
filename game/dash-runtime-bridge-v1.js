@@ -91,6 +91,17 @@ function ensureBound() {
   return scene;
 }
 
+function dispatchKeyboardDash(event) {
+  if (event.repeat || (event.code !== 'ShiftLeft' && event.code !== 'ShiftRight' && event.key !== 'Shift')) return;
+  if (event.defaultPrevented || window.__relayKeyboardDashStamp === event.timeStamp) return;
+  const scene = ensureBound();
+  if (!validScene(scene)) return;
+  window.__relayKeyboardDashStamp = event.timeStamp;
+  window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash', {
+    detail: { source: 'keyboard-shift', direction: directionFor(scene), originalEvent: event }
+  }));
+}
+
 if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
   window.__relayDashRuntimeBridgeV1 = true;
 
@@ -102,6 +113,10 @@ if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
   // Critical fallback: if module load happened before Phaser created RunnerScene,
   // the first actual dash input binds to the current scene immediately.
   window.addEventListener('relay:new-gameplay-dash', () => ensureBound(), { passive: true });
+
+  // SHIFT is a first-class gameplay input. This fallback restores dash even if
+  // the legacy scene keyboard binding was lost during HUD/runtime patching.
+  window.addEventListener('keydown', dispatchKeyboardDash, true);
 
   // If the scene already exists when this module is evaluated, bind immediately.
   ensureBound();
