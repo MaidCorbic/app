@@ -1,80 +1,8 @@
 import { missions } from '../missions.js';
+import { normalizeAndValidateMissions, validateMissionContracts } from './gameplay-contract.js';
 import './mobile-controls-controller.js';
 
-const normalizeMission = mission => {
-  if (!mission || typeof mission !== 'object') return mission;
-
-  mission.primaryObjective ??= {
-    type: 'reach-goal',
-    label: mission.objective || 'REACH THE RELAY'
-  };
-
-  mission.routeProfile ??= {};
-  mission.routeProfile.normal ??= 'Follow the marked route.';
-  mission.routeProfile.skill ??= 'Take the faster high line when safe.';
-  mission.routeProfile.recovery ??= 'Use checkpoints to recover the run.';
-
-  mission.deathLimit ??= mission.tutorial ? Infinity : 3;
-
-  const fast = mission.optionalObjectives?.find(objective => objective?.type === 'fast');
-  if (fast && Number.isFinite(mission.parTime)) {
-    fast.label = `Finish under ${Math.floor(mission.parTime / 1000)} seconds`;
-  }
-
-  mission.mastery ??= {
-    signals: Boolean(mission.optionalObjectives?.some(objective => objective?.type === 'allSignals')),
-    speed: Boolean(fast),
-    jumps: Boolean(mission.optionalObjectives?.some(objective => objective?.type === 'jumps')),
-    secrets: Array.isArray(mission.secrets) && mission.secrets.length > 0
-  };
-
-  return mission;
-};
-
-const validateMissionContracts = list => {
-  const errors = [];
-  const ids = new Set();
-
-  for (const mission of list) {
-    if (!mission?.id) errors.push('Mission is missing id');
-    if (ids.has(mission.id)) errors.push(`${mission.id}: duplicate mission id`);
-    ids.add(mission.id);
-
-    if (!mission.spawn || !Number.isFinite(mission.spawn.x) || !Number.isFinite(mission.spawn.y)) {
-      errors.push(`${mission.id}: invalid spawn`);
-    }
-    if (!mission.goal || !Number.isFinite(mission.goal.x) || !Number.isFinite(mission.goal.y)) {
-      errors.push(`${mission.id}: invalid goal`);
-    }
-    if (!Number.isFinite(mission.parTime) || mission.parTime <= 0) {
-      errors.push(`${mission.id}: invalid parTime`);
-    }
-    if (!mission.primaryObjective?.label) {
-      errors.push(`${mission.id}: missing primary objective`);
-    }
-    if (!mission.routeProfile?.normal || !mission.routeProfile?.skill || !mission.routeProfile?.recovery) {
-      errors.push(`${mission.id}: incomplete route profile`);
-    }
-
-    const required = new Set(mission.requiredAbilities || []);
-    const unlocked = new Set(mission.abilityUnlock || []);
-    for (const ability of unlocked) {
-      if (!ability) errors.push(`${mission.id}: empty ability unlock`);
-    }
-    if (mission.unlockRequirement === mission.id) {
-      errors.push(`${mission.id}: cannot unlock itself`);
-    }
-    if (required.size && !mission.unlockRequirement) {
-      errors.push(`${mission.id}: required abilities need an unlock dependency`);
-    }
-  }
-
-  return errors;
-};
-
-missions.forEach(normalizeMission);
-
-const contractErrors = validateMissionContracts(missions);
+const contractErrors = normalizeAndValidateMissions(missions);
 if (contractErrors.length) {
   console.error('[Relay Runner] Gameplay contract errors:', contractErrors);
 }
@@ -96,35 +24,13 @@ style.textContent = `
       pointer-events: none;
     }
 
-    body.is-touch #play .hud > * {
-      pointer-events: none;
-    }
-
-    body.is-touch #play .hud-route {
-      min-width: 0;
-      max-width: 46vw;
-    }
-
+    body.is-touch #play .hud > * { pointer-events: none; }
+    body.is-touch #play .hud-route { min-width: 0; max-width: 46vw; }
     body.is-touch #play .hud-route b,
-    body.is-touch #play .hud-route small {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    body.is-touch #play .hud-progress {
-      min-width: 86px;
-      max-width: 25vw;
-    }
-
-    body.is-touch #play .hud-actions {
-      gap: 6px;
-      pointer-events: none;
-    }
-
-    body.is-touch #play .hud-xp {
-      display: none;
-    }
+    body.is-touch #play .hud-route small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    body.is-touch #play .hud-progress { min-width: 86px; max-width: 25vw; }
+    body.is-touch #play .hud-actions { gap: 6px; pointer-events: none; }
+    body.is-touch #play .hud-xp { display: none; }
 
     body.is-touch #pause {
       position: fixed !important;
@@ -163,9 +69,7 @@ style.textContent = `
     body.is-touch .mobile-joystick,
     body.is-touch .mobile-actions,
     body.is-touch .mobile-actions button,
-    body.is-touch .mobile-secondary-actions {
-      pointer-events: auto !important;
-    }
+    body.is-touch .mobile-secondary-actions { pointer-events: auto !important; }
 
     body.is-touch .mobile-joystick {
       flex: 0 0 clamp(76px, 21vw, 94px) !important;
@@ -189,10 +93,7 @@ style.textContent = `
       gap: 5px !important;
     }
 
-    body.is-touch .mobile-secondary-actions {
-      display: flex !important;
-      gap: 5px !important;
-    }
+    body.is-touch .mobile-secondary-actions { display: flex !important; gap: 5px !important; }
 
     body.is-touch .mobile-controls button {
       width: clamp(46px, 13vw, 58px) !important;
@@ -219,10 +120,7 @@ style.textContent = `
       opacity: .9;
     }
 
-    body.is-touch .mobile-controls button.is-active {
-      transform: translateY(1px) scale(.96) !important;
-      filter: brightness(1.25) !important;
-    }
+    body.is-touch .mobile-controls button.is-active { transform: translateY(1px) scale(.96) !important; filter: brightness(1.25) !important; }
 
     body.is-touch .gameplay-event-hud {
       top: calc(max(64px, env(safe-area-inset-top, 0px) + 58px)) !important;
@@ -235,9 +133,7 @@ style.textContent = `
     }
 
     body.is-touch .world-marker,
-    body.is-touch .input-guide {
-      display: none !important;
-    }
+    body.is-touch .input-guide { display: none !important; }
   }
 
   @media (max-width: 390px) {
