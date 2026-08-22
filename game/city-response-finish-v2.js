@@ -14,6 +14,15 @@
 
   const finish = () => document.getElementById('finish');
   const root = () => document.getElementById('cityResponseFinishV2');
+  const n = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+
+  function deriveResponse(scene) {
+    if (!scene) return 'CLEAN';
+    if (scene.__signalNetworkStable) return 'NETWORKED';
+    const cargo = n(scene.packageCondition ?? 100);
+    if (cargo < 70 || n(scene.collisions) >= 4 || n(scene.alarms) >= 3) return 'DAMAGED';
+    return 'CLEAN';
+  }
 
   function ensurePanel() {
     const finishRoot = finish();
@@ -43,14 +52,14 @@
     panel.classList.add('is-visible', 'is-pulse');
   }
 
-  function hide() {
-    root()?.classList.remove('is-visible', 'is-pulse');
-  }
+  function hide() { root()?.classList.remove('is-visible', 'is-pulse'); }
 
   function showFromEvent(event) {
     const scene = event?.detail?.scene;
-    const response = event?.detail?.response || scene?.__cityResponse || 'CLEAN';
-    window.setTimeout(() => show(response), 180);
+    if (!scene) return;
+    const response = event.detail?.response || scene.__cityResponse || deriveResponse(scene);
+    window.setTimeout(() => show(response), 160);
+    window.setTimeout(() => show(response), 420);
   }
 
   window.addEventListener('relay:city-response', showFromEvent);
@@ -59,8 +68,8 @@
   const observer = new MutationObserver(() => {
     const finishRoot = finish();
     if (!finishRoot) return;
-    const visible = !finishRoot.classList.contains('hidden');
-    if (!visible) hide();
+    if (!finishRoot.classList.contains('hidden')) return;
+    hide();
   });
   if (document.body) observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
 })();
