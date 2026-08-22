@@ -6,7 +6,6 @@
     "start": "npm run build && vite preview --host 0.0.0.0 --port 3000 --strictPort",
     "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "vite build",
-    "preview": "vite preview",
     "test:progression": "node tests/progression.mjs",
     "test:missions": "node tests/missions.mjs",
     "test:start-flow": "node tests/start-flow.mjs",
@@ -17,6 +16,7 @@
     "test:signal-network": "node tests/signal-network.mjs",
     "test:city-response": "node tests/city-response.mjs",
     "test:collapse-protocol": "node tests/collapse-protocol.mjs",
+    "test:gameplay-mobile-repair": "node tests/gameplay-mobile-repair.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {
