@@ -4,6 +4,7 @@ import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
+import './city-response-finish-v2.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -31,6 +32,7 @@ import './signal-network-v1.js';
 
 // UPDATE 20 — additive city response. Records mission aftermath in an isolated namespace.
 import './city-response-v1.js';
+import './city-response-finish-v2.js';
 
 // UPDATE 17 — one authoritative gameplay intro runtime.
 import './gameplay-intro-final-v1.js';
