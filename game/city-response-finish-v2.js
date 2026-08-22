@@ -1,9 +1,9 @@
 /* UPDATE 20 — CITY RESPONSE FINISH V2
-   Hard-wires City Response into the existing Finish overlay so the player can always see
-   the result. Keeps existing mission completion ownership untouched.
+   Visual-only bridge into the existing Finish overlay.
+   It never changes or replaces existing Finish controls/listeners.
 */
 (() => {
-  if (window.__relayCityResponseFinishV2) return;
+  if (typeof window === 'undefined' || window.__relayCityResponseFinishV2) return;
   window.__relayCityResponseFinishV2 = true;
 
   const PROFILE = {
@@ -13,63 +13,46 @@
   };
 
   const finish = () => document.getElementById('finish');
-  const root = () => document.getElementById('cityResponseFinishV2');
-  const n = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-
-  function deriveResponse(scene) {
-    if (!scene) return 'CLEAN';
-    if (scene.__signalNetworkStable) return 'NETWORKED';
-    const cargo = n(scene.packageCondition ?? 100);
-    if (cargo < 70 || n(scene.collisions) >= 4 || n(scene.alarms) >= 3) return 'DAMAGED';
-    return 'CLEAN';
-  }
+  const panel = () => document.getElementById('cityResponseFinishV2');
 
   function ensurePanel() {
     const finishRoot = finish();
     if (!finishRoot) return null;
-    let panel = root();
-    if (panel && panel.parentElement === finishRoot) return panel;
-    panel = document.createElement('section');
-    panel.id = 'cityResponseFinishV2';
-    panel.innerHTML = '<div class="city-response-finish-kicker">CITY RESPONSE // DISTRICT STATUS</div><div class="city-response-finish-title"></div><div class="city-response-finish-line"></div><div class="city-response-finish-detail"></div>';
-    const anchor = finishRoot.querySelector('#finishLine') || finishRoot.querySelector('#finishTime') || finishRoot.lastElementChild;
-    if (anchor?.insertAdjacentElement) anchor.insertAdjacentElement('afterend', panel);
-    else finishRoot.appendChild(panel);
-    return panel;
+    let node = panel();
+    if (node && node.parentElement === finishRoot) return node;
+    node = document.createElement('section');
+    node.id = 'cityResponseFinishV2';
+    node.innerHTML = '<div class="city-response-finish-kicker">CITY RESPONSE // DISTRICT STATUS</div><div class="city-response-finish-title"></div><div class="city-response-finish-line"></div><div class="city-response-finish-detail"></div>';
+    const anchor = finishRoot.querySelector('#finishLine') || finishRoot.querySelector('.reward');
+    if (anchor?.insertAdjacentElement) anchor.insertAdjacentElement('afterend', node);
+    else finishRoot.querySelector('.outcome')?.appendChild(node);
+    return node;
   }
 
-  function show(response) {
-    const panel = ensurePanel();
-    const profile = PROFILE[response] || PROFILE.CLEAN;
-    if (!panel) return;
-    panel.style.setProperty('--city-response-finish-accent', profile.accent);
-    panel.querySelector('.city-response-finish-title').textContent = profile.label;
-    panel.querySelector('.city-response-finish-line').textContent = profile.line;
-    panel.querySelector('.city-response-finish-detail').textContent = profile.detail;
-    panel.dataset.response = response;
-    panel.classList.remove('is-visible', 'is-pulse');
-    void panel.offsetWidth;
-    panel.classList.add('is-visible', 'is-pulse');
-  }
-
-  function hide() { root()?.classList.remove('is-visible', 'is-pulse'); }
-
-  function showFromEvent(event) {
-    const scene = event?.detail?.scene;
-    if (!scene) return;
-    const response = event.detail?.response || scene.__cityResponse || deriveResponse(scene);
-    window.setTimeout(() => show(response), 160);
-    window.setTimeout(() => show(response), 420);
-  }
-
-  window.addEventListener('relay:city-response', showFromEvent);
-  window.addEventListener('relay:mission-complete', showFromEvent);
-
-  const observer = new MutationObserver(() => {
+  function render(response) {
     const finishRoot = finish();
-    if (!finishRoot) return;
-    if (!finishRoot.classList.contains('hidden')) return;
-    hide();
+    if (!finishRoot || finishRoot.classList.contains('hidden')) return false;
+    const node = ensurePanel();
+    if (!node) return false;
+    const profile = PROFILE[response] || PROFILE.CLEAN;
+    node.style.setProperty('--city-response-finish-accent', profile.accent);
+    node.querySelector('.city-response-finish-title').textContent = profile.label;
+    node.querySelector('.city-response-finish-line').textContent = profile.line;
+    node.querySelector('.city-response-finish-detail').textContent = profile.detail;
+    node.dataset.response = response;
+    node.classList.remove('is-visible', 'is-pulse');
+    void node.offsetWidth;
+    node.classList.add('is-visible', 'is-pulse');
+    return true;
+  }
+
+  function renderAfterFinish(response, attempts = 0) {
+    if (render(response)) return;
+    if (attempts >= 8) return;
+    window.requestAnimationFrame(() => renderAfterFinish(response, attempts + 1));
+  }
+
+  window.addEventListener('relay:city-response', event => {
+    renderAfterFinish(event.detail?.response || 'CLEAN');
   });
-  if (document.body) observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
 })();
