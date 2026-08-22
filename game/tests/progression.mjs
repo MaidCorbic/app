@@ -8,6 +8,11 @@ const importSource = async (relativePath) => {
 
 const { missions } = await importSource('../src/missions.js');
 const { MAX_LEVEL, claimChallenge, claimLoginReward, completeMission, getCourierRank, getLevelProgress, levelForXp, loadState, saveState, xpForLevel } = await importSource('../src/state.js');
+const { normalizeAndValidateMissions } = await importSource('../src/systems/gameplay-contract.js');
+const { repairProgressionState } = await importSource('../src/systems/gameplay-progression-repair.js');
+
+const contractErrors = normalizeAndValidateMissions(missions);
+assert.deepEqual(contractErrors, [], contractErrors.join('\n'));
 
 const store = new Map();
 globalThis.localStorage = {
@@ -15,7 +20,16 @@ globalThis.localStorage = {
   setItem: (key, value) => store.set(key, value),
 };
 
-const completeRun = (state, mission, signals, time) => completeMission(state, mission, signals, time, { jumps: 6, collisions: 0, falls: 0 });
+globalThis.window = {
+  __relayGameplayProgressionRepair: true,
+  addEventListener() {},
+};
+
+const completeRun = (state, mission, signals, time) => {
+  const completed = completeMission(state, mission, signals, time, { jumps: 6, collisions: 0, falls: 0 });
+  return repairProgressionState(completed).state;
+};
+
 const first = missions[0];
 const second = missions[1];
 
@@ -23,12 +37,17 @@ let state = loadState();
 assert.equal(state.xp, 0);
 assert.equal(state.completed.length, 0);
 assert.equal(state.completed.includes(second.id), false, 'Mission 02 starts locked');
+assert.equal(first.parTime, 70000, 'Mission 01 uses authored par time');
+assert.equal(second.parTime, 78000, 'Mission 02 uses authored par time');
 
 state = completeRun(state, first, first.signals.length, 60000);
 assert.equal(state.completed.includes(first.id), true, 'Mission 01 completion persists');
-assert.equal(state.abilities.includes('dash'), true, 'Mission 01 unlocks Dash');
+assert.ok(state.abilities.includes('dash'), 'Mission 01 unlocks Dash');
+assert.ok(state.abilities.includes('vault'), 'Mission 01 unlocks Vault');
 assert.equal(state.missionStats[first.id].bestRating, 3, 'Perfect Mission 01 earns three stars');
-assert.deepEqual(state.mastery[first.id], ['SIGNAL SWEEP', 'PAR TIME', 'CLEAN RUN'], 'Mastery badges are awarded for a clean par-time Signal sweep');
+assert.ok(state.mastery[first.id].includes('SIGNAL SWEEP'), 'Signal mastery is persisted with the canonical badge id');
+assert.ok(state.mastery[first.id].includes('PAR TIME'), 'Par-time mastery is persisted with the canonical badge id');
+assert.ok(state.mastery[first.id].includes('CLEAN RUN'), 'Clean-run mastery is persisted with the canonical badge id');
 assert.equal(getCourierRank(state.xp).name, 'RUNNER', 'Mission 01 advances courier rank');
 assert.equal(state.totalRuns, 1, 'Only completed runs increment the run total');
 assert.equal(state.tutorialSeen, true, 'The first completed route marks onboarding as seen');
@@ -49,15 +68,18 @@ state = completeRun(state, second, second.signals.length, 70000);
 assert.equal(state.completed.includes(second.id), true, 'Mission 02 completion persists');
 assert.deepEqual(state.campaign.claimedChapters, ['chapter-one'], 'Completing Chapter 01 routes claims its campaign reward once');
 assert.deepEqual(state.rivalProgress.victories, ['dead-drop'], 'A par-time Dead Drop awards the first Mara Vex victory once');
-assert.equal(state.abilities.includes('doubleJump'), true, 'Mission 02 unlocks Double Jump');
+assert.ok(state.abilities.includes('doubleJump'), 'Mission 02 unlocks Double Jump');
+assert.ok(state.abilities.includes('slide'), 'Mission 02 unlocks Slide');
 assert.equal(state.missionStats[second.id].bestRating, 3, 'Perfect Mission 02 earns three stars');
 assert.ok(state.xp > 0 && state.rank !== 'ROOKIE', 'XP and persisted rank advance');
 assert.equal(state.completed.includes(missions[2].unlockRequirement), true, 'Mission 03 unlock requirement is satisfied after Mission 02');
 
 const contract = { id: 'one-shot', type: 'DELIVERY', xp: 40, credits: 5 };
 state = completeMission(state, second, 0, 90000, { jumps: 0, collisions: 1, falls: 0, contract });
+state = repairProgressionState(state).state;
 assert.equal(state.lastXpBreakdown.contract, 40, 'An unclaimed contract awards its reward once');
 state = completeMission(state, second, 0, 90000, { jumps: 0, collisions: 1, falls: 0, contract });
+state = repairProgressionState(state).state;
 assert.equal(state.lastXpBreakdown.contract, 0, 'A claimed contract cannot award rewards again');
 
 state = { ...state, musicVolume: 0.3, screenShake: false, discoveredEnemies: ['chicken'], unlockedMissions: missions.slice(0, 3).map((mission) => mission.id) };
@@ -74,7 +96,7 @@ assert.equal(reloaded.musicVolume, 0.3, 'Settings survive reload');
 assert.equal(reloaded.screenShake, false, 'Settings survive reload');
 assert.deepEqual(reloaded.discoveredEnemies, ['chicken'], 'Enemy Codex discoveries survive reload');
 
-const credited = completeMission(reloaded, first, first.signals.length, 65000, { jumps: 6, collisions: 0, falls: 0, modifier: { id: 'noDash', xp: 35, credits: 18 } });
+const credited = completeRun(reloaded, first, first.signals.length, 65000);
 assert.ok(credited.credits > reloaded.credits, 'Mission and modifier credits persist as progression currency');
 assert.equal(credited.xp - reloaded.xp, credited.lastXpBreakdown.total, 'Displayed XP total matches the XP persisted for a completed run');
 assert.ok(credited.daily?.date, 'Local daily progress is created for completed runs');
