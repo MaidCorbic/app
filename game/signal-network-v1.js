@@ -13,7 +13,6 @@ export const NODE_PROFILES = [
   { kind: 'LINK', label: 'NETWORK LINK', short: 'LINK', accent: 0xc8b5ff, css: '#c8b5ff', description: 'Synchronizes the district relay.', reward: 'NETWORK STABLE' },
 ];
 
-const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, Number(value) || 0));
 export const chooseNodeSignalIndices = length => {
   const count = Math.max(0, Number(length) || 0);
   if (count <= 3) return Array.from({ length: count }, (_, index) => index);
@@ -52,6 +51,23 @@ function persistentMissionState(missionId) {
   const all = readPersistent();
   const current = all[missionId] || { linked: [], stable: false };
   return { all, current };
+}
+
+function tutorialPresentationActive(scene) {
+  if (!scene) return false;
+  const presentationVisible = Boolean(scene.guides?.visible || scene.guideCompanions?.visible || scene.infoCard?.visible);
+  return Boolean(scene.firstTimeTutorial && presentationVisible);
+}
+
+function gameplayVisible(scene) {
+  if (!scene?.mission?.id) return false;
+  if (scene.finished || scene.cinematicActive || window.__relayCinematicLock) return false;
+  if (tutorialPresentationActive(scene)) return false;
+  const intro = document.getElementById('intro');
+  if (intro && !intro.classList.contains('hidden')) return false;
+  const preflight = document.getElementById('preflight');
+  if (preflight && !preflight.classList.contains('hidden')) return false;
+  return Boolean(scene.isActive?.() ?? true);
 }
 
 function nodeLabel(scene, node) {
@@ -121,19 +137,16 @@ function createNodeVisual(scene, node) {
   return node;
 }
 
-function drawLink(scene, from, to, active) {
+function drawLink(scene, from, to) {
   const beam = scene.add.graphics().setDepth(27);
-  beam.lineStyle(active ? 3 : 1, active ? 0xc8b5ff : 0x8df4ff, active ? .65 : .14);
+  beam.lineStyle(1, 0x8df4ff, .14);
   beam.lineBetween(from.position[0], from.position[1], to.position[0], to.position[1]);
-  if (active) {
-    scene.tweens.add({ targets: beam, alpha: { from: .22, to: .72 }, yoyo: true, repeat: -1, duration: 720 });
-  }
   return beam;
 }
 
 function pulseAt(scene, x, y, color, radius = 82) {
   const pulse = scene.add.circle(x, y, 12, color, .08).setStrokeStyle(2, color, .8).setDepth(31);
-  scene.tweens.add({ targets: pulse, radius: radius, alpha: 0, duration: 700, ease: 'Cubic.out', onComplete: () => pulse.destroy() });
+  scene.tweens.add({ targets: pulse, scale: radius / 12, alpha: 0, duration: 700, ease: 'Cubic.out', onComplete: () => pulse.destroy() });
 }
 
 function revealSignals(scene) {
@@ -151,8 +164,8 @@ function revealSignals(scene) {
 }
 
 function applyPowerSurge(scene) {
-  if (typeof scene.ammo === 'number' && typeof scene.ammoMax === 'number') scene.ammo = Math.min(scene.ammoMax, scene.ammoMax);
-  if (typeof scene.energy === 'number' && typeof scene.energyMax === 'number') scene.energy = Math.min(scene.energyMax, scene.energyMax);
+  if (typeof scene.ammo === 'number' && typeof scene.ammoMax === 'number') scene.ammo = scene.ammoMax;
+  if (typeof scene.energy === 'number' && typeof scene.energyMax === 'number') scene.energy = scene.energyMax;
   scene.blasterCooldown = 0;
   scene.swordCooldown = 0;
   scene.boostCooldown = 0;
@@ -201,7 +214,8 @@ function completeNetwork(scene, state) {
   state.all[scene.mission.id] = state.current;
   writePersistent(state.all);
   scene.__signalNetworkStable = true;
-  const [goalX, goalY] = [scene.mission.goal?.x || scene.goal?.x || scene.player?.x || 0, scene.mission.goal?.y || scene.goal?.y || scene.player?.y || 0];
+  const goalX = scene.mission.goal?.x || scene.goal?.x || scene.player?.x || 0;
+  const goalY = scene.mission.goal?.y || scene.goal?.y || scene.player?.y || 0;
   const burst = scene.add.circle(goalX, goalY, 18, 0xc8b5ff, .12).setStrokeStyle(2, 0xeaffff, .85).setDepth(28);
   scene.tweens.add({ targets: burst, scale: 7, alpha: 0, duration: 1150, onComplete: () => burst.destroy() });
   toast('NETWORK STABLE // DISTRICT LINKED', '#eaffff', 1850);
@@ -209,8 +223,7 @@ function completeNetwork(scene, state) {
 }
 
 function tryActivate(scene, node) {
-  if (!scene?.player || scene.finished || scene.cinematicActive || window.__relayCinematicLock || scene.firstTimeTutorial) return false;
-  if (node.active) return false;
+  if (!gameplayVisible(scene) || node.active) return false;
   const distance = Phaser.Math.Distance.Between(scene.player.x, scene.player.y, node.position[0], node.position[1]);
   if (distance > 120) {
     toast('MOVE CLOSER TO RELAY NODE', node.profile.css, 900);
@@ -218,7 +231,6 @@ function tryActivate(scene, node) {
   }
 
   setNodeActive(scene, node);
-  const state = persistentMissionState(node.missionId);
   persistActivation(node);
   if (node.profile.kind === 'SCAN') revealSignals(scene);
   if (node.profile.kind === 'BOOST') applyPowerSurge(scene);
@@ -231,6 +243,15 @@ function tryActivate(scene, node) {
   return true;
 }
 
+function applyVisibility(scene, visible) {
+  scene.__signalNetworkNodes?.forEach(node => {
+    node.container?.setVisible?.(visible);
+    node.text?.setVisible?.(visible);
+    if (node.hit?.input) node.hit.input.enabled = visible;
+  });
+  scene.__signalNetworkLinks?.forEach(link => link?.setVisible?.(visible));
+}
+
 function bindScene(scene) {
   if (!scene?.mission?.id || scene.__signalNetworkV1Bound) return;
   scene.__signalNetworkV1Bound = true;
@@ -239,11 +260,11 @@ function bindScene(scene) {
   const model = createNetworkModel(scene.mission.id, scene.mission.signals || []);
   scene.__signalNetworkNodes = model.map(node => createNodeVisual(scene, node));
   scene.__signalNetworkLinks = [];
-  for (let i = 1; i < scene.__signalNetworkNodes.length; i += 1) {
-    scene.__signalNetworkLinks.push(drawLink(scene, scene.__signalNetworkNodes[i - 1], scene.__signalNetworkNodes[i], false));
-  }
+  for (let i = 1; i < scene.__signalNetworkNodes.length; i += 1) scene.__signalNetworkLinks.push(drawLink(scene, scene.__signalNetworkNodes[i - 1], scene.__signalNetworkNodes[i]));
+  applyVisibility(scene, gameplayVisible(scene));
 
   const onKey = () => {
+    if (!gameplayVisible(scene)) return;
     let nearest = null;
     let nearestDistance = Infinity;
     for (const node of scene.__signalNetworkNodes) {
@@ -256,20 +277,15 @@ function bindScene(scene) {
   scene.input?.keyboard?.on?.('keydown-E', onKey);
   scene.__signalNetworkKeyHandler = onKey;
 
-  const updateLinks = () => {
-    scene.__signalNetworkLinks.forEach((beam, index) => beam?.setAlpha?.(scene.__signalNetworkNodes[index]?.active && scene.__signalNetworkNodes[index + 1]?.active ? .95 : .16));
-  };
-  scene.__signalNetworkUpdateLinks = updateLinks;
-
   scene.events?.once?.('shutdown', () => destroyScene(scene));
   scene.events?.once?.('destroy', () => destroyScene(scene));
-  updateLinks();
 
   scene.__signalNetworkRuntimeTick = window.setInterval(() => {
     if (!scene.sys?.isActive?.()) return;
-    if (scene.finished || scene.cinematicActive || window.__relayCinematicLock || scene.firstTimeTutorial) return;
+    const visible = gameplayVisible(scene);
+    applyVisibility(scene, visible);
+    if (!visible) return;
     scene.__signalNetworkNodes.forEach(node => nodeLabel(scene, node));
-    updateLinks();
   }, 180);
 
   if (!window.__relaySignalNetworkV1) window.__relaySignalNetworkV1 = api;
