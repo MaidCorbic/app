@@ -4,6 +4,7 @@ import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
+import './collapse-protocol-v1.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -35,6 +36,7 @@ import './city-response-v1.js';
 // UPDATE 17 — one authoritative gameplay intro runtime.
 import './gameplay-intro-final-v1.js';
 import './gameplay-core-v1.js';
+import './dash-runtime-bridge-v1.js';
 import './player-death-animation-v1.js';
 import './dynamic-time-cycle-v1.js';
 import './src/systems/city-atmosphere-cleanup-v1.js';
@@ -62,3 +64,6 @@ import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
 // Additive presentation layer; loaded last so core gameplay ownership remains unchanged.
 import './dynamic-environment-reactions-v1.js';
+// UPDATE 21 — additive world interaction; uses existing barrier ownership only.
+import './collapse-protocol-v1.js';
+import './collapse-protocol-contact-bridge-v1.js';
