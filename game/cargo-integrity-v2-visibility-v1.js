@@ -1,6 +1,6 @@
 /* UPDATE 18 V2 — Cargo visibility gate.
-   Cargo HUD exists as a reusable runtime, but it must only be visible during the active post-tutorial run.
-   This layer owns presentation visibility only; it does not change cargo/gameplay state.
+   Cargo HUD stays completely hidden on Home, preflight and tutorial/cinematic presentation.
+   It becomes visible only when the real post-tutorial run is active.
 */
 (() => {
   if (window.__relayCargoVisibilityV1) return;
@@ -11,15 +11,33 @@
   const getRoot = () => document.getElementById(ROOT_ID);
   const getScene = () => window.__relayRunnerScene || null;
 
+  function tutorialIsActive(scene) {
+    if (!scene) return false;
+
+    // firstTimeTutorial alone is not a reliable completion marker in the current
+    // runtime because the tutorial state may remain true while its presentation
+    // objects are already dismissed. Treat the visible tutorial presentation as
+    // authoritative: while guides/companions/info card are visible, keep cargo hidden.
+    const guidesVisible = Boolean(scene.guides?.visible);
+    const companionsVisible = Boolean(scene.guideCompanions?.visible);
+    const infoVisible = Boolean(scene.infoCard?.visible);
+    const tutorialPresentationVisible = guidesVisible || companionsVisible || infoVisible;
+
+    return Boolean(scene.firstTimeTutorial && tutorialPresentationVisible);
+  }
+
   function shouldShow(scene) {
     if (!scene?.mission?.id) return false;
     if (scene.finished) return false;
     if (scene.cinematicActive || window.__relayCinematicLock) return false;
-    if (scene.firstTimeTutorial) return false;
+    if (tutorialIsActive(scene)) return false;
+
     const intro = document.getElementById('intro');
     if (intro && !intro.classList.contains('hidden')) return false;
+
     const preflight = document.getElementById('preflight');
     if (preflight && !preflight.classList.contains('hidden')) return false;
+
     return Boolean(scene.isActive?.() ?? true);
   }
 
