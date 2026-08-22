@@ -3,6 +3,7 @@ export const RELAY_FAQ = [
   ['How do I complete a mission?', 'Follow the mission objective, collect the required signals and reach the delivery beacon. When complete, use NEXT MISSION to continue.'],
   ['How do I move to the next mission?', 'After successfully completing a mission, press NEXT MISSION. The game loads the next level.'],
   ['What do SWORD, DASH and BUILD do?', 'SWORD is for combat, DASH helps you avoid hazards quickly, and BUILD activates available construction abilities.'],
+  ['What is City Pulse?', 'City Pulse adds timed environmental windows to active missions. Read the OPEN rhythm and pass through the pulse gate for FLOW SYNC; missing a window has no movement or mission penalty.'],
   ['Can I play on a phone?', 'Yes. The game has touch controls and landscape mode is recommended for the clearest view.'],
   ['Why is there no sound?', 'Mobile browsers may block autoplay audio. Tap the screen once to unlock audio, and check your device volume and mute settings.'],
   ['Is my progress saved?', 'Mission progress and game data use the existing save system. Avoid clearing browser data if you want to keep local progress.'],
@@ -12,14 +13,14 @@ export const RELAY_FAQ = [
 ];
 
 export const LATEST_UPDATE = {
-  version: 'LATEST UPDATE // GAMEPLAY',
-  title: 'ENEMY AWARENESS',
+  version: 'UPDATE 23 // CITY PULSE',
+  title: 'CITY PULSE',
   items: [
-    'Enemy AI now uses one movement controller for smoother, frame-rate-safe movement.',
-    'Enemies recognize platform position and only chase when the route is physically reachable.',
-    'Enemy awareness and combat difficulty now scale progressively across all seven missions.',
-    'Platform combat, ranged attacks and enemy abilities remain active without forcing enemies through level geometry.',
-    'Egg Hazard now uses a ballistic arc with target prediction and rotation that follows its real flight direction.',
-    'Home briefing, FAQ and the latest update remain available directly from the title screen.'
+    'The city now runs on timed environmental pulse windows during active missions.',
+    'Three non-physical pulse gates create readable OPEN, WARNING and CLOSED phases without changing player physics.',
+    'Passing an OPEN window produces FLOW SYNC; chaining all three produces PERFECT FLOW.',
+    'Missing a window resets the flow streak but never blocks the route or damages the player.',
+    'Pulse gates remain hidden during the tutorial and cinematic states and are cleaned up with the gameplay scene.',
+    'The system is additive and leaves movement, missions, save/progression, Cargo, Signals, City Response and Collapse ownership unchanged.'
   ]
 };

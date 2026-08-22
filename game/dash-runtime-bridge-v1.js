@@ -1,12 +1,15 @@
-/* UPDATE 21 SUPPORT — DASH RUNTIME BRIDGE
-   Restores the actual physical dash response behind the existing gameplay dash event.
-   Additive only: does not replace RunnerScene movement; it supplies dash velocity when the
-   existing input surface emits relay:new-gameplay-dash.
+/* UPDATE 29 — DASH RUNTIME BRIDGE FINAL
+   Restores the actual physical dash response behind the gameplay dash event.
+   Binding is lazy as well as lifecycle-driven so the runtime cannot miss scene boot order.
 */
 const SPEED = 670;
-const DURATION = 145;
+const DURATION = 180;
 const COOLDOWN = 620;
 const STATE_KEY = '__relayDashRuntimeV1';
+
+function currentScene() {
+  return window.__relayRunnerScene || window.RelayRuntime?.scene?.() || null;
+}
 
 function validScene(scene) {
   return !!scene?.player && !scene.finished && !scene.respawning && !scene.cinematicActive && !window.__relayCinematicLock && !scene.firstTimeTutorial;
@@ -30,6 +33,7 @@ function finishDash(scene, expectedRun) {
   }
   scene.player?.setTexture?.(scene.player.body?.velocity?.y < -40 ? 'runner-jump' : 'runner-idle');
   scene.events?.emit?.('relay:dash-complete');
+  window.dispatchEvent(new CustomEvent('relay:dash-complete', { detail: { scene } }));
 }
 
 function performDash(scene) {
@@ -49,33 +53,61 @@ function performDash(scene) {
   scene.player?.body?.setMaxVelocity?.(SPEED, scene.player.body.maxVelocity?.y || 1120);
   scene.events?.emit?.('relay:dash-start', { direction, speed: SPEED, duration: DURATION });
   window.dispatchEvent(new CustomEvent('relay:dash-runtime-applied', { detail: { scene, direction, speed: SPEED, duration: DURATION } }));
-
+  try { scene.playerCue?.('DASH', '#8df4ff'); } catch {}
   scene.time?.delayedCall?.(DURATION, () => finishDash(scene, token));
   return true;
 }
 
 function bind(scene) {
-  if (!scene || scene.__relayDashRuntimeBound) return;
+  if (!scene || scene.__relayDashRuntimeBound) return !!scene;
   scene.__relayDashRuntimeBound = true;
-  scene[STATE_KEY] = { active: false, lastAt: -Infinity, token: 0 };
-  const handler = () => performDash(scene);
+  scene[STATE_KEY] = scene[STATE_KEY] || { active: false, lastAt: -Infinity, token: 0 };
+  const handler = () => {
+    const activeScene = currentScene() || scene;
+    if (activeScene !== scene && !activeScene.__relayDashRuntimeBound) bind(activeScene);
+    performDash(activeScene);
+  };
   scene.__relayDashRuntimeDashHandler = handler;
   window.addEventListener('relay:new-gameplay-dash', handler, { passive: true });
   scene.events?.once?.('shutdown', () => {
     window.removeEventListener('relay:new-gameplay-dash', handler);
     scene.__relayDashRuntimeBound = false;
+    scene.__relayDashRuntimeDashHandler = null;
+    const state = scene[STATE_KEY];
+    if (state) state.active = false;
   });
   scene.events?.once?.('destroy', () => {
     window.removeEventListener('relay:new-gameplay-dash', handler);
     scene.__relayDashRuntimeBound = false;
+    scene.__relayDashRuntimeDashHandler = null;
   });
+  return true;
+}
+
+function ensureBound() {
+  const scene = currentScene();
+  if (!scene) return null;
+  if (!scene.__relayDashRuntimeBound) bind(scene);
+  return scene;
 }
 
 if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
   window.__relayDashRuntimeBridgeV1 = true;
-  window.addEventListener('relay:runner-scene-ready', event => bind(event.detail?.scene), { passive: true });
+
+  // Preferred lifecycle paths.
+  window.addEventListener('relay:runner-scene-ready', event => bind(event.detail?.scene || currentScene()), { passive: true });
+  window.addEventListener('relay:gameplay-core-ready', () => ensureBound(), { passive: true });
+  window.addEventListener('relay:city-pulse-ready', () => ensureBound(), { passive: true });
+
+  // Critical fallback: if module load happened before Phaser created RunnerScene,
+  // the first actual dash input binds to the current scene immediately.
+  window.addEventListener('relay:new-gameplay-dash', () => ensureBound(), { passive: true });
+
+  // If the scene already exists when this module is evaluated, bind immediately.
+  ensureBound();
+
   window.__relayDashRuntimeDebug = () => {
-    const scene = window.__relayRunnerScene;
+    const scene = ensureBound();
     const state = scene?.[STATE_KEY];
     const result = {
       runtimeLoaded: true,
@@ -86,6 +118,8 @@ if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
       dashBound: !!scene?.__relayDashRuntimeBound,
       dashActive: !!state?.active,
       dashVelocityX: Math.round(scene?.player?.body?.velocity?.x ?? 0),
+      dashCooldownMs: COOLDOWN,
+      dashDurationMs: DURATION,
     };
     console.table(result);
     return result;
