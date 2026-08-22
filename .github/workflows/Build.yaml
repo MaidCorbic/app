@@ -16,7 +16,7 @@ jobs:
       components: ${{ steps.diploi-meta.outputs.components }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - id: diploi-meta
         name: Diploi meta
         uses: diploi/action-components@v1.8
@@ -30,7 +30,7 @@ jobs:
         include: ${{ fromJSON(needs.define-components.outputs.components) }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Diploi build
         uses: diploi/action-build@v1.12
         with: ${{ matrix }}
