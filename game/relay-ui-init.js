@@ -2,6 +2,7 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 import './gameplay-event-hud-v2.css';
 import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
+import './signal-network-v1.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -23,6 +24,9 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape') { pa
 // UPDATE 18 — additive cargo integrity runtime. Keeps existing gameplay ownership authoritative.
 import './cargo-integrity-v2.js';
 import './cargo-integrity-v2-visibility-v1.js';
+
+// UPDATE 19 — additive signal network. Existing gameplay systems remain authoritative.
+import './signal-network-v1.js';
 
 // UPDATE 17 — one authoritative gameplay intro runtime.
 import './gameplay-intro-final-v1.js';
