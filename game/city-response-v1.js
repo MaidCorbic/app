@@ -207,10 +207,10 @@ function tick() {
   if (scene?.mission?.id) bindScene(scene);
 }
 
-if (!window.__relayCityResponseV1) {
+if (typeof window !== 'undefined' && !window.__relayCityResponseV1) {
   window.__relayCityResponseV1 = true;
   window.addEventListener('relay:mission-complete', handleMissionComplete, { passive: true });
-  window.addEventListener('relay:signal-network-complete', event => {
+  window.addEventListener('relay:signal-network-complete', () => {
     const scene = window.__relayRunnerScene;
     if (scene) scene.__signalNetworkStable = true;
   }, { passive: true });
