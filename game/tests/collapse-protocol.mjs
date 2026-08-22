@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { COLLAPSE_CONFIG, withinRange, pickNearestBarrier, pickChainBarrier } from '../collapse-protocol-v1.js';
 
-assert.equal(COLLAPSE_CONFIG.maxDashRangeX, 150);
-assert.equal(COLLAPSE_CONFIG.maxDashRangeY, 92);
+assert.equal(COLLAPSE_CONFIG.maxDashRangeX, 300);
+assert.equal(COLLAPSE_CONFIG.maxDashRangeY, 140);
 assert.equal(withinRange({ x: 100, y: 200 }, { x: 210, y: 250 }, 120, 60), true);
 assert.equal(withinRange({ x: 100, y: 200 }, { x: 250, y: 200 }, 120, 60), false);
 
