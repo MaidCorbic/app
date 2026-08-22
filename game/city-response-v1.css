@@ -1,26 +1,68 @@
-/* UPDATE 20 — CITY RESPONSE V1
-   Presentation-only. No persistent HUD footprint on Home/tutorial.
+/* UPDATE 20 — CITY RESPONSE V2
+   Gameplay-only reaction feedback. Finish UI remains untouched.
 */
-#cityResponseV1{position:fixed;left:50%;top:18px;width:min(360px,calc(100vw - 32px));transform:translate(-50%,-12px) scale(.98);opacity:0;visibility:hidden;display:block!important;pointer-events:none!important;z-index:10001!important;color:#eaffff;font:800 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;transition:opacity .18s ease,transform .22s cubic-bezier(.2,.75,.2,1),visibility 0s linear .22s}
-#cityResponseV1.is-visible{opacity:1;visibility:visible;transform:translate(-50%,0) scale(1);transition:opacity .18s ease,transform .22s cubic-bezier(.2,.75,.2,1),visibility 0s}
-#cityResponseV1 .city-response-card{position:relative;overflow:hidden;padding:10px 13px 11px;border:1px solid color-mix(in srgb,var(--city-response-accent) 62%,transparent);border-radius:11px;background:linear-gradient(145deg,rgba(4,12,23,.985),rgba(2,7,14,.985));box-shadow:0 18px 46px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.06),0 0 34px color-mix(in srgb,var(--city-response-accent) 16%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-#cityResponseV1 .city-response-card::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,color-mix(in srgb,var(--city-response-accent) 10%,transparent),transparent 45%,rgba(255,255,255,.035));pointer-events:none}
-#cityResponseV1 .city-response-kicker,#cityResponseV1 .city-response-title,#cityResponseV1 .city-response-line,#cityResponseV1 .city-response-detail{position:relative;z-index:1}
-#cityResponseV1 .city-response-kicker{font-size:7px;letter-spacing:.22em;opacity:.62}.city-response-title{margin-top:4px;font-size:12px;letter-spacing:.09em;color:var(--city-response-accent);text-shadow:0 0 14px color-mix(in srgb,var(--city-response-accent) 28%,transparent)}
-#cityResponseV1 .city-response-line{margin-top:3px;font-size:9px;letter-spacing:.06em}#cityResponseV1 .city-response-detail{margin-top:4px;font-size:7px;letter-spacing:.08em;opacity:.66}
+#cityResponseV1{
+  position:fixed;
+  left:50%;
+  top:18px;
+  width:min(360px,calc(100vw - 32px));
+  transform:translate(-50%,-12px) scale(.98);
+  opacity:0;
+  visibility:hidden;
+  display:block!important;
+  pointer-events:none!important;
+  z-index:10001!important;
+  color:#eaffff;
+  font:800 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
+  transition:opacity .18s ease,transform .22s cubic-bezier(.2,.75,.2,1),visibility 0s linear .22s;
+}
+#cityResponseV1.is-visible{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%,0) scale(1);
+  transition:opacity .18s ease,transform .22s cubic-bezier(.2,.75,.2,1),visibility 0s;
+}
+#cityResponseV1 .city-response-card{
+  position:relative;
+  overflow:hidden;
+  padding:10px 13px 11px;
+  border:1px solid color-mix(in srgb,var(--city-response-accent) 62%,transparent);
+  border-radius:11px;
+  background:linear-gradient(145deg,rgba(4,12,23,.985),rgba(2,7,14,.985));
+  box-shadow:0 18px 46px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.06),0 0 34px color-mix(in srgb,var(--city-response-accent) 16%,transparent);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+#cityResponseV1 .city-response-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(110deg,color-mix(in srgb,var(--city-response-accent) 10%,transparent),transparent 45%,rgba(255,255,255,.035));
+  pointer-events:none;
+}
+#cityResponseV1 .city-response-kicker,
+#cityResponseV1 .city-response-title,
+#cityResponseV1 .city-response-line,
+#cityResponseV1 .city-response-detail{position:relative;z-index:1}
+#cityResponseV1 .city-response-kicker{font-size:7px;letter-spacing:.22em;opacity:.62}
+#cityResponseV1 .city-response-title{margin-top:4px;font-size:12px;letter-spacing:.09em;color:var(--city-response-accent);text-shadow:0 0 14px color-mix(in srgb,var(--city-response-accent) 28%,transparent)}
+#cityResponseV1 .city-response-line{margin-top:3px;font-size:9px;letter-spacing:.06em}
+#cityResponseV1 .city-response-detail{margin-top:4px;font-size:7px;letter-spacing:.08em;opacity:.66}
 #cityResponseV1.is-burst .city-response-card{animation:cityResponseBurst .48s ease-out}
-@keyframes cityResponseBurst{0%{transform:translateY(5px) scale(.97);filter:brightness(.9)}45%{transform:translateY(0) scale(1.01);filter:brightness(1.28)}100%{transform:translateY(0) scale(1);filter:brightness(1)}}
-
-/* Finish: response is visual-only. Existing #again/#nextMission remain the only actions. */
-#finish{pointer-events:auto!important;z-index:70!important}
-#finish .outcome{pointer-events:auto!important;position:relative!important;z-index:71!important}
-#finish #again,#finish #nextMission{pointer-events:auto!important;position:relative!important;z-index:100!important;touch-action:manipulation!important;cursor:pointer!important}
-#cityResponseFinishV2{display:block;position:relative;z-index:1;width:min(520px,100%);margin:14px auto 12px;padding:11px 14px 12px;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--city-response-finish-accent) 58%,transparent);border-radius:12px;background:linear-gradient(145deg,rgba(4,12,23,.97),rgba(2,7,14,.97));color:#eaffff;text-align:left;box-shadow:0 0 26px color-mix(in srgb,var(--city-response-finish-accent) 14%,transparent),inset 0 1px 0 rgba(255,255,255,.05);overflow:hidden;pointer-events:none!important;user-select:none}
-#cityResponseFinishV2::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--city-response-finish-accent);box-shadow:0 0 16px var(--city-response-finish-accent);pointer-events:none}
-#cityResponseFinishV2 .city-response-finish-kicker,#cityResponseFinishV2 .city-response-finish-title,#cityResponseFinishV2 .city-response-finish-line,#cityResponseFinishV2 .city-response-finish-detail{position:relative;z-index:1;pointer-events:none}
-#cityResponseFinishV2 .city-response-finish-kicker{font:700 7px/1.2 ui-monospace,monospace;letter-spacing:.2em;opacity:.52}
-#cityResponseFinishV2 .city-response-finish-title{margin-top:5px;color:var(--city-response-finish-accent);font:900 16px/1.1 ui-monospace,monospace;letter-spacing:.08em}.city-response-finish-line{margin-top:4px;font:800 9px/1.25 ui-monospace,monospace;letter-spacing:.07em}.city-response-finish-detail{margin-top:5px;font:600 7px/1.35 ui-monospace,monospace;letter-spacing:.05em;opacity:.62}
-#cityResponseFinishV2.is-pulse{animation:cityFinishPulse .7s ease-out}
-@keyframes cityFinishPulse{0%{transform:translateY(4px) scale(.98);opacity:.2;filter:brightness(.8)}45%{transform:translateY(0) scale(1.01);opacity:1;filter:brightness(1.25)}100%{transform:translateY(0) scale(1);opacity:1;filter:brightness(1)}}
-@media(max-width:700px){#cityResponseV1{top:max(10px,env(safe-area-inset-top,0px));width:min(290px,calc(100vw - 20px))}#cityResponseV1 .city-response-card{padding:8px 10px 9px;border-radius:9px}#cityResponseV1 .city-response-kicker{font-size:6px}#cityResponseV1 .city-response-title{font-size:10px}#cityResponseV1 .city-response-line{font-size:7.5px}#cityResponseV1 .city-response-detail{font-size:6px}#cityResponseFinishV2{width:100%;padding:9px 11px 10px;margin:10px auto}}
-@media(prefers-reduced-motion:reduce){#cityResponseV1{transition:none!important}#cityResponseV1.is-burst .city-response-card,#cityResponseFinishV2.is-pulse{animation:none!important}}
+@keyframes cityResponseBurst{
+  0%{transform:translateY(5px) scale(.97);filter:brightness(.9)}
+  45%{transform:translateY(0) scale(1.01);filter:brightness(1.28)}
+  100%{transform:translateY(0) scale(1);filter:brightness(1)}
+}
+@media(max-width:700px){
+  #cityResponseV1{top:max(10px,env(safe-area-inset-top,0px));width:min(290px,calc(100vw - 20px))}
+  #cityResponseV1 .city-response-card{padding:8px 10px 9px;border-radius:9px}
+  #cityResponseV1 .city-response-kicker{font-size:6px}
+  #cityResponseV1 .city-response-title{font-size:10px}
+  #cityResponseV1 .city-response-line{font-size:7.5px}
+  #cityResponseV1 .city-response-detail{font-size:6px}
+}
+@media(prefers-reduced-motion:reduce){
+  #cityResponseV1{transition:none!important}
+  #cityResponseV1.is-burst .city-response-card{animation:none!important}
+}
