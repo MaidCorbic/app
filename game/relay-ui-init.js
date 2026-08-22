@@ -19,6 +19,9 @@ document.querySelectorAll('[data-relay-info]').forEach(button => button.addEvent
 document.addEventListener('click', event => { const question = event.target.closest('.relay-faq-question'); if (question) question.closest('.relay-faq-item')?.classList.toggle('open'); if (event.target.closest('[data-relay-close]') || event.target === panel) { panel?.classList.add('hidden'); panel?.classList.remove('relay-update-mode'); } });
 document.addEventListener('keydown', event => { if (event.key === 'Escape') { panel?.classList.add('hidden'); panel?.classList.remove('relay-update-mode'); } });
 
+// UPDATE 18 — additive cargo integrity runtime. Keeps existing gameplay ownership authoritative.
+import './cargo-integrity-v2.js';
+
 // UPDATE 17 — one authoritative gameplay intro runtime.
 import './gameplay-intro-final-v1.js';
 import './gameplay-core-v1.js';
