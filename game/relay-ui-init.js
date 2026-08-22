@@ -1,6 +1,6 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 import './src/tutorial-map-v1.js';
-import './tutorial-onboarding-v2.js';
+import './tutorial-onboarding-v3.js';
 import './gameplay-event-hud-v2.css';
 import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
