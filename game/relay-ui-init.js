@@ -5,9 +5,12 @@ import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
 import './collapse-protocol-v1.css';
+import './city-pulse-v1.css';
 
 // UPDATE 22 — shared lifecycle/event adapter. Additive only.
 import './relay-runtime-kernel-v1.js';
+// UPDATE 23 — city timing layer. Non-physical and additive.
+import './city-pulse-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
