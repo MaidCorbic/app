@@ -151,14 +151,20 @@ function getMissionDistrict(scene) {
   return String(scene?.mission?.district || scene?.mission?.districtId || '').trim() || null;
 }
 
+function getPackageCondition(scene) {
+  const value = scene?.packageCondition;
+  return Number.isFinite(Number(value)) ? Number(value) : 100;
+}
+
 function handleMissionComplete(event) {
   const scene = event?.detail?.scene;
   const mission = scene?.mission;
   const district = getMissionDistrict(scene);
-  if (!scene || !mission?.id || !district) return;
+  if (!scene || !mission?.id || !district || scene.__cityResponseRecorded) return;
+  scene.__cityResponseRecorded = true;
 
   const networkLinked = Boolean(scene.__signalNetworkStable || event.detail?.networkLinked);
-  const packageCondition = safeNumber(scene.packageCondition ?? scene.package?.condition === true ? 100 : scene.packageCondition ?? 100);
+  const packageCondition = getPackageCondition(scene);
   const response = classifyResponse({
     packageCondition,
     networkLinked,
@@ -203,12 +209,10 @@ function tick() {
 
 if (!window.__relayCityResponseV1) {
   window.__relayCityResponseV1 = true;
-  root();
   window.addEventListener('relay:mission-complete', handleMissionComplete, { passive: true });
   window.addEventListener('relay:signal-network-complete', event => {
     const scene = window.__relayRunnerScene;
     if (scene) scene.__signalNetworkStable = true;
-    handleMissionComplete({ detail: { scene, missionId: event.detail?.missionId, networkLinked: true } });
   }, { passive: true });
   window.setInterval(tick, 300);
 }
