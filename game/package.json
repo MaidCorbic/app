@@ -15,6 +15,7 @@
     "test:enemy-intel": "node tests/enemy-intel.mjs",
     "test:cargo-integrity": "node tests/cargo-integrity.mjs",
     "test:signal-network": "node tests/signal-network.mjs",
+    "test:city-response": "node tests/city-response.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {
