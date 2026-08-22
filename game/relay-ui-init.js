@@ -67,3 +67,6 @@ import './dynamic-environment-reactions-v1.js';
 // UPDATE 21 — additive world interaction; uses existing barrier ownership only.
 import './collapse-protocol-v1.js';
 import './collapse-protocol-contact-bridge-v1.js';
+
+// Gameplay/mobile repair layer: normalizes mission contracts and owns the mobile presentation/input boundary.
+import './src/systems/gameplay-mobile-hud-repair.js';
