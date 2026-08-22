@@ -4,6 +4,7 @@ import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
+import './collapse-protocol-v1.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -62,3 +63,5 @@ import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
 // Additive presentation layer; loaded last so core gameplay ownership remains unchanged.
 import './dynamic-environment-reactions-v1.js';
+// UPDATE 21 — additive world interaction; uses existing barrier ownership only.
+import './collapse-protocol-v1.js';
