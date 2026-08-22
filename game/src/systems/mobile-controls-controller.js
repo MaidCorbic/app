@@ -16,13 +16,16 @@ const ACTION_LABELS = {
   gadget1: 'GEAR — 3'
 };
 
+// Phaser's keyboard manager listens on the document target. Dispatching only on
+// window makes a synthetic mobile key invisible to the real gameplay input path.
 const emitKey = (key, type) => {
-  window.dispatchEvent(new KeyboardEvent(type, {
+  const event = new KeyboardEvent(type, {
     key,
     code: key === ' ' ? 'Space' : key.length === 1 ? `Key${key.toUpperCase()}` : key,
     bubbles: true,
     cancelable: true
-  }));
+  });
+  document.dispatchEvent(event);
 };
 
 if (!document.getElementById('relay-mobile-controls-controller-style')) {
@@ -86,6 +89,25 @@ if (!document.getElementById('relay-mobile-controls-controller-style')) {
       line-height: 1;
       letter-spacing: .45px;
     }
+    #relayMobileSettings {
+      position: fixed !important;
+      z-index: 205 !important;
+      right: max(10px, env(safe-area-inset-right, 0px) + 8px) !important;
+      bottom: max(86px, env(safe-area-inset-bottom, 0px) + 82px) !important;
+      width: 52px !important;
+      height: 38px !important;
+      padding: 0 !important;
+      border: 1px solid rgba(141,244,255,.55) !important;
+      border-radius: 9px !important;
+      background: linear-gradient(145deg,rgba(8,24,42,.97),rgba(3,10,19,.98)) !important;
+      color: #8df4ff !important;
+      box-shadow: 0 0 18px rgba(25,200,245,.18), inset 0 1px rgba(255,255,255,.05) !important;
+      font: 900 7px/1 'DM Mono',monospace !important;
+      letter-spacing: .5px !important;
+      pointer-events: auto !important;
+      touch-action: manipulation !important;
+    }
+    #relayMobileSettings:active { transform: translateY(1px) scale(.98); }
     @media (max-width: 380px) {
       body.is-touch .mobile-controls {
         --relay-touch-size: 40px;
@@ -109,6 +131,7 @@ if (!document.getElementById('relay-mobile-controls-controller-style')) {
         width: calc(var(--relay-touch-size) * 3 + 6px) !important;
         max-width: calc(100vw - 80px) !important;
       }
+      #relayMobileSettings { bottom: max(76px, env(safe-area-inset-bottom, 0px) + 72px) !important; }
     }
     @media (orientation: landscape) {
       body.is-touch .mobile-actions {
@@ -117,6 +140,7 @@ if (!document.getElementById('relay-mobile-controls-controller-style')) {
         width: calc(var(--relay-touch-size) * 6 + 20px) !important;
         max-width: calc(100vw - 96px) !important;
       }
+      #relayMobileSettings { bottom: max(66px, env(safe-area-inset-bottom, 0px) + 62px) !important; }
     }
     @media (max-height: 480px) and (orientation: landscape) {
       body.is-touch .mobile-controls {
@@ -134,6 +158,7 @@ if (!document.getElementById('relay-mobile-controls-controller-style')) {
         height: 36px !important;
         margin: -18px 0 0 -18px !important;
       }
+      #relayMobileSettings { bottom: max(58px, env(safe-area-inset-bottom, 0px) + 54px) !important; }
     }
     @media (max-height: 360px) and (orientation: landscape) {
       body.is-touch .mobile-controls {
@@ -150,6 +175,7 @@ if (!document.getElementById('relay-mobile-controls-controller-style')) {
         height: 32px !important;
         margin: -16px 0 0 -16px !important;
       }
+      #relayMobileSettings { bottom: max(50px, env(safe-area-inset-bottom, 0px) + 46px) !important; }
     }
   `;
   document.head.appendChild(style);
@@ -162,11 +188,35 @@ function isTouchDevice() {
     || matchMedia('(hover: none)').matches;
 }
 
+function openMobileSettings() {
+  const pause = document.getElementById('pauseMenu');
+  const pauseButton = document.getElementById('pause');
+  const settingsTab = document.querySelector('#pauseMenu [data-tab="settings"]');
+  if (!pause || !pauseButton || !settingsTab) return;
+  if (pause.classList.contains('hidden')) pauseButton.click();
+  window.setTimeout(() => settingsTab.click(), 0);
+}
+
+function ensureSettingsButton() {
+  if (!isTouchDevice() || document.getElementById('relayMobileSettings')) return;
+  const game = document.getElementById('game');
+  if (!game) return;
+  const button = document.createElement('button');
+  button.id = 'relayMobileSettings';
+  button.type = 'button';
+  button.setAttribute('aria-label', 'Open mobile settings');
+  button.textContent = 'SETTINGS';
+  button.addEventListener('pointerdown', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    openMobileSettings();
+  }, { passive: false });
+  game.appendChild(button);
+}
+
 function bindControls(controls) {
   if (!controls || !isTouchDevice() || controls.dataset.mobileControlsOwner === 'controller') return false;
 
-  // main.js has legacy pointer listeners. Cloning once removes those listeners while
-  // preserving the existing DOM/CSS hooks and preventing duplicate touch handlers.
   const cleanControls = controls.cloneNode(true);
   cleanControls.dataset.mobileControlsOwner = 'controller';
   controls.replaceWith(cleanControls);
@@ -253,20 +303,18 @@ function bindControls(controls) {
 
 function install() {
   if (!isTouchDevice()) return;
+  ensureSettingsButton();
   const existing = document.querySelector('.mobile-controls');
   if (existing?.dataset.mobileControlsOwner === 'controller') return;
   if (bindControls(existing)) {
     window.__relayMobileControlsController = {
-      version: '2.1.0',
+      version: '2.2.0',
       root: document.querySelector('.mobile-controls'),
       rebind: () => bindControls(document.querySelector('.mobile-controls'))
     };
   }
 }
 
-// Controls can be mounted after the initial DOM ready pass. Keep a very small
-// observer so the controller remains authoritative after responsive/gameplay DOM
-// rerenders without creating duplicate listeners.
 const observe = () => {
   install();
   if (window.__relayMobileControlsObserver) return;
