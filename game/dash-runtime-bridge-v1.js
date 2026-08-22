@@ -1,8 +1,7 @@
 import './tutorial-runtime-final-hotfix-v1.js';
 
-/* UPDATE 29 — DASH RUNTIME BRIDGE FINAL
-   Restores the actual physical dash response behind the gameplay dash event.
-   Binding is lazy as well as lifecycle-driven so the runtime cannot miss scene boot order.
+/* UPDATE 30 — DASH RUNTIME BRIDGE TUTORIAL FIX
+   Tutorial gameplay must receive the physical dash response too.
 */
 const SPEED = 670;
 const DURATION = 180;
@@ -14,8 +13,11 @@ function currentScene() {
 }
 
 function validScene(scene) {
-  const tutorialDash = scene?.firstTimeTutorial && scene?.mission?.id === 'first-delivery';
-  return !!scene?.player && !scene.finished && !scene.respawning && !scene.cinematicActive && !window.__relayCinematicLock && (!scene.firstTimeTutorial || tutorialDash);
+  return !!scene?.player
+    && !scene.finished
+    && !scene.respawning
+    && !scene.cinematicActive
+    && !window.__relayCinematicLock;
 }
 
 function directionFor(scene) {
@@ -122,7 +124,7 @@ if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
       sceneLoaded: !!scene,
       mission: scene?.mission?.id ?? 'NONE',
       tutorial: !!scene?.firstTimeTutorial,
-      tutorialDashAllowed: !!(scene?.firstTimeTutorial && scene?.mission?.id === 'first-delivery'),
+      tutorialDashAllowed: !!scene?.firstTimeTutorial,
       cinematic: !!scene?.cinematicActive,
       dashBound: !!scene?.__relayDashRuntimeBound,
       dashActive: !!state?.active,
