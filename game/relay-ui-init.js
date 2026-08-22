@@ -68,6 +68,7 @@ import './dynamic-environment-reactions-v1.js';
 import './collapse-protocol-v1.js';
 import './collapse-protocol-contact-bridge-v1.js';
 
-// Gameplay/mobile repair layer: normalizes mission contracts and owns the mobile presentation/input boundary.
+// Gameplay/mobile repair layer: normalize mission data first, then install presentation and persistence repairs.
+import './src/systems/gameplay-contract.js';
 import './src/systems/gameplay-mobile-hud-repair.js';
 import './src/systems/gameplay-progression-repair.js';
