@@ -14,6 +14,11 @@
     if (!s || s.cinematicActive || s.finished || s.respawning) return false;
     try {
       if (typeof s.mobileActionHandler === 'function') { s.mobileActionHandler(name); return true; }
+      if (!s.mobileActions) s.mobileActions = {};
+      // RunnerScene.update() is the authoritative gameplay consumer. Every mobile
+      // action is queued here and consumed by that update tick, exactly like a
+      // keyboard JustDown action, without relying on synthetic browser keys.
+      s.mobileActions[name] = true;
       s.game?.events?.emit?.('mobile-action', { action: name, source: 'mobile-direct-v1' });
       s.events?.emit?.('mobile-action', { action: name, source: 'mobile-direct-v1' });
       return true;
@@ -24,11 +29,10 @@
     const s = activeScene();
     if (!s || s.cinematicActive || s.finished || s.respawning) return;
     try {
-      if (typeof s.mobileMoveHandler === 'function') s.mobileMoveHandler(direction);
-      else {
-        s.game?.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v1' });
-        s.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v1' });
-      }
+      if (typeof s.mobileMoveHandler === 'function') { s.mobileMoveHandler(direction); return; }
+      s.mobileDirection = direction || null;
+      s.game?.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v1' });
+      s.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v1' });
     } catch {}
   };
 
