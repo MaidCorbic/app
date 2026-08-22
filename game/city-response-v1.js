@@ -82,6 +82,7 @@ function root() {
   node = document.createElement('section');
   node.id = ROOT_ID;
   node.setAttribute('aria-live', 'polite');
+  node.setAttribute('role', 'status');
   node.innerHTML = '<div class="city-response-card"><div class="city-response-kicker">CITY RESPONSE // LIVE</div><div class="city-response-title"></div><div class="city-response-line"></div><div class="city-response-detail"></div></div>';
   document.body.appendChild(node);
   return node;
@@ -91,6 +92,8 @@ function showResponse(response, mode = 'visit') {
   const profile = RESPONSE_PROFILES[response] || RESPONSE_PROFILES.CLEAN;
   const node = root();
   node.style.setProperty('--city-response-accent', profile.accent);
+  node.dataset.response = response;
+  node.dataset.mode = mode;
   const title = node.querySelector('.city-response-title');
   const line = node.querySelector('.city-response-line');
   const detail = node.querySelector('.city-response-detail');
@@ -101,7 +104,7 @@ function showResponse(response, mode = 'visit') {
   void node.offsetWidth;
   node.classList.add('is-visible', mode === 'complete' ? 'is-complete' : 'is-burst');
   window.clearTimeout(node.__hideTimer);
-  node.__hideTimer = window.setTimeout(() => node.classList.remove('is-visible', 'is-burst', 'is-complete'), mode === 'complete' ? 2300 : 1700);
+  node.__hideTimer = window.setTimeout(() => node.classList.remove('is-visible', 'is-burst', 'is-complete'), mode === 'complete' ? 3000 : 1900);
 }
 
 function responseVisuals(scene, record) {
@@ -181,7 +184,11 @@ function handleMissionComplete(event) {
     score: safeNumber(scene.collected) * 100 + safeNumber(scene.secretsCollected) * 250,
   });
   saveDistrictRecord(record);
+
+  // The finish overlay may sit above normal presentation layers. Show the response
+  // immediately and re-pulse after the overlay has had a chance to mount.
   showResponse(response, 'complete');
+  window.setTimeout(() => showResponse(response, 'complete'), 80);
 }
 
 function bindScene(scene) {
@@ -195,10 +202,12 @@ function bindScene(scene) {
   scene.events?.once?.('shutdown', () => {
     scene.__cityResponseApplied = false;
     scene.__cityResponseBound = false;
+    scene.__cityResponseRecorded = false;
   });
   scene.events?.once?.('destroy', () => {
     scene.__cityResponseApplied = false;
     scene.__cityResponseBound = false;
+    scene.__cityResponseRecorded = false;
   });
 }
 
