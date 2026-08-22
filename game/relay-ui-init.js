@@ -66,3 +66,4 @@ import './gameplay-new-layer-v2.js';
 import './dynamic-environment-reactions-v1.js';
 // UPDATE 21 — additive world interaction; uses existing barrier ownership only.
 import './collapse-protocol-v1.js';
+import './collapse-protocol-contact-bridge-v1.js';
