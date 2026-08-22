@@ -2,6 +2,7 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 import './src/tutorial-map-v1.js';
 import './tutorial-onboarding-v3.js';
 import './first-mission-transmission-suppressor-v1.js';
+import './src/systems/tutorial-chapter-order-v1.js';
 import './gameplay-event-hud-v2.css';
 import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
@@ -17,7 +18,7 @@ import './city-pulse-v1.js';
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
   document.querySelector('#intro .title-lockup')?.replaceChildren(
-    Object.assign(document.createElement('p'), { className: 'eyebrow', textContent: 'SESSION CLOSED' }),
+    Object.assign(document.createElement('p', { className: 'eyebrow', textContent: 'SESSION CLOSED' })),
     Object.assign(document.createElement('h1'), { innerHTML: 'SEE YOU<br><em>SOON.</em>' }),
     Object.assign(document.createElement('p'), { className: 'menu-tagline', textContent: 'The relay is offline. You can close this browser tab.' })
   );
@@ -69,3 +70,4 @@ import './dynamic-environment-reactions-v1.js';
 import './collapse-protocol-v1.js';
 import './collapse-protocol-contact-bridge-v1.js';
 import './src/systems/mobile-controls-controller.js';
+import './src/systems/mobile-controls-runtime-v2.js';
