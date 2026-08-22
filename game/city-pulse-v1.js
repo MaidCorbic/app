@@ -13,39 +13,21 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
   const runtime = window.RelayRuntime.module('city-pulse');
 
   const missionIdOf = scene => {
-    const values = [
-      scene?.mission?.id,
-      scene?.sys?.settings?.data?.missionId,
-      scene?.sys?.settings?.data?.mission,
-      scene?.registry?.get?.('missionId'),
-      scene?.registry?.get?.('mission'),
-      document.documentElement?.dataset?.missionId,
-      document.body?.dataset?.missionId,
-    ];
+    const values = [scene?.mission?.id, scene?.sys?.settings?.data?.missionId, scene?.sys?.settings?.data?.mission, scene?.registry?.get?.('missionId'), scene?.registry?.get?.('mission'), document.documentElement?.dataset?.missionId, document.body?.dataset?.missionId];
     return values.find(v => typeof v === 'string' && Object.prototype.hasOwnProperty.call(TARGETS, v)) || null;
   };
 
-  const activeGameplay = scene => !!scene?.player?.active
-    && !scene?.firstTimeTutorial
-    && !scene?.cinematicActive
-    && !scene?.finished;
+  const activeGameplay = scene => !!scene?.player?.active && !scene?.firstTimeTutorial && !scene?.cinematicActive && !scene?.finished;
 
   const makeGate = (scene, x, index) => {
-    // Fixed world-space presentation keeps gates aligned with the authored route and
-    // prevents a gate from jumping vertically when the player is airborne.
-    const y = 520;
-    const gate = scene.add.container(x, y).setDepth(8);
+    const gate = scene.add.container(x, 520).setDepth(8);
     const glow = scene.add.rectangle(0, -34, 10, 118, 0x8df4ff, .10).setStrokeStyle(1, 0x8df4ff, .35);
     const beam = scene.add.rectangle(0, -34, 4, 112, 0xdffcff, .35);
     const left = scene.add.rectangle(-30, 0, 6, 86, 0x8df4ff, .65);
     const right = scene.add.rectangle(30, 0, 6, 86, 0x8df4ff, .65);
     const cap = scene.add.rectangle(0, -78, 68, 4, 0x8df4ff, .70);
-    const label = scene.add.text(0, -96, `PULSE ${String(index + 1).padStart(2, '0')}`, {
-      fontFamily: 'monospace', fontSize: '9px', fontStyle: 'bold', color: '#dffcff', stroke: '#02050d', strokeThickness: 3,
-    }).setOrigin(.5);
-    const phaseText = scene.add.text(0, 31, 'SYNC', {
-      fontFamily: 'monospace', fontSize: '8px', fontStyle: 'bold', color: '#8df4ff', stroke: '#02050d', strokeThickness: 2,
-    }).setOrigin(.5);
+    const label = scene.add.text(0, -96, `PULSE ${String(index + 1).padStart(2, '0')}`, { fontFamily: 'monospace', fontSize: '9px', fontStyle: 'bold', color: '#dffcff', stroke: '#02050d', strokeThickness: 3 }).setOrigin(.5);
+    const phaseText = scene.add.text(0, 31, 'SYNC', { fontFamily: 'monospace', fontSize: '8px', fontStyle: 'bold', color: '#8df4ff', stroke: '#02050d', strokeThickness: 2 }).setOrigin(.5);
     gate.add([glow, beam, left, right, cap, label, phaseText]);
     gate.setDataEnabled();
     gate.setData('index', index);
@@ -64,9 +46,7 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
     const warning = phase === 'WARNING';
     const color = open ? 0xaee37f : warning ? 0xffd06e : 0x8df4ff;
     const alpha = open ? .95 : warning ? .52 : .20;
-    p.left.setFillStyle(color, alpha);
-    p.right.setFillStyle(color, alpha);
-    p.cap.setFillStyle(color, alpha);
+    p.left.setFillStyle(color, alpha); p.right.setFillStyle(color, alpha); p.cap.setFillStyle(color, alpha);
     p.glow.setFillStyle(color, reducedMotion ? .08 : open ? .25 : warning ? .14 : .06);
     p.beam.setFillStyle(color, open ? 1 : warning ? .60 : .16);
     text.setColor(open ? '#aee37f' : warning ? '#ffd06e' : '#8df4ff');
@@ -77,16 +57,10 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
   const cue = (scene, title, detail, success) => {
     const color = success ? '#aee37f' : '#ffd06e';
     let el = document.getElementById('cityPulseCueV1');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'cityPulseCueV1';
-      document.body.appendChild(el);
-    }
+    if (!el) { el = document.createElement('div'); el.id = 'cityPulseCueV1'; document.body.appendChild(el); }
     el.innerHTML = `<strong>${title}</strong><span>${detail}</span>`;
     el.style.setProperty('--city-pulse-color', color);
-    el.classList.remove('is-visible');
-    void el.offsetWidth;
-    el.classList.add('is-visible');
+    el.classList.remove('is-visible'); void el.offsetWidth; el.classList.add('is-visible');
     window.clearTimeout(Number(el.dataset.cityPulseTimer) || 0);
     el.dataset.cityPulseTimer = String(window.setTimeout(() => el.classList.remove('is-visible'), 900));
     scene?.playerCue?.(title, color);
@@ -105,10 +79,7 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
     if (scene.cityPulseV1 === state) delete scene.cityPulseV1;
     if (window.__relayCityPulseScene === scene) window.__relayCityPulseScene = null;
     const cueEl = document.getElementById('cityPulseCueV1');
-    if (cueEl) {
-      window.clearTimeout(Number(cueEl.dataset.cityPulseTimer) || 0);
-      cueEl.classList.remove('is-visible');
-    }
+    if (cueEl) { window.clearTimeout(Number(cueEl.dataset.cityPulseTimer) || 0); cueEl.classList.remove('is-visible'); }
   };
 
   const setup = scene => {
@@ -116,46 +87,33 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
     const missionId = missionIdOf(scene);
     const targetX = missionId ? TARGETS[missionId] : null;
     if (!missionId || !Number.isFinite(targetX)) return false;
-
     const gates = [-900, -600, -300].map((offset, index) => makeGate(scene, targetX + offset, index));
     const state = { missionId, gates, elapsed: 0, previousX: scene.player.x, flowStreak: 0 };
-    states.set(scene, state);
-    scene.cityPulseV1 = state;
-    return true;
+    states.set(scene, state); scene.cityPulseV1 = state; return true;
   };
 
   const update = (scene, delta = 16.67) => {
-    if (scene?.finished) {
-      destroy(scene);
-      return;
-    }
-
+    if (scene?.finished) { destroy(scene); return; }
     let state = states.get(scene);
-    // Do not allocate City Pulse objects during tutorial/cinematic boot. This removes
-    // the first-entry frame spike and starts the pulse clock exactly when gameplay opens.
+    // No City Pulse allocation during tutorial/cinematic boot. The update listener stays
+    // attached so the system can initialize immediately when tutorial state clears.
     if (!state) {
-      if (!activeGameplay(scene)) return;
-      if (!setup(scene)) return;
+      if (!activeGameplay(scene) || !setup(scene)) return;
       state = states.get(scene);
       if (!state) return;
     }
-
     const reducedMotion = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     state.elapsed += Math.max(0, Math.min(Number(delta) || 16.67, 50));
     const currentX = Number(scene.player?.x);
     if (!Number.isFinite(currentX)) return;
-
     for (const gate of state.gates) {
       if (!gate?.active || gate.getData('triggered')) continue;
       const localElapsed = state.elapsed + gate.getData('index') * 420;
       const phase = phaseAt(localElapsed);
       applyVisual(gate, phase, reducedMotion);
-
       const x = gate.getData('triggerX');
       const tolerance = CONFIG.gateHalfWidth;
-      const crossed = state.previousX < x - tolerance && currentX >= x - tolerance;
-      if (!crossed) continue;
-
+      if (!(state.previousX < x - tolerance && currentX >= x - tolerance)) continue;
       gate.setData('triggered', true);
       const perfect = phase === 'OPEN' && isPerfectWindow(localElapsed);
       if (perfect) {
@@ -173,18 +131,15 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
   };
 
   runtime.onSceneReady(scene => {
-    // Scene may be booting into tutorial; update() will create the system only when
-    // the authoritative gameplay state becomes active.
-    if (activeGameplay(scene)) setup(scene);
-    if (!states.has(scene)) return;
-    window.__relayCityPulseScene = scene;
+    // Always attach the scene update hook. If tutorial is active, setup is deferred;
+    // once tutorial clears the next update creates the gates without another listener.
     const onUpdate = (_time, delta) => update(scene, delta);
     scene.events?.on?.('update', onUpdate);
     runtime.cleanup(() => scene.events?.off?.('update', onUpdate));
     runtime.cleanup(() => destroy(scene));
+    if (activeGameplay(scene)) setup(scene);
   });
 
-  // Completion must tear City Pulse down before finish/replay/next-mission UI takes over.
   window.addEventListener('relay:mission-complete', event => {
     const scene = event.detail?.scene || window.__relayCityPulseScene;
     if (scene) destroy(scene);
@@ -195,30 +150,14 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
   window.__relayCityPulseDebug = () => {
     const scene = window.__relayCityPulseScene || window.RelayRuntime.scene();
     const state = scene ? states.get(scene) : null;
-    const result = {
-      runtimeLoaded: true,
-      sceneLoaded: !!scene,
-      mission: state?.missionId ?? missionIdOf(scene) ?? scene?.mission?.id ?? 'NONE',
-      tutorial: !!scene?.firstTimeTutorial,
-      cinematic: !!scene?.cinematicActive,
-      finished: !!scene?.finished,
-      gates: state?.gates?.length ?? 0,
-      visible: state?.gates?.filter(g => g.visible).length ?? 0,
-      triggered: state?.gates?.filter(g => g.getData('triggered')).length ?? 0,
-      flowStreak: state?.flowStreak ?? 0,
-      playerX: Number.isFinite(scene?.player?.x) ? Math.round(scene.player.x) : null,
-    };
-    console.table(result);
-    return result;
+    const result = { runtimeLoaded: true, sceneLoaded: !!scene, mission: state?.missionId ?? missionIdOf(scene) ?? scene?.mission?.id ?? 'NONE', tutorial: !!scene?.firstTimeTutorial, cinematic: !!scene?.cinematicActive, finished: !!scene?.finished, gates: state?.gates?.length ?? 0, visible: state?.gates?.filter(g => g.visible).length ?? 0, triggered: state?.gates?.filter(g => g.getData('triggered')).length ?? 0, flowStreak: state?.flowStreak ?? 0, playerX: Number.isFinite(scene?.player?.x) ? Math.round(scene.player.x) : null };
+    console.table(result); return result;
   };
   window.__relayCityPulseReset = () => {
     const scene = window.__relayCityPulseScene || window.RelayRuntime.scene();
     const state = scene ? states.get(scene) : null;
     if (!state) return false;
-    state.gates.forEach(gate => gate.setData('triggered', false));
-    state.flowStreak = 0;
-    state.previousX = Number(scene.player?.x) || state.previousX;
-    return true;
+    state.gates.forEach(gate => gate.setData('triggered', false)); state.flowStreak = 0; state.previousX = Number(scene.player?.x) || state.previousX; return true;
   };
   window.dispatchEvent(new CustomEvent('relay:city-pulse-ready', { detail: { version: CONFIG.version } }));
 })();
