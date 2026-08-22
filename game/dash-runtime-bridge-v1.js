@@ -1,10 +1,9 @@
-/* UPDATE 21 SUPPORT — DASH RUNTIME BRIDGE
-   Restores the actual physical dash response behind the existing gameplay dash event.
-   Additive only: does not replace RunnerScene movement; it supplies dash velocity when the
-   existing input surface emits relay:new-gameplay-dash.
+/* UPDATE 29 — DASH RUNTIME BRIDGE FINAL
+   Restores the actual physical dash response behind the gameplay dash event.
+   Scene binding is now lifecycle-safe and does not depend on a fragile window event.
 */
 const SPEED = 670;
-const DURATION = 145;
+const DURATION = 180;
 const COOLDOWN = 620;
 const STATE_KEY = '__relayDashRuntimeV1';
 
@@ -30,6 +29,7 @@ function finishDash(scene, expectedRun) {
   }
   scene.player?.setTexture?.(scene.player.body?.velocity?.y < -40 ? 'runner-jump' : 'runner-idle');
   scene.events?.emit?.('relay:dash-complete');
+  window.dispatchEvent(new CustomEvent('relay:dash-complete', { detail: { scene } }));
 }
 
 function performDash(scene) {
@@ -49,7 +49,7 @@ function performDash(scene) {
   scene.player?.body?.setMaxVelocity?.(SPEED, scene.player.body.maxVelocity?.y || 1120);
   scene.events?.emit?.('relay:dash-start', { direction, speed: SPEED, duration: DURATION });
   window.dispatchEvent(new CustomEvent('relay:dash-runtime-applied', { detail: { scene, direction, speed: SPEED, duration: DURATION } }));
-
+  try { scene.playerCue?.('DASH', '#8df4ff'); } catch {}
   scene.time?.delayedCall?.(DURATION, () => finishDash(scene, token));
   return true;
 }
@@ -73,9 +73,22 @@ function bind(scene) {
 
 if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
   window.__relayDashRuntimeBridgeV1 = true;
+
+  // Preferred lifecycle hook used by RelayRuntime/city-pulse.
+  try {
+    const runtime = window.RelayRuntime?.module?.('dash-runtime');
+    runtime?.onSceneReady?.(scene => bind(scene));
+    runtime?.cleanup?.(() => {});
+  } catch {}
+
+  // Keep the old event as a compatibility path for older scene boot flows.
   window.addEventListener('relay:runner-scene-ready', event => bind(event.detail?.scene), { passive: true });
+
+  // If the scene already exists when this module is evaluated, bind immediately.
+  try { bind(window.__relayRunnerScene || window.RelayRuntime?.scene?.()); } catch {}
+
   window.__relayDashRuntimeDebug = () => {
-    const scene = window.__relayRunnerScene;
+    const scene = window.__relayRunnerScene || window.RelayRuntime?.scene?.();
     const state = scene?.[STATE_KEY];
     const result = {
       runtimeLoaded: true,
@@ -86,6 +99,8 @@ if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
       dashBound: !!scene?.__relayDashRuntimeBound,
       dashActive: !!state?.active,
       dashVelocityX: Math.round(scene?.player?.body?.velocity?.x ?? 0),
+      dashCooldownMs: COOLDOWN,
+      dashDurationMs: DURATION
     };
     console.table(result);
     return result;
