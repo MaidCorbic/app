@@ -3,36 +3,50 @@ const ACTION_LABELS={jump:'JUMP — SPACE',fire:'FIRE — E',sword:'SWORD — Q'
 
 const isTouchDevice=()=>navigator.maxTouchPoints>0||'ontouchstart'in window||matchMedia('(pointer: coarse)').matches||matchMedia('(hover: none)').matches||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'');
 const getScene=()=>window.__relayRunnerScene||window.game?.scene?.getScene?.('runner')||window.game?.scene?.getScenes?.(true)?.find?.(s=>s?.scene?.key==='runner');
+const getActiveScene=()=>{const s=getScene();return s?.scene?.isActive?.()===false?null:s};
 
-const emitGameplay=(name,detail={})=>{try{const s=getScene();s?.game?.events?.emit?.(name,{...detail,source:detail.source||'mobile-controller'});s?.events?.emit?.(name,{...detail,source:detail.source||'mobile-controller'});}catch{}};
+const emitGameplay=(name,detail={})=>{try{const s=getActiveScene();const payload={...detail,source:detail.source||'mobile-controller'};s?.game?.events?.emit?.(name,payload);s?.events?.emit?.(name,payload)}catch{}};
 
-// Phaser gameplay normally consumes keyboard state, not DOM KeyboardEvents.
-// Drive both paths so mobile works regardless of which input adapter owns the current scene.
-const keyCodeFor=key=>({space:'SPACE', ' ':'SPACE',a:'A',d:'D',e:'E',q:'Q','1':'ONE','3':'THREE',shift:'SHIFT'})[String(key).toLowerCase()]||String(key).toUpperCase();
+const directAction=(action)=>{
+  const s=getActiveScene();
+  try {
+    // RunnerScene owns the actual mobile action state. Call that owner first.
+    if(typeof s?.mobileActionHandler==='function'){
+      s.mobileActionHandler(action);
+      return true;
+    }
+  } catch {}
+  emitGameplay('mobile-action',{action});
+  return false;
+};
+
+const directMove=(direction)=>{
+  const s=getActiveScene();
+  try {
+    if(typeof s?.mobileMoveHandler==='function'){
+      s.mobileMoveHandler(direction);
+      return true;
+    }
+  } catch {}
+  emitGameplay('mobile-move',{direction});
+  return false;
+};
+
+const keyCodeFor=key=>({space:32,' ':32,a:65,d:68,e:69,q:81,'1':49,'3':51,shift:16})[String(key).toLowerCase()]||String(key).toUpperCase().charCodeAt(0);
 const setPhaserKey=(key,isDown)=>{
   try{
-    const s=getScene(); const keyboard=s?.input?.keyboard; if(!keyboard)return;
+    const s=getActiveScene(),keyboard=s?.input?.keyboard;if(!keyboard)return;
     const code=keyCodeFor(key);
     const keyObj=keyboard.keys?.[code]||keyboard.addKey?.(code,false,false);
     if(!keyObj)return;
     keyObj.isDown=!!isDown;
-    if(!isDown)keyObj.isUp=true;
-    keyObj.emit?.(isDown?'down':'up',{key,code:key===' '?'Space':String(key).toUpperCase(),repeat:false});
+    keyObj.isUp=!isDown;
   }catch{}
 };
-
 const emitKey=(key,type)=>{
   const code=key===' '?'Space':key.length===1?`Key${key.toUpperCase()}`:String(key).toUpperCase();
-  const event=new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true});
-  try{window.dispatchEvent(event)}catch{}
-  try{document.dispatchEvent(event)}catch{}
+  try{window.dispatchEvent(new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true}))}catch{}
   setPhaserKey(key,type==='keydown');
-};
-
-const emitDash=(source='mobile-controller')=>{
-  emitGameplay('relay:new-gameplay-dash',{source});
-  window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash',{detail:{source}}));
-  window.dispatchEvent(new CustomEvent('relay:dash-start',{detail:{source,scene:getScene()}}));
 };
 
 if(!document.getElementById('relay-mobile-controls-controller-style')){
@@ -52,13 +66,26 @@ function bindControls(controls){
  root.querySelector('[data-mobile-action="build2"]')?.remove();root.querySelector('[data-mobile-action="gadget2"]')?.remove();
  root.querySelectorAll('[data-mobile-action]').forEach(button=>{
   const action=button.dataset.mobileAction,key=ACTION_KEYS[action];button.setAttribute('aria-label',ACTION_LABELS[action]||action.toUpperCase());
-  const activate=e=>{e.preventDefault();e.stopPropagation();if(document.body.classList.contains('relay-cinematic-active'))return;if(action==='dash')emitDash();else if(key){emitKey(key,'keydown');window.clearTimeout(button._relayKeyTimer);button._relayKeyTimer=window.setTimeout(()=>emitKey(key,'keyup'),140)}else emitGameplay('mobile-action',{action});button.classList.add('is-active');window.setTimeout(()=>button.classList.remove('is-active'),140)};
-  button.addEventListener('pointerdown',activate,{passive:false});button.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});button.addEventListener('contextmenu',e=>e.preventDefault());
+  const activate=e=>{
+    e.preventDefault();e.stopPropagation();
+    if(document.body.classList.contains('relay-cinematic-active'))return;
+    // Directly invoke RunnerScene's authoritative handler. This is the critical mobile path.
+    directAction(action);
+    if(action==='dash'){
+      emitGameplay('relay:new-gameplay-dash',{source:'mobile-controller'});
+      window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash',{detail:{source:'mobile-controller'}}));
+    }
+    if(key){emitKey(key,'keydown');window.clearTimeout(button._relayKeyTimer);button._relayKeyTimer=window.setTimeout(()=>emitKey(key,'keyup'),140)}
+    button.classList.add('is-active');window.setTimeout(()=>button.classList.remove('is-active'),140)
+  };
+  button.addEventListener('pointerdown',activate,{passive:false});
+  button.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
+  button.addEventListener('contextmenu',e=>e.preventDefault());
  });
  const pad=root.querySelector('[data-mobile-joystick]'),thumb=pad?.querySelector('.mobile-joystick-thumb');if(!pad||!thumb)return true;
  let pointerId=null,direction=null;
- const setDirection=next=>{if(next===direction)return;if(direction==='left')emitKey('a','keyup');if(direction==='right')emitKey('d','keyup');direction=next;if(next==='left')emitKey('a','keydown');if(next==='right')emitKey('d','keydown');emitGameplay('mobile-move',{direction:next})};
- const reset=()=>{if(direction==='left')emitKey('a','keyup');if(direction==='right')emitKey('d','keyup');direction=null;pointerId=null;pad.classList.remove('is-active');thumb.style.transform='translate(0,0)'};
+ const setDirection=next=>{if(next===direction)return;if(direction==='left')emitKey('a','keyup');if(direction==='right')emitKey('d','keyup');direction=next;directMove(next);if(next==='left')emitKey('a','keydown');if(next==='right')emitKey('d','keydown')};
+ const reset=()=>{if(direction==='left')emitKey('a','keyup');if(direction==='right')emitKey('d','keyup');directMove(null);direction=null;pointerId=null;pad.classList.remove('is-active');thumb.style.transform='translate(0,0)'};
  const update=(x,y)=>{const r=pad.getBoundingClientRect(),dx=x-r.left-r.width/2,dy=y-r.top-r.height/2,max=Math.max(24,r.width*.42),d=Math.min(Math.hypot(dx,dy),max),a=Math.atan2(dy,dx);thumb.style.transform=`translate(${(Math.cos(a)*d).toFixed(1)}px,${(Math.sin(a)*d).toFixed(1)}px)`;setDirection(Math.abs(dx)<Math.max(8,r.width*.12)?null:dx<0?'left':'right')};
  pad.addEventListener('pointerdown',e=>{if(document.body.classList.contains('relay-cinematic-active'))return;e.preventDefault();e.stopPropagation();pointerId=e.pointerId;pad.setPointerCapture?.(pointerId);pad.classList.add('is-active');update(e.clientX,e.clientY)},{passive:false});
  pad.addEventListener('pointermove',e=>{if(e.pointerId!==pointerId)return;e.preventDefault();update(e.clientX,e.clientY)},{passive:false});
