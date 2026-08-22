@@ -25,8 +25,8 @@ const emitKey = (key, type) => {
   document.dispatchEvent(event);
 };
 
-const emitDash = () => {
-  window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash', { detail: { source: 'mobile-controller' } }));
+const emitDash = (source = 'mobile-controller') => {
+  window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash', { detail: { source } }));
 };
 
 if (!document.getElementById('relay-mobile-controls-controller-style')) {
@@ -36,9 +36,58 @@ if (!document.getElementById('relay-mobile-controls-controller-style')) {
   document.head.appendChild(style);
 }
 
-function isTouchDevice() { return navigator.maxTouchPoints > 0 || 'ontouchstart' in window || matchMedia('(pointer: coarse)').matches || matchMedia('(hover: none)').matches; }
-function openMobileSettings() { const pause=document.getElementById('pauseMenu'); const pauseButton=document.getElementById('pause'); const settingsTab=document.querySelector('#pauseMenu [data-tab="settings"]'); if(!pause||!pauseButton||!settingsTab)return; if(pause.classList.contains('hidden'))pauseButton.click(); window.setTimeout(()=>settingsTab.click(),0); }
-function ensureSettingsButton() { if(!isTouchDevice()||document.getElementById('relayMobileSettings'))return; const game=document.getElementById('game'); if(!game)return; const button=document.createElement('button'); button.id='relayMobileSettings'; button.type='button'; button.setAttribute('aria-label','Open mobile settings'); button.textContent='SETTINGS'; button.addEventListener('pointerdown',event=>{event.preventDefault();event.stopPropagation();openMobileSettings();},{passive:false}); game.appendChild(button); }
+function isTouchDevice() {
+  return navigator.maxTouchPoints > 0 || 'ontouchstart' in window || matchMedia('(pointer: coarse)').matches || matchMedia('(hover: none)').matches;
+}
+
+function findPauseButton() {
+  return document.getElementById('pauseBtn') || document.getElementById('pause') || document.querySelector('[data-action="pause"], [data-pause-button]');
+}
+
+function findSettingsTab() {
+  return document.querySelector('#pauseMenu [data-tab="settings"], #pauseMenu [data-section="settings"], #pauseMenu [data-settings-tab]');
+}
+
+function openMobileSettings() {
+  const pause = document.getElementById('pauseMenu');
+  const pauseButton = findPauseButton();
+  if (!pause) return false;
+
+  const open = () => {
+    const tab = findSettingsTab();
+    if (tab) {
+      tab.click();
+      return true;
+    }
+    return false;
+  };
+
+  const isOpen = !pause.classList.contains('hidden') && !pause.hidden && pause.getAttribute('aria-hidden') !== 'true';
+  if (!isOpen && pauseButton) pauseButton.click();
+
+  if (open()) return true;
+  requestAnimationFrame(() => {
+    if (!open()) setTimeout(open, 80);
+  });
+  return true;
+}
+
+function ensureSettingsButton() {
+  if (!isTouchDevice() || document.getElementById('relayMobileSettings')) return;
+  const game = document.getElementById('game');
+  if (!game) return;
+  const button = document.createElement('button');
+  button.id = 'relayMobileSettings';
+  button.type = 'button';
+  button.setAttribute('aria-label', 'Open mobile settings');
+  button.textContent = 'SETTINGS';
+  button.addEventListener('pointerdown', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    openMobileSettings();
+  }, { passive: false });
+  game.appendChild(button);
+}
 
 function bindControls(controls) {
   if (!controls || !isTouchDevice() || controls.dataset.mobileControlsOwner === 'controller') return false;
@@ -56,26 +105,89 @@ function bindControls(controls) {
     const key = ACTION_KEYS[action];
     button.setAttribute('aria-label', ACTION_LABELS[action] || action.toUpperCase());
     button.addEventListener('pointerdown', event => {
-      event.preventDefault(); event.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
       if (action === 'dash') emitDash();
-      else if (key) { emitKey(key, 'keydown'); window.setTimeout(() => emitKey(key, 'keyup'), 110); }
-      else return;
+      else if (key) {
+        emitKey(key, 'keydown');
+        window.setTimeout(() => emitKey(key, 'keyup'), 110);
+      } else return;
       button.classList.add('is-active');
       window.setTimeout(() => button.classList.remove('is-active'), 110);
     }, { passive: false });
   });
 
   if (!joystick || !thumb) return true;
-  let pointerId = null, direction = null;
-  const setDirection = next => { if(next===direction)return; if(direction==='left')emitKey('a','keyup'); if(direction==='right')emitKey('d','keyup'); direction=next; if(next==='left')emitKey('a','keydown'); if(next==='right')emitKey('d','keydown'); };
-  const resetJoystick = () => { setDirection(null); pointerId=null; joystick.classList.remove('is-active'); thumb.style.transform='translate(0,0)'; };
-  const updateJoystick = (x,y) => { const rect=joystick.getBoundingClientRect(); const dx=x-rect.left-rect.width/2,dy=y-rect.top-rect.height/2; const distance=Math.min(Math.hypot(dx,dy),Math.max(24,rect.width*.42)); const angle=Math.atan2(dy,dx); thumb.style.transform=`translate(${(Math.cos(angle)*distance).toFixed(1)}px,${(Math.sin(angle)*distance).toFixed(1)}px)`; setDirection(Math.abs(dx)<Math.max(8,rect.width*.12)?null:dx<0?'left':'right'); };
-  joystick.addEventListener('pointerdown',event=>{event.preventDefault();event.stopPropagation();pointerId=event.pointerId;joystick.setPointerCapture?.(pointerId);joystick.classList.add('is-active');updateJoystick(event.clientX,event.clientY);},{passive:false});
-  joystick.addEventListener('pointermove',event=>{if(event.pointerId!==pointerId)return;event.preventDefault();updateJoystick(event.clientX,event.clientY);},{passive:false});
-  const end=event=>{if(event&&event.pointerId!==pointerId)return;resetJoystick();};
-  joystick.addEventListener('pointerup',end); joystick.addEventListener('pointercancel',end); joystick.addEventListener('lostpointercapture',resetJoystick); window.addEventListener('blur',resetJoystick);
+  let pointerId = null;
+  let direction = null;
+  const setDirection = next => {
+    if (next === direction) return;
+    if (direction === 'left') emitKey('a', 'keyup');
+    if (direction === 'right') emitKey('d', 'keyup');
+    direction = next;
+    if (next === 'left') emitKey('a', 'keydown');
+    if (next === 'right') emitKey('d', 'keydown');
+  };
+  const resetJoystick = () => {
+    setDirection(null);
+    pointerId = null;
+    joystick.classList.remove('is-active');
+    thumb.style.transform = 'translate(0,0)';
+  };
+  const updateJoystick = (x, y) => {
+    const rect = joystick.getBoundingClientRect();
+    const dx = x - rect.left - rect.width / 2;
+    const dy = y - rect.top - rect.height / 2;
+    const distance = Math.min(Math.hypot(dx, dy), Math.max(24, rect.width * .42));
+    const angle = Math.atan2(dy, dx);
+    thumb.style.transform = `translate(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px)`;
+    setDirection(Math.abs(dx) < Math.max(8, rect.width * .12) ? null : dx < 0 ? 'left' : 'right');
+  };
+  joystick.addEventListener('pointerdown', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    pointerId = event.pointerId;
+    joystick.setPointerCapture?.(pointerId);
+    joystick.classList.add('is-active');
+    updateJoystick(event.clientX, event.clientY);
+  }, { passive: false });
+  joystick.addEventListener('pointermove', event => {
+    if (event.pointerId !== pointerId) return;
+    event.preventDefault();
+    updateJoystick(event.clientX, event.clientY);
+  }, { passive: false });
+  const end = event => {
+    if (event && event.pointerId !== pointerId) return;
+    resetJoystick();
+  };
+  joystick.addEventListener('pointerup', end);
+  joystick.addEventListener('pointercancel', end);
+  joystick.addEventListener('lostpointercapture', resetJoystick);
+  window.addEventListener('blur', resetJoystick);
   return true;
 }
-function install(){if(!isTouchDevice())return;ensureSettingsButton();const existing=document.querySelector('.mobile-controls');if(existing?.dataset.mobileControlsOwner==='controller')return;if(bindControls(existing))window.__relayMobileControlsController={version:'2.3.0',root:document.querySelector('.mobile-controls'),rebind:()=>bindControls(document.querySelector('.mobile-controls'))};}
-function observe(){install();if(window.__relayMobileControlsObserver)return;window.__relayMobileControlsObserver=new MutationObserver(()=>install());window.__relayMobileControlsObserver.observe(document.body,{childList:true,subtree:true});}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});else observe();
+
+function install() {
+  if (!isTouchDevice()) return;
+  ensureSettingsButton();
+  const existing = document.querySelector('.mobile-controls');
+  if (existing?.dataset.mobileControlsOwner === 'controller') return;
+  if (bindControls(existing)) {
+    window.__relayMobileControlsController = {
+      version: '2.4.0',
+      root: document.querySelector('.mobile-controls'),
+      rebind: () => bindControls(document.querySelector('.mobile-controls')),
+      openSettings: openMobileSettings
+    };
+  }
+}
+
+function observe() {
+  install();
+  if (window.__relayMobileControlsObserver) return;
+  window.__relayMobileControlsObserver = new MutationObserver(() => install());
+  window.__relayMobileControlsObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observe, { once: true });
+else observe();
