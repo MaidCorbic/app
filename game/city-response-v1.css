@@ -1,68 +1,235 @@
-/* UPDATE 20 — CITY RESPONSE V2
-   Gameplay-only reaction feedback. Finish UI remains untouched.
+/* UPDATE 20 — CITY RESPONSE V3
+   Premium holographic gameplay notification.
+   Finish UI remains untouched; this layer is non-interactive and HUD-safe.
 */
 #cityResponseV1{
   position:fixed;
   left:50%;
-  top:18px;
-  width:min(360px,calc(100vw - 32px));
-  transform:translate(-50%,-12px) scale(.98);
+  top:clamp(88px,9vh,108px);
+  width:min(430px,calc(100vw - 32px));
+  transform:translate(-50%,-12px) scale(.97);
   opacity:0;
   visibility:hidden;
   display:block!important;
   pointer-events:none!important;
-  z-index:10001!important;
+  z-index:80!important;
   color:#eaffff;
-  font:800 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
-  transition:opacity .18s ease,transform .22s cubic-bezier(.2,.75,.2,1),visibility 0s linear .22s;
+  font:700 10px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;
+  isolation:isolate;
+  transition:
+    opacity .18s ease,
+    transform .24s cubic-bezier(.18,.82,.22,1),
+    visibility 0s linear .24s;
 }
+
 #cityResponseV1.is-visible{
   opacity:1;
   visibility:visible;
   transform:translate(-50%,0) scale(1);
-  transition:opacity .18s ease,transform .22s cubic-bezier(.2,.75,.2,1),visibility 0s;
+  transition:
+    opacity .18s ease,
+    transform .24s cubic-bezier(.18,.82,.22,1),
+    visibility 0s;
 }
+
 #cityResponseV1 .city-response-card{
+  --holo-a:var(--city-response-accent,#8df4ff);
   position:relative;
   overflow:hidden;
-  padding:10px 13px 11px;
-  border:1px solid color-mix(in srgb,var(--city-response-accent) 62%,transparent);
-  border-radius:11px;
-  background:linear-gradient(145deg,rgba(4,12,23,.985),rgba(2,7,14,.985));
-  box-shadow:0 18px 46px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.06),0 0 34px color-mix(in srgb,var(--city-response-accent) 16%,transparent);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
+  padding:12px 16px 13px;
+  border:1px solid color-mix(in srgb,var(--holo-a) 62%,rgba(255,255,255,.16));
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--holo-a) 13%,transparent),transparent 36%),
+    linear-gradient(145deg,rgba(3,12,23,.97),rgba(2,7,15,.95));
+  box-shadow:
+    0 18px 48px rgba(0,0,0,.48),
+    0 0 0 1px rgba(255,255,255,.025) inset,
+    0 0 18px color-mix(in srgb,var(--holo-a) 12%,transparent),
+    0 0 42px color-mix(in srgb,var(--holo-a) 10%,transparent);
+  backdrop-filter:blur(14px) saturate(1.15);
+  -webkit-backdrop-filter:blur(14px) saturate(1.15);
 }
+
+/* Holographic scan field. */
 #cityResponseV1 .city-response-card::before{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(110deg,color-mix(in srgb,var(--city-response-accent) 10%,transparent),transparent 45%,rgba(255,255,255,.035));
+  background:
+    linear-gradient(100deg,
+      color-mix(in srgb,var(--holo-a) 14%,transparent),
+      transparent 28%,
+      rgba(255,255,255,.035) 49%,
+      transparent 72%,
+      color-mix(in srgb,var(--holo-a) 7%,transparent)),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 6px,
+      rgba(255,255,255,.025) 6px 7px,
+      transparent 7px 12px);
+  mix-blend-mode:screen;
+  opacity:.75;
   pointer-events:none;
 }
+
+/* Corner brackets. */
+#cityResponseV1 .city-response-card::after{
+  content:"";
+  position:absolute;
+  inset:7px;
+  border:1px solid color-mix(in srgb,var(--holo-a) 20%,transparent);
+  border-radius:10px;
+  clip-path:polygon(
+    0 0, 14% 0, 14% 1px, 0 1px,
+    0 14%, 1px 14%, 1px 86%, 0 86%,
+    0 100%, 14% 100%, 14% calc(100% - 1px), 0 calc(100% - 1px),
+    100% calc(100% - 14%), calc(100% - 1px) calc(100% - 14%), calc(100% - 1px) 86%, 100% 86%,
+    100% 0, 86% 0, 86% 1px, 100% 1px);
+  opacity:.7;
+  pointer-events:none;
+}
+
 #cityResponseV1 .city-response-kicker,
 #cityResponseV1 .city-response-title,
 #cityResponseV1 .city-response-line,
-#cityResponseV1 .city-response-detail{position:relative;z-index:1}
-#cityResponseV1 .city-response-kicker{font-size:7px;letter-spacing:.22em;opacity:.62}
-#cityResponseV1 .city-response-title{margin-top:4px;font-size:12px;letter-spacing:.09em;color:var(--city-response-accent);text-shadow:0 0 14px color-mix(in srgb,var(--city-response-accent) 28%,transparent)}
-#cityResponseV1 .city-response-line{margin-top:3px;font-size:9px;letter-spacing:.06em}
-#cityResponseV1 .city-response-detail{margin-top:4px;font-size:7px;letter-spacing:.08em;opacity:.66}
-#cityResponseV1.is-burst .city-response-card{animation:cityResponseBurst .48s ease-out}
-@keyframes cityResponseBurst{
-  0%{transform:translateY(5px) scale(.97);filter:brightness(.9)}
-  45%{transform:translateY(0) scale(1.01);filter:brightness(1.28)}
-  100%{transform:translateY(0) scale(1);filter:brightness(1)}
+#cityResponseV1 .city-response-detail{
+  position:relative;
+  z-index:1;
 }
+
+#cityResponseV1 .city-response-kicker{
+  font-size:7px;
+  line-height:1;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  opacity:.48;
+}
+
+#cityResponseV1 .city-response-title{
+  margin-top:5px;
+  font-size:15px;
+  line-height:1.05;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--holo-a);
+  text-shadow:
+    0 0 8px color-mix(in srgb,var(--holo-a) 28%,transparent),
+    0 0 22px color-mix(in srgb,var(--holo-a) 16%,transparent);
+}
+
+#cityResponseV1 .city-response-line{
+  margin-top:5px;
+  font-size:9px;
+  line-height:1.2;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:#effcff;
+}
+
+#cityResponseV1 .city-response-detail{
+  margin-top:5px;
+  max-width:92%;
+  font-size:7px;
+  line-height:1.35;
+  letter-spacing:.07em;
+  opacity:.62;
+}
+
+#cityResponseV1 .city-response-title::before{
+  content:"//";
+  margin-right:7px;
+  opacity:.36;
+}
+
+#cityResponseV1.is-burst .city-response-card{
+  animation:cityResponseHoloIn .56s cubic-bezier(.18,.82,.22,1);
+}
+
+@keyframes cityResponseHoloIn{
+  0%{
+    opacity:.2;
+    transform:translateY(8px) scale(.97);
+    filter:brightness(.8) saturate(.8);
+  }
+  38%{
+    opacity:1;
+    transform:translateY(0) scale(1.018);
+    filter:brightness(1.24) saturate(1.22);
+  }
+  68%{transform:translateY(0) scale(.998)}
+  100%{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    filter:brightness(1) saturate(1);
+  }
+}
+
 @media(max-width:700px){
-  #cityResponseV1{top:max(10px,env(safe-area-inset-top,0px));width:min(290px,calc(100vw - 20px))}
-  #cityResponseV1 .city-response-card{padding:8px 10px 9px;border-radius:9px}
-  #cityResponseV1 .city-response-kicker{font-size:6px}
-  #cityResponseV1 .city-response-title{font-size:10px}
-  #cityResponseV1 .city-response-line{font-size:7.5px}
-  #cityResponseV1 .city-response-detail{font-size:6px}
+  #cityResponseV1{
+    top:max(78px,env(safe-area-inset-top,0px) + 64px);
+    width:calc(100vw - 24px);
+  }
+
+  #cityResponseV1 .city-response-card{
+    padding:10px 12px 11px;
+    border-radius:12px;
+  }
+
+  #cityResponseV1 .city-response-kicker{
+    font-size:6px;
+    letter-spacing:.22em;
+  }
+
+  #cityResponseV1 .city-response-title{
+    font-size:12px;
+    letter-spacing:.105em;
+  }
+
+  #cityResponseV1 .city-response-line{
+    margin-top:4px;
+    font-size:8px;
+    letter-spacing:.08em;
+  }
+
+  #cityResponseV1 .city-response-detail{
+    margin-top:4px;
+    max-width:100%;
+    font-size:6.5px;
+    line-height:1.35;
+    letter-spacing:.05em;
+  }
 }
+
+@media(max-width:390px){
+  #cityResponseV1{
+    top:max(72px,env(safe-area-inset-top,0px) + 58px);
+    width:calc(100vw - 20px);
+  }
+
+  #cityResponseV1 .city-response-card{
+    padding:9px 10px 10px;
+  }
+
+  #cityResponseV1 .city-response-title{
+    font-size:11px;
+  }
+
+  #cityResponseV1 .city-response-line{
+    font-size:7.5px;
+  }
+
+  #cityResponseV1 .city-response-detail{
+    font-size:6px;
+  }
+}
+
 @media(prefers-reduced-motion:reduce){
-  #cityResponseV1{transition:none!important}
-  #cityResponseV1.is-burst .city-response-card{animation:none!important}
+  #cityResponseV1{
+    transition:none!important;
+  }
+
+  #cityResponseV1.is-burst .city-response-card{
+    animation:none!important;
+  }
 }
