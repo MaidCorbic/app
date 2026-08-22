@@ -3,7 +3,9 @@
   if (window.__relayFirstMissionTransmissionSuppressorV1) return;
   window.__relayFirstMissionTransmissionSuppressorV1 = true;
 
-  const LEGACY_RE = /CHAPTER\s*01|OPEN\s*LINE|INCOMING\s*TRANSMISSION|FIRST\s*DELIVERY|OLD\s*QUARTER|RELAY\s*\/\/\s*ORIENTATION/i;
+  // Only suppress the obsolete transmission surface. CHAPTER 01 / OPEN LINE is
+  // campaign presentation and is intentionally kept for the post-tutorial handoff.
+  const LEGACY_RE = /INCOMING\s*TRANSMISSION|RELAY\s*\/\/\s*ORIENTATION/i;
 
   const isFirstMissionTutorial = scene => !!(
     scene?.mission?.id === 'first-delivery' && scene?.firstTimeTutorial === true
@@ -11,9 +13,6 @@
 
   const suppress = scene => {
     if (!scene || !isFirstMissionTutorial(scene)) return;
-
-    // The legacy transmission is created inside RunnerScene during createPlayer().
-    // Remove only its visual objects/text; keep gameplay, scene state and input untouched.
     scene.children?.list?.slice?.().forEach(child => {
       if (!child?.active) return;
       const text = typeof child.text === 'string' ? child.text : '';
@@ -23,8 +22,6 @@
         child.setActive?.(false);
       }
     });
-
-    // Clear any legacy DOM transmission surface left by older runtime layers.
     document.querySelectorAll('[data-relay-legacy-transmission], #legacyMissionTransmission, .mission-transmission, .relay-mission-transmission').forEach(node => {
       node.hidden = true;
       node.setAttribute('aria-hidden', 'true');
@@ -39,12 +36,10 @@
     window.addEventListener('relay:runner-scene-ready', refresh, { passive: true });
     window.addEventListener('relay:tutorial-step', refresh, { passive: true });
     window.addEventListener('relay:cinematic-lock', refresh, { passive: true });
-    window.addEventListener('relay:cinematic-unlock', refresh, { passive: true });
     scene.events?.once?.('shutdown', () => {
       window.removeEventListener('relay:runner-scene-ready', refresh);
       window.removeEventListener('relay:tutorial-step', refresh);
       window.removeEventListener('relay:cinematic-lock', refresh);
-      window.removeEventListener('relay:cinematic-unlock', refresh);
       scene.__relayFirstMissionTransmissionSuppressed = false;
     });
   };
