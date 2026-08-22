@@ -25,142 +25,135 @@ const emitKey = (key, type) => {
   }));
 };
 
-const style = document.createElement('style');
-style.id = 'relay-mobile-controls-controller-style';
-style.textContent = `
-  body.is-touch .mobile-controls {
-    --relay-touch-size: clamp(44px, 11.5vw, 54px);
-    left: max(8px, env(safe-area-inset-left, 0px) + 6px) !important;
-    right: max(8px, env(safe-area-inset-right, 0px) + 6px) !important;
-    bottom: max(10px, env(safe-area-inset-bottom, 0px) + 8px) !important;
-    align-items: flex-end !important;
-    gap: 8px !important;
-    visibility: visible;
-    opacity: 1;
-    pointer-events: auto;
-    touch-action: none;
-  }
-
-  body.is-touch .mobile-joystick {
-    flex: 0 0 clamp(68px, 18vw, 82px) !important;
-    width: clamp(68px, 18vw, 82px) !important;
-    height: clamp(68px, 18vw, 82px) !important;
-    pointer-events: auto !important;
-    touch-action: none;
-  }
-
-  body.is-touch .mobile-joystick-thumb {
-    width: 38px !important;
-    height: 38px !important;
-    margin: -19px 0 0 -19px !important;
-  }
-
-  body.is-touch .mobile-actions {
-    flex: 0 1 auto !important;
-    display: grid !important;
-    grid-template-columns: repeat(3, var(--relay-touch-size)) !important;
-    grid-auto-rows: var(--relay-touch-size) !important;
-    gap: 4px !important;
-    width: calc(var(--relay-touch-size) * 3 + 8px) !important;
-    max-width: calc(100vw - 92px) !important;
-    pointer-events: auto !important;
-    touch-action: none;
-  }
-
-  body.is-touch .mobile-controls button {
-    width: var(--relay-touch-size) !important;
-    height: var(--relay-touch-size) !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 3px !important;
-    line-height: 1 !important;
-    font-size: clamp(7px, 1.8vw, 9px) !important;
-    letter-spacing: .15px !important;
-    pointer-events: auto !important;
-    touch-action: manipulation !important;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-
-  body.is-touch .mobile-controls button small {
-    display: block;
-    margin: 3px 0 0;
-    font-size: clamp(4.5px, 1.15vw, 5.5px);
-    line-height: 1;
-    letter-spacing: .45px;
-  }
-
-  @media (max-width: 380px) {
+if (!document.getElementById('relay-mobile-controls-controller-style')) {
+  const style = document.createElement('style');
+  style.id = 'relay-mobile-controls-controller-style';
+  style.textContent = `
     body.is-touch .mobile-controls {
-      --relay-touch-size: 40px;
-      gap: 6px !important;
-      left: 6px !important;
-      right: 6px !important;
-      bottom: max(8px, env(safe-area-inset-bottom, 0px) + 6px) !important;
+      --relay-touch-size: clamp(44px, 11.5vw, 54px);
+      left: max(8px, env(safe-area-inset-left, 0px) + 6px) !important;
+      right: max(8px, env(safe-area-inset-right, 0px) + 6px) !important;
+      bottom: max(10px, env(safe-area-inset-bottom, 0px) + 8px) !important;
+      align-items: flex-end !important;
+      gap: 8px !important;
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+      touch-action: none;
     }
     body.is-touch .mobile-joystick {
-      flex-basis: 64px !important;
-      width: 64px !important;
-      height: 64px !important;
+      flex: 0 0 clamp(68px, 18vw, 82px) !important;
+      width: clamp(68px, 18vw, 82px) !important;
+      height: clamp(68px, 18vw, 82px) !important;
+      pointer-events: auto !important;
+      touch-action: none;
     }
     body.is-touch .mobile-joystick-thumb {
-      width: 34px !important;
-      height: 34px !important;
-      margin: -17px 0 0 -17px !important;
+      width: 38px !important;
+      height: 38px !important;
+      margin: -19px 0 0 -19px !important;
     }
     body.is-touch .mobile-actions {
-      gap: 3px !important;
-      width: calc(var(--relay-touch-size) * 3 + 6px) !important;
-      max-width: calc(100vw - 80px) !important;
-    }
-  }
-
-  @media (orientation: landscape) {
-    body.is-touch .mobile-actions {
-      grid-template-columns: repeat(6, var(--relay-touch-size)) !important;
+      flex: 0 1 auto !important;
+      display: grid !important;
+      grid-template-columns: repeat(3, var(--relay-touch-size)) !important;
       grid-auto-rows: var(--relay-touch-size) !important;
-      width: calc(var(--relay-touch-size) * 6 + 20px) !important;
-      max-width: calc(100vw - 96px) !important;
+      gap: 4px !important;
+      width: calc(var(--relay-touch-size) * 3 + 8px) !important;
+      max-width: calc(100vw - 92px) !important;
+      pointer-events: auto !important;
+      touch-action: none;
     }
-  }
-
-  @media (max-height: 480px) and (orientation: landscape) {
-    body.is-touch .mobile-controls {
-      --relay-touch-size: 42px;
-      bottom: max(6px, env(safe-area-inset-bottom, 0px) + 4px) !important;
-      gap: 7px !important;
+    body.is-touch .mobile-controls button {
+      width: var(--relay-touch-size) !important;
+      height: var(--relay-touch-size) !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 3px !important;
+      line-height: 1 !important;
+      font-size: clamp(7px, 1.8vw, 9px) !important;
+      letter-spacing: .15px !important;
+      pointer-events: auto !important;
+      touch-action: manipulation !important;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
-    body.is-touch .mobile-joystick {
-      flex-basis: 68px !important;
-      width: 68px !important;
-      height: 68px !important;
+    body.is-touch .mobile-controls button small {
+      display: block;
+      margin: 3px 0 0;
+      font-size: clamp(4.5px, 1.15vw, 5.5px);
+      line-height: 1;
+      letter-spacing: .45px;
     }
-    body.is-touch .mobile-joystick-thumb {
-      width: 36px !important;
-      height: 36px !important;
-      margin: -18px 0 0 -18px !important;
+    @media (max-width: 380px) {
+      body.is-touch .mobile-controls {
+        --relay-touch-size: 40px;
+        gap: 6px !important;
+        left: 6px !important;
+        right: 6px !important;
+        bottom: max(8px, env(safe-area-inset-bottom, 0px) + 6px) !important;
+      }
+      body.is-touch .mobile-joystick {
+        flex-basis: 64px !important;
+        width: 64px !important;
+        height: 64px !important;
+      }
+      body.is-touch .mobile-joystick-thumb {
+        width: 34px !important;
+        height: 34px !important;
+        margin: -17px 0 0 -17px !important;
+      }
+      body.is-touch .mobile-actions {
+        gap: 3px !important;
+        width: calc(var(--relay-touch-size) * 3 + 6px) !important;
+        max-width: calc(100vw - 80px) !important;
+      }
     }
-  }
-
-  @media (max-height: 360px) and (orientation: landscape) {
-    body.is-touch .mobile-controls {
-      --relay-touch-size: 36px;
-      gap: 5px !important;
+    @media (orientation: landscape) {
+      body.is-touch .mobile-actions {
+        grid-template-columns: repeat(6, var(--relay-touch-size)) !important;
+        grid-auto-rows: var(--relay-touch-size) !important;
+        width: calc(var(--relay-touch-size) * 6 + 20px) !important;
+        max-width: calc(100vw - 96px) !important;
+      }
     }
-    body.is-touch .mobile-joystick {
-      flex-basis: 60px !important;
-      width: 60px !important;
-      height: 60px !important;
+    @media (max-height: 480px) and (orientation: landscape) {
+      body.is-touch .mobile-controls {
+        --relay-touch-size: 42px;
+        bottom: max(6px, env(safe-area-inset-bottom, 0px) + 4px) !important;
+        gap: 7px !important;
+      }
+      body.is-touch .mobile-joystick {
+        flex-basis: 68px !important;
+        width: 68px !important;
+        height: 68px !important;
+      }
+      body.is-touch .mobile-joystick-thumb {
+        width: 36px !important;
+        height: 36px !important;
+        margin: -18px 0 0 -18px !important;
+      }
     }
-    body.is-touch .mobile-joystick-thumb {
-      width: 32px !important;
-      height: 32px !important;
-      margin: -16px 0 0 -16px !important;
+    @media (max-height: 360px) and (orientation: landscape) {
+      body.is-touch .mobile-controls {
+        --relay-touch-size: 36px;
+        gap: 5px !important;
+      }
+      body.is-touch .mobile-joystick {
+        flex-basis: 60px !important;
+        width: 60px !important;
+        height: 60px !important;
+      }
+      body.is-touch .mobile-joystick-thumb {
+        width: 32px !important;
+        height: 32px !important;
+        margin: -16px 0 0 -16px !important;
+      }
     }
-  }
-`;
-document.head.appendChild(style);
+  `;
+  document.head.appendChild(style);
+}
 
 function isTouchDevice() {
   return navigator.maxTouchPoints > 0
@@ -169,22 +162,15 @@ function isTouchDevice() {
     || matchMedia('(hover: none)').matches;
 }
 
-function install() {
-  if (window.__relayMobileControlsController) return;
+function bindControls(controls) {
+  if (!controls || !isTouchDevice() || controls.dataset.mobileControlsOwner === 'controller') return false;
 
-  const controls = document.querySelector('.mobile-controls');
-  if (!controls || !isTouchDevice()) return;
-
-  window.__relayMobileControlsController = true;
-
-  // main.js has legacy pointer listeners. Cloning after main.js ran removes those
-  // listeners while preserving the existing DOM and CSS hooks.
+  // main.js has legacy pointer listeners. Cloning once removes those listeners while
+  // preserving the existing DOM/CSS hooks and preventing duplicate touch handlers.
   const cleanControls = controls.cloneNode(true);
   cleanControls.dataset.mobileControlsOwner = 'controller';
   controls.replaceWith(cleanControls);
 
-  // Keep one button per actual mobile action. BUILD 2 / GEAR 4 remain keyboard-only
-  // shortcuts, so the touch surface stays compact and unambiguous.
   cleanControls.querySelector('[data-mobile-action="build2"]')?.remove();
   cleanControls.querySelector('[data-mobile-action="gadget2"]')?.remove();
 
@@ -197,7 +183,6 @@ function install() {
     const key = ACTION_KEYS[action];
     if (!key) return;
     button.setAttribute('aria-label', ACTION_LABELS[action] || action.toUpperCase());
-
     button.addEventListener('pointerdown', event => {
       event.preventDefault();
       event.stopPropagation();
@@ -210,7 +195,7 @@ function install() {
     }, { passive: false });
   });
 
-  if (!joystick || !thumb) return;
+  if (!joystick || !thumb) return true;
 
   let pointerId = null;
   let direction = null;
@@ -249,7 +234,6 @@ function install() {
     joystick.classList.add('is-active');
     updateJoystick(event.clientX, event.clientY);
   }, { passive: false });
-
   joystick.addEventListener('pointermove', event => {
     if (event.pointerId !== pointerId) return;
     event.preventDefault();
@@ -260,15 +244,38 @@ function install() {
     if (event && event.pointerId !== pointerId) return;
     resetJoystick();
   };
-
   joystick.addEventListener('pointerup', end);
   joystick.addEventListener('pointercancel', end);
   joystick.addEventListener('lostpointercapture', resetJoystick);
   window.addEventListener('blur', resetJoystick);
+  return true;
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', install, { once: true });
-} else {
+function install() {
+  if (!isTouchDevice()) return;
+  const existing = document.querySelector('.mobile-controls');
+  if (existing?.dataset.mobileControlsOwner === 'controller') return;
+  if (bindControls(existing)) {
+    window.__relayMobileControlsController = {
+      version: '2.1.0',
+      root: document.querySelector('.mobile-controls'),
+      rebind: () => bindControls(document.querySelector('.mobile-controls'))
+    };
+  }
+}
+
+// Controls can be mounted after the initial DOM ready pass. Keep a very small
+// observer so the controller remains authoritative after responsive/gameplay DOM
+// rerenders without creating duplicate listeners.
+const observe = () => {
   install();
+  if (window.__relayMobileControlsObserver) return;
+  window.__relayMobileControlsObserver = new MutationObserver(() => install());
+  window.__relayMobileControlsObserver.observe(document.body, { childList: true, subtree: true });
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', observe, { once: true });
+} else {
+  observe();
 }
