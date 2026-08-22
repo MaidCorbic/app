@@ -12,7 +12,8 @@ function currentScene() {
 }
 
 function validScene(scene) {
-  return !!scene?.player && !scene.finished && !scene.respawning && !scene.cinematicActive && !window.__relayCinematicLock && !scene.firstTimeTutorial;
+  const tutorialDash = scene?.firstTimeTutorial && scene?.mission?.id === 'first-delivery';
+  return !!scene?.player && !scene.finished && !scene.respawning && !scene.cinematicActive && !window.__relayCinematicLock && (!scene.firstTimeTutorial || tutorialDash);
 }
 
 function directionFor(scene) {
@@ -104,21 +105,11 @@ function dispatchKeyboardDash(event) {
 
 if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
   window.__relayDashRuntimeBridgeV1 = true;
-
-  // Preferred lifecycle paths.
   window.addEventListener('relay:runner-scene-ready', event => bind(event.detail?.scene || currentScene()), { passive: true });
   window.addEventListener('relay:gameplay-core-ready', () => ensureBound(), { passive: true });
   window.addEventListener('relay:city-pulse-ready', () => ensureBound(), { passive: true });
-
-  // Critical fallback: if module load happened before Phaser created RunnerScene,
-  // the first actual dash input binds to the current scene immediately.
   window.addEventListener('relay:new-gameplay-dash', () => ensureBound(), { passive: true });
-
-  // SHIFT is a first-class gameplay input. This fallback restores dash even if
-  // the legacy scene keyboard binding was lost during HUD/runtime patching.
   window.addEventListener('keydown', dispatchKeyboardDash, true);
-
-  // If the scene already exists when this module is evaluated, bind immediately.
   ensureBound();
 
   window.__relayDashRuntimeDebug = () => {
@@ -129,6 +120,7 @@ if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
       sceneLoaded: !!scene,
       mission: scene?.mission?.id ?? 'NONE',
       tutorial: !!scene?.firstTimeTutorial,
+      tutorialDashAllowed: !!(scene?.firstTimeTutorial && scene?.mission?.id === 'first-delivery'),
       cinematic: !!scene?.cinematicActive,
       dashBound: !!scene?.__relayDashRuntimeBound,
       dashActive: !!state?.active,
