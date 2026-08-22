@@ -1,0 +1,68 @@
+/* UPDATE 20 — CITY RESPONSE V1
+   Presentation-only. No persistent HUD footprint on Home/tutorial.
+*/
+#cityResponseV1 {
+  position: fixed;
+  left: 50%;
+  top: 18px;
+  width: min(360px, calc(100vw - 32px));
+  transform: translate(-50%, -12px) scale(.98);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 205;
+  color: #eaffff;
+  font: 800 10px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+  transition: opacity .18s ease, transform .22s cubic-bezier(.2,.75,.2,1);
+}
+#cityResponseV1.is-visible { opacity: 1; transform: translate(-50%, 0) scale(1); }
+#cityResponseV1 .city-response-card {
+  position: relative;
+  overflow: hidden;
+  padding: 10px 13px 11px;
+  border: 1px solid color-mix(in srgb, var(--city-response-accent) 42%, transparent);
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgba(4,12,23,.94), rgba(2,7,14,.94));
+  box-shadow: 0 12px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.045), 0 0 28px color-mix(in srgb, var(--city-response-accent) 10%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+#cityResponseV1 .city-response-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--city-response-accent) 7%, transparent), transparent 45%, rgba(255,255,255,.025));
+  pointer-events: none;
+}
+#cityResponseV1 .city-response-kicker,
+#cityResponseV1 .city-response-title,
+#cityResponseV1 .city-response-line,
+#cityResponseV1 .city-response-detail { position: relative; z-index: 1; }
+#cityResponseV1 .city-response-kicker { font-size: 7px; letter-spacing: .22em; opacity: .52; }
+#cityResponseV1 .city-response-title { margin-top: 4px; font-size: 12px; letter-spacing: .09em; color: var(--city-response-accent); }
+#cityResponseV1 .city-response-line { margin-top: 3px; font-size: 9px; letter-spacing: .06em; }
+#cityResponseV1 .city-response-detail { margin-top: 4px; font-size: 7px; letter-spacing: .08em; opacity: .56; }
+#cityResponseV1.is-burst .city-response-card { animation: cityResponseBurst .48s ease-out; }
+#cityResponseV1.is-complete .city-response-card { animation: cityResponseComplete .7s cubic-bezier(.2,.8,.2,1); }
+@keyframes cityResponseBurst {
+  0% { transform: translateY(5px) scale(.97); filter: brightness(.9); }
+  45% { transform: translateY(0) scale(1.01); filter: brightness(1.22); }
+  100% { transform: translateY(0) scale(1); filter: brightness(1); }
+}
+@keyframes cityResponseComplete {
+  0% { transform: scale(.96); opacity: .7; }
+  30% { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@media (max-width: 700px) {
+  #cityResponseV1 { top: max(10px, env(safe-area-inset-top, 0px)); width: min(290px, calc(100vw - 20px)); }
+  #cityResponseV1 .city-response-card { padding: 8px 10px 9px; border-radius: 9px; }
+  #cityResponseV1 .city-response-kicker { font-size: 6px; }
+  #cityResponseV1 .city-response-title { font-size: 10px; }
+  #cityResponseV1 .city-response-line { font-size: 7.5px; }
+  #cityResponseV1 .city-response-detail { font-size: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #cityResponseV1 { transition: none !important; }
+  #cityResponseV1.is-burst .city-response-card,
+  #cityResponseV1.is-complete .city-response-card { animation: none !important; }
+} 
