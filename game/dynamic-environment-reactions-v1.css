@@ -1,0 +1,14 @@
+#dynamicEnvironmentLayer{position:fixed;inset:0;z-index:90;pointer-events:none;overflow:hidden;--env-speed:0}
+#dynamicEnvironmentLayer::before{content:"";position:absolute;inset:-8%;opacity:calc(.03 + var(--env-speed)*.08);background:radial-gradient(circle at 50% 52%,rgba(70,210,255,.28),transparent 48%);transform:scale(calc(1 + var(--env-speed)*.035));transition:opacity .2s ease,transform .2s ease}
+#dynamicEnvironmentLayer[data-reaction="dash"]::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(100,225,255,.16) 48%,transparent 58%);animation:envDash .32s ease-out both}
+#dynamicEnvironmentLayer[data-reaction="danger"]::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 2px rgba(255,70,70,.28);background:radial-gradient(circle,transparent 48%,rgba(255,55,55,.08));animation:envDanger .36s ease-out both}
+#dynamicEnvironmentLayer[data-reaction="movement"]::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 72%,rgba(80,220,255,.1),transparent 38%);animation:envMove .34s ease-out both}
+#dynamicEnvironmentLayer[data-reaction="signal"]::after,#dynamicEnvironmentLayer[data-reaction="checkpoint"]::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(80,230,255,.13),transparent 46%);animation:envSignal .5s ease-out both}
+#dynamicEnvironmentLayer[data-reaction="complete"]::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(100,255,190,.16),transparent 55%);animation:envComplete .7s ease-out both}
+@keyframes envDash{from{transform:translateX(-18%);opacity:0}35%{opacity:1}to{transform:translateX(18%);opacity:0}}
+@keyframes envDanger{from{opacity:0}35%{opacity:1}to{opacity:0}}
+@keyframes envMove{from{transform:scale(.96);opacity:0}45%{opacity:1}to{transform:scale(1.03);opacity:0}}
+@keyframes envSignal{from{transform:scale(.82);opacity:0}45%{opacity:1}to{transform:scale(1.16);opacity:0}}
+@keyframes envComplete{from{transform:scale(.8);opacity:0}35%{opacity:1}to{transform:scale(1.2);opacity:0}}
+@media(max-width:768px){#dynamicEnvironmentLayer{z-index:80}#dynamicEnvironmentLayer::before{opacity:calc(.02 + var(--env-speed)*.06)}}
+@media(prefers-reduced-motion:reduce){#dynamicEnvironmentLayer::before{transition:none}#dynamicEnvironmentLayer[data-reaction]::after{animation:none;opacity:.08}}
