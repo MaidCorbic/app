@@ -1,3 +1,5 @@
+import './tutorial-runtime-final-hotfix-v1.js';
+
 /* UPDATE 29 — DASH RUNTIME BRIDGE FINAL
    Restores the actual physical dash response behind the gameplay dash event.
    Binding is lazy as well as lifecycle-driven so the runtime cannot miss scene boot order.
