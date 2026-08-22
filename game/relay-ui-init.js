@@ -22,6 +22,7 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape') { pa
 
 // UPDATE 18 — additive cargo integrity runtime. Keeps existing gameplay ownership authoritative.
 import './cargo-integrity-v2.js';
+import './cargo-integrity-v2-visibility-v1.js';
 
 // UPDATE 17 — one authoritative gameplay intro runtime.
 import './gameplay-intro-final-v1.js';
