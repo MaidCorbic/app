@@ -1,11 +1,15 @@
 /* UPDATE 29 — DASH RUNTIME BRIDGE FINAL
    Restores the actual physical dash response behind the gameplay dash event.
-   Scene binding is now lifecycle-safe and does not depend on a fragile window event.
+   Binding is lazy as well as lifecycle-driven so the runtime cannot miss scene boot order.
 */
 const SPEED = 670;
 const DURATION = 180;
 const COOLDOWN = 620;
 const STATE_KEY = '__relayDashRuntimeV1';
+
+function currentScene() {
+  return window.__relayRunnerScene || window.RelayRuntime?.scene?.() || null;
+}
 
 function validScene(scene) {
   return !!scene?.player && !scene.finished && !scene.respawning && !scene.cinematicActive && !window.__relayCinematicLock && !scene.firstTimeTutorial;
@@ -55,40 +59,55 @@ function performDash(scene) {
 }
 
 function bind(scene) {
-  if (!scene || scene.__relayDashRuntimeBound) return;
+  if (!scene || scene.__relayDashRuntimeBound) return !!scene;
   scene.__relayDashRuntimeBound = true;
-  scene[STATE_KEY] = { active: false, lastAt: -Infinity, token: 0 };
-  const handler = () => performDash(scene);
+  scene[STATE_KEY] = scene[STATE_KEY] || { active: false, lastAt: -Infinity, token: 0 };
+  const handler = () => {
+    const activeScene = currentScene() || scene;
+    if (activeScene !== scene && !activeScene.__relayDashRuntimeBound) bind(activeScene);
+    performDash(activeScene);
+  };
   scene.__relayDashRuntimeDashHandler = handler;
   window.addEventListener('relay:new-gameplay-dash', handler, { passive: true });
   scene.events?.once?.('shutdown', () => {
     window.removeEventListener('relay:new-gameplay-dash', handler);
     scene.__relayDashRuntimeBound = false;
+    scene.__relayDashRuntimeDashHandler = null;
+    const state = scene[STATE_KEY];
+    if (state) state.active = false;
   });
   scene.events?.once?.('destroy', () => {
     window.removeEventListener('relay:new-gameplay-dash', handler);
     scene.__relayDashRuntimeBound = false;
+    scene.__relayDashRuntimeDashHandler = null;
   });
+  return true;
+}
+
+function ensureBound() {
+  const scene = currentScene();
+  if (!scene) return null;
+  if (!scene.__relayDashRuntimeBound) bind(scene);
+  return scene;
 }
 
 if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
   window.__relayDashRuntimeBridgeV1 = true;
 
-  // Preferred lifecycle hook used by RelayRuntime/city-pulse.
-  try {
-    const runtime = window.RelayRuntime?.module?.('dash-runtime');
-    runtime?.onSceneReady?.(scene => bind(scene));
-    runtime?.cleanup?.(() => {});
-  } catch {}
+  // Preferred lifecycle paths.
+  window.addEventListener('relay:runner-scene-ready', event => bind(event.detail?.scene || currentScene()), { passive: true });
+  window.addEventListener('relay:gameplay-core-ready', () => ensureBound(), { passive: true });
+  window.addEventListener('relay:city-pulse-ready', () => ensureBound(), { passive: true });
 
-  // Keep the old event as a compatibility path for older scene boot flows.
-  window.addEventListener('relay:runner-scene-ready', event => bind(event.detail?.scene), { passive: true });
+  // Critical fallback: if module load happened before Phaser created RunnerScene,
+  // the first actual dash input binds to the current scene immediately.
+  window.addEventListener('relay:new-gameplay-dash', () => ensureBound(), { passive: true });
 
   // If the scene already exists when this module is evaluated, bind immediately.
-  try { bind(window.__relayRunnerScene || window.RelayRuntime?.scene?.()); } catch {}
+  ensureBound();
 
   window.__relayDashRuntimeDebug = () => {
-    const scene = window.__relayRunnerScene || window.RelayRuntime?.scene?.();
+    const scene = ensureBound();
     const state = scene?.[STATE_KEY];
     const result = {
       runtimeLoaded: true,
@@ -100,7 +119,7 @@ if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
       dashActive: !!state?.active,
       dashVelocityX: Math.round(scene?.player?.body?.velocity?.x ?? 0),
       dashCooldownMs: COOLDOWN,
-      dashDurationMs: DURATION
+      dashDurationMs: DURATION,
     };
     console.table(result);
     return result;
