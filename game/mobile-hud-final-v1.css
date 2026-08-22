@@ -76,3 +76,29 @@
 }
 
 @media (prefers-reduced-motion:reduce) { #play .hud-route .route-dot{animation:none!important}#play .hud-progress i{transition:none!important} }
+
+/* RELEASE MOBILE FIX — keep gameplay chrome out of the pause/settings surface. */
+@media (hover:none) and (pointer:coarse) {
+  body:has(#pauseMenu:not(.hidden)) #play .mobile-controls,
+  body:has(#pauseMenu:not(.hidden)) #play .world-marker,
+  body:has(#pauseMenu:not(.hidden)) #play .input-guide,
+  body:has(#pauseMenu:not(.hidden)) #play .hud {
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+
+  #play .hud-progress {
+    width:min(48vw,180px)!important;
+    max-width:180px!important;
+    padding:3px 6px!important;
+    gap:5px!important;
+    border-radius:6px!important;
+  }
+  #play .hud-progress>span:first-child { font-size:8px!important; }
+  #play .hud-progress>small { font-size:5px!important;letter-spacing:.55px!important; }
+  #play .hud-progress>div { height:2px!important; }
+}
+
+@media (hover:none) and (pointer:coarse) and (max-width:430px) and (orientation:portrait) {
+  #play .hud-progress { width:min(50vw,175px)!important;max-width:175px!important; }
+}
