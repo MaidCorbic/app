@@ -17,6 +17,7 @@
     "test:signal-network": "node tests/signal-network.mjs",
     "test:city-response": "node tests/city-response.mjs",
     "test:collapse-protocol": "node tests/collapse-protocol.mjs",
+    "test:runtime-kernel": "node tests/relay-runtime-kernel.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {

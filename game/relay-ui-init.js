@@ -6,6 +6,9 @@ import './signal-network-v1.css';
 import './city-response-v1.css';
 import './collapse-protocol-v1.css';
 
+// UPDATE 22 — shared lifecycle/event adapter. Additive only.
+import './relay-runtime-kernel-v1.js';
+
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
   document.querySelector('#intro .title-lockup')?.replaceChildren(
