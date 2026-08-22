@@ -1,10 +1,23 @@
 import { missions } from '../missions.js';
+import { RunnerScene } from '../scenes/RunnerScene.js';
 import { normalizeAndValidateMissions, validateMissionContracts } from './gameplay-contract.js';
 import './mobile-controls-controller.js';
 
 const contractErrors = normalizeAndValidateMissions(missions);
 if (contractErrors.length) {
   console.error('[Relay Runner] Gameplay contract errors:', contractErrors);
+}
+
+// Preserve the existing RunnerScene implementation but make mission-level deathLimit authoritative.
+// This is intentionally a wrapper instead of a rewrite: all existing initialization remains intact.
+if (!RunnerScene.prototype.__gameplayRepairInit) {
+  const originalInit = RunnerScene.prototype.init;
+  RunnerScene.prototype.init = function repairedInit(config = {}) {
+    const result = originalInit.call(this, config);
+    if (config.mission?.deathLimit != null) this.deathLimit = config.mission.deathLimit;
+    return result;
+  };
+  Object.defineProperty(RunnerScene.prototype, '__gameplayRepairInit', { value: true, configurable: false });
 }
 
 const style = document.createElement('style');
