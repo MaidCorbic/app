@@ -13,6 +13,7 @@
     "test:upgrades": "node tests/upgrades.mjs",
     "test:build-system": "node tests/build-system.mjs",
     "test:enemy-intel": "node tests/enemy-intel.mjs",
+    "test:cargo-integrity": "node tests/cargo-integrity.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {

@@ -1,6 +1,7 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 import './gameplay-event-hud-v2.css';
 import './dynamic-environment-reactions-v1.css';
+import './cargo-integrity-v2-polish.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -18,6 +19,10 @@ const open = kind => { if (!panel) return; panel.classList.remove('hidden'); pan
 document.querySelectorAll('[data-relay-info]').forEach(button => button.addEventListener('click', () => open(button.dataset.relayInfo)));
 document.addEventListener('click', event => { const question = event.target.closest('.relay-faq-question'); if (question) question.closest('.relay-faq-item')?.classList.toggle('open'); if (event.target.closest('[data-relay-close]') || event.target === panel) { panel?.classList.add('hidden'); panel?.classList.remove('relay-update-mode'); } });
 document.addEventListener('keydown', event => { if (event.key === 'Escape') { panel?.classList.add('hidden'); panel?.classList.remove('relay-update-mode'); } });
+
+// UPDATE 18 — additive cargo integrity runtime. Keeps existing gameplay ownership authoritative.
+import './cargo-integrity-v2.js';
+import './cargo-integrity-v2-visibility-v1.js';
 
 // UPDATE 17 — one authoritative gameplay intro runtime.
 import './gameplay-intro-final-v1.js';
