@@ -1,4 +1,6 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
+import './src/tutorial-map-v1.js';
+import './tutorial-onboarding-v2.js';
 import './gameplay-event-hud-v2.css';
 import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
@@ -9,7 +11,6 @@ import './city-pulse-v1.css';
 
 // UPDATE 22 — shared lifecycle/event adapter. Additive only.
 import './relay-runtime-kernel-v1.js';
-// UPDATE 23 — city timing layer. Non-physical and additive.
 import './city-pulse-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
@@ -29,17 +30,10 @@ document.querySelectorAll('[data-relay-info]').forEach(button => button.addEvent
 document.addEventListener('click', event => { const question = event.target.closest('.relay-faq-question'); if (question) question.closest('.relay-faq-item')?.classList.toggle('open'); if (event.target.closest('[data-relay-close]') || event.target === panel) { panel?.classList.add('hidden'); panel?.classList.remove('relay-update-mode'); } });
 document.addEventListener('keydown', event => { if (event.key === 'Escape') { panel?.classList.add('hidden'); panel?.classList.remove('relay-update-mode'); } });
 
-// UPDATE 18 — additive cargo integrity runtime. Keeps existing gameplay ownership authoritative.
 import './cargo-integrity-v2.js';
 import './cargo-integrity-v2-visibility-v1.js';
-
-// UPDATE 19 — additive signal network. Existing gameplay systems remain authoritative.
 import './signal-network-v1.js';
-
-// UPDATE 20 — additive city response. Records mission aftermath in an isolated namespace.
 import './city-response-v1.js';
-
-// UPDATE 17 — one authoritative gameplay intro runtime.
 import './gameplay-intro-final-v1.js';
 import './gameplay-core-v1.js';
 import './dash-runtime-bridge-v1.js';
@@ -70,13 +64,7 @@ import './src/systems/mission-objectives-route-goals-v1.js';
 import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
 import './city-update-gameplay-hud-v1.js';
-// Additive presentation layer; loaded last so core gameplay ownership remains unchanged.
 import './dynamic-environment-reactions-v1.js';
-// UPDATE 21 — additive world interaction; uses existing barrier ownership only.
 import './collapse-protocol-v1.js';
 import './collapse-protocol-contact-bridge-v1.js';
-
-// Mobile input repair: loaded after main.js so it replaces the legacy DOM listeners
-// with one authoritative touch layer. It emits native keyboard events consumed by
-// Phaser's existing keyboard bindings; no second gameplay input path is introduced.
 import './src/systems/mobile-controls-controller.js';
