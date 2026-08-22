@@ -1,98 +1,21 @@
 const ACTION_KEYS={jump:' ',fire:'e',sword:'q',build1:'1',gadget1:'3'};
 const ACTION_LABELS={jump:'JUMP — SPACE',fire:'FIRE — E',sword:'SWORD — Q',dash:'DASH — SHIFT',build1:'BUILD — 1',gadget1:'GEAR — 3'};
-
 const isTouchDevice=()=>navigator.maxTouchPoints>0||'ontouchstart'in window||matchMedia('(pointer: coarse)').matches||matchMedia('(hover: none)').matches||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'');
 const getScene=()=>window.__relayRunnerScene||window.game?.scene?.getScene?.('runner')||window.game?.scene?.getScenes?.(true)?.find?.(s=>s?.scene?.key==='runner');
 const getActiveScene=()=>{const s=getScene();return s?.scene?.isActive?.()===false?null:s};
-
 const emitGameplay=(name,detail={})=>{try{const s=getActiveScene();const payload={...detail,source:detail.source||'mobile-controller'};s?.game?.events?.emit?.(name,payload);s?.events?.emit?.(name,payload)}catch{}};
-
-const directAction=(action)=>{
-  const s=getActiveScene();
-  try {
-    // RunnerScene owns the actual mobile action state. Call that owner first.
-    if(typeof s?.mobileActionHandler==='function'){
-      s.mobileActionHandler(action);
-      return true;
-    }
-  } catch {}
-  emitGameplay('mobile-action',{action});
-  return false;
-};
-
-const directMove=(direction)=>{
-  const s=getActiveScene();
-  try {
-    if(typeof s?.mobileMoveHandler==='function'){
-      s.mobileMoveHandler(direction);
-      return true;
-    }
-  } catch {}
-  emitGameplay('mobile-move',{direction});
-  return false;
-};
-
+const directAction=action=>{const s=getActiveScene();try{if(typeof s?.mobileActionHandler==='function'){s.mobileActionHandler(action);return true}}catch{}emitGameplay('mobile-action',{action});return false};
+const directMove=direction=>{const s=getActiveScene();try{if(typeof s?.mobileMoveHandler==='function'){s.mobileMoveHandler(direction);return true}}catch{}emitGameplay('mobile-move',{direction});return false};
 const keyCodeFor=key=>({space:32,' ':32,a:65,d:68,e:69,q:81,'1':49,'3':51,shift:16})[String(key).toLowerCase()]||String(key).toUpperCase().charCodeAt(0);
-const setPhaserKey=(key,isDown)=>{
-  try{
-    const s=getActiveScene(),keyboard=s?.input?.keyboard;if(!keyboard)return;
-    const code=keyCodeFor(key);
-    const keyObj=keyboard.keys?.[code]||keyboard.addKey?.(code,false,false);
-    if(!keyObj)return;
-    keyObj.isDown=!!isDown;
-    keyObj.isUp=!isDown;
-  }catch{}
-};
-const emitKey=(key,type)=>{
-  const code=key===' '?'Space':key.length===1?`Key${key.toUpperCase()}`:String(key).toUpperCase();
-  try{window.dispatchEvent(new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true}))}catch{}
-  setPhaserKey(key,type==='keydown');
-};
-
-if(!document.getElementById('relay-mobile-controls-controller-style')){
- const style=document.createElement('style');style.id='relay-mobile-controls-controller-style';
- style.textContent=`body.is-touch .mobile-controls{--relay-touch-size:clamp(44px,11.5vw,54px);position:fixed!important;left:max(8px,env(safe-area-inset-left,0px) + 6px)!important;right:max(8px,env(safe-area-inset-right,0px) + 6px)!important;bottom:max(10px,env(safe-area-inset-bottom,0px) + 8px)!important;display:flex!important;align-items:flex-end!important;gap:8px!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:none!important;z-index:2147483001!important}body.is-touch.relay-cinematic-active .mobile-controls{display:none!important;visibility:hidden!important;pointer-events:none!important}body.is-touch .mobile-controls button{width:var(--relay-touch-size)!important;height:var(--relay-touch-size)!important;pointer-events:auto!important;touch-action:manipulation!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent!important}body.is-touch .mobile-joystick{flex:0 0 clamp(68px,18vw,82px)!important;width:clamp(68px,18vw,82px)!important;height:clamp(68px,18vw,82px)!important;pointer-events:auto!important;touch-action:none!important}body.is-touch .mobile-joystick-thumb{width:38px!important;height:38px!important;margin:-19px 0 0 -19px!important}body.is-touch .mobile-actions{display:grid!important;grid-template-columns:repeat(3,var(--relay-touch-size))!important;grid-auto-rows:var(--relay-touch-size)!important;gap:4px!important;pointer-events:auto!important;touch-action:none!important}@media(max-width:380px){body.is-touch .mobile-controls{left:6px!important;right:6px!important;bottom:max(8px,env(safe-area-inset-bottom,0px) + 6px)!important;gap:6px!important}body.is-touch .mobile-joystick{flex-basis:64px!important;width:64px!important;height:64px!important}body.is-touch .mobile-actions{--relay-touch-size:40px}}`;
- document.head.appendChild(style);
-}
-
+const setPhaserKey=(key,isDown)=>{try{const s=getActiveScene(),keyboard=s?.input?.keyboard;if(!keyboard)return;const code=keyCodeFor(key);const keyObj=keyboard.keys?.[code]||keyboard.addKey?.(code,false,false);if(!keyObj)return;keyObj.isDown=!!isDown;keyObj.isUp=!isDown}catch{}};
+const emitKey=(key,type)=>{const code=key===' '?'Space':key.length===1?`Key${key.toUpperCase()}`:String(key).toUpperCase();try{window.dispatchEvent(new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true}))}catch{}setPhaserKey(key,type==='keydown')};
+if(!document.getElementById('relay-mobile-controls-controller-style')){const style=document.createElement('style');style.id='relay-mobile-controls-controller-style';style.textContent=`body.is-touch .mobile-controls{--relay-touch-size:clamp(44px,11.5vw,54px);position:fixed!important;left:max(8px,env(safe-area-inset-left,0px) + 6px)!important;right:max(8px,env(safe-area-inset-right,0px) + 6px)!important;bottom:max(10px,env(safe-area-inset-bottom,0px) + 8px)!important;display:flex!important;align-items:flex-end!important;gap:8px!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:none!important;z-index:2147483001!important}body.is-touch.relay-cinematic-active .mobile-controls{display:none!important;visibility:hidden!important;pointer-events:none!important}body.is-touch .mobile-controls button{width:var(--relay-touch-size)!important;height:var(--relay-touch-size)!important;pointer-events:auto!important;touch-action:manipulation!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent!important}body.is-touch .mobile-joystick{flex:0 0 clamp(68px,18vw,82px)!important;width:clamp(68px,18vw,82px)!important;height:clamp(68px,18vw,82px)!important;pointer-events:auto!important;touch-action:none!important}body.is-touch .mobile-joystick-thumb{width:38px!important;height:38px!important;margin:-19px 0 0 -19px!important}body.is-touch .mobile-actions{display:grid!important;grid-template-columns:repeat(3,var(--relay-touch-size))!important;grid-auto-rows:var(--relay-touch-size)!important;gap:4px!important;pointer-events:auto!important;touch-action:none!important}@media(max-width:380px){body.is-touch .mobile-controls{left:6px!important;right:6px!important;bottom:max(8px,env(safe-area-inset-bottom,0px) + 6px)!important;gap:6px!important}body.is-touch .mobile-joystick{flex-basis:64px!important;width:64px!important;height:64px!important}body.is-touch .mobile-actions{--relay-touch-size:40px}}`;document.head.appendChild(style)}
 function findPauseButton(){return document.getElementById('pauseBtn')||document.getElementById('pause')||document.querySelector('[data-action="pause"],[data-pause-button]')}
 function findSettingsTab(){return document.querySelector('#pauseMenu [data-tab="settings"],#pauseMenu [data-section="settings"],#pauseMenu [data-settings-tab]')}
 function openMobileSettings(){const pause=document.getElementById('pauseMenu'),pauseButton=findPauseButton();if(!pause||document.body.classList.contains('relay-cinematic-active'))return false;const open=()=>{const tab=findSettingsTab();if(tab&&!tab.disabled){tab.click();return true}return false};const isOpen=!pause.classList.contains('hidden')&&!pause.hidden&&pause.getAttribute('aria-hidden')!=='true';if(!isOpen&&pauseButton)pauseButton.click();if(open())return true;requestAnimationFrame(()=>{if(!open())setTimeout(open,80)});return true}
 function ensureSettingsButton(){if(!isTouchDevice()||document.getElementById('relayMobileSettings'))return;const game=document.getElementById('game');if(!game)return;const b=document.createElement('button');b.id='relayMobileSettings';b.type='button';b.setAttribute('aria-label','Open mobile settings');b.textContent='SETTINGS';b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();openMobileSettings()},{passive:false});game.appendChild(b)}
-
-function bindControls(controls){
- if(!controls||!isTouchDevice()||controls.dataset.mobileControlsOwner==='controller')return false;
- const root=controls.cloneNode(true);root.dataset.mobileControlsOwner='controller';root.dataset.mobileControlsBound='1';controls.replaceWith(root);
- root.querySelector('[data-mobile-action="build2"]')?.remove();root.querySelector('[data-mobile-action="gadget2"]')?.remove();
- root.querySelectorAll('[data-mobile-action]').forEach(button=>{
-  const action=button.dataset.mobileAction,key=ACTION_KEYS[action];button.setAttribute('aria-label',ACTION_LABELS[action]||action.toUpperCase());
-  const activate=e=>{
-    e.preventDefault();e.stopPropagation();
-    if(document.body.classList.contains('relay-cinematic-active'))return;
-    // Directly invoke RunnerScene's authoritative handler. This is the critical mobile path.
-    directAction(action);
-    if(action==='dash'){
-      emitGameplay('relay:new-gameplay-dash',{source:'mobile-controller'});
-      window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash',{detail:{source:'mobile-controller'}}));
-    }
-    if(key){emitKey(key,'keydown');window.clearTimeout(button._relayKeyTimer);button._relayKeyTimer=window.setTimeout(()=>emitKey(key,'keyup'),140)}
-    button.classList.add('is-active');window.setTimeout(()=>button.classList.remove('is-active'),140)
-  };
-  button.addEventListener('pointerdown',activate,{passive:false});
-  button.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
-  button.addEventListener('contextmenu',e=>e.preventDefault());
- });
- const pad=root.querySelector('[data-mobile-joystick]'),thumb=pad?.querySelector('.mobile-joystick-thumb');if(!pad||!thumb)return true;
- let pointerId=null,direction=null;
- const setDirection=next=>{if(next===direction)return;if(direction==='left')emitKey('a','keyup');if(direction==='right')emitKey('d','keyup');direction=next;directMove(next);if(next==='left')emitKey('a','keydown');if(next==='right')emitKey('d','keydown')};
- const reset=()=>{if(direction==='left')emitKey('a','keyup');if(direction==='right')emitKey('d','keyup');directMove(null);direction=null;pointerId=null;pad.classList.remove('is-active');thumb.style.transform='translate(0,0)'};
- const update=(x,y)=>{const r=pad.getBoundingClientRect(),dx=x-r.left-r.width/2,dy=y-r.top-r.height/2,max=Math.max(24,r.width*.42),d=Math.min(Math.hypot(dx,dy),max),a=Math.atan2(dy,dx);thumb.style.transform=`translate(${(Math.cos(a)*d).toFixed(1)}px,${(Math.sin(a)*d).toFixed(1)}px)`;setDirection(Math.abs(dx)<Math.max(8,r.width*.12)?null:dx<0?'left':'right')};
- pad.addEventListener('pointerdown',e=>{if(document.body.classList.contains('relay-cinematic-active'))return;e.preventDefault();e.stopPropagation();pointerId=e.pointerId;pad.setPointerCapture?.(pointerId);pad.classList.add('is-active');update(e.clientX,e.clientY)},{passive:false});
- pad.addEventListener('pointermove',e=>{if(e.pointerId!==pointerId)return;e.preventDefault();update(e.clientX,e.clientY)},{passive:false});
- const end=e=>{if(e&&pointerId!==null&&e.pointerId!==pointerId)return;reset()};pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);pad.addEventListener('lostpointercapture',reset);window.addEventListener('pointerup',end,{passive:true});window.addEventListener('pointercancel',end,{passive:true});window.addEventListener('blur',reset,{passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)reset()},{passive:true});
- return true;
-}
-
+function bindControls(controls){if(!controls||!isTouchDevice()||controls.dataset.mobileControlsOwner==='controller')return false;const root=controls.cloneNode(true);root.dataset.mobileControlsOwner='controller';root.dataset.mobileControlsBound='1';controls.replaceWith(root);root.querySelector('[data-mobile-action="build2"]')?.remove();root.querySelector('[data-mobile-action="gadget2"]')?.remove();root.querySelectorAll('[data-mobile-action]').forEach(button=>{const action=button.dataset.mobileAction,key=ACTION_KEYS[action];button.setAttribute('aria-label',ACTION_LABELS[action]||action.toUpperCase());const activate=e=>{e.preventDefault();e.stopPropagation();if(document.body.classList.contains('relay-cinematic-active'))return;directAction(action);if(action==='dash')emitGameplay('relay:new-gameplay-dash',{source:'mobile-controller'});if(key){emitKey(key,'keydown');window.clearTimeout(button._relayKeyTimer);button._relayKeyTimer=window.setTimeout(()=>emitKey(key,'keyup'),140)}button.classList.add('is-active');window.setTimeout(()=>button.classList.remove('is-active'),140)};button.addEventListener('pointerdown',activate,{passive:false});button.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});button.addEventListener('contextmenu',e=>e.preventDefault())});const pad=root.querySelector('[data-mobile-joystick]'),thumb=pad?.querySelector('.mobile-joystick-thumb');if(!pad||!thumb)return true;let pointerId=null,direction=null;const setDirection=next=>{if(next===direction)return;if(direction==='left')emitKey('a','keyup');if(direction==='right')emitKey('d','keyup');direction=next;directMove(next);if(next==='left')emitKey('a','keydown');if(next==='right')emitKey('d','keydown')};const reset=()=>{if(direction==='left')emitKey('a','keyup');if(direction==='right')emitKey('d','keyup');directMove(null);direction=null;pointerId=null;pad.classList.remove('is-active');thumb.style.transform='translate(0,0)'};const update=(x,y)=>{const r=pad.getBoundingClientRect(),dx=x-r.left-r.width/2,dy=y-r.top-r.height/2,max=Math.max(24,r.width*.42),d=Math.min(Math.hypot(dx,dy),max),a=Math.atan2(dy,dx);thumb.style.transform=`translate(${(Math.cos(a)*d).toFixed(1)}px,${(Math.sin(a)*d).toFixed(1)}px)`;setDirection(Math.abs(dx)<Math.max(8,r.width*.12)?null:dx<0?'left':'right')};pad.addEventListener('pointerdown',e=>{if(document.body.classList.contains('relay-cinematic-active'))return;e.preventDefault();e.stopPropagation();pointerId=e.pointerId;pad.setPointerCapture?.(pointerId);pad.classList.add('is-active');update(e.clientX,e.clientY)},{passive:false});pad.addEventListener('pointermove',e=>{if(e.pointerId!==pointerId)return;e.preventDefault();update(e.clientX,e.clientY)},{passive:false});const end=e=>{if(e&&pointerId!==null&&e.pointerId!==pointerId)return;reset()};pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);pad.addEventListener('lostpointercapture',reset);window.addEventListener('pointerup',end,{passive:true});window.addEventListener('pointercancel',end,{passive:true});window.addEventListener('blur',reset,{passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)reset()},{passive:true});return true}
 function install(){if(!isTouchDevice())return;document.body.classList.add('is-touch');ensureSettingsButton();const existing=document.querySelector('.mobile-controls');if(existing?.dataset.mobileControlsOwner==='controller')return;if(existing)bindControls(existing)}
 function observe(){install();if(window.__relayMobileControlsObserver)return;window.__relayMobileControlsObserver=new MutationObserver(install);window.__relayMobileControlsObserver.observe(document.body,{childList:true,subtree:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});else observe();
+import './mobile-controls-direct-input-v1.js';
