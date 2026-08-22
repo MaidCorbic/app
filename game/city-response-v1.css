@@ -1,12 +1,12 @@
-/* UPDATE 20 — CITY RESPONSE V3
+/* UPDATE 20 — CITY RESPONSE V4
    Premium holographic gameplay notification.
-   Finish UI remains untouched; this layer is non-interactive and HUD-safe.
+   Typography-first readability polish; gameplay and Finish remain untouched.
 */
 #cityResponseV1{
   position:fixed;
   left:50%;
   top:clamp(88px,9vh,108px);
-  width:min(430px,calc(100vw - 32px));
+  width:min(440px,calc(100vw - 32px));
   transform:translate(-50%,-12px) scale(.97);
   opacity:0;
   visibility:hidden;
@@ -14,222 +14,95 @@
   pointer-events:none!important;
   z-index:80!important;
   color:#eaffff;
-  font:700 10px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;
+  font:600 11px/1.3 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   isolation:isolate;
-  transition:
-    opacity .18s ease,
-    transform .24s cubic-bezier(.18,.82,.22,1),
-    visibility 0s linear .24s;
+  transition:opacity .18s ease,transform .24s cubic-bezier(.18,.82,.22,1),visibility 0s linear .24s;
 }
-
 #cityResponseV1.is-visible{
   opacity:1;
   visibility:visible;
   transform:translate(-50%,0) scale(1);
-  transition:
-    opacity .18s ease,
-    transform .24s cubic-bezier(.18,.82,.22,1),
-    visibility 0s;
+  transition:opacity .18s ease,transform .24s cubic-bezier(.18,.82,.22,1),visibility 0s;
 }
-
 #cityResponseV1 .city-response-card{
   --holo-a:var(--city-response-accent,#8df4ff);
   position:relative;
   overflow:hidden;
-  padding:12px 16px 13px;
-  border:1px solid color-mix(in srgb,var(--holo-a) 62%,rgba(255,255,255,.16));
-  border-radius:14px;
-  background:
-    radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--holo-a) 13%,transparent),transparent 36%),
-    linear-gradient(145deg,rgba(3,12,23,.97),rgba(2,7,15,.95));
-  box-shadow:
-    0 18px 48px rgba(0,0,0,.48),
-    0 0 0 1px rgba(255,255,255,.025) inset,
-    0 0 18px color-mix(in srgb,var(--holo-a) 12%,transparent),
-    0 0 42px color-mix(in srgb,var(--holo-a) 10%,transparent);
+  padding:15px 18px 16px;
+  border:1px solid color-mix(in srgb,var(--holo-a) 62%,rgba(255,255,255,.18));
+  border-radius:15px;
+  background:radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--holo-a) 13%,transparent),transparent 36%),linear-gradient(145deg,rgba(3,12,23,.97),rgba(2,7,15,.95));
+  box-shadow:0 20px 52px rgba(0,0,0,.48),0 0 0 1px rgba(255,255,255,.025) inset,0 0 20px color-mix(in srgb,var(--holo-a) 12%,transparent),0 0 46px color-mix(in srgb,var(--holo-a) 10%,transparent);
   backdrop-filter:blur(14px) saturate(1.15);
   -webkit-backdrop-filter:blur(14px) saturate(1.15);
 }
-
-/* Holographic scan field. */
 #cityResponseV1 .city-response-card::before{
   content:"";
   position:absolute;
   inset:0;
-  background:
-    linear-gradient(100deg,
-      color-mix(in srgb,var(--holo-a) 14%,transparent),
-      transparent 28%,
-      rgba(255,255,255,.035) 49%,
-      transparent 72%,
-      color-mix(in srgb,var(--holo-a) 7%,transparent)),
-    repeating-linear-gradient(
-      180deg,
-      transparent 0 6px,
-      rgba(255,255,255,.025) 6px 7px,
-      transparent 7px 12px);
+  background:linear-gradient(100deg,color-mix(in srgb,var(--holo-a) 14%,transparent),transparent 28%,rgba(255,255,255,.035) 49%,transparent 72%,color-mix(in srgb,var(--holo-a) 7%,transparent)),repeating-linear-gradient(180deg,transparent 0 6px,rgba(255,255,255,.022) 6px 7px,transparent 7px 12px);
   mix-blend-mode:screen;
   opacity:.75;
   pointer-events:none;
 }
-
-/* Corner brackets. */
 #cityResponseV1 .city-response-card::after{
   content:"";
   position:absolute;
   inset:7px;
   border:1px solid color-mix(in srgb,var(--holo-a) 20%,transparent);
   border-radius:10px;
-  clip-path:polygon(
-    0 0, 14% 0, 14% 1px, 0 1px,
-    0 14%, 1px 14%, 1px 86%, 0 86%,
-    0 100%, 14% 100%, 14% calc(100% - 1px), 0 calc(100% - 1px),
-    100% calc(100% - 14%), calc(100% - 1px) calc(100% - 14%), calc(100% - 1px) 86%, 100% 86%,
-    100% 0, 86% 0, 86% 1px, 100% 1px);
+  clip-path:polygon(0 0,14% 0,14% 1px,0 1px,0 14%,1px 14%,1px 86%,0 86%,0 100%,14% 100%,14% calc(100% - 1px),0 calc(100% - 1px),100% calc(100% - 14%),calc(100% - 1px) calc(100% - 14%),calc(100% - 1px) 86%,100% 86%,100% 0,86% 0,86% 1px,100% 1px);
   opacity:.7;
   pointer-events:none;
 }
-
 #cityResponseV1 .city-response-kicker,
 #cityResponseV1 .city-response-title,
 #cityResponseV1 .city-response-line,
-#cityResponseV1 .city-response-detail{
-  position:relative;
-  z-index:1;
-}
-
+#cityResponseV1 .city-response-detail{position:relative;z-index:1}
 #cityResponseV1 .city-response-kicker{
-  font-size:7px;
-  line-height:1;
-  letter-spacing:.28em;
+  font:700 9px/1.1 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  letter-spacing:.17em;
   text-transform:uppercase;
-  opacity:.48;
+  opacity:.58;
 }
-
 #cityResponseV1 .city-response-title{
-  margin-top:5px;
-  font-size:15px;
-  line-height:1.05;
-  letter-spacing:.13em;
+  margin-top:6px;
+  font:800 19px/1.05 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  letter-spacing:.08em;
   text-transform:uppercase;
   color:var(--holo-a);
-  text-shadow:
-    0 0 8px color-mix(in srgb,var(--holo-a) 28%,transparent),
-    0 0 22px color-mix(in srgb,var(--holo-a) 16%,transparent);
+  text-shadow:0 0 8px color-mix(in srgb,var(--holo-a) 28%,transparent),0 0 22px color-mix(in srgb,var(--holo-a) 16%,transparent);
 }
-
 #cityResponseV1 .city-response-line{
-  margin-top:5px;
-  font-size:9px;
-  line-height:1.2;
-  letter-spacing:.11em;
+  margin-top:7px;
+  font:700 12px/1.25 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  letter-spacing:.055em;
   text-transform:uppercase;
-  color:#effcff;
+  color:#f2fdff;
 }
-
 #cityResponseV1 .city-response-detail{
-  margin-top:5px;
-  max-width:92%;
-  font-size:7px;
-  line-height:1.35;
-  letter-spacing:.07em;
-  opacity:.62;
+  margin-top:6px;
+  max-width:94%;
+  font:600 10px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  letter-spacing:.02em;
+  opacity:.72;
 }
-
-#cityResponseV1 .city-response-title::before{
-  content:"//";
-  margin-right:7px;
-  opacity:.36;
-}
-
-#cityResponseV1.is-burst .city-response-card{
-  animation:cityResponseHoloIn .56s cubic-bezier(.18,.82,.22,1);
-}
-
-@keyframes cityResponseHoloIn{
-  0%{
-    opacity:.2;
-    transform:translateY(8px) scale(.97);
-    filter:brightness(.8) saturate(.8);
-  }
-  38%{
-    opacity:1;
-    transform:translateY(0) scale(1.018);
-    filter:brightness(1.24) saturate(1.22);
-  }
-  68%{transform:translateY(0) scale(.998)}
-  100%{
-    opacity:1;
-    transform:translateY(0) scale(1);
-    filter:brightness(1) saturate(1);
-  }
-}
-
+#cityResponseV1 .city-response-title::before{content:"//";margin-right:8px;opacity:.35}
+#cityResponseV1.is-burst .city-response-card{animation:cityResponseHoloIn .56s cubic-bezier(.18,.82,.22,1)}
+@keyframes cityResponseHoloIn{0%{opacity:.2;transform:translateY(8px) scale(.97);filter:brightness(.8) saturate(.8)}38%{opacity:1;transform:translateY(0) scale(1.018);filter:brightness(1.24) saturate(1.22)}68%{transform:translateY(0) scale(.998)}100%{opacity:1;transform:translateY(0) scale(1);filter:brightness(1) saturate(1)}}
 @media(max-width:700px){
-  #cityResponseV1{
-    top:max(78px,env(safe-area-inset-top,0px) + 64px);
-    width:calc(100vw - 24px);
-  }
-
-  #cityResponseV1 .city-response-card{
-    padding:10px 12px 11px;
-    border-radius:12px;
-  }
-
-  #cityResponseV1 .city-response-kicker{
-    font-size:6px;
-    letter-spacing:.22em;
-  }
-
-  #cityResponseV1 .city-response-title{
-    font-size:12px;
-    letter-spacing:.105em;
-  }
-
-  #cityResponseV1 .city-response-line{
-    margin-top:4px;
-    font-size:8px;
-    letter-spacing:.08em;
-  }
-
-  #cityResponseV1 .city-response-detail{
-    margin-top:4px;
-    max-width:100%;
-    font-size:6.5px;
-    line-height:1.35;
-    letter-spacing:.05em;
-  }
+  #cityResponseV1{top:max(78px,env(safe-area-inset-top,0px) + 64px);width:calc(100vw - 24px);font-size:10px}
+  #cityResponseV1 .city-response-card{padding:13px 14px 14px;border-radius:13px}
+  #cityResponseV1 .city-response-kicker{font-size:7px;letter-spacing:.14em}
+  #cityResponseV1 .city-response-title{font-size:16px;letter-spacing:.065em}
+  #cityResponseV1 .city-response-line{margin-top:6px;font-size:10px;letter-spacing:.035em}
+  #cityResponseV1 .city-response-detail{margin-top:5px;max-width:100%;font-size:8.5px;line-height:1.4;letter-spacing:.01em}
 }
-
 @media(max-width:390px){
-  #cityResponseV1{
-    top:max(72px,env(safe-area-inset-top,0px) + 58px);
-    width:calc(100vw - 20px);
-  }
-
-  #cityResponseV1 .city-response-card{
-    padding:9px 10px 10px;
-  }
-
-  #cityResponseV1 .city-response-title{
-    font-size:11px;
-  }
-
-  #cityResponseV1 .city-response-line{
-    font-size:7.5px;
-  }
-
-  #cityResponseV1 .city-response-detail{
-    font-size:6px;
-  }
+  #cityResponseV1{top:max(72px,env(safe-area-inset-top,0px) + 58px);width:calc(100vw - 20px)}
+  #cityResponseV1 .city-response-card{padding:12px 13px 13px}
+  #cityResponseV1 .city-response-title{font-size:15px}
+  #cityResponseV1 .city-response-line{font-size:9.5px}
+  #cityResponseV1 .city-response-detail{font-size:8px}
 }
-
-@media(prefers-reduced-motion:reduce){
-  #cityResponseV1{
-    transition:none!important;
-  }
-
-  #cityResponseV1.is-burst .city-response-card{
-    animation:none!important;
-  }
-}
+@media(prefers-reduced-motion:reduce){#cityResponseV1{transition:none!important}#cityResponseV1.is-burst .city-response-card{animation:none!important}}
