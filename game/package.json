@@ -16,6 +16,7 @@
     "test:cargo-integrity": "node tests/cargo-integrity.mjs",
     "test:signal-network": "node tests/signal-network.mjs",
     "test:city-response": "node tests/city-response.mjs",
+    "test:collapse-protocol": "node tests/collapse-protocol.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {
