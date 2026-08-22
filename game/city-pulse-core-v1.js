@@ -1,5 +1,5 @@
 export const CITY_PULSE_CONFIG = Object.freeze({
-  version: '1.0.0',
+  version: '1.0.1',
   periodMs: 3600,
   warningMs: 650,
   openMs: 1050,
@@ -31,8 +31,8 @@ export function openStartAt(elapsed, config = CITY_PULSE_CONFIG) {
 }
 
 export function isPerfectWindow(elapsed, config = CITY_PULSE_CONFIG) {
-  const phase = phaseAt(elapsed, config);
-  if (phase !== 'OPEN') return false;
-  const untilOpen = Math.max(0, openStartAt(elapsed, config) - elapsed);
-  return untilOpen <= config.flowWindowMs;
+  const t = ((elapsed % config.periodMs) + config.periodMs) % config.periodMs;
+  const openStart = config.warningMs;
+  const perfectEnd = config.warningMs + config.flowWindowMs;
+  return t >= openStart && t < perfectEnd;
 }
