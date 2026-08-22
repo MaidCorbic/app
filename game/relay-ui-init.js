@@ -18,7 +18,7 @@ import './city-pulse-v1.js';
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
   document.querySelector('#intro .title-lockup')?.replaceChildren(
-    Object.assign(document.createElement('p', { className: 'eyebrow', textContent: 'SESSION CLOSED' })),
+    Object.assign(document.createElement('p'), { className: 'eyebrow', textContent: 'SESSION CLOSED' }),
     Object.assign(document.createElement('h1'), { innerHTML: 'SEE YOU<br><em>SOON.</em>' }),
     Object.assign(document.createElement('p'), { className: 'menu-tagline', textContent: 'The relay is offline. You can close this browser tab.' })
   );
