@@ -20,4 +20,3 @@ function ensureSettingsButton(){if(!isTouchDevice()||document.getElementById('re
 function install(){if(!isTouchDevice())return;ensureControls();ensureSettingsButton()}
 function observe(){install();if(window.__relayMobileControlsObserver)return;window.__relayMobileControlsObserver=new MutationObserver(()=>install());window.__relayMobileControlsObserver.observe(document.body,{childList:true,subtree:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});else observe();
-import './mobile-controls-direct-input-v1.js';
