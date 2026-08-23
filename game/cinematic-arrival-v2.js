@@ -1,11 +1,12 @@
-/* Cinematic Arrival V4 — fast presentation handoff; never blocks gameplay. */
+/* Cinematic Arrival V5 — non-blocking splash handoff. Presentation never gates gameplay. */
 (() => {
-  if (window.__relayCinematicArrivalV4) return;
-  window.__relayCinematicArrivalV4 = true;
+  if (window.__relayCinematicArrivalV5) return;
+  window.__relayCinematicArrivalV5 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
     if (!splash) return;
+
     splash.classList.add('cinematic-arrival');
     splash.setAttribute('aria-busy', 'true');
 
@@ -45,20 +46,30 @@
     const label = ui?.querySelector('.relay-splash-status');
     if (label) label.textContent = 'RELAY READY';
 
+    let released = false;
     const release = () => {
-      if (splash.dataset.cinematicReleased === 'true') return;
+      if (released) return;
+      released = true;
       splash.dataset.cinematicReleased = 'true';
       splash.classList.add('is-leaving');
       splash.setAttribute('aria-busy', 'false');
-      window.setTimeout(() => splash.remove(), 450);
+      splash.setAttribute('aria-hidden', 'true');
+
+      // Make the handoff observable immediately. Do not make tests or gameplay
+      // wait for a CSS transition to finish before the splash is considered gone.
+      splash.hidden = true;
+      window.setTimeout(() => splash.remove(), 500);
     };
 
-    // Presentation only: show one painted frame, then hand control to the app.
-    // Never hold the title screen or Phaser runtime behind a long splash timer.
+    // One short painted frame only. The title screen and Phaser runtime own
+    // application flow; this presentation layer must never block either.
     window.setTimeout(release, 650);
     window.setTimeout(release, 1200);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
 })();
