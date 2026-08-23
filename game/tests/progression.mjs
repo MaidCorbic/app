@@ -94,12 +94,14 @@ assert.ok(credited.storyProgress, 'Story framework is present in persistent stat
 assert.ok(Array.isArray(credited.rivalProgress.encounters), 'Rival framework is present in persistent state');
 
 const dailyReady = { ...credited, daily: { ...credited.daily, progress: { ...credited.daily.progress, clean: 1 }, claimed: [] } };
+const dailyXpBeforeClaim = dailyReady.xp;
 const claimedDaily = claimChallenge(dailyReady, 'daily', 'clean');
 assert.equal(claimedDaily.daily.claimed.includes('clean'), true, 'Completed daily challenges are claimable exactly once');
-assert.ok(claimedDaily.xp > dailyReady.xp, 'Claiming a challenge awards XP');
+assert.ok(claimedDaily.xp > dailyXpBeforeClaim, 'Claiming a challenge awards XP');
 assert.equal(claimChallenge(claimedDaily, 'daily', 'clean'), claimedDaily, 'Claimed challenges cannot be rewarded twice');
+const loginXpBeforeClaim = credited.credits;
 const loginClaimed = claimLoginReward(credited);
-assert.ok(loginClaimed.credits > credited.credits, 'Login rewards grant the persistent credit currency');
+assert.ok(loginClaimed.credits > loginXpBeforeClaim, 'Login rewards grant the persistent credit currency');
 assert.equal(claimLoginReward(loginClaimed), loginClaimed, 'Login rewards are claimable only once per day');
 assert.equal(levelForXp(xpForLevel(MAX_LEVEL)), MAX_LEVEL, 'The progression curve reaches level 100');
 assert.equal(levelForXp(xpForLevel(MAX_LEVEL) + 999999), MAX_LEVEL, 'The progression curve never exceeds level 100');
