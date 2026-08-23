@@ -22,16 +22,6 @@ function viewport(scene) {
   const h = scene?.scale?.gameSize?.height || scene?.scale?.height || window.innerHeight || 720;
   return { w, h, mobile: w <= 760 };
 }
-function tutorialBounds(scene) {
-  const list = scene?.children?.list || [];
-  const matches = list.filter(child => child?.active && child.visible !== false && child.type === 'Text' && TUTORIAL_TEXT.test(String(child.text || '')));
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  matches.forEach(child => { const b = child.getBounds?.(); if (!b) return; minX = Math.min(minX, b.x); minY = Math.min(minY, b.y); maxX = Math.max(maxX, b.right); maxY = Math.max(maxY, b.bottom); });
-  const explicit = scene?.firstTimeTutorial === true || (scene?.routeTutorials?.size || 0) > 0 || !!scene?.intelCard?.visible;
-  if (!matches.length && !explicit) return null;
-  if (!Number.isFinite(minY)) return { x: 40, y: 340, right: 500, bottom: 540 };
-  return { x: Math.max(0, minX - 24), y: Math.max(0, minY - 24), right: maxX + 24, bottom: maxY + 86 };
-}
 
 function buildPanel(scene, objective) {
   const c = scene.add.container(0, 0).setScrollFactor(0).setDepth(9200).setAlpha(0);
@@ -50,17 +40,18 @@ function buildPanel(scene, objective) {
 
 function layout(state, scene, force = false) {
   const { w, h, mobile } = viewport(scene);
-  const tutorial = tutorialBounds(scene);
   const baseW = 426, baseH = 166;
   const pw = mobile ? Math.min(338, w - 24) : Math.min(470, Math.max(360, w - 64));
   const scale = pw / baseW;
   const actualH = baseH * scale;
-  let x = Math.max(12, w - pw - (mobile ? 12 : 30));
   const bottomReserve = mobile ? Math.max(112, Math.round(h * .16)) : 28;
-  let y = Math.max(82, h - actualH - bottomReserve);
-  if (tutorial && tutorial.right > x - 8 && tutorial.bottom > y - 8) y = Math.max(82, tutorial.y - actualH - 18);
-  if (!force && state.x === x && state.y === y && state.scale === scale && state.tutorial === !!tutorial) return;
-  state.x = x; state.y = y; state.scale = scale; state.tutorial = !!tutorial;
+  const x = Math.max(12, w - pw - (mobile ? 12 : 30));
+  const y = Math.max(82, h - actualH - bottomReserve);
+  if (!force && state.x === x && state.y === y && state.scale === scale) return;
+  state.x = x;
+  state.y = y;
+  state.scale = scale;
+  state.tutorial = false;
   state.c.setPosition(x, y).setScale(scale);
 }
 
@@ -101,7 +92,7 @@ export function applyMissionObjective(scene, id = missionId(scene)) {
   if (!scene?.add) return null;
   const objective = MISSION_OBJECTIVES[id] || { ...FALLBACK_OBJECTIVE, id: id || 'active-mission' };
   const ui = buildPanel(scene, objective);
-  const state = { objective, ...ui, completed:false, last:-1, visible:false, pendingReveal:false, x:null, y:null, scale:null, tutorial:null, hudSkinned:false, hudSkins:[] };
+  const state = { objective, ...ui, completed:false, last:-1, visible:false, pendingReveal:false, x:null, y:null, scale:null, tutorial:false, hudSkinned:false, hudSkins:[] };
   states.set(scene,state); scene.__missionObjectiveState=state; scene.__missionObjective=objective;
   if (document.body.classList.contains('relay-training-active') || scene.firstTimeTutorial) {
     state.pendingReveal = true;
@@ -135,7 +126,8 @@ export function updateMissionObjective(scene) {
     s.progress.setText('OBJECTIVE COMPLETE');
     s.kicker.setText('OBJECTIVE COMPLETE');
     s.status.setText('ROUTE GOAL SECURED');
-    scene.tweens?.add?.({ targets:s.c, scaleX:{from:s.scale,to:s.scale*1.025}, scaleY:{from:s.scale,to:s.scale*1.025}, yoyo:true, duration:140, repeat:1 });
+    s.c.setAlpha(1);
+    scene.tweens?.add?.({ targets:s.c, alpha:{from:1,to:.78}, yoyo:true, duration:140, repeat:1 });
     scene.events?.emit?.('mission-objective-complete',{ id:missionId(scene), objective:s.objective });
   }
 }
