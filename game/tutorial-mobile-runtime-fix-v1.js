@@ -12,7 +12,7 @@ import { loadState } from './src/state.js';
   const cinematicActive = () => Boolean(window.__relayCinematicLock);
 
   const style = document.createElement('style');
-  style.id = 'relay-tutorial-mobile-runtime-fix-v3-style';
+  style.id = 'relay-tutorial-mobile-runtime-fix-v4-style';
   style.textContent = `
     @media(max-width:768px){
       #tutorialCard,.tutorial-card,.tutorial-panel,#relayTutorialMobileCard,#titlePanel[data-panel="tutorial"]{position:fixed!important;top:calc(72px + env(safe-area-inset-top))!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(86vw,350px)!important;max-height:min(34vh,240px)!important;overflow:auto!important;z-index:980!important;pointer-events:auto!important;}
@@ -51,6 +51,13 @@ import { loadState } from './src/state.js';
     lockGameplayHud();
   }
 
+  function markTutorialFinished() {
+    if (document.body.dataset.relayTutorialFinished === '1') return;
+    document.body.dataset.relayTutorialFinished = '1';
+    beginPostTutorialDelay();
+    window.dispatchEvent(new CustomEvent('relay:tutorial-finished'));
+  }
+
   function gameplayLayerGate() {
     const layer = document.getElementById('relay-gameplay-new-layer');
     if (!layer) return;
@@ -65,12 +72,6 @@ import { loadState } from './src/state.js';
     }
   }
 
-  function markTutorialFinished() {
-    document.body.dataset.relayTutorialFinished = '1';
-    beginPostTutorialDelay();
-    window.dispatchEvent(new CustomEvent('relay:tutorial-finished'));
-  }
-
   function installEvents() {
     const state = loadState();
     if (state.tutorialEnabled === false) {
@@ -80,6 +81,10 @@ import { loadState } from './src/state.js';
       lockGameplayHud();
     }
 
+    // The gameplay intro owns the actual tutorial/cinematic lifecycle. Its
+    // unlock is the reliable completion boundary; do not invent a second
+    // tutorial state machine here.
+    window.addEventListener('relay:cinematic-unlock', markTutorialFinished);
     window.addEventListener('relay:tutorial-complete', markTutorialFinished);
     window.addEventListener('relay:tutorial-finished', gameplayLayerGate);
     window.addEventListener('relay:runner-scene-ready', () => {
