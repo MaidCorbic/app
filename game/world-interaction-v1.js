@@ -1,5 +1,3 @@
-import { RunnerScene } from './src/scenes/RunnerScene.js';
-
 // UPDATE 09 — WORLD INTERACTION V1
 // Uses the real RunnerScene checkpoints. No duplicate save, mission, progression,
 // combat, or checkpoint system is created here.
@@ -153,29 +151,6 @@ export function updateWorldInteraction(scene) {
   button.innerHTML = 'INTERACT<small>E / TAP · CHECKPOINT</small>';
   button.classList.add('is-visible');
   button.classList.remove('is-active');
-}
-
-// Critical runtime hook: main.js creates the Phaser game before this module executes,
-// but RunnerScene does not start until the player launches a mission. Patch the actual
-// class now, before the first mission starts, so setup/update cannot be lost to another
-// wrapper around RunnerScene.prototype.create/update.
-const originalCreate = RunnerScene.prototype.create;
-const originalUpdate = RunnerScene.prototype.update;
-if (!RunnerScene.prototype.__worldInteractionCreatePatched) {
-  RunnerScene.prototype.create = function patchedWorldInteractionCreate(...args) {
-    const result = originalCreate.apply(this,args);
-    try { setupWorldInteraction(this); } catch (error) { console.error('[WorldInteraction] create failed', error); }
-    return result;
-  };
-  RunnerScene.prototype.__worldInteractionCreatePatched = true;
-}
-if (!RunnerScene.prototype.__worldInteractionUpdatePatched) {
-  RunnerScene.prototype.update = function patchedWorldInteractionUpdate(...args) {
-    const result = originalUpdate.apply(this,args);
-    try { updateWorldInteraction(this); } catch (error) { console.error('[WorldInteraction] update failed', error); }
-    return result;
-  };
-  RunnerScene.prototype.__worldInteractionUpdatePatched = true;
 }
 
 document.addEventListener('keydown',event=>{
