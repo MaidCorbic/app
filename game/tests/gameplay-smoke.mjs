@@ -21,10 +21,11 @@ const server = spawn('node', ['server.js'], {
 });
 
 let browser;
+let page;
 try {
   await waitForServer(`http://localhost:${PORT}/`);
   browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', err => errors.push(err.message));
   await page.addInitScript(() => {
