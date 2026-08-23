@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:progression": "node tests/progression.mjs",
+    "test:progression-integrity": "node tests/progression-integrity.mjs",
     "test:missions": "node tests/missions.mjs",
     "test:start-flow": "node tests/start-flow.mjs",
     "test:upgrades": "node tests/upgrades.mjs",
