@@ -5,7 +5,6 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
   window.__relayFinalStabilityV1 = true;
 
   const LEGACY_RE = /^(?:SYSTEM\s+ONLINE|RELAY\s+RUNNER\s*(?:\/\/|—|-)?\s*(?:NETWORK|STANDBY)|RELAY\s+RUNNER\s+STANDBY|NIGHT\s+RUN\s*(?:\/\/|·|-)?\s*CHAPTER\s*0?1|CHAPTER\s*0?1\s*(?:\/\/|·|-)?\s*NIGHT\s+SHIFT)$/i;
-  const TRAINING_RE = /RUNNER\s+LESSON|TUTORIAL|ORIENTATION|STEP\s*0[1-9]/i;
 
   const scrubHome = () => {
     const intro = document.getElementById('intro');
@@ -56,18 +55,20 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
     const next = document.getElementById('nextMission');
     [retry, next].forEach(button => {
       if (!button) return;
-      button.type = 'button';
-      button.disabled = false;
+      if (button.type !== 'button') button.type = 'button';
+      if (button.disabled) button.disabled = false;
       button.style.pointerEvents = 'auto';
       button.style.cursor = 'pointer';
-      button.tabIndex = 0;
+      if (button.tabIndex !== 0) button.tabIndex = 0;
     });
     if (retry) {
-      retry.innerHTML = 'RETRY MISSION <b aria-hidden="true">↻</b>';
+      const label = 'RETRY MISSION <b aria-hidden="true">↻</b>';
+      if (retry.innerHTML !== label) retry.innerHTML = label;
       retry.setAttribute('aria-label', 'Retry this mission');
     }
     if (next) {
-      next.innerHTML = 'NEXT MISSION <b aria-hidden="true">➜</b>';
+      const label = 'NEXT MISSION <b aria-hidden="true">➜</b>';
+      if (next.innerHTML !== label) next.innerHTML = label;
       next.setAttribute('aria-label', 'Continue to the next mission');
     }
   };
@@ -116,8 +117,6 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
     return 'boost-pad';
   };
 
-  // First Delivery authored positions are intentionally aligned to existing platform spans:
-  // low platform 0-800, low platform 970-1730, mid platform 1880-2630, low platform 2680-4100.
   const FIRST_DELIVERY_PADS = Object.freeze([
     [700, 588],
     [1500, 588],
@@ -140,15 +139,7 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
         .setStrokeStyle(1.5, 0x8df4ff, .38)
         .setDepth(7);
       if (!scene.motionReduced) {
-        scene.tweens?.add?.({
-          targets: ring,
-          scale: 1.18,
-          alpha: .06,
-          duration: 820 + index * 90,
-          repeat: -1,
-          yoyo: true,
-          ease: 'Sine.inOut',
-        });
+        scene.tweens?.add?.({ targets: ring, scale: 1.18, alpha: .06, duration: 820 + index * 90, repeat: -1, yoyo: true, ease: 'Sine.inOut' });
       }
 
       const body = scene.add.rectangle(x, y, 74, 22, 0x000000, 0);
@@ -161,11 +152,9 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
         const now = performance.now();
         if (now - body.__relayBounceAt < 280) return;
         body.__relayBounceAt = now;
-
         const vx = Number(scene.player?.body?.velocity?.x || 0);
         scene.player.body.setVelocityY?.(-900);
         scene.player.body.setVelocityX?.(Math.max(vx, 390));
-
         visual.setScale(1.10, .78);
         ring.setScale(1.05);
         ring.setAlpha(.32);
@@ -180,17 +169,6 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
 
     scene.__relayFinalAuthoredPads = pads;
     scene.__relayFinalAuthoredPadsInstalled = true;
-  };
-
-  const clearAuthoredPads = scene => {
-    if (!scene?.__relayFinalAuthoredPads?.length) return;
-    scene.__relayFinalAuthoredPads.forEach(item => {
-      try { item.body?.destroy?.(); } catch {}
-      try { item.visual?.destroy?.(); } catch {}
-      try { item.ring?.destroy?.(); } catch {}
-    });
-    scene.__relayFinalAuthoredPads = [];
-    scene.__relayFinalAuthoredPadsInstalled = false;
   };
 
   const installObjectiveStability = () => {
@@ -213,7 +191,6 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
       const reserve = mobile ? Math.max(112, Math.round(h * .16)) : 28;
       const x = Math.max(12, w - panelW - (mobile ? 12 : 30));
       const y = Math.max(82, h - actualH - reserve);
-
       state.x = x;
       state.y = y;
       state.scale = scale;
@@ -252,23 +229,11 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
     const scene = window.__relayRunnerScene;
     if (scene?.mission?.id === 'first-delivery') requestAnimationFrame(() => installAuthoredPads(scene));
   }, { passive: true });
-  window.addEventListener('resize', () => {
-    scrubHome();
-    scrubDomLegacy();
-    ensureFinishActions();
-  }, { passive: true });
-  window.addEventListener('orientationchange', () => {
-    scrubHome();
-    scrubDomLegacy();
-    ensureFinishActions();
-  }, { passive: true });
+  window.addEventListener('resize', () => { scrubHome(); scrubDomLegacy(); ensureFinishActions(); }, { passive: true });
+  window.addEventListener('orientationchange', () => { scrubHome(); scrubDomLegacy(); ensureFinishActions(); }, { passive: true });
 
   if (document.body) {
-    new MutationObserver(() => {
-      scrubHome();
-      scrubDomLegacy();
-      ensureFinishActions();
-    }).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(() => { scrubHome(); scrubDomLegacy(); ensureFinishActions(); }).observe(document.body, { childList: true, subtree: true });
   }
 
   if (window.__relayRunnerScene) bindScene(window.__relayRunnerScene);
