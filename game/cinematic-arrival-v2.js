@@ -1,7 +1,7 @@
-/* Cinematic Arrival V5 — non-blocking splash handoff. Presentation never gates gameplay. */
+/* Cinematic Arrival V6 — deterministic, non-blocking splash handoff. */
 (() => {
-  if (window.__relayCinematicArrivalV5) return;
-  window.__relayCinematicArrivalV5 = true;
+  if (window.__relayCinematicArrivalV6) return;
+  window.__relayCinematicArrivalV6 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
@@ -48,21 +48,22 @@
 
     let released = false;
     const release = () => {
-      if (released) return;
+      if (released || !document.body.contains(splash)) return;
       released = true;
       splash.dataset.cinematicReleased = 'true';
       splash.classList.add('is-leaving');
       splash.setAttribute('aria-busy', 'false');
       splash.setAttribute('aria-hidden', 'true');
-
-      // Make the handoff observable immediately. Do not make tests or gameplay
-      // wait for a CSS transition to finish before the splash is considered gone.
+      // Critical CSS uses !important on #relaySplash, so explicitly override it.
       splash.hidden = true;
+      splash.style.setProperty('display', 'none', 'important');
+      splash.style.setProperty('visibility', 'hidden', 'important');
+      splash.style.setProperty('pointer-events', 'none', 'important');
+      window.dispatchEvent(new CustomEvent('relay:splash-released'));
       window.setTimeout(() => splash.remove(), 500);
     };
 
-    // One short painted frame only. The title screen and Phaser runtime own
-    // application flow; this presentation layer must never block either.
+    // Keep the cinematic presentation short, but make the handoff deterministic.
     window.setTimeout(release, 650);
     window.setTimeout(release, 1200);
   };
