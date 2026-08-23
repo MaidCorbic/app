@@ -1,16 +1,13 @@
-import { loadState } from './src/state.js';
+import { getSettings } from './src/settings/settings-store.js';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
 (() => {
   if (window.__relayRuntimeAiTutorialSettingsV1) return;
   window.__relayRuntimeAiTutorialSettingsV1 = true;
 
-  const settings = () => loadState();
-  const tutorialEnabled = () => settings().tutorialEnabled !== false;
-  const voiceEnabled = () => settings().aiVoice !== false;
+  const tutorialEnabled = () => getSettings().tutorialEnabled;
+  const voiceEnabled = () => getSettings().aiVoice;
 
-  // The browser narrator is shared by the runtime. Keep the existing voice
-  // selection/queue untouched, but make the Home toggle a real runtime gate.
   const speech = window.speechSynthesis;
   if (speech && !speech.__relayAiVoiceGateV1) {
     const originalSpeak = speech.speak.bind(speech);
@@ -22,8 +19,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   }
 
   window.addEventListener('relay-settings-change', event => {
-    if (event.detail?.key === 'aiVoice' && event.detail.value === false) speech?.cancel?.();
-    if (event.detail?.reset) speech?.cancel?.();
+    const detail = event.detail || {};
+    if (detail.aiVoice === false || (detail.key === 'aiVoice' && detail.value === false)) speech?.cancel?.();
+    if (detail.reset) speech?.cancel?.();
   });
 
   const prototype = RunnerScene?.prototype;
@@ -63,9 +61,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     return originalUpdateCombatTutorial?.apply(this, args);
   };
 
-  // Gadget lessons emit the generic `tutorial` event even outside the first-run
-  // flow. Suppress only that event when the Home tutorial toggle is OFF; the
-  // gadget mechanics themselves continue to execute normally.
   prototype.useGadget = function relayTutorialAwareGadget(...args) {
     if (tutorialEnabled() || !this.game?.events?.emit) return originalUseGadget?.apply(this, args);
     const events = this.game.events;
