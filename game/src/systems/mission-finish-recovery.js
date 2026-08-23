@@ -1,5 +1,6 @@
 import { missions } from '../missions.js';
 import { completeMission, loadState, saveState } from '../state.js';
+import { applyMissionCompletionIntegrity, reconcileProgressionState } from './progression-integrity.js';
 
 const RECOVERY_DELAY = 360;
 let timer;
@@ -39,7 +40,15 @@ function showRecoveredFinish(scene) {
     };
     state = completeMission(state, mission, scene.collected || 0, scene.elapsedMs || 0, runStats);
     state = { ...state, unlockedMissions: missions.filter(item => !item.unlockRequirement || state.completed.includes(item.unlockRequirement)).map(item => item.id) };
+    state = applyMissionCompletionIntegrity(state, mission, missions, scene.elapsedMs || 0);
+    state = reconcileProgressionState(state, missions);
     saveState(state);
+  } else {
+    const reconciled = reconcileProgressionState(state, missions);
+    if (reconciled !== state) {
+      state = reconciled;
+      saveState(state);
+    }
   }
 
   window.dispatchEvent(new CustomEvent('relay:mission-complete', { detail: { scene, missionId: mission.id } }));
@@ -63,9 +72,6 @@ function showRecoveredFinish(scene) {
   return true;
 }
 
-// One authoritative click gate for mission-result transitions. The existing
-// main.js handlers still own launch/retry semantics; this layer only prevents
-// pointerup/click double-fires from starting overlapping scene transitions.
 const transitionLocks = new WeakSet();
 function installTransitionGate() {
   ['again', 'nextMission', 'retry'].forEach(id => {
@@ -80,8 +86,6 @@ function installTransitionGate() {
       }
       transitionLocks.add(button);
       button.disabled = true;
-      // Keep the lock through the current click and the next animation frame;
-      // main.js remains the sole owner of the actual mission launch.
       requestAnimationFrame(() => requestAnimationFrame(() => {
         transitionLocks.delete(button);
         if (button.isConnected) button.disabled = false;
