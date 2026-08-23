@@ -18,14 +18,17 @@ const packageJson = JSON.parse(read('package.json'));
 
 const failures = [];
 const count = (text, needle) => text.split(needle).length - 1;
+const lifecycleScriptPresent =
+  indexHtml.includes('./src/systems/runner-lifecycle-adapter.js')
+  || indexHtml.includes('/src/systems/runner-lifecycle-adapter.js');
 
-if (count(indexHtml, './src/systems/runner-lifecycle-adapter.js') !== 1) {
+if (!lifecycleScriptPresent || count(indexHtml, 'runner-lifecycle-adapter.js') !== 1) {
   failures.push('index.html must load exactly one authoritative RunnerScene lifecycle adapter');
 }
-if (indexHtml.includes('./src/systems/core-stability.js')) {
+if (indexHtml.includes('./src/systems/core-stability.js') || indexHtml.includes('/src/systems/core-stability.js')) {
   failures.push('index.html must not load the removed core-stability wrapper');
 }
-if (indexHtml.includes('./world-interaction-v1.js')) {
+if (indexHtml.includes('./world-interaction-v1.js') || indexHtml.includes('/world-interaction-v1.js')) {
   failures.push('index.html must not load world-interaction-v1 directly; lifecycle adapter owns its runtime integration');
 }
 if (!lifecycleAdapter.includes('prototype.create =')) {
