@@ -3,11 +3,11 @@ import { missions } from '../missions.js';
 
 const PANEL_CLASS = 'mission-mastery-panel';
 const BADGES = [
-  { id: 'SIGNAL SWEEP', label: 'SIGNAL SWEEP', detail: 'Collect every Signal' },
-  { id: 'PAR TIME', label: 'PAR TIME', detail: 'Finish under the target time' },
-  { id: 'CLEAN RUN', label: 'CLEAN RUN', detail: 'Finish without collisions or falls' },
-  { id: 'SECRET ROUTE', label: 'SECRET ROUTE', detail: 'Discover every secret route' },
-  { id: 'PERFECT PACKAGE', label: 'PERFECT PACKAGE', detail: 'Deliver the package at 100%' },
+  { id: 'signal-hunter', label: 'SIGNAL SWEEP', detail: 'Collect every Signal' },
+  { id: 'speed-run', label: 'PAR TIME', detail: 'Finish under the target time' },
+  { id: 'clean-run', label: 'CLEAN RUN', detail: 'Finish without collisions or falls' },
+  { id: 'secret-route', label: 'SECRET ROUTE', detail: 'Discover every secret route' },
+  { id: 'perfect-package', label: 'PERFECT PACKAGE', detail: 'Deliver the package at 100%' },
 ];
 const style = `
 .${PANEL_CLASS}{grid-column:1/-1;margin-top:4px;padding:12px 14px;border:1px solid rgba(150,190,255,.18);background:rgba(8,18,38,.52);border-radius:10px;text-align:left}
