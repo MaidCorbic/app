@@ -72,5 +72,4 @@ import './dynamic-environment-reactions-v1.js';
 import './collapse-protocol-v1.js';
 import './collapse-protocol-contact-bridge-v1.js';
 import './src/systems/mobile-controls-controller.js';
-import './src/systems/mobile-controls-runtime-v2.js';
 import './src/systems/mission-runtime-hardening-v1.js';
