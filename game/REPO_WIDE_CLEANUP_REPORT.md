@@ -1,8 +1,10 @@
 # Repo-wide cleanup report
 
-## Safe removals
-- Removed `game/gameplay-new-layer-v1.js`: no active import/reference; v2 is the active implementation and has dedicated tests.
-- Removed `game/src/systems/dynamic-world-mechanics-v1.js`: no active import/reference; v2 is the active implementation.
+Safe cleanup is limited to modules proven unused by active-reference search. Legacy-looking files are retained unless replacement and non-use are established.
+
+## Audit findings
+- `game/gameplay-new-layer-v1.js`: no active import/reference found; v2 is referenced by `relay-ui-init.js` and has dedicated tests. Marked for safe removal pending final tree write.
+- `game/src/systems/dynamic-world-mechanics-v1.js`: no active import/reference found; v2 is referenced by `relay-ui-init.js`. Marked for safe removal pending final tree write.
 
 ## Intentionally retained
 - Tutorial files with active imports in `relay-ui-init.js`.
@@ -18,3 +20,5 @@ A legacy-looking filename is not sufficient evidence for deletion. Removal requi
 - console/runtime error scan
 - mobile/desktop UI flow
 - gameplay mission lifecycle
+
+No merge to `main` is part of this cleanup.
