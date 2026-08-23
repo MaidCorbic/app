@@ -1,9 +1,7 @@
 import './player-shield-visual-cleanup-v1.js';
-import './runtime-ai-tutorial-settings.js';
 
 (() => {
   if (window.__relayHomeTutorialV3) return;
-  window.__relayHomeTutorialV3 = true;
 
   const style = document.createElement('style');
   style.textContent = `
