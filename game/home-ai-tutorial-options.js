@@ -1,4 +1,4 @@
-import { loadState, saveState } from './src/state.js';
+import { getSettings, updateSettings } from './src/settings/settings-store.js';
 
 (() => {
   if (window.__relayHomeAiTutorialOptionsV1) return;
@@ -15,10 +15,6 @@ import { loadState, saveState } from './src/state.js';
   `;
   document.head.appendChild(style);
 
-  const enabled = (state, key) => state[key] !== false;
-  const currentState = () => loadState();
-  const persist = patch => saveState({ ...currentState(), ...patch });
-
   const option = (key, title, detail, on) => {
     const row = document.createElement('div');
     row.className = 'home-opt home-opt-ai-tutorial';
@@ -26,14 +22,13 @@ import { loadState, saveState } from './src/state.js';
     row.innerHTML = `<div class="home-opt-copy"><b>${title}</b><small>${detail}</small></div><button type="button" class="${on ? 'is-on' : ''}" aria-pressed="${on}">${on ? 'ON' : 'OFF'}</button>`;
     const button = row.querySelector('button');
     button.addEventListener('click', () => {
-      const state = currentState();
-      const next = !enabled(state, key);
-      persist({ [key]: next });
+      const settings = getSettings();
+      const next = !settings[key];
+      updateSettings({ [key]: next });
       if (key === 'aiVoice' && !next) window.speechSynthesis?.cancel?.();
       button.textContent = next ? 'ON' : 'OFF';
       button.classList.toggle('is-on', next);
       button.setAttribute('aria-pressed', String(next));
-      window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { key, value: next } }));
     });
     return row;
   };
@@ -46,12 +41,12 @@ import { loadState, saveState } from './src/state.js';
     const audio = sections.find(section => section.textContent.trim() === 'AUDIO');
     if (!gameplay || !audio) return;
 
-    const state = currentState();
+    const settings = getSettings();
     if (!root.querySelector('[data-home-ai-tutorial="tutorialEnabled"]')) {
-      gameplay.insertAdjacentElement('afterend', option('tutorialEnabled', 'TUTORIAL', 'Mission guidance, first-run lessons and route tips', enabled(state, 'tutorialEnabled')));
+      gameplay.insertAdjacentElement('afterend', option('tutorialEnabled', 'TUTORIAL', 'Mission guidance, first-run lessons and route tips', settings.tutorialEnabled));
     }
     if (!root.querySelector('[data-home-ai-tutorial="aiVoice"]')) {
-      audio.insertAdjacentElement('afterend', option('aiVoice', 'AI VOICE', 'NIA / MARA narration and in-game spoken guidance', enabled(state, 'aiVoice')));
+      audio.insertAdjacentElement('afterend', option('aiVoice', 'AI VOICE', 'NIA / MARA narration and in-game spoken guidance', settings.aiVoice));
     }
 
     const reset = root.querySelector('[data-home-reset]');
@@ -59,8 +54,7 @@ import { loadState, saveState } from './src/state.js';
       reset.dataset.homeAiTutorialReset = '1';
       reset.addEventListener('click', () => {
         window.setTimeout(() => {
-          persist({ aiVoice: true, tutorialEnabled: true });
-          window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { reset: true } }));
+          updateSettings({ aiVoice: true, tutorialEnabled: true });
           inject();
         }, 0);
       });
