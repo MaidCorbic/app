@@ -12,27 +12,38 @@
   const action = name => {
     const s = activeScene();
     if (!s || s.cinematicActive || s.finished || s.respawning) return false;
+    let handled = false;
     try {
-      if (typeof s.mobileActionHandler === 'function') { s.mobileActionHandler(name); return true; }
       if (!s.mobileActions) s.mobileActions = {};
-      // RunnerScene.update() is the authoritative gameplay consumer. Every mobile
-      // action is queued here and consumed by that update tick, exactly like a
-      // keyboard JustDown action, without relying on synthetic browser keys.
+      // Always queue the action even when RunnerScene exposes a handler. update() is
+      // the authoritative consumer and must see the same state as keyboard input.
       s.mobileActions[name] = true;
-      s.game?.events?.emit?.('mobile-action', { action: name, source: 'mobile-direct-v1' });
-      s.events?.emit?.('mobile-action', { action: name, source: 'mobile-direct-v1' });
-      return true;
-    } catch { return false; }
+      handled = true;
+    } catch {}
+    try {
+      if (typeof s.mobileActionHandler === 'function') s.mobileActionHandler(name);
+    } catch {}
+    try {
+      const payload = { action: name, source: 'mobile-direct-v2', tutorial: !!s.firstTimeTutorial };
+      s.game?.events?.emit?.('mobile-action', payload);
+      s.events?.emit?.('mobile-action', payload);
+      if (name === 'dash') {
+        window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash', { detail: payload }));
+      }
+    } catch {}
+    return handled;
   };
 
   const move = direction => {
     const s = activeScene();
     if (!s || s.cinematicActive || s.finished || s.respawning) return;
     try {
-      if (typeof s.mobileMoveHandler === 'function') { s.mobileMoveHandler(direction); return; }
+      if (typeof s.mobileMoveHandler === 'function') s.mobileMoveHandler(direction);
+    } catch {}
+    try {
       s.mobileDirection = direction || null;
-      s.game?.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v1' });
-      s.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v1' });
+      s.game?.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v2' });
+      s.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v2' });
     } catch {}
   };
 
