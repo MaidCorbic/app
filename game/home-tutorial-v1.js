@@ -45,48 +45,13 @@ import './runtime-ai-tutorial-settings.js';
         <div class="tutorial-step"><b>02 · FIGHT</b><p><span class="tutorial-key">E</span> fire · <span class="tutorial-key">Q</span> blade · stomp enemies from above</p></div>
         <div class="tutorial-step"><b>03 · DELIVER</b><p>Collect Signals, use checkpoints and reach the delivery beacon.</p></div>
       </div>
-      <details class="tutorial-category" open><summary>CONTROLS & MOVEMENT</summary><ul>
-        <li><span class="tutorial-key">A</span> / <span class="tutorial-key">D</span> Move left and right.</li>
-        <li><span class="tutorial-key">SPACE</span> Jump; release early for a shorter jump.</li>
-        <li><span class="tutorial-key">SHIFT</span> Dash through gaps and danger.</li>
-        <li><span class="tutorial-key">S</span> Slide under hazards while running.</li>
-        <li>Advanced routes can unlock double jump, wall jump, wall run, air dash and ledge grab.</li>
-      </ul></details>
-      <details class="tutorial-category"><summary>COMBAT</summary><ul>
-        <li><span class="tutorial-key">E</span> Fire the equipped plasma weapon.</li>
-        <li><span class="tutorial-key">Q</span> Use the blade for close combat.</li>
-        <li>Stomp enemies from above to keep momentum.</li>
-        <li>Read enemy cues and projectiles; movement is your main defense.</li>
-      </ul></details>
-      <details class="tutorial-category"><summary>SIGNALS, OBJECTIVES & CHECKPOINTS</summary><ul>
-        <li>Gold Signals grant score, XP and mastery progress.</li>
-        <li>Follow route markers and beacon guidance to the main objective.</li>
-        <li>Checkpoints preserve route progress and reduce the cost of mistakes.</li>
-        <li>Optional objectives reward clean routes, fast finishes and full Signal collection.</li>
-      </ul></details>
-      <details class="tutorial-category"><summary>BUILD & GEAR</summary><ul>
-        <li><span class="tutorial-key">1</span> / <span class="tutorial-key">2</span> Build tools · <span class="tutorial-key">3</span> / <span class="tutorial-key">4</span> Gear.</li>
-        <li>Tools include Relay Shield, Kinetic Ball, Arc Turret and Spring Pad.</li>
-        <li>Gadgets can scan, disrupt, decoy, boost Signal score or restore Energy.</li>
-        <li>Spend Energy deliberately and recover safely at checkpoints.</li>
-      </ul></details>
-      <details class="tutorial-category"><summary>DYNAMIC WORLD & ADVANCED PLAY</summary><ul>
-        <li>Power switches, security gates, cargo lifts and reactive props can alter routes.</li>
-        <li>Low routes are often safer; high routes can be faster or richer in Signals.</li>
-        <li>Combine movement, combat and gadgets instead of relying on one mechanic.</li>
-        <li class="tutorial-note">Advanced movement lessons should appear contextually after the relevant ability is available.</li>
-      </ul></details>
-      <details class="tutorial-category"><summary>MOBILE CONTROLS</summary><ul>
-        <li>Use the virtual joystick for movement.</li>
-        <li>JUMP, SWORD and DASH are your primary actions.</li>
-        <li>BUILD 1 / BUILD 2 and GEAR 3 / GEAR 4 mirror keyboard abilities.</li>
-        <li>Landscape orientation gives the clearest route view.</li>
-      </ul></details>
-      <details class="tutorial-category"><summary>TUTORIAL OPTIONS</summary><ul>
-        <li>TUTORIAL controls contextual lessons and mission guidance.</li>
-        <li>Turn it OFF for a clean run; turn it ON again whenever you want help.</li>
-        <li>AI VOICE is independent and can be disabled separately.</li>
-      </ul></details>
+      <details class="tutorial-category" open><summary>CONTROLS & MOVEMENT</summary><ul><li><span class="tutorial-key">A</span> / <span class="tutorial-key">D</span> Move left and right.</li><li><span class="tutorial-key">SPACE</span> Jump; release early for a shorter jump.</li><li><span class="tutorial-key">SHIFT</span> Dash through gaps and danger.</li><li><span class="tutorial-key">S</span> Slide under hazards while running.</li><li>Advanced routes can unlock double jump, wall jump, wall run, air dash and ledge grab.</li></ul></details>
+      <details class="tutorial-category"><summary>COMBAT</summary><ul><li><span class="tutorial-key">E</span> Fire the equipped plasma weapon.</li><li><span class="tutorial-key">Q</span> Use the blade for close combat.</li><li>Stomp enemies from above to keep momentum.</li><li>Read enemy cues and projectiles; movement is your main defense.</li></ul></details>
+      <details class="tutorial-category"><summary>SIGNALS, OBJECTIVES & CHECKPOINTS</summary><ul><li>Gold Signals grant score, XP and mastery progress.</li><li>Follow route markers and beacon guidance to the main objective.</li><li>Checkpoints preserve route progress and reduce the cost of mistakes.</li><li>Optional objectives reward clean routes, fast finishes and full Signal collection.</li></ul></details>
+      <details class="tutorial-category"><summary>BUILD & GEAR</summary><ul><li><span class="tutorial-key">1</span> / <span class="tutorial-key">2</span> Build tools · <span class="tutorial-key">3</span> / <span class="tutorial-key">4</span> Gear.</li><li>Tools include Relay Shield, Kinetic Ball, Arc Turret and Spring Pad.</li><li>Gadgets can scan, disrupt, decoy, boost Signal score or restore Energy.</li><li>Spend Energy deliberately and recover safely at checkpoints.</li></ul></details>
+      <details class="tutorial-category"><summary>DYNAMIC WORLD & ADVANCED PLAY</summary><ul><li>Power switches, security gates, cargo lifts and reactive props can alter routes.</li><li>Low routes are often safer; high routes can be faster or richer in Signals.</li><li>Combine movement, combat and gadgets instead of relying on one mechanic.</li><li class="tutorial-note">Advanced movement lessons should appear contextually after the relevant ability is available.</li></ul></details>
+      <details class="tutorial-category"><summary>MOBILE CONTROLS</summary><ul><li>Use the virtual joystick for movement.</li><li>JUMP, SWORD and DASH are your primary actions.</li><li>BUILD 1 / BUILD 2 and GEAR 3 / GEAR 4 mirror keyboard abilities.</li><li>Landscape orientation gives the clearest route view.</li></ul></details>
+      <details class="tutorial-category"><summary>TUTORIAL OPTIONS</summary><ul><li>TUTORIAL controls contextual lessons and mission guidance.</li><li>Turn it OFF for a clean run; turn it ON again whenever you want help.</li><li>AI VOICE is independent and can be disabled separately.</li></ul></details>
       <div class="tutorial-foot">PRO TIP · Learn the safe route first. On the next run, take the high line, chain movement and chase the optional objectives for a faster rank.</div>
     </div>`;
 
@@ -102,15 +67,24 @@ import './runtime-ai-tutorial-settings.js';
   }
 
   function openTutorial() {
-    const panel = document.getElementById('titlePanel');
-    const heading = document.getElementById('titlePanelHeading');
-    const eyebrow = document.getElementById('titlePanelEyebrow');
-    const content = document.getElementById('titlePanelContent');
+    // The actual title-screen modal is relayInfoPanel. titlePanel was never
+    // part of the DOM, which made the old tutorial button silently return.
+    const panel = document.getElementById('relayInfoPanel') || document.getElementById('titlePanel');
+    const heading = document.getElementById('relayInfoHeading') || document.getElementById('titlePanelHeading');
+    const eyebrow = document.getElementById('relayInfoEyebrow') || document.getElementById('titlePanelEyebrow');
+    const content = document.getElementById('relayInfoContent') || document.getElementById('titlePanelContent');
     if (!panel || !heading || !content) return;
+
     panel.classList.remove('hidden');
-    if (eyebrow) eyebrow.textContent = 'RUNNER FIELD MANUAL · QUICK START';
+    panel.setAttribute('aria-hidden', 'false');
+    panel.classList.remove('relay-update-mode');
+    if (eyebrow) eyebrow.textContent = 'RELAY RUNNER // FIELD GUIDE';
     heading.textContent = 'TUTORIAL';
     content.innerHTML = tutorialMarkup;
+
+    requestAnimationFrame(() => {
+      panel.querySelector('.home-tutorial-content')?.scrollIntoView?.({ block: 'start' });
+    });
   }
 
   function install() {
