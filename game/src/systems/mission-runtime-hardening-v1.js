@@ -22,7 +22,7 @@ import { GAME_FLOW, gameFlow } from '../runtime/game-flow.js';
     again: GAME_FLOW.LOADING,
     nextMission: GAME_FLOW.LOADING,
     finishTitle: GAME_FLOW.HOME,
-    failTitle: GAME_FLOW.LOADING,
+    failTitle: GAME_FLOW.HOME,
   });
   let transitionLock = false;
 
@@ -78,10 +78,6 @@ import { GAME_FLOW, gameFlow } from '../runtime/game-flow.js';
     const current = gameFlow.getState();
     if (current === target) return true;
     if (gameFlow.canTransition(target)) return gameFlow.transition(target, meta);
-
-    // Recovery path for legacy UI handlers whose previous transition was not
-    // represented in the new flow yet. Resetting only the flow state is safe;
-    // the existing launch/retry handler remains authoritative for the actual scene.
     if (target === GAME_FLOW.HOME) {
       gameFlow.reset({ ...meta, reason: 'legacy-home-transition' });
       return true;
@@ -99,12 +95,8 @@ import { GAME_FLOW, gameFlow } from '../runtime/game-flow.js';
       event.stopImmediatePropagation();
       return;
     }
-
     const target = TRANSITION_TARGETS[button.id];
-    if (target) {
-      flowTransition(target, { source: 'mission-runtime-hardening', control: button.id });
-    }
-
+    if (target) flowTransition(target, { source: 'mission-runtime-hardening', control: button.id });
     transitionLock = true;
     button.disabled = true;
     button.setAttribute('aria-busy', 'true');
@@ -132,29 +124,21 @@ import { GAME_FLOW, gameFlow } from '../runtime/game-flow.js';
   const onMissionComplete = () => {
     stopTutorialRuntime();
     resetTouchState();
-    if (gameFlow.canTransition(GAME_FLOW.COMPLETE)) {
-      gameFlow.transition(GAME_FLOW.COMPLETE, { source: 'mission-runtime-hardening' });
-    }
-    if (gameFlow.canTransition(GAME_FLOW.RESULTS)) {
-      gameFlow.transition(GAME_FLOW.RESULTS, { source: 'mission-runtime-hardening' });
-    }
+    if (gameFlow.canTransition(GAME_FLOW.COMPLETE)) gameFlow.transition(GAME_FLOW.COMPLETE, { source: 'mission-runtime-hardening' });
+    if (gameFlow.canTransition(GAME_FLOW.RESULTS)) gameFlow.transition(GAME_FLOW.RESULTS, { source: 'mission-runtime-hardening' });
     bind();
   };
 
   const onPause = event => {
     const action = event.target?.closest?.('[data-action="pause"],[data-pause-button],#pauseBtn,#pause');
     if (!action) return;
-    if (gameFlow.canTransition(GAME_FLOW.PAUSED)) {
-      gameFlow.transition(GAME_FLOW.PAUSED, { source: 'mission-runtime-hardening' });
-    }
+    if (gameFlow.canTransition(GAME_FLOW.PAUSED)) gameFlow.transition(GAME_FLOW.PAUSED, { source: 'mission-runtime-hardening' });
   };
 
   const onResume = event => {
     const action = event.target?.closest?.('[data-action="resume"],[data-resume-button],#resumeBtn,#resume');
     if (!action) return;
-    if (gameFlow.canTransition(GAME_FLOW.RUNNING)) {
-      gameFlow.transition(GAME_FLOW.RUNNING, { source: 'mission-runtime-hardening' });
-    }
+    if (gameFlow.canTransition(GAME_FLOW.RUNNING)) gameFlow.transition(GAME_FLOW.RUNNING, { source: 'mission-runtime-hardening' });
   };
 
   window.addEventListener('relay:mission-complete', onMissionComplete, { passive: true });
