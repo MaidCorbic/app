@@ -7,6 +7,7 @@ const ACTION_LABELS = Object.freeze({
   build2: 'BUILD — 2',
   gadget1: 'GEAR — 3',
   gadget2: 'GEAR — 4',
+  slide: 'SLIDE',
 });
 
 const OWNER = 'controller-v3';
@@ -61,9 +62,7 @@ const releaseGameplayAction = action => {
   if (!scene) return;
   try {
     if (scene.mobileActions) scene.mobileActions[action] = false;
-    if (typeof scene.mobileActionReleaseHandler === 'function') {
-      scene.mobileActionReleaseHandler(action);
-    }
+    if (typeof scene.mobileActionReleaseHandler === 'function') scene.mobileActionReleaseHandler(action);
   } catch {}
 };
 
@@ -71,23 +70,20 @@ const resetGameplayActions = () => {
   const scene = getActiveScene();
   if (!scene?.mobileActions) return;
   try {
-    Object.keys(scene.mobileActions).forEach(action => {
-      scene.mobileActions[action] = false;
-    });
+    Object.keys(scene.mobileActions).forEach(action => { scene.mobileActions[action] = false; });
+    scene.mobileDirection = null;
   } catch {}
 };
 
 const directMove = direction => {
   const scene = getActiveScene();
   if (!scene || scene.cinematicActive || scene.finished || scene.respawning) return false;
-
   try {
     if (typeof scene.mobileMoveHandler === 'function') {
       scene.mobileMoveHandler(direction);
       return true;
     }
   } catch {}
-
   try {
     scene.mobileDirection = direction || null;
     emitGameplay('mobile-move', { direction });
@@ -131,10 +127,10 @@ function installStyle() {
     body.is-touch .relay-mobile-dpad [data-mobile-direction=right]{grid-column:3;grid-row:2}
     body.is-touch .relay-mobile-dpad [data-mobile-direction=down]{grid-column:2;grid-row:3}
     body.is-touch .relay-mobile-dpad .relay-dpad-center{grid-column:2;grid-row:2;background:radial-gradient(circle,rgba(141,244,255,.10),rgba(3,12,22,.98))!important;border:1px solid rgba(141,244,255,.20)!important;pointer-events:none}
-    body.is-touch .mobile-actions{display:grid!important;grid-template-columns:repeat(3,52px)!important;grid-auto-rows:52px!important;gap:7px!important;align-items:end!important;justify-content:end!important;pointer-events:auto!important;touch-action:none!important}
+    body.is-touch .mobile-actions{display:grid!important;grid-template-columns:repeat(4,52px)!important;grid-auto-rows:52px!important;gap:7px!important;align-items:end!important;justify-content:end!important;pointer-events:auto!important;touch-action:none!important}
     body.is-touch .mobile-actions [data-mobile-action]{width:52px!important;height:52px!important;border-radius:14px!important;pointer-events:auto!important;touch-action:none!important;-webkit-tap-highlight-color:transparent!important}
     body.is-touch .mobile-actions [data-mobile-action=dash]{border-color:rgba(141,244,255,.9)!important;box-shadow:0 0 18px rgba(25,200,245,.30),inset 0 0 12px rgba(141,244,255,.06)!important}
-    @media(max-width:430px){body.is-touch #play .mobile-controls,body.is-touch .mobile-controls{bottom:max(8px,env(safe-area-inset-bottom,0px)+7px)!important;gap:5px!important}body.is-touch .relay-mobile-dpad{transform:scale(.84);transform-origin:bottom left}body.is-touch .mobile-actions{grid-template-columns:repeat(3,44px)!important;grid-auto-rows:44px!important;gap:5px!important}body.is-touch .mobile-actions [data-mobile-action]{width:44px!important;height:44px!important;font-size:8px!important}}
+    @media(max-width:430px){body.is-touch #play .mobile-controls,body.is-touch .mobile-controls{bottom:max(8px,env(safe-area-inset-bottom,0px)+7px)!important;gap:5px!important}body.is-touch .relay-mobile-dpad{transform:scale(.84);transform-origin:bottom left}body.is-touch .mobile-actions{grid-template-columns:repeat(4,44px)!important;grid-auto-rows:44px!important;gap:5px!important}body.is-touch .mobile-actions [data-mobile-action]{width:44px!important;height:44px!important;font-size:8px!important}}
     body.is-touch.relay-cinematic-active .mobile-controls{display:none!important;visibility:hidden!important;pointer-events:none!important}
     #relayMobileSettings{position:fixed!important;right:max(10px,env(safe-area-inset-right,0px)+10px)!important;bottom:max(12px,env(safe-area-inset-bottom,0px)+12px)!important;z-index:2147483002!important;display:none!important;min-height:42px!important;padding:0 13px!important;border:1px solid rgba(141,244,255,.42)!important;border-radius:12px!important;background:linear-gradient(145deg,rgba(6,22,38,.96),rgba(3,10,18,.98))!important;color:#dffcff!important;font:900 9px/1 ui-monospace,monospace!important;letter-spacing:.08em!important;box-shadow:0 0 20px rgba(25,200,245,.12)!important}
     body.is-touch #relayMobileSettings{display:block!important}
@@ -159,7 +155,7 @@ function ensureDpad(root) {
 function ensureActions(root) {
   let actions = root.querySelector('.mobile-actions');
   if (!actions) { actions = document.createElement('div'); actions.className = 'mobile-actions'; root.appendChild(actions); }
-  [['jump','▲'],['dash','DASH'],['fire','FIRE'],['sword','BLADE'],['build1','BUILD 1'],['gadget1','GEAR 3']].forEach(([action,label]) => {
+  [['jump','▲'],['dash','DASH'],['fire','FIRE'],['sword','BLADE'],['build1','BUILD 1'],['build2','BUILD 2'],['gadget1','GEAR 3'],['gadget2','GEAR 4']].forEach(([action,label]) => {
     if (actions.querySelector(`[data-mobile-action="${action}"]`)) return;
     const button = document.createElement('button');
     button.type = 'button'; button.dataset.mobileAction = action; button.textContent = label;
@@ -178,8 +174,7 @@ function bindControls(root) {
 
   const releaseAction = (button, event) => {
     event?.preventDefault?.(); event?.stopImmediatePropagation?.();
-    const action = button.dataset.mobileAction;
-    releaseGameplayAction(action);
+    releaseGameplayAction(button.dataset.mobileAction);
     button.classList.remove('is-active');
   };
   const releaseDirection = (button, event) => {
