@@ -2,6 +2,8 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 import './src/tutorial-map-v1.js';
 import './tutorial-onboarding-v3.js';
 import './tutorial-mobile-layout-fix-v1.js';
+import './tutorial-mobile-layout-v2.css';
+import './tutorial-runner-lesson-suppressor-v1.js';
 import './first-mission-transmission-suppressor-v1.js';
 import './src/systems/tutorial-chapter-order-v1.js';
 import './gameplay-event-hud-v2.css';
