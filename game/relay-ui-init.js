@@ -1,4 +1,6 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
+import './src/runtime/game-flow.js';
+import './src/settings/settings-store.js';
 import './src/tutorial-map-v1.js';
 import './tutorial-onboarding-v3.js';
 import './tutorial-mobile-layout-fix-v1.js';
@@ -13,7 +15,6 @@ import './city-response-v1.css';
 import './collapse-protocol-v1.css';
 import './city-pulse-v1.css';
 
-// UPDATE 22 — shared lifecycle/event adapter. Additive only.
 import './relay-runtime-kernel-v1.js';
 import './city-pulse-v1.js';
 
