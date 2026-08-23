@@ -1,0 +1,114 @@
+/* Tutorial HUD layout polish — presentation only.
+   Keeps the lesson readable without consuming the mobile control zone. */
+#relayTutorialOnboardingV3 .training-card{
+  top:58%;
+  bottom:auto;
+  width:min(460px,calc(100vw - 40px));
+  max-height:min(180px,28vh);
+  overflow:hidden;
+  padding:14px 18px;
+  border-radius:16px;
+}
+#relayTutorialOnboardingV3 .training-card h2{
+  margin:6px 0 7px;
+  font-size:clamp(24px,3.2vw,34px);
+  line-height:.98;
+}
+#relayTutorialOnboardingV3 .training-card p{
+  max-width:420px;
+  font-size:11px;
+  line-height:1.35;
+}
+#relayTutorialOnboardingV3 .training-card kbd{
+  margin-top:9px;
+  padding:6px 9px;
+  font-size:8px;
+}
+#relayTutorialOnboardingV3 .training-progress{
+  margin-top:10px;
+}
+#relayTutorialOnboardingV3 .training-progress i{
+  width:22px;
+}
+
+@media (max-width:700px){
+  #relayTutorialOnboardingV3 .training-card{
+    top:54%;
+    width:min(420px,calc(100vw - 28px));
+    max-height:min(172px,25vh);
+    padding:12px 14px;
+    border-radius:15px;
+  }
+  #relayTutorialOnboardingV3 .training-card small{
+    font-size:7px;
+    letter-spacing:.2em;
+  }
+  #relayTutorialOnboardingV3 .training-card h2{
+    margin:5px 0 6px;
+    font-size:clamp(21px,5.8vw,29px);
+  }
+  #relayTutorialOnboardingV3 .training-card p{
+    max-width:390px;
+    font-size:10px;
+    line-height:1.32;
+  }
+  #relayTutorialOnboardingV3 .training-card kbd{
+    margin-top:7px;
+    padding:5px 8px;
+    font-size:7px;
+  }
+  #relayTutorialOnboardingV3 .training-progress{
+    margin-top:8px;
+  }
+  #relayTutorialOnboardingV3 .training-progress i{
+    width:20px;
+    height:2px;
+  }
+}
+
+@media (max-height:620px){
+  #relayTutorialOnboardingV3 .training-card{
+    top:55%;
+    max-height:150px;
+    padding:10px 13px;
+  }
+  #relayTutorialOnboardingV3 .training-card h2{
+    font-size:22px;
+    margin:4px 0 5px;
+  }
+  #relayTutorialOnboardingV3 .training-card p{
+    font-size:9px;
+    line-height:1.25;
+  }
+  #relayTutorialOnboardingV3 .training-card kbd{
+    margin-top:5px;
+  }
+  #relayTutorialOnboardingV3 .training-progress{
+    margin-top:6px;
+  }
+}
+
+@media (orientation:landscape) and (max-height:520px){
+  #relayTutorialOnboardingV3 .training-card{
+    top:62%;
+    width:min(390px,calc(100vw - 28px));
+    max-height:138px;
+    padding:9px 12px;
+  }
+  #relayTutorialOnboardingV3 .training-card h2{
+    font-size:20px;
+  }
+  #relayTutorialOnboardingV3 .training-card p{
+    font-size:8.5px;
+  }
+}
+
+/* The old generic Runner Lesson belongs to the field-guide/tutorial page,
+   not the live step-by-step onboarding overlay. */
+body.relay-training-active .runner-lesson,
+body.relay-training-active [data-runner-lesson],
+body.relay-training-active [data-tutorial-lesson="runner"]{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
