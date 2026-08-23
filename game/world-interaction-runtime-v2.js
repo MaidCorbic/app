@@ -3,6 +3,7 @@
 // UPDATE 11 adds the universal finish relay tower without replacing existing state systems.
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 import './finish-tower-v1.js';
+import './relay-senior-polish-v1.js';
 import { setupWorldInteraction, updateWorldInteraction } from './world-interaction-v1.js';
 
 if (!window.__relayWorldInteractionRuntimeV2) {
