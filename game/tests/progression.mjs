@@ -8,7 +8,8 @@ const importSource = async (relativePath) => {
 
 const { missions } = await importSource('../src/missions.js');
 globalThis.missions = missions;
-const { MAX_LEVEL, claimChallenge, claimLoginReward, completeMission, getCourierRank, getLevelProgress, levelForXp, loadState, saveState, xpForLevel } = await importSource('../src/state.js');
+const { MAX_LEVEL, claimChallenge, claimLoginReward, getCourierRank, getLevelProgress, levelForXp, loadState, saveState, xpForLevel } = await importSource('../src/state.js');
+const { completeMissionCanonical } = await importSource('../src/systems/mission-completion-service.js');
 
 const store = new Map();
 globalThis.localStorage = {
@@ -16,7 +17,13 @@ globalThis.localStorage = {
   setItem: (key, value) => store.set(key, value),
 };
 
-const completeRun = (state, mission, signals, time) => completeMission(state, mission, signals, time, { jumps: 6, collisions: 0, falls: 0 });
+const completeRun = (state, mission, signals, time, overrides = {}) => completeMissionCanonical(
+  state,
+  mission,
+  signals,
+  time,
+  { jumps: 6, collisions: 0, falls: 0, ...overrides },
+);
 const first = missions[0];
 const second = missions[1];
 
@@ -51,15 +58,19 @@ assert.equal(state.completed.includes(second.id), true, 'Mission 02 completion p
 assert.deepEqual(state.campaign.claimedChapters, ['chapter-one'], 'Completing Chapter 01 routes claims its campaign reward once');
 assert.deepEqual(state.rivalProgress.victories, ['dead-drop'], 'A par-time Dead Drop awards the first Mara Vex victory once');
 assert.equal(state.abilities.includes('doubleJump'), true, 'Mission 02 unlocks Double Jump');
+assert.equal(state.abilities.includes('slide'), true, 'Mission 02 unlocks Slide');
 assert.equal(state.missionStats[second.id].bestRating, 3, 'Perfect Mission 02 earns three stars');
 assert.ok(state.xp > 0 && state.rank !== 'ROOKIE', 'XP and persisted rank advance');
 assert.equal(state.completed.includes(missions[2].unlockRequirement), true, 'Mission 03 unlock requirement is satisfied after Mission 02');
+assert.equal(state.daily.progress.dockTime, 1, 'A Dead Drop completed within 90 seconds advances the daily challenge');
 
 const contract = { id: 'one-shot', type: 'DELIVERY', xp: 40, credits: 5 };
-state = completeMission(state, second, 0, 90000, { jumps: 0, collisions: 1, falls: 0, contract });
+state = completeRun(state, second, 0, 90000, { jumps: 0, collisions: 1, falls: 0, contract, contractCompleted: true });
 assert.equal(state.lastXpBreakdown.contract, 40, 'An unclaimed contract awards its reward once');
-state = completeMission(state, second, 0, 90000, { jumps: 0, collisions: 1, falls: 0, contract });
+const contractXp = state.xp;
+state = completeRun(state, second, 0, 90000, { jumps: 0, collisions: 1, falls: 0, contract, contractCompleted: true });
 assert.equal(state.lastXpBreakdown.contract, 0, 'A claimed contract cannot award rewards again');
+assert.equal(state.xp, contractXp + state.lastXpBreakdown.total, 'Duplicate contract completion does not add a second contract reward');
 
 state = { ...state, musicVolume: 0.3, screenShake: false, discoveredEnemies: ['chicken'], unlockedMissions: missions.slice(0, 3).map((mission) => mission.id) };
 saveState(state);
@@ -75,7 +86,7 @@ assert.equal(reloaded.musicVolume, 0.3, 'Settings survive reload');
 assert.equal(reloaded.screenShake, false, 'Settings survive reload');
 assert.deepEqual(reloaded.discoveredEnemies, ['chicken'], 'Enemy Codex discoveries survive reload');
 
-const credited = completeMission(reloaded, first, first.signals.length, 65000, { jumps: 6, collisions: 0, falls: 0, modifier: { id: 'noDash', xp: 35, credits: 18 } });
+const credited = completeRun(reloaded, first, first.signals.length, 65000, { jumps: 6, collisions: 0, falls: 0, modifier: { id: 'noDash', xpBonus: 35, credits: 18 } });
 assert.ok(credited.credits > reloaded.credits, 'Mission and modifier credits persist as progression currency');
 assert.equal(credited.xp - reloaded.xp, credited.lastXpBreakdown.total, 'Displayed XP total matches the XP persisted for a completed run');
 assert.ok(credited.daily?.date, 'Local daily progress is created for completed runs');
