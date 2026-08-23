@@ -50,11 +50,28 @@ try {
     assert.ok(touchState.directions.includes(direction), `Missing mobile direction: ${direction}`);
   }
 
+  await page.evaluate(() => {
+    window.__relayRunnerScene = {
+      scene: { isActive: () => true },
+      mobileActions: {},
+    };
+  });
+
   await page.locator('[data-mobile-action="dash"]').dispatchEvent('pointerdown', { pointerId: 1, pointerType: 'touch', clientX: 330, clientY: 760 });
-  const dashState = await page.evaluate(() => ({
+  const pressedState = await page.evaluate(() => ({
     activeClass: document.querySelector('[data-mobile-action="dash"]')?.classList.contains('is-active'),
+    actionDown: window.__relayRunnerScene.mobileActions.dash,
   }));
-  assert.equal(dashState.activeClass, true, 'Dash control should visibly enter active state on pointerdown');
+  assert.equal(pressedState.activeClass, true, 'Dash control should visibly enter active state on pointerdown');
+  assert.equal(pressedState.actionDown, true, 'Dash action should be down during pointerdown');
+
+  await page.locator('[data-mobile-action="dash"]').dispatchEvent('pointerup', { pointerId: 1, pointerType: 'touch', clientX: 330, clientY: 760 });
+  const releasedState = await page.evaluate(() => ({
+    activeClass: document.querySelector('[data-mobile-action="dash"]')?.classList.contains('is-active'),
+    actionDown: window.__relayRunnerScene.mobileActions.dash,
+  }));
+  assert.equal(releasedState.activeClass, false, 'Dash control should leave active state on pointerup');
+  assert.equal(releasedState.actionDown, false, 'Dash action must be released on pointerup');
 
   console.log('Mobile gameplay smoke test passed.');
 } finally {
