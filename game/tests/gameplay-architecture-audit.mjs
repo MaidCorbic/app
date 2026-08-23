@@ -4,8 +4,10 @@ import path from 'node:path';
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const relayInit = read('relay-ui-init.js');
+const indexHtml = read('index.html');
 const mobile = read('src/systems/mobile-controls-controller.js');
-const coreStability = read('src/systems/core-stability.js');
+const lifecycleAdapter = read('src/systems/runner-lifecycle-adapter.js');
+const worldInteraction = read('world-interaction-v1.js');
 const homeOptions = read('home-options.js');
 const homeAiTutorialOptions = read('home-ai-tutorial-options.js');
 const runtimeAiTutorialSettings = read('runtime-ai-tutorial-settings.js');
@@ -17,20 +19,42 @@ const packageJson = JSON.parse(read('package.json'));
 const failures = [];
 const count = (text, needle) => text.split(needle).length - 1;
 
-if (count(relayInit, "./src/systems/mobile-controls-controller.js") !== 1) {
+if (count(indexHtml, './src/systems/runner-lifecycle-adapter.js') !== 1) {
+  failures.push('index.html must load exactly one authoritative RunnerScene lifecycle adapter');
+}
+if (indexHtml.includes('./src/systems/core-stability.js')) {
+  failures.push('index.html must not load the removed core-stability wrapper');
+}
+if (indexHtml.includes('./world-interaction-v1.js')) {
+  failures.push('index.html must not load world-interaction-v1 directly; lifecycle adapter owns its runtime integration');
+}
+if (!lifecycleAdapter.includes('prototype.create =')) {
+  failures.push('lifecycle adapter must own the RunnerScene create hook');
+}
+if (!lifecycleAdapter.includes('prototype.update =')) {
+  failures.push('lifecycle adapter must own the RunnerScene update hook');
+}
+if (!lifecycleAdapter.includes('prototype.fail =')) {
+  failures.push('lifecycle adapter must own the RunnerScene fail hook');
+}
+if (!lifecycleAdapter.includes('prototype.respawnCheckpoint =')) {
+  failures.push('lifecycle adapter must own the RunnerScene respawn hook');
+}
+if (!worldInteraction.includes('export function setupWorldInteraction')) {
+  failures.push('world interaction must expose setupWorldInteraction as a pure integration API');
+}
+if (worldInteraction.includes('RunnerScene.prototype.create') || worldInteraction.includes('RunnerScene.prototype.update')) {
+  failures.push('world-interaction-v1.js must not patch RunnerScene lifecycle methods');
+}
+
+if (count(relayInit, './src/systems/mobile-controls-controller.js') !== 1) {
   failures.push('relay-ui-init.js must load exactly one authoritative mobile controls controller');
 }
-if (relayInit.includes("./src/systems/mobile-controls-runtime-v2.js")) {
+if (relayInit.includes('./src/systems/mobile-controls-runtime-v2.js')) {
   failures.push('mobile-controls-runtime-v2.js must not be loaded alongside the authoritative controller');
 }
-if (relayInit.includes("./src/systems/mobile-controls-direct-input-v1.js")) {
+if (relayInit.includes('./src/systems/mobile-controls-direct-input-v1.js')) {
   failures.push('mobile-controls-direct-input-v1.js must not be loaded as a second input path');
-}
-if (!coreStability.includes('RunnerScene.prototype.update')) {
-  failures.push('core stability must retain the gameplay safety update hook');
-}
-if (coreStability.includes('installTouchControls') || coreStability.includes('__relayTouchInstalled')) {
-  failures.push('core stability must not own a second mobile touch input implementation');
 }
 if (!mobile.includes("OWNER = 'controller-v3'")) {
   failures.push('mobile controller must expose the controller-v3 ownership marker');
@@ -45,7 +69,7 @@ if (!mobile.includes('window.__relayMobileControlsObserverV3')) {
   failures.push('mobile controller observer must be singleton');
 }
 
-if (!homeOptions.includes("./src/settings/settings-store.js")) {
+if (!homeOptions.includes('./src/settings/settings-store.js')) {
   failures.push('home-options.js must use the central settings store');
 }
 if (homeOptions.includes("import { loadState, saveState } from './src/state.js'")) {
@@ -64,7 +88,7 @@ if (!settingsStore.includes('export function updateSettings')) {
 if (!settingsStore.includes('relay-settings-change')) {
   failures.push('settings store must emit relay-settings-change');
 }
-if (!lifecycle.includes("import { GAME_FLOW, gameFlow }")) {
+if (!lifecycle.includes('import { GAME_FLOW, gameFlow }')) {
   failures.push('mission runtime hardening must use the central game flow');
 }
 for (const marker of ['GAME_FLOW.PAUSED', 'GAME_FLOW.COMPLETE', 'GAME_FLOW.RESULTS', 'GAME_FLOW.LOADING']) {
@@ -93,9 +117,10 @@ if (failures.length) {
 }
 
 console.log('Gameplay architecture audit PASS');
+console.log('- one authoritative RunnerScene lifecycle adapter');
+console.log('- world interaction exposes APIs without prototype patching');
 console.log('- one authoritative mobile controller');
 console.log('- no legacy mobile runtime imports');
-console.log('- no duplicate touch controller in core stability');
 console.log('- controller ownership marker');
 console.log('- legacy pointer duplication blocked');
 console.log('- late DOM rebind protection');
