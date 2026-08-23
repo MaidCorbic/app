@@ -30,6 +30,9 @@ jobs:
       - name: Architecture audit
         run: npm run test:gameplay-architecture
 
+      - name: Runtime core invariants
+        run: npm run test:runtime-core
+
       - name: Progression integrity
         run: npm run test:progression-integrity
 
