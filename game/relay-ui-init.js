@@ -1,6 +1,7 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 import './src/runtime/game-flow.js';
 import './src/settings/settings-store.js';
+import './src/settings/runtime-settings-bridge.js';
 import './src/tutorial-map-v1.js';
 import './tutorial-onboarding-v3.js';
 import './tutorial-mobile-layout-fix-v1.js';
