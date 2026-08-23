@@ -1,10 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 
-const importSource = async (relativePath) => {
-  const source = await readFile(new URL(relativePath, import.meta.url), 'utf8');
-  return import(`data:text/javascript,${encodeURIComponent(source)}`);
-};
+const importSource = relativePath => import(new URL(relativePath, import.meta.url).href);
 
 const { missions } = await importSource('../src/missions.js');
 globalThis.missions = missions;
