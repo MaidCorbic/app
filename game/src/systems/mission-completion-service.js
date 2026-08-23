@@ -2,6 +2,8 @@ import { missions } from '../missions.js';
 import { completeMission } from '../state.js';
 import { applyMissionCompletionIntegrity, reconcileProgressionState } from './progression-integrity.js';
 
+globalThis.missions = missions;
+
 export function completeMissionCanonical(state, mission, signals, elapsedMs = 0, runStats = {}) {
   const normalizedStats = { ...runStats };
   const contractId = normalizedStats.contract?.id;
