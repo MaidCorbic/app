@@ -1,5 +1,6 @@
 import './splash-loader.js';
-import { loadState, saveState } from './src/state.js';
+import { getSettings, updateSettings } from './src/settings/settings-store.js';
+import { applyLanguage } from './src/i18n.js';
 
 (() => {
   if (window.__relayHomeOptionsFinal) return;
@@ -7,15 +8,8 @@ import { loadState, saveState } from './src/state.js';
 
   const LANGUAGES = [['en','ENGLISH'],['exyu','EX-YU'],['es','ESPAÑOL'],['de','DEUTSCH']];
   const LANGUAGE_KEY = 'relay-runner-language';
-  const getState = () => loadState();
-  const savePatch = patch => saveState({ ...getState(), ...patch });
   const getLanguage = () => localStorage.getItem(LANGUAGE_KEY) || 'en';
-  const setLanguage = code => {
-    localStorage.setItem(LANGUAGE_KEY, code);
-    document.documentElement.lang = code === 'exyu' ? 'bs' : code;
-    document.documentElement.dataset.language = code;
-    window.dispatchEvent(new CustomEvent('relay-language-change', { detail: { code } }));
-  };
+
   const style = document.createElement('style');
   style.textContent = `
     #titlePanel{box-sizing:border-box!important;padding:clamp(8px,2vw,24px)!important;overflow:hidden!important}
@@ -28,23 +22,70 @@ import { loadState, saveState } from './src/state.js';
     @media(orientation:landscape) and (max-height:560px){#titlePanel .title-panel-card{max-height:calc(100dvh - 8px)!important;max-height:calc(100svh - 8px)!important;padding:10px!important}#titlePanelContent{max-height:calc(100dvh - 72px)!important;max-height:calc(100svh - 72px)!important}.home-options-final{gap:5px}.home-opt{padding:7px 9px}}
   `;
   document.head.appendChild(style);
-  const option = (label,key,on,detail) => `<div class="home-opt"><div class="home-opt-copy"><b>${label}</b><small>${detail}</small></div><button type="button" data-home-toggle="${key}" class="${on?'is-on':''}" aria-pressed="${on}">${on?'ON':'OFF'}</button></div>`;
+
+  const option = (label,key,value,detail) => {
+    const on = Boolean(value);
+    return `<div class="home-opt"><div class="home-opt-copy"><b>${label}</b><small>${detail}</small></div><button type="button" data-home-toggle="${key}" class="${on?'is-on':''}" aria-pressed="${on}">${on?'ON':'OFF'}</button></div>`;
+  };
+
   function render(){
-    const panel=document.getElementById('titlePanel'); const content=document.getElementById('titlePanelContent'); const heading=document.getElementById('titlePanelHeading');
+    const panel=document.getElementById('titlePanel');
+    const content=document.getElementById('titlePanelContent');
+    const heading=document.getElementById('titlePanelHeading');
     if(!panel||!content||!heading||panel.classList.contains('hidden'))return;
-    const title=heading.textContent.trim().toUpperCase(); if(!title.includes('RUN SETTINGS')&&title!=='OPTIONS')return;
-    const s=getState(); const lang=LANGUAGES.find(x=>x[0]===getLanguage())||LANGUAGES[0];
-    content.innerHTML=`<div class="home-options-final"><div class="home-section">GAMEPLAY / GUIDANCE</div>${option('TUTORIAL','tutorialEnabled',s.tutorialEnabled!==false,'Mission guidance and contextual lessons')}${option('GAME AUDIO','muted',!s.muted,'Master game audio')}${option('SCREEN SHAKE','screenShake',!!s.screenShake,'Camera impact feedback')}${option('REDUCED MOTION','reducedMotion',!!s.reducedMotion,'Reduce movement effects')}${option('ATMOSPHERIC RAIN','rain',!!s.rain,'City weather ambience')}<div class="home-section">VOICE & AUDIO</div>${option('AI VOICE','aiVoice',s.aiVoice!==false,'NIA / MARA spoken game guidance')}<label class="home-opt"><span class="home-opt-copy"><b>MUSIC</b><small><span data-volume-label="musicVolume">${Math.round((s.musicVolume??.55)*100)}%</span> VOLUME</small></span><input data-home-volume="musicVolume" type="range" min="0" max="1" step=".05" value="${s.musicVolume??.55}"></label><label class="home-opt"><span class="home-opt-copy"><b>SFX</b><small><span data-volume-label="sfxVolume">${Math.round((s.sfxVolume??.7)*100)}%</span> VOLUME</small></span><input data-home-volume="sfxVolume" type="range" min="0" max="1" step=".05" value="${s.sfxVolume??.7}"></label><div class="home-section">LANGUAGE</div><div class="home-opt home-lang"><div class="home-opt-copy"><b>GAME LANGUAGE</b><small>Choose your interface language</small></div><button type="button" data-home-language>🌐 ${lang[1]}</button><div class="home-lang-menu hidden" data-home-language-menu>${LANGUAGES.map(([code,name])=>`<button type="button" data-language="${code}" class="${code===lang[0]?'active':''}">${name}</button>`).join('')}</div></div><div class="home-section">DISPLAY</div><div class="home-options-actions"><button type="button" data-home-fullscreen>FULLSCREEN</button><button type="button" data-home-reset>RESET OPTIONS</button></div><div class="home-section">CONTROLS</div><div class="home-opt home-controls"><small>A / D MOVE · SPACE JUMP · E FIRE · Q BLADE · SHIFT DASH · ESC PAUSE</small></div></div>`;
-    content.querySelectorAll('[data-home-toggle]').forEach(btn=>btn.addEventListener('click',()=>{const key=btn.dataset.homeToggle;const current=getState();const value=key==='muted'?!current.muted:!current[key];savePatch({[key]:value});if(key==='aiVoice'&&!value)window.speechSynthesis?.cancel?.();window.dispatchEvent(new CustomEvent('relay-settings-change',{detail:{key,value}}));render();}));
-    content.querySelectorAll('[data-home-volume]').forEach(input=>input.addEventListener('input',()=>{const value=Number(input.value);savePatch({[input.dataset.homeVolume]:value});const label=content.querySelector(`[data-volume-label="${input.dataset.homeVolume}"]`);if(label)label.textContent=`${Math.round(value*100)}%`;}));
-    const langButton=content.querySelector('[data-home-language]'); const langMenu=content.querySelector('[data-home-language-menu]'); langButton?.addEventListener('click',e=>{e.stopPropagation();langMenu?.classList.toggle('hidden');}); content.querySelectorAll('[data-language]').forEach(btn=>btn.addEventListener('click',()=>{setLanguage(btn.dataset.language);render();}));
+    const title=heading.textContent.trim().toUpperCase();
+    if(!title.includes('RUN SETTINGS')&&title!=='OPTIONS')return;
+
+    const s=getSettings();
+    const lang=LANGUAGES.find(x=>x[0]===getLanguage())||LANGUAGES[0];
+    content.innerHTML=`<div class="home-options-final"><div class="home-section">GAMEPLAY / GUIDANCE</div>${option('TUTORIAL','tutorialEnabled',s.tutorialEnabled,'Mission guidance and contextual lessons')}${option('GAME AUDIO','muted',!s.muted,'Master game audio')}${option('SCREEN SHAKE','screenShake',s.screenShake,'Camera impact feedback')}${option('REDUCED MOTION','reducedMotion',s.reducedMotion,'Reduce movement effects')}${option('ATMOSPHERIC RAIN','rain',s.rain,'City weather ambience')}<div class="home-section">VOICE & AUDIO</div>${option('AI VOICE','aiVoice',s.aiVoice,'NIA / MARA spoken game guidance')}<label class="home-opt"><span class="home-opt-copy"><b>MUSIC</b><small><span data-volume-label="musicVolume">${Math.round(s.musicVolume*100)}%</span> VOLUME</small></span><input data-home-volume="musicVolume" type="range" min="0" max="1" step=".05" value="${s.musicVolume}"></label><label class="home-opt"><span class="home-opt-copy"><b>SFX</b><small><span data-volume-label="sfxVolume">${Math.round(s.sfxVolume*100)}%</span> VOLUME</small></span><input data-home-volume="sfxVolume" type="range" min="0" max="1" step=".05" value="${s.sfxVolume}"></label><div class="home-section">LANGUAGE</div><div class="home-opt home-lang"><div class="home-opt-copy"><b>GAME LANGUAGE</b><small>Choose your interface language</small></div><button type="button" data-home-language>🌐 ${lang[1]}</button><div class="home-lang-menu hidden" data-home-language-menu>${LANGUAGES.map(([code,name])=>`<button type="button" data-language="${code}" class="${code===lang[0]?'active':''}">${name}</button>`).join('')}</div></div><div class="home-section">DISPLAY</div><div class="home-options-actions"><button type="button" data-home-fullscreen>FULLSCREEN</button><button type="button" data-home-reset>RESET OPTIONS</button></div><div class="home-section">CONTROLS</div><div class="home-opt home-controls"><small>A / D MOVE · SPACE JUMP · E FIRE · Q BLADE · SHIFT DASH · ESC PAUSE</small></div></div>`;
+
+    content.querySelectorAll('[data-home-toggle]').forEach(btn=>btn.addEventListener('click',()=>{
+      const key=btn.dataset.homeToggle;
+      const current=getSettings();
+      const value=key==='muted'?!current.muted:!current[key];
+      updateSettings({[key]:value});
+      if(key==='aiVoice'&&!value)window.speechSynthesis?.cancel?.();
+      render();
+    }));
+
+    content.querySelectorAll('[data-home-volume]').forEach(input=>input.addEventListener('input',()=>{
+      const value=Number(input.value);
+      updateSettings({[input.dataset.homeVolume]:value});
+      const label=content.querySelector(`[data-volume-label="${input.dataset.homeVolume}"]`);
+      if(label)label.textContent=`${Math.round(value*100)}%`;
+    }));
+
+    const langButton=content.querySelector('[data-home-language]');
+    const langMenu=content.querySelector('[data-home-language-menu]');
+    langButton?.addEventListener('click',e=>{e.stopPropagation();langMenu?.classList.toggle('hidden');});
+    content.querySelectorAll('[data-language]').forEach(btn=>btn.addEventListener('click',()=>{
+      const code=btn.dataset.language;
+      localStorage.setItem(LANGUAGE_KEY,code);
+      document.documentElement.lang=code==='exyu'?'bs':code;
+      document.documentElement.dataset.language=code;
+      applyLanguage?.(code);
+      window.dispatchEvent(new CustomEvent('relay-language-change',{detail:{code}}));
+      render();
+    }));
+
     content.querySelector('[data-home-fullscreen]')?.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.();else await document.exitFullscreen?.();}catch{}});
-    content.querySelector('[data-home-reset]')?.addEventListener('click',()=>{savePatch({muted:false,musicVolume:.55,sfxVolume:.7,screenShake:true,reducedMotion:false,rain:true,aiVoice:true,tutorialEnabled:true});localStorage.removeItem(LANGUAGE_KEY);setLanguage('en');window.dispatchEvent(new CustomEvent('relay-settings-change',{detail:{reset:true}}));render();});
+    content.querySelector('[data-home-reset]')?.addEventListener('click',()=>{
+      updateSettings({muted:false,musicVolume:.55,sfxVolume:.7,screenShake:true,reducedMotion:false,rain:true,aiVoice:true,tutorialEnabled:true});
+      localStorage.removeItem(LANGUAGE_KEY);
+      document.documentElement.lang='en';
+      document.documentElement.dataset.language='en';
+      applyLanguage?.('en');
+      render();
+    });
   }
+
   const init=()=>{
     const panel=document.getElementById('titlePanel'); if(!panel)return;
     document.addEventListener('click',event=>{const button=event.target.closest?.('[data-title-panel="controls"]');if(!button)return;event.preventDefault();event.stopImmediatePropagation();panel.classList.remove('hidden');const heading=document.getElementById('titlePanelHeading');if(heading)heading.textContent='OPTIONS';render();},true);
     new MutationObserver(()=>window.setTimeout(render,30)).observe(panel,{attributes:true,attributeFilter:['class']});
+    window.addEventListener('relay-settings-change',render);
+    window.addEventListener('relay-language-change',render);
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
