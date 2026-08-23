@@ -1,6 +1,7 @@
-/* UPDATE 29 — DASH RUNTIME BRIDGE FINAL
-   Restores the actual physical dash response behind the gameplay dash event.
-   Binding is lazy as well as lifecycle-driven so the runtime cannot miss scene boot order.
+import './tutorial-runtime-final-hotfix-v1.js';
+
+/* UPDATE 30 — DASH RUNTIME BRIDGE TUTORIAL FIX
+   Tutorial gameplay must receive the physical dash response too.
 */
 const SPEED = 670;
 const DURATION = 180;
@@ -12,7 +13,11 @@ function currentScene() {
 }
 
 function validScene(scene) {
-  return !!scene?.player && !scene.finished && !scene.respawning && !scene.cinematicActive && !window.__relayCinematicLock && !scene.firstTimeTutorial;
+  return !!scene?.player
+    && !scene.finished
+    && !scene.respawning
+    && !scene.cinematicActive
+    && !window.__relayCinematicLock;
 }
 
 function directionFor(scene) {
@@ -91,19 +96,24 @@ function ensureBound() {
   return scene;
 }
 
+function dispatchKeyboardDash(event) {
+  if (event.repeat || (event.code !== 'ShiftLeft' && event.code !== 'ShiftRight' && event.key !== 'Shift')) return;
+  if (event.defaultPrevented || window.__relayKeyboardDashStamp === event.timeStamp) return;
+  const scene = ensureBound();
+  if (!validScene(scene)) return;
+  window.__relayKeyboardDashStamp = event.timeStamp;
+  window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash', {
+    detail: { source: 'keyboard-shift', direction: directionFor(scene), originalEvent: event }
+  }));
+}
+
 if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
   window.__relayDashRuntimeBridgeV1 = true;
-
-  // Preferred lifecycle paths.
   window.addEventListener('relay:runner-scene-ready', event => bind(event.detail?.scene || currentScene()), { passive: true });
   window.addEventListener('relay:gameplay-core-ready', () => ensureBound(), { passive: true });
   window.addEventListener('relay:city-pulse-ready', () => ensureBound(), { passive: true });
-
-  // Critical fallback: if module load happened before Phaser created RunnerScene,
-  // the first actual dash input binds to the current scene immediately.
   window.addEventListener('relay:new-gameplay-dash', () => ensureBound(), { passive: true });
-
-  // If the scene already exists when this module is evaluated, bind immediately.
+  window.addEventListener('keydown', dispatchKeyboardDash, true);
   ensureBound();
 
   window.__relayDashRuntimeDebug = () => {
@@ -114,6 +124,7 @@ if (typeof window !== 'undefined' && !window.__relayDashRuntimeBridgeV1) {
       sceneLoaded: !!scene,
       mission: scene?.mission?.id ?? 'NONE',
       tutorial: !!scene?.firstTimeTutorial,
+      tutorialDashAllowed: !!scene?.firstTimeTutorial,
       cinematic: !!scene?.cinematicActive,
       dashBound: !!scene?.__relayDashRuntimeBound,
       dashActive: !!state?.active,

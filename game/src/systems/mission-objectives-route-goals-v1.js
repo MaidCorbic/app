@@ -86,7 +86,7 @@ function skinExistingHud(scene, state) {
 }
 
 function reveal(state, scene) {
-  if (window.__relayCinematicLock) { state.pendingReveal = true; state.visible = false; state.c.setVisible(false); return; }
+  if (window.__relayCinematicLock || document.body.classList.contains('relay-training-active')) { state.pendingReveal = true; state.visible = false; state.c.setVisible(false); return; }
   if (state.visible) return;
   state.visible = true;
   state.pendingReveal = false;
@@ -103,13 +103,23 @@ export function applyMissionObjective(scene, id = missionId(scene)) {
   const ui = buildPanel(scene, objective);
   const state = { objective, ...ui, completed:false, last:-1, visible:false, pendingReveal:false, x:null, y:null, scale:null, tutorial:null, hudSkinned:false, hudSkins:[] };
   states.set(scene,state); scene.__missionObjectiveState=state; scene.__missionObjective=objective;
-  reveal(state, scene);
+  if (document.body.classList.contains('relay-training-active') || scene.firstTimeTutorial) {
+    state.pendingReveal = true;
+    state.c.setVisible(false);
+  } else reveal(state, scene);
+  const revealAfterTutorial = () => {
+    if (!state.c?.active || state.visible) return;
+    if (document.body.classList.contains('relay-training-active')) return;
+    reveal(state, scene);
+  };
+  window.addEventListener('relay:tutorial-complete', revealAfterTutorial, { once: true, passive: true });
+  scene.events?.once?.('shutdown', () => window.removeEventListener('relay:tutorial-complete', revealAfterTutorial));
   return objective;
 }
 
 export function updateMissionObjective(scene) {
   const s = states.get(scene); if (!s || !scene.player) return;
-  if (window.__relayCinematicLock) { s.c.setVisible(false); return; }
+  if (window.__relayCinematicLock || document.body.classList.contains('relay-training-active')) { s.c.setVisible(false); return; }
   if (s.pendingReveal) reveal(s, scene);
   layout(s, scene);
   skinExistingHud(scene, s);

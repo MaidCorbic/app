@@ -38,6 +38,22 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
     return gate;
   };
 
+  const setBeamScaleX = (beam, value) => {
+    if (!beam || beam.active === false) return;
+    const scaleX = Number.isFinite(value) ? value : 1;
+    // The City Pulse beam can be replaced by a non-Transform GameObject during
+    // scene/runtime handoff. Do not assume Phaser's Scale component exists.
+    if (typeof beam.setScaleX === 'function') {
+      beam.setScaleX(scaleX);
+      return;
+    }
+    if ('scaleX' in beam) {
+      beam.scaleX = scaleX;
+      return;
+    }
+    if (typeof beam.setScale === 'function') beam.setScale(scaleX, Number.isFinite(beam.scaleY) ? beam.scaleY : 1);
+  };
+
   const applyVisual = (gate, phase, reducedMotion) => {
     const p = gate.getData('parts');
     const text = gate.getData('phaseText');
@@ -51,7 +67,7 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
     p.beam.setFillStyle(color, open ? 1 : warning ? .60 : .16);
     text.setColor(open ? '#aee37f' : warning ? '#ffd06e' : '#8df4ff');
     text.setText(open ? 'OPEN' : warning ? 'WARNING' : 'CLOSED');
-    p.beam.setScaleX(!reducedMotion && open ? 1.35 : 1);
+    setBeamScaleX(p.beam, !reducedMotion && open ? 1.35 : 1);
   };
 
   const cue = (scene, title, detail, success) => {
@@ -95,8 +111,6 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
   const update = (scene, delta = 16.67) => {
     if (scene?.finished) { destroy(scene); return; }
     let state = states.get(scene);
-    // No City Pulse allocation during tutorial/cinematic boot. The update listener stays
-    // attached so the system can initialize immediately when tutorial state clears.
     if (!state) {
       if (!activeGameplay(scene) || !setup(scene)) return;
       state = states.get(scene);
@@ -131,8 +145,6 @@ import { CITY_PULSE_CONFIG, CITY_PULSE_MISSION_TARGET_X, phaseAt, isPerfectWindo
   };
 
   runtime.onSceneReady(scene => {
-    // Always attach the scene update hook. If tutorial is active, setup is deferred;
-    // once tutorial clears the next update creates the gates without another listener.
     const onUpdate = (_time, delta) => update(scene, delta);
     scene.events?.on?.('update', onUpdate);
     runtime.cleanup(() => scene.events?.off?.('update', onUpdate));
