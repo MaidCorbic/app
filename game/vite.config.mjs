@@ -36,6 +36,7 @@ function relayLegacyAssetAliases() {
 
       for (const relativePath of LEGACY_TEXT_ASSETS) {
         const source = path.join(root, relativePath);
+
         const legacyDestination = path.join(legacyDir, relativePath);
         fs.mkdirSync(path.dirname(legacyDestination), { recursive: true });
         fs.copyFileSync(source, legacyDestination);
@@ -62,10 +63,10 @@ function relayLegacyAssetAliases() {
 }
 
 export default defineConfig({
-  plugins: [relayLegacyAssetAliases()],
   server: {
     host: '0.0.0.0',
     port: 3000,
     allowedHosts: ['.diploi.me'],
   },
+  plugins: [relayLegacyAssetAliases()],
 });
