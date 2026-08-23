@@ -1,0 +1,469 @@
+import { missions } from './src/missions.js';
+import { RunnerScene } from './src/scenes/RunnerScene.js';
+
+(() => {
+  if (window.__relaySeniorPolishV1) return;
+  window.__relaySeniorPolishV1 = true;
+
+  /* =========================================================
+     1) FAQ / INFO — high-end terminal presentation
+     Existing content + click behavior remain authoritative.
+     ========================================================= */
+  const INFO_STYLE_ID = 'relay-senior-info-v1-style';
+  const installInfoStyle = () => {
+    if (document.getElementById(INFO_STYLE_ID)) return;
+    const style = document.createElement('style');
+    style.id = INFO_STYLE_ID;
+    style.textContent = `
+      #relayInfoPanel.relay-senior-polish .relay-info-card {
+        overflow:hidden!important;
+        background:
+          radial-gradient(circle at 12% 8%, rgba(141,244,255,.10), transparent 28%),
+          radial-gradient(circle at 92% 84%, rgba(255,208,110,.07), transparent 28%),
+          linear-gradient(145deg,#0b1726f8,#030913fc)!important;
+        box-shadow:
+          0 30px 100px rgba(0,0,0,.72),
+          inset 0 1px rgba(255,255,255,.05),
+          0 0 55px rgba(141,244,255,.06)!important;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-info-card::after {
+        content:'';
+        position:absolute;
+        inset:0;
+        pointer-events:none;
+        background:repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.012) 4px 5px);
+        mix-blend-mode:screen;
+        opacity:.45;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-info-eyebrow::before {
+        content:'◆';
+        display:inline-block;
+        margin-right:7px;
+        color:#68e7be;
+        text-shadow:0 0 12px rgba(104,231,190,.42);
+      }
+      #relayInfoPanel.relay-senior-polish .relay-faq-list,
+      #relayInfoPanel.relay-senior-polish .relay-update-list {
+        position:relative;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-faq-list::before,
+      #relayInfoPanel.relay-senior-polish .relay-update-list::before {
+        content:'';
+        position:absolute;
+        left:13px;
+        top:4px;
+        bottom:4px;
+        width:1px;
+        background:linear-gradient(180deg, transparent, rgba(141,244,255,.28) 12%, rgba(255,208,110,.22) 86%, transparent);
+        pointer-events:none;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-faq-item,
+      #relayInfoPanel.relay-senior-polish .relay-update-item {
+        position:relative;
+        overflow:hidden;
+        border-color:rgba(141,244,255,.11)!important;
+        background:linear-gradient(135deg,rgba(8,20,34,.92),rgba(3,10,18,.97))!important;
+        transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-faq-item::before,
+      #relayInfoPanel.relay-senior-polish .relay-update-item::before {
+        content:'';
+        position:absolute;
+        left:0;
+        top:0;
+        bottom:0;
+        width:3px;
+        background:linear-gradient(180deg,#8df4ff,#ffd06e);
+        opacity:.45;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-faq-item:hover,
+      #relayInfoPanel.relay-senior-polish .relay-update-item:hover {
+        transform:translateX(2px);
+        border-color:rgba(141,244,255,.35)!important;
+        box-shadow:0 14px 30px rgba(0,0,0,.24),0 0 24px rgba(141,244,255,.05);
+      }
+      #relayInfoPanel.relay-senior-polish .relay-faq-question {
+        padding-left:44px!important;
+        font-size:10px!important;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-faq-question::before,
+      #relayInfoPanel.relay-senior-polish .relay-update-item::before {
+        box-sizing:border-box;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-faq-index,
+      #relayInfoPanel.relay-senior-polish .relay-update-index {
+        position:absolute;
+        left:8px;
+        top:13px;
+        z-index:2;
+        width:20px;
+        height:20px;
+        display:grid;
+        place-items:center;
+        border:1px solid rgba(141,244,255,.20);
+        border-radius:6px;
+        color:#8df4ff;
+        background:#06101bf0;
+        font:800 7px/1 'DM Mono',monospace;
+        letter-spacing:.4px;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-faq-answer {
+        padding-left:44px!important;
+        border-top:1px solid rgba(141,244,255,.06);
+        background:linear-gradient(90deg,rgba(141,244,255,.025),transparent);
+      }
+      #relayInfoPanel.relay-senior-polish .relay-update-item {
+        padding:17px 16px 17px 44px!important;
+        color:#cbd7e0!important;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-update-item::after {
+        content:'SYNC';
+        position:absolute;
+        right:12px;
+        top:10px;
+        color:#68e7be;
+        font:800 6px/1 'DM Mono',monospace;
+        letter-spacing:1.2px;
+        opacity:.6;
+      }
+      #relayInfoPanel.relay-senior-polish .relay-update-meta {
+        display:inline-flex;
+        align-items:center;
+        gap:7px;
+        padding:7px 10px;
+        border:1px solid rgba(104,231,190,.16);
+        border-radius:999px;
+        background:rgba(104,231,190,.035);
+      }
+      #relayInfoPanel.relay-senior-polish .relay-update-meta::before {
+        content:'';
+        width:7px;
+        height:7px;
+        border-radius:50%;
+        background:#68e7be;
+        box-shadow:0 0 12px rgba(104,231,190,.55);
+      }
+      @media(max-width:700px){
+        #relayInfoPanel.relay-senior-polish .relay-faq-question{padding-left:40px!important}
+        #relayInfoPanel.relay-senior-polish .relay-faq-answer{padding-left:40px!important}
+        #relayInfoPanel.relay-senior-polish .relay-update-item{padding-left:40px!important}
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
+  const enhanceInfoPanel = () => {
+    const panel = document.getElementById('relayInfoPanel');
+    if (!panel) return;
+    installInfoStyle();
+    panel.classList.add('relay-senior-polish');
+    const faqItems = panel.querySelectorAll('.relay-faq-item');
+    faqItems.forEach((item, index) => {
+      if (!item.querySelector('.relay-faq-index')) {
+        const badge = document.createElement('span');
+        badge.className = 'relay-faq-index';
+        badge.textContent = String(index + 1).padStart(2, '0');
+        item.appendChild(badge);
+      }
+    });
+    const updateItems = panel.querySelectorAll('.relay-update-item');
+    updateItems.forEach((item, index) => {
+      if (!item.querySelector('.relay-update-index')) {
+        const badge = document.createElement('span');
+        badge.className = 'relay-update-index';
+        badge.textContent = String(index + 1).padStart(2, '0');
+        item.appendChild(badge);
+      }
+    });
+  };
+
+  const infoObserver = new MutationObserver(() => {
+    if (document.getElementById('relayInfoPanel')?.classList.contains('hidden')) return;
+    requestAnimationFrame(enhanceInfoPanel);
+  });
+  const infoPanel = document.getElementById('relayInfoPanel');
+  if (infoPanel) infoObserver.observe(infoPanel, { childList:true, subtree:true, attributes:true, attributeFilter:['class'] });
+  enhanceInfoPanel();
+
+  /* =========================================================
+     2) REMOVE LEGACY LEVEL FOOTERS / STATUS STRINGS
+     ========================================================= */
+  const LEGACY_STYLE_ID = 'relay-senior-legacy-cleanup-v1';
+  const installLegacyCleanup = () => {
+    if (document.getElementById(LEGACY_STYLE_ID)) return;
+    const style = document.createElement('style');
+    style.id = LEGACY_STYLE_ID;
+    style.textContent = `
+      #intro .main-menu-footer,
+      #intro .city-pulse-status,
+      #intro .menu-version,
+      #play .main-menu-footer,
+      #play .legacy-system-status,
+      #play .legacy-night-run-status,
+      #play .relay-legacy-hidden { display:none!important; visibility:hidden!important; pointer-events:none!important; }
+    `;
+    document.head.appendChild(style);
+  };
+  installLegacyCleanup();
+
+  const scrubLegacyLevelText = () => {
+    const root = document.getElementById('play');
+    if (!root) return;
+    root.querySelectorAll('*').forEach(el => {
+      if (el.children.length) return;
+      const text = (el.textContent || '').trim().replace(/\s+/g, ' ');
+      if (!text) return;
+      if (/SYSTEM ONLINE/i.test(text) || /NIGHT RUN/i.test(text) || (/NIGHT.*CHAPTER 02/i.test(text))) {
+        el.classList.add('relay-legacy-hidden');
+      }
+    });
+  };
+  const markLevelActive = () => document.body.classList.add('relay-level-active');
+  window.addEventListener('relay:runner-scene-ready', () => {
+    markLevelActive();
+    requestAnimationFrame(scrubLegacyLevelText);
+  }, { passive:true });
+  window.addEventListener('relay:gameplay-core-ready', () => requestAnimationFrame(scrubLegacyLevelText), { passive:true });
+  const bodyObserver = new MutationObserver(mutations => {
+    if (!document.getElementById('play')) return;
+    if (mutations.some(m => m.addedNodes.length)) scrubLegacyLevelText();
+  });
+  if (document.body) bodyObserver.observe(document.body, { childList:true, subtree:true });
+
+  /* =========================================================
+     3) HIGH-END RUNNER CHARACTER TEXTURES
+     Same texture keys + same 48x64 footprint, so physics/collision
+     remain untouched.
+     ========================================================= */
+  const originalCreateTextures = RunnerScene.prototype.createTextures;
+  if (!RunnerScene.prototype.__relaySeniorCharacterV1 && typeof originalCreateTextures === 'function') {
+    const drawRunner = (g, pose = 'idle') => {
+      const poses = {
+        idle:[0,0,0], runA:[-4,3,3], runB:[4,-3,-3], jump:[-2,-2,0], fall:[3,2,1], land:[0,5,0], dash:[-5,0,0], wall:[-2,-1,0], hit:[5,-4,3], finish:[0,-2,0]
+      };
+      const [legA, legB, armShift] = poses[pose] || poses.idle;
+      const cyan = 0x8df4ff;
+      const gold = 0xffd06e;
+      const white = 0xf4f7fa;
+      const suit = 0x0b1828;
+      const suit2 = 0x172a42;
+      const dark = 0x060d16;
+
+      g.fillStyle(0x8df4ff, .10).fillCircle(24, 32, 22);
+      g.fillStyle(dark, 0.96).fillRoundedRect(15, 4, 18, 17, 7);
+      g.lineStyle(1.5, cyan, .72).strokeRoundedRect(15, 4, 18, 17, 7);
+      g.fillStyle(0x10263a, 1).fillRoundedRect(17, 9, 14, 6, 3);
+      g.fillStyle(0xe8fbff, .9).fillRoundedRect(18, 10, 12, 3, 1.5);
+      g.fillStyle(gold, .72).fillCircle(16, 10, 2);
+
+      g.fillStyle(suit, .98).fillRoundedRect(12, 19, 24, 27, 7);
+      g.lineStyle(1.4, 0x33506b, .95).strokeRoundedRect(12, 19, 24, 27, 7);
+      g.fillStyle(suit2, 1).fillRoundedRect(16, 23, 16, 15, 4);
+      g.fillStyle(cyan, .18).fillRoundedRect(18, 25, 12, 4, 2);
+      g.fillStyle(gold, .9).fillRect(22, 31, 4, 9);
+      g.fillStyle(white, .8).fillRect(15, 36, 3, 5);
+      g.fillStyle(white, .55).fillRect(30, 36, 3, 5);
+      g.lineStyle(2, cyan, .8).lineBetween(16, 21, 12, 31).lineBetween(32, 21, 36, 31);
+
+      g.fillStyle(0x050a12, 1).fillRoundedRect(10, 43, 28, 7, 3);
+      g.lineStyle(1.5, gold, .75).lineBetween(13, 46, 35, 46);
+
+      g.lineStyle(4.2, suit2, 1).lineBetween(18, 43, 17 + legA, 58);
+      g.lineStyle(4.2, suit2, 1).lineBetween(30, 43, 31 + legB, 58);
+      g.lineStyle(1.4, cyan, .85).lineBetween(18, 44, 17 + legA, 58);
+      g.lineStyle(1.4, gold, .75).lineBetween(30, 44, 31 + legB, 58);
+      g.fillStyle(dark, 1).fillRoundedRect(12 + legA, 56, 8, 5, 2);
+      g.fillStyle(dark, 1).fillRoundedRect(29 + legB, 56, 8, 5, 2);
+      g.lineStyle(1.5, cyan, .9).lineBetween(14 + legA, 60, 19 + legA, 60);
+      g.lineStyle(1.5, cyan, .9).lineBetween(31 + legB, 60, 36 + legB, 60);
+
+      g.lineStyle(4.2, white, .9).lineBetween(13, 27, 7, 38 + armShift);
+      g.lineStyle(4.2, white, .9).lineBetween(35, 27, 41, 36 - armShift);
+      g.lineStyle(1.2, cyan, .9).lineBetween(11, 29, 7, 38 + armShift);
+      g.lineStyle(1.2, gold, .75).lineBetween(37, 29, 41, 36 - armShift);
+    };
+
+    const installCharacterTexture = (scene, key, pose) => {
+      scene.textures.remove(key);
+      const graphics = scene.make.graphics({ add:false });
+      drawRunner(graphics, pose);
+      graphics.generateTexture(key, 48, 64);
+      graphics.destroy();
+    };
+
+    RunnerScene.prototype.createTextures = function seniorCreateTextures(...args) {
+      originalCreateTextures.apply(this, args);
+      const map = {
+        'runner-idle':'idle','runner-run-a':'runA','runner-run-b':'runB','runner-jump':'jump',
+        'runner-fall':'fall','runner-land':'land','runner-dash':'dash','runner-wall':'wall',
+        'runner-hit':'hit','runner-finish':'finish'
+      };
+      Object.entries(map).forEach(([key, pose]) => installCharacterTexture(this, key, pose));
+
+      this.textures.remove('boost-pad');
+      const pad = this.make.graphics({ add:false });
+      pad.fillStyle(0x07111c, 1).fillRoundedRect(1, 3, 56, 13, 5);
+      pad.lineStyle(1.6, 0x8df4ff, .95).strokeRoundedRect(1, 3, 56, 13, 5);
+      pad.fillStyle(0x8df4ff, .10).fillRoundedRect(5, 6, 48, 7, 3);
+      pad.lineStyle(2.2, 0xffd06e, .95);
+      pad.lineBetween(11, 11, 17, 6); pad.lineBetween(17, 6, 23, 11);
+      pad.lineBetween(27, 11, 33, 6); pad.lineBetween(33, 6, 39, 11);
+      pad.lineBetween(43, 11, 49, 6); pad.lineBetween(49, 6, 54, 11);
+      pad.fillStyle(0x68e7be, .65).fillCircle(5, 9, 2);
+      pad.fillStyle(0x68e7be, .65).fillCircle(53, 9, 2);
+      pad.generateTexture('boost-pad', 58, 18);
+      pad.destroy();
+    };
+    RunnerScene.prototype.__relaySeniorCharacterV1 = true;
+  }
+
+  /* =========================================================
+     4) FIRST DELIVERY — safe, polished trampolines after tutorial
+     Existing levels keep their authored boostPads; First Delivery gets
+     live-route pads only after onboarding completes.
+     ========================================================= */
+  const LIVE_PADS = {
+    'first-delivery': [[2140,548],[2970,588],[3490,588]]
+  };
+
+  const addLivePads = scene => {
+    if (!scene || scene.__relaySeniorPadsInstalled || !scene.mission?.id) return;
+    const points = LIVE_PADS[scene.mission.id];
+    if (!points?.length || !scene.player?.body || !scene.physics?.add) return;
+
+    scene.__relaySeniorPadsInstalled = true;
+    scene.__relaySeniorPads = [];
+    points.forEach(([x,y], index) => {
+      const visual = scene.add.image(x, y, 'boost-pad').setDepth(7).setAlpha(.96);
+      const ring = scene.add.circle(x, y - 1, 17, 0x8df4ff, .05).setStrokeStyle(1, 0x8df4ff, .35).setDepth(6);
+      if (!scene.motionReduced) {
+        scene.tweens.add({ targets: ring, scale:1.18, alpha:.05, duration:760 + index*90, repeat:-1, yoyo:true });
+      }
+      const body = scene.add.rectangle(x, y, 58, 18, 0x000000, 0);
+      scene.physics.add.existing(body, true);
+      body.setVisible(false);
+      body.__relayLastBounce = 0;
+      scene.physics.add.overlap(scene.player, body, () => {
+        const now = performance.now();
+        if (now - body.__relayLastBounce < 260 || scene.finished || scene.cinematicActive) return;
+        body.__relayLastBounce = now;
+        scene.player.body.setVelocityY(-900);
+        const vx = scene.player.body.velocity.x;
+        if (vx < 360) scene.player.body.setVelocityX(390);
+        visual.setScale(1.08);
+        scene.tweens?.add({ targets:visual, scale:1, duration:150, ease:'Back.easeOut' });
+        scene.tweens?.add({ targets:ring, scale:1.35, alpha:0, duration:240 });
+        window.dispatchEvent(new CustomEvent('relay:trampoline-bounce', { detail:{ scene, x, y } }));
+      });
+      scene.__relaySeniorPads.push({ visual, ring, body });
+    });
+  };
+
+  window.addEventListener('relay:tutorial-complete', () => {
+    requestAnimationFrame(() => addLivePads(window.__relayRunnerScene));
+  }, { passive:true });
+  window.addEventListener('relay:cinematic-unlock', () => {
+    const scene = window.__relayRunnerScene;
+    if (scene?.mission?.id === 'first-delivery') requestAnimationFrame(() => addLivePads(scene));
+  }, { passive:true });
+
+  /* =========================================================
+     5) FINISH — replace legacy tower look with a stronger relay-core
+     visual, while the existing finish-tower update/completion logic
+     remains authoritative.
+     ========================================================= */
+  if (!RunnerScene.prototype.__relaySeniorFinishV1) {
+    RunnerScene.prototype.createGoal = function seniorCreateGoal() {
+      const x = this.mission.goal.x;
+      const topY = this.mission.goal.y;
+      const baseY = Math.min(620, topY + 250);
+      this.finishTower = { x, topY, baseY, climbing:false, completed:false, request:false };
+
+      this.goal = this.physics.add.staticImage(x, topY, 'goal').setVisible(false);
+      this.goal.body.enable = false;
+
+      const g = this.add.graphics().setDepth(5);
+      g.fillStyle(0x050b14, .97).fillRoundedRect(x - 72, baseY - 10, 144, 36, 10);
+      g.lineStyle(2, 0x8df4ff, .65).strokeRoundedRect(x - 72, baseY - 10, 144, 36, 10);
+      g.fillStyle(0x8df4ff, .10).fillRoundedRect(x - 66, baseY - 4, 132, 7, 4);
+      g.fillStyle(0xffd06e, .14).fillRect(x - 66, baseY - 4, 132, 3);
+
+      g.lineStyle(6, 0x162b42, .98).lineBetween(x - 56, baseY, x - 30, topY + 18).lineBetween(x + 56, baseY, x + 30, topY + 18);
+      g.lineStyle(2, 0x8df4ff, .55).lineBetween(x - 52, baseY - 3, x - 28, topY + 22).lineBetween(x + 52, baseY - 3, x + 28, topY + 22);
+      for (let y = baseY - 32; y > topY + 34; y -= 40) {
+        const t = (baseY - y) / 250;
+        const half = Phaser.Math.Linear(49, 27, t);
+        g.lineStyle(1.5, 0x516d88, .65).lineBetween(x - half, y, x + half, y);
+      }
+
+      g.fillStyle(0x0b192a, 1).fillRoundedRect(x - 39, topY - 8, 78, 34, 9);
+      g.lineStyle(2, 0xffd06e, .95).strokeRoundedRect(x - 39, topY - 8, 78, 34, 9);
+      g.lineStyle(2, 0x8df4ff, .6).lineBetween(x - 25, topY + 5, x + 25, topY + 5);
+      g.fillStyle(0x8df4ff, .08).fillCircle(x, topY + 7, 38);
+
+      const core = this.add.circle(x, topY + 7, 9, 0xeafcff).setDepth(8);
+      const ring1 = this.add.circle(x, topY + 7, 21, 0).setStrokeStyle(2, 0x8df4ff, .8).setDepth(8);
+      const ring2 = this.add.circle(x, topY + 7, 34, 0).setStrokeStyle(1, 0xffd06e, .45).setDepth(8);
+      const beacon = this.add.rectangle(x, topY - 28, 4, 44, 0x8df4ff, .55).setDepth(6);
+      const flare = this.add.circle(x, topY - 52, 5, 0xffd06e).setDepth(8);
+
+      if (!this.motionReduced) {
+        this.tweens.add({ targets:core, scale:1.25, alpha:.55, duration:520, yoyo:true, repeat:-1 });
+        this.tweens.add({ targets:ring1, scale:1.34, alpha:.05, duration:860, repeat:-1 });
+        this.tweens.add({ targets:ring2, scale:1.18, alpha:.03, duration:1300, repeat:-1 });
+        this.tweens.add({ targets:beacon, alpha:.15, duration:460, yoyo:true, repeat:-1 });
+        this.tweens.add({ targets:flare, scale:1.35, alpha:.25, duration:700, yoyo:true, repeat:-1 });
+      }
+
+      this.add.text(x, topY - 79, 'RELAY CORE', { fontFamily:'DM Mono', fontSize:'12px', color:'#eafcff', stroke:'#040912', strokeThickness:5 }).setOrigin(.5).setDepth(9);
+      this.add.text(x, topY - 61, 'FINAL DELIVERY NODE', { fontFamily:'DM Mono', fontSize:'7px', color:'#8df4ff', stroke:'#040912', strokeThickness:3, letterSpacing:1.4 }).setOrigin(.5).setDepth(9).setAlpha(.82);
+      this.add.text(x, baseY + 38, 'SECURE THE CORE', { fontFamily:'DM Mono', fontSize:'9px', color:'#ffd06e', stroke:'#040912', strokeThickness:3 }).setOrigin(.5).setDepth(9).setAlpha(.86);
+      this.add.text(x, baseY - 55, 'JUMP / HOLD ↑', { fontFamily:'DM Mono', fontSize:'8px', color:'#cdefff', stroke:'#040912', strokeThickness:3 }).setOrigin(.5).setDepth(9).setAlpha(.72);
+
+      const base = this.add.rectangle(x, baseY + 12, 144, 32, 0x000000, 0).setVisible(false);
+      this.physics.add.existing(base, true);
+      this.finishTowerBase = base;
+      this.physics.add.collider(this.player, base);
+
+      this.finishTowerZone = this.add.zone(x, (topY + baseY) / 2, 64, baseY - topY);
+      this.physics.add.existing(this.finishTowerZone);
+      this.finishTowerZone.body.setAllowGravity(false).setImmovable(true);
+      this.physics.add.overlap(this.player, this.finishTowerZone, () => {
+        if (!this.finishTower.completed && !this.cinematicActive) this.finishTower.request = true;
+      });
+
+      this.finishTowerTopZone = this.add.zone(x, topY + 8, 78, 46);
+      this.physics.add.existing(this.finishTowerTopZone);
+      this.finishTowerTopZone.body.setAllowGravity(false).setImmovable(true);
+      this.physics.add.overlap(this.player, this.finishTowerTopZone, () => {
+        if (this.finishTower.completed || !this.finishTower.climbing || this.finished) return;
+        const wasFinished = this.finished;
+        this.complete();
+        if (this.finished && !wasFinished) {
+          this.finishTower.completed = true;
+          this.finishTower.climbing = false;
+          this.player.body.setAllowGravity(true);
+          this.dismissIntelCard?.();
+          this.briefingProtected = false;
+          this.cinematicActive = false;
+          this.game.events.emit('finish-tower', { missionId:this.mission.id, runId:this.runId });
+          this.game.events.emit('finish-tower-climb', { active:false });
+        }
+      });
+
+      this.finishTowerKeys = this.keys;
+    };
+    RunnerScene.prototype.__relaySeniorFinishV1 = true;
+  }
+
+  /* =========================================================
+     6) Clean start-state clutter as soon as gameplay is active.
+     ========================================================= */
+  window.addEventListener('relay:runner-scene-ready', () => {
+    requestAnimationFrame(() => {
+      document.getElementById('intro')?.classList.add('relay-level-ui-clean');
+      document.getElementById('relayCityUpdateV1')?.classList.remove('show');
+      document.querySelectorAll('#play .relay-legacy-hidden').forEach(el => el.remove());
+    });
+  }, { passive:true });
+})();
