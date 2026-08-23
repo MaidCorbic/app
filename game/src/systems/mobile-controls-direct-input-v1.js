@@ -15,8 +15,15 @@
     let handled = false;
     try {
       if (!s.mobileActions) s.mobileActions = {};
-      // Always queue the action even when RunnerScene exposes a handler. update() is
-      // the authoritative consumer and must see the same state as keyboard input.
+      if (name === 'dash' && s.firstTimeTutorial) {
+        // The tutorial explicitly requires DASH. Some legacy loadouts do not grant
+        // the dash ability until later, so grant only this existing ability for the
+        // first tutorial mission. RunnerScene.update() remains authoritative.
+        if (!(s.abilities instanceof Set)) s.abilities = new Set(s.abilities || []);
+        s.abilities.add('dash');
+        s.dashCooldown = 0;
+      }
+      // Queue first: update() is the authoritative gameplay consumer.
       s.mobileActions[name] = true;
       handled = true;
     } catch {}
@@ -24,7 +31,7 @@
       if (typeof s.mobileActionHandler === 'function') s.mobileActionHandler(name);
     } catch {}
     try {
-      const payload = { action: name, source: 'mobile-direct-v2', tutorial: !!s.firstTimeTutorial };
+      const payload = { action: name, source: 'mobile-direct-v3', tutorial: !!s.firstTimeTutorial };
       s.game?.events?.emit?.('mobile-action', payload);
       s.events?.emit?.('mobile-action', payload);
       if (name === 'dash') {
@@ -37,13 +44,11 @@
   const move = direction => {
     const s = activeScene();
     if (!s || s.cinematicActive || s.finished || s.respawning) return;
-    try {
-      if (typeof s.mobileMoveHandler === 'function') s.mobileMoveHandler(direction);
-    } catch {}
+    try { if (typeof s.mobileMoveHandler === 'function') s.mobileMoveHandler(direction); } catch {}
     try {
       s.mobileDirection = direction || null;
-      s.game?.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v2' });
-      s.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v2' });
+      s.game?.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v3' });
+      s.events?.emit?.('mobile-move', { direction, source: 'mobile-direct-v3' });
     } catch {}
   };
 
