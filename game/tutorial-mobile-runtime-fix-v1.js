@@ -9,41 +9,17 @@ import { loadState } from './src/state.js';
   const POST_TUTORIAL_DELAY = 12000;
   let gameplayHudUnlockAt = Infinity;
 
-  const tutorialActive = () => {
-    const state = loadState();
-    return state.tutorialEnabled !== false && !window.__relayCinematicLock;
-  };
+  const cinematicActive = () => Boolean(window.__relayCinematicLock);
 
   const style = document.createElement('style');
-  style.id = 'relay-tutorial-mobile-runtime-fix-v2-style';
+  style.id = 'relay-tutorial-mobile-runtime-fix-v3-style';
   style.textContent = `
     @media(max-width:768px){
-      #tutorialCard,.tutorial-card,.tutorial-panel,#relayTutorialMobileCard,#titlePanel[data-panel="tutorial"]{
-        position:fixed!important;top:calc(72px + env(safe-area-inset-top))!important;bottom:auto!important;
-        left:50%!important;right:auto!important;transform:translateX(-50%)!important;
-        width:min(86vw,350px)!important;max-height:min(34vh,240px)!important;overflow:auto!important;
-        z-index:980!important;pointer-events:auto!important;
-      }
-      [data-mobile-joystick]{
-        position:fixed!important;left:18px!important;right:auto!important;
-        bottom:calc(18px + env(safe-area-inset-bottom))!important;width:108px!important;height:108px!important;
-        z-index:1200!important;border-radius:50%!important;touch-action:none!important;
-      }
-      [data-mobile-joystick] .mobile-joystick-thumb{
-        width:48px!important;height:48px!important;border-radius:50%!important;
-        will-change:transform!important;
-      }
-      #mobileActions,.mobile-actions,.action-buttons{
-        position:fixed!important;right:14px!important;
-        bottom:calc(18px + env(safe-area-inset-bottom))!important;z-index:1200!important;
-      }
-      #relay-gameplay-new-layer .ng-chain,#relay-gameplay-new-layer .ng-choice{
-        transition:opacity .22s ease,transform .22s ease!important;
-      }
-      body.relay-tutorial-hud-locked #relay-gameplay-new-layer .ng-chain,
-      body.relay-tutorial-hud-locked #relay-gameplay-new-layer .ng-choice{
-        opacity:0!important;pointer-events:none!important;visibility:hidden!important;
-      }
+      #tutorialCard,.tutorial-card,.tutorial-panel,#relayTutorialMobileCard,#titlePanel[data-panel="tutorial"]{position:fixed!important;top:calc(72px + env(safe-area-inset-top))!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(86vw,350px)!important;max-height:min(34vh,240px)!important;overflow:auto!important;z-index:980!important;pointer-events:auto!important;}
+      [data-mobile-joystick]{position:fixed!important;left:18px!important;right:auto!important;bottom:calc(18px + env(safe-area-inset-bottom))!important;width:108px!important;height:108px!important;z-index:1200!important;border-radius:50%!important;touch-action:none!important;}
+      [data-mobile-joystick] .mobile-joystick-thumb{width:48px!important;height:48px!important;border-radius:50%!important;will-change:transform!important;}
+      #mobileActions,.mobile-actions,.action-buttons{position:fixed!important;right:14px!important;bottom:calc(18px + env(safe-area-inset-bottom))!important;z-index:1200!important;}
+      body.relay-tutorial-hud-locked #relay-gameplay-new-layer .ng-chain,body.relay-tutorial-hud-locked #relay-gameplay-new-layer .ng-choice{opacity:0!important;pointer-events:none!important;visibility:hidden!important;}
     }
   `;
   document.head.appendChild(style);
@@ -66,21 +42,20 @@ import { loadState } from './src/state.js';
   function lockGameplayHud() {
     document.body.classList.add('relay-tutorial-hud-locked');
     const layer = document.getElementById('relay-gameplay-new-layer');
-    if (!layer) return;
-    layer.querySelector('.ng-chain')?.classList.remove('show');
-    layer.querySelector('.ng-choice')?.classList.remove('show');
+    layer?.querySelector('.ng-chain')?.classList.remove('show');
+    layer?.querySelector('.ng-choice')?.classList.remove('show');
   }
 
-  function unlockGameplayHud() {
+  function beginPostTutorialDelay() {
     gameplayHudUnlockAt = performance.now() + POST_TUTORIAL_DELAY;
-    document.body.classList.add('relay-tutorial-hud-locked');
+    lockGameplayHud();
   }
 
   function gameplayLayerGate() {
     const layer = document.getElementById('relay-gameplay-new-layer');
     if (!layer) return;
     const tutorialFinished = document.body.dataset.relayTutorialFinished === '1';
-    const unlocked = tutorialFinished && performance.now() >= gameplayHudUnlockAt && !tutorialActive();
+    const unlocked = tutorialFinished && performance.now() >= gameplayHudUnlockAt && !cinematicActive();
     if (!unlocked) {
       layer.querySelector('.ng-chain')?.classList.remove('show');
       layer.querySelector('.ng-choice')?.classList.remove('show');
@@ -92,13 +67,19 @@ import { loadState } from './src/state.js';
 
   function markTutorialFinished() {
     document.body.dataset.relayTutorialFinished = '1';
-    unlockGameplayHud();
+    beginPostTutorialDelay();
     window.dispatchEvent(new CustomEvent('relay:tutorial-finished'));
-    gameplayLayerGate();
   }
 
   function installEvents() {
-    lockGameplayHud();
+    const state = loadState();
+    if (state.tutorialEnabled === false) {
+      document.body.dataset.relayTutorialFinished = '1';
+      gameplayHudUnlockAt = performance.now();
+    } else {
+      lockGameplayHud();
+    }
+
     window.addEventListener('relay:tutorial-complete', markTutorialFinished);
     window.addEventListener('relay:tutorial-finished', gameplayLayerGate);
     window.addEventListener('relay:runner-scene-ready', () => {
