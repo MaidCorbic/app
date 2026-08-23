@@ -29,7 +29,7 @@ state = completeRun(state, first, first.signals.length, 60000);
 assert.equal(state.completed.includes(first.id), true, 'Mission 01 completion persists');
 assert.equal(state.abilities.includes('dash'), true, 'Mission 01 unlocks Dash');
 assert.equal(state.missionStats[first.id].bestRating, 3, 'Perfect Mission 01 earns three stars');
-assert.deepEqual(state.mastery[first.id], ['SIGNAL SWEEP', 'PAR TIME', 'CLEAN RUN'], 'Mastery badges are awarded for a clean par-time Signal sweep');
+assert.deepEqual(state.mastery[first.id], ['signal-hunter', 'speed-run', 'clean-run'], 'Mastery badges are awarded for a clean par-time Signal sweep');
 assert.equal(getCourierRank(state.xp).name, 'RUNNER', 'Mission 01 advances courier rank');
 assert.equal(state.totalRuns, 1, 'Only completed runs increment the run total');
 assert.equal(state.tutorialSeen, true, 'The first completed route marks onboarding as seen');
