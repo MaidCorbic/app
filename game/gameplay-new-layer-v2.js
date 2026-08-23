@@ -1,6 +1,6 @@
 // NEW GAMEPLAY LAYER V2
 // Browser-safe, additive gameplay feel layer. No Phaser/scene imports.
-// It listens to the existing gameplay input surface and optional relay events.
+// The layer stays dormant until real gameplay starts; tutorial completion alone never activates it.
 
 const ROOT_ID = 'relay-gameplay-new-layer';
 const STYLE_ID = 'relay-gameplay-new-layer-v2-style';
@@ -8,9 +8,11 @@ const GHOST_KEY = 'relay.runner.ghost.v2';
 const CHAIN_TIMEOUT = 1450;
 const CHOICE_COOLDOWN = 12000;
 const CLUTCH_WINDOW = 180;
+const TUTORIAL_COMPLETE_KEY = 'relay.runner.tutorial.onboarding-v3.complete';
 
 const state = {
   started: false,
+  listenersInstalled: false,
   lastAction: '',
   lastActionAt: 0,
   chain: 0,
@@ -30,12 +32,29 @@ const state = {
 };
 
 const now = () => performance.now();
-const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 
 function addTimer(fn, ms) {
   const id = window.setTimeout(() => { state.timers.delete(id); fn(); }, ms);
   state.timers.add(id);
   return id;
+}
+
+function tutorialActive() {
+  const scene = window.__relayRunnerScene;
+  if (document.body.classList.contains('relay-training-active')) return true;
+  const onboarding = document.getElementById('relayTutorialOnboardingV3');
+  if (onboarding && !onboarding.hidden) return true;
+  return scene?.mission?.id === 'first-delivery' && scene?.firstTimeTutorial === true;
+}
+
+function tutorialComplete() {
+  try { return sessionStorage.getItem(TUTORIAL_COMPLETE_KEY) === '1'; }
+  catch { return false; }
+}
+
+function realGameplayActive() {
+  if (tutorialActive()) return false;
+  return Boolean(document.getElementById('play')?.classList.contains('gameplay-moving'));
 }
 
 function installStyle() {
@@ -67,6 +86,7 @@ function mount() {
   installStyle();
   const root = document.createElement('div');
   root.id = ROOT_ID;
+  root.hidden = true;
   root.innerHTML = `
     <div class="ng-chain"><div class="ng-kicker">MOMENTUM CHAIN</div><div class="ng-value">0<em>x FLOW</em></div></div>
     <div class="ng-event" aria-live="polite"></div>
@@ -78,35 +98,75 @@ function mount() {
 }
 
 function root(){ return document.getElementById(ROOT_ID); }
-function eventText(text){ const el=root()?.querySelector('.ng-event'); if(!el)return; el.textContent=text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); addTimer(()=>el.classList.remove('show'),620); }
-function updateChain(){ const el=root()?.querySelector('.ng-chain'); if(!el)return; el.querySelector('.ng-value').innerHTML=`${state.chain}<em>x FLOW</em>`; el.classList.toggle('show',state.chain>0); }
-function updateRecap(){ const r=root(); if(!r)return; r.querySelector('[data-ng="chain"]').textContent=`${state.chainPeak}x`; r.querySelector('[data-ng="near"]').textContent=state.nearMisses; r.querySelector('[data-ng="clutch"]').textContent=state.clutches; r.querySelector('[data-ng="speed"]').textContent=Math.round(state.peakSpeed); }
+function hideLayer(){ const r=root(); if(!r)return; r.hidden=true; r.querySelector('.ng-chain')?.classList.remove('show'); r.querySelector('.ng-event')?.classList.remove('show'); r.querySelector('.ng-choice')?.classList.remove('show'); r.querySelector('.ng-recap')?.classList.remove('show'); }
+function showLayer(){ mount().hidden=false; }
+function clearTimers(){ state.timers.forEach(id=>window.clearTimeout(id)); state.timers.clear(); }
+
+function eventText(text){
+  if(!state.started || tutorialActive())return;
+  const el=root()?.querySelector('.ng-event'); if(!el)return;
+  el.textContent=text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  addTimer(()=>el.classList.remove('show'),620);
+}
+
+function updateChain(){
+  const el=root()?.querySelector('.ng-chain'); if(!el)return;
+  el.querySelector('.ng-value').innerHTML=`${state.chain}<em>x FLOW</em>`;
+  el.classList.toggle('show',state.started && !tutorialActive() && state.chain>0);
+}
+
+function updateRecap(){
+  const r=root(); if(!r)return;
+  r.querySelector('[data-ng="chain"]').textContent=`${state.chainPeak}x`;
+  r.querySelector('[data-ng="near"]').textContent=state.nearMisses;
+  r.querySelector('[data-ng="clutch"]').textContent=state.clutches;
+  r.querySelector('[data-ng="speed"]').textContent=Math.round(state.peakSpeed);
+}
 
 function resetRun(){
+  if(tutorialActive() || !tutorialComplete()){ suspendRun(); return; }
   state.started=true; state.lastAction=''; state.lastActionAt=0; state.chain=0; state.chainPeak=0; state.nearMisses=0; state.clutches=0; state.peakSpeed=0; state.lastNearMissAt=0; state.clutchUntil=0; state.choiceVisible=false; state.choiceCooldownUntil=now()+6500; state.runStartedAt=now(); state.path=[]; state.ghost=loadGhost(); state.ghostIndex=0;
-  mount(); updateChain(); updateRecap(); root()?.querySelector('.ng-choice')?.classList.remove('show'); root()?.querySelector('.ng-recap')?.classList.remove('show');
+  showLayer(); updateChain(); updateRecap(); root()?.querySelector('.ng-choice')?.classList.remove('show'); root()?.querySelector('.ng-recap')?.classList.remove('show');
+}
+
+function suspendRun(){
+  clearTimers(); state.started=false; state.choiceVisible=false; state.lastAction=''; state.lastActionAt=0; state.chain=0; state.chainPeak=0; state.nearMisses=0; state.clutches=0; state.peakSpeed=0; state.clutchUntil=0; state.choiceCooldownUntil=0; hideLayer();
 }
 
 function registerAction(action){
-  const t=now();
-  if(t-state.lastActionAt>CHAIN_TIMEOUT) state.chain=0;
-  if(action!==state.lastAction) state.chain+=1;
+  if(!state.started || tutorialActive())return;
+  const t=now(); if(t-state.lastActionAt>CHAIN_TIMEOUT)state.chain=0; if(action!==state.lastAction)state.chain+=1;
   state.lastAction=action; state.lastActionAt=t; state.chainPeak=Math.max(state.chainPeak,state.chain); updateChain();
-  if(state.chain>=3 && state.chain%3===0) eventText(`${state.chain}x FLOW`);
+  if(state.chain>=3 && state.chain%3===0)eventText(`${state.chain}x FLOW`);
 }
 
 function triggerNearMiss(){
+  if(!state.started || tutorialActive())return;
   const t=now(); if(t-state.lastNearMissAt<520)return;
   state.lastNearMissAt=t; state.nearMisses+=1; state.clutchUntil=t+CLUTCH_WINDOW; eventText('NEAR MISS'); updateRecap();
   const play=document.getElementById('play'); play?.classList.add('gameplay-near-miss'); addTimer(()=>play?.classList.remove('gameplay-near-miss'),180);
 }
-function registerClutch(){ const t=now(); if(t>state.clutchUntil)return; state.clutches+=1; state.clutchUntil=0; state.chain+=2; state.chainPeak=Math.max(state.chainPeak,state.chain); eventText('CLUTCH'); updateChain(); updateRecap(); }
 
-function choose(kind){ if(!state.choiceVisible)return; state.choiceVisible=false; state.choiceCooldownUntil=now()+CHOICE_COOLDOWN; root()?.querySelector('.ng-choice')?.classList.remove('show'); eventText(kind==='overdrive'?'OVERDRIVE':'RECOVERY LINE'); window.dispatchEvent(new CustomEvent('relay:new-gameplay-choice',{detail:{choice:kind}})); }
-function maybeChoice(){ const t=now(); if(state.choiceVisible||t<state.choiceCooldownUntil||t-state.runStartedAt<8000)return; if(Math.random()>0.0015)return; state.choiceVisible=true; root()?.querySelector('.ng-choice')?.classList.add('show'); }
+function registerClutch(){
+  if(!state.started || tutorialActive())return;
+  const t=now(); if(t>state.clutchUntil)return;
+  state.clutches+=1; state.clutchUntil=0; state.chain+=2; state.chainPeak=Math.max(state.chainPeak,state.chain); eventText('CLUTCH'); updateChain(); updateRecap();
+}
 
-function recordGhost(){ if(state.path.length<12)return; try{localStorage.setItem(`${GHOST_KEY}.${location.pathname}`,JSON.stringify(state.path.slice(-520)));}catch{} }
-function loadGhost(){ try{const raw=localStorage.getItem(`${GHOST_KEY}.${location.pathname}`);return raw?JSON.parse(raw):null;}catch{return null;} }
+function choose(kind){
+  if(!state.choiceVisible || tutorialActive())return;
+  state.choiceVisible=false; state.choiceCooldownUntil=now()+CHOICE_COOLDOWN; root()?.querySelector('.ng-choice')?.classList.remove('show'); eventText(kind==='overdrive'?'OVERDRIVE':'RECOVERY LINE'); window.dispatchEvent(new CustomEvent('relay:new-gameplay-choice',{detail:{choice:kind}}));
+}
+
+function maybeChoice(){
+  if(!state.started || tutorialActive() || !realGameplayActive())return;
+  const t=now(); if(state.choiceVisible || t<state.choiceCooldownUntil || t-state.runStartedAt<8000)return;
+  if(Math.random()>0.0015)return;
+  state.choiceVisible=true; root()?.querySelector('.ng-choice')?.classList.add('show');
+}
+
+function recordGhost(){if(state.path.length<12)return;try{localStorage.setItem(`${GHOST_KEY}.${location.pathname}`,JSON.stringify(state.path.slice(-520)));}catch{}}
+function loadGhost(){try{const raw=localStorage.getItem(`${GHOST_KEY}.${location.pathname}`);return raw?JSON.parse(raw):null;}catch{return null;}}
 
 function actionFromKey(event){
   if(event.repeat||event.altKey||event.ctrlKey||event.metaKey)return null;
@@ -118,17 +178,40 @@ function actionFromKey(event){
 }
 
 function start(){
-  if(state.started)return;
-  resetRun();
-  document.addEventListener('keydown',e=>{ const action=actionFromKey(e); if(action){registerAction(action); if(action==='dash')window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash')); if(action==='jump')window.dispatchEvent(new CustomEvent('relay:new-gameplay-jump')); }},true);
-  document.addEventListener('pointerdown',e=>{ const button=e.target.closest?.('[data-mobile-action]'); if(button)registerAction(button.dataset.mobileAction||'action'); },true);
-  window.addEventListener('relay:gameplay-core-ready',()=>{ if(!state.started)resetRun(); });
+  if(state.listenersInstalled)return;
+  state.listenersInstalled=true; mount(); hideLayer();
+
+  document.addEventListener('keydown',e=>{
+    const action=actionFromKey(e); if(!action || tutorialActive())return;
+    if(!state.started && realGameplayActive())resetRun();
+    if(state.started){registerAction(action); if(action==='dash')window.dispatchEvent(new CustomEvent('relay:new-gameplay-dash')); if(action==='jump')window.dispatchEvent(new CustomEvent('relay:new-gameplay-jump'));}
+  },true);
+
+  document.addEventListener('pointerdown',e=>{
+    const button=e.target.closest?.('[data-mobile-action]'); if(!button || tutorialActive())return;
+    if(!state.started && realGameplayActive())resetRun();
+    if(state.started)registerAction(button.dataset.mobileAction||'action');
+  },true);
+
+  window.addEventListener('relay:gameplay-core-ready',()=>{if(tutorialActive())suspendRun();});
   window.addEventListener('relay:new-gameplay-near-miss',triggerNearMiss);
   window.addEventListener('relay:new-gameplay-clutch',registerClutch);
-  window.addEventListener('relay:new-gameplay-run-start',resetRun);
-  window.addEventListener('relay:new-gameplay-run-finish',()=>{ recordGhost(); updateRecap(); root()?.querySelector('.ng-recap')?.classList.add('show'); });
-  const tick=()=>{ if(!state.started){requestAnimationFrame(tick);return;} maybeChoice(); const play=document.getElementById('play'); if(play?.classList.contains('gameplay-moving'))state.peakSpeed=Math.max(state.peakSpeed,1); updateRecap(); requestAnimationFrame(tick); };
+  window.addEventListener('relay:new-gameplay-run-start',()=>{if(!tutorialActive())resetRun();});
+  window.addEventListener('relay:new-gameplay-run-finish',()=>{if(!state.started)return;recordGhost();updateRecap();root()?.querySelector('.ng-recap')?.classList.add('show');});
+
+  const suspendForTutorial=()=>suspendRun();
+  window.addEventListener('relay:runner-scene-ready',suspendForTutorial,{passive:true});
+  window.addEventListener('relay:tutorial-step',suspendForTutorial,{passive:true});
+  window.addEventListener('relay:cinematic-lock',suspendForTutorial,{passive:true});
+  window.addEventListener('relay:tutorial-complete',suspendForTutorial,{passive:true});
+
+  const tick=()=>{
+    if(tutorialActive()){suspendRun();}
+    else if(!state.started && tutorialComplete() && realGameplayActive()){resetRun();}
+    if(state.started){maybeChoice(); const play=document.getElementById('play'); if(play?.classList.contains('gameplay-moving'))state.peakSpeed=Math.max(state.peakSpeed,1); updateRecap();}
+    requestAnimationFrame(tick);
+  };
   requestAnimationFrame(tick);
 }
 
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
