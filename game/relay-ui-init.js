@@ -15,7 +15,6 @@ import './city-pulse-v1.css';
 
 // UPDATE 22 — shared lifecycle/event adapter. Additive only.
 import './relay-runtime-kernel-v1.js';
-import './city-pulse-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -49,8 +48,6 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape') { pa
 
 import './cargo-integrity-v2.js';
 import './cargo-integrity-v2-visibility-v1.js';
-import './signal-network-v1.js';
-import './city-response-v1.js';
 import './gameplay-intro-final-v1.js';
 import './gameplay-core-v1.js';
 import './dash-runtime-bridge-v1.js';
