@@ -1,9 +1,10 @@
 import { missions } from '../missions.js';
-import { completeMission, loadState, saveState } from '../state.js';
-import { applyMissionCompletionIntegrity, reconcileProgressionState } from './progression-integrity.js';
+import { loadState, saveState } from '../state.js';
+import { completeMissionCanonical } from './mission-completion-service.js';
+import { reconcileProgressionState } from './progression-integrity.js';
 
-// state.js references the canonical mission catalog while completing a run.
-// Keep the runtime binding available before completion can be requested.
+// Preserve the global catalog binding for legacy runtime modules while the
+// canonical completion service owns the actual progression calculation.
 globalThis.missions = missions;
 
 const RECOVERY_DELAY = 360;
@@ -42,10 +43,7 @@ function showRecoveredFinish(scene) {
       signalBonusExtra: (scene.boostedSignals || 0) * 5 + (scene.loadout?.upgrades?.includes('signalXp') ? scene.collected : 0),
       score: (scene.collected || 0) * 100 + (scene.secretsCollected || 0) * 250 + (scene.boostedSignals || 0) * 100,
     };
-    state = completeMission(state, mission, scene.collected || 0, scene.elapsedMs || 0, runStats);
-    state = { ...state, unlockedMissions: missions.filter(item => !item.unlockRequirement || state.completed.includes(item.unlockRequirement)).map(item => item.id) };
-    state = applyMissionCompletionIntegrity(state, mission, missions, scene.elapsedMs || 0);
-    state = reconcileProgressionState(state, missions);
+    state = completeMissionCanonical(state, mission, scene.collected || 0, scene.elapsedMs || 0, runStats);
     saveState(state);
   } else {
     const reconciled = reconcileProgressionState(state, missions);
