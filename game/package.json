@@ -20,6 +20,7 @@
     "test:collapse-protocol": "node tests/collapse-protocol.mjs",
     "test:runtime-kernel": "node tests/relay-runtime-kernel.mjs",
     "test:city-pulse": "node tests/city-pulse.mjs",
+    "test:runtime-core": "node tests/runtime-core.mjs",
     "test:gameplay-architecture": "node tests/gameplay-architecture-audit.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs",
     "test:gameplay-mobile": "node tests/gameplay-mobile.mjs"
