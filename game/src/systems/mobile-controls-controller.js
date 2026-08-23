@@ -56,6 +56,27 @@ const directAction = action => {
   return handled;
 };
 
+const releaseGameplayAction = action => {
+  const scene = getActiveScene();
+  if (!scene) return;
+  try {
+    if (scene.mobileActions) scene.mobileActions[action] = false;
+    if (typeof scene.mobileActionReleaseHandler === 'function') {
+      scene.mobileActionReleaseHandler(action);
+    }
+  } catch {}
+};
+
+const resetGameplayActions = () => {
+  const scene = getActiveScene();
+  if (!scene?.mobileActions) return;
+  try {
+    Object.keys(scene.mobileActions).forEach(action => {
+      scene.mobileActions[action] = false;
+    });
+  } catch {}
+};
+
 const directMove = direction => {
   const scene = getActiveScene();
   if (!scene || scene.cinematicActive || scene.finished || scene.respawning) return false;
@@ -156,7 +177,10 @@ function bindControls(root) {
   ensureActions(root);
 
   const releaseAction = (button, event) => {
-    event?.preventDefault?.(); event?.stopImmediatePropagation?.(); button.classList.remove('is-active');
+    event?.preventDefault?.(); event?.stopImmediatePropagation?.();
+    const action = button.dataset.mobileAction;
+    releaseGameplayAction(action);
+    button.classList.remove('is-active');
   };
   const releaseDirection = (button, event) => {
     event?.preventDefault?.(); event?.stopImmediatePropagation?.();
@@ -195,6 +219,8 @@ function bindControls(root) {
   };
   document.addEventListener('pointerup', release, { capture: true, passive: false });
   document.addEventListener('pointercancel', release, { capture: true, passive: false });
+  window.addEventListener('blur', resetGameplayActions, { passive: true });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) resetGameplayActions(); }, { passive: true });
 }
 
 function ensureControls() {
