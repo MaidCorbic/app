@@ -34,18 +34,37 @@ try {
     DOMTokenList.prototype.add = function (...tokens) {
       const result = add.apply(this, tokens);
       const intro = document.getElementById('intro');
-      if (intro && this === intro.classList && tokens.includes('hidden')) {
-        window.__relayIntroVisibilityTrace.push(new Error('intro hidden').stack || 'unknown stack');
-      }
+      if (intro && this === intro.classList && tokens.includes('hidden')) window.__relayIntroVisibilityTrace.push(new Error('intro hidden').stack || 'unknown stack');
       return result;
     };
   });
 
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
-  await page.locator('#start').waitFor({ state: 'visible', timeout: 6000 });
+  await page.waitForTimeout(1200);
+  const titleState = await page.evaluate(() => {
+    const start = document.getElementById('start');
+    const intro = document.getElementById('intro');
+    const style = start ? getComputedStyle(start) : null;
+    const rect = start?.getBoundingClientRect();
+    return {
+      startClass: start?.className || '',
+      introClass: intro?.className || '',
+      startHiddenAttr: start?.hidden ?? null,
+      introHiddenAttr: intro?.hidden ?? null,
+      display: style?.display || null,
+      visibility: style?.visibility || null,
+      opacity: style?.opacity || null,
+      width: rect?.width || 0,
+      height: rect?.height || 0,
+      parentClass: start?.parentElement?.className || '',
+      bodyClass: document.body.className,
+      trace: window.__relayIntroVisibilityTrace || [],
+    };
+  });
+  assert.ok(titleState.width > 0 && titleState.height > 0 && titleState.display !== 'none' && titleState.visibility !== 'hidden', `Title Play button is not visible: ${JSON.stringify(titleState)}`);
+
   await page.click('#start');
   await page.waitForTimeout(2500);
-
   await page.mouse.click(1000, 340);
   await page.waitForTimeout(6000);
 
@@ -77,10 +96,6 @@ try {
   assert.ok(typeof before.x === 'number' && typeof after.x === 'number' && Math.abs(after.x - before.x) > 1, 'Player must still respond to movement after the intro');
 
   console.log('Gameplay smoke test passed: intro handoff releases lock and player remains controllable.');
-} catch (error) {
-  const trace = await page?.evaluate(() => window.__relayIntroVisibilityTrace || []).catch(() => []);
-  if (trace.length) error.message += `\nIntro hidden traces:\n${trace.join('\n---\n')}`;
-  throw error;
 } finally {
   if (browser) await browser.close();
   server.kill();
