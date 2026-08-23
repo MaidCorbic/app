@@ -110,3 +110,4 @@ import './src/systems/mobile-controls-controller.js';
 import './src/systems/mobile-controls-runtime-v2.js';
 import './src/systems/mission-runtime-hardening-v1.js';
 import './relay-senior-polish-v1.js';
+import './src/systems/relay-final-stability-v1.js';
