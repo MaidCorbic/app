@@ -2,6 +2,10 @@ import { missions } from '../missions.js';
 import { completeMission, loadState, saveState } from '../state.js';
 import { applyMissionCompletionIntegrity, reconcileProgressionState } from './progression-integrity.js';
 
+// state.js references the canonical mission catalog while completing a run.
+// Keep the runtime binding available before completion can be requested.
+globalThis.missions = missions;
+
 const RECOVERY_DELAY = 360;
 let timer;
 
