@@ -43,7 +43,7 @@ try {
   assert.equal(touchState.bodyTouch, true, 'Touch mode should be enabled on a mobile viewport');
   assert.equal(touchState.controller, true, 'Authoritative mobile controller should be installed');
   assert.equal(touchState.controls, true, 'Mobile controls should be mounted');
-  for (const action of ['jump', 'dash', 'fire', 'sword', 'build1', 'gadget1']) {
+  for (const action of ['jump', 'dash', 'fire', 'sword', 'build1', 'build2', 'gadget1', 'gadget2']) {
     assert.ok(touchState.actions.includes(action), `Missing mobile action: ${action}`);
   }
   for (const direction of ['up', 'left', 'right', 'down']) {
