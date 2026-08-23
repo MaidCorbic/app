@@ -1,4 +1,4 @@
-/* UPDATE 25 — title/home polish, language wiring and panel redesign */
+/* UPDATE 26 — title/home polish, language wiring, panel redesign and tagline emphasis */
 import './src/i18n.js';
 
 (() => {
@@ -17,7 +17,7 @@ import './src/i18n.js';
   }
 
   const style = document.createElement('style');
-  style.id = 'city-pulse-title-screen-v25-style';
+  style.id = 'city-pulse-title-screen-v26-style';
   style.textContent = `
     #intro.home-copy-locked,
     #intro.home-copy-locked * { -webkit-user-select:none!important; user-select:none!important; -webkit-touch-callout:none!important; }
@@ -28,6 +28,14 @@ import './src/i18n.js';
     #play .hud-route,
     #play .world-marker,
     #play .input-guide { display:none!important; }
+
+    #intro .menu-tagline { text-wrap:balance; }
+    #intro .menu-tagline .home-tagline-lead {
+      font-weight:850;
+      color:#eef3f7;
+      text-shadow:0 0 18px #dceeff12;
+    }
+    #intro .menu-tagline .home-tagline-rest { color:#c3cdd9; font-weight:500; }
 
     #intro .title-secondary { position:relative; }
     #intro .home-language-button { position:relative; }
@@ -132,6 +140,7 @@ import './src/i18n.js';
     @media(max-width:700px){
       #intro .title-secondary { width:min(360px,94vw)!important; }
       #intro .beta-badge { min-width:32px; height:17px; font-size:6.5px; }
+      #intro .menu-tagline .home-tagline-lead { font-weight:850; }
       #relayInfoPanel.relay-polished .relay-info-card { width:96vw!important; max-height:88dvh!important; max-height:88svh!important; padding:18px!important; border-radius:13px!important; }
       #relayInfoPanel.relay-polished #relayInfoContent { max-height:calc(88dvh - 120px)!important; max-height:calc(88svh - 120px)!important; }
       #relayInfoPanel.relay-polished h2 { font-size:34px!important; }
@@ -145,6 +154,16 @@ import './src/i18n.js';
       if (/A\s+ROOFTOP\s+DELIVERY\s+GAME/i.test(el.textContent || '')) el.classList.add('home-rooftop-removed');
     });
     intro.querySelector('.chapter-brief')?.remove();
+  };
+
+  const emphasizeHomeTagline = () => {
+    const tagline = intro.querySelector('.menu-tagline');
+    if (!tagline || tagline.dataset.emphasisApplied) return;
+    const text = tagline.textContent.trim();
+    const lead = 'Run the sleeping city.';
+    if (!text.startsWith(lead)) return;
+    tagline.innerHTML = `<strong class="home-tagline-lead">${lead}</strong> <span class="home-tagline-rest">${text.slice(lead.length).trim()}</span>`;
+    tagline.dataset.emphasisApplied = '1';
   };
 
   const addBetaBadge = () => {
@@ -224,6 +243,7 @@ import './src/i18n.js';
 
   const sync = () => {
     removeRequestedHomeText();
+    emphasizeHomeTagline();
     addBetaBadge();
     addLanguageButtons();
     annotateLanguageText();
@@ -275,5 +295,5 @@ import './src/i18n.js';
   });
 
   window.__cityPulseTitleV1 = true;
-  window.dispatchEvent(new CustomEvent('relay:city-pulse-title-ready', { detail: { version: '1.1.0' } }));
+  window.dispatchEvent(new CustomEvent('relay:city-pulse-title-ready', { detail: { version: '1.2.0' } }));
 })();
