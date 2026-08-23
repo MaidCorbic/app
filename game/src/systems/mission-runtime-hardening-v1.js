@@ -1,3 +1,5 @@
+import { GAME_FLOW, gameFlow } from '../runtime/game-flow.js';
+
 (() => {
   'use strict';
   if (window.__relayMissionRuntimeHardeningV1) return;
@@ -15,6 +17,13 @@
     '#abilityUnlock'
   ];
   const transitionButtons = new Set(['retry', 'again', 'nextMission', 'finishTitle', 'failTitle']);
+  const TRANSITION_TARGETS = Object.freeze({
+    retry: GAME_FLOW.LOADING,
+    again: GAME_FLOW.LOADING,
+    nextMission: GAME_FLOW.LOADING,
+    finishTitle: GAME_FLOW.HOME,
+    failTitle: GAME_FLOW.LOADING,
+  });
   let transitionLock = false;
 
   const runner = () => window.__relayRunnerScene || window.game?.scene?.getScene?.('runner');
@@ -65,6 +74,24 @@
     if (gameOver) gameOver.classList.add('hidden');
   };
 
+  const flowTransition = (target, meta = {}) => {
+    const current = gameFlow.getState();
+    if (current === target) return true;
+    if (gameFlow.canTransition(target)) return gameFlow.transition(target, meta);
+
+    // Recovery path for legacy UI handlers whose previous transition was not
+    // represented in the new flow yet. Resetting only the flow state is safe;
+    // the existing launch/retry handler remains authoritative for the actual scene.
+    if (target === GAME_FLOW.HOME) {
+      gameFlow.reset({ ...meta, reason: 'legacy-home-transition' });
+      return true;
+    }
+    if (target === GAME_FLOW.LOADING && [GAME_FLOW.COMPLETE, GAME_FLOW.RESULTS, GAME_FLOW.GAME_OVER].includes(current)) {
+      return gameFlow.transition(GAME_FLOW.LOADING, meta);
+    }
+    return false;
+  };
+
   const handleTransition = event => {
     const button = event.currentTarget;
     if (!button || transitionLock || button.disabled) {
@@ -72,6 +99,12 @@
       event.stopImmediatePropagation();
       return;
     }
+
+    const target = TRANSITION_TARGETS[button.id];
+    if (target) {
+      flowTransition(target, { source: 'mission-runtime-hardening', control: button.id });
+    }
+
     transitionLock = true;
     button.disabled = true;
     button.setAttribute('aria-busy', 'true');
@@ -97,10 +130,31 @@
   };
 
   const onMissionComplete = () => {
-    // Mission completion must never leave tutorial/cinematic ownership active.
     stopTutorialRuntime();
     resetTouchState();
+    if (gameFlow.canTransition(GAME_FLOW.COMPLETE)) {
+      gameFlow.transition(GAME_FLOW.COMPLETE, { source: 'mission-runtime-hardening' });
+    }
+    if (gameFlow.canTransition(GAME_FLOW.RESULTS)) {
+      gameFlow.transition(GAME_FLOW.RESULTS, { source: 'mission-runtime-hardening' });
+    }
     bind();
+  };
+
+  const onPause = event => {
+    const action = event.target?.closest?.('[data-action="pause"],[data-pause-button],#pauseBtn,#pause');
+    if (!action) return;
+    if (gameFlow.canTransition(GAME_FLOW.PAUSED)) {
+      gameFlow.transition(GAME_FLOW.PAUSED, { source: 'mission-runtime-hardening' });
+    }
+  };
+
+  const onResume = event => {
+    const action = event.target?.closest?.('[data-action="resume"],[data-resume-button],#resumeBtn,#resume');
+    if (!action) return;
+    if (gameFlow.canTransition(GAME_FLOW.RUNNING)) {
+      gameFlow.transition(GAME_FLOW.RUNNING, { source: 'mission-runtime-hardening' });
+    }
   };
 
   window.addEventListener('relay:mission-complete', onMissionComplete, { passive: true });
@@ -115,6 +169,12 @@
   window.addEventListener('blur', releaseRunnerInput, { passive: true });
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseRunnerInput(); }, { passive: true });
   window.addEventListener('pagehide', releaseRunnerInput, { passive: true });
+  document.addEventListener('click', onPause, true);
+  document.addEventListener('click', onResume, true);
+
+  gameFlow.subscribe(({ to }) => {
+    document.documentElement.dataset.relayGameFlow = to;
+  });
 
   bind();
   new MutationObserver(bind).observe(document.body, { childList: true, subtree: true });
