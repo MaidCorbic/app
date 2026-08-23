@@ -50,3 +50,6 @@ jobs:
 
       - name: Gameplay smoke
         run: node tests/gameplay-smoke.mjs
+
+      - name: Mobile gameplay smoke
+        run: npm run test:gameplay-mobile
