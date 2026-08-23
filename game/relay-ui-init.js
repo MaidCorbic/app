@@ -60,7 +60,6 @@ import './world-interaction-runtime-v2.js';
 import './player-shield-visual-cleanup-v1.js';
 import './tutorial-runtime-gate-v1.js';
 import './home-tutorial-v1.js';
-import './tutorial-mobile-runtime-fix-v1.js';
 import './cinematic-tutorial-pacing-v1.js';
 import './level-visual-stability-fix-v1.js';
 import './mission-flow-performance-v1.js';
