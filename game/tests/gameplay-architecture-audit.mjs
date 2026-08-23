@@ -5,6 +5,7 @@ const root = path.resolve(new URL('..', import.meta.url).pathname);
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const relayInit = read('relay-ui-init.js');
 const mobile = read('src/systems/mobile-controls-controller.js');
+const coreStability = read('src/systems/core-stability.js');
 const homeOptions = read('home-options.js');
 const homeAiTutorialOptions = read('home-ai-tutorial-options.js');
 const runtimeAiTutorialSettings = read('runtime-ai-tutorial-settings.js');
@@ -24,6 +25,12 @@ if (relayInit.includes("./src/systems/mobile-controls-runtime-v2.js")) {
 }
 if (relayInit.includes("./src/systems/mobile-controls-direct-input-v1.js")) {
   failures.push('mobile-controls-direct-input-v1.js must not be loaded as a second input path');
+}
+if (!coreStability.includes('RunnerScene.prototype.update')) {
+  failures.push('core stability must retain the gameplay safety update hook');
+}
+if (coreStability.includes('installTouchControls') || coreStability.includes('__relayTouchInstalled')) {
+  failures.push('core stability must not own a second mobile touch input implementation');
 }
 if (!mobile.includes("OWNER = 'controller-v3'")) {
   failures.push('mobile controller must expose the controller-v3 ownership marker');
@@ -49,12 +56,12 @@ for (const [name, source] of [
   ['runtime-ai-tutorial-settings.js', runtimeAiTutorialSettings],
 ]) {
   if (!source.includes('./src/settings/settings-store.js')) failures.push(`${name} must use the central settings store`);
-  if (source.includes("loadState") || source.includes("saveState")) failures.push(`${name} must not own settings persistence directly`);
+  if (source.includes('loadState') || source.includes('saveState')) failures.push(`${name} must not own settings persistence directly`);
 }
 if (!settingsStore.includes('export function updateSettings')) {
   failures.push('settings store must expose updateSettings');
 }
-if (!settingsStore.includes("relay-settings-change")) {
+if (!settingsStore.includes('relay-settings-change')) {
   failures.push('settings store must emit relay-settings-change');
 }
 if (!lifecycle.includes("import { GAME_FLOW, gameFlow }")) {
@@ -88,6 +95,7 @@ if (failures.length) {
 console.log('Gameplay architecture audit PASS');
 console.log('- one authoritative mobile controller');
 console.log('- no legacy mobile runtime imports');
+console.log('- no duplicate touch controller in core stability');
 console.log('- controller ownership marker');
 console.log('- legacy pointer duplication blocked');
 console.log('- late DOM rebind protection');
