@@ -5,6 +5,10 @@ const root = path.resolve(new URL('..', import.meta.url).pathname);
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const relayInit = read('relay-ui-init.js');
 const mobile = read('src/systems/mobile-controls-controller.js');
+const homeOptions = read('home-options.js');
+const settingsStore = read('src/settings/settings-store.js');
+const lifecycle = read('src/systems/mission-runtime-hardening-v1.js');
+const gameFlow = read('src/runtime/game-flow.js');
 const packageJson = JSON.parse(read('package.json'));
 
 const failures = [];
@@ -31,11 +35,39 @@ if (!mobile.includes('MutationObserver')) {
 if (!mobile.includes('window.__relayMobileControlsObserverV3')) {
   failures.push('mobile controller observer must be singleton');
 }
-if (!packageJson.scripts?.['test:gameplay-architecture']) {
-  failures.push('package.json must expose test:gameplay-architecture');
+
+if (!homeOptions.includes("./src/settings/settings-store.js")) {
+  failures.push('home-options.js must use the central settings store');
 }
-if (!packageJson.scripts?.['test:progression-integrity']) {
-  failures.push('package.json must expose test:progression-integrity');
+if (homeOptions.includes("import { loadState, saveState } from './src/state.js'")) {
+  failures.push('home-options.js must not own settings persistence directly');
+}
+if (!settingsStore.includes('export function updateSettings')) {
+  failures.push('settings store must expose updateSettings');
+}
+if (!settingsStore.includes("relay-settings-change")) {
+  failures.push('settings store must emit relay-settings-change');
+}
+if (!lifecycle.includes("import { GAME_FLOW, gameFlow }")) {
+  failures.push('mission runtime hardening must use the central game flow');
+}
+for (const marker of ['GAME_FLOW.PAUSED', 'GAME_FLOW.COMPLETE', 'GAME_FLOW.RESULTS', 'GAME_FLOW.LOADING']) {
+  if (!lifecycle.includes(marker)) failures.push(`mission runtime hardening must transition through ${marker}`);
+}
+if (!gameFlow.includes('export const GAME_FLOW')) {
+  failures.push('game flow module must expose GAME_FLOW');
+}
+if (!gameFlow.includes('export const gameFlow')) {
+  failures.push('game flow module must expose the authoritative singleton');
+}
+
+for (const script of [
+  'test:gameplay-architecture',
+  'test:progression-integrity',
+  'test:runtime-core',
+  'test:gameplay-mobile',
+]) {
+  if (!packageJson.scripts?.[script]) failures.push(`package.json must expose ${script}`);
 }
 
 if (failures.length) {
@@ -50,3 +82,5 @@ console.log('- no legacy mobile runtime imports');
 console.log('- controller ownership marker');
 console.log('- legacy pointer duplication blocked');
 console.log('- late DOM rebind protection');
+console.log('- central settings store ownership');
+console.log('- mission lifecycle routed through game flow');
