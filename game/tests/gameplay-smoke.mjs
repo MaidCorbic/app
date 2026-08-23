@@ -27,14 +27,24 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', err => errors.push(err.message));
+  await page.addInitScript(() => {
+    window.__relayIntroVisibilityTrace = [];
+    const add = DOMTokenList.prototype.add;
+    DOMTokenList.prototype.add = function (...tokens) {
+      const result = add.apply(this, tokens);
+      const intro = document.getElementById('intro');
+      if (intro && this === intro.classList && tokens.includes('hidden')) {
+        window.__relayIntroVisibilityTrace.push(new Error('intro hidden').stack || 'unknown stack');
+      }
+      return result;
+    };
+  });
 
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
   await page.locator('#start').waitFor({ state: 'visible', timeout: 6000 });
   await page.click('#start');
   await page.waitForTimeout(2500);
 
-  // Dismiss the existing chapter card if present. The cinematic intro itself
-  // must never own or disable gameplay input.
   await page.mouse.click(1000, 340);
   await page.waitForTimeout(6000);
 
@@ -66,6 +76,10 @@ try {
   assert.ok(typeof before.x === 'number' && typeof after.x === 'number' && Math.abs(after.x - before.x) > 1, 'Player must still respond to movement after the intro');
 
   console.log('Gameplay smoke test passed: intro handoff releases lock and player remains controllable.');
+} catch (error) {
+  const trace = await page?.evaluate(() => window.__relayIntroVisibilityTrace || []).catch(() => []);
+  if (trace.length) error.message += `\nIntro hidden traces:\n${trace.join('\n---\n')}`;
+  throw error;
 } finally {
   if (browser) await browser.close();
   server.kill();
