@@ -29,7 +29,7 @@ try {
   page.on('pageerror', err => errors.push(err.message));
 
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(800);
+  await page.locator('#start').waitFor({ state: 'visible', timeout: 6000 });
   await page.click('#start');
   await page.waitForTimeout(2500);
 
