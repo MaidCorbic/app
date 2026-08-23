@@ -40,7 +40,8 @@ try {
   });
 
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1200);
+  await page.locator('#relaySplash').waitFor({ state: 'hidden', timeout: 20000 });
+  await page.waitForTimeout(500);
   const titleState = await page.evaluate(() => {
     const start = document.getElementById('start');
     const intro = document.getElementById('intro');
