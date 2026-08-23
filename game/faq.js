@@ -1,3 +1,5 @@
+import './relay-senior-polish-v1.js';
+
 export const RELAY_FAQ = [
   ['How do I play?', 'Use A/D or the left/right side of the joystick to move, SPACE or JUMP to jump. On mobile, use the touch controls.'],
   ['How do I complete a mission?', 'Follow the mission objective, collect the required signals and reach the delivery beacon. When complete, use NEXT MISSION to continue.'],
