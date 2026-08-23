@@ -27,6 +27,19 @@
     #relayGameplayIntroFinalV2 .relay-intro-caption strong{display:block;font-size:clamp(22px,3vw,46px);line-height:1;font-weight:900;letter-spacing:.05em}
     #relayGameplayIntroFinalV2 .relay-intro-caption span{display:block;margin-top:12px;color:#d6e5eb;font-size:clamp(11px,1.2vw,16px);line-height:1.5}
     #relayGameplayIntroFinalV2 .relay-intro-skip{position:absolute;left:14px;top:12px;pointer-events:auto;border:1px solid rgba(141,244,255,.32);background:rgba(2,7,13,.9);color:#eafcff;padding:9px 12px;font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;cursor:pointer}
+    /* During the opening presentation the gameplay HUD must not compete with the intro. */
+    body.relay-gameplay-intro-active #progress,
+    body.relay-gameplay-intro-active #missionProgress,
+    body.relay-gameplay-intro-active #mission-progress,
+    body.relay-gameplay-intro-active [data-progress],
+    body.relay-gameplay-intro-active [data-mission-progress],
+    body.relay-gameplay-intro-active [data-dawn],
+    body.relay-gameplay-intro-active .dawn,
+    body.relay-gameplay-intro-active .dawn-indicator,
+    body.relay-gameplay-intro-active .game-progress,
+    body.relay-gameplay-intro-active .mission-progress,
+    body.relay-gameplay-intro-active .game-hud,
+    body.relay-gameplay-intro-active .hud{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
     @media(max-width:760px){#relayGameplayIntroFinalV2 .relay-intro-caption{bottom:14%;width:92vw}}
     @media(prefers-reduced-motion:reduce){#relayGameplayIntroFinalV2 .relay-intro-caption{transition:none}}
   `;
@@ -41,8 +54,8 @@
     root.classList.remove('show');
     root.hidden = true;
     active = false;
+    document.body.classList.remove('relay-gameplay-intro-active');
     sessionStorage.setItem(KEY, '1');
-    // Explicitly clear any stale cinematic lock from older runtime layers.
     window.__relayCinematicLock = false;
     window.dispatchEvent(new Event('relay:cinematic-unlock'));
     const runner = window.__relayRunnerScene || window.game?.scene?.getScene?.('runner');
@@ -56,17 +69,16 @@
   const show = () => {
     if (active || sessionStorage.getItem(KEY) === '1') return;
     active = true;
+    document.body.classList.add('relay-gameplay-intro-active');
     root.hidden = false;
     caption.innerHTML = '<small>OLD QUARTER · NIGHT SHIFT</small><strong>YOUR RUN BEGINS</strong><span>Beacon ahead. Keep your pace and deliver the relay.</span>';
     requestAnimationFrame(() => root.classList.add('show'));
-    // Presentation only: never pause, disable, hide or re-create Phaser systems.
     timer = window.setTimeout(finish, 4200);
   };
 
   start.addEventListener('click', event => {
     if (started) return;
     started = true;
-    // Let the existing Start handler create the scene first; this layer never intercepts it.
     window.setTimeout(show, 250);
   }, { capture:false });
 
