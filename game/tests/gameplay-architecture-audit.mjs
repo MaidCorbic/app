@@ -6,6 +6,8 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const relayInit = read('relay-ui-init.js');
 const mobile = read('src/systems/mobile-controls-controller.js');
 const homeOptions = read('home-options.js');
+const homeAiTutorialOptions = read('home-ai-tutorial-options.js');
+const runtimeAiTutorialSettings = read('runtime-ai-tutorial-settings.js');
 const settingsStore = read('src/settings/settings-store.js');
 const lifecycle = read('src/systems/mission-runtime-hardening-v1.js');
 const gameFlow = read('src/runtime/game-flow.js');
@@ -41,6 +43,13 @@ if (!homeOptions.includes("./src/settings/settings-store.js")) {
 }
 if (homeOptions.includes("import { loadState, saveState } from './src/state.js'")) {
   failures.push('home-options.js must not own settings persistence directly');
+}
+for (const [name, source] of [
+  ['home-ai-tutorial-options.js', homeAiTutorialOptions],
+  ['runtime-ai-tutorial-settings.js', runtimeAiTutorialSettings],
+]) {
+  if (!source.includes('./src/settings/settings-store.js')) failures.push(`${name} must use the central settings store`);
+  if (source.includes("loadState") || source.includes("saveState")) failures.push(`${name} must not own settings persistence directly`);
 }
 if (!settingsStore.includes('export function updateSettings')) {
   failures.push('settings store must expose updateSettings');
@@ -83,4 +92,5 @@ console.log('- controller ownership marker');
 console.log('- legacy pointer duplication blocked');
 console.log('- late DOM rebind protection');
 console.log('- central settings store ownership');
+console.log('- tutorial settings routed through central store');
 console.log('- mission lifecycle routed through game flow');
