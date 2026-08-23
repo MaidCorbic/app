@@ -1,10 +1,25 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 import { setupWorldInteraction, updateWorldInteraction } from '../../world-interaction-v1.js';
+import { GAME_FLOW, gameFlow } from '../runtime/game-flow.js';
 
 // Authoritative RunnerScene lifecycle adapter.
 // Exactly one runtime module owns the create/update/fail/respawn wrappers.
 const prototype = RunnerScene.prototype;
+
+const transitionToRunning = meta => {
+  const current = gameFlow.getState();
+  if (current === GAME_FLOW.RUNNING) return true;
+  if (current === GAME_FLOW.PAUSED) return gameFlow.transition(GAME_FLOW.RUNNING, meta);
+  if (current === GAME_FLOW.HOME) gameFlow.transition(GAME_FLOW.BRIEFING, meta);
+  if (gameFlow.getState() === GAME_FLOW.BRIEFING) gameFlow.transition(GAME_FLOW.LOADING, meta);
+  if (gameFlow.getState() === GAME_FLOW.LOADING) gameFlow.transition(GAME_FLOW.RUNNING, meta);
+  if (gameFlow.getState() === GAME_FLOW.COMPLETE || gameFlow.getState() === GAME_FLOW.RESULTS || gameFlow.getState() === GAME_FLOW.GAME_OVER) {
+    gameFlow.transition(GAME_FLOW.LOADING, meta);
+    gameFlow.transition(GAME_FLOW.RUNNING, meta);
+  }
+  return gameFlow.getState() === GAME_FLOW.RUNNING;
+};
 
 if (!prototype.__relayRunnerLifecycleAdapterV1) {
   prototype.__relayRunnerLifecycleAdapterV1 = true;
@@ -64,6 +79,9 @@ if (!prototype.__relayRunnerLifecycleAdapterV1) {
       const result = originalCreate.apply(this, args);
       setupWorldInteraction(this);
       window.__relayRunnerScene = this;
+      transitionToRunning({ source: 'runner-scene-ready', missionId: mission.id });
+      this.events.once('pause', () => gameFlow.transition(GAME_FLOW.PAUSED, { source: 'runner-scene-pause' }));
+      this.events.once('resume', () => transitionToRunning({ source: 'runner-scene-resume' }));
       window.dispatchEvent(new CustomEvent('relay:runner-scene-ready', { detail: { scene: this } }));
       return result;
     } catch (error) {
