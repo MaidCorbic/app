@@ -8,10 +8,10 @@ const T = {
   de: { faq:'FAQ', info:'LETZTES UPDATE', options:'OPTIONEN', language:'SPRACHE', close:'SCHLIESSEN', play:'SPIELEN', continue:'FORTSETZEN', run:'LAUFEN', jump:'SPRINGEN', fire:'FEUERN', blade:'KLINGE', dash:'DASH', signals:'SIGNALE', pause:'PAUSE', resume:'FORTSETZEN', missions:'MISSIONEN', progress:'FORTSCHRITT', settings:'EINSTELLUNGEN', nextMission:'NÄCHSTE MISSION', returnBriefing:'ZURÜCK ZUM START', cityNetwork:'STÄDTISCHES RELAY-NETZ', chooseDistrict:'DISTRIKT AUSWÄHLEN.' }
 };
 
-const getLang = () => localStorage.getItem(LANG_KEY) || 'en';
-const text = key => T[getLang()]?.[key] || T.en[key] || key;
+export const getLang = () => localStorage.getItem(LANG_KEY) || 'en';
+export const text = key => T[getLang()]?.[key] || T.en[key] || key;
 
-function applyLanguage(lang = getLang()) {
+export function applyLanguage(lang = getLang()) {
   if (!T[lang]) lang = 'en';
   localStorage.setItem(LANG_KEY, lang);
   document.documentElement.lang = lang === 'exyu' ? 'hr' : lang;
