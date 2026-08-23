@@ -1,7 +1,7 @@
-/* Cinematic Arrival V3 — slower, longer and more active presentation layer. Gameplay remains untouched. */
+/* Cinematic Arrival V4 — fast presentation handoff; never blocks gameplay. */
 (() => {
-  if (window.__relayCinematicArrivalV3) return;
-  window.__relayCinematicArrivalV3 = true;
+  if (window.__relayCinematicArrivalV4) return;
+  window.__relayCinematicArrivalV4 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
@@ -16,8 +16,6 @@
       css.dataset.cinematicArrivalV2 = 'true';
       document.head.appendChild(css);
     }
-
-    if (splash.querySelector('.arrival-copy')) return;
 
     const status = document.createElement('div');
     status.className = 'arrival-status';
@@ -39,47 +37,26 @@
         <h1 class="arrival-title"><span>THE NIGHT</span><br><em>IS ONLINE.</em></h1>
         <div class="arrival-line"></div>
         <p class="arrival-message">THE CITY IS SLEEPING. THE NETWORK IS NOT.<br>ONE RUNNER. ONE SIGNAL. NO SECOND CHANCE.</p>
-        <div class="arrival-mission">
-          <small>MISSION 01 // OLD QUARTER</small>
-          <b>ROOFTOP RELAY</b>
-          <span>FOLLOW THE RELAY · RESTORE THE SIGNAL</span>
-        </div>
+        <div class="arrival-mission"><small>MISSION 01 // OLD QUARTER</small><b>ROOFTOP RELAY</b><span>FOLLOW THE RELAY · RESTORE THE SIGNAL</span></div>
       </div>`;
 
     const ui = splash.querySelector('.relay-splash-ui');
     splash.append(status, signal, particles, copy);
-
-    if (ui) ui.querySelector('.relay-splash-status')?.setAttribute('data-original-status', 'true');
     const label = ui?.querySelector('.relay-splash-status');
-    if (label) label.textContent = 'INITIALIZING RELAY';
+    if (label) label.textContent = 'RELAY READY';
 
-    const stages = [
-      [900, 'INITIALIZING RELAY'],
-      [2600, 'SEARCHING FOR SIGNAL'],
-      [4400, 'SIGNAL ACQUIRED // OLD QUARTER'],
-      [6500, 'ROUTE LOCKED // ROOFTOP RELAY'],
-      [8400, 'DELIVERY WINDOW OPEN'],
-      [10600, 'MISSION LINK STABLE'],
-      [12800, 'PREPARING RUN'],
-      [14500, 'LAUNCHING INTO THE NIGHT'],
-    ];
-    stages.forEach(([delay, text]) => window.setTimeout(() => {
-      if (!splash.classList.contains('is-leaving') && label) label.textContent = text;
-    }, delay));
-
-    // Presentation only: never starts, pauses, resets or changes Phaser.
     const release = () => {
       if (splash.dataset.cinematicReleased === 'true') return;
       splash.dataset.cinematicReleased = 'true';
       splash.classList.add('is-leaving');
       splash.setAttribute('aria-busy', 'false');
-      window.setTimeout(() => splash.remove(), 1100);
+      window.setTimeout(() => splash.remove(), 450);
     };
 
-    window.setTimeout(release, 15800);
-    window.setTimeout(() => {
-      if (!splash.dataset.cinematicReleased) release();
-    }, 18500);
+    // Presentation only: show one painted frame, then hand control to the app.
+    // Never hold the title screen or Phaser runtime behind a long splash timer.
+    window.setTimeout(release, 650);
+    window.setTimeout(release, 1200);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
