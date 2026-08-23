@@ -63,9 +63,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   if (!document.getElementById(LEGACY_STYLE_ID)) {
     const style = document.createElement('style');
     style.id = LEGACY_STYLE_ID;
-    style.textContent = `
-      #intro .main-menu-footer,#intro .city-pulse-status,#intro .menu-version,#play .main-menu-footer,#play .legacy-system-status,#play .legacy-night-run-status,#play .relay-legacy-hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
-    `;
+    style.textContent = `#intro .main-menu-footer,#intro .city-pulse-status,#intro .menu-version,#play .main-menu-footer,#play .legacy-system-status,#play .legacy-night-run-status,#play .relay-legacy-hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}`;
     document.head.appendChild(style);
   }
 
@@ -78,7 +76,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       if (/SYSTEM ONLINE/i.test(text) || /NIGHT RUN/i.test(text) || /NIGHT.*CHAPTER 02/i.test(text)) el.classList.add('relay-legacy-hidden');
     });
   };
-  window.addEventListener('relay:runner-scene-ready',() => { requestAnimationFrame(scrubLegacyLevelText); },{passive:true});
+  window.addEventListener('relay:runner-scene-ready',() => requestAnimationFrame(scrubLegacyLevelText),{passive:true});
   window.addEventListener('relay:gameplay-core-ready',() => requestAnimationFrame(scrubLegacyLevelText),{passive:true});
   if (document.body) new MutationObserver(mutations => { if (mutations.some(m => m.addedNodes.length)) scrubLegacyLevelText(); }).observe(document.body,{childList:true,subtree:true});
 
@@ -109,7 +107,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       Object.entries(map).forEach(([key,pose]) => installCharacterTexture(this,key,pose));
       this.textures.remove('boost-pad');
       const pad=this.make.graphics({add:false});
-      pad.fillStyle(0x07111c,1).fillRoundedRect(1,3,56,13,5); pad.lineStyle(1.6,cyan=.1?0x8df4ff:0x8df4ff,.95).strokeRoundedRect(1,3,56,13,5); pad.fillStyle(0x8df4ff,.10).fillRoundedRect(5,6,48,7,3);
+      pad.fillStyle(0x07111c,1).fillRoundedRect(1,3,56,13,5); pad.lineStyle(1.6,0x8df4ff,.95).strokeRoundedRect(1,3,56,13,5); pad.fillStyle(0x8df4ff,.10).fillRoundedRect(5,6,48,7,3);
       pad.lineStyle(2.2,0xffd06e,.95); pad.lineBetween(11,11,17,6); pad.lineBetween(17,6,23,11); pad.lineBetween(27,11,33,6); pad.lineBetween(33,6,39,11); pad.lineBetween(43,11,49,6); pad.lineBetween(49,6,54,11);
       pad.fillStyle(0x68e7be,.65).fillCircle(5,9,2); pad.fillStyle(0x68e7be,.65).fillCircle(53,9,2); pad.generateTexture('boost-pad',58,18); pad.destroy();
     };
