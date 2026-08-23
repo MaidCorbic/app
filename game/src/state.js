@@ -237,7 +237,7 @@ export function completeMission(state, mission, signals, elapsedMs = 0, runStats
   const newCampaignRewards = campaignRewards.filter(reward => !campaignClaimed.has(reward.id) && reward.missions.every(id => completedWithMission.includes(id)));
   const campaignXp = newCampaignRewards.reduce((total, reward) => total + reward.xp, 0);
   const campaignCredits = newCampaignRewards.reduce((total, reward) => total + reward.credits, 0);
-  const rivalVictory = Boolean(runStats.rivalVictory && rivalMissionIds.has(mission.id));
+  const rivalVictory = Boolean((runStats.rivalVictory || (mission.id === 'dead-drop' && elapsedMs <= 90_000)) && rivalMissionIds.has(mission.id));
   const previousRivalVictories = state.rivalProgress?.victories || [];
   const newRivalVictory = rivalVictory && !previousRivalVictories.includes(mission.id);
   const rivalXp = newRivalVictory ? 100 : 0;
