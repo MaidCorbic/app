@@ -1,0 +1,52 @@
+name: Gameplay Validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, 'refactor/**', 'fix/**', 'cleanup/**']
+
+jobs:
+  gameplay-validation:
+    name: Gameplay validation
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: game
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game/package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Architecture audit
+        run: npm run test:gameplay-architecture
+
+      - name: Progression integrity
+        run: npm run test:progression-integrity
+
+      - name: Existing progression tests
+        run: npm run test:progression
+
+      - name: Mission tests
+        run: npm run test:missions
+
+      - name: Start-flow tests
+        run: npm run test:start-flow
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Gameplay smoke
+        run: node tests/gameplay-smoke.mjs
