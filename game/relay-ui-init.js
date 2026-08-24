@@ -14,6 +14,7 @@ import './collapse-protocol-v1.css';
 import './city-pulse-v1.css';
 import './relay-runtime-kernel-v1.js';
 import './gameplay-hud-responsive-v5.css';
+import './gameplay-hud-layout-manager-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
