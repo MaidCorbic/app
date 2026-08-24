@@ -1,4 +1,4 @@
-/* Cinematic Arrival V3 — slower, longer and more active presentation layer. Gameplay remains untouched. */
+/* Cinematic Arrival V3 — presentation-only. Keeps the current gameplay/HUD branch intact. */
 (() => {
   if (window.__relayCinematicArrivalV3) return;
   window.__relayCinematicArrivalV3 = true;
@@ -6,14 +6,20 @@
   const start = () => {
     const splash = document.getElementById('relaySplash');
     if (!splash) return;
+
     splash.classList.add('cinematic-arrival');
     splash.setAttribute('aria-busy', 'true');
 
+    // Resolve through the module URL so Vite/Vercel emits the CSS asset correctly.
     if (!document.querySelector('link[data-cinematic-arrival-v2]')) {
       const css = document.createElement('link');
       css.rel = 'stylesheet';
-      css.href = './cinematic-arrival-v2.css';
+      css.href = new URL('./cinematic-arrival-v2.css', import.meta.url).href;
       css.dataset.cinematicArrivalV2 = 'true';
+      css.addEventListener('error', () => {
+        // The cinematic remains presentation-only and must never block Home.
+        splash.classList.add('cinematic-style-fallback');
+      }, { once: true });
       document.head.appendChild(css);
     }
 
@@ -49,9 +55,31 @@
     const ui = splash.querySelector('.relay-splash-ui');
     splash.append(status, signal, particles, copy);
 
-    if (ui) ui.querySelector('.relay-splash-status')?.setAttribute('data-original-status', 'true');
     const label = ui?.querySelector('.relay-splash-status');
+    label?.setAttribute('data-original-status', 'true');
     if (label) label.textContent = 'INITIALIZING RELAY';
+
+    const timers = new Set();
+    const later = (callback, delay) => {
+      const id = window.setTimeout(() => {
+        timers.delete(id);
+        callback();
+      }, delay);
+      timers.add(id);
+      return id;
+    };
+
+    let released = false;
+    const release = () => {
+      if (released || !splash.isConnected) return;
+      released = true;
+      timers.forEach(id => window.clearTimeout(id));
+      timers.clear();
+      splash.dataset.cinematicReleased = 'true';
+      splash.classList.add('is-leaving');
+      splash.setAttribute('aria-busy', 'false');
+      later(() => splash.remove(), 1100);
+    };
 
     const stages = [
       [900, 'INITIALIZING RELAY'],
@@ -63,25 +91,18 @@
       [12800, 'PREPARING RUN'],
       [14500, 'LAUNCHING INTO THE NIGHT'],
     ];
-    stages.forEach(([delay, text]) => window.setTimeout(() => {
-      if (!splash.classList.contains('is-leaving') && label) label.textContent = text;
+
+    stages.forEach(([delay, text]) => later(() => {
+      if (!released && label) label.textContent = text;
     }, delay));
 
-    // Presentation only: never starts, pauses, resets or changes Phaser.
-    const release = () => {
-      if (splash.dataset.cinematicReleased === 'true') return;
-      splash.dataset.cinematicReleased = 'true';
-      splash.classList.add('is-leaving');
-      splash.setAttribute('aria-busy', 'false');
-      window.setTimeout(() => splash.remove(), 1100);
-    };
-
-    window.setTimeout(release, 15800);
-    window.setTimeout(() => {
-      if (!splash.dataset.cinematicReleased) release();
-    }, 18500);
+    later(release, 15800);
+    later(release, 18500);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
 })();
