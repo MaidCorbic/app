@@ -1,14 +1,11 @@
 // NEW GAMEPLAY — Dynamic Camera Language V1
-// Additive only. Uses the existing RunnerScene camera and Phaser event bus when available.
-// Never creates a second game/scene and never changes player physics.
+// Additive presentation layer. No per-frame RAF loop.
 (() => {
   const state = {
     boundGame: null,
     boundScene: null,
     baseZoom: null,
-    targetZoom: null,
-    pulseUntil: 0,
-    raf: 0,
+    restoreTimer: 0,
     bindTimer: 0,
     disposed: false,
   };
@@ -52,49 +49,25 @@
     state.boundGame = game;
     state.boundScene = scene;
     state.baseZoom = Number.isFinite(cam.zoom) && cam.zoom > 0 ? cam.zoom : 1;
-    state.targetZoom = state.baseZoom;
-
-    game.events.on('feedback', onFeedback);
-    game.events.on('runner-ready', syncBaseZoom);
     return true;
   }
 
   function ensureBound() {
     if (state.disposed || bind()) return;
     clearTimeout(state.bindTimer);
-    state.bindTimer = window.setTimeout(ensureBound, 500);
+    state.bindTimer = window.setTimeout(ensureBound, 750);
   }
 
   function syncBaseZoom() {
     const cam = camera();
     if (!cam) return;
     state.baseZoom = Number.isFinite(cam.zoom) && cam.zoom > 0 ? cam.zoom : 1;
-    if (!state.raf) state.targetZoom = state.baseZoom;
   }
 
-  function stopAnimation() {
-    if (state.raf) cancelAnimationFrame(state.raf);
-    state.raf = 0;
-  }
-
-  function tick() {
-    state.raf = 0;
-    if (state.disposed) return;
+  function restore() {
+    clearTimeout(state.restoreTimer);
     const cam = camera();
-    if (!cam || !Number.isFinite(state.baseZoom)) return;
-
-    if (now() >= state.pulseUntil) state.targetZoom = state.baseZoom;
-    const current = Number.isFinite(cam.zoom) ? cam.zoom : state.baseZoom;
-    const target = Number.isFinite(state.targetZoom) ? state.targetZoom : state.baseZoom;
-    const next = current + (target - current) * 0.18;
-
-    if (Math.abs(target - current) < 0.001) {
-      if (Math.abs(cam.zoom - target) >= 0.0001) cam.setZoom?.(target);
-      return;
-    }
-
-    cam.setZoom?.(next);
-    state.raf = requestAnimationFrame(tick);
+    if (cam && Number.isFinite(state.baseZoom)) cam.setZoom?.(state.baseZoom);
   }
 
   function pulse(amount, duration) {
@@ -103,12 +76,18 @@
       ensureBound();
       return;
     }
+
     const cam = camera();
     if (!cam || !Number.isFinite(state.baseZoom)) return;
 
-    state.targetZoom = Math.max(0.92, Math.min(1.12, state.baseZoom + amount));
-    state.pulseUntil = now() + duration;
-    if (!state.raf) state.raf = requestAnimationFrame(tick);
+    const target = Math.max(0.92, Math.min(1.12, state.baseZoom + amount));
+    cam.setZoom?.(target);
+
+    clearTimeout(state.restoreTimer);
+    state.restoreTimer = window.setTimeout(() => {
+      if (state.disposed) return;
+      restore();
+    }, Math.max(60, duration));
   }
 
   function onFeedback(kind) {
@@ -127,11 +106,8 @@
   }
 
   function reset() {
-    stopAnimation();
-    const cam = camera();
-    if (cam && Number.isFinite(state.baseZoom)) cam.setZoom?.(state.baseZoom);
-    state.targetZoom = state.baseZoom;
-    state.pulseUntil = 0;
+    clearTimeout(state.restoreTimer);
+    restore();
   }
 
   function dispose() {
@@ -143,7 +119,10 @@
   }
 
   function init() {
-    window.addEventListener('relay:runner-scene-ready', () => { bind(); syncBaseZoom(); }, { passive: true });
+    window.addEventListener('relay:runner-scene-ready', () => {
+      if (!bind()) return;
+      syncBaseZoom();
+    }, { passive: true });
     window.addEventListener('blur', reset, { passive: true });
     document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
     window.addEventListener('beforeunload', dispose, { once: true });
