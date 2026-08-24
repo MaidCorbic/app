@@ -1,0 +1,107 @@
+/* FINAL HUD TOP RAIL V3 — only two presentation fixes.
+   1) Desktop: restore OLD QUARTER at the top-left and give Momentum its own slot.
+   2) Touch landscape: move Momentum below the top telemetry rail so it cannot cover any HUD progress card.
+   Gameplay logic is untouched. */
+
+#play > .hud .hud-route{
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:1600!important;
+}
+
+#relay-gameplay-new-layer .ng-chain{
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  text-overflow:clip!important;
+  z-index:1500!important;
+}
+
+/* WEB / DESKTOP */
+@media (min-width:901px){
+  #play > .hud .hud-route{
+    left:0!important;
+    top:0!important;
+    width:clamp(220px,18vw,270px)!important;
+    max-width:clamp(220px,18vw,270px)!important;
+    height:58px!important;
+  }
+
+  #relay-gameplay-new-layer .ng-chain{
+    left:calc(clamp(220px,18vw,270px) + 10px)!important;
+    right:auto!important;
+    top:0!important;
+    width:clamp(190px,18vw,240px)!important;
+    max-width:clamp(190px,18vw,240px)!important;
+    min-height:52px!important;
+    padding:7px 12px!important;
+    transform:none!important;
+    text-align:left!important;
+    border:1px solid rgba(141,244,255,.22)!important;
+    border-radius:8px!important;
+    background:rgba(3,10,20,.78)!important;
+    backdrop-filter:blur(8px)!important;
+    -webkit-backdrop-filter:blur(8px)!important;
+  }
+  #relay-gameplay-new-layer .ng-chain.show{transform:none!important}
+  #relay-gameplay-new-layer .ng-kicker{
+    font-size:7px!important;
+    letter-spacing:.16em!important;
+  }
+  #relay-gameplay-new-layer .ng-value{
+    font-size:22px!important;
+    line-height:1!important;
+    margin-top:2px!important;
+  }
+  #relay-gameplay-new-layer .ng-value em{
+    font-size:10px!important;
+    letter-spacing:.06em!important;
+    margin-left:4px!important;
+  }
+}
+
+/* TOUCH LANDSCAPE / PHONE — Momentum gets a dedicated strip below the rail. */
+@media (hover:none) and (pointer:coarse) and (orientation:landscape){
+  #relay-gameplay-new-layer .ng-chain{
+    left:50%!important;
+    right:auto!important;
+    top:calc(54px + env(safe-area-inset-top,0px))!important;
+    width:clamp(150px,28vw,210px)!important;
+    max-width:clamp(150px,28vw,210px)!important;
+    min-height:34px!important;
+    padding:4px 9px!important;
+    transform:translateX(-50%)!important;
+    text-align:center!important;
+    border:1px solid rgba(141,244,255,.22)!important;
+    border-radius:8px!important;
+    background:rgba(3,10,20,.76)!important;
+    backdrop-filter:blur(8px)!important;
+    -webkit-backdrop-filter:blur(8px)!important;
+  }
+  #relay-gameplay-new-layer .ng-chain.show{transform:translateX(-50%)!important}
+  #relay-gameplay-new-layer .ng-kicker{font-size:6px!important;letter-spacing:.14em!important}
+  #relay-gameplay-new-layer .ng-value{font-size:18px!important;line-height:1!important;margin-top:1px!important}
+  #relay-gameplay-new-layer .ng-value em{font-size:8px!important;letter-spacing:.06em!important;margin-left:3px!important}
+}
+
+@media (hover:none) and (pointer:coarse) and (orientation:landscape) and (max-width:900px){
+  #relay-gameplay-new-layer .ng-chain{top:calc(50px + env(safe-area-inset-top,0px))!important}
+}
+
+@media (hover:none) and (pointer:coarse) and (orientation:landscape) and (max-width:640px){
+  #play > .hud .hud-route{width:145px!important;max-width:145px!important}
+  #relay-gameplay-new-layer .ng-chain{
+    top:calc(46px + env(safe-area-inset-top,0px))!important;
+    width:160px!important;
+    max-width:160px!important;
+    min-height:30px!important;
+    padding:3px 7px!important;
+  }
+  #relay-gameplay-new-layer .ng-kicker{font-size:5px!important}
+  #relay-gameplay-new-layer .ng-value{font-size:15px!important}
+  #relay-gameplay-new-layer .ng-value em{font-size:7px!important}
+}
+
+/* PORTRAIT remains the existing basic HUD. */
+@media (max-width:700px) and (orientation:portrait){
+  #relay-gameplay-new-layer .ng-chain{display:none!important}
+}
