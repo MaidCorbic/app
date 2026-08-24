@@ -3,6 +3,10 @@
   if (window.__relayCinematicArrivalV3) return;
   window.__relayCinematicArrivalV3 = true;
 
+  // Capture this while the classic deferred script is actually executing.
+  // document.currentScript is null later inside DOMContentLoaded callbacks.
+  const scriptUrl = document.currentScript?.src || new URL('./cinematic-arrival-v2.js', window.location.href).href;
+
   const start = () => {
     const splash = document.getElementById('relaySplash');
     if (!splash) return;
@@ -10,15 +14,10 @@
     splash.classList.add('cinematic-arrival');
     splash.setAttribute('aria-busy', 'true');
 
-    // This file is loaded as a classic deferred script. Resolve the stylesheet
-    // relative to this script, not with import.meta (which is invalid here).
     if (!document.querySelector('link[data-cinematic-arrival-v2]')) {
       const css = document.createElement('link');
       css.rel = 'stylesheet';
-      css.href = new URL(
-        './cinematic-arrival-v2.css',
-        document.currentScript?.src || window.location.href,
-      ).href;
+      css.href = new URL('./cinematic-arrival-v2.css', scriptUrl).href;
       css.dataset.cinematicArrivalV2 = 'true';
       css.addEventListener('error', () => {
         // Presentation failure must never block the game or Home UI.
