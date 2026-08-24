@@ -12,11 +12,10 @@
     pulseUntil: 0,
     raf: 0,
     disposed: false,
-    listenersBound: false,
     lastFrame: 0,
-    fpsAccumulator: 0,
-    fpsFrames: 0,
-    adaptiveSkip: 0,
+    perfScore: 60,
+    sampleCounter: 0,
+    feedback: [],
   };
 
   const now = () => performance.now();
@@ -55,7 +54,7 @@
         state.boundGame.events.off('feedback', onFeedback);
         state.boundGame.events.off('runner-ready', syncBaseZoom);
       } catch {
-        // Phaser event emitters vary; dropping the reference is sufficient.
+        // Event emitter implementations differ; dropping references remains safe.
       }
     }
     state.boundGame = null;
@@ -109,22 +108,27 @@
 
     const dt = state.lastFrame ? timestamp - state.lastFrame : 16.7;
     state.lastFrame = timestamp;
+    state.sampleCounter += 1;
 
-    // Sample cheaply. The previous version did scene lookup + camera work every frame,
-    // which can become expensive while Phaser is already rendering at 60 FPS.
-    if (state.adaptiveSkip > 0) {
-      state.adaptiveSkip -= 1;
-    } else {
-      bind();
-      state.adaptiveSkip = state.fpsAccumulator < 52 ? 1 : 0;
+    // Avoid repeated scene graph traversal when the engine is under load.
+    if (state.sampleCounter % 4 === 0 || !state.boundScene) bind();
+
+    const observedFps = 1000 / Math.max(8, dt);
+    state.perfScore = state.perfScore * 0.94 + Math.min(60, observedFps) * 0.06;
+
+    if (state.perfScore < 42) {
+      // Back off to every other frame under sustained load. Do not disable feedback.
+      if (state.sampleCounter % 2 !== 0) {
+        state.raf = requestAnimationFrame(tick);
+        return;
+      }
     }
 
-    state.fpsAccumulator = state.fpsAccumulator * 0.92 + Math.min(100, 1000 / Math.max(8, dt)) * 0.08;
     const cam = getCamera(state.boundScene);
     if (cam && Number.isFinite(state.baseZoom)) {
       if (now() >= state.pulseUntil) state.targetZoom = state.baseZoom;
       const current = Number.isFinite(cam.zoom) ? cam.zoom : state.baseZoom;
-      const alpha = state.fpsAccumulator < 45 ? 0.24 : 0.14;
+      const alpha = state.perfScore < 48 ? 0.22 : 0.14;
       const next = current + (state.targetZoom - current) * alpha;
       if (Math.abs(next - current) > 0.0005) cam.setZoom?.(next);
     }
@@ -150,7 +154,7 @@
     window.addEventListener('blur', reset, { passive: true });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) reset();
-    }, { passive: true });
+    });
 
     window.addEventListener('beforeunload', () => {
       state.disposed = true;
