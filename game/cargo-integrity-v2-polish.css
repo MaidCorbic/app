@@ -1,128 +1,50 @@
-/* UPDATE 18 V2 — Cargo HUD polish
-   Presentation-only overrides. Cargo gameplay/runtime logic remains untouched.
-   The panel is deliberately anchored to the bottom-left so it never competes with
-   centered Momentum / Flow UI or top-center gameplay telemetry.
+/* UPDATE 18 V3 — Cargo HUD polish
+   Mobile landscape owns a dedicated center utility lane directly below the mission card.
 */
-
 #cargoIntegrityV2 {
-  left: 18px !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: 18px !important;
-  transform: none !important;
-  width: min(300px, calc(100vw - 36px)) !important;
-  max-width: 300px !important;
-  z-index: 190 !important;
+  left:18px !important; right:auto !important; top:auto !important; bottom:18px !important;
+  transform:none !important; width:min(300px,calc(100vw - 36px)) !important; max-width:300px !important; z-index:190 !important;
 }
-
-#cargoIntegrityV2.is-visible {
-  transform: translateY(0) !important;
-}
-
+#cargoIntegrityV2.is-visible { transform:translateY(0) !important; }
 #cargoIntegrityV2 .cargo-card {
-  position: relative;
-  overflow: hidden;
-  padding: 10px 12px !important;
-  border-radius: 10px !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  position:relative; overflow:hidden; padding:10px 12px !important; border-radius:10px !important;
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 0 24px rgba(25,200,245,.10),inset 0 0 18px rgba(255,255,255,.025) !important;
+}
+#cargoIntegrityV2 .cargo-card::before { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg,rgba(255,255,255,.045),transparent 34%,transparent 72%,rgba(141,244,255,.035)); opacity:.9; }
+#cargoIntegrityV2 .cargo-head,#cargoIntegrityV2 .cargo-row,#cargoIntegrityV2 .cargo-foot { position:relative; z-index:1; }
+#cargoIntegrityV2 .cargo-head { margin-bottom:6px !important; }
+#cargoIntegrityV2 .cargo-label { font-size:7px !important; letter-spacing:.18em !important; }
+#cargoIntegrityV2 .cargo-type { font-size:8px !important; letter-spacing:.11em !important; }
+#cargoIntegrityV2 .cargo-track { height:6px !important; }
+#cargoIntegrityV2 .cargo-value { min-width:38px !important; font-size:11px !important; }
+#cargoIntegrityV2 .cargo-foot { margin-top:6px !important; font-size:6.5px !important; letter-spacing:.075em !important; }
+
+@media (max-width:700px) {
+  #cargoIntegrityV2 { left:10px !important; bottom:calc(78px + env(safe-area-inset-bottom,0px)) !important; width:min(260px,calc(100vw - 20px)) !important; max-width:260px !important; }
+  #cargoIntegrityV2 .cargo-card { padding:8px 9px !important; border-radius:9px !important; }
+  #cargoIntegrityV2 .cargo-label { font-size:6.5px !important; letter-spacing:.15em !important; }
+  #cargoIntegrityV2 .cargo-type { font-size:7px !important; }
+  #cargoIntegrityV2 .cargo-value { min-width:34px !important; font-size:10px !important; }
+  #cargoIntegrityV2 .cargo-foot { font-size:6px !important; line-height:1.15 !important; }
 }
 
-#cargoIntegrityV2 .cargo-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(115deg, rgba(255,255,255,.045), transparent 34%, transparent 72%, rgba(141,244,255,.035));
-  opacity: .9;
-}
-
-#cargoIntegrityV2 .cargo-head,
-#cargoIntegrityV2 .cargo-row,
-#cargoIntegrityV2 .cargo-foot {
-  position: relative;
-  z-index: 1;
-}
-
-#cargoIntegrityV2 .cargo-head {
-  margin-bottom: 6px !important;
-}
-
-#cargoIntegrityV2 .cargo-label {
-  font-size: 7px !important;
-  letter-spacing: .18em !important;
-}
-
-#cargoIntegrityV2 .cargo-type {
-  font-size: 8px !important;
-  letter-spacing: .11em !important;
-}
-
-#cargoIntegrityV2 .cargo-track {
-  height: 6px !important;
-}
-
-#cargoIntegrityV2 .cargo-value {
-  min-width: 38px !important;
-  font-size: 11px !important;
-}
-
-#cargoIntegrityV2 .cargo-foot {
-  margin-top: 6px !important;
-  font-size: 6.5px !important;
-  letter-spacing: .075em !important;
-}
-
-@media (max-width: 700px) {
+/* Mission → cargo stack. It is deliberately narrower than the mission and never enters the right action lane. */
+@media (max-width:768px) and (orientation:landscape) {
   #cargoIntegrityV2 {
-    left: 10px !important;
-    bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
-    width: min(260px, calc(100vw - 20px)) !important;
-    max-width: 260px !important;
+    left:50% !important; right:auto !important; top:58% !important; bottom:auto !important;
+    transform:translateX(-50%) !important;
+    width:min(238px,42vw) !important; max-width:238px !important; z-index:188 !important;
   }
-
-  #cargoIntegrityV2 .cargo-card {
-    padding: 8px 9px !important;
-    border-radius: 9px !important;
-  }
-
-  #cargoIntegrityV2 .cargo-label {
-    font-size: 6.5px !important;
-    letter-spacing: .15em !important;
-  }
-
-  #cargoIntegrityV2 .cargo-type {
-    font-size: 7px !important;
-  }
-
-  #cargoIntegrityV2 .cargo-value {
-    min-width: 34px !important;
-    font-size: 10px !important;
-  }
-
-  #cargoIntegrityV2 .cargo-foot {
-    font-size: 6px !important;
-    line-height: 1.15 !important;
-  }
+  #cargoIntegrityV2.is-visible { transform:translateX(-50%) translateY(0) !important; }
+  #cargoIntegrityV2 .cargo-card { padding:7px 9px !important; border-radius:9px !important; }
+  #cargoIntegrityV2 .cargo-head { margin-bottom:4px !important; }
+  #cargoIntegrityV2 .cargo-track { height:5px !important; }
+  #cargoIntegrityV2 .cargo-foot { margin-top:4px !important; }
 }
 
-@media (max-width: 420px) {
-  #cargoIntegrityV2 {
-    bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
-    width: min(236px, calc(100vw - 20px)) !important;
-    max-width: 236px !important;
-  }
-
-  #cargoIntegrityV2 .cargo-effect {
-    max-width: 128px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+@media (max-width:420px) and (orientation:portrait) {
+  #cargoIntegrityV2 { bottom:calc(82px + env(safe-area-inset-bottom,0px)) !important; width:min(236px,calc(100vw - 20px)) !important; max-width:236px !important; }
+  #cargoIntegrityV2 .cargo-effect { max-width:128px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  #cargoIntegrityV2 .cargo-card::before {
-    transition: none !important;
-  }
-}
+@media (prefers-reduced-motion:reduce) { #cargoIntegrityV2 .cargo-card::before { transition:none !important; } }
