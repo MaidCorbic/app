@@ -1,6 +1,6 @@
 export const RELAY_FAQ = [
   ['How do I play?', 'Use A/D or the left/right side of the joystick to move, SPACE or JUMP to jump. On mobile, use the touch controls.'],
-  ['How do I complete a mission?', 'Follow the mission objective, collect the required signals and reach the delivery beacon. When complete, use NEXT MISSION to continue.'],
+  ['How do I complete a mission?', 'Follow the mission objective, collect the required Signals, reach the Relay Tower and climb it to secure the relay. The tower hands completion to the existing mission runtime.'],
   ['How do I move to the next mission?', 'After successfully completing a mission, press NEXT MISSION. The game loads the next level.'],
   ['What do SWORD, DASH and BUILD do?', 'SWORD is for combat, DASH helps you avoid hazards quickly, and BUILD activates available construction abilities.'],
   ['What is City Pulse?', 'City Pulse adds timed environmental windows to active missions. Read the OPEN rhythm and pass through the pulse gate for FLOW SYNC; missing a window has no movement or mission penalty.'],
@@ -13,14 +13,15 @@ export const RELAY_FAQ = [
 ];
 
 export const LATEST_UPDATE = {
-  version: 'UPDATE 23 // CITY PULSE',
-  title: 'CITY PULSE',
+  version: 'UPDATE 24 // GAMEPLAY MAX',
+  title: 'GAMEPLAY MAX',
   items: [
-    'The city now runs on timed environmental pulse windows during active missions.',
-    'Three non-physical pulse gates create readable OPEN, WARNING and CLOSED phases without changing player physics.',
-    'Passing an OPEN window produces FLOW SYNC; chaining all three produces PERFECT FLOW.',
-    'Missing a window resets the flow streak but never blocks the route or damages the player.',
-    'Pulse gates remain hidden during the tutorial and cinematic states and are cleaned up with the gameplay scene.',
-    'The system is additive and leaves movement, missions, save/progression, Cargo, Signals, City Response and Collapse ownership unchanged.'
+    'Relay Tower is now the shared physical finish sequence for every mission instead of a passive delivery-beacon finish.',
+    'Tower climbing uses the existing player movement, mobile jump input and RunnerScene.complete() as the single authoritative completion path.',
+    'Mission-finish recovery and transition gating are active so completion, NEXT MISSION and retry cannot double-fire into overlapping scene transitions.',
+    'Cargo Integrity, Cargo visibility and Cargo polish are no longer loaded into gameplay. Cargo progress is removed from the gameplay loop.',
+    'The existing gameplay stack remains additive: encounters, adaptive modifiers, dynamic world reactions, City Pulse, Collapse, signal routes, movement feel, audio, death recovery and performance governors stay in their existing ownership layers.',
+    'The goal is a complete game loop: run → movement/combat → route decisions → dynamic encounters → Relay Tower → climb → secure relay → results → next level.',
+    'No new parallel completion, save or movement system was introduced. Existing authoritative systems remain the source of truth.'
   ]
 };
