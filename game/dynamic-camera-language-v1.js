@@ -9,7 +9,7 @@
     targetZoom: null,
     pulseUntil: 0,
     raf: 0,
-    reduced: false,
+    bindTimer: 0,
     disposed: false,
   };
 
@@ -29,8 +29,16 @@
     }
   }
 
-  function camera(scene) {
+  function camera(scene = state.boundScene) {
     return scene?.cameras?.main || null;
+  }
+
+  function unbind() {
+    const events = state.boundGame?.events;
+    events?.off?.('feedback', onFeedback);
+    events?.off?.('runner-ready', syncBaseZoom);
+    state.boundGame = null;
+    state.boundScene = null;
   }
 
   function bind() {
@@ -40,6 +48,7 @@
     if (!game?.events?.on || !scene || !cam) return false;
     if (state.boundGame === game && state.boundScene === scene) return true;
 
+    unbind();
     state.boundGame = game;
     state.boundScene = scene;
     state.baseZoom = Number.isFinite(cam.zoom) && cam.zoom > 0 ? cam.zoom : 1;
@@ -50,23 +59,59 @@
     return true;
   }
 
+  function ensureBound() {
+    if (state.disposed || bind()) return;
+    clearTimeout(state.bindTimer);
+    state.bindTimer = window.setTimeout(ensureBound, 500);
+  }
+
   function syncBaseZoom() {
-    const cam = camera(state.boundScene);
+    const cam = camera();
     if (!cam) return;
-    if (!Number.isFinite(state.baseZoom) || state.baseZoom <= 0) state.baseZoom = Number.isFinite(cam.zoom) && cam.zoom > 0 ? cam.zoom : 1;
-    state.targetZoom = state.baseZoom;
+    state.baseZoom = Number.isFinite(cam.zoom) && cam.zoom > 0 ? cam.zoom : 1;
+    if (!state.raf) state.targetZoom = state.baseZoom;
+  }
+
+  function stopAnimation() {
+    if (state.raf) cancelAnimationFrame(state.raf);
+    state.raf = 0;
+  }
+
+  function tick() {
+    state.raf = 0;
+    if (state.disposed) return;
+    const cam = camera();
+    if (!cam || !Number.isFinite(state.baseZoom)) return;
+
+    if (now() >= state.pulseUntil) state.targetZoom = state.baseZoom;
+    const current = Number.isFinite(cam.zoom) ? cam.zoom : state.baseZoom;
+    const target = Number.isFinite(state.targetZoom) ? state.targetZoom : state.baseZoom;
+    const next = current + (target - current) * 0.18;
+
+    if (Math.abs(target - current) < 0.001) {
+      if (Math.abs(cam.zoom - target) >= 0.0001) cam.setZoom?.(target);
+      return;
+    }
+
+    cam.setZoom?.(next);
+    state.raf = requestAnimationFrame(tick);
   }
 
   function pulse(amount, duration) {
-    if (getReduced()) return;
-    const cam = camera(state.boundScene);
+    if (state.disposed || getReduced()) return;
+    if (!bind()) {
+      ensureBound();
+      return;
+    }
+    const cam = camera();
     if (!cam || !Number.isFinite(state.baseZoom)) return;
+
     state.targetZoom = Math.max(0.92, Math.min(1.12, state.baseZoom + amount));
     state.pulseUntil = now() + duration;
+    if (!state.raf) state.raf = requestAnimationFrame(tick);
   }
 
   function onFeedback(kind) {
-    if (state.disposed) return;
     switch (kind) {
       case 'dash': pulse(0.035, 180); break;
       case 'jump': pulse(0.018, 130); break;
@@ -81,37 +126,31 @@
     }
   }
 
-  function tick() {
-    if (state.disposed) return;
-    bind();
-    const cam = camera(state.boundScene);
-    if (cam && Number.isFinite(state.baseZoom)) {
-      if (now() >= state.pulseUntil) state.targetZoom = state.baseZoom;
-      const current = Number.isFinite(cam.zoom) ? cam.zoom : state.baseZoom;
-      const next = current + (state.targetZoom - current) * 0.14;
-      cam.setZoom?.(next);
-    }
-    state.raf = requestAnimationFrame(tick);
-  }
-
   function reset() {
-    const cam = camera(state.boundScene);
+    stopAnimation();
+    const cam = camera();
     if (cam && Number.isFinite(state.baseZoom)) cam.setZoom?.(state.baseZoom);
     state.targetZoom = state.baseZoom;
     state.pulseUntil = 0;
   }
 
+  function dispose() {
+    if (state.disposed) return;
+    state.disposed = true;
+    clearTimeout(state.bindTimer);
+    reset();
+    unbind();
+  }
+
   function init() {
-    if (state.raf) return;
-    state.reduced = getReduced();
     window.addEventListener('relay:runner-scene-ready', () => { bind(); syncBaseZoom(); }, { passive: true });
     window.addEventListener('blur', reset, { passive: true });
     document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
-    window.addEventListener('beforeunload', () => { state.disposed = true; cancelAnimationFrame(state.raf); reset(); }, { once: true });
-    state.raf = requestAnimationFrame(tick);
+    window.addEventListener('beforeunload', dispose, { once: true });
+    ensureBound();
   }
 
-  window.relayDynamicCamera = { reset, bind };
+  window.relayDynamicCamera = { reset, bind, dispose };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
 })();
