@@ -20,7 +20,7 @@ function clamp(v, min = 0, max = 1) { return Math.max(min, Math.min(max, v || 0)
 function viewport(scene) {
   const w = scene?.scale?.gameSize?.width || scene?.scale?.width || window.innerWidth || 1280;
   const h = scene?.scale?.gameSize?.height || scene?.scale?.height || window.innerHeight || 720;
-  return { w, h, mobile: w <= 760 };
+  return { w, h, mobile: w <= 760, landscape: w > h };
 }
 function tutorialBounds(scene) {
   const list = scene?.children?.list || [];
@@ -35,7 +35,8 @@ function tutorialBounds(scene) {
 
 function buildPanel(scene, objective) {
   const c = scene.add.container(0, 0).setScrollFactor(0).setDepth(9200).setAlpha(0);
-  const bg = scene.add.rectangle(0, 0, 426, 166, 0x07111f, .95).setOrigin(0).setStrokeStyle(1, 0x38bdf8, .72);
+  const bg = scene.add.rectangle(0, 0, 426, 166, 0x07111f, .96).setOrigin(0).setStrokeStyle(1, 0x38bdf8, .72);
+  const glow = scene.add.rectangle(0, 0, 426, 3, 0x8df4ff, .72).setOrigin(0);
   const accent = scene.add.rectangle(0, 0, 4, 166, 0x38bdf8, .92).setOrigin(0);
   const kicker = scene.add.text(22, 18, 'MISSION OBJECTIVE', { fontFamily:'monospace', fontSize:'10px', color:'#8ecae6', letterSpacing:1.5 });
   const title = scene.add.text(22, 43, objective.title, { fontFamily:'monospace', fontSize:'16px', fontStyle:'bold', color:'#e8f8ff', wordWrap:{width:378} });
@@ -44,21 +45,34 @@ function buildPanel(scene, objective) {
   const track = scene.add.rectangle(22, 143, 382, 6, 0x13243a, 1).setOrigin(0,.5);
   const fill = scene.add.rectangle(22, 143, 0, 6, 0x38bdf8, 1).setOrigin(0,.5);
   const status = scene.add.text(22, 153, 'OBJECTIVE IN PROGRESS', { fontFamily:'monospace', fontSize:'8px', color:'#6ebfe8', letterSpacing:1.2 });
-  c.add([bg,accent,kicker,title,label,progress,track,fill,status]);
-  return { c, bg, accent, kicker, title, label, progress, track, fill, status };
+  c.add([bg,glow,accent,kicker,title,label,progress,track,fill,status]);
+  return { c, bg, glow, accent, kicker, title, label, progress, track, fill, status };
 }
 
 function layout(state, scene, force = false) {
-  const { w, h, mobile } = viewport(scene);
+  const { w, h, mobile, landscape } = viewport(scene);
   const tutorial = tutorialBounds(scene);
   const baseW = 426, baseH = 166;
-  const pw = mobile ? Math.min(338, w - 24) : Math.min(470, Math.max(360, w - 64));
+  const mobileLandscape = mobile && landscape;
+  const pw = mobileLandscape ? Math.min(326, w - 28) : mobile ? Math.min(338, w - 24) : Math.min(470, Math.max(360, w - 64));
   const scale = pw / baseW;
   const actualH = baseH * scale;
-  let x = Math.max(12, w - pw - (mobile ? 12 : 30));
-  const bottomReserve = mobile ? Math.max(112, Math.round(h * .16)) : 28;
-  let y = Math.max(82, h - actualH - bottomReserve);
-  if (tutorial && tutorial.right > x - 8 && tutorial.bottom > y - 8) y = Math.max(82, tutorial.y - actualH - 18);
+
+  let x;
+  let y;
+  if (mobileLandscape) {
+    // Dedicated center lane: above the cargo HUD and away from the right action cluster.
+    x = Math.round((w - pw) / 2);
+    const preferred = Math.round(h * .33);
+    const maxY = Math.max(82, h - actualH - 164);
+    y = Math.max(82, Math.min(preferred, maxY));
+  } else {
+    x = Math.max(12, w - pw - (mobile ? 12 : 30));
+    const bottomReserve = mobile ? Math.max(112, Math.round(h * .16)) : 28;
+    y = Math.max(82, h - actualH - bottomReserve);
+    if (tutorial && tutorial.right > x - 8 && tutorial.bottom > y - 8) y = Math.max(82, tutorial.y - actualH - 18);
+  }
+
   if (!force && state.x === x && state.y === y && state.scale === scale && state.tutorial === !!tutorial) return;
   state.x = x; state.y = y; state.scale = scale; state.tutorial = !!tutorial;
   state.c.setPosition(x, y).setScale(scale);
@@ -93,7 +107,7 @@ function reveal(state, scene) {
   layout(state, scene, true);
   state.c.setVisible(true);
   skinExistingHud(scene, state);
-  scene.tweens?.add?.({ targets:state.c, alpha:{from:0,to:1}, duration:160, ease:'Quad.easeOut' });
+  scene.tweens?.add?.({ targets:state.c, alpha:{from:0,to:1}, duration:220, ease:'Cubic.easeOut' });
 }
 
 export function applyMissionObjective(scene, id = missionId(scene)) {
@@ -103,15 +117,8 @@ export function applyMissionObjective(scene, id = missionId(scene)) {
   const ui = buildPanel(scene, objective);
   const state = { objective, ...ui, completed:false, last:-1, visible:false, pendingReveal:false, x:null, y:null, scale:null, tutorial:null, hudSkinned:false, hudSkins:[] };
   states.set(scene,state); scene.__missionObjectiveState=state; scene.__missionObjective=objective;
-  if (document.body.classList.contains('relay-training-active') || scene.firstTimeTutorial) {
-    state.pendingReveal = true;
-    state.c.setVisible(false);
-  } else reveal(state, scene);
-  const revealAfterTutorial = () => {
-    if (!state.c?.active || state.visible) return;
-    if (document.body.classList.contains('relay-training-active')) return;
-    reveal(state, scene);
-  };
+  if (document.body.classList.contains('relay-training-active') || scene.firstTimeTutorial) { state.pendingReveal = true; state.c.setVisible(false); } else reveal(state, scene);
+  const revealAfterTutorial = () => { if (!state.c?.active || state.visible) return; if (document.body.classList.contains('relay-training-active')) return; reveal(state, scene); };
   window.addEventListener('relay:tutorial-complete', revealAfterTutorial, { once: true, passive: true });
   scene.events?.once?.('shutdown', () => window.removeEventListener('relay:tutorial-complete', revealAfterTutorial));
   return objective;
@@ -130,11 +137,7 @@ export function updateMissionObjective(scene) {
   s.fill.width = 382 * p;
   s.progress.setText(`ROUTE PROGRESS  ${pct}%`);
   if (!s.completed && p >= s.objective.completeAt) {
-    s.completed = true;
-    s.fill.width = 382;
-    s.progress.setText('OBJECTIVE COMPLETE');
-    s.kicker.setText('OBJECTIVE COMPLETE');
-    s.status.setText('ROUTE GOAL SECURED');
+    s.completed = true; s.fill.width = 382; s.progress.setText('OBJECTIVE COMPLETE'); s.kicker.setText('OBJECTIVE COMPLETE'); s.status.setText('ROUTE GOAL SECURED');
     scene.tweens?.add?.({ targets:s.c, scaleX:{from:s.scale,to:s.scale*1.025}, scaleY:{from:s.scale,to:s.scale*1.025}, yoyo:true, duration:140, repeat:1 });
     scene.events?.emit?.('mission-objective-complete',{ id:missionId(scene), objective:s.objective });
   }
@@ -142,9 +145,7 @@ export function updateMissionObjective(scene) {
 
 export function clearMissionObjective(scene) {
   const s = states.get(scene) || scene.__missionObjectiveState;
-  s?.c?.destroy?.();
-  s?.hudSkins?.forEach(item => item?.destroy?.());
-  states.delete(scene);
+  s?.c?.destroy?.(); s?.hudSkins?.forEach(item => item?.destroy?.()); states.delete(scene);
   scene.__missionObjectiveState = null; scene.__missionObjective = null;
 }
 
