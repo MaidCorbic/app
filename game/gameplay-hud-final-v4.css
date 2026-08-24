@@ -1,0 +1,236 @@
+/* FINAL HUD V4
+   One presentation owner for desktop + touch HUD.
+   Momentum is mirrored into CSS HUD, never rendered as a world overlay.
+   Gameplay/state/input logic remains untouched. */
+
+#play .hud,
+#play .hud *,
+#relay-gameplay-new-layer,
+#relay-gameplay-new-layer * {
+  font-stretch: normal !important;
+  font-kerning: normal !important;
+  text-rendering: optimizeLegibility !important;
+  -webkit-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+}
+
+/* The legacy floating chain is never the visual owner. */
+#relay-gameplay-new-layer .ng-chain { display:none !important; }
+
+.hud-momentum {
+  position:absolute !important;
+  box-sizing:border-box !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  padding:0 10px !important;
+  height:48px !important;
+  min-width:142px !important;
+  border:1px solid rgba(141,244,255,.30) !important;
+  border-radius:0 0 10px 10px !important;
+  background:linear-gradient(145deg,rgba(2,9,19,.96),rgba(8,24,40,.92)) !important;
+  box-shadow:inset 0 1px rgba(255,255,255,.05),0 8px 26px rgba(0,0,0,.25),0 0 22px rgba(25,200,245,.08) !important;
+  color:#f3fcff !important;
+  pointer-events:none !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  z-index:1825 !important;
+}
+.hud-momentum::before {
+  content:"" !important;
+  position:absolute !important;
+  left:0 !important;
+  top:0 !important;
+  width:34px !important;
+  height:2px !important;
+  background:linear-gradient(90deg,#19c8f5,#8df4ff,transparent) !important;
+  box-shadow:0 0 10px #19c8f5 !important;
+}
+.hud-momentum small {
+  font:700 6px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:.12em !important;
+  color:#6e8da7 !important;
+}
+.hud-momentum strong {
+  font:900 20px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:0 !important;
+  color:#f3fcff !important;
+}
+.hud-momentum em {
+  font:800 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:.05em !important;
+  color:#dffcff !important;
+  font-style:normal !important;
+}
+.hud-momentum[data-flow="0"] { opacity:.76 !important; }
+.hud-momentum.is-active { box-shadow:inset 0 1px rgba(255,255,255,.06),0 8px 26px rgba(0,0,0,.25),0 0 28px rgba(25,200,245,.12) !important; }
+
+/* WEB / DESKTOP */
+@media (min-width:769px) {
+  #play > .hud {
+    top:max(8px,env(safe-area-inset-top,0px)) !important;
+    left:12px !important;
+    right:12px !important;
+    width:auto !important;
+    height:58px !important;
+    display:block !important;
+    transform:none !important;
+    padding:0 !important;
+    overflow:visible !important;
+    z-index:1800 !important;
+  }
+
+  /* OLD QUARTER is always visible on desktop and owns the first slot. */
+  #play > .hud > .hud-route {
+    display:flex !important;
+    position:absolute !important;
+    left:0 !important;
+    top:0 !important;
+    width:246px !important;
+    min-width:246px !important;
+    max-width:246px !important;
+    height:56px !important;
+    min-height:56px !important;
+    margin:0 !important;
+    padding:8px 14px !important;
+    box-sizing:border-box !important;
+    align-items:center !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:none !important;
+    z-index:1830 !important;
+  }
+
+  /* CSS HUD Momentum slot: no world-layer rendering. */
+  #play > .hud > .hud-momentum {
+    left:256px !important;
+    top:0 !important;
+    width:172px !important;
+    min-width:172px !important;
+  }
+
+  /* SIGNALS stays aligned with the top telemetry rail. */
+  #play > .hud > .hud-progress {
+    position:absolute !important;
+    top:0 !important;
+    right:clamp(355px,25vw,520px) !important;
+    left:auto !important;
+    width:112px !important;
+    min-width:112px !important;
+    max-width:112px !important;
+    height:48px !important;
+    min-height:48px !important;
+    padding:6px 9px !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    grid-template-rows:auto auto 3px !important;
+    gap:3px !important;
+    align-content:center !important;
+    overflow:hidden !important;
+    transform:none !important;
+    z-index:1835 !important;
+  }
+
+  #play > .hud > .hud-progress > small {
+    grid-column:1 !important;
+    grid-row:1 !important;
+    margin:0 !important;
+    padding:0 !important;
+    font:700 6px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+    letter-spacing:.13em !important;
+    white-space:nowrap !important;
+  }
+  #play > .hud > .hud-progress > span {
+    grid-column:1 !important;
+    grid-row:2 !important;
+    margin:0 !important;
+    padding:0 !important;
+    font:900 17px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+    letter-spacing:0 !important;
+    font-variant-numeric:tabular-nums !important;
+  }
+  #play > .hud > .hud-progress > div {
+    grid-column:1 !important;
+    grid-row:3 !important;
+    width:100% !important;
+    height:3px !important;
+    min-width:0 !important;
+    margin:0 !important;
+  }
+
+  #play > .hud > .hud-actions {
+    position:absolute !important;
+    top:0 !important;
+    right:0 !important;
+    height:48px !important;
+    display:flex !important;
+    align-items:stretch !important;
+    gap:7px !important;
+    margin:0 !important;
+    z-index:1840 !important;
+    pointer-events:auto !important;
+  }
+  #play > .hud > .hud-actions .hud-xp { width:60px !important;min-width:60px !important;height:48px !important; }
+  #play > .hud > .hud-actions .pause-button { width:48px !important;min-width:48px !important;height:48px !important; }
+
+  #play > .gameplay-event-hud,#gameplayEventHud { top:96px !important; }
+}
+
+/* TOUCH LANDSCAPE */
+@media (hover:none) and (pointer:coarse) and (orientation:landscape) {
+  #play > .hud { height:48px !important;top:max(5px,env(safe-area-inset-top,0px)) !important; }
+  #play > .hud > .hud-route {
+    display:flex !important;
+    left:0 !important;
+    top:0 !important;
+    width:clamp(180px,23vw,230px) !important;
+    min-width:clamp(180px,23vw,230px) !important;
+    max-width:clamp(180px,23vw,230px) !important;
+    height:44px !important;
+    min-height:44px !important;
+    visibility:visible !important;
+    opacity:1 !important;
+  }
+  #play > .hud > .hud-momentum {
+    top:50px !important;
+    left:50% !important;
+    transform:translateX(-50%) !important;
+    width:142px !important;
+    min-width:142px !important;
+    height:38px !important;
+    border-radius:8px !important;
+    z-index:1760 !important;
+  }
+  #play > .hud > .hud-momentum strong { font-size:15px !important; }
+  #play > .hud > .hud-momentum small { font-size:5px !important; }
+  #play > .hud > .hud-momentum em { font-size:8px !important; }
+  #play > .hud > .hud-progress {
+    top:0 !important;
+    left:clamp(228px,22vw,300px) !important;
+    right:auto !important;
+    width:clamp(94px,12vw,116px) !important;
+    min-width:clamp(94px,12vw,116px) !important;
+    max-width:clamp(94px,12vw,116px) !important;
+    height:44px !important;
+    min-height:44px !important;
+  }
+}
+
+/* PORTRAIT — basic HUD, slightly larger action frame for clean touch targets. */
+@media (hover:none) and (pointer:coarse) and (orientation:portrait) {
+  #play > .hud > .hud-route { display:flex !important;visibility:visible !important;opacity:1 !important; }
+  #play > .hud > .hud-momentum { display:none !important; }
+  #play > .mobile-controls .mobile-actions {
+    padding:10px 11px 11px !important;
+    gap:6px !important;
+    border-width:1px !important;
+    box-shadow:0 0 30px rgba(0,0,0,.32),inset 0 0 20px rgba(141,244,255,.03) !important;
+  }
+  #play > .mobile-controls .mobile-actions button { min-width:42px !important;min-height:42px !important; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .hud-momentum { transition:none !important; }
+}
