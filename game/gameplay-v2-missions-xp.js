@@ -4,7 +4,6 @@ const stateKey = 'relay-runner-state';
 const $ = selector => document.querySelector(selector);
 const intro = $('#intro');
 const play = $('#play');
-if (!play) return;
 
 let lastSnapshot = '';
 let visible = true;
@@ -23,6 +22,7 @@ function formatXp(value) {
 }
 
 function ensureHud() {
+  if (!play) return null;
   if ($('#gameplayV2Hud')) return $('#gameplayV2Hud');
   const hud = document.createElement('section');
   hud.id = 'gameplayV2Hud';
@@ -51,6 +51,7 @@ function currentMissionName() {
 
 function updateHud(force = false) {
   const hud = ensureHud();
+  if (!hud) return;
   const state = getState();
   const xp = Number(state.xp) || 0;
   const rank = getCourierRank(xp);
@@ -78,6 +79,7 @@ function updateHud(force = false) {
 
 function pulseXp() {
   const hud = ensureHud();
+  if (!hud) return;
   hud.classList.remove('xp-pulse');
   void hud.offsetWidth;
   hud.classList.add('xp-pulse');
@@ -95,7 +97,6 @@ ensureHud();
 updateHud(true);
 window.setInterval(updateHud, 500);
 
-// Keep the existing runtime authoritative: this HUD is presentation/progression only.
 window.RelayGameplayV2 = Object.freeze({
   refresh: () => updateHud(true),
   pulseXp,
