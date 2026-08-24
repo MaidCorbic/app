@@ -14,10 +14,13 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const wrapped = function perfThrottled(delta, ...rest) {
       const state = this.__relayPerfGovernorV1 ||= Object.create(null);
       const now = Number(this.elapsedMs) || 0;
-      const previous = Number(state[key]);
-      if (Number.isFinite(previous) && now - previous < intervalMs) return;
+      const previous = Number(state[key]) || now;
+      state[`${key}Delta`] = (Number(state[`${key}Delta`]) || 0) + (Number(delta) || 0);
+      if (now - previous < intervalMs) return;
       state[key] = now;
-      return original.call(this, delta, ...rest);
+      const accumulatedDelta = state[`${key}Delta`];
+      state[`${key}Delta`] = 0;
+      return original.call(this, accumulatedDelta, ...rest);
     };
 
     Object.defineProperty(wrapped, '__relayPerfWrappedV1', { value: true });
@@ -25,13 +28,13 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   };
 
   // Threat decisions involve several full enemy-group scans per frame.
-  // 30 Hz is sufficient for attack/target decisions while movement/physics stay 60 Hz.
+  // 30 Hz reduces repeated scans while the accumulated delta preserves timing.
   throttle('threatsAt', 33, 'updateSciFiThreats');
 
   // Turret target acquisition performs filter+sort work; firing cadence remains governed by
-  // the existing 700ms cooldown, so a 50ms acquisition cadence does not change gameplay rules.
+  // the existing 700ms cooldown, while accumulated delta keeps time-based behavior unchanged.
   throttle('buildsAt', 50, 'updateBuilds');
 
-  // Chaser section lookup is presentation/AI guidance, not physics. Keep it responsive at 30 Hz.
+  // Chaser section lookup is non-physics guidance. Keep it responsive at 30 Hz and preserve distance timing.
   throttle('chaserAt', 33, 'updateChaser');
 })();
