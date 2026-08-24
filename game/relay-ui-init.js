@@ -92,3 +92,4 @@ import './src/systems/continue-runtime-recovery-v2.js';
 import './src/systems/final-runtime-stabilizer-v1.js';
 import './tutorial-lifecycle-failsafe-v1.js';
 import './src/systems/runtime-performance-hotfix-v1.js';
+import './runtime-performance-governor-v1.js';
