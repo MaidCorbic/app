@@ -1,11 +1,9 @@
+import './cinematic-arrival-v2.css';
+
 /* Cinematic Arrival V3 — presentation-only. Keeps the current gameplay/HUD branch intact. */
 (() => {
   if (window.__relayCinematicArrivalV3) return;
   window.__relayCinematicArrivalV3 = true;
-
-  // Capture this while the classic deferred script is actually executing.
-  // document.currentScript is null later inside DOMContentLoaded callbacks.
-  const scriptUrl = document.currentScript?.src || new URL('./cinematic-arrival-v2.js', window.location.href).href;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
@@ -13,18 +11,6 @@
 
     splash.classList.add('cinematic-arrival');
     splash.setAttribute('aria-busy', 'true');
-
-    if (!document.querySelector('link[data-cinematic-arrival-v2]')) {
-      const css = document.createElement('link');
-      css.rel = 'stylesheet';
-      css.href = new URL('./cinematic-arrival-v2.css', scriptUrl).href;
-      css.dataset.cinematicArrivalV2 = 'true';
-      css.addEventListener('error', () => {
-        // Presentation failure must never block the game or Home UI.
-        splash.classList.add('cinematic-style-fallback');
-      }, { once: true });
-      document.head.appendChild(css);
-    }
 
     if (splash.querySelector('.arrival-copy')) return;
 
