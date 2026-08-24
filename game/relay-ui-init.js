@@ -13,6 +13,7 @@ import './city-response-v1.css';
 import './collapse-protocol-v1.css';
 import './city-pulse-v1.css';
 import './relay-runtime-kernel-v1.js';
+import './gameplay-hud-responsive-v5.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
