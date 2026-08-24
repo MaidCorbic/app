@@ -10,6 +10,7 @@ if (play && !play.dataset.gameplayCoreV1) {
 
   const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let pulseTimer;
+  let pulseFrame = 0;
   let movingKeys = 0;
 
   const clearPulse = () => {
@@ -19,16 +20,20 @@ if (play && !play.dataset.gameplayCoreV1) {
 
   const pulse = (kind, element = null, duration = 180) => {
     clearTimeout(pulseTimer);
-    play.classList.remove('gameplay-dash', 'gameplay-jump', 'gameplay-hit');
-    void play.offsetWidth;
-    if (!reducedMotion()) play.classList.add(`gameplay-${kind}`);
-    if (element) {
-      element.classList.remove('gameplay-pulse');
-      void element.offsetWidth;
-      element.classList.add('gameplay-pulse');
-      window.setTimeout(() => element.classList.remove('gameplay-pulse'), duration);
-    }
-    pulseTimer = window.setTimeout(() => play.classList.remove(`gameplay-${kind}`), duration + 40);
+    cancelAnimationFrame(pulseFrame);
+    clearPulse();
+
+    pulseFrame = requestAnimationFrame(() => {
+      if (!reducedMotion()) play.classList.add(`gameplay-${kind}`);
+      if (element) {
+        element.classList.add('gameplay-pulse');
+        window.setTimeout(() => element.classList.remove('gameplay-pulse'), duration);
+      }
+    });
+
+    pulseTimer = window.setTimeout(() => {
+      play.classList.remove(`gameplay-${kind}`);
+    }, duration + 40);
   };
 
   const actionPulse = action => {
@@ -65,8 +70,15 @@ if (play && !play.dataset.gameplayCoreV1) {
   joystick?.addEventListener('pointerdown', () => play.classList.add('gameplay-moving'), { passive: true });
   window.addEventListener('pointerup', () => play.classList.remove('gameplay-moving'), { passive: true });
   window.addEventListener('pointercancel', () => play.classList.remove('gameplay-moving'), { passive: true });
-  window.addEventListener('blur', () => { movingKeys = 0; clearPulse(); play.classList.remove('gameplay-moving'); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { movingKeys = 0; clearPulse(); play.classList.remove('gameplay-moving'); } });
+  window.addEventListener('blur', () => { movingKeys = 0; cancelAnimationFrame(pulseFrame); clearPulse(); play.classList.remove('gameplay-moving'); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      movingKeys = 0;
+      cancelAnimationFrame(pulseFrame);
+      clearPulse();
+      play.classList.remove('gameplay-moving');
+    }
+  });
 
-  window.dispatchEvent(new CustomEvent('relay:gameplay-core-ready', { detail: { version: '1.0.0' } }));
+  window.dispatchEvent(new CustomEvent('relay:gameplay-core-ready', { detail: { version: '1.0.1' } }));
 }
