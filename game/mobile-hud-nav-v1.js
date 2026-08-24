@@ -53,6 +53,12 @@
     nav.addEventListener('pointerdown', event => {
       if (event.target instanceof Element && event.target.closest('button')) event.stopPropagation();
     }, { passive: true });
+
+    // main.js owns the joystick input. Its pointermove handler already runs on
+    // the joystick and the pointer is captured there, so do not let the same
+    // move bubble to the legacy window-level tracker a second time.
+    const joystick = play.querySelector('[data-mobile-joystick]');
+    joystick?.addEventListener('pointermove', event => event.stopPropagation());
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true });
