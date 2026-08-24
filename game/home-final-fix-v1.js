@@ -118,14 +118,41 @@ import { loadState } from './src/state.js';
     });
   };
 
+  const bindPanelsInNode = node => {
+    if (!(node instanceof Element)) return;
+    if (node.matches('#homeV3Panel')) bindPanel(node);
+    node.querySelectorAll?.('#homeV3Panel').forEach(bindPanel);
+  };
+
   const observePanels = () => {
     document.querySelectorAll('#homeV3Panel').forEach(bindPanel);
     if (window.__relayHomeFinalObserver) return;
-    window.__relayHomeFinalObserver = new MutationObserver(() => {
-      document.querySelectorAll('#homeV3Panel').forEach(bindPanel);
-      applyPresentation();
+
+    window.__relayHomeFinalObserver = new MutationObserver(mutations => {
+      let presentationChanged = false;
+
+      for (const mutation of mutations) {
+        if (mutation.type !== 'childList') continue;
+
+        if (mutation.addedNodes.length) {
+          mutation.addedNodes.forEach(bindPanelsInNode);
+        }
+
+        const target = mutation.target;
+        if (target instanceof Element && (target.matches('#intro') || target.closest?.('#intro'))) {
+          if ([...mutation.addedNodes].some(node => node.nodeType === Node.ELEMENT_NODE)) {
+            presentationChanged = true;
+          }
+        }
+      }
+
+      if (presentationChanged) applyPresentation();
     });
-    window.__relayHomeFinalObserver.observe(document.body, { childList: true, subtree: true });
+
+    window.__relayHomeFinalObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   };
 
   window.addEventListener('relay-settings-change', applyAudio);
