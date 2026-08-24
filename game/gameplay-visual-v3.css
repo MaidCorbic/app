@@ -1,33 +1,187 @@
-/* GAMEPLAY VISUAL V3 — cinematic mobile HUD polish */
-#play { --relay-cyan:#8df4ff; --relay-blue:#19c8f5; --relay-ink:#030914; }
-#play > .hud { filter:drop-shadow(0 8px 24px rgba(0,0,0,.24)); }
+/* GAMEPLAY VISUAL V4 — complete HUD reskin */
+#play {
+  --relay-cyan:#8df4ff;
+  --relay-blue:#19c8f5;
+  --relay-violet:#b993ff;
+  --relay-ink:#020711;
+  --relay-panel:rgba(3,10,21,.9);
+  --relay-line:rgba(141,244,255,.34);
+  overflow:hidden !important;
+}
+
+/* The old HUD remains data-compatible, but visually becomes a new tactical shell. */
+#play > .hud {
+  position:absolute !important;
+  left:12px !important;
+  right:12px !important;
+  top:max(10px,env(safe-area-inset-top,0px)) !important;
+  height:58px !important;
+  display:grid !important;
+  grid-template-columns:minmax(180px,1fr) minmax(160px,280px) auto !important;
+  align-items:stretch !important;
+  gap:10px !important;
+  padding:0 !important;
+  z-index:1000 !important;
+  pointer-events:none !important;
+  filter:drop-shadow(0 12px 28px rgba(0,0,0,.42));
+}
+#play > .hud::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border:1px solid rgba(141,244,255,.14);
+  background:linear-gradient(90deg,rgba(25,200,245,.05),transparent 30%,rgba(185,147,255,.04));
+  clip-path:polygon(0 0,100% 0,100% 86%,98% 100%,2% 100%,0 86%);
+}
+#play > .hud::after {
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:3px; height:1px;
+  background:linear-gradient(90deg,transparent,#19c8f5,transparent);
+  opacity:.55;
+  animation:relayHudScan 3.8s linear infinite;
+}
+#play > .hud > * { pointer-events:auto; position:relative; z-index:2; }
+
 #play > .hud .hud-route,
 #play > .hud .hud-progress,
 #play > .hud .hud-xp,
 #play > .hud .pause-button {
-  border-color:rgba(141,244,255,.28) !important;
-  background:linear-gradient(145deg,rgba(3,10,21,.92),rgba(8,23,39,.82)) !important;
-  box-shadow:0 0 24px rgba(25,200,245,.08),inset 0 0 16px rgba(255,255,255,.025) !important;
+  position:relative !important;
+  min-height:46px !important;
+  box-sizing:border-box !important;
+  border:1px solid var(--relay-line) !important;
+  background:linear-gradient(145deg,rgba(2,9,19,.96),rgba(8,24,40,.88)) !important;
+  box-shadow:0 0 22px rgba(25,200,245,.10),inset 0 0 18px rgba(141,244,255,.025) !important;
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+}
+#play > .hud .hud-route {
+  display:flex !important; align-items:center !important; gap:11px !important;
+  padding:8px 15px !important;
+}
+#play > .hud .hud-route::before,
+#play > .hud .hud-progress::before,
+#play > .hud .hud-xp::before {
+  content:""; position:absolute; left:0; top:0; width:34px; height:2px;
+  background:linear-gradient(90deg,#19c8f5,#8df4ff,transparent);
+  box-shadow:0 0 10px #19c8f5;
+}
+#play > .hud .route-dot {
+  width:10px !important; height:10px !important; min-width:10px !important;
+  border-radius:50% !important; background:#8df4ff !important;
+  box-shadow:0 0 9px rgba(141,244,255,.95),0 0 24px rgba(25,200,245,.65) !important;
+  animation:relayDotPulse 1.4s ease-in-out infinite;
+}
+#play > .hud .hud-route small,
+#play > .hud .hud-progress small,
+#play > .hud .hud-xp small {
+  display:block !important; font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:.22em !important; color:#6e8da7 !important;
+}
+#play > .hud .hud-route b {
+  display:block !important; margin-top:5px !important;
+  font:900 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:.12em !important; color:#effcff !important;
+  text-shadow:0 0 12px rgba(141,244,255,.22);
+}
+
+#play > .hud .hud-progress {
+  display:grid !important; grid-template-columns:auto 1fr !important; grid-template-rows:16px 6px !important;
+  column-gap:9px !important; align-content:center !important; padding:8px 14px !important;
+}
+#play > .hud .hud-progress > span { grid-row:1 / 3; align-self:center; font:900 22px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important; color:#f3fcff !important; }
+#play > .hud .hud-progress > small { grid-column:2; align-self:end; }
+#play > .hud .hud-progress > div { grid-column:2; height:4px !important; margin-top:3px !important; background:#091828 !important; overflow:hidden; border:1px solid rgba(141,244,255,.15); }
+#play > .hud .hud-progress > div i { display:block !important; height:100% !important; background:linear-gradient(90deg,#19c8f5,#8df4ff,#b993ff) !important; box-shadow:0 0 12px #19c8f5 !important; }
+
+#play > .hud .hud-actions { display:flex !important; align-items:stretch !important; gap:7px !important; pointer-events:auto !important; }
+#play > .hud .hud-xp { min-width:74px !important; padding:8px 11px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; }
+#play > .hud .hud-xp b { margin-top:5px; font:900 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important; color:#ffd98a !important; letter-spacing:.08em; }
+#play > .hud .pause-button {
+  width:54px !important; min-width:54px !important; height:54px !important; margin:0 !important;
+  color:#eaffff !important; font-size:22px !important; border-color:rgba(185,147,255,.48) !important;
+  cursor:pointer; transition:transform .16s ease,filter .16s ease,box-shadow .16s ease !important;
+}
+#play > .hud .pause-button:hover { filter:brightness(1.18); box-shadow:0 0 28px rgba(185,147,255,.25),inset 0 0 20px rgba(141,244,255,.06) !important; }
+#play > .hud .pause-button:active { transform:scale(.92) !important; }
+
+/* Remove the old floating tutorial label from the live combat presentation. */
+#play > .world-marker,
+#play > .input-guide { display:none !important; }
+
+/* Touch controls: turn the stock circles into a tactical control deck. */
+#play .mobile-controls { z-index:900 !important; }
+#play .mobile-actions {
+  gap:7px !important;
+  padding:9px !important;
+  border:1px solid rgba(141,244,255,.18);
+  background:linear-gradient(145deg,rgba(2,8,17,.74),rgba(6,18,31,.56));
+  box-shadow:0 0 26px rgba(0,0,0,.3),inset 0 0 18px rgba(141,244,255,.025);
   backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  clip-path:polygon(0 9px,9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%);
 }
-#play > .hud .hud-route::after,
-#play > .hud .hud-progress::after,
-#play > .hud .hud-xp::after,
-#play > .hud .pause-button::after {
-  content:""; position:absolute; inset:1px; pointer-events:none; border:1px solid rgba(141,244,255,.06);
+#play .mobile-actions button {
+  position:relative !important;
+  width:48px !important; height:48px !important;
+  border:1px solid rgba(141,244,255,.4) !important;
+  border-radius:10px !important;
+  background:linear-gradient(160deg,#09192b,#030914) !important;
+  color:#eaffff !important;
+  font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:.08em !important;
+  box-shadow:inset 0 0 12px rgba(141,244,255,.04),0 5px 14px rgba(0,0,0,.32) !important;
+  text-shadow:0 0 8px rgba(141,244,255,.35);
+  transition:transform .12s ease,filter .12s ease,border-color .12s ease !important;
 }
-#play > .hud .route-dot { box-shadow:0 0 9px rgba(141,244,255,.95),0 0 22px rgba(25,200,245,.55) !important; }
-#play > .hud .pause-button { transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease !important; }
-#play > .hud .pause-button:active { transform:scale(.94) !important; }
+#play .mobile-actions button:nth-child(2) { border-color:rgba(255,130,110,.48) !important; }
+#play .mobile-actions button:nth-child(3) { border-color:rgba(185,147,255,.52) !important; }
+#play .mobile-actions button:nth-child(n+4) { border-color:rgba(174,227,127,.38) !important; }
+#play .mobile-actions button::after { content:""; position:absolute; inset:4px; border:1px solid rgba(255,255,255,.045); border-radius:7px; pointer-events:none; }
+#play .mobile-actions button:active { transform:translateY(2px) scale(.94) !important; filter:brightness(1.25); }
+#play .mobile-actions button small { display:block !important; margin-top:5px !important; font-size:5px !important; color:#7191a9 !important; letter-spacing:.12em !important; }
+
+#play .mobile-joystick {
+  border:1px solid rgba(141,244,255,.3) !important;
+  background:radial-gradient(circle,rgba(25,200,245,.16),rgba(3,9,18,.72) 58%,rgba(2,6,13,.86)) !important;
+  box-shadow:0 0 28px rgba(25,200,245,.12),inset 0 0 24px rgba(141,244,255,.05) !important;
+}
+#play .mobile-joystick-thumb {
+  border:1px solid rgba(141,244,255,.7) !important;
+  background:radial-gradient(circle,#8df4ff 0 10%,#19c8f5 11% 45%,#071625 46%) !important;
+  box-shadow:0 0 18px rgba(25,200,245,.7) !important;
+}
+
+/* Mobile landscape is deliberately asymmetric: center = mission/intel, right = actions. */
 @media (max-width:768px) and (orientation:landscape) {
-  #play > .world-marker,#play > .input-guide { opacity:.68; }
-  #play > .input-guide { transform:scale(.82); transform-origin:center top; }
-  #play > .vignette { opacity:.82; }
-}
-@media (max-width:520px) and (orientation:landscape) {
-  #play > .hud .hud-route { max-width:220px; }
+  #play > .hud {
+    left:8px !important; right:8px !important; top:6px !important; height:50px !important;
+    grid-template-columns:minmax(150px,1fr) minmax(130px,220px) auto !important; gap:6px !important;
+  }
+  #play > .hud .hud-route { padding:6px 10px !important; min-height:42px !important; }
   #play > .hud .hud-route b { font-size:9px !important; }
-  #play > .hud .hud-progress { transform:scale(.82); transform-origin:top center; }
-  #play > .hud .hud-xp { transform:scale(.9); transform-origin:top right; }
+  #play > .hud .hud-progress { min-height:42px !important; padding:6px 9px !important; }
+  #play > .hud .hud-progress > span { font-size:17px !important; }
+  #play > .hud .hud-xp { min-width:56px !important; padding:6px 7px !important; }
+  #play > .hud .hud-xp b { font-size:9px !important; }
+  #play > .hud .pause-button { width:45px !important; min-width:45px !important; height:45px !important; }
+  #play .mobile-actions { padding:6px !important; gap:5px !important; }
+  #play .mobile-actions button { width:42px !important; height:42px !important; font-size:7px !important; }
+  #play .mobile-actions button small { font-size:4px !important; }
 }
-@media (prefers-reduced-motion:reduce) { #play > .hud .pause-button { transition:none !important; } }
+
+@media (max-width:520px) and (orientation:landscape) {
+  #play > .hud .hud-route { min-width:0 !important; }
+  #play > .hud .hud-route b { max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #play > .hud .hud-progress { max-width:170px !important; }
+  #play .mobile-actions button { width:38px !important; height:38px !important; }
+}
+
+@keyframes relayHudScan { 0%,100%{opacity:.25;transform:translateX(-8%)} 50%{opacity:.8;transform:translateX(8%)} }
+@keyframes relayDotPulse { 0%,100%{transform:scale(.85);opacity:.7} 50%{transform:scale(1.15);opacity:1} }
+
+@media (prefers-reduced-motion:reduce) {
+  #play > .hud::after,#play > .hud .route-dot { animation:none !important; }
+  #play > .hud .pause-button,#play .mobile-actions button { transition:none !important; }
+}
