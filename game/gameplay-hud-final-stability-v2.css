@@ -1,52 +1,65 @@
-/* FINAL HUD STABILITY V2 — single top telemetry rail, no overlap */
+/* FINAL HUD STABILITY V3 — single top telemetry rail, no overlap */
 #play{--relay-action-w:112px;--relay-chain-w:clamp(250px,30vw,360px);--relay-signal-w:112px;--relay-top-gap:8px}
 #play > .hud{position:absolute!important;left:max(8px,env(safe-area-inset-left,0px))!important;right:max(8px,env(safe-area-inset-right,0px))!important;top:max(8px,env(safe-area-inset-top,0px))!important;height:56px!important;display:block!important;z-index:1400!important;overflow:visible!important}
-/* Route stays isolated on the left. */
-#play > .hud .hud-route{position:absolute!important;left:0!important;top:0!important;width:clamp(180px,22vw,260px)!important;max-width:clamp(180px,22vw,260px)!important;height:100%!important;min-width:0!important;overflow:hidden!important}
-/* SIGNALS is a compact vertical card: label, number, bar. */
-#play > .hud .hud-progress{position:absolute!important;left:auto!important;top:0!important;right:calc(var(--relay-action-w) + var(--relay-chain-w) + var(--relay-top-gap))!important;width:var(--relay-signal-w)!important;min-width:var(--relay-signal-w)!important;max-width:var(--relay-signal-w)!important;height:100%!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:10px 1fr 4px!important;gap:3px!important;padding:7px 9px!important;margin:0!important;overflow:hidden!important;transform:none!important}
+#play > .hud .hud-route{position:absolute!important;left:0!important;top:0!important;width:clamp(180px,22vw,260px)!important;max-width:clamp(180px,22vw,260px)!important;height:100%!important;min-width:0!important;overflow:hidden!important;visibility:visible!important;opacity:1!important;z-index:1600!important}
+#play > .hud .hud-progress{position:absolute!important;left:auto!important;top:0!important;right:calc(var(--relay-action-w) + var(--relay-chain-w) + var(--relay-top-gap))!important;width:var(--relay-signal-w)!important;min-width:var(--relay-signal-w)!important;max-width:var(--relay-signal-w)!important;height:100%!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:10px 1fr 4px!important;gap:3px!important;padding:7px 9px!important;margin:0!important;overflow:hidden!important;transform:none!important;z-index:1600!important}
 #play > .hud .hud-progress > small{grid-row:1!important;grid-column:1!important;display:block!important;align-self:start!important;justify-self:start!important;margin:0!important;white-space:nowrap!important;font-size:7px!important;line-height:10px!important;letter-spacing:.16em!important;overflow:hidden!important;text-overflow:ellipsis!important}
 #play > .hud .hud-progress > span{grid-row:2!important;grid-column:1!important;display:block!important;align-self:center!important;justify-self:start!important;margin:0!important;font-size:18px!important;line-height:1!important;letter-spacing:0!important;font-variant-numeric:tabular-nums!important;white-space:nowrap!important}
 #play > .hud .hud-progress > div{grid-row:3!important;grid-column:1!important;width:100%!important;height:4px!important;min-width:0!important;margin:0!important;align-self:end!important}
-#play > .hud .hud-actions{position:absolute!important;right:0!important;top:0!important;height:100%!important;display:flex!important;gap:6px!important;align-items:stretch!important}
+#play > .hud .hud-actions{position:absolute!important;right:0!important;top:0!important;height:100%!important;display:flex!important;gap:6px!important;align-items:stretch!important;z-index:1600!important}
 #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{height:100%!important;width:52px!important;min-width:52px!important;box-sizing:border-box!important}
-/* The FLOW / PLASMA / HEALTH chain occupies its own slot. It never shares SIGNALS coordinates. */
-#relay-gameplay-new-layer .ng-chain{position:absolute!important;left:auto!important;right:calc(max(8px,env(safe-area-inset-right,0px)) + var(--relay-action-w))!important;top:max(8px,env(safe-area-inset-top,0px))!important;width:var(--relay-chain-w)!important;max-width:var(--relay-chain-w)!important;box-sizing:border-box!important;transform:none!important;z-index:1390!important}
+#relay-gameplay-new-layer .ng-chain{position:absolute!important;box-sizing:border-box!important;z-index:1500!important;width:var(--relay-chain-w)!important;max-width:var(--relay-chain-w)!important;overflow:hidden!important;text-overflow:clip!important;transform:none!important}
 #relay-gameplay-new-layer .ng-chain.show{transform:none!important}
-/* Portrait is intentionally basic: keep SIGNALS + XP + menu, hide the wide telemetry chain. */
-@media (max-width:700px) and (orientation:portrait){
- #play{--relay-action-w:96px;--relay-signal-w:88px}
- #play > .hud{height:46px!important;left:max(6px,env(safe-area-inset-left,0px))!important;right:max(6px,env(safe-area-inset-right,0px))!important;top:max(6px,env(safe-area-inset-top,0px))!important}
- #play > .hud .hud-route{width:min(44vw,170px)!important;max-width:min(44vw,170px)!important}
- #play > .hud .hud-progress{right:calc(var(--relay-action-w) + 6px)!important;height:46px!important;padding:5px 7px!important}
- #play > .hud .hud-progress > small{font-size:6px!important}
- #play > .hud .hud-progress > span{font-size:15px!important}
- #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{width:45px!important;min-width:45px!important}
- #relay-gameplay-new-layer .ng-chain{display:none!important}
+@media(min-width:901px){
+ #play > .hud{height:58px!important}
+ #play > .hud .hud-route{width:clamp(220px,18vw,270px)!important;max-width:clamp(220px,18vw,270px)!important;height:58px!important}
+ #play > .hud .hud-progress{width:120px!important;min-width:120px!important;max-width:120px!important;height:58px!important}
+ #relay-gameplay-new-layer .ng-chain{left:calc(clamp(220px,18vw,270px) + 10px)!important;right:auto!important;top:0!important;width:clamp(190px,18vw,240px)!important;max-width:clamp(190px,18vw,240px)!important;min-height:52px!important;padding:7px 12px!important;text-align:left!important;border:1px solid rgba(141,244,255,.22)!important;border-radius:8px!important;background:rgba(3,10,20,.78)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important}
+ #relay-gameplay-new-layer .ng-kicker{font-size:7px!important;letter-spacing:.16em!important}
+ #relay-gameplay-new-layer .ng-value{font-size:22px!important;line-height:1!important;margin-top:2px!important}
+ #relay-gameplay-new-layer .ng-value em{font-size:10px!important;letter-spacing:.06em!important;margin-left:4px!important}
 }
-/* Short landscape phones: scale the whole rail without moving items into each other. */
-@media (max-width:900px) and (orientation:landscape){
+@media(hover:none) and (pointer:coarse) and (orientation:landscape){
+ #play > .hud .hud-route{height:48px!important;width:220px!important;max-width:220px!important;padding:5px 9px!important}
+ #play > .hud .hud-progress{height:48px!important}
+ #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{height:48px!important;width:48px!important;min-width:48px!important}
+ #relay-gameplay-new-layer .ng-chain{left:50%!important;right:auto!important;top:calc(54px + env(safe-area-inset-top,0px))!important;width:clamp(150px,28vw,210px)!important;max-width:clamp(150px,28vw,210px)!important;min-height:34px!important;padding:4px 9px!important;transform:translateX(-50%)!important;text-align:center!important;border:1px solid rgba(141,244,255,.22)!important;border-radius:8px!important;background:rgba(3,10,20,.76)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important}
+ #relay-gameplay-new-layer .ng-chain.show{transform:translateX(-50%)!important}
+ #relay-gameplay-new-layer .ng-kicker{font-size:6px!important;letter-spacing:.14em!important}
+ #relay-gameplay-new-layer .ng-value{font-size:18px!important;line-height:1!important;margin-top:1px!important}
+ #relay-gameplay-new-layer .ng-value em{font-size:8px!important;letter-spacing:.06em!important;margin-left:3px!important}
+}
+@media(max-width:900px) and (orientation:landscape){
  #play{--relay-action-w:94px;--relay-chain-w:clamp(210px,29vw,300px);--relay-signal-w:96px}
  #play > .hud{height:46px!important;top:max(5px,env(safe-area-inset-top,0px))!important}
- #play > .hud .hud-route{width:clamp(170px,24vw,215px)!important;max-width:clamp(170px,24vw,215px)!important;padding:5px 9px!important}
- #play > .hud .hud-progress{padding:5px 7px!important}
+ #play > .hud .hud-route{width:clamp(170px,24vw,215px)!important;max-width:clamp(170px,24vw,215px)!important;height:46px!important;padding:5px 9px!important}
+ #play > .hud .hud-progress{height:46px!important;padding:5px 7px!important}
  #play > .hud .hud-progress > small{font-size:6px!important}
  #play > .hud .hud-progress > span{font-size:15px!important}
- #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{width:44px!important;min-width:44px!important}
- #relay-gameplay-new-layer .ng-chain{top:max(5px,env(safe-area-inset-top,0px))!important}
+ #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{width:44px!important;min-width:44px!important;height:46px!important}
+ #relay-gameplay-new-layer .ng-chain{top:calc(50px + env(safe-area-inset-top,0px))!important}
 }
-/* Very narrow landscape: remove only the route title from the top rail before allowing overlap. */
-@media (max-width:640px) and (orientation:landscape){
+@media(max-width:640px) and (orientation:landscape){
  #play{--relay-action-w:84px;--relay-chain-w:180px;--relay-signal-w:78px}
- #play > .hud .hud-route{width:145px!important;max-width:145px!important}
+ #play > .hud .hud-route{width:145px!important;max-width:145px!important;height:42px!important}
  #play > .hud .hud-route b{max-width:100px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
  #play > .hud .hud-progress{padding:4px 6px!important}
  #play > .hud .hud-progress > small{font-size:5px!important;letter-spacing:.1em!important}
  #play > .hud .hud-progress > span{font-size:13px!important}
  #play > .hud .hud-actions{gap:4px!important}
- #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{width:40px!important;min-width:40px!important}
+ #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{width:40px!important;min-width:40px!important;height:42px!important}
+ #relay-gameplay-new-layer .ng-chain{top:calc(46px + env(safe-area-inset-top,0px))!important;width:160px!important;max-width:160px!important;min-height:30px!important;padding:3px 7px!important}
+ #relay-gameplay-new-layer .ng-kicker{font-size:5px!important}
+ #relay-gameplay-new-layer .ng-value{font-size:15px!important}
+ #relay-gameplay-new-layer .ng-value em{font-size:7px!important}
 }
-@media (min-width:901px){
- #play > .hud{height:58px!important}
- #play > .hud .hud-progress{width:120px!important;min-width:120px!important;max-width:120px!important}
+@media(max-width:700px) and (orientation:portrait){
+ #play{--relay-action-w:96px;--relay-signal-w:88px}
+ #play > .hud{height:46px!important;left:max(6px,env(safe-area-inset-left,0px))!important;right:max(6px,env(safe-area-inset-right,0px))!important;top:max(6px,env(safe-area-inset-top,0px))!important}
+ #play > .hud .hud-route{width:min(44vw,170px)!important;max-width:min(44vw,170px)!important;height:46px!important}
+ #play > .hud .hud-progress{right:calc(var(--relay-action-w) + 6px)!important;height:46px!important;padding:5px 7px!important}
+ #play > .hud .hud-progress > small{font-size:6px!important}
+ #play > .hud .hud-progress > span{font-size:15px!important}
+ #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{width:45px!important;min-width:45px!important}
+ #relay-gameplay-new-layer .ng-chain{display:none!important}
 }
