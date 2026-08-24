@@ -10,14 +10,18 @@
     splash.classList.add('cinematic-arrival');
     splash.setAttribute('aria-busy', 'true');
 
-    // Resolve through the module URL so Vite/Vercel emits the CSS asset correctly.
+    // This file is loaded as a classic deferred script. Resolve the stylesheet
+    // relative to this script, not with import.meta (which is invalid here).
     if (!document.querySelector('link[data-cinematic-arrival-v2]')) {
       const css = document.createElement('link');
       css.rel = 'stylesheet';
-      css.href = new URL('./cinematic-arrival-v2.css', import.meta.url).href;
+      css.href = new URL(
+        './cinematic-arrival-v2.css',
+        document.currentScript?.src || window.location.href,
+      ).href;
       css.dataset.cinematicArrivalV2 = 'true';
       css.addEventListener('error', () => {
-        // The cinematic remains presentation-only and must never block Home.
+        // Presentation failure must never block the game or Home UI.
         splash.classList.add('cinematic-style-fallback');
       }, { once: true });
       document.head.appendChild(css);
