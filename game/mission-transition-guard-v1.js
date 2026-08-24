@@ -5,7 +5,7 @@ export function createMissionTransitionGuard({ getGame, getMissions, launch }) {
   let transitioning = false;
 
   async function stopRunner() {
-    const game = getGame();
+    const game = getGame?.();
     if (!game?.scene) return;
     const key = 'runner';
     try {
@@ -15,25 +15,30 @@ export function createMissionTransitionGuard({ getGame, getMissions, launch }) {
     } catch (error) {
       console.warn('[mission-transition] runner cleanup failed', error);
     }
-    await new Promise(resolve => requestAnimationFrame(resolve));
+    // Yield once without scheduling an additional render frame. Phaser scene.stop()
+    // is synchronous for this transition path, while the microtask boundary still
+    // lets current event handlers finish before launch.
+    await Promise.resolve();
   }
 
   async function transitionTo(index) {
     if (transitioning) return false;
-    const missions = getMissions();
-    if (!Number.isInteger(index) || index < 0 || index >= missions.length) return false;
+    const missions = getMissions?.();
+    if (!Array.isArray(missions) || !Number.isInteger(index) || index < 0 || index >= missions.length) return false;
+    if (typeof launch !== 'function') return false;
+
     transitioning = true;
     try {
       await stopRunner();
-      launch(index);
+      await launch(index);
       return true;
     } catch (error) {
       console.error('[mission-transition] launch failed', error);
       return false;
     } finally {
-      // launch() is synchronous in the current runtime; release only after the
-      // next frame so duplicate pointer/click events cannot start another run.
-      requestAnimationFrame(() => { transitioning = false; });
+      // Keep the lock through the current event turn to absorb duplicate clicks,
+      // then release without creating an extra RAF handler.
+      queueMicrotask(() => { transitioning = false; });
     }
   }
 
