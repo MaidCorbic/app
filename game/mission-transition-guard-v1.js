@@ -1,11 +1,11 @@
 // Authoritative mission transition guard.
-// Prevents overlapping Retry/Next Mission launches without forcing an extra frame loop.
+// Prevents overlapping Retry/Next Mission launches without adding a frame barrier.
 
 export function createMissionTransitionGuard({ getGame, getMissions, launch }) {
   let transitioning = false;
 
   async function stopRunner() {
-    const game = getGame();
+    const game = getGame?.();
     if (!game?.scene) return;
 
     const key = 'runner';
@@ -17,8 +17,8 @@ export function createMissionTransitionGuard({ getGame, getMissions, launch }) {
       console.warn('[mission-transition] runner cleanup failed', error);
     }
 
-    // A microtask lets Phaser finish its scene-stop bookkeeping without adding
-    // another requestAnimationFrame callback to every transition.
+    // Let Phaser finish synchronous scene bookkeeping without scheduling a
+    // requestAnimationFrame callback for every transition.
     await Promise.resolve();
   }
 
@@ -31,14 +31,15 @@ export function createMissionTransitionGuard({ getGame, getMissions, launch }) {
     transitioning = true;
     try {
       await stopRunner();
-      await Promise.resolve(launch(index));
+      const result = launch?.(index);
+      if (result && typeof result.then === 'function') await result;
       return true;
     } catch (error) {
       console.error('[mission-transition] launch failed', error);
       return false;
     } finally {
-      // Hold the guard through the current event turn. This blocks duplicate
-      // click/pointer events without creating a persistent animation callback.
+      // Keep the guard closed through the current event turn so duplicate
+      // pointer/click events cannot start another transition immediately.
       queueMicrotask(() => { transitioning = false; });
     }
   }
