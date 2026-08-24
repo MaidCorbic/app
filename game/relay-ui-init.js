@@ -86,5 +86,7 @@ import './home-v4-polish.js';
 import './home-final-fix-v1.js';
 /* Final ownership layers must load last so legacy HUD positioning cannot reintroduce overlap. */
 import './gameplay-hud-final-stability-v2.css';
-import './src/systems/continue-runtime-recovery-v1.js';
 import './gameplay-hud-desktop-final-v2.css';
+import './gameplay-hud-final-v4.css';
+import './src/systems/continue-runtime-recovery-v2.js';
+import './src/systems/final-runtime-stabilizer-v1.js';
