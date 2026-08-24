@@ -12,8 +12,6 @@ import './signal-network-v1.css';
 import './city-response-v1.css';
 import './collapse-protocol-v1.css';
 import './city-pulse-v1.css';
-
-// UPDATE 22 — shared lifecycle/event adapter. Additive only.
 import './relay-runtime-kernel-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
@@ -33,12 +31,10 @@ const open = kind => {
   panel.classList.remove('hidden');
   panel.classList.toggle('relay-update-mode', kind === 'update');
   if (kind === 'faq') {
-    eyebrow.textContent = 'RELAY RUNNER // FIELD GUIDE';
-    heading.textContent = 'FAQ';
+    eyebrow.textContent = 'RELAY RUNNER // FIELD GUIDE'; heading.textContent = 'FAQ';
     content.innerHTML = '<div class="relay-faq-list">' + RELAY_FAQ.map(item => `<article class="relay-faq-item"><button class="relay-faq-question" type="button">${item[0]}</button><div class="relay-faq-answer">${item[1]}</div></article>`).join('') + '</div>';
   } else {
-    eyebrow.textContent = LATEST_UPDATE.version;
-    heading.textContent = LATEST_UPDATE.title;
+    eyebrow.textContent = LATEST_UPDATE.version; heading.textContent = LATEST_UPDATE.title;
     content.innerHTML = '<p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT</p><div class="relay-update-list">' + LATEST_UPDATE.items.map(item => `<div class="relay-update-item">${item}</div>`).join('') + '</div>';
   }
 };
@@ -82,3 +78,6 @@ import './collapse-protocol-v1.js';
 import './collapse-protocol-contact-bridge-v1.js';
 import './src/systems/mobile-controls-controller.js';
 import './src/systems/mission-runtime-hardening-v1.js';
+import './home-v3-features.js';
+import './home-v4-polish.js';
+import './home-final-fix-v1.js';
