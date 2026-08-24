@@ -1,0 +1,288 @@
+/* GAMEPLAY HUD FINAL V2
+   Desktop/web: compact, single-line tactical rail.
+   Mobile: only the SIGNALS card is normalized; existing mobile layout remains intact.
+   Presentation only — no gameplay/state/input changes. */
+
+#play .hud,
+#play .hud *,
+#relay-gameplay-new-layer,
+#relay-gameplay-new-layer * {
+  font-stretch: normal !important;
+  font-kerning: normal !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* ------------------------------------------------------------------
+   WEB / DESKTOP
+   ------------------------------------------------------------------ */
+@media (min-width: 769px) {
+  #play > .hud {
+    position: absolute !important;
+    top: max(8px, env(safe-area-inset-top, 0px)) !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    height: 56px !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    z-index: 1800 !important;
+    pointer-events: none !important;
+    overflow: visible !important;
+  }
+
+  /* The duplicate route card is not part of the desktop rail on this HUD.
+     Keep the gameplay world clean and give the momentum card the first slot. */
+  #play > .hud > .hud-route {
+    display: none !important;
+  }
+
+  /* Compact MOMENTUM card: first slot in the top rail. */
+  #relay-gameplay-new-layer .ng-chain {
+    position: absolute !important;
+    top: max(8px, env(safe-area-inset-top, 0px)) !important;
+    left: 12px !important;
+    width: 142px !important;
+    min-width: 142px !important;
+    height: 48px !important;
+    padding: 6px 10px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+    border: 1px solid rgba(141,244,255,.30) !important;
+    border-radius: 0 0 10px 10px !important;
+    background: linear-gradient(145deg, rgba(2,9,19,.96), rgba(8,24,40,.92)) !important;
+    box-shadow: inset 0 1px rgba(255,255,255,.045), 0 8px 26px rgba(0,0,0,.25), 0 0 22px rgba(25,200,245,.08) !important;
+    opacity: 1 !important;
+    transform: none !important;
+    text-align: left !important;
+    text-shadow: 0 0 14px rgba(80,220,255,.24) !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+  }
+
+  #relay-gameplay-new-layer .ng-chain::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 34px !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, #19c8f5, #8df4ff, transparent) !important;
+    box-shadow: 0 0 10px #19c8f5 !important;
+  }
+
+  #relay-gameplay-new-layer .ng-chain .ng-kicker {
+    margin: 0 !important;
+    font: 700 6px/1 ui-monospace, SFMono-Regular, Menlo, monospace !important;
+    letter-spacing: .13em !important;
+    color: #6e8da7 !important;
+    opacity: 1 !important;
+  }
+
+  #relay-gameplay-new-layer .ng-chain .ng-value {
+    margin: 0 !important;
+    font: 900 19px/1 ui-monospace, SFMono-Regular, Menlo, monospace !important;
+    letter-spacing: 0 !important;
+    color: #f3fcff !important;
+  }
+
+  #relay-gameplay-new-layer .ng-chain .ng-value em {
+    margin-left: 5px !important;
+    font: 800 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace !important;
+    letter-spacing: .05em !important;
+    color: #dffcff !important;
+  }
+
+  /* SIGNALS becomes the second slot and is never centered over gameplay. */
+  #play > .hud > .hud-progress {
+    position: absolute !important;
+    top: 8px !important;
+    left: 160px !important;
+    right: auto !important;
+    width: 112px !important;
+    min-width: 112px !important;
+    max-width: 112px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+    padding: 6px 9px !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto 4px !important;
+    align-content: center !important;
+    gap: 2px !important;
+    overflow: hidden !important;
+    transform: none !important;
+    z-index: 1810 !important;
+    border-radius: 0 0 10px 10px !important;
+  }
+
+  #play > .hud > .hud-progress::before {
+    left: 0 !important;
+    top: 0 !important;
+    width: 32px !important;
+    height: 2px !important;
+  }
+
+  #play > .hud > .hud-progress > small {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font: 700 6px/1 ui-monospace, SFMono-Regular, Menlo, monospace !important;
+    letter-spacing: .13em !important;
+    white-space: nowrap !important;
+  }
+
+  #play > .hud > .hud-progress > span {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    align-self: start !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font: 900 17px/1 ui-monospace, SFMono-Regular, Menlo, monospace !important;
+    letter-spacing: 0 !important;
+    font-variant-numeric: tabular-nums !important;
+  }
+
+  #play > .hud > .hud-progress > div {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    width: 100% !important;
+    height: 3px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* XP / settings stay on the far right of the top rail. */
+  #play > .hud > .hud-actions {
+    position: absolute !important;
+    top: 8px !important;
+    right: 0 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    gap: 7px !important;
+    height: 48px !important;
+    margin: 0 !important;
+    z-index: 1815 !important;
+  }
+
+  #play > .hud > .hud-actions .hud-xp {
+    width: 60px !important;
+    min-width: 60px !important;
+    height: 48px !important;
+    padding: 6px 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  #play > .hud > .hud-actions .pause-button {
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Keep event/choice overlays out of the telemetry rail. */
+  #play > .gameplay-event-hud,
+  #gameplayEventHud {
+    top: 92px !important;
+  }
+
+  /* Professional readability: never stretch telemetry typography. */
+  #play .hud small,
+  #play .hud b,
+  #play .hud strong,
+  #relay-gameplay-new-layer .ng-chain * {
+    transform: none !important;
+    text-size-adjust: 100% !important;
+    -webkit-text-size-adjust: 100% !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   TOUCH LANDSCAPE
+   Keep the existing mobile composition, but normalize SIGNALS only.
+   ------------------------------------------------------------------ */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  #play > .hud > .hud-progress {
+    position: absolute !important;
+    top: 0 !important;
+    left: clamp(228px, 22vw, 300px) !important;
+    right: auto !important;
+    width: clamp(94px, 12vw, 116px) !important;
+    min-width: clamp(94px, 12vw, 116px) !important;
+    max-width: clamp(94px, 12vw, 116px) !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 5px 8px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto 3px !important;
+    gap: 2px !important;
+    align-content: center !important;
+    transform: none !important;
+    overflow: hidden !important;
+    z-index: 1810 !important;
+  }
+
+  #play > .hud > .hud-progress > small {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+    font-size: 6px !important;
+    letter-spacing: .12em !important;
+    white-space: nowrap !important;
+  }
+
+  #play > .hud > .hud-progress > span {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    margin: 0 !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+  }
+
+  #play > .hud > .hud-progress > div {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    width: 100% !important;
+    height: 3px !important;
+    margin: 0 !important;
+  }
+}
+
+/* Portrait: keep SIGNALS compact and aligned to the top HUD row. */
+@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+  #play > .hud > .hud-progress {
+    position: absolute !important;
+    top: 0 !important;
+    right: 50px !important;
+    left: auto !important;
+    width: 78px !important;
+    min-width: 78px !important;
+    max-width: 78px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 5px 6px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto 3px !important;
+    gap: 2px !important;
+    align-content: center !important;
+    transform: none !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #relay-gameplay-new-layer .ng-chain { transition: none !important; }
+}
