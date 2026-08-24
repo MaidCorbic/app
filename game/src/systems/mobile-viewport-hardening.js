@@ -1,7 +1,6 @@
 // Mobile rotation hardening for Phaser + DOM layout.
-// The game itself stays on Phaser RESIZE so the canvas always fills its parent.
-// We only stabilize the browser measurements after rotation; we never switch
-// Phaser scale modes during runtime.
+// The game stays on Phaser RESIZE; this module only applies final CSS dimensions
+// and publishes a settled viewport signal without synthesizing another resize.
 
 const mobile = () => {
   const coarse = window.matchMedia?.('(pointer: coarse)').matches;
@@ -9,24 +8,24 @@ const mobile = () => {
   return coarse || touch || /Android|iPhone|iPad|iPod|Mobile|Windows Phone|Silk|Kindle/i.test(navigator.userAgent || '');
 };
 
-if (!mobile()) {
-  // Desktop keeps Phaser's normal resize lifecycle untouched.
-} else {
+if (mobile()) {
   const root = document.documentElement;
   const play = () => document.getElementById('play');
   const phaserHost = () => document.getElementById('phaser-game');
   let timer = 0;
-  let syncing = false;
+  let frame = 0;
   let last = '';
 
   const measure = () => {
     const vv = window.visualViewport;
-    const width = Math.max(1, Math.round(vv?.width || window.innerWidth || root.clientWidth));
-    const height = Math.max(1, Math.round(vv?.height || window.innerHeight || root.clientHeight));
-    return { width, height };
+    return {
+      width: Math.max(1, Math.round(vv?.width || window.innerWidth || root.clientWidth)),
+      height: Math.max(1, Math.round(vv?.height || window.innerHeight || root.clientHeight)),
+    };
   };
 
   const apply = () => {
+    frame = 0;
     const { width, height } = measure();
     const key = `${width}x${height}`;
     if (key === last) return;
@@ -47,18 +46,15 @@ if (!mobile()) {
       host.style.height = '100%';
     }
 
-    // Phaser RESIZE consumes this final browser size. Do not dispatch while
-    // syncing, otherwise visualViewport can create a resize feedback loop.
-    syncing = true;
-    window.dispatchEvent(new Event('resize'));
-    requestAnimationFrame(() => { syncing = false; });
+    document.dispatchEvent(new CustomEvent('relay:viewport-hardened', {
+      detail: { width, height, orientation: width >= height ? 'landscape' : 'portrait' },
+    }));
   };
 
   const schedule = () => {
-    if (syncing) return;
     window.clearTimeout(timer);
     timer = window.setTimeout(() => {
-      requestAnimationFrame(() => requestAnimationFrame(apply));
+      if (!frame) frame = requestAnimationFrame(apply);
     }, 80);
   };
 
