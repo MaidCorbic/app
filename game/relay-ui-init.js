@@ -90,3 +90,4 @@ import './gameplay-hud-desktop-final-v2.css';
 import './gameplay-hud-final-v4.css';
 import './src/systems/continue-runtime-recovery-v2.js';
 import './src/systems/final-runtime-stabilizer-v1.js';
+import './tutorial-lifecycle-failsafe-v1.js';
