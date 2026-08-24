@@ -1,11 +1,12 @@
-/* Cinematic Arrival V3 — slower, longer and more active presentation layer. Gameplay remains untouched. */
+/* Cinematic Arrival V3 — lightweight presentation layer. Never drives Phaser. */
 (() => {
   if (window.__relayCinematicArrivalV3) return;
   window.__relayCinematicArrivalV3 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
-    if (!splash) return;
+    if (!splash || splash.dataset.cinematicBound === 'true') return;
+    splash.dataset.cinematicBound = 'true';
     splash.classList.add('cinematic-arrival');
     splash.setAttribute('aria-busy', 'true');
 
@@ -14,25 +15,29 @@
       css.rel = 'stylesheet';
       css.href = './cinematic-arrival-v2.css';
       css.dataset.cinematicArrivalV2 = 'true';
+      css.addEventListener('error', () => css.remove(), { once: true });
       document.head.appendChild(css);
     }
 
     if (splash.querySelector('.arrival-copy')) return;
 
-    const status = document.createElement('div');
-    status.className = 'arrival-status';
-    status.textContent = 'RELAY NETWORK // SECURE CHANNEL';
+    const make = (tag, className, text) => {
+      const el = document.createElement(tag);
+      el.className = className;
+      if (text) el.textContent = text;
+      return el;
+    };
 
-    const signal = document.createElement('div');
-    signal.className = 'arrival-signal';
+    const status = make('div', 'arrival-status', 'RELAY NETWORK // SECURE CHANNEL');
+    const signal = make('div', 'arrival-signal');
     signal.innerHTML = '<i></i><i></i><i></i><span>SYNC</span>';
 
-    const particles = document.createElement('div');
-    particles.className = 'arrival-particles';
-    particles.innerHTML = '<i></i>'.repeat(10);
+    const particles = make('div', 'arrival-particles');
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 10; i += 1) fragment.appendChild(document.createElement('i'));
+    particles.appendChild(fragment);
 
-    const copy = document.createElement('div');
-    copy.className = 'arrival-copy';
+    const copy = make('div', 'arrival-copy');
     copy.innerHTML = `
       <div class="arrival-center">
         <p class="arrival-kicker">CHAPTER 01 // NIGHT SHIFT</p>
@@ -49,9 +54,18 @@
     const ui = splash.querySelector('.relay-splash-ui');
     splash.append(status, signal, particles, copy);
 
-    if (ui) ui.querySelector('.relay-splash-status')?.setAttribute('data-original-status', 'true');
-    const label = ui?.querySelector('.relay-splash-status');
+    const label = ui?.querySelector('.relay-splash-status') || null;
     if (label) label.textContent = 'INITIALIZING RELAY';
+
+    const timers = new Set();
+    const later = (fn, delay) => {
+      const id = window.setTimeout(() => {
+        timers.delete(id);
+        fn();
+      }, delay);
+      timers.add(id);
+      return id;
+    };
 
     const stages = [
       [900, 'INITIALIZING RELAY'],
@@ -63,22 +77,32 @@
       [12800, 'PREPARING RUN'],
       [14500, 'LAUNCHING INTO THE NIGHT'],
     ];
-    stages.forEach(([delay, text]) => window.setTimeout(() => {
-      if (!splash.classList.contains('is-leaving') && label) label.textContent = text;
-    }, delay));
 
-    // Presentation only: never starts, pauses, resets or changes Phaser.
+    let released = false;
     const release = () => {
-      if (splash.dataset.cinematicReleased === 'true') return;
+      if (released) return;
+      released = true;
+      timers.forEach(id => window.clearTimeout(id));
+      timers.clear();
       splash.dataset.cinematicReleased = 'true';
       splash.classList.add('is-leaving');
       splash.setAttribute('aria-busy', 'false');
-      window.setTimeout(() => splash.remove(), 1100);
+      window.setTimeout(() => splash.remove(), 900);
     };
 
-    window.setTimeout(release, 15800);
-    window.setTimeout(() => {
-      if (!splash.dataset.cinematicReleased) release();
+    if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      stages.forEach(([delay, text]) => later(() => {
+        if (!released && label) label.textContent = text;
+      }, delay));
+      later(release, 15800);
+    } else {
+      if (label) label.textContent = 'READY';
+      later(release, 900);
+    }
+
+    window.addEventListener('pagehide', release, { once: true, passive: true });
+    later(() => {
+      if (!released) release();
     }, 18500);
   };
 
