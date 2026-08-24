@@ -15,7 +15,9 @@
       css.rel = 'stylesheet';
       css.href = './cinematic-arrival-v2.css';
       css.dataset.cinematicArrivalV2 = 'true';
-      css.addEventListener('error', () => css.remove(), { once: true });
+      css.addEventListener('error', () => {
+        css.dataset.failed = 'true';
+      }, { once: true });
       document.head.appendChild(css);
     }
 
@@ -79,6 +81,7 @@
     ];
 
     let released = false;
+    let removalTimer = 0;
     const release = () => {
       if (released) return;
       released = true;
@@ -87,7 +90,7 @@
       splash.dataset.cinematicReleased = 'true';
       splash.classList.add('is-leaving');
       splash.setAttribute('aria-busy', 'false');
-      window.setTimeout(() => splash.remove(), 900);
+      removalTimer = window.setTimeout(() => splash.remove(), 900);
     };
 
     if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
@@ -104,6 +107,12 @@
     later(() => {
       if (!released) release();
     }, 18500);
+
+    window.addEventListener('beforeunload', () => {
+      timers.forEach(id => window.clearTimeout(id));
+      timers.clear();
+      if (removalTimer) window.clearTimeout(removalTimer);
+    }, { once: true });
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
