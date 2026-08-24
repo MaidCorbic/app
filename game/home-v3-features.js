@@ -10,8 +10,8 @@ import { loadState, saveState, getCourierRank, getLevelProgress, dailyChallenges
     #homeV3Utility{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;width:min(300px,100%);margin-top:8px}
     .home-v3-btn{min-height:38px;border:1px solid #61758a;border-radius:3px;background:linear-gradient(180deg,#0a1726,#06101b);color:#e9f2f8;font:800 8px 'DM Mono',monospace;letter-spacing:1px;cursor:pointer;box-shadow:inset 0 1px #ffffff08,0 7px 18px #0005;transition:transform .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease}
     .home-v3-btn:hover,.home-v3-btn:focus-visible{transform:translateY(-2px);border-color:#ffd06e;color:#ffd06e;box-shadow:0 10px 26px #0008,0 0 18px #ffd06e14;outline:none}
-    #homeV3Deck{display:none;width:min(300px,100%);grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
-    #homeV3Deck.open{display:grid;animation:homeV3DeckIn .22s ease both}
+    #homeV3Deck{display:none!important;width:min(300px,100%);grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
+    #homeV3Deck.open{display:grid!important;animation:homeV3DeckIn .22s ease both}
     #homeV3Deck .home-v3-btn{min-height:34px;font-size:7px}
     #homeV3Launch{grid-column:1/-1}
     #homeV3Audio{grid-column:auto}
@@ -57,11 +57,11 @@ import { loadState, saveState, getCourierRank, getLevelProgress, dailyChallenges
     const audio=mk(loadState().muted?'🔇 AUDIO':'🔊 AUDIO'); audio.id='homeV3Audio'; utility.appendChild(audio);
     actions.insertAdjacentElement('afterend',utility);
 
-    const deckLaunch=mk('COMMAND DECK'); deckLaunch.id='homeV3Launch';
-    const deck=document.createElement('div'); deck.id='homeV3Deck';
+    const deckLaunch=mk('COMMAND DECK'); deckLaunch.id='homeV3Launch'; deckLaunch.setAttribute('aria-expanded','false'); deckLaunch.setAttribute('aria-controls','homeV3Deck');
+    const deck=document.createElement('div'); deck.id='homeV3Deck'; deck.hidden=true;
     ['PROFILE','STATS','MISSIONS','DAILY','ACHIEVEMENTS','THEMES'].forEach(key=>{ const b=mk(key); b.dataset.homeDeck=key.toLowerCase(); deck.appendChild(b); });
     utility.insertAdjacentElement('afterend',deckLaunch); utility.insertAdjacentElement('afterend',deck);
-    deckLaunch.addEventListener('click',()=>deck.classList.toggle('open'));
+    deckLaunch.addEventListener('click',()=>{ const open=!deck.classList.contains('open'); deck.classList.toggle('open',open); deck.hidden=!open; deckLaunch.setAttribute('aria-expanded',String(open)); });
     audio.addEventListener('click',()=>toggleMute(audio));
 
     const cont=document.getElementById('continue');
