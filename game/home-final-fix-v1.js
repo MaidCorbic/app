@@ -43,13 +43,11 @@ import { loadState } from './src/state.js';
   const style = document.createElement('style');
   style.id = 'relay-home-final-fix-v1';
   style.textContent = `
-    /* FINAL HOME PRESENTATION */
     #intro[data-home-theme="day"] .menu-backdrop,
     #intro[data-home-theme="day"] .main-menu,
     #intro[data-home-theme="day"] .title-lockup{filter:saturate(.92) brightness(1.12)}
     #intro[data-home-theme="day"] .menu-backdrop::after{opacity:.55!important}
     #intro[data-home-theme="night"] .menu-backdrop{filter:none}
-
     #intro[data-courier-skin="ghostline"] .title-lockup{--home-accent:#38bdf8!important}
     #intro[data-courier-skin="ghostline"] .play-button{border-color:#38bdf8!important;box-shadow:0 14px 40px #38bdf833,inset 0 1px #fff8!important}
     #intro[data-courier-skin="ghostline"] .home-v3-btn:hover,
@@ -58,7 +56,6 @@ import { loadState } from './src/state.js';
     #intro[data-courier-skin="goldline"] .play-button{border-color:#ffd06e!important;box-shadow:0 14px 44px #ffd06e38,inset 0 1px #fff9!important}
     #intro[data-courier-skin="goldline"] .home-v3-btn:hover,
     #intro[data-courier-skin="goldline"] .home-v3-btn:focus-visible{border-color:#ffd06e!important;color:#ffd06e!important}
-
     #homeV3Panel{z-index:10000!important}
     #homeV3Panel[data-theme="day"]{background:rgba(16,27,40,.86)!important}
     #homeV3Panel[data-theme="night"]{background:rgba(2,5,10,.86)!important}
@@ -125,34 +122,24 @@ import { loadState } from './src/state.js';
   };
 
   const observePanels = () => {
+    const home = intro();
+    if (!home) return;
     document.querySelectorAll('#homeV3Panel').forEach(bindPanel);
     if (window.__relayHomeFinalObserver) return;
 
     window.__relayHomeFinalObserver = new MutationObserver(mutations => {
       let presentationChanged = false;
-
       for (const mutation of mutations) {
         if (mutation.type !== 'childList') continue;
-
-        if (mutation.addedNodes.length) {
-          mutation.addedNodes.forEach(bindPanelsInNode);
-        }
-
-        const target = mutation.target;
-        if (target instanceof Element && (target.matches('#intro') || target.closest?.('#intro'))) {
-          if ([...mutation.addedNodes].some(node => node.nodeType === Node.ELEMENT_NODE)) {
-            presentationChanged = true;
-          }
-        }
+        if (mutation.addedNodes.length) mutation.addedNodes.forEach(bindPanelsInNode);
+        if ([...mutation.addedNodes].some(node => node.nodeType === Node.ELEMENT_NODE)) presentationChanged = true;
       }
-
       if (presentationChanged) applyPresentation();
     });
 
-    window.__relayHomeFinalObserver.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
+    // The panel belongs to #intro. Observing the whole document made unrelated
+    // gameplay/HUD DOM mutations wake this Home-only controller.
+    window.__relayHomeFinalObserver.observe(home, { childList: true, subtree: true });
   };
 
   window.addEventListener('relay-settings-change', applyAudio);
