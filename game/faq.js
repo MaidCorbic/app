@@ -1,6 +1,9 @@
 export const RELAY_FAQ = [
   ['How do I play?', 'Use A/D or the left/right side of the joystick to move, SPACE or JUMP to jump. On mobile, use the touch controls.'],
-  ['How do I complete a mission?', 'Follow the mission objective, collect the required Signals, reach the Relay Tower and climb it to secure the relay. The tower hands completion to the existing mission runtime.'],
+  ['How do I complete a mission?', 'Follow the objective, collect Signals and optional Relay Caches, then reach the Relay Tower and climb it to secure the relay. The tower hands completion to the existing mission runtime.'],
+  ['What are Relay Caches?', 'Optional high-value caches placed on the route. Collecting one restores a little energy/health and gives a short Flow speed burst. Two caches can appear in each mission.'],
+  ['What is Flow Chain?', 'Collecting Signals in a clean rhythm can trigger a short speed charge. It rewards momentum without changing the core movement physics permanently.'],
+  ['What happens near the Relay Tower?', 'The final approach can trigger a brief Overdrive burst. Reach the tower, climb the ladder and secure the relay to finish the mission.'],
   ['How do I move to the next mission?', 'After successfully completing a mission, press NEXT MISSION. The game loads the next level.'],
   ['What do SWORD, DASH and BUILD do?', 'SWORD is for combat, DASH helps you avoid hazards quickly, and BUILD activates available construction abilities.'],
   ['What is City Pulse?', 'City Pulse adds timed environmental windows to active missions. Read the OPEN rhythm and pass through the pulse gate for FLOW SYNC; missing a window has no movement or mission penalty.'],
@@ -13,15 +16,16 @@ export const RELAY_FAQ = [
 ];
 
 export const LATEST_UPDATE = {
-  version: 'UPDATE 24 // GAMEPLAY MAX',
-  title: 'GAMEPLAY MAX',
+  version: 'UPDATE 25 // GAMEPLAY MAX+',
+  title: 'GAMEPLAY MAX+',
   items: [
-    'Relay Tower is now the shared physical finish sequence for every mission instead of a passive delivery-beacon finish.',
-    'Tower climbing uses the existing player movement, mobile jump input and RunnerScene.complete() as the single authoritative completion path.',
-    'Mission-finish recovery and transition gating are active so completion, NEXT MISSION and retry cannot double-fire into overlapping scene transitions.',
-    'Cargo Integrity, Cargo visibility and Cargo polish are no longer loaded into gameplay. Cargo progress is removed from the gameplay loop.',
-    'The existing gameplay stack remains additive: encounters, adaptive modifiers, dynamic world reactions, City Pulse, Collapse, signal routes, movement feel, audio, death recovery and performance governors stay in their existing ownership layers.',
-    'The goal is a complete game loop: run → movement/combat → route decisions → dynamic encounters → Relay Tower → climb → secure relay → results → next level.',
-    'No new parallel completion, save or movement system was introduced. Existing authoritative systems remain the source of truth.'
+    'NEW · Relay Caches: two optional route caches per mission can restore energy/health and trigger a short Flow speed burst.',
+    'NEW · Signal Flow Chain: clean Signal collection can build a short momentum charge without replacing the core movement system.',
+    'NEW · Checkpoint Recovery: securing a checkpoint restores a small energy reserve so long routes have a controlled recovery rhythm.',
+    'NEW · Tower Approach Overdrive: the final approach to the Relay Tower gets a brief speed window that makes the finale feel earned.',
+    'NEW · Gameplay Max score bonuses are carried into the existing mission result/save pipeline; no parallel progression system was introduced.',
+    'REMOVED · Cargo Integrity, Cargo visibility and Cargo progress remain completely outside the gameplay bootstrap.',
+    'SAFE DESIGN · All additions are event-driven or attached to the existing Phaser scene update lifecycle; no new requestAnimationFrame loop is introduced.',
+    'SAFE DESIGN · Runner movement, combat, mission completion, save state and tower completion remain owned by their existing authoritative systems.'
   ]
 };
