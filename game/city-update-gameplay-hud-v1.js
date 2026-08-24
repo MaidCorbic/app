@@ -1,61 +1,143 @@
-/* UPDATE 26 — CITY UPDATE GAMEPLAY HUD
-   Explicit, readable in-game city/status messaging. Presentation only.
+/* FINAL GAMEPLAY HUD HOTFIX V2
+   - Signals telemetry stays beside the Momentum/Flow HUD instead of covering the playfield.
+   - Signals card uses the same compact telemetry footprint as the top HUD cards.
+   - CITY UPDATE / CITY LIGHT gameplay banner is intentionally disabled; mission modifiers such as LOW GRAVITY remain untouched.
 */
 (() => {
-  if (typeof window === 'undefined' || window.__relayCityUpdateHudV1) return;
-  window.__relayCityUpdateHudV1 = true;
+  if (typeof window === 'undefined' || window.__relayGameplayHudHotfixV2) return;
+  window.__relayGameplayHudHotfixV2 = true;
 
-  const STYLE_ID = 'relay-city-update-hud-v1-style';
-  const ROOT_ID = 'relayCityUpdateV1';
-  let hideTimer = 0;
+  const STYLE_ID = 'relay-gameplay-hud-hotfix-v2-style';
 
-  const style = () => {
+  function installStyle() {
     if (document.getElementById(STYLE_ID)) return;
-    const el = document.createElement('style');
-    el.id = STYLE_ID;
-    el.textContent = `
-#${ROOT_ID}{position:fixed;left:50%;top:calc(124px + env(safe-area-inset-top,0px));z-index:100004;width:min(86vw,360px);box-sizing:border-box;padding:9px 13px;border:1px solid rgba(141,244,255,.42);border-radius:10px;background:linear-gradient(135deg,rgba(3,12,24,.96),rgba(6,23,38,.92));box-shadow:0 0 26px rgba(25,200,245,.16),inset 0 0 18px rgba(141,244,255,.04);color:#eafcff;font:800 10px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-align:center;text-transform:uppercase;opacity:0;transform:translate(-50%,-8px) scale(.98);pointer-events:none;transition:opacity .2s ease,transform .2s ease}
-#${ROOT_ID}.show{opacity:1;transform:translate(-50%,0) scale(1)}
-#${ROOT_ID} b,#${ROOT_ID} span{display:block}#${ROOT_ID} span{margin-top:4px;font-size:7px;letter-spacing:.1em;color:#8df4ff;opacity:.8}
-/* Training owns the screen. Do not leak live-mission HUD into onboarding. */
-body.relay-training-active #${ROOT_ID},
-body.relay-training-active #relayTimeIndicator,
-body.relay-training-active #objective,
-body.relay-training-active #missionObjective,
-body.relay-training-active #mission-objective,
-body.relay-training-active .mission-objective,
-body.relay-training-active .mission-objective-panel,
-body.relay-training-active [data-mission-objective],
-body.relay-training-active [data-objective-panel],
-body.relay-training-active .delivery-objective{display:none!important;visibility:hidden!important;pointer-events:none!important}
-@media(max-width:520px){#${ROOT_ID}{top:calc(112px + env(safe-area-inset-top,0px));width:min(82vw,320px);padding:8px 10px;font-size:9px}#${ROOT_ID} span{font-size:6px}}
-@media(max-height:520px) and (orientation:landscape){#${ROOT_ID}{top:calc(64px + env(safe-area-inset-top,0px));width:min(54vw,300px);padding:6px 9px}}
-@media(prefers-reduced-motion:reduce){#${ROOT_ID}{transition:none}}
+    const style = document.createElement('style');
+    style.id = STYLE_ID;
+    style.textContent = `
+/* Never render the old CITY UPDATE gameplay toast. */
+#relayCityUpdateV1{display:none!important;visibility:hidden!important;pointer-events:none!important}
+
+/* SIGNALS: compact telemetry card aligned beside MOMENTUM CHAIN / FLOW. */
+#play > .hud > .hud-progress{
+  position:absolute!important;
+  left:calc(50% - 166px)!important;
+  top:clamp(74px,10vh,98px)!important;
+  width:116px!important;
+  min-width:116px!important;
+  max-width:116px!important;
+  height:46px!important;
+  min-height:46px!important;
+  margin:0!important;
+  padding:5px 8px!important;
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:9px 18px 3px!important;
+  grid-template-areas:'label' 'value' 'meter'!important;
+  align-content:center!important;
+  justify-items:center!important;
+  gap:1px!important;
+  text-align:center!important;
+  overflow:hidden!important;
+  z-index:60!important;
+}
+#play > .hud > .hud-progress > small{
+  grid-area:label!important;
+  align-self:end!important;
+  justify-self:center!important;
+  margin:0!important;
+  font-size:6px!important;
+  line-height:1!important;
+  letter-spacing:.18em!important;
+  white-space:nowrap!important;
+}
+#play > .hud > .hud-progress > span:first-child{
+  grid-area:value!important;
+  align-self:center!important;
+  justify-self:center!important;
+  margin:0!important;
+  font-size:18px!important;
+  line-height:1!important;
+  font-variant-numeric:tabular-nums!important;
+  letter-spacing:0!important;
+}
+#play > .hud > .hud-progress > div{
+  grid-area:meter!important;
+  width:72px!important;
+  height:3px!important;
+  min-width:72px!important;
+  margin:0!important;
+  align-self:center!important;
+  justify-self:center!important;
+}
+
+/* The top telemetry row remains compact; SIGNALS owns only its reserved slot. */
+#play > .hud > .hud-actions{position:relative!important;z-index:70!important}
+
+@media (max-width:768px) and (orientation:landscape){
+  #play > .hud > .hud-progress{
+    left:calc(50% - 166px)!important;
+    top:clamp(66px,11vh,88px)!important;
+    width:110px!important;
+    min-width:110px!important;
+    max-width:110px!important;
+    height:44px!important;
+    min-height:44px!important;
+  }
+  #play > .hud > .hud-progress > span:first-child{font-size:17px!important}
+  #play > .hud > .hud-progress > div{width:68px!important;min-width:68px!important}
+}
+
+@media (max-width:520px) and (orientation:landscape){
+  #play > .hud > .hud-progress{
+    left:calc(50% - 142px)!important;
+    top:64px!important;
+    width:98px!important;
+    min-width:98px!important;
+    max-width:98px!important;
+    height:40px!important;
+    min-height:40px!important;
+    padding:4px 6px!important;
+    grid-template-rows:8px 16px 3px!important;
+  }
+  #play > .hud > .hud-progress > span:first-child{font-size:15px!important}
+  #play > .hud > .hud-progress > small{font-size:5.5px!important}
+  #play > .hud > .hud-progress > div{width:58px!important;min-width:58px!important}
+}
+
+@media (orientation:portrait){
+  #play > .hud > .hud-progress{
+    left:50%!important;
+    top:clamp(72px,11vh,96px)!important;
+    transform:translateX(-50%)!important;
+    width:104px!important;
+    min-width:104px!important;
+    max-width:104px!important;
+    height:42px!important;
+    min-height:42px!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  #relayCityUpdateV1{transition:none!important;animation:none!important}
+}
 `;
-    document.head.appendChild(el);
-  };
+    document.head.appendChild(style);
+  }
 
-  const show = (title, detail, ms = 1800) => {
-    if (document.body.classList.contains('relay-training-active')) return;
-    style();
-    let el = document.getElementById(ROOT_ID);
-    if (!el) { el = document.createElement('div'); el.id = ROOT_ID; document.body.appendChild(el); }
-    el.innerHTML = `<b>${title}</b><span>${detail}</span>`;
-    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-    clearTimeout(hideTimer); hideTimer = window.setTimeout(() => el.classList.remove('show'), ms);
-  };
+  function removeLegacyBanner() {
+    document.getElementById('relayCityUpdateV1')?.remove();
+  }
 
-  const city = () => document.getElementById('district')?.textContent?.trim() || 'CITY NETWORK';
-  const objective = () => document.getElementById('objective')?.textContent?.trim() || 'RELAY ROUTE';
+  function boot() {
+    installStyle();
+    removeLegacyBanner();
+    const observer = new MutationObserver(() => removeLegacyBanner());
+    observer.observe(document.body, { childList:true, subtree:true });
+    window.addEventListener('resize', installStyle, { passive:true });
+    window.addEventListener('orientationchange', installStyle, { passive:true });
+  }
 
-  window.addEventListener('relay:runner-scene-ready', () => {
-    window.setTimeout(() => show('CITY UPDATE', `${city()} // ${objective()}`), 650);
-  }, { passive: true });
-  window.addEventListener('relay:gameplay-core-ready', () => {
-    window.setTimeout(() => show('CITY UPDATE', `${city()} // NETWORK ONLINE`), 450);
-  }, { passive: true });
-  window.addEventListener('relay:city-pulse-ready', () => {
-    window.setTimeout(() => show('CITY PULSE ONLINE', `${city()} // RHYTHM WINDOWS ACTIVE`), 120);
-  }, { passive: true });
-  window.addEventListener('relay:mission-complete', () => show('CITY UPDATE', `${city()} // DELIVERY REGISTERED`, 1500), { passive: true });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true });
+  else boot();
 })();
