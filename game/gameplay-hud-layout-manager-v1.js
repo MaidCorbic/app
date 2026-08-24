@@ -1,11 +1,12 @@
-/* GAMEPLAY HUD LAYOUT MANAGER V1
+/* GAMEPLAY HUD LAYOUT MANAGER V2
    One presentation owner for gameplay overlays. Gameplay state/input is untouched.
+   Landscape is primary. Portrait is intentionally compact.
 */
 (() => {
-  if (typeof window === 'undefined' || window.__relayGameplayHudLayoutV1) return;
-  window.__relayGameplayHudLayoutV1 = true;
+  if (typeof window === 'undefined' || window.__relayGameplayHudLayoutV2) return;
+  window.__relayGameplayHudLayoutV2 = true;
 
-  const STYLE_ID = 'relay-gameplay-hud-layout-v1-style';
+  const STYLE_ID = 'relay-gameplay-hud-layout-v2-style';
   const isTouch = () => window.matchMedia?.('(hover:none) and (pointer:coarse)').matches === true;
   const landscape = () => innerWidth >= innerHeight;
   const getScene = () => window.__relayRunnerScene || window.game?.scene?.getScene?.('RunnerScene') || null;
@@ -15,41 +16,79 @@
     const s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = `
+#play{--relay-safe-x:max(14px,env(safe-area-inset-left,0px));--relay-safe-r:max(14px,env(safe-area-inset-right,0px));--relay-safe-b:max(14px,env(safe-area-inset-bottom,0px));--relay-top-h:64px}
 #play .hud,#play .hud *,#relay-gameplay-new-layer,#relay-gameplay-new-layer *{font-stretch:normal;font-kerning:normal;text-rendering:optimizeLegibility}
 #play .hud{letter-spacing:normal!important}
-#play .hud small,#play .hud .label,#play .hud .eyebrow{letter-spacing:.06em!important}
-#play .hud b,#play .hud strong,#play .hud .value{letter-spacing:.01em!important}
-#relay-gameplay-new-layer .ng-kicker,#relay-gameplay-new-layer .ng-choice-title,#relay-gameplay-new-layer .ng-title{letter-spacing:.08em!important}
-#relay-gameplay-new-layer .ng-value{letter-spacing:-.01em!important}
-#relay-gameplay-new-layer .ng-event{letter-spacing:.06em!important}
-#relay-gameplay-new-layer button b{letter-spacing:.04em!important}
-#relay-gameplay-new-layer button small{letter-spacing:.02em!important}
-#play{--relay-safe-x:max(12px,env(safe-area-inset-left,0px));--relay-safe-r:max(12px,env(safe-area-inset-right,0px));--relay-safe-b:max(12px,env(safe-area-inset-bottom,0px))}
-#play>.hud .hud-route,#play>.hud .hud-progress,#play>.hud .hud-xp,#play>.hud .pause-button{border-color:rgba(141,244,255,.24)!important;background:linear-gradient(145deg,rgba(4,14,27,.93),rgba(4,10,19,.82))!important;box-shadow:0 10px 26px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.035)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-#relay-gameplay-new-layer .ng-choice{left:50%!important;width:min(460px,calc(100vw - 32px))!important;box-sizing:border-box!important}
-#relay-gameplay-new-layer .ng-grid{gap:10px!important}
-#relay-gameplay-new-layer button{min-height:54px!important;padding:10px 12px!important;border-radius:9px!important;border-color:rgba(141,244,255,.28)!important}
-@media(min-width:769px){#relay-gameplay-new-layer .ng-chain{top:92px!important}#relay-gameplay-new-layer .ng-event{top:44%!important}#relay-gameplay-new-layer .ng-choice{bottom:clamp(92px,12vh,132px)!important}#relay-gameplay-new-layer .ng-recap{right:clamp(18px,2vw,34px)!important}}
-@media(hover:none) and (pointer:coarse) and (orientation:landscape){
- #relay-gameplay-new-layer .ng-chain{top:clamp(58px,12vh,82px)!important}
- #relay-gameplay-new-layer .ng-event{top:calc(var(--relay-mission-bottom,46vh) + 8px)!important}
- #relay-gameplay-new-layer .ng-choice{top:calc(var(--relay-mission-bottom,52vh) + 12px)!important;bottom:auto!important;width:min(440px,42vw)!important}
- #relay-gameplay-new-layer .ng-choice-title{margin-bottom:6px!important}
- #relay-gameplay-new-layer .ng-grid{gap:8px!important}
- #relay-gameplay-new-layer button{min-height:50px!important}
- #relay-gameplay-new-layer .ng-recap{display:none!important}
- #cargoIntegrityV2{left:50%!important;right:auto!important;top:calc(var(--relay-mission-bottom,52vh) + 10px)!important;bottom:auto!important;transform:translateX(-50%)!important;width:min(230px,28vw)!important;max-width:230px!important;z-index:1080!important}
- #cargoIntegrityV2.is-visible{transform:translateX(-50%)!important}
- #play.relay-choice-active #cargoIntegrityV2{left:var(--relay-safe-x)!important;top:auto!important;bottom:calc(var(--relay-safe-b) + clamp(72px,15vh,100px))!important;transform:none!important;width:min(220px,27vw)!important}
- #play>.mobile-controls{z-index:1100!important}#play>.mobile-controls .mobile-joystick{z-index:1101!important}#play>.mobile-controls .mobile-actions{z-index:1102!important}
+#play .hud small,#play .hud .label,#play .hud .eyebrow{letter-spacing:.055em!important}
+#play .hud b,#play .hud strong,#play .hud .value{letter-spacing:0!important}
+#relay-gameplay-new-layer .ng-kicker,#relay-gameplay-new-layer .ng-choice-title,#relay-gameplay-new-layer .ng-title{letter-spacing:.07em!important}
+#relay-gameplay-new-layer .ng-value{letter-spacing:0!important}
+#relay-gameplay-new-layer .ng-event{letter-spacing:.055em!important}
+#relay-gameplay-new-layer button b{letter-spacing:.035em!important}
+#relay-gameplay-new-layer button small{letter-spacing:.015em!important}
+
+/* Mission + cargo form the left utility stack. */
+#cargoIntegrityV2{box-sizing:border-box!important}
+
+/* Signals sit in the top telemetry row, immediately beside Momentum/Flow. */
+#play > .hud .hud-progress{position:fixed!important;top:max(8px,env(safe-area-inset-top,0px) + 4px)!important;left:calc(50% - 150px)!important;width:126px!important;min-width:0!important;height:48px!important;box-sizing:border-box!important;z-index:1200!important}
+#relay-gameplay-new-layer .ng-chain{top:8px!important;left:50%!important;z-index:1201!important}
+
+/* Settings/menu belongs to the far right corner, never inside the central HUD cluster. */
+#play > .hud .hud-actions{position:fixed!important;top:max(8px,env(safe-area-inset-top,0px) + 4px)!important;right:var(--relay-safe-r)!important;z-index:1202!important;display:flex!important;gap:6px!important}
+#play > .hud .hud-actions .hud-xp{width:48px!important;min-width:48px!important;height:48px!important;box-sizing:border-box!important}
+#play > .hud .hud-actions .pause-button{width:48px!important;min-width:48px!important;height:48px!important}
+
+/* Landscape: mission starts under Old Quarter, cargo directly below it. */
+@media (hover:none) and (pointer:coarse) and (orientation:landscape){
+  #play .hud{pointer-events:none!important}
+  #play > .hud .hud-progress,#play > .hud .hud-actions{pointer-events:auto!important}
+  #play > .hud .hud-route{position:fixed!important;top:max(8px,env(safe-area-inset-top,0px) + 4px)!important;left:var(--relay-safe-x)!important;width:220px!important;min-width:0!important;height:48px!important;box-sizing:border-box!important;z-index:1200!important}
+  #play > .hud .hud-route b{max-width:180px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;letter-spacing:0!important}
+  #play > .hud .hud-progress{left:calc(50% - 156px)!important;width:126px!important}
+  #play > .hud .hud-xp{display:flex!important}
+
+  #cargoIntegrityV2{left:var(--relay-safe-x)!important;right:auto!important;top:calc(var(--relay-mission-bottom,210px) + 10px)!important;bottom:auto!important;transform:none!important;width:min(285px,25vw)!important;max-width:285px!important;z-index:1150!important}
+  #cargoIntegrityV2.is-visible{transform:none!important}
+
+  /* Choice overlay is below the mission/cargo stack, never through the controls. */
+  #relay-gameplay-new-layer .ng-choice{left:50%!important;top:auto!important;bottom:calc(var(--relay-safe-b) + 74px)!important;width:min(460px,42vw)!important}
+  #relay-gameplay-new-layer .ng-choice.show{transform:translate(-50%,0)!important}
+  #relay-gameplay-new-layer .ng-event{top:46%!important}
 }
-@media(hover:none) and (pointer:coarse) and (orientation:landscape) and (max-height:520px){#relay-gameplay-new-layer .ng-chain{top:54px!important}#relay-gameplay-new-layer .ng-choice{width:min(390px,48vw)!important;top:calc(var(--relay-mission-bottom,48vh) + 8px)!important}#relay-gameplay-new-layer button{min-height:46px!important;padding:8px 10px!important}#cargoIntegrityV2{width:200px!important;top:calc(var(--relay-mission-bottom,48vh) + 8px)!important}#play.relay-choice-active #cargoIntegrityV2{width:190px!important;bottom:calc(var(--relay-safe-b) + 70px)!important;top:auto!important}}
-@media(hover:none) and (pointer:coarse) and (orientation:portrait){
- #relay-gameplay-new-layer .ng-chain{top:84px!important}#relay-gameplay-new-layer .ng-event{top:38%!important}
- #relay-gameplay-new-layer .ng-choice{top:auto!important;bottom:calc(118px + env(safe-area-inset-bottom,0px))!important;width:min(330px,calc(100vw - 28px))!important}
- #relay-gameplay-new-layer .ng-recap{display:none!important}#relay-gameplay-new-layer .ng-grid{grid-template-columns:1fr!important}#relay-gameplay-new-layer button{min-height:48px!important}
- #cargoIntegrityV2{left:var(--relay-safe-x)!important;right:auto!important;top:auto!important;bottom:calc(78px + env(safe-area-inset-bottom,0px))!important;transform:none!important;width:min(205px,calc(100vw - 104px))!important}
+
+/* Short landscape phones: tighten dimensions without shrinking readable type. */
+@media (hover:none) and (pointer:coarse) and (orientation:landscape) and (max-height:520px){
+  #play > .hud .hud-route{width:205px!important;height:44px!important;padding:5px 9px!important}
+  #play > .hud .hud-progress{width:112px!important;height:44px!important;left:calc(50% - 138px)!important;padding:5px 8px!important}
+  #play > .hud .hud-actions{top:max(6px,env(safe-area-inset-top,0px) + 3px)!important}
+  #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{width:44px!important;min-width:44px!important;height:44px!important}
+  #cargoIntegrityV2{width:240px!important;top:calc(var(--relay-mission-bottom,188px) + 8px)!important}
 }
+
+/* Portrait: compact top telemetry, centred mission, cargo beneath mission, controls stay clear. */
+@media (hover:none) and (pointer:coarse) and (orientation:portrait){
+  #play > .hud .hud-route{position:fixed!important;top:max(6px,env(safe-area-inset-top,0px) + 3px)!important;left:var(--relay-safe-x)!important;width:min(190px,45vw)!important;height:42px!important;z-index:1200!important}
+  #play > .hud .hud-progress{top:max(6px,env(safe-area-inset-top,0px) + 3px)!important;left:calc(50% - 66px)!important;width:96px!important;height:42px!important}
+  #play > .hud .hud-actions{top:max(6px,env(safe-area-inset-top,0px) + 3px)!important;right:var(--relay-safe-r)!important}
+  #play > .hud .hud-actions .hud-xp{width:42px!important;min-width:42px!important;height:42px!important}
+  #play > .hud .hud-actions .pause-button{width:42px!important;min-width:42px!important;height:42px!important}
+  #cargoIntegrityV2{left:50%!important;right:auto!important;top:calc(var(--relay-mission-bottom,230px) + 8px)!important;bottom:auto!important;transform:translateX(-50%)!important;width:min(250px,calc(100vw - 54px))!important;max-width:250px!important}
+  #cargoIntegrityV2.is-visible{transform:translateX(-50%)!important}
+  #relay-gameplay-new-layer .ng-chain{top:58px!important}
+  #relay-gameplay-new-layer .ng-choice{bottom:calc(var(--relay-safe-b) + 112px)!important;width:min(320px,calc(100vw - 30px))!important}
+}
+
+/* Desktop: same hierarchy, larger breathing room, still left mission/cargo. */
+@media(min-width:769px){
+  #play > .hud .hud-route{position:fixed!important;top:max(10px,env(safe-area-inset-top,0px) + 4px)!important;left:clamp(18px,2vw,32px)!important;width:250px!important;height:52px!important;z-index:1200!important}
+  #play > .hud .hud-progress{top:max(10px,env(safe-area-inset-top,0px) + 4px)!important;left:calc(50% - 160px)!important;width:140px!important;height:52px!important}
+  #play > .hud .hud-actions{top:max(10px,env(safe-area-inset-top,0px) + 4px)!important;right:clamp(18px,2vw,32px)!important}
+  #play > .hud .hud-actions .hud-xp,#play > .hud .hud-actions .pause-button{width:52px!important;min-width:52px!important;height:52px!important}
+  #cargoIntegrityV2{left:clamp(18px,2vw,32px)!important;top:calc(var(--relay-mission-bottom,230px) + 12px)!important;bottom:auto!important;width:300px!important;max-width:300px!important;transform:none!important}
+}
+
+/* Avoid accidental overlap with the touch control deck. */
 #play,#relay-gameplay-new-layer{max-width:100vw;overflow-x:clip}
 @media(prefers-reduced-motion:reduce){#relay-gameplay-new-layer .ng-chain,#relay-gameplay-new-layer .ng-event,#relay-gameplay-new-layer .ng-choice{transition:none!important}}
 `;
@@ -59,7 +98,10 @@
   function missionBottom() {
     const c = getScene()?.__missionObjectiveState?.c;
     if (!c?.active) return null;
-    return (Number(c.y)||0) + (Number(c.height)||166) * (Number(c.scaleY)||Number(c.scaleX)||1);
+    const y = Number(c.y) || 0;
+    const h = Number(c.height) || 166;
+    const scale = Number(c.scaleY) || Number(c.scaleX) || 1;
+    return y + h * scale;
   }
 
   function apply() {
