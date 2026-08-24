@@ -1,0 +1,33 @@
+/* GAMEPLAY VISUAL V3 — cinematic mobile HUD polish */
+#play { --relay-cyan:#8df4ff; --relay-blue:#19c8f5; --relay-ink:#030914; }
+#play > .hud { filter:drop-shadow(0 8px 24px rgba(0,0,0,.24)); }
+#play > .hud .hud-route,
+#play > .hud .hud-progress,
+#play > .hud .hud-xp,
+#play > .hud .pause-button {
+  border-color:rgba(141,244,255,.28) !important;
+  background:linear-gradient(145deg,rgba(3,10,21,.92),rgba(8,23,39,.82)) !important;
+  box-shadow:0 0 24px rgba(25,200,245,.08),inset 0 0 16px rgba(255,255,255,.025) !important;
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+}
+#play > .hud .hud-route::after,
+#play > .hud .hud-progress::after,
+#play > .hud .hud-xp::after,
+#play > .hud .pause-button::after {
+  content:""; position:absolute; inset:1px; pointer-events:none; border:1px solid rgba(141,244,255,.06);
+}
+#play > .hud .route-dot { box-shadow:0 0 9px rgba(141,244,255,.95),0 0 22px rgba(25,200,245,.55) !important; }
+#play > .hud .pause-button { transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease !important; }
+#play > .hud .pause-button:active { transform:scale(.94) !important; }
+@media (max-width:768px) and (orientation:landscape) {
+  #play > .world-marker,#play > .input-guide { opacity:.68; }
+  #play > .input-guide { transform:scale(.82); transform-origin:center top; }
+  #play > .vignette { opacity:.82; }
+}
+@media (max-width:520px) and (orientation:landscape) {
+  #play > .hud .hud-route { max-width:220px; }
+  #play > .hud .hud-route b { font-size:9px !important; }
+  #play > .hud .hud-progress { transform:scale(.82); transform-origin:top center; }
+  #play > .hud .hud-xp { transform:scale(.9); transform-origin:top right; }
+}
+@media (prefers-reduced-motion:reduce) { #play > .hud .pause-button { transition:none !important; } }
