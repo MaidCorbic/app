@@ -16,19 +16,21 @@
   ];
   const transitionButtons = new Set(['retry', 'again', 'nextMission', 'finishTitle', 'failTitle']);
   let transitionLock = false;
+  let unlockTimer = 0;
 
-  const runner = () => window.__relayRunnerScene || window.game?.scene?.getScene?.('runner');
   const hide = node => {
     if (!node) return;
     node.classList.add('hidden');
     node.setAttribute('aria-hidden', 'true');
   };
+
   const stopTutorialRuntime = () => {
     try { window.dispatchEvent(new Event('relay:tutorial-runtime-stop')); } catch {}
     document.body.classList.remove('relay-training-active', 'relay-cinematic-active');
     const root = document.getElementById('relayTutorialOnboardingV3');
     if (root) root.hidden = true;
   };
+
   const clearTransientUi = () => {
     stopTutorialRuntime();
     TRANSIENT_SELECTORS.forEach(selector => {
@@ -39,6 +41,7 @@
       });
     });
   };
+
   const resetTouchState = () => {
     document.querySelectorAll('.mobile-joystick').forEach(node => {
       node.classList.remove('is-active');
@@ -47,6 +50,7 @@
     });
     try { window.dispatchEvent(new Event('relay:mobile-input-reset')); } catch {}
   };
+
   const releaseRunnerInput = () => {
     resetTouchState();
     try { document.dispatchEvent(new KeyboardEvent('keyup', { key:'a', code:'KeyA', bubbles:true })); } catch {}
@@ -59,24 +63,17 @@
     releaseRunnerInput();
     clearTransientUi();
     document.body.classList.remove('rotate-dismissed');
-    const finish = document.getElementById('finish');
-    const gameOver = document.getElementById('gameOver');
-    if (finish) finish.classList.add('hidden');
-    if (gameOver) gameOver.classList.add('hidden');
+    document.getElementById('finish')?.classList.add('hidden');
+    document.getElementById('gameOver')?.classList.add('hidden');
   };
 
-  const handleTransition = event => {
-    const button = event.currentTarget;
-    if (!button || transitionLock || button.disabled) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      return;
-    }
+  const armTransitionLock = button => {
     transitionLock = true;
     button.disabled = true;
     button.setAttribute('aria-busy', 'true');
     cleanForTransition();
-    window.setTimeout(() => {
+    window.clearTimeout(unlockTimer);
+    unlockTimer = window.setTimeout(() => {
       transitionLock = false;
       if (!button.isConnected) return;
       button.disabled = false;
@@ -84,29 +81,36 @@
     }, 1200);
   };
 
-  const bind = () => {
-    transitionButtons.forEach(id => {
-      const button = document.getElementById(id);
-      if (!button || button.dataset.relayLifecycleGate === '1') return;
-      button.dataset.relayLifecycleGate = '1';
-      button.addEventListener('click', handleTransition, true);
-      button.addEventListener('pointerdown', event => {
-        if (transitionLock) { event.preventDefault(); event.stopImmediatePropagation(); }
-      }, true);
-    });
+  const delegatedPointerDown = event => {
+    const button = event.target?.closest?.('button');
+    if (!button || !transitionButtons.has(button.id)) return;
+    if (transitionLock || button.disabled) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  };
+
+  const delegatedClick = event => {
+    const button = event.target?.closest?.('button');
+    if (!button || !transitionButtons.has(button.id)) return;
+    if (transitionLock || button.disabled) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+    armTransitionLock(button);
   };
 
   const onMissionComplete = () => {
-    // Mission completion must never leave tutorial/cinematic ownership active.
     stopTutorialRuntime();
     resetTouchState();
-    bind();
   };
 
+  document.addEventListener('pointerdown', delegatedPointerDown, true);
+  document.addEventListener('click', delegatedClick, true);
   window.addEventListener('relay:mission-complete', onMissionComplete, { passive: true });
   window.addEventListener('relay:tutorial-complete', () => {
     document.body.classList.remove('relay-training-active');
-    bind();
   }, { passive: true });
   window.addEventListener('relay:cinematic-unlock', () => {
     document.body.classList.remove('relay-cinematic-active');
@@ -115,7 +119,4 @@
   window.addEventListener('blur', releaseRunnerInput, { passive: true });
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseRunnerInput(); }, { passive: true });
   window.addEventListener('pagehide', releaseRunnerInput, { passive: true });
-
-  bind();
-  new MutationObserver(bind).observe(document.body, { childList: true, subtree: true });
 })();
