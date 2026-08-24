@@ -27,6 +27,7 @@ let settleToken = 0;
 let lastApplied = '';
 let scheduled = false;
 let running = false;
+let pendingReason = '';
 
 const waitFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -34,8 +35,6 @@ async function waitForStableViewport(token) {
   let previous = null;
   let stableFrames = 0;
 
-  // Mobile viewport rotation normally settles within a few frames. Keep the
-  // bounded probe small so this system cannot become a long-running RAF loop.
   for (let i = 0; i < 8; i += 1) {
     await waitFrame();
     if (token !== settleToken) return null;
@@ -78,9 +77,6 @@ async function syncViewport(reason = 'resize') {
     document.documentElement.style.setProperty('--relay-viewport-height', `${height}px`);
     document.documentElement.dataset.relayOrientation = width >= height ? 'landscape' : 'portrait';
 
-    // Notify consumers after the final dimensions are known. Do not dispatch a
-    // synthetic browser resize here: Phaser already receives the original resize
-    // and synthetic events can recursively trigger expensive scale/layout work.
     document.dispatchEvent(new CustomEvent('relay:viewport-settled', {
       detail: {
         reason,
@@ -90,18 +86,34 @@ async function syncViewport(reason = 'resize') {
       },
     }));
   } finally {
-    if (token === settleToken) running = false;
+    if (token === settleToken) {
+      running = false;
+      if (pendingReason) {
+        const nextReason = pendingReason;
+        pendingReason = '';
+        schedule(nextReason);
+      }
+    }
   }
 }
 
-const schedule = reason => {
-  if (scheduled) return;
+function schedule(reason) {
+  if (running) {
+    pendingReason = reason;
+    return;
+  }
+  if (scheduled) {
+    pendingReason = reason;
+    return;
+  }
   scheduled = true;
   requestAnimationFrame(() => {
     scheduled = false;
-    if (!running) syncViewport(reason);
+    const nextReason = pendingReason || reason;
+    pendingReason = '';
+    syncViewport(nextReason);
   });
-};
+}
 
 window.addEventListener('orientationchange', () => schedule('orientationchange'), { passive: true });
 window.addEventListener('resize', () => schedule('resize'), { passive: true });
