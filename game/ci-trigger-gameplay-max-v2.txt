@@ -1,0 +1,1 @@
+Gameplay Max V2 CI trigger. No runtime import; used only to force the existing push workflow to validate the current branch snapshot.
