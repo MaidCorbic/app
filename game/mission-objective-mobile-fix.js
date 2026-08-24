@@ -1,28 +1,51 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-function isTouchLandscape() {
-  const coarse = window.matchMedia?.('(hover:none) and (pointer:coarse)')?.matches === true;
-  return coarse && window.innerWidth > window.innerHeight && window.innerHeight <= 820;
+function inputMode() {
+  const touch = window.matchMedia?.('(hover:none) and (pointer:coarse)')?.matches === true;
+  const landscape = window.innerWidth > window.innerHeight;
+  return { touch, landscape };
 }
 
-function compactMissionCard(scene) {
-  if (!isTouchLandscape()) return;
+function placeMissionCard(scene) {
   const state = scene?.__missionObjectiveState;
   const card = state?.c;
   if (!card?.active) return;
 
+  const { touch, landscape } = inputMode();
   const w = scene?.scale?.gameSize?.width || window.innerWidth;
   const h = scene?.scale?.gameSize?.height || window.innerHeight;
   const baseW = 426;
   const baseH = 166;
-  const pw = Math.min(360, w - 28);
-  const scale = pw / baseW;
-  const actualH = baseH * scale;
 
-  // Keep the objective panel in the safe middle lane. The right side belongs
-  // to JUMP/FIRE/SWORD/DASH and the lower-left belongs to the joystick/cargo UI.
-  const x = Math.max(14, Math.round((w - pw) / 2));
-  const y = Math.max(120, Math.min(Math.round(h * 0.42), h - actualH - 145));
+  let scale;
+  let pw;
+  let x;
+  let y;
+
+  if (touch && landscape) {
+    // PRIMARY PHONE MODE: mission stays centered above the play lane.
+    // The bottom-right action deck and bottom-left cargo/joystick lanes remain clear.
+    pw = Math.min(330, w * 0.40);
+    scale = pw / baseW;
+    const actualH = baseH * scale;
+    x = Math.round((w - pw) / 2);
+    y = Math.max(82, Math.min(Math.round(h * 0.28), h - actualH - 112));
+  } else if (touch && !landscape) {
+    // PORTRAIT: basic HUD. Keep the objective high enough to leave the
+    // lower playfield and touch controls visually open.
+    pw = Math.min(320, w - 36);
+    scale = pw / baseW;
+    const actualH = baseH * scale;
+    x = Math.round((w - pw) / 2);
+    y = Math.max(112, Math.min(Math.round(h * 0.19), h - actualH - 150));
+  } else {
+    // DESKTOP: cinematic center card, scaled down slightly so the world remains visible.
+    pw = Math.min(400, w * 0.34);
+    scale = pw / baseW;
+    const actualH = baseH * scale;
+    x = Math.round((w - pw) / 2);
+    y = Math.max(92, Math.min(Math.round(h * 0.25), h - actualH - 80));
+  }
 
   card.setPosition(x, y).setScale(scale);
   state.x = x;
@@ -30,11 +53,11 @@ function compactMissionCard(scene) {
   state.scale = scale;
 }
 
-if (!RunnerScene.prototype.__missionObjectiveMobileFixPatched) {
+if (!RunnerScene.prototype.__missionObjectiveResponsiveV5Patched) {
   const originalUpdate = RunnerScene.prototype.update;
   RunnerScene.prototype.update = function (...args) {
     const result = originalUpdate.apply(this, args);
-    try { compactMissionCard(this); } catch (error) { console.error('[MissionObjectiveMobileFix]', error); }
+    try { placeMissionCard(this); } catch (error) { console.error('[MissionObjectiveResponsiveV5]', error); }
     return result;
   };
 
@@ -42,10 +65,17 @@ if (!RunnerScene.prototype.__missionObjectiveMobileFixPatched) {
   if (typeof originalResize === 'function') {
     RunnerScene.prototype.resize = function (...args) {
       const result = originalResize.apply(this, args);
-      try { compactMissionCard(this); } catch (error) { console.error('[MissionObjectiveMobileFix resize]', error); }
+      try { placeMissionCard(this); } catch (error) { console.error('[MissionObjectiveResponsiveV5 resize]', error); }
       return result;
     };
   }
 
-  RunnerScene.prototype.__missionObjectiveMobileFixPatched = true;
+  window.addEventListener('resize', () => {
+    try {
+      const scene = window.__relayRunnerScene || window.game?.scene?.getScene?.('RunnerScene');
+      if (scene) placeMissionCard(scene);
+    } catch {}
+  }, { passive: true });
+
+  RunnerScene.prototype.__missionObjectiveResponsiveV5Patched = true;
 }
