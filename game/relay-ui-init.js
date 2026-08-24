@@ -75,7 +75,7 @@ import './src/systems/mission-objectives-route-goals-v1.js';
 import './mission-objective-mobile-fix.js';
 import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
-import './city-update-gameplay-hud-v1.js';
+/* CITY UPDATE GAMEPLAY HUD intentionally disabled: it must not mount after tutorial. */
 import './dynamic-environment-reactions-v1.js';
 import './collapse-protocol-v1.js';
 import './collapse-protocol-contact-bridge-v1.js';
