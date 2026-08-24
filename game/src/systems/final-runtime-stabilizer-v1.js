@@ -6,7 +6,6 @@
   window.__relayFinalRuntimeStabilizerV2 = true;
 
   const TUTORIAL_COMPLETE = 'relay.runner.tutorial.onboarding-v3.complete';
-  const TUTORIAL_STEP = 'relay.runner.tutorial.onboarding-v3.step';
   const scene = () => window.__relayRunnerScene || window.game?.scene?.getScene?.('runner') || null;
   const hud = () => document.querySelector('#play > .hud');
   const tutorialActive = () => document.body.classList.contains('relay-training-active');
@@ -76,7 +75,4 @@
     if (!(event.persisted || performance.getEntriesByType?.('navigation')?.[0]?.type === 'reload')) return;
     [250,700].forEach(delay => window.setTimeout(stabilizePresentation,delay));
   },{passive:true});
-
-  window.addEventListener('resize',stabilizePresentation,{passive:true});
-  window.addEventListener('orientationchange',()=>window.setTimeout(stabilizePresentation,80),{passive:true});
 })();
