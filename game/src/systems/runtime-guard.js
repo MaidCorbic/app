@@ -14,8 +14,6 @@ const errors = missions.flatMap(mission => {
 
 window.relayMissionValidation = { ok: errors.length === 0, errors, missionCount: missions.length };
 
-// Production mode: never replace the game with a recovery overlay. A runtime error is
-// logged for diagnostics while the normal game UI remains intact.
 const report = (error, title = 'GAME RUNTIME ERROR') => {
   console.error(`[Relay Runner] ${title}`, error);
   window.relayLastRuntimeError = { title, error: String(error?.stack || error?.reason?.stack || error?.reason || error || 'Unknown runtime error'), at: Date.now() };
@@ -26,16 +24,23 @@ window.addEventListener('error', event => report(event.error || event.message));
 window.addEventListener('unhandledrejection', event => report(event.reason));
 
 const start = document.getElementById('start');
+let bootWatchdog = 0;
+const clearBootWatchdog = () => {
+  if (!bootWatchdog) return;
+  clearTimeout(bootWatchdog);
+  bootWatchdog = 0;
+};
+
 start?.addEventListener('click', () => {
-  const started = Date.now();
-  const timer = setInterval(() => {
-    if (window.strideReady || !document.getElementById('start')) return clearInterval(timer);
-    if (Date.now() - started > 10000) {
-      clearInterval(timer);
+  clearBootWatchdog();
+  bootWatchdog = window.setTimeout(() => {
+    bootWatchdog = 0;
+    if (!window.strideReady && document.getElementById('start')) {
       report('RunnerScene did not report ready within 10 seconds.', 'MISSION FAILED TO BOOT');
     }
-  }, 250);
+  }, 10000);
 }, { capture: true });
+window.addEventListener('relay:runner-scene-ready', clearBootWatchdog, { once: false });
 
 const speech = window.speechSynthesis;
 if (speech && window.SpeechSynthesisUtterance) {
