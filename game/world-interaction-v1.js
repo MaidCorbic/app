@@ -155,10 +155,6 @@ export function updateWorldInteraction(scene) {
   button.classList.remove('is-active');
 }
 
-// Critical runtime hook: main.js creates the Phaser game before this module executes,
-// but RunnerScene does not start until the player launches a mission. Patch the actual
-// class now, before the first mission starts, so setup/update cannot be lost to another
-// wrapper around RunnerScene.prototype.create/update.
 const originalCreate = RunnerScene.prototype.create;
 const originalUpdate = RunnerScene.prototype.update;
 if (!RunnerScene.prototype.__worldInteractionCreatePatched) {
