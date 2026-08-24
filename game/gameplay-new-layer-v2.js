@@ -1,6 +1,7 @@
 // NEW GAMEPLAY LAYER V2
 // Browser-safe, additive gameplay feel layer. No Phaser/scene imports.
 // It listens to the existing gameplay input surface and optional relay events.
+// Performance note: this layer is event/timer driven; it must never own a per-frame RAF loop.
 
 const ROOT_ID = 'relay-gameplay-new-layer';
 const STYLE_ID = 'relay-gameplay-new-layer-v2-style';
@@ -27,6 +28,7 @@ const state = {
   ghost: null,
   ghostIndex: 0,
   timers: new Set(),
+  maintenanceTimer: 0,
 };
 
 const now = () => performance.now();
@@ -78,13 +80,35 @@ function mount() {
 }
 
 function root(){ return document.getElementById(ROOT_ID); }
-function eventText(text){ const el=root()?.querySelector('.ng-event'); if(!el)return; el.textContent=text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); addTimer(()=>el.classList.remove('show'),620); }
+function eventText(text){
+  const el=root()?.querySelector('.ng-event');
+  if(!el)return;
+  el.textContent=text;
+  el.classList.add('show');
+  addTimer(()=>el.classList.remove('show'),620);
+}
 function updateChain(){ const el=root()?.querySelector('.ng-chain'); if(!el)return; el.querySelector('.ng-value').innerHTML=`${state.chain}<em>x FLOW</em>`; el.classList.toggle('show',state.chain>0); }
 function updateRecap(){ const r=root(); if(!r)return; r.querySelector('[data-ng="chain"]').textContent=`${state.chainPeak}x`; r.querySelector('[data-ng="near"]').textContent=state.nearMisses; r.querySelector('[data-ng="clutch"]').textContent=state.clutches; r.querySelector('[data-ng="speed"]').textContent=Math.round(state.peakSpeed); }
 
 function resetRun(){
   state.started=true; state.lastAction=''; state.lastActionAt=0; state.chain=0; state.chainPeak=0; state.nearMisses=0; state.clutches=0; state.peakSpeed=0; state.lastNearMissAt=0; state.clutchUntil=0; state.choiceVisible=false; state.choiceCooldownUntil=now()+6500; state.runStartedAt=now(); state.path=[]; state.ghost=loadGhost(); state.ghostIndex=0;
+  for (const id of state.timers) clearTimeout(id);
+  state.timers.clear();
+  if (state.maintenanceTimer) { clearTimeout(state.maintenanceTimer); state.maintenanceTimer = 0; }
   mount(); updateChain(); updateRecap(); root()?.querySelector('.ng-choice')?.classList.remove('show'); root()?.querySelector('.ng-recap')?.classList.remove('show');
+  scheduleMaintenance();
+}
+
+function scheduleMaintenance(){
+  if (!state.started) return;
+  if (state.maintenanceTimer) clearTimeout(state.maintenanceTimer);
+  state.maintenanceTimer = window.setTimeout(() => {
+    state.maintenanceTimer = 0;
+    if (!state.started) return;
+    maybeChoice();
+    if (document.getElementById('play')?.classList.contains('gameplay-moving')) state.peakSpeed = Math.max(state.peakSpeed, 1);
+    scheduleMaintenance();
+  }, 500);
 }
 
 function registerAction(action){
@@ -127,8 +151,6 @@ function start(){
   window.addEventListener('relay:new-gameplay-clutch',registerClutch);
   window.addEventListener('relay:new-gameplay-run-start',resetRun);
   window.addEventListener('relay:new-gameplay-run-finish',()=>{ recordGhost(); updateRecap(); root()?.querySelector('.ng-recap')?.classList.add('show'); });
-  const tick=()=>{ if(!state.started){requestAnimationFrame(tick);return;} maybeChoice(); const play=document.getElementById('play'); if(play?.classList.contains('gameplay-moving'))state.peakSpeed=Math.max(state.peakSpeed,1); updateRecap(); requestAnimationFrame(tick); };
-  requestAnimationFrame(tick);
 }
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
