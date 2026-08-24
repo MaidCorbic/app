@@ -37,7 +37,7 @@
 }
 
 @media (hover:none) and (pointer:coarse) {
-  /* Top HUD: status only. Bottom controls own the lower safe area. */
+  /* Top HUD: compact telemetry. Bottom controls own the lower safe area. */
   #play .hud {
     position:absolute;
     top:0;
@@ -46,8 +46,8 @@
     width:100%;
     box-sizing:border-box;
     display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
-    grid-template-areas:"route actions" "progress progress";
+    grid-template-columns:minmax(0,1fr) minmax(96px,116px) auto;
+    grid-template-areas:"route progress actions";
     align-items:start;
     gap:6px;
     padding:max(8px,env(safe-area-inset-top,0px) + 5px)
@@ -83,6 +83,7 @@
     line-height:1.15;
   }
 
+  /* SIGNALS: same compact telemetry family as FLOW, never centered over the map. */
   #play .hud-progress {
     grid-area:progress;
     position:relative;
@@ -90,28 +91,46 @@
     top:auto;
     transform:none;
     display:grid!important;
-    grid-template-columns:auto minmax(42px,1fr) auto;
+    grid-template-columns:auto minmax(22px,1fr) auto;
     align-items:center;
-    gap:6px;
-    width:min(60vw,260px);
-    min-width:0;
-    margin:0 auto;
-    padding:4px 7px;
-    border-radius:7px;
+    gap:5px;
+    width:100%;
+    min-width:96px;
+    max-width:116px;
+    height:42px;
+    margin:0;
+    padding:5px 7px;
+    border-radius:8px;
     pointer-events:none;
   }
 
-  #play .hud-progress > span:first-child { font-size:10px;line-height:1; }
-  #play .hud-progress > small { font-size:6px;letter-spacing:.8px;white-space:nowrap; }
-  #play .hud-progress > div { height:3px;min-width:0; }
+  #play .hud-progress > span:first-child {
+    font-size:10px;
+    line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+
+  #play .hud-progress > small {
+    font-size:6px;
+    letter-spacing:.7px;
+    white-space:nowrap;
+  }
+
+  #play .hud-progress > div {
+    height:3px;
+    min-width:0;
+  }
+
   #play .hud-progress i { height:100%; }
 
   #play .hud-actions {
     grid-area:actions;
     display:flex;
     align-items:center;
+    justify-content:flex-end;
     gap:5px;
     pointer-events:none;
+    min-width:0;
   }
 
   #play .hud-xp {
@@ -207,8 +226,6 @@
     opacity:.65;
   }
 
-  /* Pause/settings live in the game HUD. Keep them thumb-accessible without
-     competing with the bottom gameplay controls. */
   #play .hud-actions > #pause {
     width:42px;
     height:40px;
@@ -218,7 +235,6 @@
     touch-action:manipulation;
   }
 
-  /* When Pause is open, gameplay chrome must stop intercepting touches. */
   body:has(#pauseMenu:not(.hidden)) #play .mobile-controls,
   body:has(#pauseMenu:not(.hidden)) #play .world-marker,
   body:has(#pauseMenu:not(.hidden)) #play .input-guide,
@@ -229,8 +245,20 @@
 }
 
 @media (hover:none) and (pointer:coarse) and (max-width:430px) and (orientation:portrait) {
+  #play .hud {
+    grid-template-columns:minmax(0,1fr) 92px auto;
+    gap:4px;
+  }
   #play .hud-route { width:min(50vw,200px); }
-  #play .hud-progress { width:min(50vw,175px);max-width:175px; }
+  #play .hud-progress {
+    min-width:92px;
+    max-width:92px;
+    height:40px;
+    padding:4px 5px;
+    gap:4px;
+  }
+  #play .hud-progress > span:first-child { font-size:9px; }
+  #play .hud-progress > small { font-size:5.5px; }
   #play .hud-xp { display:none!important; }
   #play .hud-actions > #pause { width:34px;height:32px;min-width:34px; }
   #play .mobile-joystick { flex-basis:66px;width:66px!important;height:66px!important; }
@@ -241,9 +269,13 @@
 }
 
 @media (hover:none) and (pointer:coarse) and (max-height:480px) and (orientation:landscape) {
-  #play .hud { padding-top:max(5px,env(safe-area-inset-top,0px) + 3px);gap:4px; }
+  #play .hud {
+    grid-template-columns:minmax(0,1fr) 100px auto;
+    padding-top:max(5px,env(safe-area-inset-top,0px) + 3px);
+    gap:4px;
+  }
   #play .hud-route { width:180px;padding:5px 8px; }
-  #play .hud-progress { width:210px;padding:3px 6px; }
+  #play .hud-progress { min-width:100px;max-width:100px;height:36px;padding:3px 6px; }
   #play .hud-actions > #pause { width:34px;height:32px;min-width:34px; }
   #play .hud-xp { min-width:40px;padding:4px 5px; }
   #play .world-marker { bottom:104px!important; }
