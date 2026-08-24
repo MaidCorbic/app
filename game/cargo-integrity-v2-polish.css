@@ -1,17 +1,20 @@
-/* UPDATE 18 V3 — Cargo HUD polish
-   Mobile landscape owns a dedicated center utility lane directly below the mission card.
-*/
+/* CARGO V4 — tactical utility card, stacked under the mission lane */
 #cargoIntegrityV2 {
   left:18px !important; right:auto !important; top:auto !important; bottom:18px !important;
-  transform:none !important; width:min(300px,calc(100vw - 36px)) !important; max-width:300px !important; z-index:190 !important;
+  transform:none !important; width:min(300px,calc(100vw - 36px)) !important; max-width:300px !important; z-index:950 !important;
 }
 #cargoIntegrityV2.is-visible { transform:translateY(0) !important; }
 #cargoIntegrityV2 .cargo-card {
   position:relative; overflow:hidden; padding:10px 12px !important; border-radius:10px !important;
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  box-shadow:0 0 24px rgba(25,200,245,.10),inset 0 0 18px rgba(255,255,255,.025) !important;
+  border:1px solid rgba(141,244,255,.3) !important;
+  background:linear-gradient(145deg,rgba(2,9,19,.94),rgba(7,22,36,.88)) !important;
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 0 26px rgba(25,200,245,.11),inset 0 0 18px rgba(141,244,255,.025) !important;
 }
-#cargoIntegrityV2 .cargo-card::before { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg,rgba(255,255,255,.045),transparent 34%,transparent 72%,rgba(141,244,255,.035)); opacity:.9; }
+#cargoIntegrityV2 .cargo-card::before {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg,rgba(141,244,255,.055),transparent 36%,rgba(185,147,255,.04));
+}
 #cargoIntegrityV2 .cargo-head,#cargoIntegrityV2 .cargo-row,#cargoIntegrityV2 .cargo-foot { position:relative; z-index:1; }
 #cargoIntegrityV2 .cargo-head { margin-bottom:6px !important; }
 #cargoIntegrityV2 .cargo-label { font-size:7px !important; letter-spacing:.18em !important; }
@@ -29,12 +32,14 @@
   #cargoIntegrityV2 .cargo-foot { font-size:6px !important; line-height:1.15 !important; }
 }
 
-/* Mission → cargo stack. It is deliberately narrower than the mission and never enters the right action lane. */
+/* Mission is positioned at ~18% viewport height. Cargo follows it with a fixed gap. */
 @media (max-width:768px) and (orientation:landscape) {
   #cargoIntegrityV2 {
-    left:50% !important; right:auto !important; top:58% !important; bottom:auto !important;
+    left:50% !important; right:auto !important;
+    top:calc(18% + min(133px, 34vw) + 12px) !important;
+    bottom:auto !important;
     transform:translateX(-50%) !important;
-    width:min(238px,42vw) !important; max-width:238px !important; z-index:188 !important;
+    width:min(250px,36vw) !important; max-width:250px !important; z-index:940 !important;
   }
   #cargoIntegrityV2.is-visible { transform:translateX(-50%) translateY(0) !important; }
   #cargoIntegrityV2 .cargo-card { padding:7px 9px !important; border-radius:9px !important; }
@@ -43,8 +48,13 @@
   #cargoIntegrityV2 .cargo-foot { margin-top:4px !important; }
 }
 
+@media (max-width:520px) and (orientation:landscape) {
+  #cargoIntegrityV2 { top:calc(18% + 122px) !important; width:220px !important; }
+}
+
 @media (max-width:420px) and (orientation:portrait) {
   #cargoIntegrityV2 { bottom:calc(82px + env(safe-area-inset-bottom,0px)) !important; width:min(236px,calc(100vw - 20px)) !important; max-width:236px !important; }
   #cargoIntegrityV2 .cargo-effect { max-width:128px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 }
+
 @media (prefers-reduced-motion:reduce) { #cargoIntegrityV2 .cargo-card::before { transition:none !important; } }
