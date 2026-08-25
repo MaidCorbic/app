@@ -3,5 +3,5 @@
 .phaser-title-active #phaserTitleRoot{opacity:1;visibility:visible;pointer-events:auto}
 #phaserTitleRoot canvas{display:block;width:100%!important;height:100%!important;touch-action:manipulation}
 #phaserTitleRoot.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
-.phaser-title-active #intro.intro{display:none!important}
+#intro.intro{display:none!important}
 @media(max-width:700px){#phaserTitleRoot{touch-action:manipulation}}
