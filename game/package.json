@@ -20,6 +20,7 @@
     "test:runtime-kernel": "node tests/relay-runtime-kernel.mjs",
     "test:city-pulse": "node tests/city-pulse.mjs",
     "test:gameplay-architecture": "node tests/gameplay-architecture-audit.mjs",
+    "test:boot-entrypoints": "node tests/boot-entrypoint-audit.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {
