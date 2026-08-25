@@ -1,7 +1,8 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 
-// UPDATE 21 — DIEGETIC DYNAMIC ENCOUNTERS
-// Surprise without another permanent HUD. Existing gameplay remains authoritative.
+// UPDATE 22 — DIEGETIC ENCOUNTERS / GAMEPLAY DIRECTOR REFINE
+// Extends the existing encounter system only. No duplicate HUD, score, mission,
+// cargo, combo, progression, or movement ownership.
 
 const CONFIG = {
   'first-delivery': { variants: [
@@ -35,6 +36,12 @@ const CONFIG = {
 };
 
 const FALLBACK = { type: 'signal-anomaly', radius: 220, duration: 6200, message: 'SIGNAL FIELD UNSTABLE' };
+const DIRECTOR = {
+  baseCooldown: 7800,
+  earlyCooldown: 11000,
+  lateCooldown: 6200,
+  nearMissDistance: 78,
+};
 const states = new WeakMap();
 const distance = (a, b) => Math.hypot((a?.x || 0) - (b?.x || 0), (a?.y || 0) - (b?.y || 0));
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -42,6 +49,29 @@ const lerp = (from, to, amount) => from + (to - from) * amount;
 
 function missionId(scene) {
   return [scene?.sys?.settings?.data?.missionId, scene?.sys?.settings?.data?.mission, scene?.registry?.get?.('missionId'), scene?.mission?.id, document.documentElement?.dataset?.missionId, document.body?.dataset?.missionId].find(value => typeof value === 'string') || null;
+}
+
+function progressOf(scene) {
+  const bounds = scene?.physics?.world?.bounds;
+  const width = Number(bounds?.width);
+  const left = Number(bounds?.x);
+  const playerX = Number(scene?.player?.x);
+  if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(left) || !Number.isFinite(playerX)) return 0.5;
+  return clamp((playerX - left) / width, 0, 1);
+}
+
+function directorIntensity(scene) {
+  const progress = progressOf(scene);
+  if (progress >= 0.78) return 1.15;
+  if (progress <= 0.28) return 0.85;
+  return 1;
+}
+
+function directorCooldown(scene) {
+  const progress = progressOf(scene);
+  if (progress >= 0.78) return DIRECTOR.lateCooldown;
+  if (progress <= 0.28) return DIRECTOR.earlyCooldown;
+  return DIRECTOR.baseCooldown;
 }
 
 function getConfig(scene, id) {
@@ -77,8 +107,11 @@ function feedback(scene, kind) {
   try { scene.game?.events?.emit('feedback', kind); } catch {}
 }
 
+function dispatchGameplayEvent(name, detail = {}) {
+  try { window.dispatchEvent(new CustomEvent(name, { detail })); } catch {}
+}
+
 function announce(scene, config) {
-  // Intentionally no DOM HUD. playerCue is the existing short-lived gameplay communication layer.
   try { scene.playerCue?.(config.message, '#8df4ff'); } catch {}
   feedback(scene, config.type === 'pursuit' || config.type === 'ambush' ? 'chase' : 'warning');
 }
@@ -114,7 +147,8 @@ function spawnAmbush(scene, state) {
     .filter(enemy => !enemy.getData?.('boss') && distance(enemy, player) > 280 && distance(enemy, player) < 1050)
     .sort((a, b) => distance(a, player) - distance(b, player));
   if (!candidates.length) return false;
-  const selected = candidates.slice(0, Math.min(2, candidates.length));
+  const count = state.intensity > 1 ? Math.min(2, candidates.length) : 1;
+  const selected = candidates.slice(0, count);
   selected.forEach((enemy, index) => {
     const route = enemy.getData?.('route') || {};
     const direction = enemy.x < player.x ? 1 : -1;
@@ -142,14 +176,22 @@ function triggerPursuit(scene, state) {
   return true;
 }
 
+function canActivate(scene, state, now) {
+  if (state.triggered || state.completed) return false;
+  if (state.lastActivatedAt && now - state.lastActivatedAt < directorCooldown(scene)) return false;
+  return true;
+}
+
 function activate(scene, state) {
-  if (state.triggered || state.completed) return;
+  const now = performance.now();
+  if (!canActivate(scene, state, now)) return;
   let applied = true;
   if (state.config.type === 'ambush') applied = spawnAmbush(scene, state);
   else if (state.config.type === 'pursuit') applied = triggerPursuit(scene, state);
   if (!applied && (state.config.type === 'ambush' || state.config.type === 'pursuit')) return;
   state.triggered = true;
-  state.expiresAt = performance.now() + state.config.duration;
+  state.lastActivatedAt = now;
+  state.expiresAt = now + Math.round(state.config.duration / state.intensity);
   createWorldCue(scene, state);
   announce(scene, state.config);
 }
@@ -177,11 +219,24 @@ function updatePowerSurge(scene, state, now) {
   if (gate && scene.tweens) scene.tweens.add({ targets: gate, alpha: .35, duration: 90, yoyo: true, repeat: 2 });
 }
 
+function checkNearMiss(scene, state, enemy, now) {
+  if (!enemy?.active || state.nearMissCooldownUntil > now) return;
+  const player = scene.player;
+  const d = distance(enemy, player);
+  const previous = state.previousEnemyDistances.get(enemy) ?? d;
+  state.previousEnemyDistances.set(enemy, d);
+  if (previous > DIRECTOR.nearMissDistance && d <= DIRECTOR.nearMissDistance && d > 18) {
+    state.nearMissCooldownUntil = now + 650;
+    dispatchGameplayEvent('relay:new-gameplay-near-miss', { distance: Math.round(d), source: enemy, missionId: state.missionId });
+  }
+}
+
 function updateEnemies(scene, state, now) {
   const player = scene.player;
   if (!player) return;
   for (const enemy of state.selectedEnemies || []) {
     if (!enemy?.active) continue;
+    checkNearMiss(scene, state, enemy, now);
     const mode = enemy.getData?.('dynamicEncounter');
     const until = enemy.getData?.('dynamicEncounterUntil') || 0;
     if (!mode || now >= until) {
@@ -230,6 +285,8 @@ function update(scene) {
       enemy.setData?.('dynamicEncounterTarget', null);
       enemy.setData?.('dynamicEncounterUntil', 0);
     });
+    state.selectedEnemies = [];
+    state.previousEnemyDistances.clear();
     state.completed = true;
   }
 }
@@ -237,7 +294,20 @@ function update(scene) {
 function setup(scene) {
   if (!scene || states.has(scene) || !scene.player) return;
   const id = missionId(scene);
-  states.set(scene, { missionId: id, config: getConfig(scene, id), triggered: false, completed: false, expiresAt: 0, lastWorldPulse: 0, affectedSignals: [], selectedEnemies: [] });
+  states.set(scene, {
+    missionId: id,
+    config: getConfig(scene, id),
+    intensity: directorIntensity(scene),
+    triggered: false,
+    completed: false,
+    expiresAt: 0,
+    lastActivatedAt: 0,
+    lastWorldPulse: 0,
+    nearMissCooldownUntil: 0,
+    affectedSignals: [],
+    selectedEnemies: [],
+    previousEnemyDistances: new Map(),
+  });
 }
 
 function teardown(scene) {
@@ -250,6 +320,7 @@ function teardown(scene) {
     enemy.setData?.('dynamicEncounterTarget', null);
     enemy.setData?.('dynamicEncounterUntil', 0);
   });
+  state.previousEnemyDistances.clear();
   states.delete(scene);
 }
 
