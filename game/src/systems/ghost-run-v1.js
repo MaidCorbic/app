@@ -1,13 +1,22 @@
 import Phaser from 'phaser';
 
-const STORAGE_KEY = 'relay-runner-ghost-v1';
+const STORAGE_PREFIX = 'relay-runner-ghost-v1:';
 const SAMPLE_MS = 80;
 const MAX_SAMPLES = 4500;
 const GHOST_ALPHA = 0.24;
 
-function readBest() {
+function getRunKey(scene) {
+  const data = scene?.scene?.settings?.data || {};
+  return String(data.packageId || data.packageKey || scene?.packageId || scene?.packageKey || data.missionId || 'default');
+}
+
+function storageKey(scene) {
+  return `${STORAGE_PREFIX}${getRunKey(scene)}`;
+}
+
+function readBest(scene) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey(scene));
     if (!raw) return null;
     const data = JSON.parse(raw);
     if (!data || !Number.isFinite(data.durationMs) || !Array.isArray(data.samples) || data.samples.length < 2) return null;
@@ -15,15 +24,15 @@ function readBest() {
   } catch { return null; }
 }
 
-function writeBest(record) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch { /* storage is optional */ }
+function writeBest(scene, record) {
+  try { localStorage.setItem(storageKey(scene), JSON.stringify(record)); } catch { /* storage is optional */ }
 }
 
 function makeGhost(scene) {
   if (!scene?.add || !scene.textures?.exists?.('runner-idle')) return null;
   const ghost = scene.add.image(scene.player?.x || 0, scene.player?.y || 0, 'runner-idle');
   ghost.setAlpha(GHOST_ALPHA);
-  ghost.setDepth(5);
+  ghost.setDepth((scene.player?.depth || 10) - 1);
   ghost.setTint(0x8df4ff);
   ghost.setBlendMode(Phaser.BlendModes.ADD);
   ghost.setData('relayGhost', true);
@@ -75,7 +84,7 @@ export function installGhostRun(RunnerScene) {
   const originalCreate = RunnerScene.prototype.create;
   RunnerScene.prototype.create = function (...args) {
     const result = originalCreate.apply(this, args);
-    const best = readBest();
+    const best = readBest(this);
     const state = this.__ghostRun = {
       best,
       ghost: best ? makeGhost(this) : null,
@@ -95,7 +104,7 @@ export function installGhostRun(RunnerScene) {
         state.recording = false;
         const durationMs = Math.max(1, performance.now() - state.startedAt);
         if (state.samples.length >= 2 && (!state.best || durationMs < state.best.durationMs)) {
-          writeBest({ durationMs, samples: state.samples });
+          writeBest(this, { durationMs, samples: state.samples });
         }
       }
     };
