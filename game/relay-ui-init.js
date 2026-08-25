@@ -49,6 +49,7 @@ import './src/systems/city-backdrop-replacement-v1.js';
 import './src/systems/dynamic-world-mechanics-v2.js';
 import './src/systems/viewport-sync.js';
 import './world-interaction-runtime-v2.js';
+import './environmental-force-zone-v1.js';
 import './player-shield-visual-cleanup-v1.js';
 import './tutorial-runtime-gate-v1.js';
 import './home-tutorial-v1.js';
