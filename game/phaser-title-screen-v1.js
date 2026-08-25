@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import './phaser-title-screen-v1.css';
 
 (() => {
   if (window.__relayPhaserTitleScreen) return;
@@ -130,11 +131,11 @@ import Phaser from 'phaser';
 
       const rowGap = compact ? 57 : 61;
       const firstY = Math.max(h * 0.32, 248);
-      const total = rowGap * (this.menu.length - 1) + 52;
+      const total = rowGap * (this.menu.list.length - 1) + 52;
       const adjustedFirstY = Math.min(firstY, h - total - 70);
       this.menu.setPosition(centerX, Math.max(230, adjustedFirstY));
       this.menu.list.forEach((child, index) => child.setPosition(0, index * rowGap).setScale(Math.min(1, (w - 40) / 320)));
-      this.status.setPosition(centerX, this.menu.y + rowGap * this.menu.length + 18);
+      this.status.setPosition(centerX, this.menu.y + rowGap * this.menu.list.length + 18);
       this.footer.setPosition(centerX, h - 18);
     }
 
@@ -158,8 +159,12 @@ import Phaser from 'phaser';
   }
 
   const boot = () => {
-    const root = document.getElementById('phaserTitleRoot');
-    if (!root) return;
+    if (document.getElementById('phaserTitleRoot')) return;
+    const root = document.createElement('div');
+    root.id = 'phaserTitleRoot';
+    document.body.appendChild(root);
+    const intro = document.getElementById('intro');
+    if (intro) intro.classList.add('phaser-home-hidden');
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: root,
