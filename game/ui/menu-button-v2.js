@@ -16,8 +16,16 @@ export class MenuButton extends Phaser.GameObjects.Container {
     this.marker = scene.add.text(-134, -7, '›', { fontFamily: 'monospace', fontSize: '18px', fontStyle: 'bold', color: '#557088' }).setOrigin(0.5);
     this.add([this.glow, this.fill, this.inner, this.accent, this.sweep, this.label, this.detail, this.marker]);
     this.setSize(320, 56).setInteractive({ useHandCursor: true });
-    this.on('pointerover', () => this.setFocused(true, true));
-    this.on('pointerout', () => this.setFocused(false, false));
+    this.on('pointerover', () => {
+      this.setFocused(true, true);
+      if (this.scene.buttons) {
+        const index = this.scene.buttons.indexOf(this);
+        if (index >= 0) this.scene.selectedIndex = index;
+      }
+    });
+    this.on('pointerout', () => {
+      if (this.scene.buttons?.[this.scene.selectedIndex] !== this) this.setFocused(false, false);
+    });
     this.on('pointerdown', () => this.activate());
     scene.add.existing(this);
   }
