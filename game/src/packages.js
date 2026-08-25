@@ -10,17 +10,19 @@ export const packages = {
 
 void import('./scenes/RunnerScene.js')
   .then(async ({ RunnerScene }) => {
-    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }] = await Promise.all([
+    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }, { installWorldMemory }] = await Promise.all([
       import('./systems/enemy-runtime-v2.js'),
       import('./systems/enemy-layout-v2.js'),
       import('./systems/enemy-ai-awareness-v1.js'),
       import('./systems/ghost-run-v1.js'),
       import('./systems/reactive-courier-encounter-v1.js'),
+      import('./systems/world-memory-v1.js'),
     ]);
     installEnemyLayout(RunnerScene);
     installEnemyRuntime(RunnerScene);
     installEnemyAIAwareness(RunnerScene);
     installGhostRun(RunnerScene);
+    installWorldMemory(RunnerScene);
     installReactiveCourierEncounter(RunnerScene);
   })
   .catch(error => console.error('[gameplay-runtime] failed to initialize', error));
