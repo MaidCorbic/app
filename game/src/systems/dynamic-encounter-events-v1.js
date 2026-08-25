@@ -38,6 +38,7 @@ const FALLBACK = { type: 'signal-anomaly', radius: 220, duration: 6200, message:
 const states = new WeakMap();
 const distance = (a, b) => Math.hypot((a?.x || 0) - (b?.x || 0), (a?.y || 0) - (b?.y || 0));
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const lerp = (from, to, amount) => from + (to - from) * amount;
 
 function missionId(scene) {
   return [scene?.sys?.settings?.data?.missionId, scene?.sys?.settings?.data?.mission, scene?.registry?.get?.('missionId'), scene?.mission?.id, document.documentElement?.dataset?.missionId, document.body?.dataset?.missionId].find(value => typeof value === 'string') || null;
@@ -202,7 +203,7 @@ function updateEnemies(scene, state, now) {
     if (mode === 'ambush') {
       const direction = enemy.getData?.('dynamicEncounterDirection') || 1;
       const route = enemy.getData?.('dynamicEncounterRoute') || enemy.getData?.('route') || {};
-      if (enemy.body?.velocity) enemy.body.velocity.x = Phaser.Math.Linear(enemy.body.velocity.x || 0, direction * 170, .035);
+      if (enemy.body?.velocity) enemy.body.velocity.x = lerp(enemy.body.velocity.x || 0, direction * 170, .035);
       if (Number.isFinite(route.min) && Number.isFinite(route.max)) {
         if (enemy.x <= route.min) enemy.setData?.('dynamicEncounterDirection', 1);
         if (enemy.x >= route.max) enemy.setData?.('dynamicEncounterDirection', -1);
