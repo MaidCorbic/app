@@ -80,6 +80,7 @@ import './dynamic-environment-reactions-v1.js';
 import './collapse-protocol-v1.js';
 import './collapse-protocol-contact-bridge-v1.js';
 import './src/systems/mission-runtime-hardening-v1.js';
+import './character-motion-v3.js';
 import './home-v3-features.js';
 import './home-v4-polish.js';
 import './home-final-fix-v1.js';
