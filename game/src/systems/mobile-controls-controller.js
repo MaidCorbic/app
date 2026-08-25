@@ -1,20 +1,269 @@
-const ACTION_KEYS={jump:' ',fire:'e',sword:'q',dash:'shift',build1:'1',gadget1:'3'};
-const ACTION_LABELS={jump:'JUMP — SPACE',fire:'FIRE — E',sword:'SWORD — Q',dash:'DASH — SHIFT',build1:'BUILD — 1',gadget1:'GEAR — 3'};
-const isTouchDevice=()=>navigator.maxTouchPoints>0||'ontouchstart'in window||matchMedia('(pointer: coarse)').matches||matchMedia('(hover: none)').matches||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'');
-const getScene=()=>window.__relayRunnerScene||window.game?.scene?.getScene?.('runner')||window.game?.scene?.getScenes?.(true)?.find?.(s=>s?.scene?.key==='runner');
-const getActiveScene=()=>{const s=getScene();return s?.scene?.isActive?.()===false?null:s};
-const emitGameplay=(name,detail={})=>{try{const s=getActiveScene();const payload={...detail,source:detail.source||'mobile-controller'};s?.game?.events?.emit?.(name,payload);s?.events?.emit?.(name,payload);window.dispatchEvent(new CustomEvent(name,{detail:payload}))}catch{}};
-const keyCodeFor=key=>({space:32,' ':32,a:65,d:68,e:69,q:81,'1':49,'3':51,shift:16})[String(key).toLowerCase()]||String(key).toUpperCase().charCodeAt(0);
-const emitKey=(key,type)=>{const code=key===' '?'Space':key.length===1?`Key${key.toUpperCase()}`:String(key).toUpperCase();try{window.dispatchEvent(new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true}))}catch{}try{document.dispatchEvent(new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true}))}catch{}try{const s=getActiveScene(),keyboard=s?.input?.keyboard;if(keyboard){const n=keyCodeFor(key);const k=keyboard.keys?.[n]||keyboard.addKey?.(n,false,false);if(k){k.isDown=type==='keydown';k.isUp=!k.isDown}}}catch{}};
-if(!document.getElementById('relay-mobile-controls-controller-style')){const style=document.createElement('style');style.id='relay-mobile-controls-controller-style';style.textContent=`body.is-touch #play .mobile-controls,body.is-touch .mobile-controls{position:fixed!important;left:max(8px,env(safe-area-inset-left,0px) + 7px)!important;right:max(8px,env(safe-area-inset-right,0px) + 7px)!important;bottom:max(10px,env(safe-area-inset-bottom,0px) + 9px)!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:12px!important;width:auto!important;min-height:78px!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;touch-action:none!important;z-index:2147483001!important}body.is-touch .relay-mobile-dpad{position:relative!important;display:grid!important;grid-template-columns:repeat(3,48px)!important;grid-template-rows:repeat(3,48px)!important;width:144px!important;height:144px!important;pointer-events:auto!important;touch-action:none!important}body.is-touch .relay-mobile-dpad button{width:48px!important;height:48px!important;margin:0!important;padding:0!important;border:1px solid rgba(141,244,255,.55)!important;border-radius:12px!important;background:linear-gradient(145deg,rgba(5,20,35,.96),rgba(4,10,19,.98))!important;color:#dffcff!important;font:900 22px/1 ui-monospace,monospace!important;box-shadow:0 0 16px rgba(25,200,245,.12),inset 0 0 12px rgba(141,244,255,.04)!important;pointer-events:auto!important;touch-action:none!important;-webkit-tap-highlight-color:transparent!important}body.is-touch .relay-mobile-dpad button.is-active{transform:scale(.94)!important;border-color:#8df4ff!important;background:linear-gradient(145deg,rgba(15,65,86,.98),rgba(5,22,35,.98))!important;box-shadow:0 0 22px rgba(141,244,255,.42),inset 0 0 16px rgba(141,244,255,.12)!important}body.is-touch .relay-mobile-dpad [data-mobile-direction=up]{grid-column:2;grid-row:1}body.is-touch .relay-mobile-dpad [data-mobile-direction=left]{grid-column:1;grid-row:2}body.is-touch .relay-mobile-dpad [data-mobile-direction=right]{grid-column:3;grid-row:2}body.is-touch .relay-mobile-dpad [data-mobile-direction=down]{grid-column:2;grid-row:3}body.is-touch .relay-mobile-dpad .relay-dpad-center{grid-column:2;grid-row:2;width:48px;height:48px;border-radius:12px;background:radial-gradient(circle,rgba(141,244,255,.10),rgba(3,12,22,.98))!important;border:1px solid rgba(141,244,255,.20)!important;pointer-events:none}body.is-touch .mobile-actions{display:grid!important;grid-template-columns:repeat(2,52px)!important;grid-auto-rows:52px!important;gap:7px!important;align-items:end!important;justify-content:end!important;pointer-events:auto!important;touch-action:none!important}body.is-touch .mobile-actions [data-mobile-action]{width:52px!important;height:52px!important;border-radius:14px!important;pointer-events:auto!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}body.is-touch .mobile-actions [data-mobile-action=dash]{border-color:rgba(141,244,255,.9)!important;box-shadow:0 0 18px rgba(25,200,245,.30),inset 0 0 12px rgba(141,244,255,.06)!important}@media(max-width:430px){body.is-touch #play .mobile-controls,body.is-touch .mobile-controls{bottom:max(8px,env(safe-area-inset-bottom,0px) + 7px)!important;gap:5px!important}.relay-mobile-dpad{transform:scale(.84);transform-origin:bottom left}.mobile-actions{grid-template-columns:repeat(2,44px)!important;grid-auto-rows:44px!important;gap:5px!important}.mobile-actions [data-mobile-action]{width:44px!important;height:44px!important;font-size:8px!important}}body.is-touch.relay-cinematic-active .mobile-controls{display:none!important;visibility:hidden!important;pointer-events:none!important}`;document.head.appendChild(style)}
-function ensureDpad(root){let dpad=root.querySelector('.relay-mobile-dpad');if(!dpad){dpad=document.createElement('div');dpad.className='relay-mobile-dpad';dpad.setAttribute('aria-label','Movement controls');dpad.innerHTML=`<button type="button" data-mobile-direction="up" aria-label="Jump">▲</button><button type="button" data-mobile-direction="left" aria-label="Move left">◀</button><span class="relay-dpad-center" aria-hidden="true"></span><button type="button" data-mobile-direction="right" aria-label="Move right">▶</button><button type="button" data-mobile-direction="down" aria-label="Move down / slide">▼</button>`;const joystick=root.querySelector('[data-mobile-joystick]');if(joystick)joystick.replaceWith(dpad);else root.insertBefore(dpad,root.firstChild)}return dpad}
-function ensureActions(root){let actions=root.querySelector('.mobile-actions');if(!actions){actions=document.createElement('div');actions.className='mobile-actions';root.appendChild(actions)}[['jump','▲'],['dash','DASH'],['fire','FIRE'],['sword','SWORD']].forEach(([action,label])=>{if(!actions.querySelector(`[data-mobile-action="${action}"]`)){const b=document.createElement('button');b.type='button';b.dataset.mobileAction=action;b.textContent=label;b.setAttribute('aria-label',ACTION_LABELS[action]||action);actions.appendChild(b)}});return actions}
-function bindControls(root){if(!root||root.dataset.mobileControlsOwner==='controller-v3')return;root.dataset.mobileControlsOwner='controller-v3';root.dataset.mobileControlsBound='1';ensureDpad(root);ensureActions(root);root.querySelectorAll('[data-mobile-action]').forEach(button=>{const action=button.dataset.mobileAction,key=ACTION_KEYS[action];button.setAttribute('aria-label',ACTION_LABELS[action]||action.toUpperCase());const down=e=>{e.preventDefault();e.stopPropagation();if(document.body.classList.contains('relay-cinematic-active'))return;if(action==='dash')emitGameplay('relay:new-gameplay-dash',{source:'mobile-controller',tutorial:!!getActiveScene()?.firstTimeTutorial});if(key)emitKey(key,'keydown');button.classList.add('is-active')};const up=e=>{if(e){e.preventDefault();e.stopPropagation()}if(key)emitKey(key,'keyup');button.classList.remove('is-active')};button.addEventListener('pointerdown',down,{passive:false});button.addEventListener('pointerup',up,{passive:false});button.addEventListener('pointercancel',up,{passive:false});button.addEventListener('pointerleave',up,{passive:false});button.addEventListener('contextmenu',e=>e.preventDefault())});const dpad=root.querySelector('.relay-mobile-dpad');dpad.querySelectorAll('[data-mobile-direction]').forEach(button=>{const dir=button.dataset.mobileDirection;const down=e=>{e.preventDefault();e.stopPropagation();if(document.body.classList.contains('relay-cinematic-active'))return;button.setPointerCapture?.(e.pointerId);button.classList.add('is-active');if(dir==='left'||dir==='right'){emitKey(dir==='left'?'a':'d','keydown')}else if(dir==='up'){emitKey(' ','keydown')}else if(dir==='down'){emitKey('s','keydown')}};const up=e=>{if(e){e.preventDefault();e.stopPropagation()}button.classList.remove('is-active');if(dir==='left'||dir==='right'){emitKey(dir==='left'?'a':'d','keyup')}else if(dir==='up'){emitKey(' ','keyup')}else if(dir==='down'){emitKey('s','keyup')}};button.addEventListener('pointerdown',down,{passive:false});button.addEventListener('pointerup',up,{passive:false});button.addEventListener('pointercancel',up,{passive:false});button.addEventListener('lostpointercapture',up,{passive:false})})}
-function ensureControls(){if(!isTouchDevice())return;document.body.classList.add('is-touch');let root=document.querySelector('#play .mobile-controls,.mobile-controls');if(!root){const parent=document.getElementById('play')||document.getElementById('game')||document.body;root=document.createElement('div');root.className='mobile-controls';root.id='relayMobileControls';parent.appendChild(root)}bindControls(root)}
-function findPauseButton(){return document.getElementById('pauseBtn')||document.getElementById('pause')||document.querySelector('[data-action="pause"],[data-pause-button]')}
-function findSettingsTab(){return document.querySelector('#pauseMenu [data-tab="settings"],#pauseMenu [data-section="settings"],#pauseMenu [data-settings-tab]')}
-function openMobileSettings(){const pause=document.getElementById('pauseMenu'),pauseButton=findPauseButton();if(!pause||document.body.classList.contains('relay-cinematic-active'))return false;const open=()=>{const tab=findSettingsTab();if(tab&&!tab.disabled){tab.click();return true}return false};const isOpen=!pause.classList.contains('hidden')&&!pause.hidden&&pause.getAttribute('aria-hidden')!=='true';if(!isOpen&&pauseButton)pauseButton.click();if(open())return true;requestAnimationFrame(()=>{if(!open())setTimeout(open,80)});return true}
-function ensureSettingsButton(){if(!isTouchDevice()||document.getElementById('relayMobileSettings'))return;const game=document.getElementById('game');if(!game)return;const b=document.createElement('button');b.id='relayMobileSettings';b.type='button';b.setAttribute('aria-label','Open mobile settings');b.textContent='SETTINGS';b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();openMobileSettings()},{passive:false});game.appendChild(b)}
-function install(){if(!isTouchDevice())return;ensureControls();ensureSettingsButton()}
-function observe(){install();if(window.__relayMobileControlsObserver)return;window.__relayMobileControlsObserver=new MutationObserver(()=>install());window.__relayMobileControlsObserver.observe(document.body,{childList:true,subtree:true})}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});else observe();
+const ACTION_KEYS = {
+  jump: ' ',
+  fire: 'e',
+  sword: 'q',
+  dash: 'Shift',
+  build1: '1',
+  gadget1: '3'
+};
+
+const ACTION_LABELS = {
+  jump: 'JUMP — SPACE',
+  fire: 'FIRE — E',
+  sword: 'SWORD — Q',
+  dash: 'DASH — SHIFT',
+  build1: 'BUILD — 1',
+  gadget1: 'GEAR — 3'
+};
+
+const emitKey = (key, type) => {
+  window.dispatchEvent(new KeyboardEvent(type, {
+    key,
+    code: key === ' ' ? 'Space' : key.length === 1 ? `Key${key.toUpperCase()}` : key,
+    bubbles: true,
+    cancelable: true
+  }));
+};
+
+const style = document.createElement('style');
+style.id = 'relay-mobile-controls-controller-style';
+style.textContent = `
+  /* Touch-control layer only. Viewport/canvas scaling is intentionally untouched. */
+  body.is-touch .mobile-controls {
+    --relay-touch-size: clamp(46px, 12.5vw, 58px);
+    left: max(10px, env(safe-area-inset-left, 0px) + 8px) !important;
+    right: max(10px, env(safe-area-inset-right, 0px) + 8px) !important;
+    bottom: max(12px, env(safe-area-inset-bottom, 0px) + 10px) !important;
+    align-items: flex-end !important;
+    gap: 10px !important;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  body.is-touch .mobile-joystick {
+    flex: 0 0 clamp(76px, 20vw, 92px) !important;
+    width: clamp(76px, 20vw, 92px) !important;
+    height: clamp(76px, 20vw, 92px) !important;
+    pointer-events: auto !important;
+  }
+
+  body.is-touch .mobile-joystick-thumb {
+    width: 42px !important;
+    height: 42px !important;
+    margin: -21px 0 0 -21px !important;
+  }
+
+  body.is-touch .mobile-actions {
+    flex: 0 1 auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, var(--relay-touch-size)) !important;
+    grid-template-rows: 1fr !important;
+    gap: 4px !important;
+    width: calc(var(--relay-touch-size) * 4 + 12px) !important;
+    max-width: calc(100vw - 110px) !important;
+    pointer-events: auto !important;
+  }
+
+  body.is-touch .mobile-controls button {
+    width: var(--relay-touch-size) !important;
+    height: var(--relay-touch-size) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 1px !important;
+    line-height: 1 !important;
+    font-size: clamp(8px, 2.15vw, 10px) !important;
+    letter-spacing: .2px !important;
+    pointer-events: auto !important;
+  }
+
+  body.is-touch .mobile-controls button small {
+    display: block;
+    margin: 0;
+    font-size: clamp(5px, 1.35vw, 6px);
+    line-height: 1;
+    letter-spacing: .55px;
+  }
+
+  @media (max-width: 380px) {
+    body.is-touch .mobile-controls {
+      --relay-touch-size: 43px;
+      gap: 7px !important;
+      left: 8px !important;
+      right: 8px !important;
+      bottom: max(10px, env(safe-area-inset-bottom, 0px) + 8px) !important;
+    }
+    body.is-touch .mobile-joystick {
+      flex-basis: 72px !important;
+      width: 72px !important;
+      height: 72px !important;
+    }
+    body.is-touch .mobile-joystick-thumb {
+      width: 38px !important;
+      height: 38px !important;
+      margin: -19px 0 0 -19px !important;
+    }
+    body.is-touch .mobile-actions {
+      gap: 3px !important;
+      width: calc(var(--relay-touch-size) * 4 + 9px) !important;
+      max-width: calc(100vw - 88px) !important;
+    }
+  }
+
+  @media (max-height: 480px) and (orientation: landscape) {
+    body.is-touch .mobile-controls {
+      --relay-touch-size: 46px;
+      bottom: max(7px, env(safe-area-inset-bottom, 0px) + 5px) !important;
+      gap: 8px !important;
+    }
+    body.is-touch .mobile-joystick {
+      flex-basis: 76px !important;
+      width: 76px !important;
+      height: 76px !important;
+    }
+    body.is-touch .mobile-joystick-thumb {
+      width: 40px !important;
+      height: 40px !important;
+      margin: -20px 0 0 -20px !important;
+    }
+    body.is-touch .mobile-actions {
+      gap: 3px !important;
+      width: calc(var(--relay-touch-size) * 4 + 9px) !important;
+    }
+  }
+
+  @media (max-height: 360px) and (orientation: landscape) {
+    body.is-touch .mobile-controls {
+      --relay-touch-size: 40px;
+      gap: 6px !important;
+    }
+    body.is-touch .mobile-joystick {
+      flex-basis: 66px !important;
+      width: 66px !important;
+      height: 66px !important;
+    }
+    body.is-touch .mobile-joystick-thumb {
+      width: 34px !important;
+      height: 34px !important;
+      margin: -17px 0 0 -17px !important;
+    }
+    body.is-touch .mobile-actions {
+      gap: 2px !important;
+      width: calc(var(--relay-touch-size) * 4 + 6px) !important;
+    }
+  }
+`;
+document.head.appendChild(style);
+
+function isTouchDevice() {
+  return navigator.maxTouchPoints > 0
+    || 'ontouchstart' in window
+    || matchMedia('(pointer: coarse)').matches
+    || matchMedia('(hover: none)').matches;
+}
+
+function install() {
+  if (window.__relayMobileControlsController) return;
+  window.__relayMobileControlsController = true;
+
+  let controls = document.querySelector('.mobile-controls');
+  if (!controls || !isTouchDevice()) return;
+
+  // Clone once to remove pointer listeners installed by older touch-control modules.
+  // The existing joystick and action-button DOM is preserved.
+  const cleanControls = controls.cloneNode(true);
+  cleanControls.dataset.mobileControlsOwner = 'controller';
+  controls.replaceWith(cleanControls);
+  controls = cleanControls;
+
+  // ONLY remove the duplicate mobile buttons requested by the user.
+  // Keyboard actions 2 and 4 remain fully available in the game.
+  controls.querySelector('[data-mobile-action="build2"]')?.remove();
+  controls.querySelector('[data-mobile-action="gadget2"]')?.remove();
+
+  const joystick = controls.querySelector('[data-mobile-joystick]');
+  const thumb = joystick?.querySelector('.mobile-joystick-thumb');
+  const buttons = [...controls.querySelectorAll('[data-mobile-action]')];
+
+  buttons.forEach(button => {
+    const action = button.dataset.mobileAction;
+    const key = ACTION_KEYS[action];
+    if (!key) return;
+    if (ACTION_LABELS[action]) button.setAttribute('aria-label', ACTION_LABELS[action]);
+
+    button.addEventListener('pointerdown', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      emitKey(key, 'keydown');
+      button.classList.add('is-active');
+      window.setTimeout(() => {
+        emitKey(key, 'keyup');
+        button.classList.remove('is-active');
+      }, 90);
+    }, { passive: false });
+  });
+
+  if (joystick && thumb) {
+    let pointerId = null;
+    let direction = null;
+
+    const setDirection = next => {
+      if (next === direction) return;
+      if (direction === 'left') emitKey('a', 'keyup');
+      if (direction === 'right') emitKey('d', 'keyup');
+      direction = next;
+      if (next === 'left') emitKey('a', 'keydown');
+      if (next === 'right') emitKey('d', 'keydown');
+    };
+
+    const resetJoystick = () => {
+      setDirection(null);
+      pointerId = null;
+      joystick.classList.remove('is-active');
+      thumb.style.transform = 'translate(0,0)';
+    };
+
+    const updateJoystick = (x, y) => {
+      const rect = joystick.getBoundingClientRect();
+      const dx = x - rect.left - rect.width / 2;
+      const dy = y - rect.top - rect.height / 2;
+      const distance = Math.min(Math.hypot(dx, dy), 32);
+      const angle = Math.atan2(dy, dx);
+      thumb.style.transform = `translate(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px)`;
+      setDirection(Math.abs(dx) < 9 ? null : dx < 0 ? 'left' : 'right');
+    };
+
+    joystick.addEventListener('pointerdown', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      pointerId = event.pointerId;
+      joystick.setPointerCapture?.(pointerId);
+      joystick.classList.add('is-active');
+      updateJoystick(event.clientX, event.clientY);
+    }, { passive: false });
+
+    joystick.addEventListener('pointermove', event => {
+      if (event.pointerId !== pointerId) return;
+      event.preventDefault();
+      updateJoystick(event.clientX, event.clientY);
+    }, { passive: false });
+
+    const end = event => {
+      if (event && event.pointerId !== pointerId) return;
+      resetJoystick();
+    };
+
+    joystick.addEventListener('pointerup', end);
+    joystick.addEventListener('pointercancel', end);
+    joystick.addEventListener('lostpointercapture', resetJoystick);
+    window.addEventListener('blur', resetJoystick);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', install, { once: true });
+} else {
+  install();
+}

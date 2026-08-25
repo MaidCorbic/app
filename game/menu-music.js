@@ -3,3 +3,5 @@
 import './src/menu-music.js';
 import './world-atmosphere.js';
 import './world-atmosphere-test.js';
+import './home-ai-tutorial-options.js';
+import './runtime-ai-tutorial-settings.js';

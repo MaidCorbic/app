@@ -1,6 +1,6 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-// UPDATE 27 FINAL — deterministic, readable player death/respawn.
+// UPDATE 07 FINAL — deterministic player death/respawn.
 (() => {
   if (window.__relayPlayerDeathAnimationV1Final) return;
   window.__relayPlayerDeathAnimationV1Final = true;
@@ -9,10 +9,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const originalFail = RunnerScene.prototype.fail;
   const originalRespawnCheckpoint = RunnerScene.prototype.respawnCheckpoint;
   const SPAWN_SHIELD_MS = 10000;
-  const WORLD_BOTTOM_MARGIN = 14;
+  const WORLD_BOTTOM_MARGIN = 24;
   const SPIKE_WIDTH = 34;
-  const DEATH_REVEAL_MS = 720;
-  const VOID_FAIL_DELAY_MS = 220;
 
   const resetInput = scene => {
     scene.mobileDirection = null;
@@ -43,45 +41,15 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     scene.__forceVoidDeath = true;
     makeVoidVisual(scene);
     resetInput(scene);
-
-    const startX = Number(scene.player.x) || 0;
-    const startY = Number(scene.player.y) || 0;
-    const direction = scene.player.flipX ? -1 : 1;
     scene.player.setAngle(0).setAlpha(1).setScale(1).clearTint().play('runner-hit', true);
-
-    const label = scene.add.text(startX, startY - 62, 'SIGNAL LOST', {
-      fontFamily: 'DM Mono', fontSize: '13px', color: '#ff9b8b', stroke: '#08101c', strokeThickness: 5, letterSpacing: 1
-    }).setOrigin(.5).setDepth(20).setScrollFactor(0);
-    const ring = scene.add.circle(startX, startY + 22, 12, 0xff826e, .22)
-      .setStrokeStyle(2, 0xff826e, .9).setDepth(18);
-
-    scene.tweens.add({
-      targets: scene.player,
-      x: startX - direction * 18,
-      y: startY + 74,
-      angle: direction * 82,
-      scaleX: .86,
-      scaleY: .86,
-      alpha: .12,
-      duration: DEATH_REVEAL_MS,
-      ease: 'Cubic.in'
-    });
-    scene.tweens.add({ targets: label, y: label.y - 26, alpha: 0, duration: DEATH_REVEAL_MS - 40, ease: 'Quad.out' });
-    scene.tweens.add({ targets: ring, scale: 3.8, alpha: 0, duration: 520, onComplete: () => ring.destroy() });
-    if (!scene.motionReduced) scene.shake(170, .008);
-    thisSafeFeedback(scene);
-
-    scene.time.delayedCall(DEATH_REVEAL_MS, () => {
-      label.destroy();
+    const ring = scene.add.circle(scene.player.x, scene.player.y + 22, 12, 0xff826e, .22).setStrokeStyle(2, 0xff826e, .9).setDepth(18);
+    scene.tweens.add({ targets: ring, scale: 3.4, alpha: 0, duration: 220, onComplete: () => ring.destroy() });
+    if (!scene.motionReduced) scene.shake(120, .006);
+    scene.time.delayedCall(220, () => {
       scene.__finalDeathLock = false;
       scene.fail('The courier fell into the relay void.');
     });
   };
-
-  function thisSafeFeedback(scene) {
-    try { scene.game.events.emit('feedback', 'death'); } catch {}
-    try { scene.playerCue?.('SIGNAL LOST', '#ff9b8b'); } catch {}
-  }
 
   RunnerScene.prototype.update = function finalDeathUpdate(time, delta) {
     if (this.__finalDeathLock) { resetInput(this); return; }
@@ -90,11 +58,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       const bounds = this.physics?.world?.bounds;
       const bodyBottom = Number(this.player.body?.bottom ?? (this.player.y + 28));
       const bottomLimit = Number(bounds?.bottom);
-      // Do not use a hard-coded Y=760 cutoff: that caused premature/random-looking deaths.
-      const reachedWorldBottom = Number.isFinite(bottomLimit)
-        ? bodyBottom >= bottomLimit - WORLD_BOTTOM_MARGIN
-        : Number(this.player.y) >= 900;
-      if (reachedWorldBottom) { startVoidDeath(this); return; }
+      const fellBeyondRoute = Number(this.player.y) >= 760;
+      const reachedWorldBottom = Number.isFinite(bottomLimit) && bodyBottom >= bottomLimit - WORLD_BOTTOM_MARGIN;
+      if (fellBeyondRoute || reachedWorldBottom) { startVoidDeath(this); return; }
     }
     return originalUpdate.call(this, time, delta);
   };
@@ -108,19 +74,24 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const isVoid = /void|fell|fall|bottom|rain/i.test(String(message));
 
     if (isVoid) {
-      sceneDeathLock(this);
+      this.__finalDeathLock = true;
       resetInput(this);
       this.player?.setAngle(0).setScale(1).setAlpha(1).clearTint().play('runner-hit', true);
-      if (!this.motionReduced) this.shake(150, .007);
-      thisSafeFeedback(this);
-      this.time.delayedCall(VOID_FAIL_DELAY_MS, () => {
+      if (!this.motionReduced) this.shake(140, .007);
+      this.game.events.emit('feedback', 'death');
+      this.time.delayedCall(160, () => {
         this.__finalDeathLock = false;
+
+        // Environmental void deaths are lethal even during the combat spawn shield.
+        // Clear only the temporary shield guard for the underlying fail() call;
+        // respawnCheckpoint() immediately restores the full 10s shield afterward.
         const savedRespawnGrace = this.respawnGrace;
         const savedHealthInvulnerable = this.healthInvulnerable;
         this.respawnGrace = 0;
         this.healthInvulnerable = 0;
-        try { originalFail.call(this, message); }
-        finally {
+        try {
+          originalFail.call(this, message);
+        } finally {
           this.respawnGrace = savedRespawnGrace;
           this.healthInvulnerable = savedHealthInvulnerable;
         }
@@ -128,7 +99,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       return;
     }
 
-    sceneDeathLock(this);
+    this.__finalDeathLock = true;
     resetInput(this);
     const startX = this.player.x;
     const startY = this.player.y;
@@ -136,15 +107,13 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     this.player.play('runner-hit', true).setTint(0xff826e);
     const label = this.add.text(startX, startY - 62, 'SIGNAL LOST', { fontFamily: 'DM Mono', fontSize: '13px', color: '#ff9b8b', stroke: '#08101c', strokeThickness: 5, letterSpacing: 1 }).setOrigin(.5).setDepth(20).setScrollFactor(0);
     const pulse = this.add.circle(startX, startY + 8, 16, 0xff826e, .18).setStrokeStyle(2, 0xff826e, .55).setDepth(19);
-    this.tweens.add({ targets: this.player, x: startX - direction * 26, y: startY + 30, angle: direction * 105, scaleX: .82, scaleY: .82, alpha: 0, duration: DEATH_REVEAL_MS, ease: 'Cubic.in' });
-    this.tweens.add({ targets: label, y: label.y - 28, alpha: 0, duration: DEATH_REVEAL_MS });
-    this.tweens.add({ targets: pulse, scale: 3.4, alpha: 0, duration: 600, onComplete: () => pulse.destroy() });
-    if (!this.motionReduced) this.shake(170, .008);
-    thisSafeFeedback(this);
-    this.time.delayedCall(DEATH_REVEAL_MS, () => { label.destroy(); this.__finalDeathLock = false; originalFail.call(this, message); });
+    this.tweens.add({ targets: this.player, x: startX - direction * 26, y: startY + 30, angle: direction * 105, scaleX: .82, scaleY: .82, alpha: 0, duration: 420, ease: 'Cubic.in' });
+    this.tweens.add({ targets: label, y: label.y - 28, alpha: 0, duration: 420 });
+    this.tweens.add({ targets: pulse, scale: 3.4, alpha: 0, duration: 400, onComplete: () => pulse.destroy() });
+    if (!this.motionReduced) this.shake(150, .008);
+    this.game.events.emit('feedback', 'death');
+    this.time.delayedCall(440, () => { label.destroy(); this.__finalDeathLock = false; originalFail.call(this, message); });
   };
-
-  function sceneDeathLock(scene) { scene.__finalDeathLock = true; }
 
   RunnerScene.prototype.respawnCheckpoint = function finalRespawn(...args) {
     const result = originalRespawnCheckpoint.apply(this, args);
