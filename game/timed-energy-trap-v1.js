@@ -39,8 +39,30 @@ function setup(scene) {
     phase: 0,
     drainCarry: 0,
     lastCueAt: -Infinity,
+    pulseUntil: 0,
   };
   sceneState.set(scene, state);
+
+  scene.__relayFieldPulse = () => {
+    const now = Number(scene.elapsedMs || 0);
+    if (!state.active || now < state.pulseUntil || scene.respawning) return false;
+    const energy = Number(scene.energy || 0);
+    if (energy < 8) {
+      scene.playerCue?.('FIELD PULSE · NEED 8 ENERGY', '#ff9c91');
+      return false;
+    }
+    const inside = Math.abs(scene.player.x - state.zone.x) < 96 && Math.abs(scene.player.y - state.zone.y) < 68;
+    if (!inside) return false;
+    scene.energy = Math.max(0, energy - 8);
+    scene.game?.events?.emit('energy', scene.energy, scene.energyMax);
+    state.pulseUntil = now + 900;
+    state.drainCarry = 0;
+    scene.playerCue?.('FIELD PULSE · CLEAR', '#aee37f');
+    scene.game?.events?.emit('feedback', 'signal');
+    const flash = scene.add.circle(state.zone.x, state.zone.y, 10, 0xaee37f, .24).setDepth(12);
+    scene.tweens?.add({ targets: flash, scale: 4, alpha: 0, duration: 360, onComplete: () => flash.destroy() });
+    return true;
+  };
 
   if (!scene.motionReduced) {
     scene.tweens.add({ targets: core, alpha: { from: .25, to: 1 }, duration: 360, yoyo: true, repeat: -1 });
@@ -68,7 +90,7 @@ function update(scene, delta) {
     scene.playerCue?.(active ? 'ENERGY FIELD · WAIT OR PUSH' : 'ENERGY FIELD · CLEAR', active ? '#ffcf82' : '#b9f5ff');
   }
 
-  if (!active || scene.respawning) return;
+  if (!active || scene.respawning || now < state.pulseUntil) return;
 
   const inside = Math.abs(scene.player.x - state.zone.x) < 68 && Math.abs(scene.player.y - state.zone.y) < 44;
   if (!inside) return;
@@ -92,6 +114,7 @@ function teardown(scene) {
   if (!state) return;
   state.zone?.destroy?.();
   state.core?.destroy?.();
+  delete scene.__relayFieldPulse;
   sceneState.delete(scene);
 }
 
