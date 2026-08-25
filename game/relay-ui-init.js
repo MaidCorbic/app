@@ -12,6 +12,7 @@ import './signal-network-v1.css';
 import './city-response-v1.css';
 import './collapse-protocol-v1.css';
 import './city-pulse-v1.css';
+import './gameplay-v2-missions-xp.css';
 import './relay-runtime-kernel-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
@@ -72,6 +73,7 @@ import './src/systems/adaptive-mission-modifiers-v1.js';
 import './src/systems/mission-objectives-route-goals-v1.js';
 import './mission-objective-mobile-fix.js';
 import './dynamic-camera-language-v1.js';
+import './gameplay-v2-missions-xp.js';
 import './gameplay-new-layer-v2.js';
 import './city-update-gameplay-hud-v1.js';
 import './dynamic-environment-reactions-v1.js';
