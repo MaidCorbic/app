@@ -140,6 +140,47 @@ function restoreWorldCue(state) {
   state.affectedSignals = [];
 }
 
+function snapshotEnemy(state, enemy) {
+  if (state.enemySnapshots.has(enemy)) return;
+  const velocity = enemy?.body?.velocity;
+  state.enemySnapshots.set(enemy, {
+    velocityX: Number(velocity?.x) || 0,
+    velocityY: Number(velocity?.y) || 0,
+    flipX: Boolean(enemy?.flipX),
+    dynamicEncounter: enemy.getData?.('dynamicEncounter'),
+    dynamicEncounterTarget: enemy.getData?.('dynamicEncounterTarget'),
+    dynamicEncounterUntil: enemy.getData?.('dynamicEncounterUntil'),
+    dynamicEncounterDirection: enemy.getData?.('dynamicEncounterDirection'),
+    dynamicEncounterSlot: enemy.getData?.('dynamicEncounterSlot'),
+    dynamicEncounterRoute: enemy.getData?.('dynamicEncounterRoute'),
+  });
+}
+
+function restoreEnemy(state, enemy) {
+  const snapshot = state.enemySnapshots.get(enemy);
+  if (!snapshot || !enemy?.active) return;
+  try {
+    if (enemy.body?.velocity) {
+      enemy.body.velocity.x = snapshot.velocityX;
+      enemy.body.velocity.y = snapshot.velocityY;
+    }
+    enemy.setFlipX?.(snapshot.flipX);
+    enemy.setData?.('dynamicEncounter', snapshot.dynamicEncounter);
+    enemy.setData?.('dynamicEncounterTarget', snapshot.dynamicEncounterTarget);
+    enemy.setData?.('dynamicEncounterUntil', snapshot.dynamicEncounterUntil);
+    enemy.setData?.('dynamicEncounterDirection', snapshot.dynamicEncounterDirection);
+    enemy.setData?.('dynamicEncounterSlot', snapshot.dynamicEncounterSlot);
+    enemy.setData?.('dynamicEncounterRoute', snapshot.dynamicEncounterRoute);
+  } catch {}
+  state.enemySnapshots.delete(enemy);
+}
+
+function restoreAllEnemies(state) {
+  for (const enemy of state.enemySnapshots.keys()) restoreEnemy(state, enemy);
+  state.enemySnapshots.clear();
+  state.selectedEnemies = [];
+}
+
 function spawnAmbush(scene, state) {
   const player = scene.player;
   if (!player) return false;
@@ -150,6 +191,7 @@ function spawnAmbush(scene, state) {
   const count = state.intensity > 1 ? Math.min(2, candidates.length) : 1;
   const selected = candidates.slice(0, count);
   selected.forEach((enemy, index) => {
+    snapshotEnemy(state, enemy);
     const route = enemy.getData?.('route') || {};
     const direction = enemy.x < player.x ? 1 : -1;
     enemy.setData?.('dynamicEncounter', 'ambush');
@@ -169,6 +211,7 @@ function triggerPursuit(scene, state) {
     .sort((a, b) => distance(a, player) - distance(b, player))
     .find(candidate => distance(candidate, player) > 240 && distance(candidate, player) < 1000);
   if (!enemy) return false;
+  snapshotEnemy(state, enemy);
   enemy.setData?.('dynamicEncounter', 'pursuit');
   enemy.setData?.('dynamicEncounterTarget', player);
   enemy.setData?.('dynamicEncounterUntil', performance.now() + state.config.duration);
@@ -240,9 +283,7 @@ function updateEnemies(scene, state, now) {
     const mode = enemy.getData?.('dynamicEncounter');
     const until = enemy.getData?.('dynamicEncounterUntil') || 0;
     if (!mode || now >= until) {
-      enemy.setData?.('dynamicEncounter', null);
-      enemy.setData?.('dynamicEncounterTarget', null);
-      enemy.setData?.('dynamicEncounterUntil', 0);
+      restoreEnemy(state, enemy);
       continue;
     }
     if (mode === 'pursuit') {
@@ -279,13 +320,7 @@ function update(scene) {
   updateEnemies(scene, state, now);
   if (state.expiresAt && now >= state.expiresAt) {
     restoreWorldCue(state);
-    state.selectedEnemies?.forEach(enemy => {
-      if (!enemy?.active) return;
-      enemy.setData?.('dynamicEncounter', null);
-      enemy.setData?.('dynamicEncounterTarget', null);
-      enemy.setData?.('dynamicEncounterUntil', 0);
-    });
-    state.selectedEnemies = [];
+    restoreAllEnemies(state);
     state.previousEnemyDistances.clear();
     state.completed = true;
   }
@@ -307,6 +342,7 @@ function setup(scene) {
     affectedSignals: [],
     selectedEnemies: [],
     previousEnemyDistances: new Map(),
+    enemySnapshots: new Map(),
   });
 }
 
@@ -314,12 +350,7 @@ function teardown(scene) {
   const state = states.get(scene);
   if (!state) return;
   restoreWorldCue(state);
-  state.selectedEnemies?.forEach(enemy => {
-    if (!enemy?.active) return;
-    enemy.setData?.('dynamicEncounter', null);
-    enemy.setData?.('dynamicEncounterTarget', null);
-    enemy.setData?.('dynamicEncounterUntil', 0);
-  });
+  restoreAllEnemies(state);
   state.previousEnemyDistances.clear();
   states.delete(scene);
 }
