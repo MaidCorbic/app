@@ -1,4 +1,5 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
+import './phaser-title-screen-v1.js';
 import './src/tutorial-map-v1.js';
 import './tutorial-onboarding-v3.js';
 import './tutorial-mobile-layout-fix-v1.js';
