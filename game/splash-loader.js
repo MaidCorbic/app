@@ -66,16 +66,26 @@ globalThis.missions = missions;
     const MIN_SPLASH_MS = 3000;
     const startedAt = performance.now();
 
-    const setProgress = (value, label) => {
+    const getProgressStatus = value => {
+      if (value >= 100) return 'READY';
+      if (value >= 90) return 'FINALIZING RELAY';
+      if (value >= 75) return 'PREPARING HOME';
+      if (value >= 55) return 'STARTING WORLD';
+      if (value >= 35) return 'LOADING GAME SYSTEMS';
+      if (value >= 15) return 'LOADING INTERFACE';
+      return 'INITIALIZING RELAY';
+    };
+
+    const setProgress = value => {
       progress = Math.max(progress, Math.min(100, Math.round(value)));
       bar.style.width = `${progress}%`;
       percent.textContent = `${progress}%`;
-      if (label) status.textContent = label;
+      status.textContent = getProgressStatus(progress);
     };
 
-    const animateTo = (target, label) => new Promise(resolve => {
+    const animateTo = target => new Promise(resolve => {
       if (target <= progress) {
-        setProgress(target, label);
+        setProgress(target);
         resolve();
         return;
       }
@@ -84,7 +94,7 @@ globalThis.missions = missions;
       const duration = Math.max(320, Math.min(1000, (target - from) * 15));
       const frame = now => {
         const t = Math.min(1, (now - startTime) / duration);
-        setProgress(from + (target - from) * (t * (2 - t)), label);
+        setProgress(from + (target - from) * (t * (2 - t)));
         if (t < 1) requestAnimationFrame(frame);
         else resolve();
       };
@@ -99,7 +109,7 @@ globalThis.missions = missions;
         return;
       }
       finishing = true;
-      await animateTo(100, 'READY');
+      await animateTo(100);
       splash.setAttribute('aria-busy', 'false');
       splash.classList.add('is-leaving');
       window.setTimeout(() => {
@@ -112,13 +122,13 @@ globalThis.missions = missions;
       if (!image.naturalWidth || !image.naturalHeight) return;
       imageReady = true;
       sizeArtwork();
-      await animateTo(25, 'LOADING INTERFACE');
+      await animateTo(25);
       finish();
     };
 
     if (imageReady) {
       sizeArtwork();
-      setProgress(25, 'LOADING INTERFACE');
+      setProgress(25);
     } else {
       image.addEventListener('load', onImageReady, { once: true });
       image.addEventListener('error', () => {
@@ -127,7 +137,7 @@ globalThis.missions = missions;
       }, { once: true });
     }
 
-    const onDomReady = () => animateTo(45, 'LOADING GAME SYSTEMS');
+    const onDomReady = () => animateTo(45);
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', onDomReady, { once: true });
     } else {
@@ -137,17 +147,17 @@ globalThis.missions = missions;
     if (!pageReady) {
       window.addEventListener('load', () => {
         pageReady = true;
-        animateTo(65, 'STARTING WORLD').then(finish);
+        animateTo(65).then(finish);
       }, { once: true });
     } else {
-      setProgress(65, 'STARTING WORLD');
+      setProgress(65);
     }
 
     const checkEngine = () => {
       const canvas = document.querySelector('#phaser-game canvas');
       if (canvas) {
         engineReady = true;
-        animateTo(92, 'PREPARING HOME').then(finish);
+        animateTo(92).then(finish);
         return;
       }
       window.setTimeout(checkEngine, 50);
