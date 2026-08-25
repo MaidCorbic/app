@@ -75,15 +75,14 @@ function collectCharge(scene, charge, kind) {
   const energyGain = kind === 'moving' ? 18 : 28;
   scene.energy = Math.min(Number(scene.energyMax || 100), Number(scene.energy || 0) + energyGain);
   scene.boosterTimer = Math.max(Number(scene.boosterTimer) || 0, kind === 'moving' ? 1800 : 3600);
-  scene.game?.events?.emit('health', scene.health);
   scene.game?.events?.emit('feedback', 'gadget');
   scene.playerCue?.(kind === 'moving' ? 'MOBILE CHARGE · SIGNAL BOOST' : 'EMERGENCY CHARGE · +ENERGY', '#8df4ff');
   const burst = scene.add.circle(charge.x, charge.y, 10, 0x8df4ff, .35).setDepth(12);
   scene.tweens?.add({ targets: burst, scale: 3.2, alpha: 0, duration: 260, onComplete: () => burst.destroy() });
 }
 
-function activateHazard(scene, hazard, state, now) {
-  if (!hazard?.active || state.hazardCooldownUntil > now || scene.respawning || scene.finished) return;
+function activateHazard(scene, state, now) {
+  if (state.hazardCooldownUntil > now || scene.respawning || scene.finished) return;
   state.hazardCooldownUntil = now + 1800;
   scene.game?.events?.emit('feedback', 'warning');
   scene.playerCue?.('LIVE CURRENT · MOVE THROUGH', '#ffcf82');
@@ -104,7 +103,7 @@ function breakRouteObject(scene, breaker, state) {
   scene.tweens?.add({ targets: burst, scale: 3.5, alpha: 0, duration: 300, onComplete: () => burst.destroy() });
 }
 
-function activateAccess(scene, node, state) {
+function activateAccess(scene, node) {
   if (!node?.active || node.getData('used')) return;
   if (distance(scene.player, node) > 72) return;
   node.setData('used', true);
@@ -126,9 +125,8 @@ function activateAccess(scene, node, state) {
 function updateMovingPickup(scene, state, now) {
   const moving = state.movingPickup;
   if (!moving?.node?.active) return;
-  const center = moving.originX;
   const offset = Math.sin(now * .0012) * moving.range;
-  moving.node.x = center + offset;
+  moving.node.x = moving.originX + offset;
   moving.node.y = moving.originY + Math.sin(now * .0021) * 8;
   moving.trail.x = moving.node.x;
   moving.trail.y = moving.node.y;
@@ -144,14 +142,14 @@ function update(scene) {
   const now = scene.time?.now ?? performance.now();
 
   state.hazards?.forEach(hazard => {
-    if (hazard?.active && hazard.getBounds?.()?.contains?.(scene.player.x, scene.player.y)) activateHazard(scene, hazard, state, now);
+    if (hazard?.active && hazard.getBounds?.()?.contains?.(scene.player.x, scene.player.y)) activateHazard(scene, state, now);
   });
 
   state.breakers?.forEach(breaker => {
     if (breaker?.active && distance(scene.player, breaker) < 62) breakRouteObject(scene, breaker, state);
   });
 
-  state.accessNodes?.forEach(node => activateAccess(scene, node, state));
+  state.accessNodes?.forEach(node => activateAccess(scene, node));
   updateMovingPickup(scene, state, now);
 }
 
@@ -174,8 +172,8 @@ function makeFeatureState(scene) {
   // 1) Emergency Charge — stationary, uses existing energy/booster runtime.
   const chargeX = routeX(scene, .22);
   const chargeY = groundY(scene, chargeX) - 30;
-  const charge = scene.physics.add.staticImage?.(chargeX, chargeY, 'signal') || scene.physics.add.staticSprite(chargeX, chargeY, 'signal');
-  charge.setScale(.42).setTint(0x8df4ff).setData('feature', 'emergency-charge').setData('collected', false).setDepth(10);
+  const charge = scene.add.image(chargeX, chargeY, 'signal').setScale(.42).setTint(0x8df4ff).setData('feature', 'emergency-charge').setData('collected', false).setDepth(10);
+  scene.physics.add.existing(charge, true);
   state.charges.push(charge);
   scene.physics.add.overlap(scene.player, charge, () => collectCharge(scene, charge, 'emergency'), undefined, scene);
   drawCharge(scene, chargeX, chargeY);
@@ -187,7 +185,7 @@ function makeFeatureState(scene) {
   scene.physics.add.existing(hazard, true);
   state.hazards.push(hazard);
   drawHazard(scene, hazardX, hazardY);
-  scene.physics.add.overlap(scene.player, hazard, () => activateHazard(scene, hazard, state, scene.time?.now ?? performance.now()), undefined, scene);
+  scene.physics.add.overlap(scene.player, hazard, () => activateHazard(scene, state, scene.time?.now ?? performance.now()), undefined, scene);
 
   // 3) Breakable Route Object — only breaks under a high-speed/dash approach.
   const breakerX = routeX(scene, .50);
@@ -212,6 +210,7 @@ function makeFeatureState(scene) {
   state.movingPickup = { node: moving.node, trail: moving.trail, originX: movingX, originY: movingY, range: clamp(span * .045, 70, 150) };
   scene.physics.add.existing(moving.node);
   moving.node.body.setAllowGravity(false);
+  scene.physics.add.overlap(scene.player, moving.node, () => collectCharge(scene, moving.node, 'moving'), undefined, scene);
 }
 
 function teardown(scene) {
@@ -233,7 +232,7 @@ const originalShutdown = RunnerScene.prototype.shutdown;
 if (!RunnerScene.prototype.__worldGameplayExpansionCreatePatched) {
   RunnerScene.prototype.create = function worldGameplayExpansionCreate(...args) {
     const result = originalCreate.apply(this, args);
-    try { const state = makeFeatureState(this); stateByScene.set(this, state); } catch (error) { console.error('[WorldGameplayExpansion] create failed', error); }
+    try { stateByScene.set(this, makeFeatureState(this)); } catch (error) { console.error('[WorldGameplayExpansion] create failed', error); }
     return result;
   };
   RunnerScene.prototype.__worldGameplayExpansionCreatePatched = true;
