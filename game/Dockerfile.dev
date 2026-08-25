@@ -1,7 +1,7 @@
-FROM node:24.14.0-slim
-
-# This is set by the GitHub/Diploi build to the component folder.
+# This will be set by the GitHub action to the folder containing this component.
 ARG FOLDER=/app
+
+FROM node:24.14.0-slim
 
 # Enable corepack
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
@@ -13,10 +13,12 @@ ENV PATH="$PNPM_HOME:$PNPM_HOME/bin:$PATH"
 RUN mkdir -p /home/codespace/.pnpm-store /pnpm \
     && chown -R 1000:1000 /home/codespace/.pnpm-store /pnpm
 
+
 COPY . /app
 WORKDIR ${FOLDER}
 
 ENV NODE_ENV=development
+
 USER 1000:1000
 
 # Apply PNPM settings to be consistent with devcontainer

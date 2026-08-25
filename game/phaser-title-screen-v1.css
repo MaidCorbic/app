@@ -1,8 +1,0 @@
-#phaserTitleRoot{position:fixed;inset:0;z-index:12000;display:block;overflow:hidden;background:#02060d;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,visibility .2s ease}
-.phaser-title-active #phaserTitleRoot{opacity:1;visibility:visible;pointer-events:auto}
-#phaserTitleRoot canvas{display:block;width:100%!important;height:100%!important;touch-action:manipulation;image-rendering:auto}
-#intro.intro{display:none!important}
-body.phaser-title-active{overflow:hidden;background:#02060d}
-body.phaser-title-active #relaySplash{display:none!important}
-@media(max-width:700px){#phaserTitleRoot{touch-action:manipulation}}
-@media(prefers-reduced-motion:reduce){#phaserTitleRoot{transition:none}}

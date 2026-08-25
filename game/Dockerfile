@@ -1,6 +1,6 @@
 FROM node:24.14.0-slim AS base
 
-# This is set by the GitHub/Diploi build to the component folder.
+# This will be set by the GitHub action to the folder containing this component.
 ARG FOLDER=/app
 
 # Enable corepack
@@ -53,10 +53,12 @@ RUN \
 
 # Production image, copy all the files and run "npm start"
 FROM base AS runner
+
 COPY --from=builder --chown=1000:1000 /app /app
 WORKDIR ${FOLDER}
 
 ENV NODE_ENV=production
+
 USER 1000:1000
 
 EXPOSE 3000

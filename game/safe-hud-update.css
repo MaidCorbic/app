@@ -1,0 +1,117 @@
+/* SAFE HUD UPDATE 1
+   Visual-only enhancement. No gameplay, Phaser, progression, or runtime logic is changed.
+*/
+
+.hud {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.hud-route,
+.hud-progress,
+.hud-actions {
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.hud-route:hover,
+.hud-progress:hover,
+.hud-actions:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.hud-progress > div {
+  position: relative;
+  overflow: hidden;
+}
+
+.hud-progress > div::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  animation: relayHudSweep 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.route-dot {
+  box-shadow: 0 0 0 0 rgba(56,189,248,.55);
+  animation: relayHudPulse 2s ease-out infinite;
+}
+
+.pause-button {
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+
+.pause-button:hover,
+.pause-button:focus-visible {
+  transform: translateY(-2px) scale(1.04);
+  filter: brightness(1.12);
+}
+
+.pause-button:active {
+  transform: translateY(0) scale(.97);
+}
+
+.world-marker {
+  transition: transform .25s ease, opacity .25s ease;
+}
+
+.world-marker span {
+  letter-spacing: .16em;
+}
+
+#signalCount,
+#hudXp {
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 14px rgba(56,189,248,.22);
+}
+
+#toast {
+  pointer-events: none;
+}
+
+@keyframes relayHudPulse {
+  0% { box-shadow: 0 0 0 0 rgba(56,189,248,.55); }
+  70% { box-shadow: 0 0 0 8px rgba(56,189,248,0); }
+  100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); }
+}
+
+@keyframes relayHudSweep {
+  0%, 45% { transform: translateX(-100%); }
+  75%, 100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-dot,
+  .hud-progress > div::after {
+    animation: none;
+  }
+
+  .hud-route,
+  .hud-progress,
+  .hud-actions,
+  .pause-button,
+  .world-marker {
+    transition: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hud {
+    gap: 8px;
+  }
+
+  .hud-route,
+  .hud-progress,
+  .hud-actions {
+    min-width: 0;
+  }
+
+  .hud-route b,
+  .hud-route small,
+  .hud-progress small {
+    white-space: nowrap;
+  }
+}

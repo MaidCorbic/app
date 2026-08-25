@@ -1,9 +1,0 @@
-/* UPDATE 21 — COLLAPSE PROTOCOL V1 */
-#collapseProtocolV1{position:fixed;inset:0;z-index:220;pointer-events:none;color:#effcff;font-family:inherit}
-#collapseProtocolV1 .collapse-event{position:absolute;left:50%;top:clamp(120px,15vh,170px);width:min(560px,calc(100vw - 28px));transform:translate(-50%,-10px) scale(.96);opacity:0;visibility:hidden;text-align:center;white-space:normal;text-shadow:0 0 22px rgba(255,118,78,.62);transition:opacity .15s ease,transform .2s cubic-bezier(.18,.82,.22,1)}
-#collapseProtocolV1 .collapse-event.show{opacity:1;visibility:visible;transform:translate(-50%,0) scale(1)}
-#collapseProtocolV1 .collapse-kicker{font-size:9px;font-weight:800;letter-spacing:.25em;opacity:.72}
-#collapseProtocolV1 .collapse-title{margin-top:4px;font-size:22px;font-weight:900;letter-spacing:.1em;color:#ff9d6e}
-#collapseProtocolV1 .collapse-sub{margin-top:5px;font-size:10px;font-weight:700;letter-spacing:.08em;color:#f2fdff}
-@media(max-width:700px){#collapseProtocolV1 .collapse-event{top:112px;width:calc(100vw - 24px)}#collapseProtocolV1 .collapse-kicker{font-size:8px}#collapseProtocolV1 .collapse-title{font-size:18px}#collapseProtocolV1 .collapse-sub{font-size:9px}}
-@media(prefers-reduced-motion:reduce){#collapseProtocolV1 .collapse-event{transition:none!important}}

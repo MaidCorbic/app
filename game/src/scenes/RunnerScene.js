@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { packages } from '../packages.js';
 import { rivalAppearances } from '../world-content.js';
 import { enemyIntel, signatureThreats } from '../enemy-intel.js';
-import titleBackdropUrl from '../../assets/title-city-backdrop-v2.png';
 
 // Kept together so movement can be tuned without touching level or state logic.
 const RUNNER_TUNING = {
@@ -34,10 +33,6 @@ const DISTRICT_VISUALS = {
 
 export class RunnerScene extends Phaser.Scene {
   constructor() { super('runner'); }
-
-  preload() {
-    if (!this.textures.exists('runner-city-backdrop')) this.load.image('runner-city-backdrop', titleBackdropUrl);
-  }
 
   createTextures() {
     const make = (key, width, height, draw) => {
@@ -142,11 +137,8 @@ export class RunnerScene extends Phaser.Scene {
 
   createEnvironment() {
     const visual = DISTRICT_VISUALS[this.mission.id];
-    const city = this.add.image(750, 360, 'runner-city-backdrop').setScrollFactor(.035).setOrigin(.5).setAlpha(.88);
-    city.setScale(Math.max(1500 / city.width, 760 / city.height));
     const sky = this.add.graphics().setScrollFactor(0);
-    const skyBottom = this.mission.blackout ? 0x10182a : visual.skyline;
-    sky.fillStyle(0x02060d, .46).fillRect(0, 0, 1500, 720).fillStyle(skyBottom, .17).fillRect(0, 410, 1500, 310);
+    const skyBottom = this.mission.blackout ? 0x10182a : visual.skyline; sky.fillGradientStyle(0x07101e, 0x07101e, skyBottom, skyBottom, 1).fillRect(0, 0, 1500, 720);
     if (this.mission.gravityMode === 'low') { for (let index = 0; index < 86; index++) { const x = (index * 137) % 1500; const y = (index * 71) % 500; sky.fillStyle(index % 4 ? 0x8df4ff : 0xffd06e, .45).fillCircle(x, y, index % 7 ? 1 : 2); } sky.fillStyle(0x5f4e96, .25).fillCircle(1200, 180, 140).fillStyle(0x1d2445).fillCircle(1245, 150, 120); }
     sky.fillStyle(0xffe0a8, .14).fillCircle(975, 104, 104).fillStyle(0xffe0a8).fillCircle(975, 104, 58).fillStyle(0x10182a).fillCircle(1002, 87, 58);
     const environment = { 'first-delivery': ['LANTERN ROOFS', 0xffd06e], 'dead-drop': ['HARBOR FOG', 0xffbd5b], blackout: ['EMERGENCY GRID', 0x8df4ff], pursuit: ['RAIL STORM', 0xff826e], 'signal-storm': ['CROWN TEMPEST', 0xb993ff], 'corporate-lockdown': ['HELIX SIEGE', 0xff826e], 'final-relay': ['APEX ORBIT', 0xffe0a8] }[this.mission.id];
@@ -167,7 +159,7 @@ export class RunnerScene extends Phaser.Scene {
       foreground.fillStyle(0x0a1220, .78).fillRect(x + 20, 475, 24, 245).fillRect(x + 105, 530, 15, 190).fillStyle(0x131f30).fillRect(x, 628, 270, 92);
       foreground.lineStyle(3, 0x52677d, .6).lineBetween(x + 44, 505, x + 130, 505).lineBetween(x + 44, 505, x + 44, 580);
     }
-    this.parallaxLayers = [{ layer: city, base: .035 }, { layer: distant, base: .12 }, { layer: middle, base: .38 }, { layer: foreground, base: .72 }];
+    this.parallaxLayers = [{ layer: distant, base: .12 }, { layer: middle, base: .38 }, { layer: foreground, base: .72 }];
   }
 
   createPlatforms() {
