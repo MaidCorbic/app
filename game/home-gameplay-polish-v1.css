@@ -1,0 +1,21 @@
+/* Home/gameplay presentation polish: preserve existing HUD, reduce desktop overflow, keep menu actions obvious. */
+#intro{overflow:hidden!important;overscroll-behavior:none!important;min-height:100dvh!important;height:100dvh!important}
+#intro .main-menu,#intro .main-menu-body{min-height:0!important;height:100%!important;overflow:hidden!important}
+#intro .main-menu-body{display:flex!important;align-items:center!important;justify-content:center!important;padding:clamp(78px,9vh,112px) 24px 24px!important;box-sizing:border-box!important}
+#intro .title-lockup{max-width:min(920px,92vw)!important}
+#intro .menu-actions{gap:10px!important}
+#intro .play-button,#intro .continue-button,#intro .menu-option-button,#intro .faq-launcher,#intro .info-circle{font-family:'DM Mono',ui-monospace,monospace!important;text-transform:uppercase!important}
+#intro .play-button{position:relative!important;min-height:58px!important;padding:0 24px!important;border:1px solid rgba(141,244,255,.68)!important;border-radius:10px!important;background:linear-gradient(180deg,#112b3d,#07131f)!important;box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 22px rgba(25,200,245,.16),inset 0 1px rgba(255,255,255,.08)!important;clip-path:polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px))!important}
+#intro .play-button:hover{transform:translateY(-2px)!important;box-shadow:0 14px 34px rgba(0,0,0,.45),0 0 34px rgba(25,200,245,.28)!important}
+#intro .title-secondary{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;margin-top:14px!important}
+#intro .menu-option-button{min-height:52px!important;padding:10px 11px!important;border:1px solid rgba(217,231,244,.16)!important;border-radius:8px!important;background:linear-gradient(180deg,rgba(11,24,39,.96),rgba(5,12,21,.96))!important;color:#eaf2f8!important;box-shadow:0 8px 20px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.04)!important;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,color .16s ease!important}
+#intro .menu-option-button:hover,#intro .menu-option-button:focus-visible{transform:translateY(-2px)!important;border-color:rgba(255,208,110,.74)!important;color:#ffd06e!important;box-shadow:0 10px 26px rgba(0,0,0,.35),0 0 18px rgba(255,208,110,.1)!important;outline:none!important}
+#intro .menu-option-button span{display:block!important;font-size:10px!important;font-weight:900!important;letter-spacing:.12em!important;white-space:nowrap!important}
+#intro .menu-option-button small{display:block!important;margin-top:4px!important;color:#8498aa!important;font-size:7px!important;letter-spacing:.08em!important;white-space:nowrap!important}
+#intro.relay-home-entrance-v4 .main-menu{opacity:0;transform:translateY(18px) scale(.985);transition:opacity .7s cubic-bezier(.2,.75,.2,1),transform .7s cubic-bezier(.2,.75,.2,1)}
+#intro.relay-home-entrance-done .main-menu{opacity:1;transform:none}
+#intro .relay-home-title-enter{opacity:0;transform:translateY(12px);transition:opacity .65s .12s ease,transform .65s .12s cubic-bezier(.2,.75,.2,1)}
+#intro.relay-home-entrance-done .relay-home-title-enter{opacity:1;transform:none}
+@media(max-width:760px){#intro .main-menu-body{overflow:auto!important;padding:86px 14px 18px!important;align-items:flex-start!important}#intro .title-secondary{grid-template-columns:repeat(2,minmax(0,1fr))!important}#intro .menu-option-button{min-height:50px!important}}
+@media(min-width:761px){body{overflow:hidden!important}#game{height:100dvh!important;overflow:hidden!important}#intro .main-menu-header{position:fixed!important;top:0;left:0;right:0;z-index:80;padding:18px 24px!important}#intro .info-launcher{position:fixed!important;top:18px;right:24px;z-index:90!important}}
+@media(prefers-reduced-motion:reduce){#intro .main-menu,#intro .relay-home-title-enter{transition:none!important;transform:none!important;opacity:1!important}}
