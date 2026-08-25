@@ -1,4 +1,5 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
+import './update-ui.css';
 import './gameplay-event-hud-v2.css';
 import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
