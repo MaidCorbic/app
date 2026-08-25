@@ -10,7 +10,7 @@ export const packages = {
 
 void import('./scenes/RunnerScene.js')
   .then(async ({ RunnerScene }) => {
-    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }, { installWorldMemory }, { installGrappleTraversal }] = await Promise.all([
+    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }, { installWorldMemory }, { installGrappleTraversal }, { installTeleportNetwork }] = await Promise.all([
       import('./systems/enemy-runtime-v2.js'),
       import('./systems/enemy-layout-v2.js'),
       import('./systems/enemy-ai-awareness-v1.js'),
@@ -18,6 +18,7 @@ void import('./scenes/RunnerScene.js')
       import('./systems/reactive-courier-encounter-v1.js'),
       import('./systems/world-memory-v1.js'),
       import('./systems/grapple-traversal-v1.js'),
+      import('./systems/teleport-network-v1.js'),
     ]);
     installEnemyLayout(RunnerScene);
     installEnemyRuntime(RunnerScene);
@@ -26,5 +27,6 @@ void import('./scenes/RunnerScene.js')
     installWorldMemory(RunnerScene);
     installReactiveCourierEncounter(RunnerScene);
     installGrappleTraversal(RunnerScene);
+    installTeleportNetwork(RunnerScene);
   })
   .catch(error => console.error('[gameplay-runtime] failed to initialize', error));
