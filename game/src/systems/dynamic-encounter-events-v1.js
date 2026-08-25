@@ -1,58 +1,61 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 
-// UPDATE 14 — DYNAMIC ENCOUNTER EVENTS V1
-// One deterministic encounter per run. Reads existing scene/enemy state only.
-// No progression, score, Performance V1, mission completion, or save ownership.
-// Existing mission-specific encounters always win. A safe Signal Anomaly fallback
-// is used only for a mission that has no encounter configured yet.
+// UPDATE 21 — DIEGETIC DYNAMIC ENCOUNTERS
+// Surprise without another permanent HUD. Existing gameplay remains authoritative.
+
 const CONFIG = {
-  'first-delivery': { type: 'signal-anomaly', triggerX: 1780, radius: 210, title: 'SIGNAL ANOMALY', message: 'SIGNAL FIELD UNSTABLE', duration: 6500 },
-  'dead-drop': { type: 'ambush', triggerX: 2050, radius: 230, title: 'AMBUSH', message: 'HOSTILES INBOUND', duration: 7000 },
-  blackout: { type: 'power-surge', triggerX: 2280, radius: 230, title: 'POWER SURGE', message: 'GRID LOAD SPIKE', duration: 6500 },
-  pursuit: { type: 'pursuit', triggerX: 2200, radius: 250, title: 'PURSUIT', message: 'INTERCEPTOR LOCKED ON', duration: 8500 },
-  'signal-storm': { type: 'signal-anomaly', triggerX: 2350, radius: 250, title: 'SIGNAL STORM', message: 'SIGNAL FIELD DESTABILIZED', duration: 8000 },
-  'corporate-lockdown': { type: 'ambush', triggerX: 2450, radius: 250, title: 'LOCKDOWN', message: 'SECURITY RESPONSE ACTIVE', duration: 8000 },
-  'final-relay': { type: 'pursuit', triggerX: 2500, radius: 260, title: 'FINAL PURSUIT', message: 'INTERCEPTOR DEPLOYED', duration: 9000 },
+  'first-delivery': { variants: [
+    { type: 'signal-anomaly', triggerX: 1780, radius: 210, duration: 6200, message: 'SIGNAL FIELD UNSTABLE' },
+    { type: 'ambush', triggerX: 2240, radius: 220, duration: 6500, message: 'MOVEMENT AHEAD' },
+  ]},
+  'dead-drop': { variants: [
+    { type: 'ambush', triggerX: 2050, radius: 230, duration: 7000, message: 'HOSTILES MOVING' },
+    { type: 'signal-anomaly', triggerX: 2520, radius: 220, duration: 6200, message: 'DEAD DROP SIGNAL DISTORTED' },
+  ]},
+  blackout: { variants: [
+    { type: 'power-surge', triggerX: 2280, radius: 230, duration: 5600, message: 'GRID LOAD SPIKE' },
+    { type: 'ambush', triggerX: 2760, radius: 230, duration: 6800, message: 'SECURITY RESPONSE' },
+  ]},
+  pursuit: { variants: [
+    { type: 'pursuit', triggerX: 2200, radius: 250, duration: 8500, message: 'INTERCEPTOR LOCKED ON' },
+    { type: 'ambush', triggerX: 2880, radius: 240, duration: 6800, message: 'CUT-OFF AHEAD' },
+  ]},
+  'signal-storm': { variants: [
+    { type: 'signal-anomaly', triggerX: 2350, radius: 250, duration: 8000, message: 'SIGNAL FIELD DESTABILIZED' },
+    { type: 'power-surge', triggerX: 3180, radius: 250, duration: 6200, message: 'ARRAY SURGE' },
+  ]},
+  'corporate-lockdown': { variants: [
+    { type: 'ambush', triggerX: 2450, radius: 250, duration: 8000, message: 'SECURITY RESPONSE ACTIVE' },
+    { type: 'pursuit', triggerX: 3220, radius: 250, duration: 8200, message: 'INTERCEPTOR DEPLOYED' },
+  ]},
+  'final-relay': { variants: [
+    { type: 'pursuit', triggerX: 2500, radius: 260, duration: 9000, message: 'FINAL INTERCEPT' },
+    { type: 'signal-anomaly', triggerX: 3420, radius: 260, duration: 7600, message: 'RELAY CORE DISTORTION' },
+  ]},
 };
 
-const DEFAULT_SIGNAL_ANOMALY = {
-  type: 'signal-anomaly',
-  radius: 220,
-  title: 'SIGNAL ANOMALY',
-  message: 'SIGNAL FIELD UNSTABLE',
-  duration: 6500,
-};
-
+const FALLBACK = { type: 'signal-anomaly', radius: 220, duration: 6200, message: 'SIGNAL FIELD UNSTABLE' };
 const states = new WeakMap();
 const distance = (a, b) => Math.hypot((a?.x || 0) - (b?.x || 0), (a?.y || 0) - (b?.y || 0));
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const lerp = (from, to, amount) => from + (to - from) * amount;
 
 function missionId(scene) {
-  return [
-    scene?.sys?.settings?.data?.missionId,
-    scene?.sys?.settings?.data?.mission,
-    scene?.registry?.get?.('missionId'),
-    scene?.mission?.id,
-    document.documentElement?.dataset?.missionId,
-    document.body?.dataset?.missionId,
-  ].find(value => typeof value === 'string') || null;
-}
-
-function fallbackTriggerX(scene) {
-  const bounds = scene?.physics?.world?.bounds;
-  const width = Number(bounds?.width);
-  const left = Number(bounds?.x);
-  if (Number.isFinite(width) && width > 600 && Number.isFinite(left)) {
-    return left + width * .55;
-  }
-  return Number(scene?.player?.x || 0) + 900;
+  return [scene?.sys?.settings?.data?.missionId, scene?.sys?.settings?.data?.mission, scene?.registry?.get?.('missionId'), scene?.mission?.id, document.documentElement?.dataset?.missionId, document.body?.dataset?.missionId].find(value => typeof value === 'string') || null;
 }
 
 function getConfig(scene, id) {
-  if (!id) return null;
-  if (CONFIG[id]) return CONFIG[id];
-  // Future/new missions get a single lightweight anomaly instead of no encounter.
-  // This is deliberately fallback-only so existing authored encounters are untouched.
-  return { ...DEFAULT_SIGNAL_ANOMALY, triggerX: fallbackTriggerX(scene) };
+  const variants = CONFIG[id]?.variants;
+  if (variants?.length) {
+    const runId = Number(scene?.runId);
+    const seed = Number.isFinite(runId) ? Math.abs(runId) : Math.floor(performance.now() / 1000);
+    return { ...variants[seed % variants.length] };
+  }
+  const bounds = scene?.physics?.world?.bounds;
+  const width = Number(bounds?.width);
+  const left = Number(bounds?.x);
+  const triggerX = Number.isFinite(width) && width > 600 && Number.isFinite(left) ? left + width * .55 : Number(scene?.player?.x || 0) + 900;
+  return { ...FALLBACK, triggerX };
 }
 
 function getEnemies(scene) {
@@ -65,76 +68,41 @@ function getEnemies(scene) {
 
 function getNearbySignals(scene, radius = 620) {
   const player = scene.player;
-  const displayList = scene.children?.list || [];
-  if (!player || !displayList.length) return [];
-  return displayList.filter(node => {
-    if (!node || node.active === false || node.texture?.key !== 'signal') return false;
-    return distance(node, player) <= radius;
-  });
+  const list = scene.children?.list || [];
+  if (!player || !list.length) return [];
+  return list.filter(node => node?.active !== false && node?.texture?.key === 'signal' && distance(node, player) <= radius);
+}
+
+function feedback(scene, kind) {
+  try { scene.game?.events?.emit('feedback', kind); } catch {}
 }
 
 function announce(scene, config) {
+  // Intentionally no DOM HUD. playerCue is the existing short-lived gameplay communication layer.
   try { scene.playerCue?.(config.message, '#8df4ff'); } catch {}
-
-  let node = document.getElementById('dynamicEncounterEvent');
-  if (!node) {
-    node = document.createElement('div');
-    node.id = 'dynamicEncounterEvent';
-    node.setAttribute('role', 'status');
-    node.setAttribute('aria-live', 'polite');
-    node.innerHTML = '<strong></strong><small></small>';
-    document.body.appendChild(node);
-
-    const style = document.createElement('style');
-    style.id = 'dynamic-encounter-events-v1-style';
-    style.textContent = `
-      #dynamicEncounterEvent{position:fixed;left:50%;top:calc(86px + env(safe-area-inset-top,0px));transform:translateX(-50%) translateY(-8px);z-index:100002;display:none;min-width:min(84vw,340px);padding:10px 14px;border:1px solid rgba(141,244,255,.72);border-radius:10px;background:rgba(4,12,24,.94);box-shadow:0 0 20px rgba(141,244,255,.18),inset 0 0 18px rgba(141,244,255,.04);text-align:center;color:#e9fdff;font:900 11px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.11em;text-transform:uppercase;pointer-events:none;opacity:0;transition:opacity .18s ease,transform .18s ease}
-      #dynamicEncounterEvent.is-visible{display:block;opacity:1;transform:translateX(-50%) translateY(0)}
-      #dynamicEncounterEvent small{display:block;margin-top:4px;font-size:8px;letter-spacing:.08em;color:#8df4ff;opacity:.78}
-      @media(max-width:700px){#dynamicEncounterEvent{top:calc(72px + env(safe-area-inset-top,0px));min-width:76vw;padding:9px 11px;font-size:9px}}
-      @media(prefers-reduced-motion:reduce){#dynamicEncounterEvent{transition:none}}
-    `;
-    document.head.appendChild(style);
-  }
-
-  node.querySelector('strong').textContent = config.title;
-  node.querySelector('small').textContent = config.type.replaceAll('-', ' ').toUpperCase();
-  node.classList.add('is-visible');
-  clearTimeout(node.__hideTimer);
-  node.__hideTimer = setTimeout(() => node.classList.remove('is-visible'), 2600);
+  feedback(scene, config.type === 'pursuit' || config.type === 'ambush' ? 'chase' : 'warning');
 }
 
 function createWorldCue(scene, state) {
-  const config = state.config;
   try {
-    if (config.type === 'signal-anomaly') {
+    if (state.config.type === 'signal-anomaly') {
       const signals = getNearbySignals(scene);
-      state.affectedSignals = signals.map(signal => ({ signal, scale: signal.scaleX || 1, alpha: signal.alpha ?? 1 }));
-      signals.forEach(signal => {
-        signal.setTint?.(0x8df4ff);
-        signal.setAlpha?.(.72);
-        signal.setScale?.((signal.scaleX || 1) * 1.14, (signal.scaleY || 1) * 1.14);
-      });
-      state.pulseUntil = performance.now() + config.duration;
-      try { scene.cameras?.main?.flash?.(180, 70, 180, 255, false); } catch {}
-    } else if (config.type === 'power-surge') {
-      state.pulseUntil = performance.now() + config.duration;
-      try { scene.cameras?.main?.flash?.(120, 90, 220, 255, false); } catch {}
+      state.affectedSignals = signals.map(signal => ({ signal, scaleX: signal.scaleX || 1, scaleY: signal.scaleY || 1, alpha: signal.alpha ?? 1 }));
+      signals.forEach(signal => { signal.setTint?.(0x8df4ff); signal.setAlpha?.(.72); });
+      state.lastWorldPulse = performance.now();
+      if (!scene.motionReduced) scene.cameras?.main?.flash?.(110, 70, 180, 255, false);
+    } else if (state.config.type === 'power-surge') {
+      state.lastWorldPulse = performance.now();
+      if (!scene.motionReduced) scene.cameras?.main?.flash?.(90, 90, 220, 255, false);
     }
-  } catch (error) {
-    console.warn('[DynamicEncounterV1] visual cue skipped', error);
-  }
+  } catch (error) { console.warn('[DynamicEncounterV1] world cue skipped', error); }
 }
 
 function restoreWorldCue(state) {
   for (const entry of state.affectedSignals || []) {
     const signal = entry.signal;
     if (!signal || signal.destroyed) continue;
-    try {
-      signal.clearTint?.();
-      signal.setAlpha?.(entry.alpha);
-      signal.setScale?.(entry.scale);
-    } catch {}
+    try { signal.clearTint?.(); signal.setAlpha?.(entry.alpha); signal.setScale?.(entry.scaleX, entry.scaleY); } catch {}
   }
   state.affectedSignals = [];
 }
@@ -142,104 +110,146 @@ function restoreWorldCue(state) {
 function spawnAmbush(scene, state) {
   const player = scene.player;
   if (!player) return false;
-  const candidates = getEnemies(scene).filter(enemy => distance(enemy, player) > 280 && distance(enemy, player) < 1200);
+  const candidates = getEnemies(scene)
+    .filter(enemy => !enemy.getData?.('boss') && distance(enemy, player) > 280 && distance(enemy, player) < 1050)
+    .sort((a, b) => distance(a, player) - distance(b, player));
   if (!candidates.length) return false;
-  candidates.slice(0, 2).forEach(enemy => enemy.setData?.('dynamicEncounter', state.config.type));
+  const selected = candidates.slice(0, Math.min(2, candidates.length));
+  selected.forEach((enemy, index) => {
+    const route = enemy.getData?.('route') || {};
+    const direction = enemy.x < player.x ? 1 : -1;
+    enemy.setData?.('dynamicEncounter', 'ambush');
+    enemy.setData?.('dynamicEncounterUntil', performance.now() + state.config.duration);
+    enemy.setData?.('dynamicEncounterDirection', direction);
+    enemy.setData?.('dynamicEncounterSlot', index);
+    enemy.setData?.('dynamicEncounterRoute', route);
+  });
+  state.selectedEnemies = selected;
   return true;
 }
 
 function triggerPursuit(scene, state) {
   const player = scene.player;
-  const enemy = getEnemies(scene).find(candidate => distance(candidate, player) > 240 && distance(candidate, player) < 1000);
+  const enemy = getEnemies(scene)
+    .filter(candidate => !candidate.getData?.('boss'))
+    .sort((a, b) => distance(a, player) - distance(b, player))
+    .find(candidate => distance(candidate, player) > 240 && distance(candidate, player) < 1000);
   if (!enemy) return false;
   enemy.setData?.('dynamicEncounter', 'pursuit');
   enemy.setData?.('dynamicEncounterTarget', player);
   enemy.setData?.('dynamicEncounterUntil', performance.now() + state.config.duration);
+  state.selectedEnemies = [enemy];
   return true;
 }
 
 function activate(scene, state) {
   if (state.triggered || state.completed) return;
-  const type = state.config.type;
   let applied = true;
-  if (type === 'ambush') applied = spawnAmbush(scene, state);
-  else if (type === 'pursuit') applied = triggerPursuit(scene, state);
-  if (!applied && (type === 'ambush' || type === 'pursuit')) return;
-
+  if (state.config.type === 'ambush') applied = spawnAmbush(scene, state);
+  else if (state.config.type === 'pursuit') applied = triggerPursuit(scene, state);
+  if (!applied && (state.config.type === 'ambush' || state.config.type === 'pursuit')) return;
   state.triggered = true;
   state.expiresAt = performance.now() + state.config.duration;
   createWorldCue(scene, state);
   announce(scene, state.config);
 }
 
-function setup(scene) {
-  if (!scene || states.has(scene)) return;
-  const id = missionId(scene);
-  const config = getConfig(scene, id);
-  if (config && scene.player) {
-    states.set(scene, {
-      missionId: id,
-      config,
-      fallback: !CONFIG[id],
-      triggered: false,
-      completed: false,
-      expiresAt: 0,
-      affectedSignals: [],
-      pulseUntil: 0,
-    });
+function updateSignalAnomaly(scene, state, now) {
+  if (state.config.type !== 'signal-anomaly' || now >= state.expiresAt) return;
+  const pulse = 1 + Math.sin(now * .018) * .075;
+  for (const entry of state.affectedSignals || []) {
+    const signal = entry.signal;
+    if (!signal?.active) continue;
+    signal.setScale?.(entry.scaleX * pulse, entry.scaleY * pulse);
+    signal.setAlpha?.(.52 + (Math.sin(now * .012) + 1) * .12);
+  }
+  if (!scene.motionReduced && now - state.lastWorldPulse > 900) {
+    state.lastWorldPulse = now;
+    scene.cameras?.main?.shake?.(70, .0012);
+  }
+}
+
+function updatePowerSurge(scene, state, now) {
+  if (state.config.type !== 'power-surge' || now >= state.expiresAt || now - state.lastWorldPulse < 700) return;
+  state.lastWorldPulse = now;
+  const gates = scene.movingGates?.getChildren?.() || [];
+  const gate = gates.find(item => item?.active);
+  if (gate && scene.tweens) scene.tweens.add({ targets: gate, alpha: .35, duration: 90, yoyo: true, repeat: 2 });
+}
+
+function updateEnemies(scene, state, now) {
+  const player = scene.player;
+  if (!player) return;
+  for (const enemy of state.selectedEnemies || []) {
+    if (!enemy?.active) continue;
+    const mode = enemy.getData?.('dynamicEncounter');
+    const until = enemy.getData?.('dynamicEncounterUntil') || 0;
+    if (!mode || now >= until) {
+      enemy.setData?.('dynamicEncounter', null);
+      enemy.setData?.('dynamicEncounterTarget', null);
+      enemy.setData?.('dynamicEncounterUntil', 0);
+      continue;
+    }
+    if (mode === 'pursuit') {
+      const target = enemy.getData?.('dynamicEncounterTarget') || player;
+      const dx = (target?.x || 0) - enemy.x;
+      const dy = (target?.y || 0) - enemy.y;
+      if (enemy.body?.velocity) {
+        enemy.body.velocity.x = clamp(enemy.body.velocity.x + Math.sign(dx) * .95, -250, 250);
+        enemy.body.velocity.y = clamp(enemy.body.velocity.y + Math.sign(dy) * .18, -55, 55);
+      }
+      enemy.setFlipX?.(dx < 0);
+    }
+    if (mode === 'ambush') {
+      const direction = enemy.getData?.('dynamicEncounterDirection') || 1;
+      const route = enemy.getData?.('dynamicEncounterRoute') || enemy.getData?.('route') || {};
+      if (enemy.body?.velocity) enemy.body.velocity.x = lerp(enemy.body.velocity.x || 0, direction * 170, .035);
+      if (Number.isFinite(route.min) && Number.isFinite(route.max)) {
+        if (enemy.x <= route.min) enemy.setData?.('dynamicEncounterDirection', 1);
+        if (enemy.x >= route.max) enemy.setData?.('dynamicEncounterDirection', -1);
+      }
+      enemy.setFlipX?.(direction < 0);
+    }
   }
 }
 
 function update(scene) {
   const state = states.get(scene);
-  if (!state || state.completed || !scene.player?.active) return;
-
+  if (!state || state.completed || !scene.player?.active || scene.finished || scene.respawning) return;
+  const now = performance.now();
   if (!state.triggered && Math.abs((scene.player.x || 0) - state.config.triggerX) <= state.config.radius) activate(scene, state);
-
-  if (state.triggered && state.expiresAt && performance.now() >= state.expiresAt) {
+  if (!state.triggered) return;
+  updateSignalAnomaly(scene, state, now);
+  updatePowerSurge(scene, state, now);
+  updateEnemies(scene, state, now);
+  if (state.expiresAt && now >= state.expiresAt) {
     restoreWorldCue(state);
+    state.selectedEnemies?.forEach(enemy => {
+      if (!enemy?.active) return;
+      enemy.setData?.('dynamicEncounter', null);
+      enemy.setData?.('dynamicEncounterTarget', null);
+      enemy.setData?.('dynamicEncounterUntil', 0);
+    });
     state.completed = true;
   }
+}
 
-  if (state.triggered && state.config.type === 'signal-anomaly' && state.expiresAt > performance.now()) {
-    const pulse = 1 + Math.sin(performance.now() * .018) * .07;
-    for (const entry of state.affectedSignals || []) entry.signal?.setScale?.(entry.scale * pulse, entry.scale * pulse);
-  }
-
-  if (state.triggered && state.config.type === 'pursuit') {
-    const now = performance.now();
-    getEnemies(scene).forEach(enemy => {
-      if (enemy.getData?.('dynamicEncounter') !== 'pursuit') return;
-      const until = enemy.getData?.('dynamicEncounterUntil') || 0;
-      if (now >= until) {
-        enemy.setData?.('dynamicEncounter', null);
-        enemy.setData?.('dynamicEncounterTarget', null);
-        enemy.setData?.('dynamicEncounterUntil', 0);
-        return;
-      }
-      const target = enemy.getData?.('dynamicEncounterTarget');
-      const dx = (target?.x || 0) - (enemy.x || 0);
-      const dy = (target?.y || 0) - (enemy.y || 0);
-      if (enemy.body?.velocity) {
-        enemy.body.velocity.x += Math.sign(dx) * 7;
-        enemy.body.velocity.y += Math.sign(dy) * 2;
-      }
-    });
-  }
+function setup(scene) {
+  if (!scene || states.has(scene) || !scene.player) return;
+  const id = missionId(scene);
+  states.set(scene, { missionId: id, config: getConfig(scene, id), triggered: false, completed: false, expiresAt: 0, lastWorldPulse: 0, affectedSignals: [], selectedEnemies: [] });
 }
 
 function teardown(scene) {
   const state = states.get(scene);
   if (!state) return;
   restoreWorldCue(state);
-  getEnemies(scene).forEach(enemy => {
-    if (enemy.getData?.('dynamicEncounter')) {
-      enemy.setData('dynamicEncounter', null);
-      enemy.setData('dynamicEncounterTarget', null);
-      enemy.setData('dynamicEncounterUntil', 0);
-    }
+  state.selectedEnemies?.forEach(enemy => {
+    if (!enemy?.active) return;
+    enemy.setData?.('dynamicEncounter', null);
+    enemy.setData?.('dynamicEncounterTarget', null);
+    enemy.setData?.('dynamicEncounterUntil', 0);
   });
-  document.getElementById('dynamicEncounterEvent')?.classList.remove('is-visible');
   states.delete(scene);
 }
 
