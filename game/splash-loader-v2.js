@@ -1,7 +1,7 @@
-/* Production cinematic splash V3. Owns first-load presentation and fails open safely. */
+/* Production cinematic splash V4. Owns first-load presentation and fails open safely. */
 (() => {
-  if (window.__relaySplashV3) return;
-  window.__relaySplashV3 = true;
+  if (window.__relaySplashV4) return;
+  window.__relaySplashV4 = true;
 
   const boot = () => {
     document.getElementById('bootLoader')?.remove();
@@ -10,11 +10,11 @@
 
     if (!splash.classList.contains('relay-splash')) splash.classList.add('relay-splash');
 
-    if (!document.querySelector('link[data-relay-cinematic-v3]')) {
+    if (!document.querySelector('link[data-relay-cinematic-v4]')) {
       const css = document.createElement('link');
       css.rel = 'stylesheet';
       css.href = './cinematic-splash.css';
-      css.dataset.relayCinematicV3 = 'true';
+      css.dataset.relayCinematicV4 = 'true';
       document.head.appendChild(css);
     }
 
@@ -24,30 +24,13 @@
     const label = splash.querySelector('.relay-splash-status');
     if (!image || !bar || !pct || !label) return;
 
-    if (!splash.querySelector('.relay-splash-brand')) {
-      const brand = document.createElement('div');
-      brand.className = 'relay-splash-brand';
-      brand.innerHTML = '<b>R/</b><span>RELAY RUNNER</span>';
-      splash.appendChild(brand);
-    }
-
-    const stages = [
-      [8, 'INITIALIZING RELAY'],
-      [26, 'LOADING INTERFACE'],
-      [48, 'LOADING GAME SYSTEMS'],
-      [68, 'CONNECTING WORLD'],
-      [86, 'PREPARING HOME'],
-    ];
-
     let progress = 0;
     let imageReady = image.complete && image.naturalWidth > 0;
     let pageReady = document.readyState === 'complete';
     let engineReady = false;
     let finishing = false;
-    let timedOut = false;
+    const MIN_SPLASH_MS = 600;
     const startedAt = performance.now();
-    const MIN_SPLASH_MS = 2200;
-    const MAX_SPLASH_MS = 7000;
 
     const setProgress = (value, text) => {
       progress = Math.max(progress, Math.min(100, Math.round(value)));
@@ -64,36 +47,34 @@
       }
       const from = progress;
       const started = performance.now();
-      const duration = Math.max(180, Math.min(650, (target - from) * 10));
+      const duration = Math.max(140, Math.min(500, (target - from) * 8));
       const frame = now => {
         const t = Math.min(1, (now - started) / duration);
-        const eased = t * (2 - t);
-        setProgress(from + (target - from) * eased, text);
+        setProgress(from + (target - from) * (t * (2 - t)), text);
         if (t < 1) requestAnimationFrame(frame);
         else resolve();
       };
       requestAnimationFrame(frame);
     });
 
-    const finish = async (forced = false) => {
-      if (finishing) return;
+    const finish = async () => {
+      if (finishing || !imageReady || !pageReady || !engineReady) return;
       const elapsed = performance.now() - startedAt;
-      if (!forced && (!imageReady || !pageReady || !engineReady)) return;
-      if (!forced && elapsed < MIN_SPLASH_MS) {
-        window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed);
+      if (elapsed < MIN_SPLASH_MS) {
+        window.setTimeout(finish, MIN_SPLASH_MS - elapsed);
         return;
       }
       finishing = true;
       await animateTo(100, 'READY');
       splash.setAttribute('aria-busy', 'false');
       splash.classList.add('is-hidden');
-      window.setTimeout(() => splash.remove(), 700);
+      window.setTimeout(() => splash.remove(), 350);
     };
 
     const markImageReady = () => {
       if (imageReady) return;
       imageReady = true;
-      animateTo(26, 'LOADING INTERFACE').then(() => finish());
+      animateTo(26, 'LOADING INTERFACE').then(finish);
     };
 
     if (imageReady) setProgress(26, 'LOADING INTERFACE');
@@ -101,15 +82,13 @@
       image.addEventListener('load', markImageReady, { once: true });
       image.addEventListener('error', () => {
         imageReady = true;
-        setProgress(22, 'USING SAFE MODE');
+        setProgress(22, 'SAFE MODE');
         finish();
       }, { once: true });
     }
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        animateTo(48, 'LOADING GAME SYSTEMS');
-      }, { once: true });
+      document.addEventListener('DOMContentLoaded', () => animateTo(48, 'LOADING GAME SYSTEMS'), { once: true });
     } else {
       animateTo(48, 'LOADING GAME SYSTEMS');
     }
@@ -124,36 +103,23 @@
     }
 
     const checkEngine = () => {
-      const canvas = document.querySelector('#phaser-game canvas');
+      const canvas = document.querySelector('#phaserTitleRoot canvas, #phaser-game canvas');
       if (canvas) {
         engineReady = true;
-        animateTo(86, 'PREPARING HOME').then(finish);
+        animateTo(86, 'STARTING HOME').then(finish);
         return;
       }
-      if (!finishing) window.setTimeout(checkEngine, 60);
+      if (!finishing) window.setTimeout(checkEngine, 50);
     };
     checkEngine();
 
-    const orientation = window.matchMedia('(orientation: landscape)');
-    const onOrientation = () => {
-      if (finishing) return;
-      imageReady = image.complete && image.naturalWidth > 0;
-    };
-    orientation.addEventListener?.('change', onOrientation);
-    window.addEventListener('resize', onOrientation, { passive: true });
-
     window.setTimeout(() => {
-      if (finishing || timedOut) return;
-      timedOut = true;
-      label.textContent = 'STARTING HOME';
-      finish(true);
-    }, MAX_SPLASH_MS);
-
-    stages.forEach(([value, text], index) => {
-      window.setTimeout(() => {
-        if (!finishing && !timedOut) setProgress(value, text);
-      }, 220 + index * 360);
-    });
+      if (finishing) return;
+      imageReady = true;
+      pageReady = true;
+      engineReady = true;
+      finish();
+    }, 5000);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
