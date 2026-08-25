@@ -53,6 +53,7 @@ import './environmental-force-zone-v1.js';
 import './timed-energy-trap-v1.js';
 import './pressure-route-node-v1.js';
 import './route-mutation-v1.js';
+import './temporary-world-distortion-v1.js';
 import './player-shield-visual-cleanup-v1.js';
 import './tutorial-runtime-gate-v1.js';
 import './home-tutorial-v1.js';
