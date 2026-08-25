@@ -1,150 +1,21 @@
-/* GAMEPLAY VISUAL V3 — cinematic mobile HUD polish */
-#play { --relay-cyan:#8df4ff; --relay-blue:#19c8f5; --relay-ink:#030914; }
-#play > .hud { filter:drop-shadow(0 8px 24px rgba(0,0,0,.24)); }
-#play > .hud .hud-route,
-#play > .hud .hud-progress,
-#play > .hud .hud-xp,
-#play > .hud .pause-button {
-  border-color:rgba(141,244,255,.28) !important;
-  background:linear-gradient(145deg,rgba(3,10,21,.92),rgba(8,23,39,.82)) !important;
-  box-shadow:0 0 24px rgba(25,200,245,.08),inset 0 0 16px rgba(255,255,255,.025) !important;
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-}
-#play > .hud .hud-route::after,
-#play > .hud .hud-progress::after,
-#play > .hud .hud-xp::after,
-#play > .hud .pause-button::after {
-  content:""; position:absolute; inset:1px; pointer-events:none; border:1px solid rgba(141,244,255,.06);
-}
-#play > .hud .route-dot { box-shadow:0 0 9px rgba(141,244,255,.95),0 0 22px rgba(25,200,245,.55) !important; }
-#play > .hud .pause-button { transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease !important; }
-#play > .hud .pause-button:active { transform:scale(.94) !important; }
-@media (max-width:768px) and (orientation:landscape) {
-  #play > .world-marker,#play > .input-guide { opacity:.68; }
-  #play > .input-guide { transform:scale(.82); transform-origin:center top; }
-  #play > .vignette { opacity:.82; }
-}
-@media (max-width:520px) and (orientation:landscape) {
-  #play > .hud .hud-route { max-width:220px; }
-  #play > .hud .hud-route b { font-size:9px !important; }
-  #play > .hud .hud-progress { transform:scale(.82); transform-origin:top center; }
-  #play > .hud .hud-xp { transform:scale(.9); transform-origin:top right; }
-}
-@media (prefers-reduced-motion:reduce) { #play > .hud .pause-button { transition:none !important; } }
-
-/* FINAL HUD V4/V5 — presentation-only responsive architecture.
-   Keeps gameplay/state/input logic untouched. */
-#play {
-  --hud-gap: clamp(8px, 1vw, 14px);
-  --hud-safe-x: max(10px, env(safe-area-inset-left, 0px));
-  --hud-safe-r: max(10px, env(safe-area-inset-right, 0px));
-  --hud-safe-b: max(10px, env(safe-area-inset-bottom, 0px));
-  overflow: hidden !important;
-  isolation: isolate;
-}
-#play > .hud,
-#play > .world-marker,
-#play > .input-guide,
-#play > .mobile-controls,
-#play > #gameplayV2Hud,
-#play > #cargoIntegrityV2 { box-sizing:border-box; }
-#play > #gameplayV2Hud { display:none !important; }
-#play > .input-guide,
-#play > .world-marker { display:none !important; }
-
-.hud-momentum {
-  position:absolute !important; box-sizing:border-box !important; display:flex !important;
-  align-items:center !important; gap:6px !important; padding:0 10px !important; height:48px !important;
-  min-width:142px !important; border:1px solid rgba(141,244,255,.30) !important;
-  border-radius:0 0 10px 10px !important;
-  background:linear-gradient(145deg,rgba(2,9,19,.96),rgba(8,24,40,.92)) !important;
-  box-shadow:inset 0 1px rgba(255,255,255,.05),0 8px 26px rgba(0,0,0,.25),0 0 22px rgba(25,200,245,.08) !important;
-  color:#f3fcff !important; pointer-events:none !important; white-space:nowrap !important;
-  overflow:hidden !important; z-index:1825 !important;
-}
-.hud-momentum::before { content:"" !important; position:absolute !important; left:0 !important; top:0 !important;
-  width:34px !important; height:2px !important; background:linear-gradient(90deg,#19c8f5,#8df4ff,transparent) !important;
-  box-shadow:0 0 10px #19c8f5 !important; }
-.hud-momentum small { font:700 6px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important; letter-spacing:.12em !important; color:#6e8da7 !important; }
-.hud-momentum strong { font:900 20px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important; letter-spacing:0 !important; color:#f3fcff !important; }
-.hud-momentum em { font:800 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important; letter-spacing:.05em !important; color:#dffcff !important; font-style:normal !important; }
-.hud-momentum[data-flow="0"] { opacity:.76 !important; }
-.hud-momentum.is-active { box-shadow:inset 0 1px rgba(255,255,255,.06),0 8px 26px rgba(0,0,0,.25),0 0 28px rgba(25,200,245,.12) !important; }
-
-@media (min-width:769px) {
-  #play > .hud { position:absolute !important; top:max(12px,env(safe-area-inset-top,0px)) !important; left:50% !important; right:auto !important;
-    width:min(1440px,calc(100% - 32px)) !important; height:66px !important; transform:translateX(-50%) !important;
-    display:grid !important; grid-template-columns:minmax(210px,1.15fr) minmax(220px,.9fr) auto !important;
-    align-items:stretch !important; gap:var(--hud-gap) !important; z-index:1000 !important; pointer-events:none !important; }
-  #play > .hud .hud-route,#play > .hud .hud-progress,#play > .hud .hud-xp,#play > .hud .pause-button { min-height:52px !important; }
-  #play > .hud .hud-route { min-width:0 !important; }
-  #play > .hud .hud-route b { max-width:34vw !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; }
-  #play > .hud .hud-actions { justify-content:flex-end !important; }
-  #play > .mobile-controls { display:none !important; }
-  #cargoIntegrityV2 { left:clamp(18px,2vw,34px) !important; right:auto !important; top:auto !important;
-    bottom:clamp(18px,3vh,34px) !important; transform:none !important; width:min(310px,24vw) !important; max-width:310px !important; z-index:950 !important; }
-}
-
-@media (hover:none) and (pointer:coarse) and (orientation:landscape) {
-  #play > .hud { top:max(6px,env(safe-area-inset-top,0px) + 3px) !important; left:var(--hud-safe-x) !important; right:var(--hud-safe-r) !important;
-    width:auto !important; height:clamp(44px,12vh,58px) !important; transform:none !important;
-    grid-template-columns:minmax(155px,1fr) minmax(150px,230px) auto !important; gap:6px !important; }
-  #play > .hud .hud-route,#play > .hud .hud-progress,#play > .hud .hud-xp,#play > .hud .pause-button { min-height:clamp(40px,10vh,50px) !important; }
-  #play > .hud .hud-route { padding:6px 10px !important; }
-  #play > .hud .hud-route b { max-width:32vw !important; font-size:clamp(8px,1.45vw,11px) !important; }
-  #play > .hud .hud-route small,#play > .hud .hud-progress small,#play > .hud .hud-xp small { font-size:clamp(5px,1vw,7px) !important; }
-  #play > .hud .hud-progress { padding:6px 9px !important; }
-  #play > .hud .hud-progress > span { font-size:clamp(15px,3vw,21px) !important; }
-  #play > .hud .hud-xp { min-width:48px !important; padding:6px 8px !important; }
-  #play > .hud .pause-button { width:clamp(40px,9vw,50px) !important; min-width:clamp(40px,9vw,50px) !important; height:clamp(40px,9vw,50px) !important; }
-  #play > .mobile-controls { position:absolute !important; left:var(--hud-safe-x) !important; right:var(--hud-safe-r) !important; bottom:var(--hud-safe-b) !important;
-    width:auto !important; height:auto !important; display:flex !important; align-items:flex-end !important; justify-content:space-between !important;
-    gap:clamp(10px,2vw,24px) !important; z-index:1100 !important; pointer-events:none !important; }
-  #play > .mobile-controls .mobile-joystick,#play > .mobile-controls .mobile-actions { pointer-events:auto !important; }
-  #play > .mobile-controls .mobile-joystick { flex:0 0 clamp(66px,13vh,88px) !important; width:clamp(66px,13vh,88px) !important; height:clamp(66px,13vh,88px) !important; }
-  #play > .mobile-controls .mobile-actions { display:grid !important; grid-template-columns:repeat(4,clamp(38px,7vh,50px)) !important;
-    grid-auto-rows:clamp(38px,7vh,50px) !important; gap:clamp(4px,.8vh,7px) !important; margin-left:auto !important; max-width:48vw !important; }
-  #play > .mobile-controls .mobile-actions button { width:clamp(38px,7vh,50px) !important; height:clamp(38px,7vh,50px) !important; }
-  #cargoIntegrityV2 { left:var(--hud-safe-x) !important; right:auto !important; bottom:calc(var(--hud-safe-b) + clamp(72px,15vh,100px)) !important;
-    top:auto !important; transform:none !important; width:min(250px,30vw) !important; max-width:250px !important; z-index:1050 !important; }
-}
-
-@media (hover:none) and (pointer:coarse) and (orientation:landscape) and (max-height:520px) {
-  #play > .hud { grid-template-columns:minmax(130px,1fr) minmax(120px,180px) auto !important; }
-  #play > .hud .hud-route { padding:5px 8px !important; }
-  #play > .hud .hud-route b { font-size:8px !important; }
-  #play > .hud .hud-progress { padding:4px 7px !important; }
-  #play > .hud .hud-progress > span { font-size:15px !important; }
-  #play > .hud .hud-xp { min-width:42px !important; padding:5px 6px !important; }
-  #cargoIntegrityV2 { width:min(220px,32vw) !important; bottom:calc(var(--hud-safe-b) + 74px) !important; }
-}
-
-@media (hover:none) and (pointer:coarse) and (orientation:portrait) {
-  #play > .hud { top:max(6px,env(safe-area-inset-top,0px) + 4px) !important; left:var(--hud-safe-x) !important; right:var(--hud-safe-r) !important;
-    width:auto !important; height:44px !important; transform:none !important; display:grid !important; grid-template-columns:minmax(0,1fr) auto auto !important; gap:5px !important; }
-  #play > .hud .hud-route { min-width:0 !important; padding:5px 8px !important; }
-  #play > .hud .hud-route small { font-size:6px !important; }
-  #play > .hud .hud-route b { max-width:43vw !important; font-size:8px !important; }
-  #play > .hud .hud-progress { width:auto !important; min-width:72px !important; padding:5px 7px !important; }
-  #play > .hud .hud-progress > span { font-size:14px !important; }
-  #play > .hud .hud-progress > small { font-size:5px !important; }
-  #play > .hud .hud-xp { min-width:40px !important; padding:5px 6px !important; }
-  #play > .hud .hud-xp b { font-size:8px !important; }
-  #play > .hud .pause-button { width:38px !important; min-width:38px !important; height:38px !important; }
-  #play > .mobile-controls { position:absolute !important; left:var(--hud-safe-x) !important; right:var(--hud-safe-r) !important; bottom:var(--hud-safe-b) !important;
-    display:flex !important; align-items:flex-end !important; justify-content:space-between !important; gap:8px !important; z-index:1100 !important; pointer-events:none !important; }
-  #play > .mobile-controls .mobile-joystick,#play > .mobile-controls .mobile-actions { pointer-events:auto !important; }
-  #play > .mobile-controls .mobile-joystick { flex:0 0 68px !important; width:68px !important; height:68px !important; }
-  #play > .mobile-controls .mobile-actions { display:grid !important; grid-template-columns:repeat(2,42px) !important; grid-auto-rows:42px !important; gap:5px !important; max-width:94px !important; }
-  #play > .mobile-controls .mobile-actions button { width:42px !important; height:42px !important; }
-  #play > .mobile-controls .mobile-actions button:nth-child(n+5) { display:none !important; }
-  #cargoIntegrityV2 { left:var(--hud-safe-x) !important; right:auto !important; bottom:calc(var(--hud-safe-b) + 78px) !important;
-    top:auto !important; transform:none !important; width:min(230px,calc(100vw - 112px)) !important; max-width:230px !important; z-index:1050 !important; }
-}
-@media (hover:none) and (pointer:coarse) and (orientation:portrait) and (max-width:420px) {
-  #play > .hud .hud-xp { display:none !important; }
-  #play > .hud .hud-route b { max-width:48vw !important; }
-  #cargoIntegrityV2 { width:min(205px,calc(100vw - 104px)) !important; }
-}
-#play > .hud,#play > .mobile-controls,#cargoIntegrityV2 { max-width:100vw; }
-@media (prefers-reduced-motion:reduce) { .hud-momentum { transition:none !important; } #play > .hud .route-dot { animation:none !important; } }
+/* GAMEPLAY VISUAL V3 — responsive/layout polish. HUD chrome visuals are owned by hud-v2.css. */
+#play{--hud-gap:clamp(8px,1vw,14px);--hud-safe-x:max(10px,env(safe-area-inset-left,0px));--hud-safe-r:max(10px,env(safe-area-inset-right,0px));--hud-safe-b:max(10px,env(safe-area-inset-bottom,0px));overflow:hidden!important;isolation:isolate}
+#play>.hud,#play>.world-marker,#play>.input-guide,#play>.mobile-controls,#play>#gameplayV2Hud,#play>#cargoIntegrityV2{box-sizing:border-box}
+#play>#gameplayV2Hud{display:none!important}
+#play>.input-guide,#play>.world-marker{display:none!important}
+.hud-momentum{position:absolute!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;gap:6px!important;padding:0 10px!important;height:48px!important;min-width:142px!important;border:1px solid rgba(141,244,255,.30)!important;border-radius:0 0 10px 10px!important;background:linear-gradient(145deg,rgba(2,9,19,.96),rgba(8,24,40,.92))!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 8px 26px rgba(0,0,0,.25),0 0 22px rgba(25,200,245,.08)!important;color:#f3fcff!important;pointer-events:none!important;white-space:nowrap!important;overflow:hidden!important;z-index:1825!important}
+.hud-momentum::before{content:""!important;position:absolute!important;left:0!important;top:0!important;width:34px!important;height:2px!important;background:linear-gradient(90deg,#19c8f5,#8df4ff,transparent)!important;box-shadow:0 0 10px #19c8f5!important}
+.hud-momentum small{font:700 6px/1 ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.12em!important;color:#6e8da7!important}
+.hud-momentum strong{font:900 20px/1 ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:0!important;color:#f3fcff!important}
+.hud-momentum em{font:800 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.05em!important;color:#dffcff!important;font-style:normal!important}
+.hud-momentum[data-flow="0"]{opacity:.76!important}
+.hud-momentum.is-active{box-shadow:inset 0 1px rgba(255,255,255,.06),0 8px 26px rgba(0,0,0,.25),0 0 28px rgba(25,200,245,.12)!important}
+@media(max-width:768px) and (orientation:landscape){#play>.world-marker,#play>.input-guide{opacity:.68}#play>.input-guide{transform:scale(.82);transform-origin:center top}#play>.vignette{opacity:.82}}
+@media(max-width:520px) and (orientation:landscape){#play>.hud .hud-route{max-width:220px}#play>.hud .hud-route b{font-size:9px!important}#play>.hud .hud-progress{transform:scale(.82);transform-origin:top center}#play>.hud .hud-xp{transform:scale(.9);transform-origin:top right}}
+@media(min-width:769px){#play>.hud{position:absolute!important;top:max(12px,env(safe-area-inset-top,0px))!important;left:50%!important;right:auto!important;width:min(1440px,calc(100% - 32px))!important;height:66px!important;transform:translateX(-50%)!important;display:grid!important;grid-template-columns:minmax(210px,1.15fr) minmax(220px,.9fr) auto!important;align-items:stretch!important;gap:var(--hud-gap)!important;z-index:1000!important;pointer-events:none!important}#play>.hud .hud-route,#play>.hud .hud-progress,#play>.hud .hud-xp,#play>.hud .pause-button{min-height:52px!important}#play>.hud .hud-route{min-width:0!important}#play>.hud .hud-route b{max-width:34vw!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}#play>.hud .hud-actions{justify-content:flex-end!important}#play>.mobile-controls{display:none!important}#cargoIntegrityV2{left:clamp(18px,2vw,34px)!important;right:auto!important;top:auto!important;bottom:clamp(18px,3vh,34px)!important;transform:none!important;width:min(310px,24vw)!important;max-width:310px!important;z-index:950!important}}
+@media(hover:none) and (pointer:coarse) and (orientation:landscape){#play>.hud{top:max(6px,env(safe-area-inset-top,0px)+3px)!important;left:var(--hud-safe-x)!important;right:var(--hud-safe-r)!important;width:auto!important;height:clamp(44px,12vh,58px)!important;transform:none!important;grid-template-columns:minmax(155px,1fr) minmax(150px,230px) auto!important;gap:6px!important}#play>.hud .hud-route,#play>.hud .hud-progress,#play>.hud .hud-xp,#play>.hud .pause-button{min-height:clamp(40px,10vh,50px)!important}#play>.hud .hud-route{padding:6px 10px!important}#play>.hud .hud-route b{max-width:32vw!important;font-size:clamp(8px,1.45vw,11px)!important}#play>.hud .hud-route small,#play>.hud .hud-progress small,#play>.hud .hud-xp small{font-size:clamp(5px,1vw,7px)!important}#play>.hud .hud-progress{padding:6px 9px!important}#play>.hud .hud-progress>span{font-size:clamp(15px,3vw,21px)!important}#play>.hud .hud-xp{min-width:48px!important;padding:6px 8px!important}#play>.hud .pause-button{width:clamp(40px,9vw,50px)!important;min-width:clamp(40px,9vw,50px)!important;height:clamp(40px,9vw,50px)!important}#play>.mobile-controls{position:absolute!important;left:var(--hud-safe-x)!important;right:var(--hud-safe-r)!important;bottom:var(--hud-safe-b)!important;width:auto!important;height:auto!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:clamp(10px,2vw,24px)!important;z-index:1100!important;pointer-events:none!important}#play>.mobile-controls .mobile-joystick,#play>.mobile-controls .mobile-actions{pointer-events:auto!important}#play>.mobile-controls .mobile-joystick{flex:0 0 clamp(66px,13vh,88px)!important;width:clamp(66px,13vh,88px)!important;height:clamp(66px,13vh,88px)!important}#play>.mobile-controls .mobile-actions{display:grid!important;grid-template-columns:repeat(4,clamp(38px,7vh,50px))!important;grid-auto-rows:clamp(38px,7vh,50px)!important;gap:clamp(4px,.8vh,7px)!important;margin-left:auto!important;max-width:48vw!important}#play>.mobile-controls .mobile-actions button{width:clamp(38px,7vh,50px)!important;height:clamp(38px,7vh,50px)!important}#cargoIntegrityV2{left:var(--hud-safe-x)!important;right:auto!important;bottom:calc(var(--hud-safe-b) + clamp(72px,15vh,100px))!important;top:auto!important;transform:none!important;width:min(250px,30vw)!important;max-width:250px!important;z-index:1050!important}}
+@media(hover:none) and (pointer:coarse) and (orientation:landscape) and (max-height:520px){#play>.hud{grid-template-columns:minmax(130px,1fr) minmax(120px,180px) auto!important}#play>.hud .hud-route{padding:5px 8px!important}#play>.hud .hud-route b{font-size:8px!important}#play>.hud .hud-progress{padding:4px 7px!important}#play>.hud .hud-progress>span{font-size:15px!important}#play>.hud .hud-xp{min-width:42px!important;padding:5px 6px!important}#cargoIntegrityV2{width:min(220px,32vw)!important;bottom:calc(var(--hud-safe-b) + 74px)!important}}
+@media(hover:none) and (pointer:coarse) and (orientation:portrait){#play>.hud{top:max(6px,env(safe-area-inset-top,0px)+4px)!important;left:var(--hud-safe-x)!important;right:var(--hud-safe-r)!important;width:auto!important;height:44px!important;transform:none!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;gap:5px!important}#play>.hud .hud-route{min-width:0!important;padding:5px 8px!important}#play>.hud .hud-route small{font-size:6px!important}#play>.hud .hud-route b{max-width:43vw!important;font-size:8px!important}#play>.hud .hud-progress{width:auto!important;min-width:72px!important;padding:5px 7px!important}#play>.hud .hud-progress>span{font-size:14px!important}#play>.hud .hud-progress>small{font-size:5px!important}#play>.hud .hud-xp{min-width:40px!important;padding:5px 6px!important}#play>.hud .hud-xp b{font-size:8px!important}#play>.hud .pause-button{width:38px!important;min-width:38px!important;height:38px!important}#play>.mobile-controls{position:absolute!important;left:var(--hud-safe-x)!important;right:var(--hud-safe-r)!important;bottom:var(--hud-safe-b)!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:8px!important;z-index:1100!important;pointer-events:none!important}#play>.mobile-controls .mobile-joystick,#play>.mobile-controls .mobile-actions{pointer-events:auto!important}#play>.mobile-controls .mobile-joystick{flex:0 0 68px!important;width:68px!important;height:68px!important}#play>.mobile-controls .mobile-actions{display:grid!important;grid-template-columns:repeat(2,42px)!important;grid-auto-rows:42px!important;gap:5px!important;max-width:94px!important}#play>.mobile-controls .mobile-actions button{width:42px!important;height:42px!important}#play>.mobile-controls .mobile-actions button:nth-child(n+5){display:none!important}#cargoIntegrityV2{left:var(--hud-safe-x)!important;right:auto!important;bottom:calc(var(--hud-safe-b) + 78px)!important;top:auto!important;transform:none!important;width:min(230px,calc(100vw - 112px))!important;max-width:230px!important;z-index:1050!important}}
+@media(hover:none) and (pointer:coarse) and (orientation:portrait) and (max-width:420px){#play>.hud .hud-xp{display:none!important}#play>.hud .hud-route b{max-width:48vw!important}#cargoIntegrityV2{width:min(205px,calc(100vw - 104px))!important}}
+#play>.hud,#play>.mobile-controls,#cargoIntegrityV2{max-width:100vw}
+@media(prefers-reduced-motion:reduce){.hud-momentum{transition:none!important}#play>.hud .route-dot{animation:none!important}}
