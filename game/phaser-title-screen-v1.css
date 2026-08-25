@@ -1,5 +1,7 @@
-#phaserTitleRoot{position:fixed;inset:0;z-index:12000;display:block;overflow:hidden;background:#02060d;opacity:1;visibility:visible}
+#phaserTitleRoot{position:fixed;inset:0;z-index:12000;display:block;overflow:hidden;background:#02060d;opacity:0;visibility:hidden;pointer-events:none}
+#phaserTitleRoot,.phaser-title-active #phaserTitleRoot{transition:opacity .18s ease,visibility .18s ease}
+.phaser-title-active #phaserTitleRoot{opacity:1;visibility:visible;pointer-events:auto}
 #phaserTitleRoot canvas{display:block;width:100%!important;height:100%!important;touch-action:manipulation}
 #phaserTitleRoot.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
-#intro.intro{display:none!important}
+.phaser-title-active #intro.intro{display:none!important}
 @media(max-width:700px){#phaserTitleRoot{touch-action:manipulation}}
