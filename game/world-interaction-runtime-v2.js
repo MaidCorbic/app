@@ -1,9 +1,11 @@
 // UPDATE 09 FINAL RUNTIME BRIDGE
 // Loaded last from relay-ui-init.js, after the existing gameplay wrappers.
 // UPDATE 11 adds the universal finish relay tower without replacing existing state systems.
+// UPDATE 23 adds the secret-cache interaction extension without replacing the existing secret system.
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 import './finish-tower-v1.js';
 import { setupWorldInteraction, updateWorldInteraction } from './world-interaction-v1.js';
+import './secret-cache-interaction-v1.js';
 
 if (!window.__relayWorldInteractionRuntimeV2) {
   window.__relayWorldInteractionRuntimeV2 = true;
