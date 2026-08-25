@@ -1,9 +1,7 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
 // TIMED ENERGY TRAP V1
-// Uses the existing energy state only. No new damage, HUD, mission, score,
-// cargo, progression, or movement system.
-
+// Existing energy owner; adds a contextual field-pulse action without a new HUD/system.
 const sceneState = new WeakMap();
 
 function routeX(scene, fraction) {
@@ -11,68 +9,67 @@ function routeX(scene, fraction) {
   const goal = Number(scene?.mission?.goal?.x ?? start + 3200);
   return start + (goal - start) * fraction;
 }
-
 function groundY(scene, x, fallback = 560) {
   const platforms = scene?.mission?.platforms || [];
-  return platforms
-    .map(([px, py, width]) => ({ x: px, y: py, width }))
+  return platforms.map(([px, py, width]) => ({ x: px, y: py, width }))
     .filter(p => x >= p.x + 20 && x <= p.x + p.width - 20)
     .sort((a, b) => a.y - b.y)[0]?.y ?? fallback;
 }
-
 function setup(scene) {
   if (!scene?.player || sceneState.has(scene)) return;
   const start = Number(scene.mission?.spawn?.x ?? scene.player.x ?? 0);
   const goal = Number(scene.mission?.goal?.x ?? start + 3200);
   if (!(goal - start > 1500)) return;
-
   const x = routeX(scene, .56);
   const y = groundY(scene, x) - 20;
   const zone = scene.add.rectangle(x, y, 138, 48, 0xff826e, .055).setDepth(4);
   const core = scene.add.rectangle(x, y, 118, 3, 0xff826e, .72).setDepth(5);
   scene.physics.add.existing(zone, true);
-
-  const state = {
-    zone,
-    core,
-    active: false,
-    phase: 0,
-    drainCarry: 0,
-    lastCueAt: -Infinity,
-  };
+  const state = { zone, core, active: false, phase: 0, drainCarry: 0, pulseUntil: 0, lastCueAt: -Infinity };
   sceneState.set(scene, state);
-
+  scene.__relayFieldPulse = () => {
+    const now = Number(scene.elapsedMs || 0);
+    if (!state.active || now < state.pulseUntil || scene.respawning) return false;
+    const energy = Number(scene.energy || 0);
+    if (energy < 8) {
+      scene.playerCue?.('FIELD PULSE · NEED 8 ENERGY', '#ff9c91');
+      return false;
+    }
+    const inside = Math.abs(scene.player.x - zone.x) < 96 && Math.abs(scene.player.y - zone.y) < 68;
+    if (!inside) return false;
+    scene.energy = Math.max(0, energy - 8);
+    scene.game?.events?.emit('energy', scene.energy, scene.energyMax);
+    state.pulseUntil = now + 900;
+    state.drainCarry = 0;
+    scene.playerCue?.('FIELD PULSE · CLEAR', '#aee37f');
+    scene.game?.events?.emit('feedback', 'signal');
+    const flash = scene.add.circle(zone.x, zone.y, 10, 0xaee37f, .24).setDepth(12);
+    scene.tweens?.add({ targets: flash, scale: 4, alpha: 0, duration: 360, onComplete: () => flash.destroy() });
+    return true;
+  };
   if (!scene.motionReduced) {
     scene.tweens.add({ targets: core, alpha: { from: .25, to: 1 }, duration: 360, yoyo: true, repeat: -1 });
     scene.tweens.add({ targets: zone, alpha: { from: .025, to: .12 }, duration: 540, yoyo: true, repeat: -1 });
   }
 }
-
 function update(scene, delta) {
   const state = sceneState.get(scene);
   if (!state || !scene.player?.active || scene.finished) return;
-
   const now = Number(scene.elapsedMs || 0);
-  const period = 3600;
-  const phase = now % period;
+  const phase = now % 3600;
   const active = phase >= 1500 && phase < 2850;
   const changed = active !== state.active;
   state.active = active;
   state.phase = phase;
-
   state.core.setFillStyle(active ? 0xff826e : 0x8df4ff, active ? .9 : .42);
   state.zone.setFillStyle(active ? 0xff826e : 0x8df4ff, active ? .08 : .025);
-
   if (changed && now - state.lastCueAt > 700) {
     state.lastCueAt = now;
     scene.playerCue?.(active ? 'ENERGY FIELD · WAIT OR PUSH' : 'ENERGY FIELD · CLEAR', active ? '#ffcf82' : '#b9f5ff');
   }
-
-  if (!active || scene.respawning) return;
-
+  if (!active || scene.respawning || now < state.pulseUntil) return;
   const inside = Math.abs(scene.player.x - state.zone.x) < 68 && Math.abs(scene.player.y - state.zone.y) < 44;
   if (!inside) return;
-
   state.drainCarry += delta;
   if (state.drainCarry < 250) return;
   const ticks = Math.floor(state.drainCarry / 250);
@@ -86,37 +83,17 @@ function update(scene, delta) {
     scene.game?.events?.emit('feedback', 'empty');
   }
 }
-
 function teardown(scene) {
   const state = sceneState.get(scene);
   if (!state) return;
-  state.zone?.destroy?.();
-  state.core?.destroy?.();
-  sceneState.delete(scene);
+  state.zone?.destroy?.(); state.core?.destroy?.(); delete scene.__relayFieldPulse; sceneState.delete(scene);
 }
-
 if (!RunnerScene.prototype.__timedEnergyTrapPatched) {
   const originalCreate = RunnerScene.prototype.create;
   const originalUpdate = RunnerScene.prototype.update;
   const originalShutdown = RunnerScene.prototype.shutdown;
-
-  RunnerScene.prototype.create = function timedEnergyTrapCreate(...args) {
-    const result = originalCreate.apply(this, args);
-    try { setup(this); } catch (error) { console.error('[EnergyTrap] create failed', error); }
-    return result;
-  };
-
-  RunnerScene.prototype.update = function timedEnergyTrapUpdate(...args) {
-    const delta = Number(args[1] ?? this.game?.loop?.delta ?? 16.67);
-    const result = originalUpdate.apply(this, args);
-    try { update(this, delta); } catch (error) { console.error('[EnergyTrap] update failed', error); }
-    return result;
-  };
-
-  RunnerScene.prototype.shutdown = function timedEnergyTrapShutdown(...args) {
-    try { teardown(this); } catch (error) { console.error('[EnergyTrap] teardown failed', error); }
-    return originalShutdown.apply(this, args);
-  };
-
+  RunnerScene.prototype.create = function timedEnergyTrapCreate(...args) { const result = originalCreate.apply(this, args); try { setup(this); } catch (error) { console.error('[EnergyTrap] create failed', error); } return result; };
+  RunnerScene.prototype.update = function timedEnergyTrapUpdate(...args) { const delta = Number(args[1] ?? this.game?.loop?.delta ?? 16.67); const result = originalUpdate.apply(this, args); try { update(this, delta); } catch (error) { console.error('[EnergyTrap] update failed', error); } return result; };
+  RunnerScene.prototype.shutdown = function timedEnergyTrapShutdown(...args) { try { teardown(this); } catch (error) { console.error('[EnergyTrap] teardown failed', error); } return originalShutdown.apply(this, args); };
   RunnerScene.prototype.__timedEnergyTrapPatched = true;
 }
