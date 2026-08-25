@@ -101,6 +101,21 @@ globalThis.missions = missions;
       requestAnimationFrame(frame);
     });
 
+    const orientationQuery = window.matchMedia('(orientation: landscape)');
+
+    const onOrientationChange = () => {
+      if (finishing) return;
+      imageReady = false;
+      selectArtwork();
+      sizeArtwork();
+      image.addEventListener('load', onImageReady, { once: true });
+    };
+
+    const cleanup = () => {
+      orientationQuery.removeEventListener?.('change', onOrientationChange);
+      window.removeEventListener('resize', sizeArtwork);
+    };
+
     const finish = async () => {
       if (finishing || !imageReady || !engineReady || !pageReady) return;
       const elapsed = performance.now() - startedAt;
@@ -113,6 +128,7 @@ globalThis.missions = missions;
       splash.setAttribute('aria-busy', 'false');
       splash.classList.add('is-leaving');
       window.setTimeout(() => {
+        cleanup();
         splash.remove();
         style?.remove();
       }, 550);
@@ -164,14 +180,6 @@ globalThis.missions = missions;
     };
     checkEngine();
 
-    const orientationQuery = window.matchMedia('(orientation: landscape)');
-    const onOrientationChange = () => {
-      if (finishing) return;
-      imageReady = false;
-      selectArtwork();
-      sizeArtwork();
-      image.addEventListener('load', onImageReady, { once: true });
-    };
     orientationQuery.addEventListener?.('change', onOrientationChange);
     window.addEventListener('resize', sizeArtwork, { passive: true });
   };
