@@ -37,9 +37,6 @@ globalThis.missions = missions;
     };
 
     const sizeArtwork = () => {
-      // Portrait mobile: size from the image's intrinsic ratio so the ENTIRE artwork
-      // remains visible. Do not force 100% width/height, which can make the preview
-      // feel cropped on tall phone viewports.
       if (isMobilePortrait()) {
         image.style.width = 'auto';
         image.style.height = 'auto';
@@ -63,7 +60,7 @@ globalThis.missions = missions;
     let engineReady = false;
     let pageReady = document.readyState === 'complete';
     let finishing = false;
-    const MIN_SPLASH_MS = 3000;
+    const MIN_SPLASH_MS = 600;
     const startedAt = performance.now();
 
     const setProgress = (value, label) => {
@@ -81,7 +78,7 @@ globalThis.missions = missions;
       }
       const from = progress;
       const startTime = performance.now();
-      const duration = Math.max(320, Math.min(1000, (target - from) * 15));
+      const duration = Math.max(180, Math.min(650, (target - from) * 10));
       const frame = now => {
         const t = Math.min(1, (now - startTime) / duration);
         setProgress(from + (target - from) * (t * (2 - t)), label);
@@ -105,7 +102,7 @@ globalThis.missions = missions;
       window.setTimeout(() => {
         splash.remove();
         style?.remove();
-      }, 550);
+      }, 350);
     };
 
     const onImageReady = async () => {
@@ -122,8 +119,9 @@ globalThis.missions = missions;
     } else {
       image.addEventListener('load', onImageReady, { once: true });
       image.addEventListener('error', () => {
-        imageReady = false;
-        console.error('[Relay Runner] Splash image failed to load.');
+        imageReady = true;
+        setProgress(25, 'LOADING INTERFACE');
+        finish();
       }, { once: true });
     }
 
@@ -144,7 +142,7 @@ globalThis.missions = missions;
     }
 
     const checkEngine = () => {
-      const canvas = document.querySelector('#phaser-game canvas');
+      const canvas = document.querySelector('#phaserTitleRoot canvas, #phaser-game canvas');
       if (canvas) {
         engineReady = true;
         animateTo(92, 'PREPARING HOME').then(finish);
