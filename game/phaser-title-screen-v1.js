@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import './phaser-title-screen-v1.css';
-import { TitleScene } from './scenes/title-scene.js';
+import { TitleSceneV2 } from './scenes/title-scene-v2.js';
 
 (() => {
   if (window.__relayPhaserTitleScreen) return;
@@ -19,11 +19,11 @@ import { TitleScene } from './scenes/title-scene.js';
         height: window.innerHeight,
         backgroundColor: '#02060d',
         scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
-        scene: [TitleScene],
+        scene: [TitleSceneV2],
         render: { antialias: true, roundPixels: true },
       });
     } catch (error) {
-      console.error('Relay title scene failed to start; retaining the HTML home fallback.', error);
+      console.error('Relay title V2 failed to start; retaining the HTML home fallback.', error);
       root.remove();
       window.__relayPhaserTitleScreen = false;
     }
