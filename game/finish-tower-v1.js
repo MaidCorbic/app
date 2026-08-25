@@ -1,11 +1,11 @@
-/* UPDATE 11.7 — Finish Relay Tower reliable climb handoff */
+/* UPDATE 11.8 — Finish Relay Tower: deterministic entrance trigger */
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-const TOWER = { height:250, baseHeight:28, ladderWidth:78, climbSpeed:190, engageRadius:110 };
+const TOWER = { height:250, baseHeight:28, ladderWidth:96, climbSpeed:190, engageRadius:135 };
 
-if (!window.__relayFinishTowerV117) {
-  window.__relayFinishTowerV117 = true;
+if (!window.__relayFinishTowerV118) {
+  window.__relayFinishTowerV118 = true;
   const originalUpdate = RunnerScene.prototype.update;
 
   RunnerScene.prototype.createGoal = function createFinishRelayTower() {
@@ -28,15 +28,13 @@ if (!window.__relayFinishTowerV117) {
     this.add.text(x,baseY+34,'CLIMB TO SECURE RELAY',{fontFamily:'DM Mono',fontSize:'9px',color:'#9bb0c2',stroke:'#08101c',strokeThickness:3}).setOrigin(.5).setDepth(8).setAlpha(.8);
     this.add.text(x,baseY-52,'▲ / JUMP / T',{fontFamily:'DM Mono',fontSize:'8px',color:'#ffd06e',stroke:'#08101c',strokeThickness:3}).setOrigin(.5).setDepth(8).setAlpha(.72);
 
-    // The tower is a traversal interaction, not a solid wall. The old invisible
-    // base collider blocked the player from reaching the climb zone on some maps.
     const base=this.add.rectangle(x,baseY+10,116,TOWER.baseHeight,0x000000,0).setVisible(false);
-    this.physics.add.existing(base,true); this.finishTowerBase=base;
-    this.finishTowerBase.body.enable=false;
+    this.physics.add.existing(base,true); this.finishTowerBase=base; this.finishTowerBase.body.enable=false;
+    this.finishTowerTKey=this.input?.keyboard?.addKey?.(Phaser.Input.Keyboard.KeyCodes.T);
 
     this.finishTowerZone=this.add.zone(x,(topY+baseY)/2,TOWER.ladderWidth,baseY-topY); this.physics.add.existing(this.finishTowerZone); this.finishTowerZone.body.setAllowGravity(false).setImmovable(true);
     this.physics.add.overlap(this.player,this.finishTowerZone,()=>{if(!this.finishTower.completed&&!this.cinematicActive)this.finishTower.request=true});
-    this.finishTowerTopZone=this.add.zone(x,topY+8,92,48); this.physics.add.existing(this.finishTowerTopZone); this.finishTowerTopZone.body.setAllowGravity(false).setImmovable(true);
+    this.finishTowerTopZone=this.add.zone(x,topY+8,96,48); this.physics.add.existing(this.finishTowerTopZone); this.finishTowerTopZone.body.setAllowGravity(false).setImmovable(true);
     this.physics.add.overlap(this.player,this.finishTowerTopZone,()=>{if(this.finishTower.completed||!this.finishTower.climbing||this.finished)return;const wasFinished=this.finished;this.complete();if(this.finished&&!wasFinished){this.finishTower.completed=true;this.finishTower.climbing=false;this.player.body.setAllowGravity(true);this.dismissIntelCard?.();this.briefingProtected=false;this.cinematicActive=false;this.game.events.emit('finish-tower',{missionId:this.mission.id,runId:this.runId});this.game.events.emit('finish-tower-climb',{active:false})}});
     this.finishTowerKeys=this.keys;
   };
@@ -45,19 +43,22 @@ if (!window.__relayFinishTowerV117) {
     const mobileJumpBeforeUpdate=Boolean(this.mobileActions?.jump), jumpBeforeUpdate=Boolean(this.keys?.W?.isDown||this.keys?.SPACE?.isDown||this.cursors?.up?.isDown);
     const result=originalUpdate.apply(this,arguments),tower=this.finishTower;
     if(!tower||tower.completed||!this.player?.body)return result;
-    if(this.cinematicActive){if(mobileJumpBeforeUpdate){this.mobileActions.jump=false;this.cinematicSkipHandler?.()}return result}
+    if(this.cinematicActive){if(mobileJumpBeforeUpdate)this.mobileActions.jump=false;return result}
 
-    const keys=this.finishTowerKeys||{}, down=keys.S?.isDown||this.cursors?.down?.isDown, tKey=keys.T?.isDown || this.input?.keyboard?.checkDown?.(this.input.keyboard.addKey?.('T'));
-    const near=Math.abs(this.player.x-tower.x)<=TOWER.engageRadius && this.player.y>=tower.baseY-55 && this.player.y<=tower.baseY+45;
-    if(near && (tKey || (this.game?.input?.keyboard?.isDown?.(Phaser.Input.Keyboard.KeyCodes.T)))) tower.request=true;
+    const keys=this.finishTowerKeys||{};
+    const down=keys.S?.isDown||this.cursors?.down?.isDown;
+    const tKey=Boolean(this.finishTowerTKey?.isDown);
+    const near=Math.abs(this.player.x-tower.x)<=TOWER.engageRadius && this.player.y>=tower.baseY-115 && this.player.y<=tower.baseY+65;
 
-    // Auto-enter the ladder when the player reaches the tower base. Jump/T remains
-    // a supported manual trigger, but there is no hidden prerequisite anymore.
-    if(!tower.climbing && near && (tower.request||mobileJumpBeforeUpdate||jumpBeforeUpdate||this.player.body.velocity.y<-100||true)){
+    if(!tower.climbing && near && (tower.request||tKey||mobileJumpBeforeUpdate||jumpBeforeUpdate||this.player.body.velocity.y<-100)){
       tower.climbing=true; tower.request=false; this.player.body.setAllowGravity(false).setVelocity(0,0); this.player.setTexture('runner-wall'); this.game.events.emit('finish-tower-climb',{active:true});
     }
     if(!tower.climbing)return result;
-    this.player.body.setAllowGravity(false).setVelocity(0,0); this.player.x=Phaser.Math.Linear(this.player.x,tower.x,.32); const direction=down?-1:1; this.player.y-=TOWER.climbSpeed*direction*delta/1000; this.player.y=Phaser.Math.Clamp(this.player.y,tower.topY+12,tower.baseY-28);
+
+    this.player.body.setAllowGravity(false).setVelocity(0,0); this.player.x=Phaser.Math.Linear(this.player.x,tower.x,.32);
+    const direction=down?-1:1;
+    this.player.y-=TOWER.climbSpeed*direction*delta/1000;
+    this.player.y=Phaser.Math.Clamp(this.player.y,tower.topY+12,tower.baseY-28);
     if(this.player.y<=tower.topY+18)this.player.y=tower.topY+16;
     if(this.player.y>=tower.baseY-28&&down){tower.climbing=false;this.player.body.setAllowGravity(true);this.player.setTexture('runner-idle');this.game.events.emit('finish-tower-climb',{active:false})}
     return result;
