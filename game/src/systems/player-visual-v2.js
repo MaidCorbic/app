@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 // Polished player presentation layer. Gameplay physics and collision remain on the original player body.
 export function installPlayerVisualV2(RunnerScene) {
   if (!RunnerScene?.prototype || RunnerScene.prototype.__playerVisualV2Installed) return;
