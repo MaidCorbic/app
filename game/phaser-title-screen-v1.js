@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import './phaser-title-screen-v1.css';
 import { TitleSceneV2 } from './scenes/title-scene-v2.js';
+import { installProceduralTitleWallpaper } from './procedural-title-wallpaper-v1.js';
+
+installProceduralTitleWallpaper(TitleSceneV2);
 
 (() => {
   if (window.__relayPhaserTitleScreen) return;
