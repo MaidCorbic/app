@@ -1,23 +1,25 @@
 import Phaser from 'phaser';
+import { getWorldMemory, setWorldMemory } from './world-memory-v1.js';
 
 const INTERACTION_RANGE = 110;
 const COOLDOWN_MS = 9000;
 
-function makeCourier(scene) {
+function makeCourier(scene, remembered) {
   if (!scene?.add) return null;
   const g = scene.add.graphics();
+  const accent = remembered ? 0x8df4ff : 0xffd06e;
   g.fillStyle(0x18253a, 1).fillRoundedRect(-15, -27, 30, 48, 7);
   g.fillStyle(0xd8f0ff, 1).fillCircle(0, -34, 8);
-  g.fillStyle(0xffd06e, 1).fillRect(-9, -14, 18, 5);
-  g.lineStyle(2, 0x8df4ff, .9).strokeRoundedRect(-15, -27, 30, 48, 7);
+  g.fillStyle(accent, 1).fillRect(-9, -14, 18, 5);
+  g.lineStyle(2, accent, .9).strokeRoundedRect(-15, -27, 30, 48, 7);
   g.setDepth(8);
   g.setData('relayCourier', true);
   return g;
 }
 
-function pulse(scene, x, y) {
+function pulse(scene, x, y, color = 0x8df4ff) {
   if (!scene?.tweens) return;
-  const ring = scene.add.circle(x, y, 8, 0x8df4ff, .08).setStrokeStyle(2, 0x8df4ff, .8).setDepth(9);
+  const ring = scene.add.circle(x, y, 8, color, .08).setStrokeStyle(2, color, .8).setDepth(9);
   scene.tweens.add({ targets: ring, radius: 34, alpha: 0, duration: 420, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
 }
 
@@ -31,19 +33,26 @@ export function installReactiveCourierEncounter(RunnerScene) {
     const player = this.player;
     if (!player) return result;
 
-    const courier = makeCourier(this);
+    const memory = getWorldMemory();
+    const remembered = memory.courierHelped === true;
+    const courier = makeCourier(this, remembered);
     if (!courier) return result;
 
     const state = this.__reactiveCourier = {
       courier,
       active: true,
       used: false,
+      remembered,
       cooldownUntil: 0,
       baseX: player.x + 210,
       baseY: player.y - 10,
-      offset: 210,
     };
     courier.setPosition(state.baseX, state.baseY);
+
+    if (remembered) {
+      this.playerCue?.('COURIER REMEMBERS YOU', 'WORLD');
+      pulse(this, courier.x, courier.y, 0x8df4ff);
+    }
 
     const interact = () => {
       if (!state.active || state.used || performance.now() < state.cooldownUntil) return;
@@ -51,13 +60,15 @@ export function installReactiveCourierEncounter(RunnerScene) {
       if (d > INTERACTION_RANGE) return;
       state.used = true;
       state.cooldownUntil = performance.now() + COOLDOWN_MS;
+      setWorldMemory('courierHelped', true);
       pulse(this, courier.x, courier.y);
       courier.clear();
-      courier.fillStyle(0xffd06e, 1).fillCircle(0, -22, 8);
-      courier.lineStyle(2, 0xffd06e, .95).strokeCircle(0, -22, 13);
+      courier.fillStyle(0x8df4ff, 1).fillCircle(0, -22, 8);
+      courier.lineStyle(2, 0x8df4ff, .95).strokeCircle(0, -22, 13);
       courier.setAlpha(.9);
-      this.playerCue?.('COURIER LINKED', 'WORLD');
-      this.events?.emit?.('courier:linked', { courier, player });
+      this.playerCue?.(state.remembered ? 'COURIER TRUST RESTORED' : 'COURIER LINKED', 'WORLD');
+      this.events?.emit?.('courier:linked', { courier, player, remembered: state.remembered });
+      this.events?.emit?.('world-memory:changed', { key: 'courierHelped', value: true });
       this.tweens?.add?.({ targets: courier, x: courier.x + 95, alpha: 0, duration: 500, ease: 'Cubic.easeIn', onComplete: () => courier.setVisible(false) });
     };
 
