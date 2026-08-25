@@ -115,3 +115,12 @@
     white-space: nowrap;
   }
 }
+
+@media (max-width: 480px) {
+  .hud-route b,
+  .hud-route small,
+  .hud-progress small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
