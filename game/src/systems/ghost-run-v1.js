@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 const STORAGE_KEY = 'relay-runner-ghost-v1';
 const SAMPLE_MS = 80;
 const MAX_SAMPLES = 4500;
@@ -84,7 +86,7 @@ export function installGhostRun(RunnerScene) {
       saved: false,
     };
 
-    this.events?.on?.('update', () => {
+    const onUpdate = () => {
       if (!this.__ghostRun) return;
       sample(this, state);
       playback(this, state);
@@ -96,10 +98,12 @@ export function installGhostRun(RunnerScene) {
           writeBest({ durationMs, samples: state.samples });
         }
       }
-    });
+    };
 
+    this.events?.on?.('update', onUpdate);
     this.events?.once?.('shutdown', () => {
       state.recording = false;
+      this.events?.off?.('update', onUpdate);
       state.ghost?.destroy?.();
       this.__ghostRun = null;
     });
