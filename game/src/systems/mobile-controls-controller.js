@@ -35,6 +35,7 @@ style.textContent = `
     flex: 0 0 clamp(76px, 20vw, 92px) !important;
     width: clamp(76px, 20vw, 92px) !important;
     height: clamp(76px, 20vw, 92px) !important;
+    overflow: hidden !important;
   }
   body.is-touch .mobile-joystick-thumb {
     width: 42px !important;
@@ -112,9 +113,6 @@ function install() {
   }
 
   window.__relayMobileControlsController = true;
-
-  // main.js and the legacy touch layer attach listeners to the original DOM.
-  // Clone once so this controller becomes the only owner of touch input.
   const cleanControls = controls.cloneNode(true);
   cleanControls.dataset.mobileControlsOwner = 'controller';
   controls.replaceWith(cleanControls);
@@ -147,8 +145,10 @@ function install() {
 
   let pointerId = null;
   let direction = null;
-  const max = 34;
-  const deadzone = 8;
+  // Keep the thumb safely inside the joystick ring. The previous 34px travel
+  // could visually poke through the edge on smaller Android screens.
+  const max = 26;
+  const deadzone = 7;
 
   const setDirection = next => {
     if (next === direction) return;
@@ -162,7 +162,7 @@ function install() {
     direction = null;
     emitGameEvent('mobile-move', null);
     joystick.classList.remove('is-active', 'is-driving');
-    thumb.style.transform = 'translate(0,0)';
+    thumb.style.transform = 'translate3d(0,0,0)';
   };
 
   const move = (x, y) => {
@@ -171,7 +171,7 @@ function install() {
     const dy = y - (rect.top + rect.height / 2);
     const distance = Math.min(Math.hypot(dx, dy), max);
     const angle = Math.atan2(dy, dx);
-    thumb.style.transform = `translate(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px)`;
+    thumb.style.transform = `translate3d(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px,0)`;
     setDirection(Math.abs(dx) <= deadzone ? null : dx < 0 ? 'left' : 'right');
   };
 
