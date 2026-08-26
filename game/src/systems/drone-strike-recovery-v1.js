@@ -5,8 +5,11 @@ const CONFIG = {
   droneCount: 2,
   droneDetectRadius: 560,
   lockMs: 1050,
-  strikeDelayMs: 1550,
   strikeCooldownMs: 4200,
+  strikeCooldownJitterMs: 3000,
+  firstStrikeMinDelayMs: 1800,
+  firstStrikeMaxDelayMs: 4200,
+  spawnProtectionMs: 10000,
   zoneRadius: 92,
   zoneLifeMs: 2550,
   recoveryHoldMs: 900,
@@ -22,9 +25,23 @@ function emit(scene, name, detail = {}) {
   try { scene.events?.emit(name, { ...detail, source: 'drone-strike-recovery-v1' }); } catch { /* optional */ }
 }
 
+function isAirstrikeProtected(scene) {
+  return (scene?.time?.now || 0) < (scene?.__droneStrikeSpawnProtectedUntil || 0);
+}
+
+function armNextStrike(scene, drone, first = false) {
+  const now = scene.time?.now || 0;
+  if (first) {
+    const delay = Phaser.Math.Between(CONFIG.firstStrikeMinDelayMs, CONFIG.firstStrikeMaxDelayMs);
+    drone.nextStrikeAt = now + CONFIG.spawnProtectionMs + delay;
+    return;
+  }
+  drone.nextStrikeAt = now + CONFIG.strikeCooldownMs + Phaser.Math.Between(0, CONFIG.strikeCooldownJitterMs);
+}
+
 function killPlayer(scene, reason = 'ATOMIC STRIKE') {
   const player = scene?.player;
-  if (!player || scene.__droneStrikeDeathLock) return;
+  if (!player || scene.__droneStrikeDeathLock || isAirstrikeProtected(scene)) return;
   scene.__droneStrikeDeathLock = true;
   try {
     player.setTint?.(0xff5a55);
@@ -66,6 +83,7 @@ function createDrone(scene, index) {
     targetY: null,
   };
 
+  armNextStrike(scene, state, true);
   scene.tweens.add({ targets: [glow, core], alpha: { from: .35, to: 1 }, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
   return state;
 }
@@ -100,8 +118,8 @@ function detonateZone(scene, life) {
   const blast = scene.add.circle(life.x, life.y, 24, 0xffd9df, .72).setDepth(60).setBlendMode(Phaser.BlendModes.ADD);
   scene.tweens.add({ targets: blast, radius: CONFIG.zoneRadius * 1.65, alpha: 0, duration: 420, ease: 'Cubic.Out', onComplete: () => blast.destroy() });
   scene.cameras?.main?.shake?.(420, .014);
-  emit(scene, 'drone:strike-detonate', { x: life.x, y: life.y, hit: dist <= CONFIG.zoneRadius });
-  if (dist <= CONFIG.zoneRadius) killPlayer(scene);
+  emit(scene, 'drone:strike-detonate', { x: life.x, y: life.y, hit: dist <= CONFIG.zoneRadius && !isAirstrikeProtected(scene) });
+  if (dist <= CONFIG.zoneRadius && !isAirstrikeProtected(scene)) killPlayer(scene);
   life.zone.destroy(true);
   scene.__droneZones = scene.__droneZones.filter(z => z !== life);
 }
@@ -126,6 +144,8 @@ export function installDroneStrikeRecovery(RunnerScene) {
     originalCreate.apply(this, args);
     if (!safeMission(this) || !this.player) return;
 
+    this.__droneStrikeSpawnProtectedUntil = (this.time?.now || 0) + CONFIG.spawnProtectionMs;
+    this.__droneWasRespawning = !!this.respawning;
     this.__droneUnits = [0, 1].slice(0, CONFIG.droneCount).map(i => createDrone(this, i));
     this.__droneZones = [];
     this.__droneRecovery = { station: null, x: null, y: null, holdStarted: 0, cooldownUntil: 0 };
@@ -157,6 +177,20 @@ export function installDroneStrikeRecovery(RunnerScene) {
     if (!player || !this.__droneUnits) return;
 
     const now = this.time.now;
+
+    if (this.respawning && !this.__droneWasRespawning) {
+      this.__droneStrikeSpawnProtectedUntil = now + CONFIG.spawnProtectionMs;
+      for (const drone of this.__droneUnits) {
+        drone.lockedAt = 0;
+        armNextStrike(this, drone, true);
+      }
+      for (const zone of [...(this.__droneZones || [])]) zone.zone?.destroy(true);
+      this.__droneZones = [];
+    }
+    this.__droneWasRespawning = !!this.respawning;
+
+    const protectedAtSpawn = isAirstrikeProtected(this);
+
     for (const drone of this.__droneUnits) {
       const desiredX = player.x + (drone.index ? 230 : -230);
       const desiredY = player.y - 210 - Math.sin(now / 430 + drone.phase) * 34;
@@ -166,7 +200,7 @@ export function installDroneStrikeRecovery(RunnerScene) {
       drone.beam.alpha = Phaser.Math.Distance.Between(drone.root.x, drone.root.y, player.x, player.y) < CONFIG.droneDetectRadius ? .15 : .04;
 
       const dist = Phaser.Math.Distance.Between(drone.root.x, drone.root.y, player.x, player.y);
-      if (dist < CONFIG.droneDetectRadius) {
+      if (!protectedAtSpawn && dist < CONFIG.droneDetectRadius) {
         if (!drone.lockedAt) {
           drone.lockedAt = now;
           drone.targetX = player.x;
@@ -177,7 +211,7 @@ export function installDroneStrikeRecovery(RunnerScene) {
           const x = Phaser.Math.Clamp(player.x + Phaser.Math.Between(-90, 90), 90, Math.max(90, (this.physics?.world?.bounds?.width || 6280) - 90));
           const y = Phaser.Math.Clamp(player.y + Phaser.Math.Between(-12, 12), 430, 690);
           createZone(this, x, y);
-          drone.nextStrikeAt = now + CONFIG.strikeCooldownMs;
+          armNextStrike(this, drone, false);
           drone.lockedAt = 0;
         }
       } else if (drone.lockedAt && now - drone.lockedAt > 800) {
