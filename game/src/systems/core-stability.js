@@ -46,6 +46,49 @@ function ensureWebKeyboardRefs(scene) {
   if (!keysReady) scene.keys = keyboard.addKeys('A,D,W,S,E,Q,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC');
 }
 
+function recoverWebPresentationState(scene) {
+  if (!scene || isPrimaryTouchDevice() || !scene.player?.body || scene.finished || scene.respawning) return;
+  const intro = document.getElementById('relayGameplayIntroFinalV1');
+  const title = document.getElementById('titlePanel');
+  const introVisible = Boolean(intro && !intro.hidden && !intro.classList.contains('hidden'));
+  const titleVisible = Boolean(title && !title.classList.contains('hidden'));
+  if (introVisible || titleVisible) return;
+
+  // Only clear a stale presentation lock after the scene has fully booted.
+  const age = performance.now() - Number(scene.__webSceneStartedAt || performance.now());
+  if (age < 450) return;
+  if (scene.cinematicActive || scene.inputEnabled === false) {
+    scene.cinematicActive = false;
+    scene.inputEnabled = true;
+    try { scene.physics?.world?.resume?.(); } catch { /* already running */ }
+    scene.player.body.enable = true;
+    scene.player.body.moves = true;
+    scene.player.body.allowGravity = true;
+    scene.cameras?.main?.startFollow?.(scene.player, true, .08, .08);
+  }
+}
+
+function recoverWebFallState(scene) {
+  if (!scene || isPrimaryTouchDevice() || !scene.player?.active || !scene.player.body || scene.finished || scene.respawning) return;
+  if (scene.cinematicActive) return;
+  const body = scene.player.body;
+  const boundsBottom = Number(scene.physics?.world?.bounds?.bottom);
+  const fellThroughWorld = Number(scene.player.y) >= 760;
+  const hitWorldBottom = Number.isFinite(boundsBottom) && Number(body.bottom) >= boundsBottom + 16;
+  if (!fellThroughWorld && !hitWorldBottom) return;
+
+  // One authoritative recovery request; the existing death/respawn system owns the actual reset.
+  if (scene.__webFallRecoveryPending) return;
+  scene.__webFallRecoveryPending = true;
+  try {
+    scene.falls = Math.max(0, Number(scene.falls || 0)) + 1;
+    if (scene.game?.events) scene.game.events.emit('deaths', scene.deaths || 0, scene.deathLimit || 0);
+    if (typeof scene.fail === 'function') scene.fail('The courier fell into the relay void.');
+  } finally {
+    scene.time?.delayedCall?.(600, () => { scene.__webFallRecoveryPending = false; });
+  }
+}
+
 function installSafeRunnerStart(game) {
   if (!game || game.__relaySafeRunnerStart) return;
   const manager = game.scene;
@@ -71,9 +114,12 @@ RunnerScene.prototype.create = function stableCreate(...args) {
     return;
   }
   installSafeRunnerStart(this.game);
+  this.__webSceneStartedAt = performance.now();
+  this.__webFallRecoveryPending = false;
   try {
     const result = originalCreate.apply(this, args);
     ensureWebKeyboardRefs(this);
+    recoverWebPresentationState(this);
     setupWorldInteraction(this);
     window.__relayRunnerScene = this;
     return result;
@@ -133,6 +179,9 @@ function installTouchControls() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installTouchControls, { once: true }); else installTouchControls();
 
 RunnerScene.prototype.update = function stableUpdate(time, delta) {
+  ensureWebKeyboardRefs(this);
+  recoverWebPresentationState(this);
   update.call(this, time, delta);
   updateWorldInteraction(this);
+  recoverWebFallState(this);
 };
