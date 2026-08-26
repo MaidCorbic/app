@@ -17,6 +17,7 @@ import { installEnemyDiscovery } from './systems/enemy-discovery-v1.js';
 import { installEnemyDialogue } from './systems/enemy-dialogue-v1.js';
 import { installEnemyProgression } from './systems/enemy-progression-v1.js';
 import { installPuzzleEngine } from './systems/puzzle-engine-v1.js';
+import { installPuzzleProgression } from './systems/puzzle-progression-v1.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
 import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
@@ -42,6 +43,7 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installEnemyDialogue(RunnerScene);
   installEnemyProgression(RunnerScene);
   installPuzzleEngine(RunnerScene);
+  installPuzzleProgression(RunnerScene);
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
   installDroneStrikeRecovery(RunnerScene);
