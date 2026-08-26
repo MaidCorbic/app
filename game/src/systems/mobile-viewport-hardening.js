@@ -1,3 +1,5 @@
+import './mobile-controls-bridge-v2.js';
+
 // Mobile rotation hardening for Phaser + DOM layout.
 // The game itself stays on Phaser RESIZE so the canvas always fills its parent.
 // We only stabilize the browser measurements after rotation; we never switch
