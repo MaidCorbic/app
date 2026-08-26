@@ -1,7 +1,6 @@
 import '../feature-runtime.js';
 import './mobile-black-screen-fix.js';
 import { RunnerScene } from '../scenes/RunnerScene.js';
-import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 import { setupWorldInteraction, updateWorldInteraction } from '../../world-interaction-v1.js';
 
 function keepPhaserSurfaceMounted() {
@@ -30,27 +29,34 @@ const hit = RunnerScene.prototype.takeSciFiHit;
 const update = RunnerScene.prototype.update;
 const stop = scene => scene.player?.body?.setVelocity(0, 0);
 
-const isTouchDevice = () => navigator.maxTouchPoints > 0
-  || 'ontouchstart' in window
-  || window.matchMedia?.('(pointer: coarse)').matches
-  || window.matchMedia?.('(hover: none)').matches;
-
-function ensureWebKeyboardRefs(scene) {
-  // This is deliberately web-only. Mobile keeps its existing input path intact.
-  if (!scene || isTouchDevice() || !scene.input?.keyboard) return;
-  if (!scene.cursors) scene.cursors = scene.input.keyboard.createCursorKeys();
-  if (!scene.keys) {
-    scene.keys = scene.input.keyboard.addKeys({ A:'A', D:'D', W:'W', S:'S', SPACE:'SPACE', SHIFT:'SHIFT', E:'E', Q:'Q' });
-  }
+function isPrimaryTouchDevice() {
+  const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+  const fine = window.matchMedia?.('(pointer: fine)').matches ?? false;
+  const touchPoints = Number(navigator.maxTouchPoints || 0);
+  return coarse && !fine && touchPoints > 0;
 }
 
-function recoverWebPresentationLock(scene) {
-  if (!scene || isTouchDevice() || !scene.player?.body) return;
+function ensureWebKeyboardRefs(scene) {
+  if (!scene || isPrimaryTouchDevice() || !scene.input?.keyboard) return;
+  const keyboard = scene.input.keyboard;
+  keyboard.enabled = true;
+  const cursorsReady = Boolean(scene.cursors?.left && scene.cursors?.right && scene.cursors?.up && scene.cursors?.down);
+  if (!cursorsReady) scene.cursors = keyboard.createCursorKeys();
+  const keysReady = Boolean(scene.keys?.A && scene.keys?.D && scene.keys?.W && scene.keys?.S && scene.keys?.SPACE && scene.keys?.SHIFT && scene.keys?.E && scene.keys?.Q && scene.keys?.ESC);
+  if (!keysReady) scene.keys = keyboard.addKeys('A,D,W,S,E,Q,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC');
+}
+
+function recoverWebPresentationState(scene) {
+  if (!scene || isPrimaryTouchDevice() || !scene.player?.body || scene.finished || scene.respawning) return;
   const intro = document.getElementById('relayGameplayIntroFinalV1');
   const title = document.getElementById('titlePanel');
-  const introVisible = intro && !intro.hidden && !intro.classList.contains('hidden');
-  const titleVisible = title && !title.classList.contains('hidden');
+  const introVisible = Boolean(intro && !intro.hidden && !intro.classList.contains('hidden'));
+  const titleVisible = Boolean(title && !title.classList.contains('hidden'));
   if (introVisible || titleVisible) return;
+
+  // Only clear a stale presentation lock after the scene has fully booted.
+  const age = performance.now() - Number(scene.__webSceneStartedAt || performance.now());
+  if (age < 450) return;
   if (scene.cinematicActive || scene.inputEnabled === false) {
     scene.cinematicActive = false;
     scene.inputEnabled = true;
@@ -59,6 +65,27 @@ function recoverWebPresentationLock(scene) {
     scene.player.body.moves = true;
     scene.player.body.allowGravity = true;
     scene.cameras?.main?.startFollow?.(scene.player, true, .08, .08);
+  }
+}
+
+function recoverWebFallState(scene) {
+  if (!scene || isPrimaryTouchDevice() || !scene.player?.active || !scene.player.body || scene.finished || scene.respawning) return;
+  if (scene.cinematicActive) return;
+  const body = scene.player.body;
+  const boundsBottom = Number(scene.physics?.world?.bounds?.bottom);
+  const fellThroughWorld = Number(scene.player.y) >= 760;
+  const hitWorldBottom = Number.isFinite(boundsBottom) && Number(body.bottom) >= boundsBottom + 16;
+  if (!fellThroughWorld && !hitWorldBottom) return;
+
+  // One authoritative recovery request; the existing death/respawn system owns the actual reset.
+  if (scene.__webFallRecoveryPending) return;
+  scene.__webFallRecoveryPending = true;
+  try {
+    scene.falls = Math.max(0, Number(scene.falls || 0)) + 1;
+    if (scene.game?.events) scene.game.events.emit('deaths', scene.deaths || 0, scene.deathLimit || 0);
+    if (typeof scene.fail === 'function') scene.fail('The courier fell into the relay void.');
+  } finally {
+    scene.time?.delayedCall?.(600, () => { scene.__webFallRecoveryPending = false; });
   }
 }
 
@@ -87,10 +114,12 @@ RunnerScene.prototype.create = function stableCreate(...args) {
     return;
   }
   installSafeRunnerStart(this.game);
+  this.__webSceneStartedAt = performance.now();
+  this.__webFallRecoveryPending = false;
   try {
     const result = originalCreate.apply(this, args);
     ensureWebKeyboardRefs(this);
-    recoverWebPresentationLock(this);
+    recoverWebPresentationState(this);
     setupWorldInteraction(this);
     window.__relayRunnerScene = this;
     return result;
@@ -134,20 +163,25 @@ function installTouchControls() {
     const reset = () => { setDir(null); id = null; thumb.style.transform = 'translate(0,0)'; pad.classList.remove('is-active'); };
     pad.addEventListener('pointerdown', e => { id = e.pointerId; pad.setPointerCapture?.(id); pad.classList.add('is-active'); move(e.clientX, e.clientY); e.preventDefault(); });
     pad.addEventListener('pointermove', e => { if (e.pointerId === id) { move(e.clientX, e.clientY); e.preventDefault(); } }, { passive: false });
-    pad.addEventListener('pointerup', e => { if (e.pointerId === id) reset(); }); pad.addEventListener('pointercancel', reset); window.addEventListener('blur', reset);
+    pad.addEventListener('pointerup', e => { if (e.pointerId === id) reset(); });
+    pad.addEventListener('pointercancel', reset);
+    window.addEventListener('blur', reset);
   }
   const keys = { jump: ' ', fire: 'e', sword: 'q', dash: 'Shift', build1: '1', build2: '2', gadget1: '3', gadget2: '4' };
-  document.querySelectorAll('[data-mobile-action]').forEach(button => button.addEventListener('pointerdown', e => { e.preventDefault(); const key = keys[button.dataset.mobileAction]; if (!key) return; emit(key, 'keydown'); setTimeout(() => emit(key, 'keyup'), 90); }, { passive: false }));
+  document.querySelectorAll('[data-mobile-action]').forEach(button => button.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    const key = keys[button.dataset.mobileAction];
+    if (!key) return;
+    emit(key, 'keydown');
+    setTimeout(() => emit(key, 'keyup'), 90);
+  }, { passive: false }));
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installTouchControls, { once: true }); else installTouchControls();
 
 RunnerScene.prototype.update = function stableUpdate(time, delta) {
   ensureWebKeyboardRefs(this);
-  recoverWebPresentationLock(this);
+  recoverWebPresentationState(this);
   update.call(this, time, delta);
   updateWorldInteraction(this);
-  if (this.finished || this.respawning || this.cinematicActive || this.dashTimer > 0 || !this.player?.body || !this.cursors || !this.keys) return;
-  const left = this.cursors.left.isDown || this.keys.A.isDown || this.mobileDirection === 'left';
-  const right = this.cursors.right.isDown || this.keys.D.isDown || this.mobileDirection === 'right';
-  applyHorizontalMovementFeel({ player: this.player, axis: (right ? 1 : 0) - (left ? 1 : 0), delta });
+  recoverWebFallState(this);
 };

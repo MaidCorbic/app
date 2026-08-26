@@ -1,3 +1,5 @@
+import { installEnemyAIStability } from './enemy-ai-stability-v2.js';
+
 const LEGACY_ROUTE_ENEMIES = new Set([
   'security:4550:430:4420:4680',
   'guard:5250:470:5120:5420',
@@ -25,10 +27,9 @@ export function installEnemyLayout(RunnerScene) {
 
   prototype.__enemyLayoutV2 = true;
 
-  // RunnerScene is a function parameter, not a module-global. Keep the
-  // stability installer inside this scope so the runtime patch receives the
-  // actual class instead of throwing `RunnerScene is not defined`.
-  void import('./enemy-ai-stability-v2.js')
-    .then(({ installEnemyAIStability }) => queueMicrotask(() => installEnemyAIStability(RunnerScene)))
-    .catch(error => console.error('[enemy-ai-stability] failed to initialize', error));
+  // Keep enemy AI initialization synchronous with the game runtime. A dynamic
+  // import can fail after deployment/cache changes and surface as a global
+  // "failed to fetch dynamically imported module" runtime error. Static import
+  // makes the Vite build own the dependency and removes that failure mode.
+  installEnemyAIStability(RunnerScene);
 }

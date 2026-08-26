@@ -23,7 +23,6 @@ import { installLockedGate } from './systems/locked-gate-v1.js';
 import { installWorldProgression } from './systems/world-progression-v1.js';
 import { installEnemyPuzzleIntegration } from './systems/enemy-puzzle-integration-v1.js';
 import { installMissionProgressionPolish } from './systems/mission-progression-polish-v1.js';
-import { installWebMovementRecovery } from './systems/web-movement-recovery-v1.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
 import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
@@ -55,7 +54,6 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installWorldProgression(RunnerScene);
   installEnemyPuzzleIntegration(RunnerScene);
   installMissionProgressionPolish(RunnerScene);
-  installWebMovementRecovery(RunnerScene);
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
   installDroneStrikeRecovery(RunnerScene);
