@@ -21,6 +21,7 @@ export function installTeleportNetwork(RunnerScene) {
   const originalCreate = RunnerScene.prototype.create;
   RunnerScene.prototype.create = function (...args) {
     const result = originalCreate.apply(this, args);
+    if (!this.isFeatureEnabled?.('teleport')) return result;
     const player = this.player;
     if (!player || !this.add) return result;
 
