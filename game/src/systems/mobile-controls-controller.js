@@ -4,7 +4,9 @@ const ACTION_KEYS = {
   sword: 'q',
   dash: 'Shift',
   build1: '1',
-  gadget1: '3'
+  build2: '2',
+  gadget1: '3',
+  gadget2: '4'
 };
 
 const ACTION_LABELS = {
@@ -13,22 +15,14 @@ const ACTION_LABELS = {
   sword: 'SWORD — Q',
   dash: 'DASH — SHIFT',
   build1: 'BUILD — 1',
-  gadget1: 'GEAR — 3'
-};
-
-const emitKey = (key, type) => {
-  window.dispatchEvent(new KeyboardEvent(type, {
-    key,
-    code: key === ' ' ? 'Space' : key.length === 1 ? `Key${key.toUpperCase()}` : key,
-    bubbles: true,
-    cancelable: true
-  }));
+  build2: 'BUILD 2 — 2',
+  gadget1: 'GEAR — 3',
+  gadget2: 'GEAR 2 — 4'
 };
 
 const style = document.createElement('style');
 style.id = 'relay-mobile-controls-controller-style';
 style.textContent = `
-  /* Touch-control layer only. Viewport/canvas scaling is intentionally untouched. */
   body.is-touch .mobile-controls {
     --relay-touch-size: clamp(46px, 12.5vw, 58px);
     left: max(10px, env(safe-area-inset-left, 0px) + 8px) !important;
@@ -39,6 +33,9 @@ style.textContent = `
     visibility: visible;
     opacity: 1;
     pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   body.is-touch .mobile-joystick {
@@ -46,12 +43,14 @@ style.textContent = `
     width: clamp(76px, 20vw, 92px) !important;
     height: clamp(76px, 20vw, 92px) !important;
     pointer-events: auto !important;
+    touch-action: none !important;
   }
 
   body.is-touch .mobile-joystick-thumb {
     width: 42px !important;
     height: 42px !important;
     margin: -21px 0 0 -21px !important;
+    will-change: transform;
   }
 
   body.is-touch .mobile-actions {
@@ -63,6 +62,7 @@ style.textContent = `
     width: calc(var(--relay-touch-size) * 4 + 12px) !important;
     max-width: calc(100vw - 110px) !important;
     pointer-events: auto !important;
+    touch-action: none !important;
   }
 
   body.is-touch .mobile-controls button {
@@ -77,6 +77,7 @@ style.textContent = `
     font-size: clamp(8px, 2.15vw, 10px) !important;
     letter-spacing: .2px !important;
     pointer-events: auto !important;
+    touch-action: none !important;
   }
 
   body.is-touch .mobile-controls button small {
@@ -167,21 +168,28 @@ function isTouchDevice() {
 function install() {
   if (window.__relayMobileControlsController) return;
   window.__relayMobileControlsController = true;
+  if (!isTouchDevice()) return;
 
   let controls = document.querySelector('.mobile-controls');
-  if (!controls || !isTouchDevice()) return;
+  if (!controls) return;
 
-  // Clone once to remove pointer listeners installed by older touch-control modules.
-  // The existing joystick and action-button DOM is preserved.
   const cleanControls = controls.cloneNode(true);
   cleanControls.dataset.mobileControlsOwner = 'controller';
   controls.replaceWith(cleanControls);
   controls = cleanControls;
 
-  // ONLY remove the duplicate mobile buttons requested by the user.
-  // Keyboard actions 2 and 4 remain fully available in the game.
-  controls.querySelector('[data-mobile-action="build2"]')?.remove();
-  controls.querySelector('[data-mobile-action="gadget2"]')?.remove();
+  const getRunner = () => window.__relayRunnerScene || null;
+  const isGameUsable = () => {
+    const scene = getRunner();
+    return !!scene?.player?.active && !scene.finished && !scene.respawning && !scene.cinematicActive;
+  };
+
+  const setMobileDirection = direction => {
+    const scene = getRunner();
+    if (scene) scene.mobileDirection = direction;
+  };
+
+  const clearMobileDirection = () => setMobileDirection(null);
 
   const joystick = controls.querySelector('[data-mobile-joystick]');
   const thumb = joystick?.querySelector('.mobile-joystick-thumb');
@@ -189,53 +197,85 @@ function install() {
 
   buttons.forEach(button => {
     const action = button.dataset.mobileAction;
-    const key = ACTION_KEYS[action];
-    if (!key) return;
+    if (!ACTION_KEYS[action]) return;
     if (ACTION_LABELS[action]) button.setAttribute('aria-label', ACTION_LABELS[action]);
 
-    button.addEventListener('pointerdown', event => {
+    let timer = null;
+    const press = event => {
       event.preventDefault();
       event.stopPropagation();
-      emitKey(key, 'keydown');
+      if (!isGameUsable()) return;
+
       button.classList.add('is-active');
-      window.setTimeout(() => {
-        emitKey(key, 'keyup');
+      const key = ACTION_KEYS[action];
+      const code = key === ' ' ? 'Space' : key.length === 1 ? `Key${key.toUpperCase()}` : key;
+
+      window.dispatchEvent(new KeyboardEvent('keydown', {
+        key,
+        code,
+        bubbles: true,
+        cancelable: true
+      }));
+
+      timer = window.setTimeout(() => {
+        window.dispatchEvent(new KeyboardEvent('keyup', {
+          key,
+          code,
+          bubbles: true,
+          cancelable: true
+        }));
+        timer = null;
         button.classList.remove('is-active');
-      }, 90);
-    }, { passive: false });
+      }, 120);
+    };
+
+    const release = () => {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      button.classList.remove('is-active');
+    };
+
+    button.addEventListener('pointerdown', press, { passive: false });
+    button.addEventListener('pointerup', release, { passive: true });
+    button.addEventListener('pointercancel', release, { passive: true });
+    button.addEventListener('lostpointercapture', release, { passive: true });
   });
 
   if (joystick && thumb) {
     let pointerId = null;
     let direction = null;
+    const max = 34;
+    const deadzone = 8;
 
     const setDirection = next => {
       if (next === direction) return;
-      if (direction === 'left') emitKey('a', 'keyup');
-      if (direction === 'right') emitKey('d', 'keyup');
       direction = next;
-      if (next === 'left') emitKey('a', 'keydown');
-      if (next === 'right') emitKey('d', 'keydown');
+      setMobileDirection(next);
+      joystick.classList.toggle('is-driving', !!next);
     };
 
     const resetJoystick = () => {
-      setDirection(null);
       pointerId = null;
-      joystick.classList.remove('is-active');
+      direction = null;
+      clearMobileDirection();
+      joystick.classList.remove('is-active', 'is-driving');
       thumb.style.transform = 'translate(0,0)';
     };
 
     const updateJoystick = (x, y) => {
       const rect = joystick.getBoundingClientRect();
-      const dx = x - rect.left - rect.width / 2;
-      const dy = y - rect.top - rect.height / 2;
-      const distance = Math.min(Math.hypot(dx, dy), 32);
+      const dx = x - (rect.left + rect.width / 2);
+      const dy = y - (rect.top + rect.height / 2);
+      const distance = Math.min(Math.hypot(dx, dy), max);
       const angle = Math.atan2(dy, dx);
       thumb.style.transform = `translate(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px)`;
-      setDirection(Math.abs(dx) < 9 ? null : dx < 0 ? 'left' : 'right');
+      setDirection(Math.abs(dx) <= deadzone ? null : dx < 0 ? 'left' : 'right');
     };
 
     joystick.addEventListener('pointerdown', event => {
+      if (!isGameUsable()) return;
       event.preventDefault();
       event.stopPropagation();
       pointerId = event.pointerId;
@@ -255,10 +295,15 @@ function install() {
       resetJoystick();
     };
 
-    joystick.addEventListener('pointerup', end);
-    joystick.addEventListener('pointercancel', end);
-    joystick.addEventListener('lostpointercapture', resetJoystick);
-    window.addEventListener('blur', resetJoystick);
+    joystick.addEventListener('pointerup', end, { passive: true });
+    joystick.addEventListener('pointercancel', end, { passive: true });
+    joystick.addEventListener('lostpointercapture', resetJoystick, { passive: true });
+    window.addEventListener('pointerup', end, { passive: true });
+    window.addEventListener('pointercancel', end, { passive: true });
+    window.addEventListener('blur', resetJoystick, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) resetJoystick();
+    }, { passive: true });
   }
 }
 
