@@ -46,47 +46,6 @@ function ensureWebKeyboardRefs(scene) {
   if (!keysReady) scene.keys = keyboard.addKeys('A,D,W,S,E,Q,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC');
 }
 
-function recoverWebPresentationLock(scene) {
-  if (!scene || isPrimaryTouchDevice() || !scene.player?.body) return;
-  const intro = document.getElementById('relayGameplayIntroFinalV1');
-  const title = document.getElementById('titlePanel');
-  const introVisible = intro && !intro.hidden && !intro.classList.contains('hidden');
-  const titleVisible = title && !title.classList.contains('hidden');
-  if (introVisible || titleVisible) return;
-
-  const age = performance.now() - Number(scene.__webSceneStartedAt || performance.now());
-  const staleCinematic = Boolean(scene.cinematicActive) && age > 6500;
-  const staleInputLock = scene.inputEnabled === false && age > 6500;
-  if (staleCinematic || staleInputLock) {
-    scene.cinematicActive = false;
-    scene.inputEnabled = true;
-    try { scene.physics?.world?.resume?.(); } catch { /* already running */ }
-    scene.player.body.enable = true;
-    scene.player.body.moves = true;
-    scene.player.body.allowGravity = true;
-    scene.cameras?.main?.startFollow?.(scene.player, true, .08, .08);
-  }
-}
-
-function recoverWebPlayerRuntime(scene) {
-  if (!scene || isPrimaryTouchDevice() || !scene.player?.active || !scene.player.body) return;
-  if (scene.finished || scene.respawning || scene.cinematicActive) return;
-  const body = scene.player.body;
-  body.enable = true;
-  body.moves = true;
-  body.allowGravity = true;
-  body.checkCollision.none = false;
-  const animationState = scene.player.anims;
-  if (animationState?.isPaused) animationState.resume();
-  if (animationState?.isPlaying && animationState.currentAnim) return;
-  const grounded = Boolean(body.blocked?.down || body.touching?.down);
-  const vx = Number(body.velocity?.x || 0);
-  const vy = Number(body.velocity?.y || 0);
-  if (!grounded) scene.player.play(vy < 0 ? 'runner-jump' : 'runner-fall', true);
-  else if (Math.abs(vx) > 35) scene.player.play('runner-run', true);
-  else scene.player.play('runner-idle', true);
-}
-
 function installSafeRunnerStart(game) {
   if (!game || game.__relaySafeRunnerStart) return;
   const manager = game.scene;
@@ -112,12 +71,9 @@ RunnerScene.prototype.create = function stableCreate(...args) {
     return;
   }
   installSafeRunnerStart(this.game);
-  this.__webSceneStartedAt = performance.now();
   try {
     const result = originalCreate.apply(this, args);
     ensureWebKeyboardRefs(this);
-    recoverWebPresentationLock(this);
-    recoverWebPlayerRuntime(this);
     setupWorldInteraction(this);
     window.__relayRunnerScene = this;
     return result;
@@ -161,17 +117,22 @@ function installTouchControls() {
     const reset = () => { setDir(null); id = null; thumb.style.transform = 'translate(0,0)'; pad.classList.remove('is-active'); };
     pad.addEventListener('pointerdown', e => { id = e.pointerId; pad.setPointerCapture?.(id); pad.classList.add('is-active'); move(e.clientX, e.clientY); e.preventDefault(); });
     pad.addEventListener('pointermove', e => { if (e.pointerId === id) { move(e.clientX, e.clientY); e.preventDefault(); } }, { passive: false });
-    pad.addEventListener('pointerup', e => { if (e.pointerId === id) reset(); }); pad.addEventListener('pointercancel', reset); window.addEventListener('blur', reset);
+    pad.addEventListener('pointerup', e => { if (e.pointerId === id) reset(); });
+    pad.addEventListener('pointercancel', reset);
+    window.addEventListener('blur', reset);
   }
   const keys = { jump: ' ', fire: 'e', sword: 'q', dash: 'Shift', build1: '1', build2: '2', gadget1: '3', gadget2: '4' };
-  document.querySelectorAll('[data-mobile-action]').forEach(button => button.addEventListener('pointerdown', e => { e.preventDefault(); const key = keys[button.dataset.mobileAction]; if (!key) return; emit(key, 'keydown'); setTimeout(() => emit(key, 'keyup'), 90); }, { passive: false }));
+  document.querySelectorAll('[data-mobile-action]').forEach(button => button.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    const key = keys[button.dataset.mobileAction];
+    if (!key) return;
+    emit(key, 'keydown');
+    setTimeout(() => emit(key, 'keyup'), 90);
+  }, { passive: false }));
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installTouchControls, { once: true }); else installTouchControls();
 
 RunnerScene.prototype.update = function stableUpdate(time, delta) {
-  ensureWebKeyboardRefs(this);
-  recoverWebPresentationLock(this);
   update.call(this, time, delta);
   updateWorldInteraction(this);
-  recoverWebPlayerRuntime(this);
 };
