@@ -45,12 +45,13 @@ export function installPlayerVisualV2(RunnerScene) {
       if (!player || !this.playerVisualV2) return;
       const key = player.anims?.currentAnim?.key || 'runner-idle';
       const mode = key.replace('runner-', '');
-      root.setPosition(player.x, player.y - 4).setFlipX(Boolean(player.flipX));
+      root.setPosition(player.x, player.y - 4);
       const airborne = mode === 'jump' || mode === 'fall';
       const running = mode === 'run';
       const dash = mode === 'dash';
       const hit = mode === 'hit';
-      root.setScale(dash ? 1.14 : running ? 1.035 : 1, dash ? .88 : 1);
+      const baseScaleX = dash ? 1.14 : running ? 1.035 : 1;
+      root.setScale(player.flipX ? -baseScaleX : baseScaleX, dash ? .88 : 1);
       root.setAngle(mode === 'jump' ? -3 : mode === 'fall' ? 3 : hit ? 7 : 0);
       shadow.setScale(airborne ? .7 : 1, airborne ? .7 : 1);
       aura.setAlpha(dash ? .16 : running ? .075 : .055);
