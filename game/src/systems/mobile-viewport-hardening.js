@@ -1,4 +1,11 @@
 import './mobile-controls-bridge-v2.js';
+import { RunnerScene } from '../scenes/RunnerScene.js';
+import { installCharacterStateReactions } from './character-state-reactions-v1.js';
+
+// Character reactions are a visual/state layer only. They observe the existing
+// player physics state and never write velocity, acceleration, gravity, input,
+// collision, or mobile/web movement values.
+installCharacterStateReactions(RunnerScene);
 
 // Mobile rotation hardening for Phaser + DOM layout.
 // The game itself stays on Phaser RESIZE so the canvas always fills its parent.
