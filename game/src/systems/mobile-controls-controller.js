@@ -145,10 +145,24 @@ function install() {
 
   let pointerId = null;
   let direction = null;
-  // Keep the thumb safely inside the joystick ring. The previous 34px travel
-  // could visually poke through the edge on smaller Android screens.
-  const max = 26;
-  const deadzone = 7;
+
+  // Precision tuning only: the visual joystick design is unchanged.
+  // Travel is calculated from the actual rendered size so the thumb can never
+  // visually poke through the ring, including on small Android screens.
+  const getGeometry = () => {
+    const rect = joystick.getBoundingClientRect();
+    const thumbRect = thumb.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const maxX = Math.max(0, rect.width / 2 - thumbRect.width / 2 - 3);
+    const maxY = Math.max(0, rect.height / 2 - thumbRect.height / 2 - 3);
+    return { rect, centerX, centerY, maxX, maxY };
+  };
+
+  // Small center deadzone prevents accidental walking from tiny finger shifts.
+  // A slightly smaller release threshold gives stable left/right control near center.
+  const deadzone = 6;
+  const releaseZone = 4;
 
   const setDirection = next => {
     if (next === direction) return;
@@ -158,6 +172,9 @@ function install() {
   };
 
   const reset = () => {
+    if (pointerId !== null) {
+      try { joystick.releasePointerCapture?.(pointerId); } catch (_) {}
+    }
     pointerId = null;
     direction = null;
     emitGameEvent('mobile-move', null);
@@ -166,19 +183,34 @@ function install() {
   };
 
   const move = (x, y) => {
-    const rect = joystick.getBoundingClientRect();
-    const dx = x - (rect.left + rect.width / 2);
-    const dy = y - (rect.top + rect.height / 2);
-    const distance = Math.min(Math.hypot(dx, dy), max);
-    const angle = Math.atan2(dy, dx);
-    thumb.style.transform = `translate3d(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px,0)`;
-    setDirection(Math.abs(dx) <= deadzone ? null : dx < 0 ? 'left' : 'right');
+    const { centerX, centerY, maxX, maxY } = getGeometry();
+    const rawX = x - centerX;
+    const rawY = y - centerY;
+
+    // Clamp X/Y independently so the thumb always remains fully inside the ring.
+    const clampedX = Math.max(-maxX, Math.min(maxX, rawX));
+    const clampedY = Math.max(-maxY, Math.min(maxY, rawY));
+    thumb.style.transform = `translate3d(${clampedX.toFixed(1)}px,${clampedY.toFixed(1)}px,0)`;
+
+    // Movement is intentionally horizontal because RunnerScene consumes
+    // left/right directions. Vertical finger movement remains visual only.
+    const absX = Math.abs(rawX);
+    if (direction === null) {
+      if (absX > deadzone) setDirection(rawX < 0 ? 'left' : 'right');
+      return;
+    }
+
+    // Hysteresis stops rapid left/right flicker when the finger sits around center.
+    if (absX <= releaseZone) setDirection(null);
+    else if (rawX < 0) setDirection('left');
+    else setDirection('right');
   };
 
   joystick.addEventListener('pointerdown', event => {
     if (!isGameUsable()) return;
     event.preventDefault();
     event.stopPropagation();
+    if (pointerId !== null) reset();
     pointerId = event.pointerId;
     joystick.setPointerCapture?.(pointerId);
     joystick.classList.add('is-active');
