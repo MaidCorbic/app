@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 const FIRST_MAP_ID = 'first-delivery';
 const PUZZLE_SEQUENCE = [1, 2, 3];
 const PUZZLE_X = 2240;
@@ -5,7 +7,8 @@ const GATE_X = 2620;
 const GROUND_Y = 548;
 
 function safeDestroy(value) {
-  value?.destroy?.(true);
+  if (!value) return;
+  try { value.destroy?.(true); } catch { /* scene shutdown is already in progress */ }
 }
 
 function createNode(scene, x, value, index, puzzle) {
@@ -21,14 +24,14 @@ function createNode(scene, x, value, index, puzzle) {
   }).setOrigin(.5).setDepth(902);
 
   const activate = () => {
-    if (puzzle.solved || puzzle.locked) return;
+    if (puzzle.solved) return;
+    const before = puzzle.progress.length;
     const solved = scene.solvePuzzleStep?.(puzzle, value) ?? false;
-    const correct = puzzle.progress[puzzle.progress.length - 1] === value;
-    glow.setFillStyle(correct ? 0xb9f5ff : 0xff826e, correct ? .22 : .16);
-    glow.setStrokeStyle(2, correct ? 0xb9f5ff : 0xff826e, .9);
-    if (!correct) {
+    const accepted = puzzle.progress.length > before || solved;
+    glow.setFillStyle(accepted ? 0xb9f5ff : 0xff826e, accepted ? .22 : .16);
+    glow.setStrokeStyle(2, accepted ? 0xb9f5ff : 0xff826e, .9);
+    if (!accepted) {
       puzzle.failedAttempts = (puzzle.failedAttempts || 0) + 1;
-      puzzle.progress = [];
       scene.playerCue?.('SEQUENCE RESET · TRY AGAIN', '#ff9b8b');
     } else if (solved) {
       scene.playerCue?.('SEQUENCE CORRECT · GATE OPEN', '#b9f5ff');
@@ -48,16 +51,20 @@ function installFirstMapPuzzleGate(RunnerScene) {
 
   const originalCreate = RunnerScene.prototype.create;
   const originalUpdate = RunnerScene.prototype.update;
+  const originalShutdown = RunnerScene.prototype.shutdown;
 
   RunnerScene.prototype.create = function firstMapPuzzleGateCreate(...args) {
     const result = originalCreate.apply(this, args);
-    if (this.mission?.id !== FIRST_MAP_ID || this.__firstMapPuzzleGate) return result;
+    if (this.mission?.id !== FIRST_MAP_ID) return result;
 
     const puzzle = this.createPuzzle?.({ id: 'first-map-sequence-lock', level: 1 });
-    if (!puzzle) return result;
-    puzzle.zone = this.createLockedZone?.({ id: 'first-map-gate-zone', x: GATE_X, y: GROUND_Y, width: 76, height: 116, puzzle });
-    const gate = this.createLockedGate?.(puzzle.zone, { x: GATE_X, y: GROUND_Y, width: 76, height: 116, depth: 900 });
-    if (!gate) return result;
+    const zone = puzzle && this.createLockedZone?.({
+      id: 'first-map-gate-zone', x: GATE_X, y: GROUND_Y, width: 76, height: 116, puzzle,
+    });
+    const gate = zone && this.createLockedGate?.(zone, {
+      x: GATE_X, y: GROUND_Y, width: 76, height: 116, depth: 900,
+    });
+    if (!puzzle || !zone || !gate) return result;
 
     const group = this.add.container(0, 0).setDepth(899).setName('first-map-puzzle-gate-v1');
     const title = this.add.text(PUZZLE_X, GROUND_Y - 118, 'SEQUENCE LOCK', {
@@ -75,8 +82,7 @@ function installFirstMapPuzzleGate(RunnerScene) {
       fontFamily: 'DM Mono', fontSize: '9px', color: '#ffcf82', stroke: '#08101c', strokeThickness: 4,
     }).setOrigin(.5).setDepth(902);
 
-    puzzle.locked = false;
-    this.__firstMapPuzzleGate = { puzzle, gate, group, nodes, gateLabel, interactRadius: 150 };
+    this.__firstMapPuzzleGate = { puzzle, zone, gate, group, nodes, gateLabel, interactRadius: 150 };
     this.playerCue?.('NEW ROUTE OBJECTIVE · SOLVE THE SEQUENCE LOCK', '#b9f5ff');
     return result;
   };
@@ -86,10 +92,10 @@ function installFirstMapPuzzleGate(RunnerScene) {
     const state = this.__firstMapPuzzleGate;
     if (!state || this.mission?.id !== FIRST_MAP_ID || state.puzzle.solved || this.finished || this.respawning) return result;
 
-    const nodeIndex = state.puzzle.progress.length;
-    const node = state.nodes[nodeIndex];
-    const near = node && this.player ? Phaser.Math.Distance.Between(this.player.x, this.player.y, node.glow.x, node.glow.y) <= state.interactRadius : false;
-    if (near && this.keys?.E?.isDown && !state.puzzle.__eLatch) {
+    const node = state.nodes[state.puzzle.progress.length];
+    const near = Boolean(node && this.player && Phaser.Math.Distance.Between(this.player.x, this.player.y, node.glow.x, node.glow.y) <= state.interactRadius);
+    const interact = near && this.keys?.E?.isDown;
+    if (interact && !state.puzzle.__eLatch) {
       state.puzzle.__eLatch = true;
       node.glow.emit('pointerdown');
     }
@@ -105,7 +111,7 @@ function installFirstMapPuzzleGate(RunnerScene) {
       safeDestroy(state.gateLabel);
       this.__firstMapPuzzleGate = null;
     }
-    return this.__firstMapPuzzleGateOriginalShutdown?.apply(this, args);
+    if (typeof originalShutdown === 'function') return originalShutdown.apply(this, args);
   };
 }
 
