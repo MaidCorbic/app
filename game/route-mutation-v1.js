@@ -11,7 +11,9 @@ function setup(scene) {
   const barriers = scene.barriers?.getChildren?.() || [];
   if (barriers.length < 2) return;
 
-  const ordered = barriers.filter(item => item?.active).sort((a, b) => a.x - b.x);
+  const ordered = barriers
+    .filter(item => item?.active && item?.body)
+    .sort((a, b) => a.x - b.x);
   const left = ordered[Math.max(0, Math.floor(ordered.length * .42))];
   const right = ordered[Math.max(0, Math.floor(ordered.length * .64))];
   if (!left || !right || left === right) return;
@@ -21,21 +23,40 @@ function setup(scene) {
 
 function update(scene) {
   const state = sceneState.get(scene);
-  if (!state || state.mutated || scene.finished) return;
+  if (!state || state.mutated || scene.finished || !scene.player?.active) return;
   const start = Number(scene.mission?.spawn?.x ?? scene.player.x ?? 0);
   const goal = Number(scene.mission?.goal?.x ?? start + 3200);
   const threshold = start + (goal - start) * .55;
   if (scene.player.x < threshold) return;
 
+  // Phaser GameObjects can remain in a group after their body is destroyed or
+  // disabled by another route/world system. Never call a physics API without a live body.
+  const left = state.left?.active && state.left?.body ? state.left : null;
+  const right = state.right?.active ? state.right : null;
+  if (!left && !right) {
+    state.mutated = true;
+    return;
+  }
+
   state.mutated = true;
-  state.left.disableBody?.(true, true);
-  state.right.enableBody?.(false, state.right.x, state.right.y, true, true);
-  state.right.setImmovable?.(true);
+  try { left?.disableBody?.(true, true); } catch (error) { console.warn('[RouteMutation] left barrier already unavailable', error); }
+
+  if (right?.body) {
+    try {
+      right.enableBody?.(false, right.x, right.y, true, true);
+      right.setImmovable?.(true);
+    } catch (error) {
+      console.warn('[RouteMutation] right barrier physics restore skipped', error);
+    }
+  }
+
   scene.playerCue?.('ROUTE SHIFT · NEW LINE OPEN', '#8df4ff');
   scene.game?.events?.emit('feedback', 'signal');
 
-  const flash = scene.add.circle(state.right.x, state.right.y, 12, 0x8df4ff, .22).setDepth(12);
-  scene.tweens?.add({ targets: flash, scale: 4, alpha: 0, duration: 420, onComplete: () => flash.destroy() });
+  if (right?.active) {
+    const flash = scene.add.circle(right.x, right.y, 12, 0x8df4ff, .22).setDepth(12);
+    scene.tweens?.add({ targets: flash, scale: 4, alpha: 0, duration: 420, onComplete: () => flash.destroy() });
+  }
 }
 
 function teardown(scene) { sceneState.delete(scene); }
