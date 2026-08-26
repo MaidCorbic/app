@@ -18,11 +18,11 @@ import { installPlayerVisualV2 } from './systems/player-visual-v2.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
 import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
+import { installDroneStrikeRecoveryV2 } from './systems/drone-strike-recovery-v2.js';
 
 if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   RunnerScene.prototype.__relayFeatureRuntimeInstalled = true;
 
-  // Feature gating must be installed before feature-specific create wrappers.
   installMissionFeatureGating(RunnerScene);
   installEnemyLayout(RunnerScene);
   installEnemyRuntime(RunnerScene);
@@ -38,4 +38,5 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
   installDroneStrikeRecovery(RunnerScene);
+  installDroneStrikeRecoveryV2(RunnerScene);
 }
