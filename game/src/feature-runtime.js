@@ -15,6 +15,7 @@ import { installPlayerVisualV2 } from './systems/player-visual-v2.js';
 import { installCharacterStateReactions } from './systems/character-state-reactions-v1.js';
 import { installEnemyDiscovery } from './systems/enemy-discovery-v1.js';
 import { installEnemyDialogue } from './systems/enemy-dialogue-v1.js';
+import { installEnemyProgression } from './systems/enemy-progression-v1.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
 import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
@@ -38,6 +39,7 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installCharacterStateReactions(RunnerScene);
   installEnemyDiscovery(RunnerScene);
   installEnemyDialogue(RunnerScene);
+  installEnemyProgression(RunnerScene);
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
   installDroneStrikeRecovery(RunnerScene);
