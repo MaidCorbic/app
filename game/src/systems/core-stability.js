@@ -30,6 +30,38 @@ const hit = RunnerScene.prototype.takeSciFiHit;
 const update = RunnerScene.prototype.update;
 const stop = scene => scene.player?.body?.setVelocity(0, 0);
 
+const isTouchDevice = () => navigator.maxTouchPoints > 0
+  || 'ontouchstart' in window
+  || window.matchMedia?.('(pointer: coarse)').matches
+  || window.matchMedia?.('(hover: none)').matches;
+
+function ensureWebKeyboardRefs(scene) {
+  // This is deliberately web-only. Mobile keeps its existing input path intact.
+  if (!scene || isTouchDevice() || !scene.input?.keyboard) return;
+  if (!scene.cursors) scene.cursors = scene.input.keyboard.createCursorKeys();
+  if (!scene.keys) {
+    scene.keys = scene.input.keyboard.addKeys({ A:'A', D:'D', W:'W', S:'S', SPACE:'SPACE', SHIFT:'SHIFT', E:'E', Q:'Q' });
+  }
+}
+
+function recoverWebPresentationLock(scene) {
+  if (!scene || isTouchDevice() || !scene.player?.body) return;
+  const intro = document.getElementById('relayGameplayIntroFinalV1');
+  const title = document.getElementById('titlePanel');
+  const introVisible = intro && !intro.hidden && !intro.classList.contains('hidden');
+  const titleVisible = title && !title.classList.contains('hidden');
+  if (introVisible || titleVisible) return;
+  if (scene.cinematicActive || scene.inputEnabled === false) {
+    scene.cinematicActive = false;
+    scene.inputEnabled = true;
+    try { scene.physics?.world?.resume?.(); } catch { /* already running */ }
+    scene.player.body.enable = true;
+    scene.player.body.moves = true;
+    scene.player.body.allowGravity = true;
+    scene.cameras?.main?.startFollow?.(scene.player, true, .08, .08);
+  }
+}
+
 function installSafeRunnerStart(game) {
   if (!game || game.__relaySafeRunnerStart) return;
   const manager = game.scene;
@@ -57,6 +89,8 @@ RunnerScene.prototype.create = function stableCreate(...args) {
   installSafeRunnerStart(this.game);
   try {
     const result = originalCreate.apply(this, args);
+    ensureWebKeyboardRefs(this);
+    recoverWebPresentationLock(this);
     setupWorldInteraction(this);
     window.__relayRunnerScene = this;
     return result;
@@ -108,6 +142,8 @@ function installTouchControls() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installTouchControls, { once: true }); else installTouchControls();
 
 RunnerScene.prototype.update = function stableUpdate(time, delta) {
+  ensureWebKeyboardRefs(this);
+  recoverWebPresentationLock(this);
   update.call(this, time, delta);
   updateWorldInteraction(this);
   if (this.finished || this.respawning || this.cinematicActive || this.dashTimer > 0 || !this.player?.body || !this.cursors || !this.keys) return;
