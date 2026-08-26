@@ -1,4 +1,5 @@
 import '../feature-runtime.js';
+import './mobile-black-screen-fix.js';
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 import { setupWorldInteraction, updateWorldInteraction } from '../../world-interaction-v1.js';
