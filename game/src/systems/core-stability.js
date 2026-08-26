@@ -58,6 +58,7 @@ RunnerScene.prototype.create = function stableCreate(...args) {
   try {
     const result = originalCreate.apply(this, args);
     setupWorldInteraction(this);
+    this.mobileDirection = null;
     window.__relayRunnerScene = this;
     return result;
   } catch (error) {
@@ -85,27 +86,8 @@ RunnerScene.prototype.respawnCheckpoint = function stableRespawn() {
   if (this.player?.body) { this.player.body.enable = true; this.player.body.checkCollision.none = false; }
   this.respawnGrace = Math.max(this.respawnGrace || 0, 1100);
   this.healthInvulnerable = Math.max(this.healthInvulnerable || 0, 1100);
+  this.mobileDirection = null;
 };
-
-function installTouchControls() {
-  if (window.__relayTouchInstalled) return;
-  window.__relayTouchInstalled = true;
-  const emit = (key, type) => window.dispatchEvent(new KeyboardEvent(type, { key, code: key === ' ' ? 'Space' : key.length === 1 ? `Key${key.toUpperCase()}` : key, bubbles: true }));
-  const pad = document.querySelector('[data-mobile-joystick]');
-  const thumb = pad?.querySelector('.mobile-joystick-thumb');
-  if (pad && thumb) {
-    let id = null; let dir = null;
-    const setDir = next => { if (next === dir) return; if (dir) emit(dir === 'left' ? 'a' : 'd', 'keyup'); dir = next; if (dir) emit(dir === 'left' ? 'a' : 'd', 'keydown'); };
-    const move = (x, y) => { const r = pad.getBoundingClientRect(); const dx = x - r.left - r.width / 2; const dy = y - r.top - r.height / 2; const d = Math.min(Math.hypot(dx, dy), 38); const a = Math.atan2(dy, dx); thumb.style.transform = `translate(${(Math.cos(a) * d).toFixed(1)}px,${(Math.sin(a) * d).toFixed(1)}px)`; setDir(Math.abs(dx) < 9 ? null : dx < 0 ? 'left' : 'right'); };
-    const reset = () => { setDir(null); id = null; thumb.style.transform = 'translate(0,0)'; pad.classList.remove('is-active'); };
-    pad.addEventListener('pointerdown', e => { id = e.pointerId; pad.setPointerCapture?.(id); pad.classList.add('is-active'); move(e.clientX, e.clientY); e.preventDefault(); });
-    pad.addEventListener('pointermove', e => { if (e.pointerId === id) { move(e.clientX, e.clientY); e.preventDefault(); } }, { passive: false });
-    pad.addEventListener('pointerup', e => { if (e.pointerId === id) reset(); }); pad.addEventListener('pointercancel', reset); window.addEventListener('blur', reset);
-  }
-  const keys = { jump: ' ', fire: 'e', sword: 'q', dash: 'Shift', build1: '1', build2: '2', gadget1: '3', gadget2: '4' };
-  document.querySelectorAll('[data-mobile-action]').forEach(button => button.addEventListener('pointerdown', e => { e.preventDefault(); const key = keys[button.dataset.mobileAction]; if (!key) return; emit(key, 'keydown'); setTimeout(() => emit(key, 'keyup'), 90); }, { passive: false }));
-}
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installTouchControls, { once: true }); else installTouchControls();
 
 RunnerScene.prototype.update = function stableUpdate(time, delta) {
   update.call(this, time, delta);
