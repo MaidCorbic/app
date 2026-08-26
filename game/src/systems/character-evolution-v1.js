@@ -1,90 +1,94 @@
 const FLIGHT_KEY = 'F';
-const FLIGHT_SPEED_Y = 260;
-const FLIGHT_ASCEND_BOOST = 310;
-const FLIGHT_DESCEND_BOOST = 230;
+const FLIGHT_ASCEND_SPEED = 320;
+const FLIGHT_DESCEND_SPEED = 240;
+const FLIGHT_MAX_SPEED = 300;
 const WING_COLOR = 0x8df4ff;
 const WING_GLOW = 0xb9f5ff;
 
-function isWebInput(scene) {
+function isPrimaryTouch() {
   const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
   const fine = window.matchMedia?.('(pointer: fine)').matches ?? false;
-  return !(coarse && !fine && Number(navigator.maxTouchPoints || 0) > 0) && Boolean(scene?.input?.keyboard);
-}
-
-function keyIsDown(scene, key) {
-  const source = scene?.keys?.[key] || scene?.input?.keyboard?.addKey?.(key);
-  return Boolean(source?.isDown);
+  return coarse && !fine && Number(navigator.maxTouchPoints || 0) > 0;
 }
 
 function ensureWingVisual(scene) {
-  if (!scene?.player || scene.__characterWingsV1) return;
-  const root = scene.playerVisualV2?.root;
-  if (!root) return;
-
-  const wings = scene.add.container(-1, 4).setDepth(-1).setName('character-wings-v1');
-  const leftGlow = scene.add.triangle(-14, 0, 0, 14, -28, 2, -2, -16, WING_GLOW, .32);
-  const rightGlow = scene.add.triangle(14, 0, 0, 14, 28, 2, 2, -16, WING_GLOW, .32);
-  const left = scene.add.polygon(-13, 1, [0, -11, -30, 3, -21, 12, -8, 7], WING_COLOR, .78);
-  const right = scene.add.polygon(13, 1, [0, -11, 30, 3, 21, 12, 8, 7], WING_COLOR, .78);
+  const root = scene?.playerVisualV2?.root;
+  if (!root || scene.__characterWingsV1) return;
+  const wings = scene.add.container(0, 5).setDepth(-1).setName('character-wings-v1');
+  const leftGlow = scene.add.polygon(-14, 0, [0, -12, -32, 3, -22, 15, -7, 8], WING_GLOW, .22);
+  const rightGlow = scene.add.polygon(14, 0, [0, -12, 32, 3, 22, 15, 7, 8], WING_GLOW, .22);
+  const left = scene.add.polygon(-14, 0, [0, -9, -29, 2, -19, 13, -7, 7], WING_COLOR, .78);
+  const right = scene.add.polygon(14, 0, [0, -9, 29, 2, 19, 13, 7, 7], WING_COLOR, .78);
   wings.add([leftGlow, rightGlow, left, right]);
   root.add(wings);
   scene.__characterWingsV1 = { wings, left, right, leftGlow, rightGlow };
-
   if (!scene.motionReduced) {
-    scene.tweens.add({
-      targets: [left, right],
-      scaleY: { from: .9, to: 1.06 },
-      angle: { from: -3, to: 3 },
-      duration: 360,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.inOut',
-    });
+    scene.tweens.add({ targets: [left, right], angle: { from: -4, to: 4 }, scaleY: { from: .94, to: 1.05 }, duration: 360, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
   }
 }
 
-function destroyWingVisual(scene) {
-  const wings = scene?.__characterWingsV1;
-  if (!wings) return;
-  wings.wings?.destroy(true);
-  scene.__characterWingsV1 = null;
-}
-
 function setFlight(scene, active) {
-  if (!scene?.player?.body || scene.finished || scene.respawning) return;
-  if (!scene.__characterFlightUnlocked) return;
-  if (Boolean(scene.__characterFlightActive) === Boolean(active)) return;
-
+  if (!scene?.player?.body || scene.finished || scene.respawning || !scene.__flightUnlocked) return;
+  if (Boolean(scene.__flightActive) === Boolean(active)) return;
   const body = scene.player.body;
   if (active) {
-    scene.__characterPreviousAllowGravity = body.allowGravity !== false;
+    scene.__flightPreviousGravity = body.allowGravity !== false;
     body.allowGravity = false;
     body.setVelocityY(0);
-    scene.__characterFlightActive = true;
-    scene.playerCue?.('WINGS ONLINE · FLIGHT', '#b9f5ff');
+    scene.__flightActive = true;
+    scene.playerCue?.('WINGS ONLINE · FLY MODE', '#b9f5ff');
   } else {
-    body.allowGravity = scene.__characterPreviousAllowGravity !== false;
-    body.setVelocityY(Math.min(Number(body.velocity?.y || 0), 80));
-    scene.__characterFlightActive = false;
+    body.allowGravity = scene.__flightPreviousGravity !== false;
+    body.setVelocityY(0);
+    scene.__flightActive = false;
+    scene.__flightAscendHeld = false;
     scene.playerCue?.('WINGS OFFLINE', '#dffcff');
   }
 }
 
 function updateFlight(scene, delta) {
-  if (!scene?.player?.body || !scene.__characterFlightUnlocked || !scene.__characterFlightActive) return;
+  if (!scene?.player?.body || !scene.__flightActive || !scene.__flightUnlocked) return;
   const body = scene.player.body;
   body.allowGravity = false;
-  const ascend = keyIsDown(scene, 'SPACE') || keyIsDown(scene, 'W');
-  const descend = keyIsDown(scene, 'S');
-  let targetY = 0;
-  if (ascend) targetY -= FLIGHT_ASCEND_BOOST;
-  else if (descend) targetY += FLIGHT_DESCEND_BOOST;
-  else targetY = 0;
-  const step = Math.max(.016, Math.min(.05, Number(delta || 16) / 1000));
-  const nextY = Phaser.Math.Linear(body.velocity?.y || 0, targetY, Math.min(1, step * 9));
-  body.setVelocityY(Math.max(-FLIGHT_SPEED_Y, Math.min(FLIGHT_SPEED_Y, nextY)));
-  scene.__characterWingsV1?.leftGlow?.setAlpha(ascend ? .58 : .28);
-  scene.__characterWingsV1?.rightGlow?.setAlpha(ascend ? .58 : .28);
+  const keys = scene.keys;
+  const ascend = Boolean(keys?.SPACE?.isDown || keys?.W?.isDown || scene.__flightAscendHeld);
+  const descend = Boolean(keys?.S?.isDown);
+  const target = ascend ? -FLIGHT_ASCEND_SPEED : descend ? FLIGHT_DESCEND_SPEED : 0;
+  const dt = Math.max(.016, Math.min(.05, Number(delta || 16) / 1000));
+  const current = Number(body.velocity?.y || 0);
+  const next = Phaser.Math.Linear(current, target, Math.min(1, dt * 10));
+  body.setVelocityY(Phaser.Math.Clamp(next, -FLIGHT_MAX_SPEED, FLIGHT_MAX_SPEED));
+  scene.__characterWingsV1?.leftGlow?.setAlpha(ascend ? .62 : .24);
+  scene.__characterWingsV1?.rightGlow?.setAlpha(ascend ? .62 : .24);
+}
+
+function installMobileFlightHold(scene) {
+  if (!isPrimaryTouch()) return;
+  const button = document.querySelector('[data-mobile-action="jump"]');
+  if (!button || button.dataset.characterFlightBound === 'true') return;
+  button.dataset.characterFlightBound = 'true';
+  let taps = [];
+  button.addEventListener('pointerdown', event => {
+    const now = performance.now();
+    taps = taps.filter(time => now - time < 360);
+    taps.push(now);
+    if (taps.length >= 2 && scene.__flightUnlocked) {
+      taps = [];
+      setFlight(scene, !scene.__flightActive);
+    }
+    if (scene.__flightActive) {
+      scene.__flightAscendHeld = true;
+      event.stopPropagation();
+    }
+  }, { passive: true });
+  const release = event => {
+    if (scene.__flightActive) {
+      scene.__flightAscendHeld = false;
+      event.stopPropagation();
+    }
+  };
+  button.addEventListener('pointerup', release, { passive: true });
+  button.addEventListener('pointercancel', release, { passive: true });
 }
 
 function installCharacterEvolution(RunnerScene) {
@@ -93,41 +97,40 @@ function installCharacterEvolution(RunnerScene) {
 
   const originalCreate = RunnerScene.prototype.create;
   const originalUpdate = RunnerScene.prototype.update;
-  const originalShutdown = RunnerScene.prototype.shutdown;
 
   RunnerScene.prototype.create = function characterEvolutionCreate(...args) {
     const result = originalCreate.apply(this, args);
-    this.__characterFlightUnlocked = true;
-    this.__characterFlightActive = false;
-    this.__characterPreviousAllowGravity = true;
+    this.__flightUnlocked = true;
+    this.__flightActive = false;
+    this.__flightPreviousGravity = true;
+    this.__flightAscendHeld = false;
     ensureWingVisual(this);
-    if (isWebInput(this)) {
+    if (isPrimaryTouch()) {
+      installMobileFlightHold(this);
+    } else if (!this.__characterFlightToggle) {
       this.__characterFlightToggle = event => {
         if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
         if (String(event.key).toUpperCase() !== FLIGHT_KEY) return;
         event.preventDefault();
-        setFlight(this, !this.__characterFlightActive);
+        setFlight(this, !this.__flightActive);
       };
       window.addEventListener('keydown', this.__characterFlightToggle);
     }
+    if (this.player) this.player.setAlpha(0);
     return result;
   };
 
   RunnerScene.prototype.update = function characterEvolutionUpdate(time, delta) {
-    const result = originalUpdate.call(this, time, delta);
-    if (this.__characterFlightUnlocked) {
-      if (this.__characterFlightActive && (this.finished || this.respawning)) setFlight(this, false);
-      updateFlight(this, delta);
-      this.__characterWingsV1?.wings?.setVisible(true);
-    }
+    const result = originalUpdate.apply(this, argsFromUpdate(arguments));
+    if (this.__flightActive && (this.finished || this.respawning || this.cinematicActive)) setFlight(this, false);
+    updateFlight(this, delta);
+    this.__characterWingsV1?.wings?.setVisible(true);
     return result;
   };
 
-  RunnerScene.prototype.shutdown = function characterEvolutionShutdown(...args) {
-    if (this.__characterFlightToggle) window.removeEventListener('keydown', this.__characterFlightToggle);
-    destroyWingVisual(this);
-    return originalShutdown?.apply(this, args);
-  };
+  function argsFromUpdate(args) {
+    return args;
+  }
 }
 
 export { installCharacterEvolution };
