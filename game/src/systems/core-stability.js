@@ -1,3 +1,4 @@
+import '../feature-runtime.js';
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 import { setupWorldInteraction, updateWorldInteraction } from '../../world-interaction-v1.js';
@@ -55,9 +56,6 @@ RunnerScene.prototype.create = function stableCreate(...args) {
   installSafeRunnerStart(this.game);
   try {
     const result = originalCreate.apply(this, args);
-    // RunnerScene.create has already built checkpoints/platforms at this point.
-    // Integration happens here instead of replacing RunnerScene.prototype.create
-    // from a second module, eliminating the previous hook-order collision.
     setupWorldInteraction(this);
     window.__relayRunnerScene = this;
     return result;
@@ -110,8 +108,6 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 
 RunnerScene.prototype.update = function stableUpdate(time, delta) {
   update.call(this, time, delta);
-  // Interaction update runs after the real RunnerScene update, so player/checkpoint
-  // positions are current and the mobile/desktop prompt uses the actual game state.
   updateWorldInteraction(this);
   if (this.finished || this.respawning || this.cinematicActive || this.dashTimer > 0 || !this.player?.body || !this.cursors || !this.keys) return;
   const left = this.cursors.left.isDown || this.keys.A.isDown || this.mobileDirection === 'left';
