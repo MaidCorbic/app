@@ -1,7 +1,4 @@
 // Deterministic gameplay feature installer.
-// RunnerScene imports ../packages.js for mission data, so packages.js must not
-// dynamically import RunnerScene again. This module owns all prototype installers
-// and is imported by main.js after the authoritative RunnerScene module exists.
 import { RunnerScene } from './scenes/RunnerScene.js';
 import { installMissionFeatureGating } from './systems/mission-feature-gating-v1.js';
 import { installEnemyRuntime } from './systems/enemy-runtime-v2.js';
@@ -17,12 +14,10 @@ import { installAutonomousCharacter } from './systems/autonomous-character-v1.js
 import { installPlayerVisualV2 } from './systems/player-visual-v2.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
-import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
 import { installDroneStrikeRecoveryV2 } from './systems/drone-strike-recovery-v2.js';
 
 if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   RunnerScene.prototype.__relayFeatureRuntimeInstalled = true;
-
   installMissionFeatureGating(RunnerScene);
   installEnemyLayout(RunnerScene);
   installEnemyRuntime(RunnerScene);
@@ -37,6 +32,5 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installPlayerVisualV2(RunnerScene);
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
-  installDroneStrikeRecovery(RunnerScene);
   installDroneStrikeRecoveryV2(RunnerScene);
 }
