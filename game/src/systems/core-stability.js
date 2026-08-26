@@ -24,6 +24,13 @@ function installAudioResume() {
 }
 installAudioResume();
 
+function isTouchDevice() {
+  return navigator.maxTouchPoints > 0
+    || 'ontouchstart' in window
+    || matchMedia('(pointer: coarse)').matches
+    || matchMedia('(hover: none)').matches;
+}
+
 const originalCreate = RunnerScene.prototype.create;
 const fail = RunnerScene.prototype.fail;
 const respawn = RunnerScene.prototype.respawnCheckpoint;
@@ -58,6 +65,19 @@ RunnerScene.prototype.create = function stableCreate(...args) {
   installSafeRunnerStart(this.game);
   try {
     const result = originalCreate.apply(this, args);
+
+    // MOBILE ONLY: the opening cinematic can leave the player physically
+    // suspended because RunnerScene.update intentionally stops while the
+    // cinematic is active. Desktop keeps the cinematic exactly as authored.
+    if (isTouchDevice() && this.cinematicActive) {
+      try { this.cinematicSkipHandler?.(); } catch (error) { console.warn('[Relay Mobile] Could not close opening cinematic cleanly:', error); }
+      this.cinematicActive = false;
+      this.physics?.resume?.();
+      this.player?.body?.setVelocity(0, 0);
+      this.player?.body?.setAcceleration(0, 0);
+      this.mobileDirection = null;
+    }
+
     setupWorldInteraction(this);
     this.mobileDirection = null;
     window.__relayRunnerScene = this;
