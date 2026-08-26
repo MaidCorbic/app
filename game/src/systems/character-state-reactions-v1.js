@@ -2,7 +2,6 @@ const RUN_MIN_SPEED = 70;
 const RUN_FRAME_MS = 110;
 const LAND_REACTION_MS = 150;
 const SWORD_REACTION_MS = 170;
-const HIT_REACTION_MS = 180;
 
 function safeSetTexture(player, key) {
   if (!player?.active || !player.scene?.textures?.exists(key)) return;
@@ -20,7 +19,6 @@ function installCharacterStateReactions(RunnerScene) {
 
   RunnerScene.prototype.create = function (...args) {
     originalCreate.apply(this, args);
-
     if (!this.player) return;
 
     this.__characterVisualState = 'idle';
@@ -49,11 +47,11 @@ function installCharacterStateReactions(RunnerScene) {
 
     const now = this.time.now;
     const body = player.body;
-    const grounded = body.blocked?.down || body.touching?.down || player.y >= (this.mission?.spawn?.y || 0) + 70;
+    const grounded = Boolean(body.blocked?.down || body.touching?.down);
     const vx = Math.abs(body.velocity?.x || 0);
     const vy = body.velocity?.y || 0;
 
-    // Visual-only landing reaction. It never changes velocity, collision or movement state.
+    // Visual-only landing reaction. It never changes velocity, collision, or movement state.
     if (grounded && !this.__characterWasGrounded && vy >= 0) {
       this.__characterReactionState = 'land';
       this.__characterReactionUntil = now + LAND_REACTION_MS;
@@ -61,9 +59,8 @@ function installCharacterStateReactions(RunnerScene) {
     this.__characterWasGrounded = grounded;
 
     if (this.__characterReactionState && now < this.__characterReactionUntil) {
-      const state = this.__characterReactionState;
-      if (state === 'sword') safeSetTexture(player, 'runner-hit');
-      else if (state === 'land') safeSetTexture(player, 'runner-land');
+      if (this.__characterReactionState === 'sword') safeSetTexture(player, 'runner-hit');
+      if (this.__characterReactionState === 'land') safeSetTexture(player, 'runner-land');
       return;
     }
 
@@ -87,7 +84,6 @@ function installCharacterStateReactions(RunnerScene) {
       }
       safeSetTexture(player, this.__characterRunFrame ? 'runner-run-a' : 'runner-run-b');
       this.__characterVisualState = 'run';
-      player.setFlipX(body.velocity.x < -4);
       return;
     }
 
