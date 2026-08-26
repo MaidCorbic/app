@@ -68,3 +68,5 @@ import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
 // Additive presentation layer; loaded last so core gameplay ownership remains unchanged.
 import './dynamic-environment-reactions-v1.js';
+// Production safety net: presentation/tutorial failures must never leave the run frozen.
+import './production-unfreeze-v1.js';
