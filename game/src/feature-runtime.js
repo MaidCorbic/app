@@ -17,6 +17,7 @@ import { installAutonomousCharacter } from './systems/autonomous-character-v1.js
 import { installPlayerVisualV2 } from './systems/player-visual-v2.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
+import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
 
 if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   RunnerScene.prototype.__relayFeatureRuntimeInstalled = true;
@@ -36,4 +37,5 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installPlayerVisualV2(RunnerScene);
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
+  installDroneStrikeRecovery(RunnerScene);
 }
