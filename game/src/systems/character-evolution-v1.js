@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 const FLIGHT_KEY = 'F';
 const FLIGHT_ASCEND_SPEED = 320;
 const FLIGHT_DESCEND_SPEED = 240;
@@ -76,16 +78,10 @@ function installMobileFlightHold(scene) {
       taps = [];
       setFlight(scene, !scene.__flightActive);
     }
-    if (scene.__flightActive) {
-      scene.__flightAscendHeld = true;
-      event.stopPropagation();
-    }
+    if (scene.__flightActive) scene.__flightAscendHeld = true;
   }, { passive: true });
-  const release = event => {
-    if (scene.__flightActive) {
-      scene.__flightAscendHeld = false;
-      event.stopPropagation();
-    }
+  const release = () => {
+    if (scene.__flightActive) scene.__flightAscendHeld = false;
   };
   button.addEventListener('pointerup', release, { passive: true });
   button.addEventListener('pointercancel', release, { passive: true });
@@ -116,21 +112,17 @@ function installCharacterEvolution(RunnerScene) {
       };
       window.addEventListener('keydown', this.__characterFlightToggle);
     }
-    if (this.player) this.player.setAlpha(0);
+    if (this.player && this.playerVisualV2?.root) this.player.setAlpha(0);
     return result;
   };
 
   RunnerScene.prototype.update = function characterEvolutionUpdate(time, delta) {
-    const result = originalUpdate.apply(this, argsFromUpdate(arguments));
+    const result = originalUpdate.apply(this, arguments);
     if (this.__flightActive && (this.finished || this.respawning || this.cinematicActive)) setFlight(this, false);
     updateFlight(this, delta);
-    this.__characterWingsV1?.wings?.setVisible(true);
+    this.__characterWingsV1?.wings?.setVisible(Boolean(this.player?.active));
     return result;
   };
-
-  function argsFromUpdate(args) {
-    return args;
-  }
 }
 
 export { installCharacterEvolution };
