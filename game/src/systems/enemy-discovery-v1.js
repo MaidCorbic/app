@@ -31,7 +31,7 @@ function installCardStyles() {
     .relay-enemy-card dl{display:grid;grid-template-columns:82px 1fr;gap:8px 12px;margin:0}
     .relay-enemy-card dt{color:#8fa6bd;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
     .relay-enemy-card dd{margin:0;color:#e8edf4}
-    .relay-enemy-card button{margin-top:18px;width:100%;min-height:44px;border:1px solid rgba(141,244,255,.55);background:#0b2135;color:#eafcff;font-weight:800;letter-spacing:.1em;cursor:pointer}
+    .relay-enemy-card button{margin-top:18px;width:100%;min-height:44px;border:1px solid rgba(141,244,255,.55);background:#0b2135;color:#eafcff;font-weight:800;letter-spacing:.1em;cursor:pointer;touch-action:manipulation}
     @media(max-width:700px){.relay-enemy-discovery{padding:14px;align-items:end;padding-bottom:max(18px,env(safe-area-inset-bottom) + 12px)}.relay-enemy-card{width:min(460px,calc(100vw - 28px));padding:18px}.relay-enemy-card h2{font-size:23px}}
   `;
   document.head.appendChild(style);
@@ -73,6 +73,11 @@ function installEnemyDiscovery(RunnerScene) {
     this.__enemyDiscoveryCard.hidden = true;
     this.__enemyDiscoveryActiveKey = null;
     this.infoCard = null;
+  };
+
+  // Existing RunnerScene/menu code uses this name for Escape dismissal.
+  RunnerScene.prototype.dismissIntelCard = function () {
+    if (this.__enemyDiscoveryActiveKey) this.dismissEnemyDiscovery();
   };
 
   RunnerScene.prototype.showEnemyDiscovery = function (key) {
