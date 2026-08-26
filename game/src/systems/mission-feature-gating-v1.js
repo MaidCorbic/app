@@ -23,18 +23,26 @@ export function missionFeatureSet(missionId) {
   return Object.keys(FEATURE_UNLOCKS).filter(feature => featureEnabled(feature, missionId));
 }
 
+function readMissionId(scene) {
+  return scene?.sys?.settings?.data?.mission?.id
+    || scene?.mission?.id
+    || scene?.activeMission?.id
+    || scene?.package?.id
+    || scene?.currentMissionId
+    || scene?.sys?.settings?.data?.missionId
+    || null;
+}
+
 export function installMissionFeatureGating(RunnerScene) {
   if (!RunnerScene?.prototype || RunnerScene.prototype.__missionFeatureGatingInstalled) return;
   RunnerScene.prototype.__missionFeatureGatingInstalled = true;
-
   const originalCreate = RunnerScene.prototype.create;
   RunnerScene.prototype.create = function (...args) {
     const result = originalCreate.apply(this, args);
-    const missionId = this.mission?.id || this.activeMission?.id || this.package?.id || this.currentMissionId || this.scene?.settings?.missionId || null;
+    const missionId = readMissionId(this);
     this.__missionFeatureGating = { missionId, enabled: new Set(missionFeatureSet(missionId)) };
     return result;
   };
-
   RunnerScene.prototype.isFeatureEnabled = function (feature) {
     return this.__missionFeatureGating?.enabled?.has(FEATURE_ALIASES[feature] || feature) === true;
   };
