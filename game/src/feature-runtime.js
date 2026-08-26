@@ -12,6 +12,8 @@ import { installTeleportNetwork } from './systems/teleport-network-v1.js';
 import { installBiohazardContamination } from './systems/biohazard-contamination-v1.js';
 import { installAutonomousCharacter } from './systems/autonomous-character-v1.js';
 import { installPlayerVisualV2 } from './systems/player-visual-v2.js';
+import { installCharacterStateReactions } from './systems/character-state-reactions-v1.js';
+import { installEnemyDiscovery } from './systems/enemy-discovery-v1.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
 import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
@@ -32,6 +34,8 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installBiohazardContamination(RunnerScene);
   installAutonomousCharacter(RunnerScene);
   installPlayerVisualV2(RunnerScene);
+  installCharacterStateReactions(RunnerScene);
+  installEnemyDiscovery(RunnerScene);
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
   installDroneStrikeRecovery(RunnerScene);
