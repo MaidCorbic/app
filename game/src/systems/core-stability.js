@@ -1,7 +1,6 @@
 import '../feature-runtime.js';
 import './mobile-black-screen-fix.js';
 import { RunnerScene } from '../scenes/RunnerScene.js';
-import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 import { setupWorldInteraction, updateWorldInteraction } from '../../world-interaction-v1.js';
 
 function keepPhaserSurfaceMounted() {
@@ -30,28 +29,37 @@ const hit = RunnerScene.prototype.takeSciFiHit;
 const update = RunnerScene.prototype.update;
 const stop = scene => scene.player?.body?.setVelocity(0, 0);
 
-const isTouchDevice = () => navigator.maxTouchPoints > 0
-  || 'ontouchstart' in window
-  || window.matchMedia?.('(pointer: coarse)').matches
-  || window.matchMedia?.('(hover: none)').matches;
+function isPrimaryTouchDevice() {
+  const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+  const fine = window.matchMedia?.('(pointer: fine)').matches ?? false;
+  const touchPoints = Number(navigator.maxTouchPoints || 0);
+  return coarse && !fine && touchPoints > 0;
+}
 
 function ensureWebKeyboardRefs(scene) {
-  // This is deliberately web-only. Mobile keeps its existing input path intact.
-  if (!scene || isTouchDevice() || !scene.input?.keyboard) return;
-  if (!scene.cursors) scene.cursors = scene.input.keyboard.createCursorKeys();
-  if (!scene.keys) {
-    scene.keys = scene.input.keyboard.addKeys({ A:'A', D:'D', W:'W', S:'S', SPACE:'SPACE', SHIFT:'SHIFT', E:'E', Q:'Q' });
-  }
+  if (!scene || isPrimaryTouchDevice() || !scene.input?.keyboard) return;
+  const keyboard = scene.input.keyboard;
+  keyboard.enabled = true;
+
+  const cursorsReady = Boolean(scene.cursors?.left && scene.cursors?.right && scene.cursors?.up && scene.cursors?.down);
+  if (!cursorsReady) scene.cursors = keyboard.createCursorKeys();
+
+  const keysReady = Boolean(scene.keys?.A && scene.keys?.D && scene.keys?.W && scene.keys?.S && scene.keys?.SPACE && scene.keys?.SHIFT && scene.keys?.E && scene.keys?.Q && scene.keys?.ESC);
+  if (!keysReady) scene.keys = keyboard.addKeys('A,D,W,S,E,Q,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC');
 }
 
 function recoverWebPresentationLock(scene) {
-  if (!scene || isTouchDevice() || !scene.player?.body) return;
+  if (!scene || isPrimaryTouchDevice() || !scene.player?.body) return;
   const intro = document.getElementById('relayGameplayIntroFinalV1');
   const title = document.getElementById('titlePanel');
   const introVisible = intro && !intro.hidden && !intro.classList.contains('hidden');
   const titleVisible = title && !title.classList.contains('hidden');
   if (introVisible || titleVisible) return;
-  if (scene.cinematicActive || scene.inputEnabled === false) {
+
+  const age = performance.now() - Number(scene.__webSceneStartedAt || performance.now());
+  const staleCinematic = Boolean(scene.cinematicActive) && age > 6500;
+  const staleInputLock = scene.inputEnabled === false && age > 6500;
+  if (staleCinematic || staleInputLock) {
     scene.cinematicActive = false;
     scene.inputEnabled = true;
     try { scene.physics?.world?.resume?.(); } catch { /* already running */ }
@@ -60,6 +68,28 @@ function recoverWebPresentationLock(scene) {
     scene.player.body.allowGravity = true;
     scene.cameras?.main?.startFollow?.(scene.player, true, .08, .08);
   }
+}
+
+function recoverWebPlayerRuntime(scene) {
+  if (!scene || isPrimaryTouchDevice() || !scene.player?.active || !scene.player.body) return;
+  if (scene.finished || scene.respawning || scene.cinematicActive) return;
+
+  const body = scene.player.body;
+  body.enable = true;
+  body.moves = true;
+  body.allowGravity = true;
+  body.checkCollision.none = false;
+
+  const animationState = scene.player.anims;
+  if (animationState?.isPaused) animationState.resume();
+  if (animationState?.isPlaying && animationState.currentAnim) return;
+
+  const grounded = Boolean(body.blocked?.down || body.touching?.down);
+  const vx = Number(body.velocity?.x || 0);
+  const vy = Number(body.velocity?.y || 0);
+  if (!grounded) scene.player.play(vy < 0 ? 'runner-jump' : 'runner-fall', true);
+  else if (Math.abs(vx) > 35) scene.player.play('runner-run', true);
+  else scene.player.play('runner-idle', true);
 }
 
 function installSafeRunnerStart(game) {
@@ -87,10 +117,12 @@ RunnerScene.prototype.create = function stableCreate(...args) {
     return;
   }
   installSafeRunnerStart(this.game);
+  this.__webSceneStartedAt = performance.now();
   try {
     const result = originalCreate.apply(this, args);
     ensureWebKeyboardRefs(this);
     recoverWebPresentationLock(this);
+    recoverWebPlayerRuntime(this);
     setupWorldInteraction(this);
     window.__relayRunnerScene = this;
     return result;
@@ -146,8 +178,5 @@ RunnerScene.prototype.update = function stableUpdate(time, delta) {
   recoverWebPresentationLock(this);
   update.call(this, time, delta);
   updateWorldInteraction(this);
-  if (this.finished || this.respawning || this.cinematicActive || this.dashTimer > 0 || !this.player?.body || !this.cursors || !this.keys) return;
-  const left = this.cursors.left.isDown || this.keys.A.isDown || this.mobileDirection === 'left';
-  const right = this.cursors.right.isDown || this.keys.D.isDown || this.mobileDirection === 'right';
-  applyHorizontalMovementFeel({ player: this.player, axis: (right ? 1 : 0) - (left ? 1 : 0), delta });
+  recoverWebPlayerRuntime(this);
 };
