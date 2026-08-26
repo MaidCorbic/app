@@ -10,7 +10,7 @@ export const packages = {
 
 void import('./scenes/RunnerScene.js')
   .then(async ({ RunnerScene }) => {
-    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }, { installWorldMemory }, { installGrappleTraversal }, { installTeleportNetwork }, { installBiohazardContamination }, { installAutonomousCharacter }] = await Promise.all([
+    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }, { installWorldMemory }, { installGrappleTraversal }, { installTeleportNetwork }, { installBiohazardContamination }, { installAutonomousCharacter }, { installPlayerVisualV2 }] = await Promise.all([
       import('./systems/enemy-runtime-v2.js'),
       import('./systems/enemy-layout-v2.js'),
       import('./systems/enemy-ai-awareness-v1.js'),
@@ -21,6 +21,7 @@ void import('./scenes/RunnerScene.js')
       import('./systems/teleport-network-v1.js'),
       import('./systems/biohazard-contamination-v1.js'),
       import('./systems/autonomous-character-v1.js'),
+      import('./systems/player-visual-v2.js'),
     ]);
     installEnemyLayout(RunnerScene);
     installEnemyRuntime(RunnerScene);
@@ -32,5 +33,6 @@ void import('./scenes/RunnerScene.js')
     installTeleportNetwork(RunnerScene);
     installBiohazardContamination(RunnerScene);
     installAutonomousCharacter(RunnerScene);
+    installPlayerVisualV2(RunnerScene);
   })
   .catch(error => console.error('[gameplay-runtime] failed to initialize', error));
