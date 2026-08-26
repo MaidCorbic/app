@@ -10,7 +10,7 @@ export const packages = {
 
 void import('./scenes/RunnerScene.js')
   .then(async ({ RunnerScene }) => {
-    const [{ installMissionFeatureGating }, { installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }, { installWorldMemory }, { installGrappleTraversal }, { installTeleportNetwork }, { installBiohazardContamination }, { installAutonomousCharacter }, { installPlayerVisualV2 }, { installEarthquakeEvents }] = await Promise.all([
+    const [{ installMissionFeatureGating }, { installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }, { installWorldMemory }, { installGrappleTraversal }, { installTeleportNetwork }, { installBiohazardContamination }, { installAutonomousCharacter }, { installPlayerVisualV2 }, { installEarthquakeEvents }, { installEarthquakeCinematic }] = await Promise.all([
       import('./systems/mission-feature-gating-v1.js'),
       import('./systems/enemy-runtime-v2.js'),
       import('./systems/enemy-layout-v2.js'),
@@ -24,6 +24,7 @@ void import('./scenes/RunnerScene.js')
       import('./systems/autonomous-character-v1.js'),
       import('./systems/player-visual-v2.js'),
       import('./systems/earthquake-events-v1.js'),
+      import('./systems/earthquake-events-cinematic-v1.js'),
     ]);
     installMissionFeatureGating(RunnerScene);
     installEnemyLayout(RunnerScene);
@@ -38,5 +39,6 @@ void import('./scenes/RunnerScene.js')
     installAutonomousCharacter(RunnerScene);
     installPlayerVisualV2(RunnerScene);
     installEarthquakeEvents(RunnerScene);
+    installEarthquakeCinematic(RunnerScene);
   })
   .catch(error => console.error('[gameplay-runtime] failed to initialize', error));
