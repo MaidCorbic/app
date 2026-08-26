@@ -1,10 +1,8 @@
 import Phaser from 'phaser';
 import { RunnerScene } from '../scenes/RunnerScene.js';
 
-// Web-only recovery layer. It does not change movement tuning or physics;
-// it restores the existing keyboard references/play state when presentation
-// code accidentally leaves them unavailable.
-if (!RunnerScene.prototype.__webMovementRecoveryV1) {
+function installWebMovementRecovery() {
+  if (RunnerScene.prototype.__webMovementRecoveryV1) return;
   RunnerScene.prototype.__webMovementRecoveryV1 = true;
 
   const isTouchDevice = () => navigator.maxTouchPoints > 0
@@ -64,3 +62,5 @@ if (!RunnerScene.prototype.__webMovementRecoveryV1) {
     return originalUpdate.call(this, time, delta);
   };
 }
+
+export { installWebMovementRecovery };
