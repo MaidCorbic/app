@@ -10,7 +10,8 @@ export const packages = {
 
 void import('./scenes/RunnerScene.js')
   .then(async ({ RunnerScene }) => {
-    const [{ installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }, { installWorldMemory }, { installGrappleTraversal }, { installTeleportNetwork }, { installBiohazardContamination }, { installAutonomousCharacter }, { installPlayerVisualV2 }] = await Promise.all([
+    const [{ installMissionFeatureGating }, { installEnemyRuntime }, { installEnemyLayout }, { installEnemyAIAwareness }, { installGhostRun }, { installReactiveCourierEncounter }, { installWorldMemory }, { installGrappleTraversal }, { installTeleportNetwork }, { installBiohazardContamination }, { installAutonomousCharacter }, { installPlayerVisualV2 }] = await Promise.all([
+      import('./systems/mission-feature-gating-v1.js'),
       import('./systems/enemy-runtime-v2.js'),
       import('./systems/enemy-layout-v2.js'),
       import('./systems/enemy-ai-awareness-v1.js'),
@@ -23,6 +24,7 @@ void import('./scenes/RunnerScene.js')
       import('./systems/autonomous-character-v1.js'),
       import('./systems/player-visual-v2.js'),
     ]);
+    installMissionFeatureGating(RunnerScene);
     installEnemyLayout(RunnerScene);
     installEnemyRuntime(RunnerScene);
     installEnemyAIAwareness(RunnerScene);
