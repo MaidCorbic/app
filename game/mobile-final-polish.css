@@ -5,12 +5,23 @@
 #relaySplash.relay-splash .relay-splash-meta{display:flex;align-items:flex-end;justify-content:space-between}
 #relaySplash.relay-splash .relay-splash-status{text-align:left}
 #relaySplash.relay-splash .relay-splash-brand{display:flex}
-#relay-flight-hud-v1{display:none!important}
-#relay-flight-hud-v1 *{display:none!important}
-@media(max-width:768px){
+#relay-flight-hud-v1,#relay-flight-hud-v1 *{display:none!important}
+
+/* Gameplay: no accidental text selection, dragging or browser gesture handling. */
+#play,#play *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent}
+#play{-webkit-touch-callout:none;overscroll-behavior:none;touch-action:manipulation}
+#phaser-game,#phaser-game canvas,.mobile-controls,.mobile-joystick,.mobile-actions{touch-action:none!important}
+
+/* Portrait remains a valid orientation, but touch action buttons are hidden there. */
+@media(max-width:768px) and (orientation:portrait) and (pointer:coarse){
+ body.is-touch .mobile-controls{display:none!important}
+}
+
+/* Landscape keeps the complete touch HUD. */
+@media(max-width:768px) and (orientation:landscape) and (pointer:coarse){
+ body.is-touch .mobile-controls{display:flex!important}
  body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v6"] .mobile-actions{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-auto-flow:column!important;align-items:center!important;gap:clamp(4px,1.2vw,8px)!important}
  body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v6"] .mobile-actions>button{width:var(--touch-size)!important;height:var(--touch-size)!important;min-width:var(--touch-size)!important;min-height:var(--touch-size)!important;max-width:var(--touch-size)!important;max-height:var(--touch-size)!important;aspect-ratio:1/1!important;border-radius:50%!important;padding:0!important;flex:0 0 var(--touch-size)!important;line-height:1!important;display:grid!important;place-items:center!important;align-content:center!important;gap:2px!important}
  body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v6"] .mobile-actions>button small{display:block!important;font-size:clamp(7px,1.8vw,9px)!important;line-height:1!important}
- body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v6"] .mobile-actions>button:last-child{border-radius:50%!important;overflow:hidden!important}
 }
-@media(max-width:380px){body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v6"] .mobile-actions{gap:3px!important}body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v6"] .mobile-actions>button{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;max-width:44px!important;max-height:44px!important;border-radius:50%!important}}
+@media(max-width:380px) and (orientation:landscape) and (pointer:coarse){body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v6"] .mobile-actions{gap:3px!important}body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v6"] .mobile-actions>button{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;max-width:44px!important;max-height:44px!important;border-radius:50%!important}}
