@@ -16,6 +16,7 @@ assert.match(pause, /data-setting="rain"/);
 assert.match(pause, /data-volume="musicVolume"/);
 assert.match(pause, /data-volume="sfxVolume"/);
 assert.doesNotMatch(pause, /data-pause-range=/, 'pause settings must use the main runtime volume handler');
+assert.match(pause, /const value = current\[key\] === false;/, 'undefined defaults must toggle from ON to OFF');
 assert.match(pause, /relay-settings-change/);
 
 console.log('Settings state contract: PASS');
