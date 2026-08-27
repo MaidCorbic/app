@@ -5,6 +5,7 @@ const FLIGHT_KEY = Phaser.Input.Keyboard.KeyCodes.F;
 const MAX_DELTA_MS = 50;
 const MIN_GLIDE_GRAVITY_SCALE = 0.08;
 const MAX_GLIDE_GRAVITY_SCALE = 0.35;
+const DEFAULT_FLIGHT_DURATION_MS = 30000;
 
 const isFlightState = state => state === FLIGHT_STATE.FLYING || state === FLIGHT_STATE.HOVER;
 const finite = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
@@ -23,6 +24,9 @@ function installFlightHoverGlide(RunnerScene) {
       enabled: this.mission?.id != null,
       state: FLIGHT_STATE.GROUNDED,
       hoverHold: false,
+      flightDurationMs: DEFAULT_FLIGHT_DURATION_MS,
+      flightStartedAt: 0,
+      flightEndsAt: 0,
       energyDrainPerSecond: 11,
       minEnergyToStart: 8,
       verticalSpeed: 260,
@@ -36,6 +40,10 @@ function installFlightHoverGlide(RunnerScene) {
       toggleCooldownMs: 180,
       depletedNoticeAt: 0,
       lastEnergyPercent: Math.round(finite(this.energy) / Math.max(1, finite(this.energyMax, 1)) * 100),
+      lastFlightSeconds: -1,
+      flightWarningSent: false,
+      glideGravityApplied: false,
+      paused: false,
       keys: {
         up: this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W),
         down: this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S),
@@ -57,6 +65,16 @@ function installFlightHoverGlide(RunnerScene) {
       if (event?.type === 'relay:toggle-flight') this.toggleFlightMode?.(event.detail?.source || 'mobile');
     };
     window.addEventListener('relay:toggle-flight', this.__flightPointerHandler);
+
+    this.__flightPauseHandler = event => {
+      if (!this.__flightHVG) return;
+      this.__flightHVG.paused = Boolean(event?.detail?.paused);
+      if (this.__flightHVG.paused && isFlightState(this.__flightHVG.state)) {
+        this.__flightHVG.hoverHold = false;
+        this.player?.body?.setVelocityY?.(0);
+      }
+    };
+    window.addEventListener('relay:flight-pause', this.__flightPauseHandler);
     return result;
   };
 
@@ -64,7 +82,11 @@ function installFlightHoverGlide(RunnerScene) {
     const data = this.__flightHVG;
     if (!data || (data.state === state && !meta.force)) return;
     data.state = state;
-    this.game?.events?.emit('flight-state', state, { source: meta.source || 'system', reason: meta.reason || null });
+    this.game?.events?.emit('flight-state', state, {
+      source: meta.source || 'system',
+      reason: meta.reason || null,
+      remainingMs: this.getFlightRemainingMs?.() ?? 0,
+    });
   };
 
   RunnerScene.prototype.restoreFlightBody = function () {
@@ -73,17 +95,39 @@ function installFlightHoverGlide(RunnerScene) {
     if (!data || !body) return false;
     body.setGravityY?.(data.baseGravityY);
     body.setAllowGravity?.(data.baseAllowGravity);
+    data.glideGravityApplied = false;
     return true;
+  };
+
+  RunnerScene.prototype.getFlightRemainingMs = function () {
+    const data = this.__flightHVG;
+    if (!data || !isFlightState(data.state)) return 0;
+    return Math.max(0, data.flightEndsAt - performance.now());
   };
 
   RunnerScene.prototype.resetFlightState = function (reason = 'reset') {
     const data = this.__flightHVG;
     if (!data) return false;
     data.hoverHold = false;
+    data.flightStartedAt = 0;
+    data.flightEndsAt = 0;
     data.glideUntil = 0;
-    data.state = FLIGHT_STATE.GROUNDED;
+    data.flightWarningSent = false;
+    data.lastFlightSeconds = -1;
     this.restoreFlightBody?.();
-    this.game?.events?.emit('flight-state', data.state, { reason });
+    this.emitFlightState?.(FLIGHT_STATE.GROUNDED, { reason, force: true });
+    return true;
+  };
+
+  RunnerScene.prototype.endFlight = function (reason = 'duration-ended') {
+    const data = this.__flightHVG;
+    if (!data || !isFlightState(data.state)) return false;
+    data.hoverHold = false;
+    data.flightEndsAt = 0;
+    data.glideUntil = performance.now() + data.glideWindowMs;
+    data.flightWarningSent = false;
+    this.emitFlightState?.(FLIGHT_STATE.GLIDING, { reason });
+    this.playerCue?.(reason === 'duration-ended' ? 'FLIGHT TIME EXPIRED · GLIDE' : 'FLIGHT OFF · GLIDE', '#ffcf82');
     return true;
   };
 
@@ -96,11 +140,7 @@ function installFlightHoverGlide(RunnerScene) {
     data.lastToggleAt = now;
 
     if (isFlightState(data.state)) {
-      data.hoverHold = false;
-      data.glideUntil = now + data.glideWindowMs;
-      this.emitFlightState?.(FLIGHT_STATE.GLIDING, { source, reason: 'manual-off' });
-      this.playerCue?.('FLIGHT OFF · GLIDE', '#b9f5ff');
-      return true;
+      return this.endFlight?.('manual-off') ?? false;
     }
 
     const energy = finite(this.energy);
@@ -115,6 +155,10 @@ function installFlightHoverGlide(RunnerScene) {
 
     data.baseGravityY = finite(body.gravity?.y, data.baseGravityY);
     data.baseAllowGravity = body.allowGravity !== false;
+    data.flightStartedAt = now;
+    data.flightEndsAt = now + data.flightDurationMs;
+    data.lastFlightSeconds = Math.ceil(data.flightDurationMs / 1000);
+    data.flightWarningSent = false;
     data.hoverHold = false;
     data.glideUntil = 0;
     body.setGravityY?.(data.baseGravityY);
@@ -122,7 +166,7 @@ function installFlightHoverGlide(RunnerScene) {
     body.setVelocityY?.(0);
     this.emitFlightState?.(FLIGHT_STATE.FLYING, { source, reason: 'manual-on' });
     this.game?.events?.emit('feedback', 'flight');
-    this.playerCue?.('FLIGHT ONLINE · F / W S / SPACE', '#8df4ff');
+    this.playerCue?.('FLIGHT ONLINE · 30 SEC · F / W S / SPACE', '#8df4ff');
     return true;
   };
 
@@ -143,7 +187,18 @@ function installFlightHoverGlide(RunnerScene) {
     if (!data) return null;
     const energyMax = Math.max(0, finite(this.energyMax));
     const energy = Math.max(0, finite(this.energy));
-    return { enabled: data.enabled, state: data.state, energy, energyMax, energyRatio: energyMax > 0 ? energy / energyMax : 0, paused: Boolean(data.paused) };
+    const remainingMs = this.getFlightRemainingMs?.() || 0;
+    return {
+      enabled: data.enabled,
+      state: data.state,
+      energy,
+      energyMax,
+      energyRatio: energyMax > 0 ? energy / energyMax : 0,
+      remainingMs,
+      remainingSeconds: Math.ceil(remainingMs / 1000),
+      durationMs: data.flightDurationMs,
+      paused: Boolean(data.paused),
+    };
   };
 
   RunnerScene.prototype.publishFlightEnergy = function () {
@@ -157,6 +212,20 @@ function installFlightHoverGlide(RunnerScene) {
     this.game?.events?.emit('flight-energy', { value: Math.max(0, finite(this.energy)), max: maxEnergy, percent });
   };
 
+  RunnerScene.prototype.publishFlightTimer = function () {
+    const data = this.__flightHVG;
+    if (!data || !isFlightState(data.state)) return;
+    const remainingMs = Math.max(0, data.flightEndsAt - performance.now());
+    const seconds = Math.ceil(remainingMs / 1000);
+    if (seconds === data.lastFlightSeconds) return;
+    data.lastFlightSeconds = seconds;
+    this.game?.events?.emit('flight-timer', { remainingMs, seconds, durationMs: data.flightDurationMs });
+    if (seconds <= 5 && seconds > 0 && !data.flightWarningSent) {
+      data.flightWarningSent = true;
+      this.playerCue?.(`FLIGHT ${seconds} SEC`, '#ffcf82');
+    }
+  };
+
   RunnerScene.prototype.updateFlightHoverGlide = function (delta) {
     const data = this.__flightHVG;
     const body = this.player?.body;
@@ -166,8 +235,19 @@ function installFlightHoverGlide(RunnerScene) {
     const now = performance.now();
 
     if (isFlightState(data.state)) {
+      if (data.flightEndsAt > 0 && now >= data.flightEndsAt) {
+        this.endFlight?.('duration-ended');
+        return;
+      }
+
       this.energy = Math.max(0, finite(this.energy) - data.energyDrainPerSecond * dt / 1000);
       this.publishFlightEnergy?.();
+      this.publishFlightTimer?.();
+
+      if (this.energy <= 0) {
+        this.endFlight?.('energy-depleted');
+        return;
+      }
 
       const keys = data.keys || {};
       const up = Boolean(keys.up?.isDown);
@@ -178,13 +258,6 @@ function installFlightHoverGlide(RunnerScene) {
       body.setAllowGravity?.(false);
       const vertical = (up ? -1 : 0) + (down ? 1 : 0);
       body.setVelocityY?.(data.state === FLIGHT_STATE.HOVER || vertical === 0 ? 0 : vertical * data.verticalSpeed);
-
-      if (this.energy <= 0) {
-        data.hoverHold = false;
-        data.glideUntil = now + data.glideWindowMs;
-        this.emitFlightState?.(FLIGHT_STATE.GLIDING, { reason: 'energy-depleted' });
-        this.playerCue?.('FLIGHT ENERGY DEPLETED · GLIDE', '#ffcf82');
-      }
       return;
     }
 
@@ -200,7 +273,6 @@ function installFlightHoverGlide(RunnerScene) {
       if (now >= data.glideUntil || body.blocked?.down || body.touching?.down) {
         this.emitFlightState?.(FLIGHT_STATE.GROUNDED, { reason: 'glide-ended' });
         this.restoreFlightBody?.();
-        data.glideGravityApplied = false;
       }
       return;
     }
@@ -214,8 +286,10 @@ function installFlightHoverGlide(RunnerScene) {
     this.restoreFlightBody?.();
     if (this.__flightKeyDownHandler) window.removeEventListener('keydown', this.__flightKeyDownHandler, true);
     if (this.__flightPointerHandler) window.removeEventListener('relay:toggle-flight', this.__flightPointerHandler);
+    if (this.__flightPauseHandler) window.removeEventListener('relay:flight-pause', this.__flightPauseHandler);
     this.__flightKeyDownHandler = null;
     this.__flightPointerHandler = null;
+    this.__flightPauseHandler = null;
   };
 
   RunnerScene.prototype.destroyFlightHoverGlide = function () {
@@ -230,4 +304,4 @@ function installFlightHoverGlide(RunnerScene) {
   };
 }
 
-export { installFlightHoverGlide, FLIGHT_STATE, FLIGHT_KEY };
+export { installFlightHoverGlide, FLIGHT_STATE, FLIGHT_KEY, DEFAULT_FLIGHT_DURATION_MS };
