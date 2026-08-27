@@ -35,6 +35,7 @@ function tutorialBounds(scene) {
 
 function buildPanel(scene, objective) {
   const c = scene.add.container(0, 0).setScrollFactor(0).setDepth(9200).setAlpha(0);
+  c.setData?.('mobileLayoutRole', 'mission-objective');
   const bg = scene.add.rectangle(0, 0, 426, 166, 0x07111f, .95).setOrigin(0).setStrokeStyle(1, 0x38bdf8, .72);
   const accent = scene.add.rectangle(0, 0, 4, 166, 0x38bdf8, .92).setOrigin(0);
   const kicker = scene.add.text(22, 18, 'MISSION OBJECTIVE', { fontFamily:'monospace', fontSize:'10px', color:'#8ecae6', letterSpacing:1.5 });
@@ -52,11 +53,23 @@ function layout(state, scene, force = false) {
   const { w, h, mobile } = viewport(scene);
   const tutorial = tutorialBounds(scene);
   const baseW = 426, baseH = 166;
-  const pw = mobile ? Math.min(338, w - 24) : Math.min(470, Math.max(360, w - 64));
+  if (mobile) {
+    /* Mobile HUD zone: compact card below the top header, centered away from player and controls. */
+    const pw = Math.min(286, Math.max(238, w - 28));
+    const scale = pw / baseW;
+    const actualH = baseH * scale;
+    const x = Math.max(14, (w - pw) / 2);
+    const y = Math.max(78, Math.min(104, h * .16));
+    if (!force && state.x === x && state.y === y && state.scale === scale && state.tutorial === false) return;
+    state.x = x; state.y = y; state.scale = scale; state.tutorial = false;
+    state.c.setPosition(x, y).setScale(scale);
+    return;
+  }
+  let pw = Math.min(470, Math.max(360, w - 64));
   const scale = pw / baseW;
   const actualH = baseH * scale;
-  let x = Math.max(12, w - pw - (mobile ? 12 : 30));
-  const bottomReserve = mobile ? Math.max(112, Math.round(h * .16)) : 28;
+  let x = Math.max(12, w - pw - 30);
+  const bottomReserve = 28;
   let y = Math.max(82, h - actualH - bottomReserve);
   if (tutorial && tutorial.right > x - 8 && tutorial.bottom > y - 8) y = Math.max(82, tutorial.y - actualH - 18);
   if (!force && state.x === x && state.y === y && state.scale === scale && state.tutorial === !!tutorial) return;
