@@ -26,6 +26,7 @@
     "test:death-retry-state-reset": "node tests/death-retry-state-reset.mjs",
     "test:respawn-shield-single-owner": "node tests/respawn-shield-single-owner.mjs",
     "test:death-reason-statistics": "node tests/death-reason-statistics.mjs",
+    "test:initial-spawn-shield-consistency": "node tests/initial-spawn-shield-consistency.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {"node": "^20.19.0 || >=22.12.0"},
