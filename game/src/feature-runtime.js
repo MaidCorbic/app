@@ -1,5 +1,6 @@
 // Deterministic gameplay feature installer.
 import '../flight-hud-v1.js';
+import './systems/web-zoom-lock-v1.js';
 import { RunnerScene } from './scenes/RunnerScene.js';
 import { installMissionFeatureGating } from './systems/mission-feature-gating-v1.js';
 import { installEnemyRuntime } from './systems/enemy-runtime-v2.js';
