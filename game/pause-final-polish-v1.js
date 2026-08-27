@@ -16,12 +16,6 @@ import { loadState, saveState } from './src/state.js';
     window.dispatchEvent(new CustomEvent('relay-language-change', { detail: { code } }));
   };
 
-  const runtimeRefresh = () => {
-    window.setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { refresh: true, state: state() } }));
-    }, 0);
-  };
-
   const style = document.createElement('style');
   style.textContent = `
     #pauseMenu .menu>header .close{display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;gap:5px!important;white-space:nowrap!important;line-height:1!important}
@@ -60,14 +54,6 @@ import { loadState, saveState } from './src/state.js';
       if (key === 'aiVoice' && !value) window.speechSynthesis?.cancel?.();
       window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { key, value } }));
       renderOptions();
-    }));
-
-    panel.querySelectorAll('[data-pause-range]').forEach(input => input.addEventListener('input', () => {
-      const value = Number(input.value);
-      save({ [input.dataset.pauseRange]: value });
-      const label = panel.querySelector(`[data-pause-volume="${input.dataset.pauseRange}"]`);
-      if (label) label.textContent = `${Math.round(value * 100)}%`;
-      runtimeRefresh();
     }));
 
     const langButton = panel.querySelector('[data-pause-language]'); const langMenu = panel.querySelector('[data-pause-language-menu]'); langButton?.addEventListener('click', event => { event.stopPropagation(); langMenu?.classList.toggle('hidden'); });
