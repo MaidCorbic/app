@@ -17,8 +17,12 @@ function installHealthRestoreZones(RunnerScene) {
     const mission = this.mission;
     const checkpoints = Array.isArray(mission?.checkpoints) ? mission.checkpoints : [];
     const authoredZones = Array.isArray(mission?.healthRestoreZones) ? mission.healthRestoreZones : [];
-    const fallbackZones = checkpoints.map(([x, y]) => [x, y + 18, DEFAULT_RADIUS]);
-    const zoneDefs = authoredZones.length ? authoredZones : fallbackZones;
+    const authoredSafeZones = Array.isArray(mission?.safeZones) ? mission.safeZones : [];
+    const zoneDefs = authoredZones.length
+      ? authoredZones
+      : authoredSafeZones.length
+        ? authoredSafeZones.map(([x, y, width]) => [Number(x) + Math.max(20, Number(width) || 0) / 2, Number(y) + 22, Math.min(DEFAULT_RADIUS, Math.max(60, (Number(width) || 120) / 2)), DEFAULT_HEAL_RATE])
+        : checkpoints.map(([x, y]) => [x, y + 18, DEFAULT_RADIUS, DEFAULT_HEAL_RATE]);
 
     this.__healthRestore = {
       enabled: zoneDefs.length > 0,
@@ -39,6 +43,7 @@ function installHealthRestoreZones(RunnerScene) {
     };
 
     this.createHealthRestoreZones?.();
+    this.events?.once?.(Phaser.Scenes.Events.SHUTDOWN, () => this.shutdownHealthRestoreZones?.());
     this.game?.events?.emit('health-restore-zones-ready', this.__healthRestore.zones.length);
     return result;
   };
