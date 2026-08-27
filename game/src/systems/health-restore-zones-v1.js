@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 const HEALTH_ZONE_STATE = Object.freeze({ IDLE: 'idle', ACTIVE: 'active' });
 const DEFAULT_RADIUS = 82;
 const DEFAULT_HEAL_RATE = 1.6;
@@ -123,7 +125,12 @@ function installHealthRestoreZones(RunnerScene) {
 
   RunnerScene.prototype.takeSciFiHit = function (...args) {
     if (this.isInHealthRestoreZone?.()) {
-      this.playerCue?.('SAFE RESTORE ACTIVE', '#8df4ff');
+      const data = this.__healthRestore;
+      const now = performance.now();
+      if (!data || now - data.lastCueAt > 900) {
+        if (data) data.lastCueAt = now;
+        this.playerCue?.('SAFE RESTORE ACTIVE', '#8df4ff');
+      }
       return false;
     }
     return originalHit?.apply(this, args);
