@@ -1,4 +1,5 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
+import { SPAWN_SHIELD_MS } from './src/config/gameplay-timing.js';
 
 // UPDATE 07 FINAL — deterministic player death/respawn.
 (() => {
@@ -8,7 +9,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const originalUpdate = RunnerScene.prototype.update;
   const originalFail = RunnerScene.prototype.fail;
   const originalRespawnCheckpoint = RunnerScene.prototype.respawnCheckpoint;
-  const SPAWN_SHIELD_MS = 10000;
   const WORLD_BOTTOM_MARGIN = 24;
   const SPIKE_WIDTH = 34;
 
@@ -81,10 +81,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       this.game.events.emit('feedback', 'death');
       this.time.delayedCall(160, () => {
         this.__finalDeathLock = false;
-
-        // Environmental void deaths are lethal even during the combat spawn shield.
-        // Clear only the temporary shield guard for the underlying fail() call;
-        // respawnCheckpoint() immediately restores the full 10s shield afterward.
         const savedRespawnGrace = this.respawnGrace;
         const savedHealthInvulnerable = this.healthInvulnerable;
         this.respawnGrace = 0;
@@ -121,7 +117,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     this.__forceVoidDeath = false;
     resetInput(this);
     const checkpointX = Number.isFinite(Number(this.checkpoint?.x)) ? Number(this.checkpoint.x) : this.player?.x;
-    const checkpointY = Number.isFinite(Number(this.checkpoint?.y)) ? Number(this.checkpoint.y) : this.player?.y;
+    const checkpointY = Number.isFinite(Number(this.checkpoint?.y)) ? Number(this.checkpoint?.y) : this.player?.y;
     this.player?.setPosition(checkpointX, checkpointY);
     this.player?.body?.reset(checkpointX, checkpointY);
     this.player?.body?.setVelocity(0, 0).setAcceleration(0, 0).setMaxVelocity(460, 1120);

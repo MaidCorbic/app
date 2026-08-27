@@ -1,6 +1,7 @@
 import '../feature-runtime.js';
 import './mobile-black-screen-fix.js';
 import { RunnerScene } from '../scenes/RunnerScene.js';
+import { SPAWN_SHIELD_MS } from '../config/gameplay-timing.js';
 
 function keepPhaserSurfaceMounted() {
   if (window.__relaySurfaceGuardInstalled) return;
@@ -140,8 +141,6 @@ RunnerScene.prototype.respawnCheckpoint = function stableRespawn() {
   }
   respawn.call(this);
   if (this.player?.body) { this.player.body.enable = true; this.player.body.checkCollision.none = false; }
-  this.respawnGrace = Math.max(this.respawnGrace || 0, 1100);
-  this.healthInvulnerable = Math.max(this.healthInvulnerable || 0, 1100);
 };
 
 RunnerScene.prototype.update = function stableUpdate(time, delta) {
