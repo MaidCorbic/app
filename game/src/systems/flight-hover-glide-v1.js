@@ -5,7 +5,9 @@ const FLIGHT_KEY = Phaser.Input.Keyboard.KeyCodes.F;
 const MAX_DELTA_MS = 50;
 const MIN_GLIDE_GRAVITY_SCALE = 0.08;
 const MAX_GLIDE_GRAVITY_SCALE = 0.35;
-const DEFAULT_FLIGHT_DURATION_MS = 30000;
+const DEFAULT_FLIGHT_DURATION_MS = 8000;
+const DEFAULT_GLIDE_WINDOW_MS = 1200;
+const DEFAULT_GLIDE_MAX_FALL_SPEED = 180;
 
 const isFlightState = state => state === FLIGHT_STATE.FLYING || state === FLIGHT_STATE.HOVER;
 const finite = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
@@ -31,8 +33,8 @@ function installFlightHoverGlide(RunnerScene) {
       minEnergyToStart: 8,
       verticalSpeed: 260,
       glideGravityScale: 0.16,
-      glideMaxFallSpeed: 230,
-      glideWindowMs: 850,
+      glideMaxFallSpeed: DEFAULT_GLIDE_MAX_FALL_SPEED,
+      glideWindowMs: DEFAULT_GLIDE_WINDOW_MS,
       glideUntil: 0,
       baseGravityY: finite(body?.gravity?.y, 720),
       baseAllowGravity: body?.allowGravity !== false,
@@ -143,6 +145,12 @@ function installFlightHoverGlide(RunnerScene) {
       return this.endFlight?.('manual-off') ?? false;
     }
 
+    // A flight window must finish its glide and touch down before another flight can start.
+    if (data.state === FLIGHT_STATE.GLIDING) {
+      this.playerCue?.('LANDING · FLIGHT LOCKED', '#ffcf82');
+      return false;
+    }
+
     const energy = finite(this.energy);
     if (energy < data.minEnergyToStart) {
       this.emitFlightState?.(FLIGHT_STATE.DEPLETED, { source, reason: 'low-energy' });
@@ -166,7 +174,7 @@ function installFlightHoverGlide(RunnerScene) {
     body.setVelocityY?.(0);
     this.emitFlightState?.(FLIGHT_STATE.FLYING, { source, reason: 'manual-on' });
     this.game?.events?.emit('feedback', 'flight');
-    this.playerCue?.('FLIGHT ONLINE · 30 SEC · F / W S / SPACE', '#8df4ff');
+    this.playerCue?.('FLIGHT ONLINE · 8 SEC · F / W S / SPACE', '#8df4ff');
     return true;
   };
 
@@ -268,7 +276,7 @@ function installFlightHoverGlide(RunnerScene) {
         body.setGravityY?.(data.baseGravityY * scale);
         data.glideGravityApplied = true;
       }
-      const maxFall = Math.max(0, finite(data.glideMaxFallSpeed, 230));
+      const maxFall = Math.max(0, finite(data.glideMaxFallSpeed, DEFAULT_GLIDE_MAX_FALL_SPEED));
       body.setVelocityY?.(Math.min(finite(body.velocity?.y), maxFall));
       if (now >= data.glideUntil || body.blocked?.down || body.touching?.down) {
         this.emitFlightState?.(FLIGHT_STATE.GROUNDED, { reason: 'glide-ended' });
