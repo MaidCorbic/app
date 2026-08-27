@@ -6,6 +6,7 @@ import { patchDeathReason } from './death-reason-patch.mjs';
 import { patchInitialSpawnShield } from './initial-spawn-shield-patch.mjs';
 import { patchCheckpointCollectibles } from './checkpoint-collectible-patch.mjs';
 import { patchRespawnTransientState } from './respawn-transient-state-patch.mjs';
+import { patchSpecialEventCreditReward } from './special-event-credit-reward-patch.mjs';
 
 const LEGACY_TEXT_ASSETS = [
   'campaign-v2.css',
@@ -119,6 +120,17 @@ function relayRespawnTransientStateFix() {
   };
 }
 
+function relaySpecialEventCreditRewardFix() {
+  return {
+    name: 'relay-special-event-credit-reward-fix',
+    transform(code, id) {
+      if (!id.endsWith('/src/state.js')) return null;
+      const transformed = patchSpecialEventCreditReward(code);
+      return transformed === code ? null : { code: transformed, map: null };
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     relaySeasonalProgressionFix(),
@@ -126,6 +138,7 @@ export default defineConfig({
     relayInitialSpawnShieldFix(),
     relayCheckpointCollectiblesFix(),
     relayRespawnTransientStateFix(),
+    relaySpecialEventCreditRewardFix(),
     relayLegacyAssetAliases(),
   ],
 });
