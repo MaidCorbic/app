@@ -1,14 +1,9 @@
-// MOBILE INPUT SINGLE OWNER V4
-// Final mobile control owner. It intentionally runs after main.js so it can
-// replace the boot-time control subtree and detach element-bound legacy handlers.
+// MOBILE INPUT SINGLE OWNER V5
+// Final mobile control owner. Runs after main.js, replaces the boot-time control
+// subtree, and owns all touch action / joystick listeners on touch devices.
 
 const ACTION_KEYS = Object.freeze({
-  jump: ' ',
-  fire: 'e',
-  sword: 'q',
-  dash: 'Shift',
-  build1: '1',
-  gadget1: '3'
+  jump: ' ', fire: 'e', sword: 'q', dash: 'Shift', build1: '1', gadget1: '3'
 });
 
 const emitKey = (key, type) => window.dispatchEvent(new KeyboardEvent(type, {
@@ -29,8 +24,9 @@ function installCompactStyle() {
   style.id = 'mobile-input-single-owner-style';
   style.textContent = `
     @media (max-width: 768px) {
-      .mobile-controls { touch-action: none !important; }
-      .mobile-actions {
+      .mobile-controls[data-mobile-controls-owner="single-owner-v5"] { touch-action: none !important; }
+      .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-joystick { touch-action: none !important; }
+      .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-actions {
         display: grid !important;
         grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
         grid-auto-flow: column !important;
@@ -38,7 +34,7 @@ function installCompactStyle() {
         min-width: 0 !important;
         width: min(100%, 560px) !important;
       }
-      .mobile-actions > button {
+      .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-actions > button {
         min-width: 0 !important;
         width: 100% !important;
         max-width: none !important;
@@ -46,31 +42,32 @@ function installCompactStyle() {
         overflow: hidden !important;
         text-overflow: clip !important;
       }
-      .mobile-actions > button small { display: block !important; }
+      .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-actions > button small { display: block !important; }
+      .mobile-controls[data-mobile-controls-owner="single-owner-v5"].is-ready { opacity: 1 !important; }
     }
     @media (max-width: 380px) {
-      .mobile-actions { gap: 3px !important; }
-      .mobile-actions > button { font-size: clamp(8px, 2.4vw, 11px) !important; }
-      .mobile-actions > button small { font-size: clamp(7px, 2vw, 9px) !important; }
+      .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-actions { gap: 3px !important; }
+      .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-actions > button { font-size: clamp(8px, 2.4vw, 11px) !important; }
+      .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-actions > button small { font-size: clamp(7px, 2vw, 9px) !important; }
     }
   `;
   document.head.appendChild(style);
 }
 
 function install() {
-  if (window.__relayMobileInputSingleOwnerV4) return;
-  window.__relayMobileInputSingleOwnerV4 = true;
-  window.__relayMobileControlsController = true;
+  if (window.__relayMobileInputSingleOwnerV5) return;
   if (!isTouchDevice()) return;
+  window.__relayMobileInputSingleOwnerV5 = true;
+  window.__relayMobileControlsController = true;
 
   const current = document.querySelector('.mobile-controls');
   if (!current) return;
   installCompactStyle();
 
-  // main.js historically adds a second FIRE button at boot. Clone first, then
-  // normalize by action name so every mobile action exists exactly once.
+  // main.js may have attached legacy listeners and may have inserted FIRE.
+  // Replacing the entire subtree detaches those element-bound listeners.
   const controls = current.cloneNode(true);
-  controls.dataset.mobileControlsOwner = 'single-owner-v4';
+  controls.dataset.mobileControlsOwner = 'single-owner-v5';
   const seen = new Set();
   controls.querySelectorAll('[data-mobile-action]').forEach(button => {
     const action = button.dataset.mobileAction;
@@ -78,6 +75,8 @@ function install() {
     else seen.add(action);
   });
   current.replaceWith(controls);
+  controls.classList.add('is-ready');
+  document.documentElement.dataset.relayMobileInput = 'ready-v5';
 
   const buttons = [...controls.querySelectorAll('[data-mobile-action]')];
   const activePointers = new Map();
@@ -85,12 +84,14 @@ function install() {
   buttons.forEach(button => {
     const key = ACTION_KEYS[button.dataset.mobileAction];
     if (!key) return;
+    button.setAttribute('aria-pressed', 'false');
 
     const release = pointerId => {
       if (!activePointers.has(pointerId)) return;
       activePointers.delete(pointerId);
       emitKey(key, 'keyup');
       button.classList.remove('is-active');
+      button.setAttribute('aria-pressed', 'false');
       try { button.releasePointerCapture?.(pointerId); } catch {}
     };
 
@@ -102,6 +103,7 @@ function install() {
       button.setPointerCapture?.(event.pointerId);
       emitKey(key, 'keydown');
       button.classList.add('is-active');
+      button.setAttribute('aria-pressed', 'true');
     }, { passive: false });
     button.addEventListener('pointerup', event => release(event.pointerId));
     button.addEventListener('pointercancel', event => release(event.pointerId));
@@ -113,10 +115,12 @@ function install() {
       const key = ACTION_KEYS[button.dataset.mobileAction];
       if (key && button.classList.contains('is-active')) emitKey(key, 'keyup');
       button.classList.remove('is-active');
+      button.setAttribute('aria-pressed', 'false');
     });
     activePointers.clear();
   };
   window.addEventListener('blur', releaseAll);
+  window.addEventListener('pagehide', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
 
   const joystick = controls.querySelector('[data-mobile-joystick]');
@@ -177,6 +181,7 @@ function install() {
   joystick.addEventListener('pointercancel', end);
   joystick.addEventListener('lostpointercapture', reset);
   window.addEventListener('blur', reset);
+  window.addEventListener('pagehide', reset);
   document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
 }
 
