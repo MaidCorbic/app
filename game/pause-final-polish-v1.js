@@ -49,7 +49,7 @@ import { loadState, saveState } from './src/state.js';
     panel.querySelectorAll('[data-pause-option="tutorialEnabled"],[data-pause-option="aiVoice"]').forEach(btn => btn.addEventListener('click', () => {
       const key = btn.dataset.pauseOption;
       const current = state();
-      const value = !current[key];
+      const value = current[key] === false;
       save({ [key]: value });
       if (key === 'aiVoice' && !value) window.speechSynthesis?.cancel?.();
       window.dispatchEvent(new CustomEvent('relay-settings-change', { detail: { key, value } }));
