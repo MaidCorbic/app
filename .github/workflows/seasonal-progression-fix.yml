@@ -1,0 +1,91 @@
+name: Seasonal progression fix
+on:
+  push:
+    branches: [fix/seasonal-progression-contract-v1]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch seasonal progression and test
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('game/src/state.js')
+          s = p.read_text()
+          old = """function challengeProgress(state, mission, signals, cleanRun, contractComplete, bossDefeated, elapsedMs) {
+            const daily = state.daily?.date === today() ? state.daily : { date: today(), progress: {}, claimed: [] };
+            const monthly = challengeState(state.monthly, monthKey());
+            const weekly = challengeState(state.weekly, weekKey());
+            const seasonal = challengeState(state.seasonal, seasonKey());
+            const dockTimeComplete = mission.id === 'dead-drop' && elapsedMs <= 90000;
+            return {
+              daily: { ...daily, progress: { ...daily.progress, signals: (daily.progress.signals || 0) + signals, contracts: (daily.progress.contracts || 0) + (contractComplete ? 1 : 0), clean: (daily.progress.clean || 0) + (cleanRun ? 1 : 0), dockTime: (daily.progress.dockTime || 0) + (dockTimeComplete ? 1 : 0) } },
+              weekly: { ...weekly, progress: { ...weekly.progress, runs: (weekly.progress.runs || 0) + 1, signals: (weekly.progress.signals || 0) + signals, clean: (weekly.progress.clean || 0) + (cleanRun ? 1 : 0) } },
+              monthly: { ...monthly, progress: { ...monthly, progress: { ...monthly.progress, runs: (monthly.progress.runs || 0) + 1, signals: (monthly.progress.signals || 0) + signals, bosses: (monthly.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
+              seasonal: { ...seasonal, progress: { ...seasonal.progress, routes: state.completed.includes(mission.id) ? state.completed.length : state.completed.length + 1, mastery: 0, bosses: (seasonal.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
+            };
+          }
+          """
+          # The source has a slightly simpler monthly object than the guard above; patch exact live text.
+          old = """function challengeProgress(state, mission, signals, cleanRun, contractComplete, bossDefeated, elapsedMs) {
+  const daily = state.daily?.date === today() ? state.daily : { date: today(), progress: {}, claimed: [] };
+  const monthly = challengeState(state.monthly, monthKey());
+  const weekly = challengeState(state.weekly, weekKey());
+  const seasonal = challengeState(state.seasonal, seasonKey());
+  const dockTimeComplete = mission.id === 'dead-drop' && elapsedMs <= 90000;
+  return {
+    daily: { ...daily, progress: { ...daily.progress, signals: (daily.progress.signals || 0) + signals, contracts: (daily.progress.contracts || 0) + (contractComplete ? 1 : 0), clean: (daily.progress.clean || 0) + (cleanRun ? 1 : 0), dockTime: (daily.progress.dockTime || 0) + (dockTimeComplete ? 1 : 0) } },
+    weekly: { ...weekly, progress: { ...weekly.progress, runs: (weekly.progress.runs || 0) + 1, signals: (weekly.progress.signals || 0) + signals, clean: (weekly.progress.clean || 0) + (cleanRun ? 1 : 0) } },
+    monthly: { ...monthly, progress: { ...monthly.progress, runs: (monthly.progress.runs || 0) + 1, signals: (monthly.progress.signals || 0) + signals, bosses: (monthly.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
+    seasonal: { ...seasonal, progress: { ...seasonal.progress, routes: state.completed.includes(mission.id) ? state.completed.length : state.completed.length + 1, mastery: 0, bosses: (seasonal.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
+  };
+}
+"""
+          new = """function challengeProgress(state, mission, signals, cleanRun, contractComplete, bossDefeated, elapsedMs) {
+  const daily = state.daily?.date === today() ? state.daily : { date: today(), progress: {}, claimed: [] };
+  const monthly = challengeState(state.monthly, monthKey());
+  const weekly = challengeState(state.weekly, weekKey());
+  const seasonal = challengeState(state.seasonal, seasonKey());
+  const dockTimeComplete = mission.id === 'dead-drop' && elapsedMs <= 90000;
+  const completedRoutes = [...new Set(state.completed || [])];
+  const masteryCount = Object.values(state.mastery || {}).reduce((total, badges) => total + new Set(Array.isArray(badges) ? badges : []).size, 0);
+  const nextCompletedRoutes = completedRoutes.includes(mission.id) ? completedRoutes : [...completedRoutes, mission.id];
+  return {
+    daily: { ...daily, progress: { ...daily.progress, signals: (daily.progress.signals || 0) + signals, contracts: (daily.progress.contracts || 0) + (contractComplete ? 1 : 0), clean: (daily.progress.clean || 0) + (cleanRun ? 1 : 0), dockTime: (daily.progress.dockTime || 0) + (dockTimeComplete ? 1 : 0) } },
+    weekly: { ...weekly, progress: { ...weekly.progress, runs: (weekly.progress.runs || 0) + 1, signals: (weekly.progress.signals || 0) + signals, clean: (weekly.progress.clean || 0) + (cleanRun ? 1 : 0) } },
+    monthly: { ...monthly, progress: { ...monthly.progress, runs: (monthly.progress.runs || 0) + 1, signals: (monthly.progress.signals || 0) + signals, bosses: (monthly.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
+    seasonal: { ...seasonal, progress: { ...seasonal.progress, routes: nextCompletedRoutes.length, mastery: Math.max(seasonal.progress?.mastery || 0, masteryCount), bosses: (seasonal.progress?.bosses || 0) + (bossDefeated ? 1 : 0) } },
+  };
+}
+"""
+          if old not in s:
+              raise SystemExit('challengeProgress source block not found')
+          p.write_text(s.replace(old, new, 1))
+
+          test = Path('game/tests/seasonal-progression-contract.mjs')
+          test.write_text("""import assert from 'node:assert/strict';\nimport { loadState, saveState } from '../src/state.js';\n\nconst original = globalThis.localStorage;\nconst store = new Map();\nglobalThis.localStorage = { getItem: key => store.get(key) ?? null, setItem: (key, value) => store.set(key, value), removeItem: key => store.delete(key) };\n\ntry {\n  saveState({ ...loadState(), completed: ['first-delivery'], seasonal: { period: '2099-S1', progress: { routes: 1, mastery: 3, bosses: 0 }, claimed: [] }, mastery: { 'first-delivery': ['SIGNAL SWEEP', 'PAR TIME', 'CLEAN RUN'] } });\n  const loaded = loadState();\n  assert.equal(Object.values(loaded.mastery).reduce((n, badges) => n + badges.length, 0), 3);\n  assert.equal(loaded.seasonal.progress.mastery, 3);\n  assert.equal(loaded.seasonal.progress.routes, 1);\n  console.log('Seasonal progression contract: PASS');\n} finally {\n  globalThis.localStorage = original;\n}\n""")
+
+          pkg = Path('game/package.json')
+          ps = pkg.read_text()
+          marker = '"test:settings-state": "node tests/settings-state-contract.mjs",'
+          replacement = marker + '\n    "test:seasonal-progression": "node tests/seasonal-progression-contract.mjs",'
+          if 'test:seasonal-progression' not in ps:
+              ps = ps.replace(marker, replacement)
+              pkg.write_text(ps)
+          PY
+      - name: Validate syntax and contract
+        run: |
+          node --check game/src/state.js
+          cd game && npm run test:seasonal-progression
+      - name: Commit patch and remove workflow
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add game/src/state.js game/tests/seasonal-progression-contract.mjs game/package.json .github/workflows/seasonal-progression-fix.yml
+          git rm .github/workflows/seasonal-progression-fix.yml
+          git commit -m "fix: preserve seasonal mastery and route progress"
+          git push
