@@ -30,6 +30,7 @@ import './city-response-v1.js';
 import './gameplay-intro-final-v1.js';
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
+import './src/systems/death-retry-state-reset-v1.js';
 import './dynamic-time-cycle-v1.js';
 import './src/systems/city-atmosphere-cleanup-v1.js';
 import './game-feel-v1.js';
