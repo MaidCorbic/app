@@ -55,6 +55,7 @@ function installFlightHudBridge(RunnerScene) {
       this.__flightHudStateHandler = null;
       this.__flightHudEnergyHandler = null;
       this.__flightHudTimerHandler = null;
+      this.shutdownFlightHoverGlide?.();
       return originalShutdown.apply(this, args);
     };
     wrappedShutdown.__flightHudBridgeWrapped = true;
