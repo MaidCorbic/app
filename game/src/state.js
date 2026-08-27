@@ -132,13 +132,14 @@ function monthKey(date = new Date()) { return `${date.getFullYear()}-${String(da
 function weekKey(date = new Date()) { const start = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())); start.setUTCDate(start.getUTCDate() + 4 - (start.getUTCDay() || 7)); const yearStart = new Date(Date.UTC(start.getUTCFullYear(), 0, 1)); return `${start.getUTCFullYear()}-W${String(Math.ceil(((start - yearStart) / 86400000 + 1) / 7)).padStart(2, '0')}`; }
 function seasonKey(date = new Date()) { return `${date.getFullYear()}-S${Math.floor(date.getMonth() / 3) + 1}`; }
 function challengeState(current, period) { return current?.period === period ? current : { period, progress: {}, claimed: [] }; }
-function challengeProgress(state, mission, signals, cleanRun, contractComplete, bossDefeated) {
+function challengeProgress(state, mission, signals, cleanRun, contractComplete, bossDefeated, elapsedMs) {
   const daily = state.daily?.date === today() ? state.daily : { date: today(), progress: {}, claimed: [] };
   const monthly = challengeState(state.monthly, monthKey());
   const weekly = challengeState(state.weekly, weekKey());
   const seasonal = challengeState(state.seasonal, seasonKey());
+  const dockTimeComplete = mission.id === 'dead-drop' && elapsedMs <= 90000;
   return {
-    daily: { ...daily, progress: { ...daily.progress, signals: (daily.progress.signals || 0) + signals, contracts: (daily.progress.contracts || 0) + (contractComplete ? 1 : 0), clean: (daily.progress.clean || 0) + (cleanRun ? 1 : 0), dockTime: (daily.progress.dockTime || 0) + (mission.id === 'dead-drop' && signals >= 0 ? 1 : 0) } },
+    daily: { ...daily, progress: { ...daily.progress, signals: (daily.progress.signals || 0) + signals, contracts: (daily.progress.contracts || 0) + (contractComplete ? 1 : 0), clean: (daily.progress.clean || 0) + (cleanRun ? 1 : 0), dockTime: (daily.progress.dockTime || 0) + (dockTimeComplete ? 1 : 0) } },
     weekly: { ...weekly, progress: { ...weekly.progress, runs: (weekly.progress.runs || 0) + 1, signals: (weekly.progress.signals || 0) + signals, clean: (weekly.progress.clean || 0) + (cleanRun ? 1 : 0) } },
     monthly: { ...monthly, progress: { ...monthly.progress, runs: (monthly.progress.runs || 0) + 1, signals: (monthly.progress.signals || 0) + signals, bosses: (monthly.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
     seasonal: { ...seasonal, progress: { ...seasonal.progress, routes: state.completed.includes(mission.id) ? state.completed.length : state.completed.length + 1, mastery: 0, bosses: (seasonal.progress.bosses || 0) + (bossDefeated ? 1 : 0) } },
@@ -195,7 +196,14 @@ export function loadState() {
     const completed = Array.isArray(saved.completed) ? saved.completed.map(id => legacyIds[id] || id) : [];
     const daily = saved.daily?.date === today() ? saved.daily : { date: today(), progress: {}, claimed: [] };
     const unlockedDistricts = districts.filter(district => !district.unlockMission || completed.includes(district.unlockMission)).map(district => district.id);
-    return { ...defaults, ...saved, daily, weekly: challengeState(saved.weekly, weekKey()), monthly: challengeState(saved.monthly, monthKey()), seasonal: challengeState(saved.seasonal, seasonKey()), completed, level: levelForXp(saved.xp || 0), storyProgress: saved.storyProgress || saved.worldStory || defaults.storyProgress, unlockedDistricts: saved.unlockedDistricts || unlockedDistricts, rank: saved.rank || getCourierRank(saved.xp || 0).name, unlockedMissions: saved.unlockedMissions || ['first-delivery'] };
+    const masteryMigrations = {
+      'signal-hunter': 'SIGNAL SWEEP',
+      'speed-run': 'PAR TIME',
+      'clean-run': 'CLEAN RUN',
+      'hunter': 'HUNTER',
+    };
+    const mastery = Object.fromEntries(Object.entries(saved.mastery || {}).map(([missionId, badges]) => [missionId, [...new Set((Array.isArray(badges) ? badges : []).map(id => masteryMigrations[id] || id))]]));
+    return { ...defaults, ...saved, daily, weekly: challengeState(saved.weekly, weekKey()), monthly: challengeState(saved.monthly, monthKey()), seasonal: challengeState(saved.seasonal, seasonKey()), completed, mastery, level: levelForXp(saved.xp || 0), storyProgress: saved.storyProgress || saved.worldStory || defaults.storyProgress, unlockedDistricts: saved.unlockedDistricts || unlockedDistricts, rank: saved.rank || getCourierRank(saved.xp || 0).name, unlockedMissions: saved.unlockedMissions || ['first-delivery'] };
   } catch {
     return { ...defaults };
   }
@@ -221,10 +229,10 @@ export function completeMission(state, mission, signals, elapsedMs = 0, runStats
   const cleanRun = !(runStats.deaths > 0);
   const mastery = state.mastery?.[mission.id] || [];
   const missionMastery = [...mastery];
-  if (signals === mission.signals.length && !missionMastery.includes('signal-hunter')) missionMastery.push('signal-hunter');
-  if (elapsedMs <= mission.parTime && !missionMastery.includes('speed-run')) missionMastery.push('speed-run');
-  if (cleanRun && !missionMastery.includes('clean-run')) missionMastery.push('clean-run');
-  if (runStats.enemyDefeats >= 3 && !missionMastery.includes('hunter')) missionMastery.push('hunter');
+  if (signals === mission.signals.length && !missionMastery.includes('SIGNAL SWEEP')) missionMastery.push('SIGNAL SWEEP');
+  if (elapsedMs <= mission.parTime && !missionMastery.includes('PAR TIME')) missionMastery.push('PAR TIME');
+  if (cleanRun && !missionMastery.includes('CLEAN RUN')) missionMastery.push('CLEAN RUN');
+  if (runStats.enemyDefeats >= 3 && !missionMastery.includes('HUNTER')) missionMastery.push('HUNTER');
   const contract = runStats.contract;
   const contractComplete = Boolean(contract && runStats.contractCompleted);
   const contractXp = contractComplete ? contract.xp : 0;
@@ -252,7 +260,7 @@ export function completeMission(state, mission, signals, elapsedMs = 0, runStats
   const district = districts.find(item => item.missions.includes(mission.id));
   const previousDistrict = state.districtProgress?.[district?.id] || { missions: 0, signals: 0, secrets: 0, bestScore: 0 };
   const newCompleted = state.completed.includes(mission.id) ? state.completed : [...state.completed, mission.id];
-  const challengeUpdates = challengeProgress({ ...state, completed: newCompleted }, mission, signals, cleanRun, contractComplete, Boolean(runStats.bossDefeated));
+  const challengeUpdates = challengeProgress({ ...state, completed: newCompleted }, mission, signals, cleanRun, contractComplete, Boolean(runStats.bossDefeated), elapsedMs);
   const next = {
     ...state,
     xp: nextXp,
