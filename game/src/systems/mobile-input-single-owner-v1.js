@@ -1,8 +1,6 @@
-// MOBILE INPUT SINGLE OWNER V3
-// The only mobile control owner. main.js may boot before this module, so install()
-// replaces the original control subtree and removes its element-bound listeners.
-// Window-level legacy joystick listeners are harmless because the old pointer id
-// can never become active after the subtree replacement.
+// MOBILE INPUT SINGLE OWNER V4
+// Final mobile control owner. It intentionally runs after main.js so it can
+// replace the boot-time control subtree and detach element-bound legacy handlers.
 
 const ACTION_KEYS = Object.freeze({
   jump: ' ',
@@ -60,8 +58,8 @@ function installCompactStyle() {
 }
 
 function install() {
-  if (window.__relayMobileInputSingleOwnerV3) return;
-  window.__relayMobileInputSingleOwnerV3 = true;
+  if (window.__relayMobileInputSingleOwnerV4) return;
+  window.__relayMobileInputSingleOwnerV4 = true;
   window.__relayMobileControlsController = true;
   if (!isTouchDevice()) return;
 
@@ -69,11 +67,16 @@ function install() {
   if (!current) return;
   installCompactStyle();
 
-  // Replacing the subtree removes any listeners previously attached by main.js.
+  // main.js historically adds a second FIRE button at boot. Clone first, then
+  // normalize by action name so every mobile action exists exactly once.
   const controls = current.cloneNode(true);
-  controls.dataset.mobileControlsOwner = 'single-owner-v3';
-  controls.querySelector('[data-mobile-action="build2"]')?.remove();
-  controls.querySelector('[data-mobile-action="gadget2"]')?.remove();
+  controls.dataset.mobileControlsOwner = 'single-owner-v4';
+  const seen = new Set();
+  controls.querySelectorAll('[data-mobile-action]').forEach(button => {
+    const action = button.dataset.mobileAction;
+    if (!ACTION_KEYS[action] || seen.has(action)) button.remove();
+    else seen.add(action);
+  });
   current.replaceWith(controls);
 
   const buttons = [...controls.querySelectorAll('[data-mobile-action]')];
@@ -100,7 +103,6 @@ function install() {
       emitKey(key, 'keydown');
       button.classList.add('is-active');
     }, { passive: false });
-
     button.addEventListener('pointerup', event => release(event.pointerId));
     button.addEventListener('pointercancel', event => release(event.pointerId));
     button.addEventListener('lostpointercapture', event => release(event.pointerId));
@@ -161,7 +163,6 @@ function install() {
     joystick.classList.add('is-active');
     move(event.clientX, event.clientY);
   }, { passive: false });
-
   joystick.addEventListener('pointermove', event => {
     if (event.pointerId !== pointerId) return;
     event.preventDefault();
