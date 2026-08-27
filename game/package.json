@@ -18,6 +18,7 @@
     "test:city-response": "node tests/city-response.mjs",
     "test:mobile-action-layout": "node tests/mobile-action-layout.mjs",
     "test:mobile-input-single-owner": "node tests/mobile-input-single-owner-v3.mjs",
+    "test:settings-state": "node tests/settings-state-contract.mjs",
     "test:gameplay-touch-lock": "node tests/gameplay-touch-lock.mjs",
     "test:mission-finish-recovery-lifecycle": "node tests/mission-finish-recovery-lifecycle.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
