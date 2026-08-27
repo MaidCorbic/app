@@ -1,10 +1,15 @@
-// MOBILE INPUT SINGLE OWNER V2
-// Single mobile input owner. Preserves the existing controls while guaranteeing
-// one compact action row and clearing held input on lifecycle interruptions.
+// MOBILE INPUT SINGLE OWNER V4
+// Final mobile control owner. It intentionally runs after main.js so it can
+// replace the boot-time control subtree and detach element-bound legacy handlers.
 
-const ACTION_KEYS = {
-  jump: ' ', fire: 'e', sword: 'q', dash: 'Shift', build1: '1', gadget1: '3'
-};
+const ACTION_KEYS = Object.freeze({
+  jump: ' ',
+  fire: 'e',
+  sword: 'q',
+  dash: 'Shift',
+  build1: '1',
+  gadget1: '3'
+});
 
 const emitKey = (key, type) => window.dispatchEvent(new KeyboardEvent(type, {
   key,
@@ -18,49 +23,99 @@ const isTouchDevice = () => navigator.maxTouchPoints > 0
   || window.matchMedia?.('(pointer: coarse)').matches
   || window.matchMedia?.('(hover: none)').matches;
 
+function installCompactStyle() {
+  if (document.getElementById('mobile-input-single-owner-style')) return;
+  const style = document.createElement('style');
+  style.id = 'mobile-input-single-owner-style';
+  style.textContent = `
+    @media (max-width: 768px) {
+      .mobile-controls { touch-action: none !important; }
+      .mobile-actions {
+        display: grid !important;
+        grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+        grid-auto-flow: column !important;
+        gap: clamp(4px, 1.2vw, 8px) !important;
+        min-width: 0 !important;
+        width: min(100%, 560px) !important;
+      }
+      .mobile-actions > button {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: clip !important;
+      }
+      .mobile-actions > button small { display: block !important; }
+    }
+    @media (max-width: 380px) {
+      .mobile-actions { gap: 3px !important; }
+      .mobile-actions > button { font-size: clamp(8px, 2.4vw, 11px) !important; }
+      .mobile-actions > button small { font-size: clamp(7px, 2vw, 9px) !important; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 function install() {
-  if (window.__relayMobileInputSingleOwnerV2) return;
-  window.__relayMobileInputSingleOwnerV2 = true;
+  if (window.__relayMobileInputSingleOwnerV4) return;
+  window.__relayMobileInputSingleOwnerV4 = true;
   window.__relayMobileControlsController = true;
   if (!isTouchDevice()) return;
 
-  let controls = document.querySelector('.mobile-controls');
-  if (!controls) return;
+  const current = document.querySelector('.mobile-controls');
+  if (!current) return;
+  installCompactStyle();
 
-  const cleanControls = controls.cloneNode(true);
-  cleanControls.dataset.mobileControlsOwner = 'single-owner-v2';
-  controls.replaceWith(cleanControls);
-  controls = cleanControls;
-
-  // Keep the mobile HUD intentionally compact: six essential actions plus joystick.
-  controls.querySelector('[data-mobile-action="build2"]')?.remove();
-  controls.querySelector('[data-mobile-action="gadget2"]')?.remove();
+  // main.js historically adds a second FIRE button at boot. Clone first, then
+  // normalize by action name so every mobile action exists exactly once.
+  const controls = current.cloneNode(true);
+  controls.dataset.mobileControlsOwner = 'single-owner-v4';
+  const seen = new Set();
+  controls.querySelectorAll('[data-mobile-action]').forEach(button => {
+    const action = button.dataset.mobileAction;
+    if (!ACTION_KEYS[action] || seen.has(action)) button.remove();
+    else seen.add(action);
+  });
+  current.replaceWith(controls);
 
   const buttons = [...controls.querySelectorAll('[data-mobile-action]')];
+  const activePointers = new Map();
+
   buttons.forEach(button => {
     const key = ACTION_KEYS[button.dataset.mobileAction];
     if (!key) return;
+
+    const release = pointerId => {
+      if (!activePointers.has(pointerId)) return;
+      activePointers.delete(pointerId);
+      emitKey(key, 'keyup');
+      button.classList.remove('is-active');
+      try { button.releasePointerCapture?.(pointerId); } catch {}
+    };
+
     button.addEventListener('pointerdown', event => {
+      if (activePointers.has(event.pointerId)) return;
       event.preventDefault();
       event.stopPropagation();
+      activePointers.set(event.pointerId, true);
+      button.setPointerCapture?.(event.pointerId);
       emitKey(key, 'keydown');
       button.classList.add('is-active');
     }, { passive: false });
-    const release = event => {
-      if (event && event.pointerId !== undefined && event.pointerId !== button.__pointerId) return;
-      if (button.classList.contains('is-active')) emitKey(key, 'keyup');
-      button.classList.remove('is-active');
-    };
-    button.addEventListener('pointerup', release);
-    button.addEventListener('pointercancel', release);
-    button.addEventListener('lostpointercapture', release);
+    button.addEventListener('pointerup', event => release(event.pointerId));
+    button.addEventListener('pointercancel', event => release(event.pointerId));
+    button.addEventListener('lostpointercapture', event => release(event.pointerId));
   });
 
-  const releaseAll = () => buttons.forEach(button => {
-    const key = ACTION_KEYS[button.dataset.mobileAction];
-    if (key) emitKey(key, 'keyup');
-    button.classList.remove('is-active');
-  });
+  const releaseAll = () => {
+    buttons.forEach(button => {
+      const key = ACTION_KEYS[button.dataset.mobileAction];
+      if (key && button.classList.contains('is-active')) emitKey(key, 'keyup');
+      button.classList.remove('is-active');
+    });
+    activePointers.clear();
+  };
   window.addEventListener('blur', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
 
@@ -102,12 +157,12 @@ function install() {
   joystick.addEventListener('pointerdown', event => {
     event.preventDefault();
     event.stopPropagation();
+    if (pointerId !== null) reset();
     pointerId = event.pointerId;
     joystick.setPointerCapture?.(pointerId);
     joystick.classList.add('is-active');
     move(event.clientX, event.clientY);
   }, { passive: false });
-
   joystick.addEventListener('pointermove', event => {
     if (event.pointerId !== pointerId) return;
     event.preventDefault();
@@ -122,6 +177,7 @@ function install() {
   joystick.addEventListener('pointercancel', end);
   joystick.addEventListener('lostpointercapture', reset);
   window.addEventListener('blur', reset);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
