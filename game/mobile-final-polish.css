@@ -6,43 +6,50 @@
 #relaySplash.relay-splash .relay-splash-status{text-align:left}
 #relaySplash.relay-splash .relay-splash-brand{display:flex}
 #relay-flight-hud-v1,#relay-flight-hud-v1 *{display:none!important}
-
-/* GAMEPLAY CONTRACT: no accidental browser selection/drag/zoom. */
 #play,#play *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent}
 #play{-webkit-touch-callout:none;overscroll-behavior:none;touch-action:manipulation}
 #phaser-game,#phaser-game canvas,.mobile-controls,.mobile-joystick,.mobile-actions,.mobile-actions button{touch-action:none!important}
 
-/* Portrait: gameplay remains visible, but touch controls are hidden. */
-@media(max-width:768px) and (orientation:portrait) and (pointer:coarse){
-  body.is-touch .mobile-controls{display:none!important}
-  body.is-touch .rotate-prompt{display:flex!important}
+@media(max-width:768px) and (orientation:portrait){
+  html body.is-touch section#play div.mobile-controls{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+  html body.is-touch section#play div.mobile-controls *{pointer-events:none!important}
+  html body.is-touch section#play .rotate-prompt{display:flex!important}
 }
 
-/* Landscape: full controls, clean spacing, no button collision. */
-@media(max-width:768px) and (orientation:landscape) and (pointer:coarse){
-  body.is-touch .mobile-controls{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:clamp(12px,2.5vw,28px)!important;padding:0 clamp(12px,2.8vw,28px) clamp(12px,3.2vh,24px)!important;box-sizing:border-box!important;pointer-events:none!important}
-  body.is-touch .mobile-controls .mobile-joystick{pointer-events:auto!important;flex:0 0 auto!important}
-  body.is-touch .mobile-controls .mobile-actions{pointer-events:auto!important;display:grid!important;grid-template-columns:repeat(3,var(--touch-size))!important;grid-template-rows:repeat(2,var(--touch-size))!important;grid-auto-flow:row!important;align-items:center!important;justify-content:end!important;gap:clamp(7px,1.5vw,12px)!important;width:max-content!important;height:max-content!important;margin:0!important}
-  body.is-touch .mobile-controls .mobile-actions>button{box-sizing:border-box!important;width:var(--touch-size)!important;height:var(--touch-size)!important;min-width:var(--touch-size)!important;min-height:var(--touch-size)!important;max-width:var(--touch-size)!important;max-height:var(--touch-size)!important;aspect-ratio:1/1!important;border-radius:50%!important;padding:0!important;margin:0!important;flex:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-align:center!important}
-  body.is-touch .mobile-controls .mobile-actions>button small{display:block!important;margin:0!important;padding:0!important;font-size:clamp(7px,1.65vw,9px)!important;line-height:1!important;font-weight:700!important;letter-spacing:.04em!important;opacity:.9!important}
-  body.is-touch .mobile-controls .mobile-actions>button:last-child{width:var(--touch-size)!important;height:var(--touch-size)!important;min-width:var(--touch-size)!important;min-height:var(--touch-size)!important;max-width:var(--touch-size)!important;max-height:var(--touch-size)!important;border-radius:50%!important;overflow:hidden!important}
-  body.is-touch .mobile-controls .mobile-actions>button.is-active{transform:scale(.94)!important}
+@media(max-width:768px) and (orientation:landscape){
+  html body.is-touch section#play div.mobile-controls{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:clamp(10px,2vw,22px)!important;padding:0 max(10px,env(safe-area-inset-left,0px)) max(10px,env(safe-area-inset-bottom,0px))!important;box-sizing:border-box!important;pointer-events:none!important}
+  html body.is-touch section#play div.mobile-controls div.mobile-joystick{pointer-events:auto!important;flex:0 0 auto!important}
+  html body.is-touch section#play div.mobile-controls div.mobile-actions{pointer-events:auto!important;display:grid!important;grid-template-columns:repeat(4,var(--touch-size))!important;grid-template-rows:repeat(2,var(--touch-size))!important;align-items:center!important;justify-items:center!important;justify-content:end!important;gap:clamp(7px,1.35vw,12px)!important;width:max-content!important;height:max-content!important;margin:0!important}
+  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{box-sizing:border-box!important;width:var(--touch-size)!important;height:var(--touch-size)!important;min-width:var(--touch-size)!important;min-height:var(--touch-size)!important;max-width:var(--touch-size)!important;max-height:var(--touch-size)!important;aspect-ratio:1/1!important;border-radius:50%!important;padding:0!important;margin:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-align:center!important}
+  html body.is-touch section#play div.mobile-controls div.mobile-actions>button:nth-child(5){grid-column:2!important}
+  html body.is-touch section#play div.mobile-controls div.mobile-actions>button:nth-child(6){grid-column:3!important}
+  html body.is-touch section#play div.mobile-controls div.mobile-actions>button small{display:block!important;margin:0!important;padding:0!important;font-size:clamp(7px,1.45vw,9px)!important;line-height:1!important;font-weight:700!important;letter-spacing:.04em!important;opacity:.9!important}
 }
 
-@media(max-width:420px) and (orientation:landscape) and (pointer:coarse){
-  body.is-touch .mobile-controls{gap:8px!important;padding-left:8px!important;padding-right:8px!important;padding-bottom:8px!important}
-  body.is-touch .mobile-controls .mobile-actions{--touch-size:48px;grid-template-columns:repeat(3,48px)!important;grid-template-rows:repeat(2,48px)!important;gap:5px!important}
-  body.is-touch .mobile-controls .mobile-actions>button{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;max-width:48px!important;max-height:48px!important}
+@media(max-width:420px) and (orientation:landscape){
+  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:46px;gap:5px!important}
+  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;max-width:46px!important;max-height:46px!important}
+}
+@media(min-width:421px) and (max-width:768px) and (orientation:landscape){
+  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:52px}
 }
 
-@media(min-width:421px) and (max-width:768px) and (orientation:landscape) and (pointer:coarse){
-  body.is-touch .mobile-controls .mobile-actions{--touch-size:56px}
-}
+html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="jump"],
+html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="fire"],
+html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="sword"],
+html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="dash"],
+html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="build1"],
+html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="gadget1"]{border-radius:50%!important;overflow:hidden!important}
 
-/* Keep the Dash/GEAR class treatment consistent: every action is a real circular control. */
-body.is-touch .mobile-controls .mobile-actions>button[data-mobile-action="jump"],
-body.is-touch .mobile-controls .mobile-actions>button[data-mobile-action="fire"],
-body.is-touch .mobile-controls .mobile-actions>button[data-mobile-action="sword"],
-body.is-touch .mobile-controls .mobile-actions>button[data-mobile-action="dash"],
-body.is-touch .mobile-controls .mobile-actions>button[data-mobile-action="build1"],
-body.is-touch .mobile-controls .mobile-actions>button[data-mobile-action="gadget1"]{border-radius:50%!important;overflow:hidden!important}
+@media(max-width:768px){
+  #cargoIntegrityV2{left:14px!important;right:auto!important;top:78px!important;transform:none!important;width:min(250px,42vw)!important;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))!important}
+  #cargoIntegrityV2 .cargo-card{padding:3px 0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+  #cargoIntegrityV2 .cargo-head{margin-bottom:4px!important;gap:8px!important}
+  #cargoIntegrityV2 .cargo-label{font-size:7px!important;letter-spacing:.12em!important;text-shadow:0 1px 3px #000}
+  #cargoIntegrityV2 .cargo-type{font-size:7px!important;text-shadow:0 1px 3px #000}
+  #cargoIntegrityV2 .cargo-row{gap:7px!important}
+  #cargoIntegrityV2 .cargo-track{height:4px!important;border:0!important;background:rgba(3,9,20,.35)!important;box-shadow:none!important}
+  #cargoIntegrityV2 .cargo-fill{box-shadow:0 0 8px color-mix(in srgb,var(--cargo-accent) 45%,transparent)!important}
+  #cargoIntegrityV2 .cargo-value{min-width:29px!important;font-size:9px!important;text-shadow:0 1px 3px #000}
+  #cargoIntegrityV2 .cargo-foot,#cargoIntegrityV2 .cargo-flash{display:none!important}
+}
