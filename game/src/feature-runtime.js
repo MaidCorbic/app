@@ -29,6 +29,7 @@ import { installFlashlight } from './systems/flashlight-v1.js';
 import { installWireRepairRoom } from './systems/wire-repair-room-v1.js';
 import { installWireRepairRoomVisual } from './systems/wire-repair-room-visual-v1.js';
 import { installSafeRoom } from './systems/safe-room-v1.js';
+import { installSafeRoomVisual } from './systems/safe-room-visual-v1.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
 import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
@@ -66,6 +67,7 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installWireRepairRoom(RunnerScene);
   installWireRepairRoomVisual(RunnerScene);
   installSafeRoom(RunnerScene);
+  installSafeRoomVisual(RunnerScene);
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
   installDroneStrikeRecovery(RunnerScene);
