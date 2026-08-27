@@ -10,6 +10,8 @@ function installSafeRoom(RunnerScene) {
     return {
       id: config.id || `safe-room-${Date.now()}`,
       name: config.name || 'SAFE ROOM',
+      x: Number(config.x ?? 0),
+      y: Number(config.y ?? 0),
       state: config.locked ? SAFE_ROOM_STATE.LOCKED : SAFE_ROOM_STATE.AVAILABLE,
       radius: Math.max(16, Number(config.radius ?? 96)),
       healRate: Math.max(0, Number(config.healRate ?? 8)),
@@ -60,10 +62,10 @@ function installSafeRoom(RunnerScene) {
   RunnerScene.prototype.canEnterSafeRoom = function (room, playerX, playerY) {
     if (!room || room.state !== SAFE_ROOM_STATE.AVAILABLE || !room.doorOpen) return false;
     if (room.requiresPower && !room.powered) return false;
-    if (!this?.player) return true;
-    const x = Number(playerX ?? this.player.x);
-    const y = Number(playerY ?? this.player.y);
-    return Phaser.Math.Distance.Between(x, y, room.x ?? 0, room.y ?? 0) <= room.radius;
+    const x = Number(playerX ?? this?.player?.x);
+    const y = Number(playerY ?? this?.player?.y);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+    return Phaser.Math.Distance.Between(x, y, room.x, room.y) <= room.radius;
   };
 
   RunnerScene.prototype.enterSafeRoom = function (room, player = this.player) {
@@ -106,6 +108,8 @@ function installSafeRoom(RunnerScene) {
     return {
       id: room.id,
       name: room.name,
+      x: room.x,
+      y: room.y,
       state: room.state,
       powered: room.powered,
       requiresPower: room.requiresPower,
