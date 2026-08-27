@@ -51,13 +51,15 @@ function canStand(scene, state) {
 }
 
 function startSlide(scene, state) {
-  if (!scene?.player?.body || state.slideTimer > 0 || !state.crouching || scene.finished || scene.respawning) return false;
+  if (!scene?.player?.body || state.slideTimer > 0 || state.slideCooldown > 0 || !state.crouching || scene.finished || scene.respawning) return false;
   const body = scene.player.body;
-  if (!body.blocked?.down && !body.touching?.down && !scene.player.body.onFloor?.()) return false;
+  const grounded = Boolean(body.blocked?.down || body.touching?.down);
+  if (!grounded) return false;
   const speed = Math.abs(body.velocity.x || 0);
   if (speed < 145) return false;
 
   state.slideTimer = 560;
+  state.slideCooldown = 760;
   state.slideElapsed = 0;
   state.slideDirection = Math.sign(body.velocity.x) || (scene.player.flipX ? -1 : 1);
   state.slideSpeed = Math.max(430, Math.min(760, speed * 1.42));
@@ -75,17 +77,17 @@ function startSlide(scene, state) {
 }
 
 function updateSlide(scene, state, delta) {
+  state.slideCooldown = Math.max(0, state.slideCooldown - delta);
   if (state.slideTimer <= 0) {
     scene.sliding = false;
     scene.player?.setData('sliding', false);
+    if (scene.player) scene.player.rotation = 0;
     return;
   }
   const player = scene.player;
   const body = player.body;
   if (!player.active || !body || !state.crouching || scene.respawning || scene.finished) {
-    state.slideTimer = 0;
-    scene.sliding = false;
-    player?.setData('sliding', false);
+    stopSlide(scene, state);
     return;
   }
 
@@ -111,16 +113,17 @@ function updateSlide(scene, state, delta) {
     scene.tweens.add({ targets:dust, x:dust.x - state.slideDirection * (10 + Math.random() * 18), y:dust.y - (8 + Math.random() * 14), alpha:0, scale:1.8, duration:220, onComplete:() => dust.destroy() });
   }
 
-  if (state.slideTimer <= 0 || Math.abs(body.velocity.x) < 180) stopSlide(scene, state);
+  if (state.slideTimer <= 0) stopSlide(scene, state);
 }
 
 function stopSlide(scene, state) {
-  if (state.slideTimer <= 0 && !scene.sliding) return;
+  if (!scene || !state) return;
+  const wasSliding = scene.sliding || state.slideTimer > 0;
   state.slideTimer = 0;
   scene.sliding = false;
   scene.player?.setData('sliding', false);
   if (scene.player) scene.player.rotation = 0;
-  scene.game?.events?.emit('crouch-slide', false);
+  if (wasSliding) scene.game?.events?.emit('crouch-slide', false);
 }
 
 function setCrouch(scene, active) {
@@ -174,6 +177,7 @@ function installForScene(scene) {
     keyDown:false,
     mobileHeld:false,
     slideTimer:0,
+    slideCooldown:0,
     slideElapsed:0,
     slideDirection:1,
     slideSpeed:0,
@@ -210,7 +214,7 @@ if (!RunnerScene.prototype.__crouchGameplayV1CreatePatched) {
 }
 if (!RunnerScene.prototype.__crouchGameplayV1UpdatePatched) {
   RunnerScene.prototype.update = function crouchGameplayUpdate(time, delta, ...args) {
-    const result = originalUpdate.apply(this,time === undefined ? args : [time, delta, ...args]);
+    const result = originalUpdate.apply(this, [time, delta, ...args]);
     try { updateScene(this, delta); } catch(error) { console.error('[Crouch] update failed',error); }
     return result;
   };
@@ -230,6 +234,6 @@ document.addEventListener('keyup', event => {
 function activeScene() { return window.__relayRunnerScene || null; }
 window.addEventListener('relay:crouch-start', () => { const state = sceneState.get(activeScene()); if (state) state.mobileHeld = true; });
 window.addEventListener('relay:crouch-end', () => { const state = sceneState.get(activeScene()); if (state) state.mobileHeld = false; });
-window.addEventListener('blur', () => { const state = sceneState.get(activeScene()); if (state) { state.keyDown=false; state.mobileHeld=false; stopSlide(activeScene(), state); } document.getElementById(MOBILE_BUTTON_ID)?.classList.remove('is-held'); });
+window.addEventListener('blur', () => { const scene = activeScene(); const state = sceneState.get(scene); if (state) { state.keyDown=false; state.mobileHeld=false; stopSlide(scene, state); } document.getElementById(MOBILE_BUTTON_ID)?.classList.remove('is-held'); });
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',installMobileButton,{once:true}); else installMobileButton();
