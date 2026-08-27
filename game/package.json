@@ -28,6 +28,7 @@
     "test:death-reason-statistics": "node tests/death-reason-statistics.mjs",
     "test:initial-spawn-shield-consistency": "node tests/initial-spawn-shield-consistency.mjs",
     "test:checkpoint-collectible-recovery": "node tests/checkpoint-collectible-recovery.mjs",
+    "test:double-fall-statistics": "node tests/double-fall-statistics.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {"node": "^20.19.0 || >=22.12.0"},
