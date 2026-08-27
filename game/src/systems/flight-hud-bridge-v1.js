@@ -2,20 +2,28 @@ function installFlightHudBridge(RunnerScene) {
   if (!RunnerScene?.prototype || RunnerScene.prototype.__flightHudBridgeV1) return;
   RunnerScene.prototype.__flightHudBridgeV1 = true;
 
+  const dispatch = scene => {
+    const current = scene?.getFlightState?.();
+    if (!current) return;
+    const max = Math.max(1, Number(current.energyMax) || 1);
+    window.dispatchEvent(new CustomEvent('relay:flight-state', {
+      detail: {
+        state: current.state || 'off',
+        energy: Number(current.energy) || 0,
+        energyRatio: Math.max(0, Math.min(1, (Number(current.energy) || 0) / max)),
+      },
+    }));
+  };
+
   const bind = scene => {
-    const game = scene?.game;
-    if (!game?.events?.on || scene.__flightHudBound) return;
+    const events = scene?.game?.events;
+    if (!events?.on || scene.__flightHudBound) return;
     scene.__flightHudBound = true;
-    game.events.on('flight-state', state => {
-      const current = scene.getFlightState?.() || {};
-      window.dispatchEvent(new CustomEvent('relay:flight-state', {
-        detail: {
-          state,
-          energy: Number(current.energy) || 0,
-          energyRatio: Number(current.energyMax) > 0 ? Number(current.energy) / Number(current.energyMax) : 0,
-        },
-      }));
-    });
+    scene.__flightHudStateHandler = () => dispatch(scene);
+    scene.__flightHudEnergyHandler = () => dispatch(scene);
+    events.on('flight-state', scene.__flightHudStateHandler);
+    events.on('flight-energy', scene.__flightHudEnergyHandler);
+    dispatch(scene);
   };
 
   const originalCreate = RunnerScene.prototype.create;
@@ -27,6 +35,23 @@ function installFlightHudBridge(RunnerScene) {
     };
     wrapped.__flightHudBridgeWrapped = true;
     RunnerScene.prototype.create = wrapped;
+  }
+
+  const originalShutdown = RunnerScene.prototype.shutdown;
+  if (typeof originalShutdown === 'function' && !originalShutdown.__flightHudBridgeWrapped) {
+    const wrappedShutdown = function (...args) {
+      const events = this.game?.events;
+      if (events?.off && this.__flightHudBound) {
+        events.off('flight-state', this.__flightHudStateHandler);
+        events.off('flight-energy', this.__flightHudEnergyHandler);
+      }
+      this.__flightHudBound = false;
+      this.__flightHudStateHandler = null;
+      this.__flightHudEnergyHandler = null;
+      return originalShutdown.apply(this, args);
+    };
+    wrappedShutdown.__flightHudBridgeWrapped = true;
+    RunnerScene.prototype.shutdown = wrappedShutdown;
   }
 }
 
