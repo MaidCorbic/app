@@ -2,13 +2,8 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 
-// End-to-end smoke test: boots the production build, clicks through the home
-// screen and the chapter-intro card, and asserts the game reaches real
-// gameplay with zero runtime errors. This is the scenario that previously
-// caught two blank-screen regressions:
-//   1. Phaser's SceneManager auto-starting RunnerScene with no mission data.
-//   2. `Phaser.Math.MoveTowards` not existing, crashing movement on the first
-//      frame of gameplay after the chapter-intro card is dismissed.
+// End-to-end smoke test: boots the production build, reaches gameplay, and
+// treats both page exceptions and browser console errors as regressions.
 const PORT = 4173;
 
 function waitForServer(url, timeoutMs = 15000) {
@@ -37,14 +32,16 @@ try {
   browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
-  page.on('pageerror', err => errors.push(err.message));
+  page.on('pageerror', err => errors.push(`pageerror: ${err.message}`));
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(`console: ${message.text()}`);
+  });
 
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1000);
   await page.click('#start');
   await page.waitForTimeout(2500);
 
-  // Dismiss the chapter-intro card and start actually moving/playing.
   await page.mouse.click(1000, 340);
   await page.waitForTimeout(1500);
   await page.keyboard.press('Space');
@@ -60,14 +57,14 @@ try {
     performanceReady: typeof window.__missionFlowPerformanceV1?.scoreRun === 'function',
   }));
 
-  assert.equal(errors.length, 0, `Expected zero page errors, got: ${errors.join(', ')}`);
+  assert.equal(errors.length, 0, `Expected zero browser errors, got: ${errors.join(' | ')}`);
   assert.ok(hud.objective.length > 0, 'Mission objective HUD should be populated during gameplay');
   assert.equal(hud.playHidden, false, 'Play HUD should be visible during gameplay');
   assert.equal(hud.introHidden, true, 'Intro screen should be hidden during gameplay');
   assert.equal(hud.performanceVersion, '1.0', 'Mission Performance V1 should be installed');
   assert.equal(hud.performanceReady, true, 'Mission Performance V1 should expose its scoring API');
 
-  console.log('Gameplay smoke test passed: home -> chapter intro -> live gameplay, zero errors, Performance V1 loaded.');
+  console.log('Gameplay smoke test passed: live gameplay reached with zero page and console errors.');
 } finally {
   if (browser) await browser.close();
   server.kill();
