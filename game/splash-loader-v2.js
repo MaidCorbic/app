@@ -3,7 +3,34 @@
   if (window.__relaySplashV3) return;
   window.__relaySplashV3 = true;
 
+  const applyFirstPaintHardening = () => {
+    const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
+    const image = splash?.querySelector('.relay-splash-art, #relaySplashArt');
+    if (!splash || !image) return;
+    splash.style.width = '100vw';
+    splash.style.height = '100vh';
+    splash.style.width = '100dvw';
+    splash.style.height = '100dvh';
+    image.style.display = 'block';
+    image.style.position = 'absolute';
+    image.style.inset = '0';
+    image.style.width = '100dvw';
+    image.style.height = '100dvh';
+    image.style.minWidth = '100%';
+    image.style.minHeight = '100%';
+    image.style.maxWidth = 'none';
+    image.style.maxHeight = 'none';
+    image.style.objectFit = 'cover';
+    image.style.objectPosition = 'center';
+    image.style.transform = 'none';
+    image.style.animation = 'none';
+    image.style.opacity = '1';
+  };
+
+  applyFirstPaintHardening();
+
   const boot = () => {
+    applyFirstPaintHardening();
     document.getElementById('bootLoader')?.remove();
     const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
     if (!splash) return;
@@ -17,12 +44,20 @@
       css.dataset.relayCinematicV3 = 'true';
       document.head.appendChild(css);
     }
+    if (!document.querySelector('link[data-relay-cinematic-hardening]')) {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = './cinematic-splash-hardening.css';
+      css.dataset.relayCinematicHardening = 'true';
+      document.head.appendChild(css);
+    }
 
     const image = splash.querySelector('.relay-splash-art, #relaySplashArt');
     const bar = splash.querySelector('.relay-splash-progress');
     const pct = splash.querySelector('.relay-splash-percent');
     const label = splash.querySelector('.relay-splash-status');
     if (!image || !bar || !pct || !label) return;
+    applyFirstPaintHardening();
 
     if (!splash.querySelector('.relay-splash-brand')) {
       const brand = document.createElement('div');
@@ -138,6 +173,7 @@
     const onOrientation = () => {
       if (finishing) return;
       imageReady = image.complete && image.naturalWidth > 0;
+      applyFirstPaintHardening();
     };
     orientation.addEventListener?.('change', onOrientation);
     window.addEventListener('resize', onOrientation, { passive: true });
