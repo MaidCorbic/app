@@ -1,3 +1,4 @@
+// Build-safe achievement export: keep a single earnedAchievementIds declaration.
 const key = 'relay-runner-state';
 const districts = [
   { id: 'old-city', unlockMission: null, missions: ['first-delivery'] }, { id: 'industrial', unlockMission: 'first-delivery', missions: ['dead-drop'] }, { id: 'downtown', unlockMission: 'dead-drop', missions: ['blackout'] }, { id: 'corporate', unlockMission: 'blackout', missions: ['pursuit'] }, { id: 'residential', unlockMission: 'pursuit', missions: ['signal-storm'] }, { id: 'apex', unlockMission: 'signal-storm', missions: ['corporate-lockdown', 'final-relay'] },
