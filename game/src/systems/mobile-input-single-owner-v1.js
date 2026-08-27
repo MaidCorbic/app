@@ -137,7 +137,7 @@ const install = () => {
   joystick.addEventListener('pointerdown', event => {
     event.preventDefault();
     event.stopPropagation();
-    reset();
+    if (pointerId !== null) return;
     pointerId = event.pointerId;
     joystick.setPointerCapture?.(pointerId);
     joystick.classList.add('is-active');
@@ -150,9 +150,13 @@ const install = () => {
     move(event.clientX, event.clientY);
   }, { passive: false });
 
-  joystick.addEventListener('pointerup', reset);
-  joystick.addEventListener('pointercancel', reset);
-  joystick.addEventListener('lostpointercapture', reset);
+  const end = event => {
+    if (event && event.pointerId !== pointerId) return;
+    reset();
+  };
+  joystick.addEventListener('pointerup', end);
+  joystick.addEventListener('pointercancel', end);
+  joystick.addEventListener('lostpointercapture', end);
   window.addEventListener('blur', reset);
   window.addEventListener('pagehide', reset);
   document.addEventListener('visibilitychange', () => {

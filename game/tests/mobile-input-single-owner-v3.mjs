@@ -23,4 +23,7 @@ assert.match(owner, /ACTION_KEYS = Object\.freeze/);
 assert.match(owner, /activePointers\.has\(event\.pointerId\)/);
 assert.match(owner, /mobileControlsOwner/);
 assert.match(owner, /single-owner-v7/);
+assert.match(owner, /if \(pointerId !== null\) return;/, 'joystick must reject a second pointer while one is active');
+assert.match(owner, /const end = event => \{/);
+assert.match(owner, /if \(event && event\.pointerId !== pointerId\) return;/, 'joystick release must only clear its owning pointer');
 console.log('Mobile input single-owner V7 contract: PASS');
