@@ -12,6 +12,7 @@ function installFlightHoverGlide(RunnerScene) {
 
   RunnerScene.prototype.create = function (...args) {
     const result = originalCreate?.apply(this, args);
+    const playerBody = this.player?.body;
     this.__flightHVG = {
       enabled: this.mission?.id != null,
       state: FLIGHT_STATE.GROUNDED,
@@ -23,6 +24,7 @@ function installFlightHoverGlide(RunnerScene) {
       glideMaxFallSpeed: 230,
       glideWindowMs: 850,
       glideUntil: 0,
+      baseGravityY: Number(playerBody?.gravity?.y) || 720,
       lastToggleAt: 0,
       toggleCooldownMs: 180,
       depletedNoticeAt: 0,
@@ -39,6 +41,11 @@ function installFlightHoverGlide(RunnerScene) {
       this.toggleFlightMode?.('keyboard');
     };
     window.addEventListener('keydown', this.__flightKeyDownHandler, true);
+
+    this.__flightPointerHandler = event => {
+      if (event.type === 'relay:toggle-flight') this.toggleFlightMode?.(event.detail?.source || 'mobile');
+    };
+    window.addEventListener('relay:toggle-flight', this.__flightPointerHandler);
     return result;
   };
 
@@ -72,6 +79,7 @@ function installFlightHoverGlide(RunnerScene) {
     data.state = FLIGHT_STATE.FLYING;
     data.hoverHold = false;
     data.glideUntil = 0;
+    data.baseGravityY = Number(this.player?.body?.gravity?.y) || data.baseGravityY || 720;
     this.player?.body?.setAllowGravity?.(false);
     this.player?.body?.setVelocityY?.(0);
     this.game?.events?.emit('flight-state', data.state, { source });
@@ -98,8 +106,7 @@ function installFlightHoverGlide(RunnerScene) {
 
   RunnerScene.prototype.updateFlightHoverGlide = function (delta) {
     const data = this.__flightHVG;
-    const player = this.player;
-    const body = player?.body;
+    const body = this.player?.body;
     if (!data?.enabled || !body || this.finished || this.respawning) return;
 
     const now = performance.now();
@@ -113,17 +120,13 @@ function installFlightHoverGlide(RunnerScene) {
       const up = Boolean(keys.up?.isDown);
       const down = Boolean(keys.down?.isDown);
       const space = Boolean(keys.space?.isDown);
-
       body.setAllowGravity(false);
-      if (space) {
-        if (!data.hoverHold) this.setFlightHover?.(true, 'keyboard');
-      } else if (data.hoverHold) {
-        this.setFlightHover?.(false, 'keyboard');
-      }
+
+      if (space && !data.hoverHold) this.setFlightHover?.(true, 'keyboard');
+      else if (!space && data.hoverHold) this.setFlightHover?.(false, 'keyboard');
 
       const vertical = (up ? -1 : 0) + (down ? 1 : 0);
-      if (data.state === FLIGHT_STATE.HOVER || vertical === 0) body.setVelocityY(0);
-      else body.setVelocityY(vertical * data.verticalSpeed);
+      body.setVelocityY(data.state === FLIGHT_STATE.HOVER || vertical === 0 ? 0 : vertical * data.verticalSpeed);
 
       if (this.energy <= 0) {
         data.hoverHold = false;
@@ -136,13 +139,12 @@ function installFlightHoverGlide(RunnerScene) {
     }
 
     if (data.state === FLIGHT_STATE.GLIDING) {
-      const originalGravity = Number(body.gravity?.y) || 720;
       body.setAllowGravity(true);
-      body.setGravityY?.(originalGravity * data.glideGravityScale);
+      body.setGravityY?.(data.baseGravityY * data.glideGravityScale);
       body.setVelocityY(Math.min(body.velocity.y, data.glideMaxFallSpeed));
       if (now >= data.glideUntil || body.blocked?.down || body.touching?.down) {
         data.state = FLIGHT_STATE.GROUNDED;
-        body.setGravityY?.(originalGravity);
+        body.setGravityY?.(data.baseGravityY);
         this.game?.events?.emit('flight-state', data.state, { reason: 'glide-ended' });
       }
     }
@@ -150,7 +152,9 @@ function installFlightHoverGlide(RunnerScene) {
 
   RunnerScene.prototype.shutdownFlightHoverGlide = function () {
     if (this.__flightKeyDownHandler) window.removeEventListener('keydown', this.__flightKeyDownHandler, true);
+    if (this.__flightPointerHandler) window.removeEventListener('relay:toggle-flight', this.__flightPointerHandler);
     this.__flightKeyDownHandler = null;
+    this.__flightPointerHandler = null;
   };
 
   RunnerScene.prototype.update = function (time, delta) {
