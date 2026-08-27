@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { patchSeasonalProgression } from './seasonal-progression-patch.mjs';
 import { patchDeathReason } from './death-reason-patch.mjs';
+import { patchInitialSpawnShield } from './initial-spawn-shield-patch.mjs';
 
 const LEGACY_TEXT_ASSETS = [
   'campaign-v2.css',
@@ -83,6 +84,17 @@ function relayDeathReasonFix() {
   };
 }
 
+function relayInitialSpawnShieldFix() {
+  return {
+    name: 'relay-initial-spawn-shield-fix',
+    transform(code, id) {
+      if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
+      const transformed = patchInitialSpawnShield(code);
+      return transformed === code ? null : { code: transformed, map: null };
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [relaySeasonalProgressionFix(), relayDeathReasonFix(), relayLegacyAssetAliases()],
+  plugins: [relaySeasonalProgressionFix(), relayDeathReasonFix(), relayInitialSpawnShieldFix(), relayLegacyAssetAliases()],
 });
