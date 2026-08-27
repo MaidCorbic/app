@@ -31,6 +31,7 @@ import { installWireRepairRoom } from './systems/wire-repair-room-v1.js';
 import { installWireRepairRoomVisual } from './systems/wire-repair-room-visual-v1.js';
 import { installSafeRoom } from './systems/safe-room-v1.js';
 import { installSafeRoomVisual } from './systems/safe-room-visual-v1.js';
+import { installHealthRestoreZones } from './systems/health-restore-zones-v1.js';
 import { installEmergencySystemsGuide } from './systems/emergency-systems-guide-v1.js';
 import { installFlightHoverGlide } from './systems/flight-hover-glide-v1.js';
 import { installFlightHudBridge } from './systems/flight-hud-bridge-v1.js';
@@ -73,6 +74,7 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installWireRepairRoomVisual(RunnerScene);
   installSafeRoom(RunnerScene);
   installSafeRoomVisual(RunnerScene);
+  installHealthRestoreZones(RunnerScene);
   installEmergencySystemsGuide(RunnerScene);
   installFlightHoverGlide(RunnerScene);
   installFlightHudBridge(RunnerScene);
