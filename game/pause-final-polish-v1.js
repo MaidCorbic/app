@@ -78,7 +78,7 @@ import { loadState, saveState } from './src/state.js';
       const option = event.target.closest?.('#pauseMenu [data-setting]');
       if (!option) return;
       window.setTimeout(renderOptions, 0);
-    });
+    }, true);
 
     document.addEventListener('click', event => {
       if (!event.target.closest?.('.pause-options-v1 .language')) document.querySelectorAll('.pause-options-v1 .language-menu').forEach(menu => menu.classList.add('hidden'));
