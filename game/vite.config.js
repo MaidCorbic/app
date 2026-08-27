@@ -4,6 +4,7 @@ import path from 'node:path';
 import { patchSeasonalProgression } from './seasonal-progression-patch.mjs';
 import { patchDeathReason } from './death-reason-patch.mjs';
 import { patchInitialSpawnShield } from './initial-spawn-shield-patch.mjs';
+import { patchCheckpointCollectibles } from './checkpoint-collectible-patch.mjs';
 
 const LEGACY_TEXT_ASSETS = [
   'campaign-v2.css',
@@ -95,6 +96,23 @@ function relayInitialSpawnShieldFix() {
   };
 }
 
+function relayCheckpointCollectiblesFix() {
+  return {
+    name: 'relay-checkpoint-collectibles-fix',
+    transform(code, id) {
+      if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
+      const transformed = patchCheckpointCollectibles(code);
+      return transformed === code ? null : { code: transformed, map: null };
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [relaySeasonalProgressionFix(), relayDeathReasonFix(), relayInitialSpawnShieldFix(), relayLegacyAssetAliases()],
+  plugins: [
+    relaySeasonalProgressionFix(),
+    relayDeathReasonFix(),
+    relayInitialSpawnShieldFix(),
+    relayCheckpointCollectiblesFix(),
+    relayLegacyAssetAliases(),
+  ],
 });
