@@ -77,7 +77,6 @@ function recoverWebFallState(scene) {
   if (scene.__webFallRecoveryPending) return;
   scene.__webFallRecoveryPending = true;
   try {
-    scene.falls = Math.max(0, Number(scene.falls || 0)) + 1;
     if (scene.game?.events) scene.game.events.emit('deaths', scene.deaths || 0, scene.deathLimit || 0);
     if (typeof scene.fail === 'function') scene.fail('The courier fell into the relay void.');
   } finally {
