@@ -7,6 +7,7 @@
     const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
     const image = splash?.querySelector('.relay-splash-art, #relaySplashArt');
     if (!splash || !image) return;
+    const mobilePortrait = window.matchMedia('(max-width:700px) and (orientation:portrait)').matches;
     splash.style.width = '100vw';
     splash.style.height = '100vh';
     splash.style.width = '100dvw';
@@ -20,9 +21,9 @@
     image.style.minHeight = '100%';
     image.style.maxWidth = 'none';
     image.style.maxHeight = 'none';
-    image.style.objectFit = 'cover';
+    image.style.objectFit = mobilePortrait ? 'contain' : 'cover';
     image.style.objectPosition = 'center';
-    image.style.transform = 'none';
+    image.style.transform = mobilePortrait ? 'scale(1)' : 'none';
     image.style.animation = 'none';
     image.style.opacity = '1';
   };
