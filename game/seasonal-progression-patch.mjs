@@ -1,4 +1,4 @@
-export function patchSeasonalProgression(source) {
+function patchSeasonalChallenges(source) {
   const pattern = /function challengeProgress\(state, mission, signals, cleanRun, contractComplete, bossDefeated, elapsedMs\) \{[\s\S]*?\n\}\nexport function earnedAchievementIds/;
   const match = source.match(pattern);
   if (!match) return source;
@@ -23,4 +23,30 @@ export function patchSeasonalProgression(source) {
 }
 `;
   return source.replace(current, replacement + 'export function earnedAchievementIds');
+}
+
+function patchUnlockReconciliation(source) {
+  const importStatement = "import { missions } from './missions.js';\n";
+  if (!source.includes(importStatement)) source = importStatement + source;
+
+  const staleDistricts = 'unlockedDistricts: saved.unlockedDistricts || unlockedDistricts,';
+  const staleMissions = "unlockedMissions: saved.unlockedMissions || ['first-delivery']";
+  if (!source.includes(staleDistricts) && !source.includes(staleMissions)) return source;
+
+  const derived = `const reconciledUnlockedDistricts = districts
+      .filter(district => !district.unlockMission || completed.includes(district.unlockMission))
+      .map(district => district.id);
+    const reconciledUnlockedMissions = missions
+      .filter(mission => !mission.unlockRequirement || completed.includes(mission.unlockRequirement))
+      .map(mission => mission.id);`;
+  const anchor = '    const masteryMigrations = {';
+  if (!source.includes(derived)) source = source.replace(anchor, `    ${derived}\n${anchor}`);
+  source = source.replace(staleDistricts, 'unlockedDistricts: reconciledUnlockedDistricts,');
+  source = source.replace(staleMissions, 'unlockedMissions: reconciledUnlockedMissions');
+  return source;
+}
+
+export function patchSeasonalProgression(source) {
+  const seasonal = patchSeasonalChallenges(source);
+  return patchUnlockReconciliation(seasonal);
 }

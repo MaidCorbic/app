@@ -20,6 +20,7 @@
     "test:mobile-input-single-owner": "node tests/mobile-input-single-owner-v3.mjs",
     "test:settings-state": "node tests/settings-state-contract.mjs",
     "test:seasonal-progression": "node tests/seasonal-progression-contract.mjs",
+    "test:state-unlock-reconciliation": "node tests/state-unlock-reconciliation-contract.mjs",
     "test:gameplay-touch-lock": "node tests/gameplay-touch-lock.mjs",
     "test:mission-finish-recovery-lifecycle": "node tests/mission-finish-recovery-lifecycle.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
