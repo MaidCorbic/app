@@ -5,6 +5,7 @@ import { patchSeasonalProgression } from './seasonal-progression-patch.mjs';
 import { patchDeathReason } from './death-reason-patch.mjs';
 import { patchInitialSpawnShield } from './initial-spawn-shield-patch.mjs';
 import { patchCheckpointCollectibles } from './checkpoint-collectible-patch.mjs';
+import { patchRespawnTransientState } from './respawn-transient-state-patch.mjs';
 
 const LEGACY_TEXT_ASSETS = [
   'campaign-v2.css',
@@ -107,12 +108,24 @@ function relayCheckpointCollectiblesFix() {
   };
 }
 
+function relayRespawnTransientStateFix() {
+  return {
+    name: 'relay-respawn-transient-state-fix',
+    transform(code, id) {
+      if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
+      const transformed = patchRespawnTransientState(code);
+      return transformed === code ? null : { code: transformed, map: null };
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     relaySeasonalProgressionFix(),
     relayDeathReasonFix(),
     relayInitialSpawnShieldFix(),
     relayCheckpointCollectiblesFix(),
+    relayRespawnTransientStateFix(),
     relayLegacyAssetAliases(),
   ],
 });
