@@ -25,6 +25,7 @@ import { installEnemyPuzzleIntegration } from './systems/enemy-puzzle-integratio
 import { installMissionProgressionPolish } from './systems/mission-progression-polish-v1.js';
 import { installFireWater } from './systems/fire-water-v1.js';
 import { installPowerFailure } from './systems/power-failure-v1.js';
+import { installFlashlight } from './systems/flashlight-v1.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
 import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
@@ -58,6 +59,7 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installMissionProgressionPolish(RunnerScene);
   installFireWater(RunnerScene);
   installPowerFailure(RunnerScene);
+  installFlashlight(RunnerScene);
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
   installDroneStrikeRecovery(RunnerScene);
