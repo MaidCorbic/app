@@ -1,0 +1,55 @@
+/* Final visual contract: restore cinematic splash + perfectly round mobile actions. */
+#relaySplash.relay-splash{
+  font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+#relaySplash.relay-splash .relay-splash-art{
+  display:block;
+}
+#relaySplash.relay-splash .relay-splash-ui{
+  text-align:left;
+}
+#relaySplash.relay-splash .relay-splash-meta{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+}
+#relaySplash.relay-splash .relay-splash-status{
+  text-align:left;
+}
+#relaySplash.relay-splash .relay-splash-brand{
+  display:flex;
+}
+
+@media (max-width:768px){
+  body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-actions{
+    display:grid!important;
+    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    grid-auto-flow:column!important;
+    align-items:center!important;
+  }
+  body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-actions > button{
+    width:var(--touch-size)!important;
+    height:var(--touch-size)!important;
+    min-width:var(--touch-size)!important;
+    min-height:var(--touch-size)!important;
+    max-width:var(--touch-size)!important;
+    max-height:var(--touch-size)!important;
+    aspect-ratio:1/1!important;
+    border-radius:50%!important;
+    padding:0!important;
+    flex:0 0 var(--touch-size)!important;
+    line-height:1!important;
+  }
+}
+
+@media (max-width:380px){
+  body.is-touch .mobile-controls[data-mobile-controls-owner="single-owner-v5"] .mobile-actions > button{
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+    max-width:44px!important;
+    max-height:44px!important;
+    border-radius:50%!important;
+  }
+}
