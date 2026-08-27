@@ -34,23 +34,7 @@
     document.getElementById('bootLoader')?.remove();
     const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
     if (!splash) return;
-
     if (!splash.classList.contains('relay-splash')) splash.classList.add('relay-splash');
-
-    if (!document.querySelector('link[data-relay-cinematic-v3]')) {
-      const css = document.createElement('link');
-      css.rel = 'stylesheet';
-      css.href = './cinematic-splash.css';
-      css.dataset.relayCinematicV3 = 'true';
-      document.head.appendChild(css);
-    }
-    if (!document.querySelector('link[data-relay-cinematic-hardening]')) {
-      const css = document.createElement('link');
-      css.rel = 'stylesheet';
-      css.href = './cinematic-splash-hardening.css';
-      css.dataset.relayCinematicHardening = 'true';
-      document.head.appendChild(css);
-    }
 
     const image = splash.querySelector('.relay-splash-art, #relaySplashArt');
     const bar = splash.querySelector('.relay-splash-progress');
@@ -66,14 +50,7 @@
       splash.appendChild(brand);
     }
 
-    const stages = [
-      [8, 'INITIALIZING RELAY'],
-      [26, 'LOADING INTERFACE'],
-      [48, 'LOADING GAME SYSTEMS'],
-      [68, 'CONNECTING WORLD'],
-      [86, 'PREPARING HOME'],
-    ];
-
+    const stages = [[8, 'INITIALIZING RELAY'], [26, 'LOADING INTERFACE'], [48, 'LOADING GAME SYSTEMS'], [68, 'CONNECTING WORLD'], [86, 'PREPARING HOME']];
     let progress = 0;
     let imageReady = image.complete && image.naturalWidth > 0;
     let pageReady = document.readyState === 'complete';
@@ -92,11 +69,7 @@
     };
 
     const animateTo = (target, text) => new Promise(resolve => {
-      if (target <= progress) {
-        setProgress(target, text);
-        resolve();
-        return;
-      }
+      if (target <= progress) { setProgress(target, text); resolve(); return; }
       const from = progress;
       const started = performance.now();
       const duration = Math.max(180, Math.min(650, (target - from) * 10));
@@ -104,8 +77,7 @@
         const t = Math.min(1, (now - started) / duration);
         const eased = t * (2 - t);
         setProgress(from + (target - from) * eased, text);
-        if (t < 1) requestAnimationFrame(frame);
-        else resolve();
+        if (t < 1) requestAnimationFrame(frame); else resolve();
       };
       requestAnimationFrame(frame);
     });
@@ -114,10 +86,7 @@
       if (finishing) return;
       const elapsed = performance.now() - startedAt;
       if (!forced && (!imageReady || !pageReady || !engineReady)) return;
-      if (!forced && elapsed < MIN_SPLASH_MS) {
-        window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed);
-        return;
-      }
+      if (!forced && elapsed < MIN_SPLASH_MS) { window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed); return; }
       finishing = true;
       await animateTo(100, 'READY');
       splash.setAttribute('aria-busy', 'false');
@@ -134,62 +103,29 @@
     if (imageReady) setProgress(26, 'LOADING INTERFACE');
     else {
       image.addEventListener('load', markImageReady, { once: true });
-      image.addEventListener('error', () => {
-        imageReady = true;
-        setProgress(22, 'USING SAFE MODE');
-        finish();
-      }, { once: true });
+      image.addEventListener('error', () => { imageReady = true; setProgress(22, 'USING SAFE MODE'); finish(); }, { once: true });
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        animateTo(48, 'LOADING GAME SYSTEMS');
-      }, { once: true });
-    } else {
-      animateTo(48, 'LOADING GAME SYSTEMS');
-    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => animateTo(48, 'LOADING GAME SYSTEMS'), { once: true });
+    else animateTo(48, 'LOADING GAME SYSTEMS');
 
-    if (!pageReady) {
-      window.addEventListener('load', () => {
-        pageReady = true;
-        animateTo(68, 'CONNECTING WORLD').then(finish);
-      }, { once: true });
-    } else {
-      setProgress(68, 'CONNECTING WORLD');
-    }
+    if (!pageReady) window.addEventListener('load', () => { pageReady = true; animateTo(68, 'CONNECTING WORLD').then(finish); }, { once: true });
+    else setProgress(68, 'CONNECTING WORLD');
 
     const checkEngine = () => {
       const canvas = document.querySelector('#phaser-game canvas');
-      if (canvas) {
-        engineReady = true;
-        animateTo(86, 'PREPARING HOME').then(finish);
-        return;
-      }
+      if (canvas) { engineReady = true; animateTo(86, 'PREPARING HOME').then(finish); return; }
       if (!finishing) window.setTimeout(checkEngine, 60);
     };
     checkEngine();
 
     const orientation = window.matchMedia('(orientation: landscape)');
-    const onOrientation = () => {
-      if (finishing) return;
-      imageReady = image.complete && image.naturalWidth > 0;
-      applyFirstPaintHardening();
-    };
+    const onOrientation = () => { if (finishing) return; imageReady = image.complete && image.naturalWidth > 0; applyFirstPaintHardening(); };
     orientation.addEventListener?.('change', onOrientation);
     window.addEventListener('resize', onOrientation, { passive: true });
 
-    window.setTimeout(() => {
-      if (finishing || timedOut) return;
-      timedOut = true;
-      label.textContent = 'STARTING HOME';
-      finish(true);
-    }, MAX_SPLASH_MS);
-
-    stages.forEach(([value, text], index) => {
-      window.setTimeout(() => {
-        if (!finishing && !timedOut) setProgress(value, text);
-      }, 220 + index * 360);
-    });
+    window.setTimeout(() => { if (finishing || timedOut) return; timedOut = true; label.textContent = 'STARTING HOME'; finish(true); }, MAX_SPLASH_MS);
+    stages.forEach(([value, text], index) => window.setTimeout(() => { if (!finishing && !timedOut) setProgress(value, text); }, 220 + index * 360));
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
