@@ -11,18 +11,24 @@ assert.match(transformed, /const reconciledUnlockedMissions = missions/, 'State 
 assert.match(transformed, /unlockedDistricts: reconciledUnlockedDistricts,/, 'Persisted district unlock list must not override derived progression');
 assert.match(transformed, /unlockedMissions: reconciledUnlockedMissions/, 'Persisted mission unlock list must not override derived progression');
 
+const executable = transformed.replace(
+  "import { missions } from './missions.js';\n",
+  "const missions = [{ id: 'first-delivery', unlockRequirement: null }, { id: 'dead-drop', unlockRequirement: 'first-delivery' }, { id: 'blackout', unlockRequirement: 'dead-drop' }];\n",
+);
+
 const store = new Map();
 globalThis.localStorage = {
   getItem: key => store.get(key) ?? null,
   setItem: (key, value) => store.set(key, value),
 };
 
-const stateModule = await import(`data:text/javascript,${encodeURIComponent(transformed)}`);
+const stateModule = await import(`data:text/javascript,${encodeURIComponent(executable)}`);
 stateModule.saveState({ completed: ['first-delivery'], unlockedDistricts: ['old-city'], unlockedMissions: ['first-delivery'] });
 const loaded = stateModule.loadState();
 
 assert.ok(loaded.unlockedDistricts.includes('industrial'), 'Completed first mission must unlock Industrial after reload');
 assert.ok(loaded.unlockedMissions.includes('dead-drop'), 'Completed first mission must unlock the next mission after reload');
+assert.ok(!loaded.unlockedMissions.includes('blackout'), 'Locked missions must remain locked after reload');
 assert.ok(loaded.unlockedDistricts.length >= 2, 'Derived districts must not regress to the stale saved list');
 
 console.log('State unlock reconciliation contract: PASS');
