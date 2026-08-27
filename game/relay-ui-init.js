@@ -23,17 +23,10 @@ document.querySelectorAll('[data-relay-info]').forEach(button => button.addEvent
 document.addEventListener('click', event => { const question = event.target.closest('.relay-faq-question'); if (question) question.closest('.relay-faq-item')?.classList.toggle('open'); if (event.target.closest('[data-relay-close]') || event.target === panel) { panel?.classList.add('hidden'); panel?.classList.remove('relay-update-mode'); } });
 document.addEventListener('keydown', event => { if (event.key === 'Escape') { panel?.classList.add('hidden'); panel?.classList.remove('relay-update-mode'); } });
 
-// UPDATE 18 — additive cargo integrity runtime. Keeps existing gameplay ownership authoritative.
 import './cargo-integrity-v2.js';
 import './cargo-integrity-v2-visibility-v1.js';
-
-// UPDATE 19 — additive signal network. Existing gameplay systems remain authoritative.
 import './signal-network-v1.js';
-
-// UPDATE 20 — additive city response. Records mission aftermath in an isolated namespace.
 import './city-response-v1.js';
-
-// UPDATE 17 — one authoritative gameplay intro runtime.
 import './gameplay-intro-final-v1.js';
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
@@ -67,7 +60,8 @@ import './src/systems/mission-objectives-route-goals-v1.js';
 import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
 import './crouch-gameplay-v1.js';
-// Additive presentation layer; loaded last so core gameplay ownership remains unchanged.
+import './slide-jump-momentum-v1.js';
+import './dash-dodge-v1.js';
+import './wall-slide-v1.js';
 import './dynamic-environment-reactions-v1.js';
-// Production safety net: presentation/tutorial failures must never leave the run frozen.
 import './production-unfreeze-v1.js';
