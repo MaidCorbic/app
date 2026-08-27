@@ -22,7 +22,7 @@ function patchSeasonalChallenges(source) {
   };
 }
 `;
-  return source.replace(current, replacement + 'export function earnedAchievementIds');
+  return source.replace(current, replacement);
 }
 
 function patchUnlockReconciliation(source) {
