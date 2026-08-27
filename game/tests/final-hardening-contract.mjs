@@ -7,7 +7,7 @@ const flight = await readFile(fileURLToPath(new URL('src/systems/flight-hover-gl
 const health = await readFile(fileURLToPath(new URL('src/systems/health-restore-zones-v1.js', root)), 'utf8');
 const zoom = await readFile(fileURLToPath(new URL('src/systems/web-zoom-lock-v1.js', root)), 'utf8');
 const splashLoader = await readFile(fileURLToPath(new URL('splash-loader-v2.js', root)), 'utf8');
-const splashHardening = await readFile(fileURLToPath(new URL('cinematic-splash-hardening.css', root)), 'utf8');
+const splashCss = await readFile(fileURLToPath(new URL('cinematic-splash.css', root)), 'utf8');
 const runtime = await readFile(fileURLToPath(new URL('src/feature-runtime.js', root)), 'utf8');
 
 assert.match(flight, /DEFAULT_FLIGHT_DURATION_MS = 8000/);
@@ -29,7 +29,9 @@ assert.match(zoom, /gesturestart/);
 assert.match(splashLoader, /applyFirstPaintHardening/);
 assert.match(splashLoader, /image\.style\.objectFit = 'cover'/);
 assert.match(splashLoader, /image\.style\.animation = 'none'/);
-assert.match(splashHardening, /width:100dvw/);
-assert.match(splashHardening, /height:100dvh/);
-assert.match(splashHardening, /transform:none!important/);
+assert.match(splashCss, /width:100dvw/);
+assert.match(splashCss, /height:100dvh/);
+assert.match(splashCss, /transform:none!important/);
+assert.match(splashCss, /animation:none!important/);
+assert.match(splashCss, /object-fit:cover!important/);
 console.log('Final hardening contract: PASS');
