@@ -34,6 +34,14 @@ import './runtime-ai-tutorial-settings.js';
     @keyframes tutorialReveal{to{opacity:1;transform:none}}
     @media(max-width:700px){.tutorial-steps{grid-template-columns:1fr}.tutorial-hero{padding:12px}.tutorial-category ul{font-size:7px}.tutorial-hero p{font-size:7px}}
     @media(prefers-reduced-motion:reduce){.tutorial-hero,.tutorial-step,.tutorial-category,.tutorial-foot{animation:none;opacity:1;transform:none}}
+    /* BUGFIX ONLY: keep existing tutorial content/features, but prevent mobile panel overflow. */
+    #titlePanelContent{min-width:0;overscroll-behavior:contain}
+    @media(max-width:700px){
+      #titlePanelContent{max-height:calc(100dvh - 180px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding-right:3px;box-sizing:border-box}
+      #titlePanelContent .tutorial-category summary{min-height:34px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+      #titlePanelContent .tutorial-category summary::after{float:none;flex:0 0 auto}
+      #titlePanelContent .tutorial-category ul{overflow-wrap:anywhere;word-break:normal}
+    }
   `;
   document.head.appendChild(style);
 
