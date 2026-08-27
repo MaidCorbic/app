@@ -25,6 +25,7 @@
     "test:mission-finish-recovery-lifecycle": "node tests/mission-finish-recovery-lifecycle.mjs",
     "test:death-retry-state-reset": "node tests/death-retry-state-reset.mjs",
     "test:respawn-shield-single-owner": "node tests/respawn-shield-single-owner.mjs",
+    "test:death-reason-statistics": "node tests/death-reason-statistics.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs"
   },
   "engines": {"node": "^20.19.0 || >=22.12.0"},

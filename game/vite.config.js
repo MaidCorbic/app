@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
 import { patchSeasonalProgression } from './seasonal-progression-patch.mjs';
+import { patchDeathReason } from './death-reason-patch.mjs';
 
 const LEGACY_TEXT_ASSETS = [
   'campaign-v2.css',
@@ -71,6 +72,17 @@ function relaySeasonalProgressionFix() {
   };
 }
 
+function relayDeathReasonFix() {
+  return {
+    name: 'relay-death-reason-fix',
+    transform(code, id) {
+      if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
+      const transformed = patchDeathReason(code);
+      return transformed === code ? null : { code: transformed, map: null };
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [relaySeasonalProgressionFix(), relayLegacyAssetAliases()],
+  plugins: [relaySeasonalProgressionFix(), relayDeathReasonFix(), relayLegacyAssetAliases()],
 });
