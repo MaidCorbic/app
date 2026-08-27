@@ -44,6 +44,12 @@ function install() {
   controls.replaceWith(cleanControls);
   controls = cleanControls;
 
+  // Keep the touch action bar to one compact row. BUILD 2 and GEAR 4 remain
+  // available through their keyboard shortcuts on desktop and are intentionally
+  // not duplicated as touch buttons.
+  controls.querySelector('[data-mobile-action="build2"]')?.remove();
+  controls.querySelector('[data-mobile-action="gadget2"]')?.remove();
+
   const buttons = [...controls.querySelectorAll('[data-mobile-action]')];
   buttons.forEach(button => {
     const key = ACTION_KEYS[button.dataset.mobileAction];
