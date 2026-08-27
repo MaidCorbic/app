@@ -2,7 +2,8 @@ import { missions } from '../missions.js';
 import { completeMission, loadState, saveState } from '../state.js';
 
 const RECOVERY_DELAY = 360;
-let timer;
+let timer = null;
+let observer = null;
 
 const getElement = id => document.getElementById(id);
 const setText = (id, value) => {
@@ -11,16 +12,22 @@ const setText = (id, value) => {
   element.textContent = String(value ?? '');
   return true;
 };
-const toggleHidden = (id, hidden) => {
-  const element = getElement(id);
-  if (!element?.classList) return false;
-  element.classList.toggle('hidden', Boolean(hidden));
-  return true;
-};
 
 function formatTime(ms) {
   const value = Math.max(0, Number(ms) || 0);
   return `${String(Math.floor(value / 60000)).padStart(2, '0')}:${String(Math.floor(value / 1000) % 60).padStart(2, '0')}.${Math.floor(value % 1000 / 100)}`;
+}
+
+function stopPolling() {
+  if (timer !== null) {
+    window.clearTimeout(timer);
+    timer = null;
+  }
+}
+
+function schedulePoll(delay = 350) {
+  stopPolling();
+  timer = window.setTimeout(tick, delay);
 }
 
 function showRecoveredFinish(scene) {
@@ -60,7 +67,7 @@ function showRecoveredFinish(scene) {
   const performanceResult = window.__missionFlowPerformanceV1?.finalize?.(scene) || window.__missionFlowPerformanceV1?.latest || null;
   if (!performanceResult) console.warn('[Relay Runner] Performance V1 did not produce a completion result.', mission.id);
 
-  const stat = state.missionStats?.[mission.id] || { bestRating: 1, bestScore: scene.collected * 100, bestTime: scene.elapsedMs };
+  const stat = state.missionStats?.[mission.id] || { bestRating: 1, bestScore: (scene.collected || 0) * 100, bestTime: scene.elapsedMs };
   const breakdown = state.lastXpBreakdown || {};
   setText('finishRating', '★'.repeat(Math.max(1, stat.bestRating || 1)));
   setText('finishSignals', `${scene.collected || 0} / ${mission.signals?.length || 0} SIGNALS`);
@@ -71,24 +78,49 @@ function showRecoveredFinish(scene) {
 
   const next = getElement('nextMission');
   const hasNext = missionIndex + 1 < missions.length && (!missions[missionIndex + 1].unlockRequirement || state.completed.includes(missions[missionIndex + 1].unlockRequirement));
-  if (next?.classList) next.classList.toggle('hidden', !hasNext);
-  if (play?.classList) play.classList.add('hidden');
+  next?.classList.toggle('hidden', !hasNext);
+  play?.classList.add('hidden');
   finish.classList.remove('hidden');
   console.warn('[Relay Runner] Mission finish UI recovered after completion handoff.', mission.id);
   return true;
 }
 
 function tick() {
+  timer = null;
   const scene = window.__relayRunnerScene;
   const finish = getElement('finish');
-  if (scene?.finished && finish?.classList?.contains('hidden')) {
+  if (!scene?.finished) {
+    schedulePoll();
+    return;
+  }
+  if (finish?.classList?.contains('hidden')) {
     try { showRecoveredFinish(scene); }
     catch (error) { console.error('[Relay Runner] Mission finish recovery failed.', error); }
   }
-  timer = window.setTimeout(tick, 350);
+  // Once the finish UI is visible, polling is no longer necessary. The observer
+  // below rearms recovery when a new run hides the finish overlay again.
+  if (finish && !finish.classList.contains('hidden')) stopPolling();
+  else schedulePoll();
+}
+
+function installLifecycleObserver() {
+  if (observer || typeof MutationObserver === 'undefined') return;
+  const finish = getElement('finish');
+  if (!finish) return;
+  observer = new MutationObserver(() => {
+    if (finish.classList.contains('hidden')) schedulePoll(RECOVERY_DELAY);
+    else stopPolling();
+  });
+  observer.observe(finish, { attributes: true, attributeFilter: ['class'] });
 }
 
 if (!window.__relayMissionFinishRecovery) {
   window.__relayMissionFinishRecovery = true;
-  timer = window.setTimeout(tick, RECOVERY_DELAY);
+  installLifecycleObserver();
+  schedulePoll(RECOVERY_DELAY);
+  window.addEventListener('beforeunload', () => {
+    stopPolling();
+    observer?.disconnect();
+    observer = null;
+  }, { once: true });
 }
