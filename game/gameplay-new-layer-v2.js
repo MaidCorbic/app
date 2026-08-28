@@ -131,4 +131,19 @@ function start(){
   requestAnimationFrame(tick);
 }
 
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
+function homeIsActive(){
+  const intro=document.getElementById('intro');
+  return !!intro && !intro.classList.contains('hidden');
+}
+
+function waitForGameplay(){
+  if (!homeIsActive()) { start(); return; }
+  const intro=document.getElementById('intro');
+  if (!intro) return;
+  const observer=new MutationObserver(() => {
+    if (!homeIsActive()) { observer.disconnect(); start(); }
+  });
+  observer.observe(intro,{attributes:true,attributeFilter:['class']});
+}
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',waitForGameplay,{once:true}); else waitForGameplay();
