@@ -123,11 +123,26 @@ function installFlightHoverGlide(RunnerScene) {
 
   RunnerScene.prototype.endFlight = function (reason = 'duration-ended') {
     const data = this.__flightHVG;
+    const body = this.player?.body;
     if (!data || !isFlightState(data.state)) return false;
     data.hoverHold = false;
     data.flightEndsAt = 0;
-    data.glideUntil = performance.now() + data.glideWindowMs;
     data.flightWarningSent = false;
+
+    // Manual F-off is an explicit player command: restore normal gravity now.
+    // Timeout/energy depletion still use a short controlled glide so the player
+    // is not dropped abruptly when the resource expires naturally.
+    if (reason === 'manual-off') {
+      data.glideUntil = 0;
+      this.restoreFlightBody?.();
+      const currentVy = finite(body?.velocity?.y);
+      body?.setVelocityY?.(Math.max(70, Math.min(260, currentVy + 120)));
+      this.emitFlightState?.(FLIGHT_STATE.GROUNDED, { reason });
+      this.playerCue?.('FLIGHT OFF · DESCENDING', '#ffcf82');
+      return true;
+    }
+
+    data.glideUntil = performance.now() + data.glideWindowMs;
     this.emitFlightState?.(FLIGHT_STATE.GLIDING, { reason });
     this.playerCue?.(reason === 'duration-ended' ? 'FLIGHT TIME EXPIRED · GLIDE' : 'FLIGHT OFF · GLIDE', '#ffcf82');
     return true;
@@ -145,7 +160,6 @@ function installFlightHoverGlide(RunnerScene) {
       return this.endFlight?.('manual-off') ?? false;
     }
 
-    // A flight window must finish its glide and touch down before another flight can start.
     if (data.state === FLIGHT_STATE.GLIDING) {
       this.playerCue?.('LANDING · FLIGHT LOCKED', '#ffcf82');
       return false;
