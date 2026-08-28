@@ -1,0 +1,71 @@
+/* Final Options scroll contract. Loaded after legacy/unified option styles. */
+#titlePanel #titlePanelContent,
+#pauseMenu #panelContent,
+#titlePanel .relay-options-body,
+#pauseMenu .relay-options-body,
+#titlePanel .home-options-final,
+#pauseMenu .pause-options-v1{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+  scrollbar-width:thin !important;
+  scrollbar-color: rgba(141,244,255,.58) rgba(255,255,255,.055) !important;
+}
+
+#titlePanel #titlePanelContent::-webkit-scrollbar,
+#pauseMenu #panelContent::-webkit-scrollbar,
+#titlePanel .relay-options-body::-webkit-scrollbar,
+#pauseMenu .relay-options-body::-webkit-scrollbar,
+#titlePanel .home-options-final::-webkit-scrollbar,
+#pauseMenu .pause-options-v1::-webkit-scrollbar{
+  width:10px !important;
+  height:10px !important;
+  display:block !important;
+}
+
+#titlePanel #titlePanelContent::-webkit-scrollbar-track,
+#pauseMenu #panelContent::-webkit-scrollbar-track,
+#titlePanel .relay-options-body::-webkit-scrollbar-track,
+#pauseMenu .relay-options-body::-webkit-scrollbar-track,
+#titlePanel .home-options-final::-webkit-scrollbar-track,
+#pauseMenu .pause-options-v1::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.045) !important;
+  border-radius:999px !important;
+}
+
+#titlePanel #titlePanelContent::-webkit-scrollbar-thumb,
+#pauseMenu #panelContent::-webkit-scrollbar-thumb,
+#titlePanel .relay-options-body::-webkit-scrollbar-thumb,
+#pauseMenu .relay-options-body::-webkit-scrollbar-thumb,
+#titlePanel .home-options-final::-webkit-scrollbar-thumb,
+#pauseMenu .pause-options-v1::-webkit-scrollbar-thumb{
+  min-height:38px !important;
+  background:linear-gradient(180deg,rgba(141,244,255,.72),rgba(255,208,110,.72)) !important;
+  border:2px solid rgba(4,12,23,.72) !important;
+  border-radius:999px !important;
+}
+
+#titlePanel #titlePanelContent::-webkit-scrollbar-thumb:hover,
+#pauseMenu #panelContent::-webkit-scrollbar-thumb:hover,
+#titlePanel .relay-options-body::-webkit-scrollbar-thumb:hover,
+#pauseMenu .relay-options-body::-webkit-scrollbar-thumb:hover,
+#titlePanel .home-options-final::-webkit-scrollbar-thumb:hover,
+#pauseMenu .pause-options-v1::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,rgba(141,244,255,.9),rgba(255,208,110,.9)) !important;
+}
+
+@media (max-width:760px){
+  #titlePanel #titlePanelContent,
+  #pauseMenu #panelContent,
+  #titlePanel .relay-options-body,
+  #pauseMenu .relay-options-body{
+    scrollbar-width:thin !important;
+  }
+  #titlePanel #titlePanelContent::-webkit-scrollbar,
+  #pauseMenu #panelContent::-webkit-scrollbar,
+  #titlePanel .relay-options-body::-webkit-scrollbar,
+  #pauseMenu .relay-options-body::-webkit-scrollbar{
+    width:8px !important;
+  }
+}
