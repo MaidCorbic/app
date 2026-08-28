@@ -1,4 +1,4 @@
-import { RunnerScene } from './src/scenes/RunnerScene.js';
+import { RunnerScene } from '../scenes/RunnerScene.js';
 
 const NS = '__relayGameplayExpansionV3Safe';
 const REMAPS = [
