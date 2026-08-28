@@ -9,7 +9,6 @@ import './home-v2.css';
     if (!intro || intro.dataset.homeV2Built === '1') return;
     intro.dataset.homeV2Built = '1';
     intro.classList.add('home-v2');
-    const app = window.RelayApp?.controller;
     const legacy = intro.querySelector('.main-menu');
     if (legacy) legacy.hidden = true;
 
@@ -49,22 +48,20 @@ import './home-v2.css';
     intro.prepend(bg, header, content, status);
 
     const controller = () => window.RelayApp?.controller;
-    const action = (name, fallback) => (...args) => { const c = controller(); if (c?.home?.[name]) return c.home[name](...args); fallback?.(...args); };
-    const fallbackClick = id => document.getElementById(id)?.click();
-    const actions = {
-      play: action('play', () => fallbackClick('start')),
-      continue: action('continue', () => fallbackClick('continue')),
-      exit: action('exit', () => fallbackClick('exitTitle')),
-      options: action('options'),
-      tutorial: action('tutorial'),
-      faq: action('faq')
+    const call = (name) => {
+      const c = controller();
+      if (c?.home?.[name]) c.home[name]();
     };
-    content.querySelector('[data-home-play]')?.addEventListener('click', e => { e.preventDefault(); actions.play(); });
-    content.querySelector('[data-home-continue]')?.addEventListener('click', e => { e.preventDefault(); actions.continue(); });
-    content.querySelector('[data-home-exit]')?.addEventListener('click', e => { e.preventDefault(); actions.exit(); });
-    content.querySelector('[data-home-options]')?.addEventListener('click', e => { e.preventDefault(); actions.options(); });
-    content.querySelector('[data-home-tutorial]')?.addEventListener('click', e => { e.preventDefault(); actions.tutorial(); });
-    content.querySelector('[data-home-faq]')?.addEventListener('click', e => { e.preventDefault(); actions.faq(); });
+    const bind = (selector, name) => content.querySelector(selector)?.addEventListener('click', event => {
+      event.preventDefault();
+      call(name);
+    });
+    bind('[data-home-play]', 'play');
+    bind('[data-home-continue]', 'continue');
+    bind('[data-home-exit]', 'exit');
+    bind('[data-home-options]', 'options');
+    bind('[data-home-tutorial]', 'tutorial');
+    bind('[data-home-faq]', 'faq');
 
     const syncContinue = () => {
       const legacyContinue = document.getElementById('continue');
