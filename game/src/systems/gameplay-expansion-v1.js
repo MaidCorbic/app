@@ -1,266 +1,228 @@
 import Phaser from 'phaser';
 
 // Gameplay Expansion V1
-// Additive only: attaches a self-contained set of traversal/world mechanics to RunnerScene.
-// Core mission, combat, movement and persistence logic remain authoritative elsewhere.
+// Additive world/traversal pack. Existing RunnerScene systems remain authoritative.
+// Features are intentionally mission-scoped so the route does not become overloaded.
 
 const NS = '__relayGameplayExpansionV1';
 const FEATURE_LAYOUT = {
-  'first-delivery': ['companion', 'throwable'],
+  'first-delivery': ['zipline', 'throwable'],
   'dead-drop': ['crane', 'throwable', 'handoff'],
-  blackout: ['lightTraversal', 'companion', 'movingRelay'],
-  pursuit: ['train', 'traffic', 'courierHandoff'],
-  'signal-storm': ['movingRelay', 'lightTraversal', 'companion'],
+  blackout: ['laserSweep', 'soundPressure', 'movingRelay'],
+  pursuit: ['train', 'traffic', 'zipline'],
+  'signal-storm': ['movingRelay', 'laserSweep', 'soundPressure'],
   'corporate-lockdown': ['train', 'traffic', 'elevator', 'handoff'],
-  'final-relay': ['train', 'crane', 'courierHandoff', 'movingRelay', 'traffic'],
+  'final-relay': ['train', 'crane', 'elevator', 'movingRelay', 'soundPressure'],
 };
-const DEFAULT_FEATURES = Object.fromEntries([
-  'train', 'crane', 'traffic', 'companion', 'throwable', 'lightTraversal', 'movingRelay', 'handoff', 'elevator', 'courierHandoff'
-].map(key => [key, false]));
+const FEATURE_KEYS = ['train', 'crane', 'traffic', 'zipline', 'throwable', 'laserSweep', 'movingRelay', 'handoff', 'elevator', 'soundPressure'];
+const DEFAULT_FEATURES = Object.fromEntries(FEATURE_KEYS.map(key => [key, false]));
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const lerp = (a, b, t) => a + (b - a) * t;
 
 function routeWidth(scene) { return Math.max(1200, Number(scene.worldWidth || scene.mission?.goal?.x || 4200)); }
-
-function makeRectTexture(scene, key, width, height, fill, line = 0xdffcff) {
-  if (scene.textures.exists(key)) return;
-  const g = scene.make.graphics({ add: false });
-  g.fillStyle(fill, 1).fillRoundedRect(0, 0, width, height, Math.min(10, width * .12));
-  g.lineStyle(2, line, .75).strokeRoundedRect(1, 1, width - 2, height - 2, Math.min(9, width * .11));
-  g.generateTexture(key, width, height); g.destroy();
-}
-
-function safeCue(scene, text, color = '#8df4ff') { try { scene.playerCue?.(text, color); } catch {} }
-
-function addWorldText(scene, text, x, y, color = '#dffcff') {
-  return scene.add.text(x, y, text, { fontFamily: 'DM Mono', fontSize: '8px', color, stroke: '#08101c', strokeThickness: 4, letterSpacing: 1 }).setOrigin(.5).setDepth(14).setAlpha(.84);
-}
-
-function pickRouteX(scene, fraction, offset = 0) {
+function routeX(scene, fraction, offset = 0) {
   const start = Number(scene.mission?.spawn?.x || 160);
   const goal = Number(scene.mission?.goal?.x || start + 3600);
-  return clamp(lerp(start + 360, goal - 260, fraction) + offset, start + 180, goal - 120);
+  return clamp(lerp(start + 340, goal - 250, fraction) + offset, start + 170, goal - 120);
 }
-
-function nearestPlatformY(scene, x, fallback = 540) {
+function platformY(scene, x, fallback = 540) {
   const platforms = Array.isArray(scene.mission?.platforms) ? scene.mission.platforms : [];
   let best = null;
-  for (const data of platforms) {
-    const [px, py, width] = data;
-    if (!Number.isFinite(px) || !Number.isFinite(py) || !Number.isFinite(width)) continue;
+  for (const [px, py, width] of platforms) {
+    if (![px, py, width].every(Number.isFinite)) continue;
     const score = Math.abs(px + width / 2 - x);
     if (!best || score < best.score) best = { y: py, score };
   }
   return best?.y ?? fallback;
 }
-
-function destroySafely(value) { try { value?.destroy?.(); } catch {} }
-
-function installTextures(scene) {
-  makeRectTexture(scene, 'gx-train', 210, 46, 0x17263b, 0x8df4ff);
-  makeRectTexture(scene, 'gx-crane', 44, 18, 0x2a3b54, 0xffd06e);
-  makeRectTexture(scene, 'gx-traffic', 78, 32, 0x241d2a, 0xff826e);
-  makeRectTexture(scene, 'gx-drone', 42, 28, 0x203d5a, 0x8df4ff);
-  makeRectTexture(scene, 'gx-crate', 32, 30, 0x3f3440, 0xffd06e);
-  makeRectTexture(scene, 'gx-relay', 30, 48, 0x1b3a4d, 0xb9f5ff);
-  makeRectTexture(scene, 'gx-elevator', 118, 18, 0x263953, 0xaee37f);
-  makeRectTexture(scene, 'gx-courier', 36, 52, 0x22304c, 0xe0a7ff);
+function cue(scene, text, color = '#8df4ff') { try { scene.playerCue?.(text, color); } catch {} }
+function text(scene, label, x, y, color = '#dffcff') {
+  return scene.add.text(x, y, label, { fontFamily: 'DM Mono', fontSize: '8px', color, stroke: '#08101c', strokeThickness: 4, letterSpacing: 1 }).setOrigin(.5).setDepth(16).setAlpha(.84);
 }
-
-function baseState(scene) {
+function timer(scene, fn, ms) {
+  const state = scene[NS]; if (!state) return;
+  const id = scene.time.delayedCall(ms, () => { state.timers.delete(id); if (!state.destroyed) fn(); });
+  state.timers.add(id);
+}
+function texture(scene, key, width, height, fill, line = 0xdffcff) {
+  if (scene.textures.exists(key)) return;
+  const g = scene.make.graphics({ add: false });
+  g.fillStyle(fill, 1).fillRoundedRect(0, 0, width, height, Math.min(12, width * .12));
+  g.lineStyle(2, line, .8).strokeRoundedRect(1, 1, width - 2, height - 2, Math.min(11, width * .11));
+  g.generateTexture(key, width, height); g.destroy();
+}
+function installTextures(scene) {
+  texture(scene, 'gx-train', 210, 46, 0x17263b, 0x8df4ff);
+  texture(scene, 'gx-crane', 44, 18, 0x2a3b54, 0xffd06e);
+  texture(scene, 'gx-traffic', 78, 32, 0x241d2a, 0xff826e);
+  texture(scene, 'gx-crate', 32, 30, 0x3f3440, 0xffd06e);
+  texture(scene, 'gx-relay', 30, 48, 0x1b3a4d, 0xb9f5ff);
+  texture(scene, 'gx-elevator', 118, 18, 0x263953, 0xaee37f);
+  texture(scene, 'gx-zip-anchor', 18, 18, 0x213b50, 0xe0a7ff);
+  texture(scene, 'gx-zip-car', 28, 20, 0x382844, 0xe0a7ff);
+  texture(scene, 'gx-laser-node', 22, 22, 0x2e1f34, 0xff6a9c);
+  texture(scene, 'gx-noise-beacon', 28, 42, 0x22304c, 0xffcf82);
+}
+function base(scene) {
   if (scene[NS]) return scene[NS];
-  const selected = FEATURE_LAYOUT[scene.mission?.id] || ['companion'];
-  const features = { ...DEFAULT_FEATURES };
-  selected.forEach(key => { features[key] = true; });
-  const state = { features, entities: {}, timers: new Set(), destroyed: false, shadowPenaltyAt: 0, handoffDone: false, courierHandoffDone: false, throwHeld: null };
+  const state = { features: { ...DEFAULT_FEATURES }, entities: {}, timers: new Set(), destroyed: false, heldCrate: null, handoffDone: false, soundAlarmUntil: 0 };
+  for (const key of (FEATURE_LAYOUT[scene.mission?.id] || [])) state.features[key] = true;
   scene[NS] = state;
   return state;
 }
 
-function addTimer(scene, fn, delay) {
-  const state = scene[NS]; if (!state) return;
-  const id = scene.time.delayedCall(delay, () => { state.timers.delete(id); if (!state.destroyed) fn(); });
-  state.timers.add(id);
-}
-
 function installTrain(scene) {
-  const state = baseState(scene); if (!state.features.train || state.entities.train) return;
-  const x = pickRouteX(scene, .22), y = nearestPlatformY(scene, x, 540) - 32;
-  const train = scene.physics.add.sprite(x, y, 'gx-train').setDepth(9).setImmovable(true); train.body.allowGravity = false; train.body.setVelocityX(115); train.setData('gxLastX', train.x);
-  const label = addWorldText(scene, 'MOVING LINE · BOARD / VAULT', x, y - 34, '#8df4ff'); state.entities.train = { train, label };
-  scene.physics.add.overlap(scene.player, train, () => { if (train.active && !scene.respawning && !scene.finished) safeCue(scene, 'MOVING LINE', '#8df4ff'); });
+  const s = base(scene); if (!s.features.train || s.entities.train) return;
+  const x = routeX(scene, .24), y = platformY(scene, x) - 34;
+  const train = scene.physics.add.sprite(x, y, 'gx-train').setDepth(10).setImmovable(true); train.body.allowGravity = false; train.body.setVelocityX(120); train.setData('lastX', x);
+  const label = text(scene, 'MOVING LINE · BOARD / VAULT', x, y - 34, '#8df4ff'); s.entities.train = { train, label };
 }
-
-function updateTrain(scene, dt) {
-  const entry = scene[NS]?.entities.train; if (!entry?.train?.active) return;
-  const train = entry.train, previousX = Number(train.getData('gxLastX') || train.x);
-  const maxX = Number(scene.mission?.goal?.x || train.x + 1000) - 90, minX = Number(scene.mission?.spawn?.x || 100) + 220;
-  if (train.x >= maxX) train.body.setVelocityX(-115); if (train.x <= minX) train.body.setVelocityX(115);
-  const dx = train.x - previousX; train.setData('gxLastX', train.x); entry.label?.setPosition(train.x, train.y - 34);
-  if (scene.player?.active && Phaser.Geom.Intersects.RectangleToRectangle(scene.player.getBounds(), train.getBounds()) && Math.abs(dx) > .1 && dt < 45) scene.player.x = clamp(scene.player.x + dx, 20, routeWidth(scene) - 20);
+function updateTrain(scene) {
+  const e = scene[NS]?.entities.train; if (!e?.train?.active) return;
+  const train = e.train, previous = Number(train.getData('lastX') || train.x), min = Number(scene.mission?.spawn?.x || 100) + 220, max = Number(scene.mission?.goal?.x || train.x + 1000) - 90;
+  if (train.x >= max) train.body.setVelocityX(-120); if (train.x <= min) train.body.setVelocityX(120);
+  const dx = train.x - previous; train.setData('lastX', train.x); e.label?.setPosition(train.x, train.y - 34);
+  if (scene.player?.active && Math.abs(dx) > .1 && Phaser.Geom.Intersects.RectangleToRectangle(scene.player.getBounds(), train.getBounds())) scene.player.x = clamp(scene.player.x + dx, 20, routeWidth(scene) - 20);
 }
-
 function installCrane(scene) {
-  const state = baseState(scene); if (!state.features.crane || state.entities.crane) return;
-  const x = pickRouteX(scene, .34), top = nearestPlatformY(scene, x, 520) - 170, bottom = top + 115;
-  const body = scene.physics.add.sprite(x, top, 'gx-crane').setDepth(8).setImmovable(true); body.body.allowGravity = false; body.setData('gxTop', top); body.setData('gxBottom', bottom);
-  const cable = scene.add.graphics().setDepth(7), label = addWorldText(scene, 'CONSTRUCTION LIFT', x, top - 24, '#ffd06e'); state.entities.crane = { body, cable, label };
+  const s = base(scene); if (!s.features.crane || s.entities.crane) return;
+  const x = routeX(scene, .34), top = platformY(scene, x) - 170, bottom = top + 115;
+  const lift = scene.physics.add.sprite(x, top, 'gx-crane').setDepth(9).setImmovable(true); lift.body.allowGravity = false; lift.setData({ top, bottom });
+  const cable = scene.add.graphics().setDepth(8), label = text(scene, 'CONSTRUCTION LIFT', x, top - 24, '#ffd06e'); s.entities.crane = { lift, cable, label };
 }
-
 function updateCrane(scene, time) {
-  const entry = scene[NS]?.entities.crane; if (!entry?.body?.active) return;
-  const p = entry.body, top = p.getData('gxTop'), bottom = p.getData('gxBottom'); p.y = lerp(top, bottom, (Math.sin(time / 1150) + 1) / 2);
-  entry.label?.setPosition(p.x, p.y - 24); entry.cable?.clear().lineStyle(2, 0x8fa7ba, .65).lineBetween(p.x, 335, p.x, p.y);
+  const e = scene[NS]?.entities.crane; if (!e?.lift?.active) return;
+  const lift = e.lift, data = lift.data.values; lift.y = lerp(data.top, data.bottom, (Math.sin(time / 1150) + 1) / 2); e.cable?.clear().lineStyle(2, 0x8fa7ba, .65).lineBetween(lift.x, 330, lift.x, lift.y); e.label?.setPosition(lift.x, lift.y - 24);
 }
-
 function installTraffic(scene) {
-  const state = baseState(scene); if (!state.features.traffic || state.entities.traffic) return;
+  const s = base(scene); if (!s.features.traffic || s.entities.traffic) return;
   const traffic = [];
   for (let i = 0; i < 3; i++) {
-    const x = pickRouteX(scene, .46 + i * .13, i * 34), y = nearestPlatformY(scene, x, 555) - 24;
-    const vehicle = scene.physics.add.sprite(x, y, 'gx-traffic').setDepth(8).setImmovable(true); vehicle.body.allowGravity = false; vehicle.body.setVelocityX(i % 2 ? -145 : 145);
-    const label = addWorldText(scene, i % 2 ? 'CROSS TRAFFIC' : 'LIVE ROAD', x, y - 24, '#ff9c91'); traffic.push({ vehicle, label, min: x - 260, max: x + 520 });
-    scene.physics.add.overlap(scene.player, vehicle, () => { if (scene.healthInvulnerable > 0 || scene.respawning || scene.finished) return; scene.takeSciFiHit?.('Cross traffic clipped the courier.'); safeCue(scene, 'TRAFFIC IMPACT', '#ff9c91'); });
+    const x = routeX(scene, .43 + i * .12), y = platformY(scene, x) - 24;
+    const vehicle = scene.physics.add.sprite(x, y, 'gx-traffic').setDepth(9).setImmovable(true); vehicle.body.allowGravity = false; vehicle.body.setVelocityX(i % 2 ? -150 : 150);
+    const label = text(scene, 'LIVE TRAFFIC', x, y - 24, '#ff9c91'); traffic.push({ vehicle, label, min: x - 250, max: x + 520 });
+    scene.physics.add.overlap(scene.player, vehicle, () => { if (scene.healthInvulnerable > 0 || scene.respawning || scene.finished) return; scene.takeSciFiHit?.('Cross traffic clipped the courier.'); cue(scene, 'TRAFFIC IMPACT', '#ff9c91'); });
   }
-  state.entities.traffic = traffic;
+  s.entities.traffic = traffic;
 }
-
 function updateTraffic(scene) {
-  const traffic = scene[NS]?.entities.traffic; if (!Array.isArray(traffic)) return;
-  for (const item of traffic) { const v = item.vehicle; if (!v?.active) continue; if (v.x >= item.max) v.body.setVelocityX(-145); if (v.x <= item.min) v.body.setVelocityX(145); item.label?.setPosition(v.x, v.y - 24); }
+  for (const item of scene[NS]?.entities.traffic || []) { const v = item.vehicle; if (!v?.active) continue; if (v.x >= item.max) v.body.setVelocityX(-150); if (v.x <= item.min) v.body.setVelocityX(150); item.label?.setPosition(v.x, v.y - 24); }
 }
 
-function installCompanion(scene) {
-  const state = baseState(scene); if (!state.features.companion || state.entities.companion) return;
-  const drone = scene.physics.add.sprite(scene.player.x - 62, scene.player.y - 72, 'gx-drone').setDepth(15); drone.body.allowGravity = false; drone.setData('phase', Math.random() * Math.PI * 2);
-  const label = addWorldText(scene, 'RELAY SCOUT', drone.x, drone.y - 22, '#b9f5ff'); state.entities.companion = { drone, label, pulse: 0 };
+// NEW #4 — Zipline Traversal. Distinct from grapple: player rides a fixed cable between two anchors.
+function installZipline(scene) {
+  const s = base(scene); if (!s.features.zipline || s.entities.zipline) return;
+  const x1 = routeX(scene, .30), x2 = routeX(scene, .48), y = platformY(scene, x1) - 150;
+  const line = scene.add.graphics().setDepth(7).lineStyle(3, 0xe0a7ff, .55).lineBetween(x1, y, x2, y + 55);
+  const a = scene.add.image(x1, y, 'gx-zip-anchor').setDepth(10), b = scene.add.image(x2, y + 55, 'gx-zip-anchor').setDepth(10);
+  const car = scene.physics.add.sprite(x1, y, 'gx-zip-car').setDepth(11); car.body.allowGravity = false; car.body.setImmovable(true);
+  const label = text(scene, 'ZIPLINE · Z TO RIDE', (x1 + x2) / 2, y - 28, '#e0a7ff');
+  s.entities.zipline = { line, a, b, car, label, x1, y1: y, x2, y2: y + 55, riding: false };
+  const ride = () => {
+    const e = scene[NS]?.entities.zipline; if (!e || e.riding || !scene.player?.active) return;
+    if (Phaser.Math.Distance.Between(scene.player.x, scene.player.y, e.car.x, e.car.y) > 95) return;
+    e.riding = true; cue(scene, 'ZIPLINE ENGAGED', '#e0a7ff'); scene.player.body.setAllowGravity(false); scene.player.setData('ziplineRide', true);
+  };
+  scene.input.keyboard?.on('keydown-Z', ride); s.entities.zipKey = ride;
 }
-
-function updateCompanion(scene, time) {
-  const entry = scene[NS]?.entities.companion; if (!entry?.drone?.active || !scene.player?.active) return;
-  const drone = entry.drone, phase = Number(drone.getData('phase') || 0), targetX = scene.player.x - (scene.player.flipX ? -58 : 58), targetY = scene.player.y - 72 + Math.sin(time / 340 + phase) * 8;
-  drone.x = lerp(drone.x, targetX, .08); drone.y = lerp(drone.y, targetY, .08); entry.label?.setPosition(drone.x, drone.y - 22);
+function updateZipline(scene) {
+  const e = scene[NS]?.entities.zipline; if (!e?.car?.active) return;
+  if (!e.riding) { e.car.x = e.x1 + Math.sin(scene.time.now / 950) * 6; e.car.y = lerp(e.y1, e.y2, (Math.sin(scene.time.now / 1500) + 1) / 2); }
+  else {
+    const t = Number(scene.player.getData('ziplineT') || 0); const next = clamp(t + .008, 0, 1); scene.player.setData('ziplineT', next); scene.player.x = lerp(e.x1, e.x2, next); scene.player.y = lerp(e.y1, e.y2, next) + 12; e.car.x = scene.player.x; e.car.y = scene.player.y - 12;
+    if (next >= 1) { e.riding = false; scene.player.setData('ziplineRide', false).setData('ziplineT', 0); scene.player.body.setAllowGravity(true); cue(scene, 'ZIPLINE RELEASE', '#e0a7ff'); }
+  }
+  e.label?.setPosition((e.x1 + e.x2) / 2, Math.min(e.y1, e.y2) - 28);
 }
 
 function installThrowables(scene) {
-  const state = baseState(scene); if (!state.features.throwable || state.entities.throwables) return;
+  const s = base(scene); if (!s.features.throwable || s.entities.throwables) return;
   const crates = [];
-  for (let i = 0; i < 4; i++) {
-    const x = pickRouteX(scene, .18 + i * .17, i * 26), y = nearestPlatformY(scene, x, 540) - 15;
-    const crate = scene.physics.add.sprite(x, y, 'gx-crate').setDepth(10); crate.body.setAllowGravity(true).setBounce(.05).setDrag(260, 0);
-    const label = addWorldText(scene, 'LIFTABLE', x, y - 24, '#ffd06e'); crates.push({ crate, label });
-    scene.physics.add.overlap(scene.player, crate, () => { if (!crate.active || state.throwHeld) return; if (Phaser.Math.Distance.Between(scene.player.x, scene.player.y, crate.x, crate.y) > 62) return; state.throwHeld = crate; crate.body.enable = false; crate.setAlpha(.86); safeCue(scene, 'OBJECT READY · G TO THROW', '#ffd06e'); });
+  for (let i = 0; i < 4; i++) { const x = routeX(scene, .18 + i * .17), y = platformY(scene, x) - 15; const crate = scene.physics.add.sprite(x, y, 'gx-crate').setDepth(10); crate.body.setAllowGravity(true).setBounce(.06).setDrag(260, 0); const label = text(scene, 'LIFTABLE', x, y - 24, '#ffd06e'); crates.push({ crate, label });
+    scene.physics.add.overlap(scene.player, crate, () => { if (!crate.active || s.heldCrate) return; if (Phaser.Math.Distance.Between(scene.player.x, scene.player.y, crate.x, crate.y) > 65) return; s.heldCrate = crate; crate.body.enable = false; crate.setAlpha(.8); cue(scene, 'OBJECT READY · G TO THROW', '#ffd06e'); });
   }
-  state.entities.throwables = crates;
-  const release = event => {
-    if (String(event.key || '').toLowerCase() !== 'g' || !state.throwHeld || state.destroyed) return;
-    const crate = state.throwHeld; state.throwHeld = null; crate.body.enable = true; crate.setAlpha(1);
-    const direction = scene.player?.flipX ? -1 : 1; crate.x = scene.player.x + direction * 34; crate.y = scene.player.y - 4; crate.body.setVelocity(direction * 520, -250); safeCue(scene, 'THROW', '#ffd06e');
-  };
-  scene.input.keyboard?.on('keydown', release); state.entities.throwableKeyHandler = release;
+  s.entities.throwables = crates;
+  const release = event => { if (String(event.key).toLowerCase() !== 'g' || !s.heldCrate) return; const item = s.heldCrate; s.heldCrate = null; item.crate.body.enable = true; item.crate.setAlpha(1); const dir = scene.player.flipX ? -1 : 1; item.crate.x = scene.player.x + dir * 34; item.crate.y = scene.player.y - 4; item.crate.body.setVelocity(dir * 520, -250); cue(scene, 'THROW', '#ffd06e'); };
+  scene.input.keyboard?.on('keydown', release); s.entities.throwableKey = release;
 }
+function updateThrowables(scene) { const s = scene[NS]; if (!s) return; for (const item of s.entities.throwables || []) item.label?.setPosition(item.crate.x, item.crate.y - 24); if (s.heldCrate?.crate?.active) { s.heldCrate.crate.x = scene.player.x + (scene.player.flipX ? -1 : 1) * 26; s.heldCrate.crate.y = scene.player.y - 42; } }
 
-function updateThrowables(scene) {
-  const state = scene[NS], crates = state?.entities.throwables; if (!Array.isArray(crates)) return;
-  for (const item of crates) item.label?.setPosition(item.crate.x, item.crate.y - 24);
-  const held = state.throwHeld; if (held?.active && scene.player?.active) { held.x = scene.player.x + (scene.player.flipX ? -1 : 1) * 26; held.y = scene.player.y - 42; }
+// NEW #6 — Rotating laser hazard. It is a spatial timing hazard, not a flashlight/lighting system.
+function installLaserSweep(scene) {
+  const s = base(scene); if (!s.features.laserSweep || s.entities.laserSweep) return;
+  const x = routeX(scene, .40), y = platformY(scene, x) - 130;
+  const node = scene.add.image(x, y, 'gx-laser-node').setDepth(12);
+  const beam = scene.add.graphics().setDepth(11); const label = text(scene, 'LASER SWEEP · TIME YOUR PASS', x, y - 30, '#ff7aa8');
+  s.entities.laserSweep = { node, beam, label, x, y, angle: -1.1, hitAt: 0 };
 }
-
-function installLightTraversal(scene) {
-  const state = baseState(scene); if (!state.features.lightTraversal || state.entities.light) return;
-  const zones = [];
-  for (let i = 0; i < 2; i++) {
-    const x = pickRouteX(scene, .29 + i * .32), y = nearestPlatformY(scene, x, 520) - 120, width = 220, required = i % 2 ? 'dark' : 'light';
-    const zone = { x1: x - width / 2, x2: x + width / 2, y1: y - 110, y2: y + 20, required };
-    const g = scene.add.graphics().setDepth(2); g.fillStyle(required === 'light' ? 0xffe0a8 : 0x050a12, required === 'light' ? .08 : .2).fillRect(zone.x1, zone.y1, width, 130); g.lineStyle(1, required === 'light' ? 0xffe0a8 : 0x8df4ff, .25).strokeRect(zone.x1, zone.y1, width, 130);
-    zone.graphics = g; zone.label = addWorldText(scene, required === 'light' ? 'LIGHT ROUTE' : 'SHADOW ROUTE', x, y - 8, required === 'light' ? '#ffdca0' : '#8df4ff').setDepth(3); zones.push(zone);
-  }
-  const veil = scene.add.rectangle(0, 0, routeWidth(scene), 720, 0x02060d, 0).setOrigin(0).setDepth(30).setScrollFactor(0); state.entities.light = { zones, veil };
-}
-
-function updateLightTraversal(scene, time) {
-  const entry = scene[NS]?.entities.light; if (!entry?.zones || !scene.player?.active) return;
-  let activeZone = null;
-  for (const zone of entry.zones) { zone.label?.setPosition((zone.x1 + zone.x2) / 2, zone.y1 - 8); if (scene.player.x >= zone.x1 && scene.player.x <= zone.x2 && scene.player.y >= zone.y1 && scene.player.y <= zone.y2) { activeZone = zone; break; } }
-  if (!activeZone) { scene.player.setData('shadowState', null); entry.veil?.setAlpha(0); return; }
-  const current = Math.sin(scene.player.x / 38 + time / 500) > 0 ? 'light' : 'dark'; scene.player.setData('shadowState', current); const valid = current === activeZone.required; entry.veil?.setAlpha(valid ? 0 : .08);
-  if (!valid && time - (scene[NS].shadowPenaltyAt || 0) > 1800 && scene.healthInvulnerable <= 0) { scene[NS].shadowPenaltyAt = time; scene.takeSciFiHit?.(activeZone.required === 'light' ? 'The courier crossed a dark surveillance lane.' : 'The courier broke cover in the lit lane.'); safeCue(scene, activeZone.required === 'light' ? 'STAY IN LIGHT' : 'STAY IN SHADOW', '#ffcf82'); }
+function updateLaserSweep(scene, time) {
+  const e = scene[NS]?.entities.laserSweep; if (!e?.node?.active || !scene.player?.active) return;
+  e.angle = Math.sin(time / 900) * 1.1; e.beam.clear().lineStyle(5, 0xff4f8c, .8).lineBetween(e.x, e.y, e.x + Math.cos(e.angle) * 360, e.y + Math.sin(e.angle) * 360);
+  const dx = scene.player.x - e.x, dy = scene.player.y - e.y, distance = Math.hypot(dx, dy), angle = Math.atan2(dy, dx); let diff = Math.atan2(Math.sin(angle - e.angle), Math.cos(angle - e.angle));
+  if (distance < 330 && Math.abs(diff) < .035 && time - e.hitAt > 900 && scene.healthInvulnerable <= 0) { e.hitAt = time; scene.takeSciFiHit?.('The sweep laser caught the courier.'); cue(scene, 'LASER CONTACT', '#ff7aa8'); }
+  e.label?.setPosition(e.x, e.y - 30);
 }
 
 function installMovingRelay(scene) {
-  const state = baseState(scene); if (!state.features.movingRelay || state.entities.movingRelay) return;
-  const x = pickRouteX(scene, .56), relay = scene.physics.add.sprite(x, nearestPlatformY(scene, x, 520) - 58, 'gx-relay').setDepth(12).setImmovable(true); relay.body.allowGravity = false;
-  const label = addWorldText(scene, 'MOVING RELAY · INTERCEPT', relay.x, relay.y - 34, '#b9f5ff'); state.entities.movingRelay = { relay, label, collected: false, phase: Math.random() * Math.PI * 2 };
-  scene.physics.add.overlap(scene.player, relay, () => { if (!relay.active || state.entities.movingRelay.collected) return; state.entities.movingRelay.collected = true; relay.disableBody(true, true); safeCue(scene, 'MOVING RELAY SECURED', '#b9f5ff'); scene.game.events.emit('signal', { source: 'moving-relay' }); });
+  const s = base(scene); if (!s.features.movingRelay || s.entities.movingRelay) return;
+  const relay = scene.physics.add.sprite(routeX(scene, .56), platformY(scene, routeX(scene, .56)) - 62, 'gx-relay').setDepth(12).setImmovable(true); relay.body.allowGravity = false;
+  const label = text(scene, 'MOVING RELAY · INTERCEPT', relay.x, relay.y - 34, '#b9f5ff'); s.entities.movingRelay = { relay, label, collected: false, phase: Math.random() * Math.PI * 2 };
+  scene.physics.add.overlap(scene.player, relay, () => { if (!relay.active || s.entities.movingRelay.collected) return; s.entities.movingRelay.collected = true; relay.disableBody(true, true); cue(scene, 'MOVING RELAY SECURED', '#b9f5ff'); scene.game.events.emit('signal', { source: 'moving-relay' }); });
 }
+function updateMovingRelay(scene, time) { const e = scene[NS]?.entities.movingRelay; if (!e?.relay?.active) return; const start = routeX(scene, .55), end = routeX(scene, .76), phase = (Math.sin(time / 1200 + e.phase) + 1) / 2; e.relay.x = lerp(start, end, phase); e.relay.y = platformY(scene, e.relay.x) - 62 + Math.sin(time / 300) * 7; e.label?.setPosition(e.relay.x, e.relay.y - 34); }
 
-function updateMovingRelay(scene, time) {
-  const entry = scene[NS]?.entities.movingRelay; if (!entry?.relay?.active) return;
-  const start = pickRouteX(scene, .55), end = pickRouteX(scene, .76), phase = (Math.sin(time / 1200 + entry.phase) + 1) / 2;
-  entry.relay.x = lerp(start, end, phase); entry.relay.y = nearestPlatformY(scene, entry.relay.x, 520) - 62 + Math.sin(time / 300) * 7; entry.label?.setPosition(entry.relay.x, entry.relay.y - 34);
+function installHandoff(scene) {
+  const s = base(scene); if (!s.features.handoff || s.entities.handoff) return;
+  const x = routeX(scene, .79), y = platformY(scene, x) - 30; const npc = scene.physics.add.sprite(x, y, 'gx-crate').setDepth(11).setImmovable(true); npc.body.allowGravity = false; npc.setScale(.8);
+  const marker = scene.add.circle(x, y - 12, 34, 0xe0a7ff, .08).setStrokeStyle(2, 0xe0a7ff, .55).setDepth(10); const label = text(scene, 'HANDOFF POINT', x, y - 44, '#e0a7ff'); s.entities.handoff = { npc, marker, label };
+  scene.physics.add.overlap(scene.player, npc, () => { if (s.handoffDone || scene.respawning || scene.finished) return; s.handoffDone = true; marker.setFillStyle(0x8df4ff, .15); marker.setStrokeStyle(2, 0x8df4ff, .75); label.setText('HANDOFF COMPLETE'); cue(scene, 'PACKAGE HANDOFF COMPLETE', '#8df4ff'); scene.game.events.emit('package-handoff', { missionId: scene.mission?.id }); });
 }
-
-function installDeliveryHandoff(scene) {
-  const state = baseState(scene); if (!state.features.handoff || state.entities.handoff) return;
-  const x = pickRouteX(scene, .79), y = nearestPlatformY(scene, x, 530) - 30;
-  const npc = scene.physics.add.sprite(x, y, 'gx-courier').setDepth(11).setImmovable(true); npc.body.allowGravity = false;
-  const marker = scene.add.circle(x, y - 12, 34, 0xe0a7ff, .08).setStrokeStyle(2, 0xe0a7ff, .55).setDepth(10); const label = addWorldText(scene, 'HANDOFF POINT', x, y - 44, '#e0a7ff');
-  state.entities.handoff = { npc, marker, label };
-  scene.physics.add.overlap(scene.player, npc, () => { if (state.handoffDone || scene.respawning || scene.finished) return; state.handoffDone = true; marker.setFillStyle(0x8df4ff, .15); marker.setStrokeStyle(2, 0x8df4ff, .75); label.setText('HANDOFF COMPLETE'); safeCue(scene, 'PACKAGE HANDOFF COMPLETE', '#8df4ff'); scene.game.events.emit('package-handoff', { missionId: scene.mission?.id }); });
-}
-
 function installElevator(scene) {
-  const state = baseState(scene); if (!state.features.elevator || state.entities.elevator) return;
-  const x = pickRouteX(scene, .67), y = nearestPlatformY(scene, x, 520) - 96; const platform = scene.physics.add.sprite(x, y, 'gx-elevator').setDepth(8).setImmovable(true); platform.body.allowGravity = false;
-  const label = addWorldText(scene, 'VERTICAL LIFT', x, y - 22, '#aee37f'); state.entities.elevator = { platform, top: y - 130, bottom: y + 58, label, lastY: y };
+  const s = base(scene); if (!s.features.elevator || s.entities.elevator) return;
+  const x = routeX(scene, .67), y = platformY(scene, x) - 96; const platform = scene.physics.add.sprite(x, y, 'gx-elevator').setDepth(9).setImmovable(true); platform.body.allowGravity = false;
+  const label = text(scene, 'VERTICAL LIFT', x, y - 22, '#aee37f'); s.entities.elevator = { platform, top: y - 130, bottom: y + 58, label, lastY: y };
 }
+function updateElevator(scene, time) { const e = scene[NS]?.entities.elevator; if (!e?.platform?.active) return; const p = e.platform, previous = e.lastY; p.y = lerp(e.top, e.bottom, (Math.sin(time / 1500) + 1) / 2); e.lastY = p.y; e.label?.setPosition(p.x, p.y - 22); const dy = p.y - previous; if (scene.player?.active && Math.abs(dy) > .05 && Phaser.Geom.Intersects.RectangleToRectangle(scene.player.getBounds(), p.getBounds())) scene.player.y += dy; }
 
-function updateElevator(scene, time) {
-  const entry = scene[NS]?.entities.elevator; if (!entry?.platform?.active) return;
-  const p = entry.platform, previousY = Number(entry.lastY || p.y); p.y = lerp(entry.top, entry.bottom, (Math.sin(time / 1500) + 1) / 2); entry.lastY = p.y; entry.label?.setPosition(p.x, p.y - 22);
-  const dy = p.y - previousY; if (scene.player?.active && Math.abs(dy) > .05 && Phaser.Geom.Intersects.RectangleToRectangle(scene.player.getBounds(), p.getBounds())) scene.player.y += dy;
+// NEW #10 — Sound Pressure. Movement/noise temporarily creates a pressure field and can trigger a local alarm.
+function installSoundPressure(scene) {
+  const s = base(scene); if (!s.features.soundPressure || s.entities.soundPressure) return;
+  const x = routeX(scene, .63), y = platformY(scene, x) - 46; const beacon = scene.physics.add.sprite(x, y, 'gx-noise-beacon').setDepth(10).setImmovable(true); beacon.body.allowGravity = false;
+  const ring = scene.add.circle(x, y, 24, 0xffcf82, .06).setStrokeStyle(2, 0xffcf82, .45).setDepth(9); const label = text(scene, 'QUIET ZONE · MANAGE NOISE', x, y - 42, '#ffcf82');
+  s.entities.soundPressure = { beacon, ring, label, radius: 190, pulseAt: 0 };
 }
-
-function installCourierHandoff(scene) {
-  const state = baseState(scene); if (!state.features.courierHandoff || state.entities.courierHandoff) return;
-  const x = pickRouteX(scene, .63, 55), y = nearestPlatformY(scene, x, 525) - 30; const courier = scene.physics.add.sprite(x, y, 'gx-courier').setDepth(10).setImmovable(true); courier.body.allowGravity = false;
-  const label = addWorldText(scene, 'COURIER SYNC', x, y - 44, '#e0a7ff'); state.entities.courierHandoff = { courier, label, nextPulse: 0 };
-  scene.physics.add.overlap(scene.player, courier, () => { if (state.courierHandoffDone) return; state.courierHandoffDone = true; label.setText('SYNCED · FOLLOW THE RUNNER'); safeCue(scene, 'COURIER SYNC COMPLETE', '#e0a7ff'); scene.game.events.emit('courier-handoff', { missionId: scene.mission?.id }); addTimer(scene, () => { if (courier.active) courier.body.setVelocityX(220); }, 250); });
-}
-
-function updateCourierHandoff(scene, time) {
-  const entry = scene[NS]?.entities.courierHandoff; if (!entry?.courier?.active) return; const courier = entry.courier;
-  if (scene[NS].courierHandoffDone) { courier.x += 1.6; entry.label?.setPosition(courier.x, courier.y - 44); if (time > entry.nextPulse) { entry.nextPulse = time + 2200; const pulse = scene.add.circle(courier.x, courier.y, 10, 0xe0a7ff, .25).setDepth(12); scene.tweens.add({ targets: pulse, scale: 3.4, alpha: 0, duration: 520, onComplete: () => pulse.destroy() }); } return; }
-  courier.x += Math.sin(time / 900) * .55; entry.label?.setPosition(courier.x, courier.y - 44);
+function updateSoundPressure(scene, time) {
+  const e = scene[NS]?.entities.soundPressure; if (!e?.beacon?.active || !scene.player?.active) return;
+  const distance = Phaser.Math.Distance.Between(scene.player.x, scene.player.y, e.beacon.x, e.beacon.y); const moving = Math.abs(scene.player.body?.velocity?.x || 0) > 250 || Math.abs(scene.player.body?.velocity?.y || 0) > 520; const noisy = distance < e.radius && moving;
+  e.ring.setRadius(noisy ? 34 + Math.sin(time / 70) * 8 : 24).setStrokeStyle(2, noisy ? 0xff6b7b : 0xffcf82, noisy ? .75 : .45); e.label?.setPosition(e.beacon.x, e.beacon.y - 42);
+  if (noisy && time - e.pulseAt > 1200) { e.pulseAt = time; cue(scene, 'NOISE PRESSURE', '#ffcf82'); scene.game.events.emit('sound-pressure', { missionId: scene.mission?.id }); if (time > (scene[NS].soundAlarmUntil || 0)) scene[NS].soundAlarmUntil = time + 1800; }
+  if (time < (scene[NS].soundAlarmUntil || 0)) scene.player.setTint(0xffc48b); else if (scene.player?.active && scene.player.tintTopLeft) scene.player.clearTint();
 }
 
 function install(scene) {
   if (!scene || scene[NS]?.initialized) return;
-  baseState(scene).initialized = true; installTextures(scene);
-  installTrain(scene); installCrane(scene); installTraffic(scene); installCompanion(scene); installThrowables(scene); installLightTraversal(scene); installMovingRelay(scene); installDeliveryHandoff(scene); installElevator(scene); installCourierHandoff(scene);
+  const s = base(scene); s.initialized = true; installTextures(scene);
+  installTrain(scene); installCrane(scene); installTraffic(scene); installZipline(scene); installThrowables(scene); installLaserSweep(scene); installMovingRelay(scene); installHandoff(scene); installElevator(scene); installSoundPressure(scene);
 }
-
 function update(scene, time, delta) {
-  const state = scene[NS]; if (!state || state.destroyed || !scene.player?.active || scene.respawning || scene.finished) return;
-  updateTrain(scene, delta); updateCrane(scene, time); updateTraffic(scene); updateCompanion(scene, time); updateThrowables(scene); updateLightTraversal(scene, time); updateMovingRelay(scene, time); updateElevator(scene, time); updateCourierHandoff(scene, time);
+  const s = scene[NS]; if (!s || s.destroyed || !scene.player?.active || scene.respawning || scene.finished) return;
+  updateTrain(scene, delta); updateCrane(scene, time); updateTraffic(scene); updateZipline(scene); updateThrowables(scene); updateLaserSweep(scene, time); updateMovingRelay(scene, time); updateElevator(scene, time); updateSoundPressure(scene, time);
 }
-
 function destroy(scene) {
-  const state = scene[NS]; if (!state || state.destroyed) return; state.destroyed = true;
-  for (const timer of state.timers) timer.remove?.(); state.timers.clear();
-  if (state.entities.throwableKeyHandler) scene.input.keyboard?.off('keydown', state.entities.throwableKeyHandler);
-  const destroyEntry = entry => { if (!entry) return; if (Array.isArray(entry)) return entry.forEach(destroyEntry); for (const value of Object.values(entry)) if (value && typeof value === 'object' && ('destroy' in value || 'remove' in value)) destroySafely(value); };
-  destroyEntry(state.entities);
+  const s = scene[NS]; if (!s || s.destroyed) return; s.destroyed = true; for (const id of s.timers) id.remove?.(); s.timers.clear();
+  if (s.entities.zipKey) scene.input.keyboard?.off('keydown-Z', s.entities.zipKey);
+  if (s.entities.throwableKey) scene.input.keyboard?.off('keydown', s.entities.throwableKey);
+  const destroyAny = value => { if (!value) return; if (Array.isArray(value)) return value.forEach(destroyAny); if (typeof value === 'object') { for (const child of Object.values(value)) { if (child && typeof child.destroy === 'function') { try { child.destroy(); } catch {} } } } };
+  destroyAny(s.entities);
 }
-
 export function installGameplayExpansion(RunnerScene) {
   if (!RunnerScene?.prototype || RunnerScene.prototype.__relayGameplayExpansionInstalled) return;
   RunnerScene.prototype.__relayGameplayExpansionInstalled = true;
-  const originalCreate = RunnerScene.prototype.create;
-  RunnerScene.prototype.create = function gameplayExpansionCreate(...args) { const result = originalCreate.apply(this, args); try { if (this.mission) install(this); } catch (error) { console.warn('[Relay] gameplay expansion isolated:', error); } return result; };
-  const originalUpdate = RunnerScene.prototype.update;
-  RunnerScene.prototype.update = function gameplayExpansionUpdate(time, delta, ...args) { try { update(this, time, delta); } catch (error) { console.warn('[Relay] gameplay expansion update isolated:', error); } return originalUpdate.apply(this, [time, delta, ...args]); };
-  const originalShutdown = RunnerScene.prototype.shutdown;
-  RunnerScene.prototype.shutdown = function gameplayExpansionShutdown(...args) { try { destroy(this); } catch (error) { console.warn('[Relay] gameplay expansion cleanup isolated:', error); } return originalShutdown?.apply(this, args); };
+  const create = RunnerScene.prototype.create;
+  RunnerScene.prototype.create = function gameplayExpansionCreate(...args) { const result = create.apply(this, args); try { if (this.mission) install(this); } catch (error) { console.warn('[Relay] gameplay expansion isolated:', error); } return result; };
+  const updateCore = RunnerScene.prototype.update;
+  RunnerScene.prototype.update = function gameplayExpansionUpdate(time, delta, ...args) { try { update(this, time, delta); } catch (error) { console.warn('[Relay] gameplay expansion update isolated:', error); } return updateCore.apply(this, [time, delta, ...args]); };
+  const shutdown = RunnerScene.prototype.shutdown;
+  RunnerScene.prototype.shutdown = function gameplayExpansionShutdown(...args) { try { destroy(this); } catch (error) { console.warn('[Relay] gameplay expansion cleanup isolated:', error); } return shutdown?.apply(this, args); };
 }
