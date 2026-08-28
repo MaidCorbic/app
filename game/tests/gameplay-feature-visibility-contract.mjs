@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const source=fs.readFileSync(new URL('../src/systems/gameplay-feature-visibility.js',import.meta.url),'utf8');
+const loader=fs.readFileSync(new URL('../gameplay-expansion-loader-v1.js',import.meta.url),'utf8');
+for(const v of ['V1','V2','V3','V4','V5','V6']) assert.match(source,new RegExp(v));
+for(const f of ['Train / Moving Object','Magnetic Polarity','Body Swap','Echo Scan','Stamina / Endurance','Disguise Identity']) assert.match(source,new RegExp(f.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+assert.match(source,/setInteractive/);
+assert.match(source,/focusFeature/);
+assert.match(source,/GAMEPLAY SYSTEMS/);
+assert.match(loader,/installGameplayFeatureVisibility\(RunnerScene\)/);
+assert.doesNotMatch(source,/addEventListener\(['"]keydown['"]/i);
+console.log('Gameplay V1-V6 visibility contract passed');
