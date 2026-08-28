@@ -43,7 +43,6 @@ import { installEarthquakeCinematic } from './systems/earthquake-events-cinemati
 import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
 import { installWaterSurvival } from './systems/water-survival-v1.js';
 import { installForwardCollapseZone } from './systems/forward-collapse-zone-v1.js';
-import { installGameplayExpansion } from './systems/gameplay-expansion-v1.js';
 
 if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   RunnerScene.prototype.__relayFeatureRuntimeInstalled = true;
@@ -87,5 +86,4 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installDroneStrikeRecovery(RunnerScene);
   installWaterSurvival(RunnerScene);
   installForwardCollapseZone(RunnerScene);
-  installGameplayExpansion(RunnerScene);
 }
