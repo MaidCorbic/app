@@ -3,7 +3,6 @@
   'use strict';
   if (window.__relayProductionUnfreezeV1) return;
   window.__relayProductionUnfreezeV1 = true;
-  const startedAt = Date.now();
   let recoveryDone = false;
   const runner = () => window.__relayRunnerScene || window.game?.scene?.getScene?.('runner') || null;
   const hidden = element => element?.classList?.contains('hidden');
@@ -25,6 +24,14 @@
       scene.cinematicActive = false;
       scene.cameras?.main?.startFollow?.(scene.player, true, .08, .08);
       if (scene.scene?.isPaused?.()) scene.scene.resume();
+      try { scene.physics?.world?.resume?.(); } catch {}
+      const body = scene.player?.body;
+      if (body) {
+        body.enable = true;
+        body.moves = true;
+        body.allowGravity = true;
+        body.checkCollision.none = false;
+      }
     }
     document.getElementById('play')?.classList.remove('relay-cinematic-presentation-lock');
     window.__relayCinematicLock = false;
@@ -33,11 +40,14 @@
   const check = () => {
     const scene = runner();
     const cinematic = document.getElementById('relayGameplayIntroFinalV1');
-    const cinematicStuck = cinematic && !cinematic.hidden && Date.now() - startedAt > 9000;
-    const sceneStuck = scene && scene.cinematicActive && Date.now() - startedAt > 9000;
+    const playing = cinematic && !cinematic.hidden && cinematic.classList.contains('playing');
+    if (playing && !cinematic.dataset.startedAt) cinematic.dataset.startedAt = String(Date.now());
+    if (!playing && cinematic?.dataset.startedAt) delete cinematic.dataset.startedAt;
+    const age = playing ? Date.now() - Number(cinematic.dataset.startedAt || Date.now()) : 0;
+    const sceneStuck = scene && scene.cinematicActive && playing && age > 55000;
     const panel = document.getElementById('titlePanel');
     const tutorialOverlayBlocking = scene && panel && !hidden(panel) && scene.scene?.isActive?.();
-    if (cinematicStuck || sceneStuck || tutorialOverlayBlocking) recover(cinematicStuck ? 'cinematic timeout' : sceneStuck ? 'scene cinematic timeout' : 'blocking title panel');
+    if (sceneStuck || tutorialOverlayBlocking) recover(sceneStuck ? 'cinematic timeout' : 'blocking title panel');
   };
   window.setTimeout(() => {
     const splash = document.getElementById('relaySplash');
