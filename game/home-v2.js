@@ -65,9 +65,26 @@ import './home-v2.css';
       if (!legacyContinue || !button) return;
       const hidden = legacyContinue.classList.contains('hidden') || getComputedStyle(legacyContinue).display === 'none';
       button.hidden = hidden;
+      button.setAttribute('aria-hidden', String(hidden));
+      button.tabIndex = hidden ? -1 : 0;
     };
     syncContinue();
     new MutationObserver(syncContinue).observe(document.getElementById('continue') || intro, {attributes:true,attributeFilter:['class','style']});
+
+    document.addEventListener('keydown', event => {
+      if (!intro || intro.classList.contains('hidden')) return;
+      const target = event.target;
+      if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+      if (event.key === 'Enter' && !document.querySelector('#titlePanel:not(.hidden),#relayInfoPanel:not(.hidden)')) {
+        const legacyContinue = document.getElementById('continue');
+        if (legacyContinue && !legacyContinue.classList.contains('hidden')) legacyClick('continue');
+        else legacyClick('start');
+      }
+      if (event.key === 'Escape') {
+        document.getElementById('closeTitlePanel')?.click();
+        document.querySelector('[data-relay-close]')?.click();
+      }
+    });
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
