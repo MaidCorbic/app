@@ -2,3 +2,4 @@
 import './audio-context-gate-v1.js';
 import './options-entrypoint-v1.js';
 import './options-ui-stable-v2.js';
+import './exit-button-polish-v1.js';
