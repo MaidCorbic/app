@@ -1,0 +1,1 @@
+import fs from 'node:fs'; import assert from 'node:assert/strict'; const root=new URL('../',import.meta.url); const css=fs.readFileSync(new URL('home-v3-isolation.css',root),'utf8'); assert.match(css,/body\.home-v3-active #intro \.main-menu/); assert.match(css,/body\.home-v3-active #play/); console.log('HOME V3 NO OVERLAP: PASS');
