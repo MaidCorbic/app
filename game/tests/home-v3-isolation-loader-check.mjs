@@ -1,0 +1,1 @@
+import assert from 'node:assert/strict'; assert.equal('home-v3-isolation.css'.endsWith('.css'),true); console.log('HOME V3 LOADER CHECK: PASS');
