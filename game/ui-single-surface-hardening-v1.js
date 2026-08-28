@@ -1,14 +1,14 @@
-/* UI surface hardening V2.
+/* UI surface hardening V3.
  * Home Options/Tutorial get one visible surface at a time.
  * PLAY gets a responsive zipper reveal without taking ownership of gameplay start.
  */
 (() => {
   'use strict';
-  if (window.__relayUiSurfaceHardeningV2) return;
-  window.__relayUiSurfaceHardeningV2 = true;
+  if (window.__relayUiSurfaceHardeningV3) return;
+  window.__relayUiSurfaceHardeningV3 = true;
 
   const style = document.createElement('style');
-  style.id = 'relay-ui-surface-hardening-v2';
+  style.id = 'relay-ui-surface-hardening-v3';
   style.textContent = `
     #titlePanel.relay-surface-pending #titlePanelContent,
     #titlePanel.relay-surface-pending #titlePanelHeading,
@@ -47,7 +47,6 @@
 
   const panel = () => document.getElementById('titlePanel');
   const content = () => document.getElementById('titlePanelContent');
-
   const markPending = expected => {
     const p = panel();
     if (!p) return;
@@ -55,14 +54,9 @@
     const start = performance.now();
     const check = () => {
       const c = content();
-      const ready = expected === 'options'
-        ? !!c?.querySelector('.relay-stable-shell')
-        : !!c?.querySelector('.home-tutorial-content');
-      if (ready || performance.now() - start > 1800) {
-        p.classList.remove('relay-surface-pending');
-        return;
-      }
-      requestAnimationFrame(check);
+      const ready = expected === 'options' ? !!c?.querySelector('.relay-stable-shell') : !!c?.querySelector('.home-tutorial-content');
+      if (ready || performance.now() - start > 1800) p.classList.remove('relay-surface-pending');
+      else requestAnimationFrame(check);
     };
     requestAnimationFrame(check);
   };
@@ -76,8 +70,8 @@
 
   const play = document.getElementById('start');
   if (play) {
-    // Deliberately do NOT preventDefault/stopImmediatePropagation here. The
-    // gameplay intro owns the PLAY action; this listener is visual only.
+    // Capture only for presentation. We intentionally allow the later gameplay
+    // intro capture listener to receive the same click and start the game.
     play.addEventListener('click', () => {
       if (window.__relayPlayZipActive) return;
       window.__relayPlayZipActive = true;
@@ -91,6 +85,6 @@
         zip.classList.remove('playing', 'opening');
         window.__relayPlayZipActive = false;
       }, 950);
-    }, false);
+    }, true);
   }
 })();
