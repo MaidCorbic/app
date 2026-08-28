@@ -10,15 +10,16 @@
     panel.classList.remove('hidden');
     heading.textContent = 'OPTIONS';
     heading.className = 'relay-stable-title';
+    window.dispatchEvent(new CustomEvent('relay-options-open', { detail: { panel } }));
     return true;
   };
 
   const bind = () => {
     document.addEventListener('click', event => {
-      const button = event.target instanceof Element ? event.target.closest('[data-title-panel="controls"]') : null;
+      const target = event.target;
+      const button = target instanceof Element ? target.closest('[data-title-panel="controls"]') : null;
       if (!button) return;
       event.preventDefault();
-      event.stopImmediatePropagation();
       open();
     }, true);
   };
