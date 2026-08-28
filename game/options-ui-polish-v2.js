@@ -1,3 +1,4 @@
+import './options-scrollbar-final-v1.css';
 import { loadState, saveState } from './src/state.js';
 
 (() => {
