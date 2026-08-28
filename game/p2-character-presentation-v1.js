@@ -1,42 +1,48 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-// P2 CHARACTER / PRESENTATION V1
-// One player object, state-driven presentation. No replacement character overlay.
+// P2 CHARACTER / PRESENTATION V2
+// One player object. The authoritative flight system owns physics; this layer
+// only renders character states, wings, and the presentation HUD.
 (() => {
   'use strict';
-  if (!RunnerScene?.prototype || window.__relayP2CharacterPresentationV1) return;
-  window.__relayP2CharacterPresentationV1 = true;
+  if (!RunnerScene?.prototype || window.__relayP2CharacterPresentationV2) return;
+  window.__relayP2CharacterPresentationV2 = true;
 
   const states = new WeakMap();
   const RUN_TICKS = 7;
-  const FLIGHT_CODE = 'KeyF';
+  const FLIGHT_STATES = new Set(['flying', 'hover']);
+
   const isGameplayVisible = scene => scene?.player?.active && !scene.finished && !scene.respawning && !scene.cinematicActive;
   const grounded = scene => {
     const body = scene?.player?.body;
     return Boolean(body?.blocked?.down || body?.touching?.down || body?.onFloor?.());
   };
-  const flightRequested = scene => Boolean(scene?.__relayP2FlightHeld || scene?.flightActive || scene?.flying || scene?.isFlying || scene?.player?.getData?.('flightActive'));
+  const getFlightState = scene => scene?.getFlightState?.() || null;
+  const isFlying = scene => FLIGHT_STATES.has(String(getFlightState(scene)?.state || ''));
 
-  function ensureUi(scene) {
-    if (document.getElementById('relayP2CharacterHud')) return document.getElementById('relayP2CharacterHud');
+  function ensureUi() {
+    let hud = document.getElementById('relayP2CharacterHud');
+    if (hud) return hud;
     const style = document.createElement('style');
-    style.id = 'relay-p2-character-style';
+    style.id = 'relay-p2-character-style-v2';
     style.textContent = `
-      #relayP2CharacterHud{position:fixed;left:50%;bottom:clamp(14px,3vh,30px);transform:translateX(-50%);z-index:935;pointer-events:none;display:flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid rgba(141,244,255,.16);border-radius:999px;background:rgba(3,10,20,.58);backdrop-filter:blur(8px);opacity:0;transition:opacity .16s ease}
-      #relayP2CharacterHud.show{opacity:.9}
-      #relayP2CharacterHud .p2-dot{width:6px;height:6px;border-radius:50%;background:#8df4ff;box-shadow:0 0 12px rgba(141,244,255,.7)}
-      #relayP2CharacterHud .p2-label{font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.18em;color:#dffcff}
-      #relayP2CharacterHud.flight .p2-dot{background:#aee37f;box-shadow:0 0 12px rgba(174,227,127,.8)}
+      #relayP2CharacterHud{position:fixed;left:50%;bottom:clamp(88px,11vh,118px);transform:translateX(-50%);z-index:960;pointer-events:none;display:flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid rgba(141,244,255,.18);border-radius:999px;background:rgba(3,10,20,.72);backdrop-filter:blur(9px);opacity:0;transition:opacity .14s ease,transform .14s ease;box-shadow:0 10px 28px rgba(0,0,0,.28)}
+      #relayP2CharacterHud.show{opacity:.94}
+      #relayP2CharacterHud .p2-dot{width:6px;height:6px;border-radius:50%;background:#8df4ff;box-shadow:0 0 12px rgba(141,244,255,.72);flex:0 0 auto}
+      #relayP2CharacterHud .p2-label{font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.18em;color:#dffcff;white-space:nowrap}
+      #relayP2CharacterHud .p2-hint{font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;color:#6f879d;white-space:nowrap}
+      #relayP2CharacterHud.flight .p2-dot{background:#aee37f;box-shadow:0 0 14px rgba(174,227,127,.85)}
       #relayP2CharacterHud.dash .p2-dot{background:#ffd06e;box-shadow:0 0 14px rgba(255,208,110,.9)}
-      #relayP2CharacterHud.impact .p2-dot{background:#ff826e;box-shadow:0 0 14px rgba(255,130,110,.8)}
-      @media(max-width:520px){#relayP2CharacterHud{bottom:88px}.relay-p2-character-fly{display:flex!important}}
-      .relay-p2-character-fly{display:none;position:fixed;right:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:940;width:58px;height:58px;border:1px solid rgba(174,227,127,.52);border-radius:16px;background:linear-gradient(145deg,rgba(14,32,18,.96),rgba(5,14,9,.98));color:#efffdc;font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(174,227,127,.12),0 12px 28px rgba(0,0,0,.42);touch-action:none;user-select:none}
-      .relay-p2-character-fly.active{border-color:#aee37f;box-shadow:0 0 24px rgba(174,227,127,.3),0 12px 28px rgba(0,0,0,.42);transform:scale(.95)}
+      #relayP2CharacterHud.impact .p2-dot{background:#ff826e;box-shadow:0 0 14px rgba(255,130,110,.82)}
+      .relay-p2-character-fly{display:none;position:fixed;right:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:965;width:60px;height:54px;border:1px solid rgba(174,227,127,.5);border-radius:15px;background:linear-gradient(145deg,rgba(14,32,18,.97),rgba(5,14,9,.99));color:#efffdc;font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(174,227,127,.12),0 12px 28px rgba(0,0,0,.44);touch-action:manipulation;user-select:none}
+      .relay-p2-character-fly.active{border-color:#aee37f;box-shadow:0 0 24px rgba(174,227,127,.3),0 12px 28px rgba(0,0,0,.44);transform:scale(.95)}
+      @media(max-width:520px){#relayP2CharacterHud{bottom:162px}.relay-p2-character-fly{display:flex}}
+      @media(max-width:380px){#relayP2CharacterHud{bottom:146px;padding:6px 8px}.relay-p2-character-fly{right:10px;width:54px;height:50px}.#relayP2CharacterHud .p2-hint{display:none}}
     `;
     document.head.appendChild(style);
-    const hud = document.createElement('div');
+    hud = document.createElement('div');
     hud.id = 'relayP2CharacterHud';
-    hud.innerHTML = '<span class="p2-dot"></span><span class="p2-label">RUN READY</span>';
+    hud.innerHTML = '<span class="p2-dot"></span><span class="p2-label">READY</span><span class="p2-hint">SHIFT=DASH · F=FLIGHT</span>';
     document.body.appendChild(hud);
     return hud;
   }
@@ -52,74 +58,47 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     button.className = 'relay-p2-character-fly';
     button.type = 'button';
     button.textContent = 'FLY';
-    button.setAttribute('aria-label', 'Hold to fly');
-    const down = event => { event.preventDefault(); event.stopPropagation(); button.classList.add('active'); window.__relayRunnerScene && (window.__relayRunnerScene.__relayP2FlightHeld = true); };
-    const up = event => { if (event) { event.preventDefault(); event.stopPropagation(); } button.classList.remove('active'); if (window.__relayRunnerScene) window.__relayRunnerScene.__relayP2FlightHeld = false; };
-    button.addEventListener('pointerdown', down, { passive:false });
-    button.addEventListener('pointerup', up, { passive:false });
-    button.addEventListener('pointercancel', up, { passive:false });
-    button.addEventListener('lostpointercapture', up, { passive:false });
-    window.addEventListener('blur', up);
-    document.addEventListener('visibilitychange', () => { if (document.hidden) up(); });
+    button.setAttribute('aria-label', 'Toggle flight');
+    button.addEventListener('pointerdown', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      button.classList.add('active');
+      window.dispatchEvent(new CustomEvent('relay:toggle-flight', { detail:{ source:'mobile-p2' } }));
+    }, { passive:false });
+    const clear = () => button.classList.remove('active');
+    button.addEventListener('pointerup', clear);
+    button.addEventListener('pointercancel', clear);
+    window.addEventListener('blur', clear);
     actions.appendChild(button);
     return button;
   }
 
   function makeWings(scene) {
-    const left = scene.add.graphics().setDepth(13);
-    const right = scene.add.graphics().setDepth(13);
-    return { left, right, shown: false };
+    const left = scene.add.graphics().setDepth(14);
+    const right = scene.add.graphics().setDepth(14);
+    return { left, right, shown:false, pulse:0 };
   }
 
   function drawWing(graphics, side, pulse) {
     graphics.clear();
-    const flap = Math.sin(pulse) * 2.2;
+    const flap = Math.sin(pulse) * 2.4;
     const s = side < 0 ? -1 : 1;
     graphics.fillStyle(0x8df4ff, .18);
-    graphics.lineStyle(1.5, 0xb9f5ff, .88);
+    graphics.lineStyle(1.5, 0xb9f5ff, .9);
     graphics.beginPath();
     graphics.moveTo(0, 0);
-    graphics.lineTo(s * 12, -7 - flap);
-    graphics.lineTo(s * 27, -1 - flap * .5);
-    graphics.lineTo(s * 17, 7 + flap);
+    graphics.lineTo(s * 13, -8 - flap);
+    graphics.lineTo(s * 29, -1 - flap * .5);
+    graphics.lineTo(s * 18, 8 + flap);
     graphics.lineTo(0, 4);
     graphics.closePath();
     graphics.fillPath();
     graphics.strokePath();
     graphics.lineStyle(1, 0xeaffff, .48);
-    graphics.lineBetween(0, 1, s * 20, -2 - flap * .5);
+    graphics.lineBetween(0, 1, s * 21, -2 - flap * .5);
   }
 
-  function setFlightPhysics(scene, state, active) {
-    const body = scene?.player?.body;
-    if (!body) return;
-    if (active && !state.flightActive) {
-      state.flightActive = true;
-      state.originalGravity = body.gravity?.y ?? 1600;
-      if (grounded(scene)) body.setVelocityY?.(-430);
-      body.setGravityY?.(0);
-      scene.flightActive = true;
-      scene.player?.setData?.('flightActive', true);
-      scene.playerCue?.('FLIGHT · WINGS DEPLOYED', '#aee37f');
-    } else if (!active && state.flightActive) {
-      state.flightActive = false;
-      body.setGravityY?.(state.originalGravity);
-      scene.flightActive = false;
-      scene.player?.setData?.('flightActive', false);
-      body.setVelocityY?.(Math.min(Number(body.velocity?.y) || 0, 80));
-    }
-    if (active) {
-      body.allowGravity = false;
-      body.setGravityY?.(0);
-      if (!grounded(scene)) body.setVelocityY?.(Math.max(-180, Math.min(180, Number(body.velocity?.y) || 0)));
-    }
-  }
-
-  function resolveTexture(scene, key) {
-    return scene?.textures?.exists?.(key) ? key : null;
-  }
-
-  function applyPresentation(scene, state, delta) {
+  function applyCharacterState(scene, state, delta) {
     const player = scene.player;
     const body = player?.body;
     if (!player?.active || !body) return;
@@ -130,9 +109,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const dashing = Boolean(scene.dashing || player.getData?.('dashing'));
     const onGround = grounded(scene);
     const hit = Boolean(player.getData?.('hit') || player.getData?.('hurt') || scene.playerHit);
-    const requested = flightRequested(scene) && !scene.respawning && !scene.finished;
-    const flight = requested && !onGround;
-    setFlightPhysics(scene, state, flight);
+    const flight = isFlying(scene) && !onGround;
 
     let next = 'idle';
     if (dashing) next = 'dash';
@@ -146,8 +123,16 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     if (next === 'run') state.runFrame = Math.floor(state.tick / RUN_TICKS) % 2;
     if (next === 'fly') state.flightPulse += (delta || 16) * .01;
 
-    const textureKey = next === 'run' ? (state.runFrame ? 'runner-run-b' : 'runner-run-a') : next === 'jump' ? 'runner-jump' : next === 'fall' ? 'runner-fall' : next === 'dash' ? 'runner-dash' : next === 'hit' ? 'runner-hit' : 'runner-idle';
-    player.setTexture?.(resolveTexture(scene, textureKey) || player.texture?.key);
+    const textureKey = next === 'run'
+      ? (state.runFrame ? 'runner-run-b' : 'runner-run-a')
+      : next === 'jump' ? 'runner-jump'
+      : next === 'fall' ? 'runner-fall'
+      : next === 'dash' ? 'runner-dash'
+      : next === 'hit' ? 'runner-hit'
+      : 'runner-idle';
+    const resolved = scene?.textures?.exists?.(textureKey) ? textureKey : null;
+    if (resolved && player.texture?.key !== resolved) player.setTexture(resolved);
+
     player.setData?.('presentationState', next);
     player.setData?.('singleCharacterPresentation', true);
 
@@ -157,21 +142,25 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     state.wings.right.setVisible(wingsOn);
     if (wingsOn) {
       const x = player.x + (player.flipX ? -2 : 2);
-      const y = player.y - 10;
+      const y = player.y - 9;
       state.wings.left.setPosition(x, y);
       state.wings.right.setPosition(x, y);
       drawWing(state.wings.left, -1, state.flightPulse);
       drawWing(state.wings.right, 1, state.flightPulse + Math.PI * .08);
     }
 
-    const hud = ensureUi(scene);
-    const label = { idle:'READY', run:'RUN', jump:'JUMP', fall:'FALL', dash:'DASH', fly:'FLIGHT · WINGS', hit:'IMPACT' }[next] || 'READY';
-    hud.querySelector('.p2-label').textContent = label;
+    const hud = ensureUi();
+    const labels = { idle:'READY', run:'RUN', jump:'JUMP', fall:'FALL', dash:'DASH', fly:'FLIGHT · WINGS', hit:'IMPACT' };
+    hud.querySelector('.p2-label').textContent = labels[next] || 'READY';
+    hud.querySelector('.p2-hint').textContent = next === 'fly' ? 'F = FLIGHT OFF' : 'SHIFT = DASH · F = FLIGHT';
     hud.classList.toggle('show', isGameplayVisible(scene));
     hud.classList.toggle('flight', next === 'fly');
     hud.classList.toggle('dash', next === 'dash');
     hud.classList.toggle('impact', next === 'hit');
     state.lastState = next;
+
+    const mobileButton = document.getElementById('relayP2FlightButton');
+    mobileButton?.classList.toggle('active', flight);
   }
 
   const baseCreate = RunnerScene.prototype.create;
@@ -180,9 +169,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   RunnerScene.prototype.create = function p2CharacterCreate(...args) {
     const result = baseCreate.apply(this, args);
-    states.set(this, { tick:0, runFrame:0, flightPulse:0, lastState:'idle', flightActive:false, originalGravity:1600, wings: makeWings(this) });
+    states.set(this, { tick:0, runFrame:0, flightPulse:0, lastState:'idle', wings:makeWings(this) });
     window.__relayRunnerScene = this;
-    ensureUi(this);
+    ensureUi();
     ensureMobileFlightButton();
     return result;
   };
@@ -191,7 +180,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const result = baseUpdate.apply(this, [time, delta, ...args]);
     const state = states.get(this);
     if (state) {
-      try { applyPresentation(this, state, delta); } catch (error) { console.error('[P2Character] update failed', error); }
+      try { applyCharacterState(this, state, delta); } catch (error) { console.error('[P2Character] update failed', error); }
     }
     return result;
   };
@@ -200,24 +189,21 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const state = states.get(this);
     state?.wings?.left?.destroy?.();
     state?.wings?.right?.destroy?.();
+    document.getElementById('relayP2FlightButton')?.remove();
+    document.getElementById('relayP2CharacterHud')?.classList.remove('show');
     const result = baseShutdown?.apply(this, args);
     states.delete(this);
     return result;
   };
 
-  const onFlightKey = event => {
-    if (event.code !== FLIGHT_CODE || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
+  const forwardFlight = event => {
+    if (event.code !== 'KeyF' || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
     const scene = window.__relayRunnerScene;
-    if (!scene || !isGameplayVisible(scene)) return;
-    scene.__relayP2FlightHeld = true;
+    if (!scene || !isGameplayVisible(scene) || typeof scene.toggleFlightMode !== 'function') return;
+    const target = event.target;
+    if (target && typeof target.tagName === 'string' && /input|textarea|select|button/i.test(target.tagName)) return;
     event.preventDefault();
+    scene.toggleFlightMode('keyboard-p2');
   };
-  const onFlightKeyUp = event => {
-    if (event.code !== FLIGHT_CODE) return;
-    const scene = window.__relayRunnerScene;
-    if (scene) scene.__relayP2FlightHeld = false;
-  };
-  window.addEventListener('keydown', onFlightKey, true);
-  window.addEventListener('keyup', onFlightKeyUp, true);
-  window.addEventListener('blur', onFlightKeyUp, true);
+  window.addEventListener('keydown', forwardFlight, true);
 })();
