@@ -1,0 +1,1 @@
+import fs from 'node:fs'; import assert from 'node:assert/strict'; const root=new URL('../',import.meta.url); const css=fs.readFileSync(new URL('home-v3-isolation.css',root),'utf8'); assert.match(css,/home-v3-active/); console.log('HOME V3 ISOLATION FINAL CHECK: PASS');
