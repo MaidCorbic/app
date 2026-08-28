@@ -64,6 +64,7 @@ import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
 import './crouch-gameplay-v1.js';
 import './slide-jump-momentum-v1.js';
+import './dash-dodge-v1.js';
 import './wall-slide-v1.js';
 import './dynamic-environment-reactions-v1.js';
 import './production-unfreeze-v1.js';
