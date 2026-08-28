@@ -27,9 +27,8 @@
     const panel = document.getElementById('titlePanel');
     const content = document.getElementById('titlePanelContent');
     const rail = document.getElementById('homeOptionsScrollbar');
-    if (!panel || !content) return;
-    const mobile = matchMedia('(max-width:700px)').matches;
-    if (!mobile) return;
+    if (!panel || !content || !matchMedia('(max-width:700px)').matches) return;
+
     content.style.setProperty('touch-action','pan-y','important');
     content.style.setProperty('overflow-y','auto','important');
     content.style.setProperty('overflow-x','hidden','important');
@@ -43,7 +42,9 @@
   const boot = () => {
     sync();
     const panel = document.getElementById('titlePanel');
-    if (panel) new MutationObserver(sync).observe(panel,{attributes:true,childList:true,subtree:true});
+    // Observe DOM additions/removals only. sync() changes inline styles, so observing
+    // attributes here would trigger itself indefinitely and can stall page startup.
+    if (panel) new MutationObserver(sync).observe(panel,{childList:true,subtree:true});
     addEventListener('resize',sync,{passive:true});
     addEventListener('orientationchange',sync,{passive:true});
   };
