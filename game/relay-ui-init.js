@@ -6,6 +6,7 @@ import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
 import './home-options-final-mobile-v1.css';
+import './home-options-card-motion-v1.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -62,7 +63,6 @@ import './src/systems/mission-objectives-route-goals-v1.js';
 import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
 import './crouch-gameplay-v1.js';
-import './slide-jump-momentum-v1.js';
 import './dash-dodge-v1.js';
 import './wall-slide-v1.js';
 import './dynamic-environment-reactions-v1.js';
