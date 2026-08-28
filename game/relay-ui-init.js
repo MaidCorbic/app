@@ -5,6 +5,7 @@ import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
+import './home-options-final-mobile-v1.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -62,6 +63,7 @@ import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
 import './crouch-gameplay-v1.js';
 import './slide-jump-momentum-v1.js';
+import './dash-dodge-v1.js';
 import './wall-slide-v1.js';
 import './dynamic-environment-reactions-v1.js';
 import './production-unfreeze-v1.js';
@@ -71,3 +73,4 @@ import './p1-gameplay-correctness-v1.js';
 import './p2-character-presentation-v4.js';
 import './p2-ux-controls-v1.js';
 import './home-options-tactical-rail-v1.js';
+import './home-options-tactical-v1.js';
