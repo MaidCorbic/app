@@ -1,4 +1,4 @@
-/* Final Options scroll contract. Loaded after legacy/unified option styles. */
+/* Final Options scroll/readability contract. Loaded after legacy/unified option styles. */
 #titlePanel #titlePanelContent,
 #pauseMenu #panelContent,
 #titlePanel .relay-options-body,
@@ -10,8 +10,40 @@
   -webkit-overflow-scrolling:touch !important;
   overscroll-behavior:contain !important;
   scrollbar-width:thin !important;
-  scrollbar-color: rgba(141,244,255,.58) rgba(255,255,255,.055) !important;
+  scrollbar-color:rgba(141,244,255,.58) rgba(255,255,255,.055) !important;
 }
+
+#titlePanel #titlePanelContent,
+#pauseMenu #panelContent{
+  max-height:calc(100dvh - 150px) !important;
+  max-height:calc(100svh - 150px) !important;
+  min-height:0 !important;
+}
+
+#titlePanel .relay-options-body,
+#pauseMenu .relay-options-body{
+  min-height:0 !important;
+  max-height:calc(100dvh - 170px) !important;
+  max-height:calc(100svh - 170px) !important;
+}
+
+/* Make the unified terminal clearly readable without changing its visual language. */
+#titlePanel .relay-options-title,
+#pauseMenu .relay-options-title{font-size:clamp(26px,4.2vw,38px) !important}
+#titlePanel .relay-section-title,
+#pauseMenu .relay-section-title{font-size:11px !important;letter-spacing:.18em !important}
+#titlePanel .relay-option-copy strong,
+#pauseMenu .relay-option-copy strong{font-size:12px !important;line-height:1.2 !important}
+#titlePanel .relay-option-copy small,
+#pauseMenu .relay-option-copy small{font-size:9px !important;line-height:1.45 !important}
+#titlePanel .relay-toggle,
+#pauseMenu .relay-toggle{min-width:104px !important;height:40px !important;font-size:10px !important;letter-spacing:.12em !important}
+#titlePanel .relay-range-head,
+#pauseMenu .relay-range-head{font-size:9px !important}
+#titlePanel .relay-action,
+#pauseMenu .relay-action{min-height:44px !important;font-size:10px !important}
+#titlePanel .relay-key,
+#pauseMenu .relay-key{font-size:9px !important}
 
 #titlePanel #titlePanelContent::-webkit-scrollbar,
 #pauseMenu #panelContent::-webkit-scrollbar,
@@ -55,17 +87,39 @@
   background:linear-gradient(180deg,rgba(141,244,255,.9),rgba(255,208,110,.9)) !important;
 }
 
-@media (max-width:760px){
+@media(max-width:760px){
   #titlePanel #titlePanelContent,
   #pauseMenu #panelContent,
   #titlePanel .relay-options-body,
   #pauseMenu .relay-options-body{
+    max-height:calc(100dvh - 112px) !important;
+    max-height:calc(100svh - 112px) !important;
     scrollbar-width:thin !important;
   }
+  #titlePanel .relay-options-title,
+  #pauseMenu .relay-options-title{font-size:24px !important}
+  #titlePanel .relay-section-title,
+  #pauseMenu .relay-section-title{font-size:10px !important}
+  #titlePanel .relay-option-copy strong,
+  #pauseMenu .relay-option-copy strong{font-size:10.5px !important}
+  #titlePanel .relay-option-copy small,
+  #pauseMenu .relay-option-copy small{font-size:8px !important}
+  #titlePanel .relay-toggle,
+  #pauseMenu .relay-toggle{min-width:92px !important;width:92px !important;height:38px !important;font-size:9px !important}
   #titlePanel #titlePanelContent::-webkit-scrollbar,
   #pauseMenu #panelContent::-webkit-scrollbar,
   #titlePanel .relay-options-body::-webkit-scrollbar,
   #pauseMenu .relay-options-body::-webkit-scrollbar{
-    width:8px !important;
+    width:9px !important;
+  }
+}
+
+@media(max-width:390px){
+  #titlePanel #titlePanelContent,
+  #pauseMenu #panelContent,
+  #titlePanel .relay-options-body,
+  #pauseMenu .relay-options-body{
+    max-height:calc(100dvh - 96px) !important;
+    max-height:calc(100svh - 96px) !important;
   }
 }
