@@ -19,6 +19,7 @@
     "test:mobile-action-layout": "node tests/mobile-action-layout.mjs",
     "test:mobile-input-single-owner": "node tests/mobile-input-single-owner-v3.mjs",
     "test:settings-state": "node tests/settings-state-contract.mjs",
+    "test:home-options-tutorial": "node tests/home-options-tutorial-contract.mjs",
     "test:seasonal-progression": "node tests/seasonal-progression-contract.mjs",
     "test:state-unlock-reconciliation": "node tests/state-unlock-reconciliation-contract.mjs",
     "test:gameplay-touch-lock": "node tests/gameplay-touch-lock.mjs",
