@@ -1,0 +1,21 @@
+/* P3 Options UI polish: readable typography, visible scrollbars, touch-safe sizing. */
+:root{--relay-cyan:#8df4ff;--relay-green:#aee37f;--relay-amber:#ffd06e;--relay-ink:#edfaff;--relay-muted:#8498aa}
+#titlePanel:has(.home-options-final) .home-section,#pauseMenu .pause-options-v1 .section{font-size:10px!important;letter-spacing:.16em!important}
+#titlePanel:has(.home-options-final) .home-opt-copy b,#pauseMenu .pause-options-v1 .copy b{font-size:12px!important;line-height:1.2!important;letter-spacing:.075em!important}
+#titlePanel:has(.home-options-final) .home-opt-copy small,#pauseMenu .pause-options-v1 .copy small{font-size:9px!important;line-height:1.45!important;color:#8194a7!important}
+#titlePanel:has(.home-options-final) .home-opt,#pauseMenu .pause-options-v1 .row{min-height:50px!important;padding:12px 14px!important;border-radius:12px!important}
+#titlePanel:has(.home-options-final) .home-opt button,#pauseMenu .pause-options-v1 .toggle{min-width:104px!important;height:38px!important;border-radius:10px!important;font-size:10px!important;font-weight:900!important;letter-spacing:.12em!important}
+#titlePanel:has(.home-options-final) .home-options-actions button,#pauseMenu .pause-options-v1 .actions button{min-height:44px!important;font-size:10px!important;border-radius:11px!important;font-weight:900!important;letter-spacing:.1em!important}
+#titlePanel:has(.home-options-final) #titlePanelContent{scrollbar-width:auto!important;scrollbar-color:rgba(141,244,255,.55) rgba(255,255,255,.05)!important;overflow-y:auto!important;overscroll-behavior:contain!important;touch-action:pan-y!important}
+#titlePanel:has(.home-options-final) #titlePanelContent::-webkit-scrollbar{display:block!important;width:10px!important;height:10px!important}
+#titlePanel:has(.home-options-final) #titlePanelContent::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:999px}
+#titlePanel:has(.home-options-final) #titlePanelContent::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(141,244,255,.68),rgba(255,208,110,.62));border:2px solid rgba(255,255,255,.04);border-radius:999px}
+#pauseMenu #panelContent{min-height:0!important;overflow:hidden!important}
+#pauseMenu .pause-options-v1{max-height:100%!important;min-height:0!important;overflow-y:auto!important;scrollbar-width:auto!important;scrollbar-color:rgba(141,244,255,.55) rgba(255,255,255,.05)!important;overscroll-behavior:contain!important;touch-action:pan-y!important}
+#pauseMenu .pause-options-v1::-webkit-scrollbar{display:block!important;width:10px!important;height:10px!important}
+#pauseMenu .pause-options-v1::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:999px}
+#pauseMenu .pause-options-v1::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(141,244,255,.68),rgba(255,208,110,.62));border:2px solid rgba(255,255,255,.04);border-radius:999px}
+.relay-option-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,10px);z-index:5000;pointer-events:none;opacity:0;padding:10px 14px;border:1px solid rgba(141,244,255,.22);border-radius:999px;background:rgba(3,10,20,.94);box-shadow:0 12px 30px rgba(0,0,0,.45),0 0 22px rgba(141,244,255,.08);color:#e9fbff;font:900 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;transition:opacity .16s ease,transform .16s ease}
+.relay-option-toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:700px){#titlePanel:has(.home-options-final) #titlePanelContent{max-height:calc(100dvh - 110px)!important;overflow-y:auto!important}.home-section,#pauseMenu .pause-options-v1 .section{font-size:9px!important}#titlePanel:has(.home-options-final) .home-opt-copy b,#pauseMenu .pause-options-v1 .copy b{font-size:10px!important}#titlePanel:has(.home-options-final) .home-opt-copy small,#pauseMenu .pause-options-v1 .copy small{font-size:8px!important}#titlePanel:has(.home-options-final) .home-opt button,#pauseMenu .pause-options-v1 .toggle{min-width:92px!important;width:92px!important;height:36px!important;font-size:9px!important}.relay-option-toast{bottom:88px;font-size:9px}}
+@media(max-width:390px){#titlePanel:has(.home-options-final) #titlePanelContent{max-height:calc(100dvh - 98px)!important}.relay-option-toast{font-size:8px}}
