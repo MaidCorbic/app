@@ -1,0 +1,84 @@
+/* Relay Runner Home V2 — unified surfaces. This intentionally overrides legacy title/info panel chrome. */
+:root{--rr-cyan:#8df4ff;--rr-cyan-soft:rgba(141,244,255,.18);--rr-gold:#ffd06e;--rr-ink:#02060d;--rr-panel:rgba(5,13,24,.96);--rr-panel-2:rgba(9,22,38,.94);--rr-text:#eefaff;--rr-muted:#8197a9;--rr-line:rgba(141,244,255,.16)}
+
+/* Home must own the screen. Legacy menu/backdrop/game chrome is suppressed while intro is active. */
+body:has(#intro:not(.hidden)) #play{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+body:has(#intro:not(.hidden)) #play>*{visibility:hidden!important;pointer-events:none!important}
+body:has(#intro:not(.hidden)) #pauseMenu,body:has(#intro:not(.hidden)) #finish,body:has(#intro:not(.hidden)) #gameOver,body:has(#intro:not(.hidden)) #levelUp,body:has(#intro:not(.hidden)) #abilityUnlock{visibility:hidden!important;pointer-events:none!important}
+
+/* Shared premium modal shell. */
+#intro.home-v2 #titlePanel,
+body #relayInfoPanel{position:fixed!important;inset:0!important;z-index:5000!important;display:grid!important;place-items:center!important;padding:clamp(14px,4vw,48px)!important;box-sizing:border-box!important;background:rgba(1,5,11,.78)!important;backdrop-filter:blur(16px) saturate(1.1)!important;-webkit-backdrop-filter:blur(16px) saturate(1.1)!important}
+#intro.home-v2 #titlePanel.hidden,
+body #relayInfoPanel.hidden{display:none!important}
+#intro.home-v2 #titlePanel::before,
+body #relayInfoPanel::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 15%,rgba(141,244,255,.09),transparent 35%),linear-gradient(135deg,rgba(141,244,255,.025),transparent 45%,rgba(255,208,110,.025));pointer-events:none}
+
+#intro.home-v2 #titlePanel .title-panel-card,
+body #relayInfoPanel .relay-info-card{position:relative;z-index:1;width:min(820px,94vw)!important;max-width:100%!important;max-height:min(86dvh,760px)!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;gap:0!important;padding:0!important;overflow:hidden!important;border:1px solid rgba(141,244,255,.28)!important;border-radius:14px!important;background:linear-gradient(145deg,rgba(10,27,45,.98),rgba(3,9,18,.985) 62%,rgba(7,16,29,.98))!important;box-shadow:0 30px 100px rgba(0,0,0,.62),0 0 55px rgba(56,189,248,.10),inset 0 1px rgba(255,255,255,.07)!important;color:var(--rr-text)!important}
+#intro.home-v2 #titlePanel .title-panel-card::before,
+body #relayInfoPanel .relay-info-card::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--rr-cyan),var(--rr-gold),transparent);box-shadow:0 0 20px rgba(141,244,255,.25);pointer-events:none}
+
+#intro.home-v2 #titlePanel .title-panel-card::after,
+body #relayInfoPanel .relay-info-card::after{content:"R/  //  RELAY TERMINAL";position:absolute;right:18px;top:18px;color:rgba(141,244,255,.3);font:800 7px/1 'DM Mono',monospace;letter-spacing:1.5px;pointer-events:none}
+#intro.home-v2 #titlePanel .title-panel-close,
+body #relayInfoPanel .relay-info-close{position:absolute!important;z-index:3;right:14px!important;top:12px!important;width:36px!important;height:36px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border:1px solid rgba(141,244,255,.2)!important;border-radius:8px!important;background:rgba(3,10,20,.78)!important;color:#cfe6ee!important;font:500 22px/1 Arial,sans-serif!important;cursor:pointer!important;transition:.18s ease!important}
+#intro.home-v2 #titlePanel .title-panel-close:hover,
+#intro.home-v2 #titlePanel .title-panel-close:focus-visible,
+body #relayInfoPanel .relay-info-close:hover,
+body #relayInfoPanel .relay-info-close:focus-visible{border-color:var(--rr-gold)!important;color:var(--rr-gold)!important;box-shadow:0 0 20px rgba(255,208,110,.12)!important;outline:none!important}
+
+#intro.home-v2 #titlePanel #titlePanelEyebrow,
+body #relayInfoPanel .relay-info-eyebrow{margin:0!important;padding:25px 58px 0 28px!important;color:var(--rr-cyan)!important;font:900 8px/1.3 'DM Mono',monospace!important;letter-spacing:2px!important;text-transform:uppercase!important}
+#intro.home-v2 #titlePanel #titlePanelHeading,
+body #relayInfoPanel #relayInfoHeading{margin:7px 58px 18px 28px!important;color:#f2fbff!important;font:900 clamp(28px,5vw,46px)/.92 'Arial Narrow','DM Mono',sans-serif!important;letter-spacing:-1.8px!important;text-transform:uppercase!important}
+#intro.home-v2 #titlePanel #titlePanelContent,
+body #relayInfoPanel #relayInfoContent{width:auto!important;min-width:0!important;max-width:none!important;max-height:none!important;flex:1 1 auto!important;overflow:auto!important;overscroll-behavior:contain!important;padding:0 28px 26px!important;box-sizing:border-box!important;scrollbar-width:thin!important;scrollbar-color:rgba(141,244,255,.3) transparent!important}
+#intro.home-v2 #titlePanel #titlePanelContent::-webkit-scrollbar,
+body #relayInfoPanel #relayInfoContent::-webkit-scrollbar{width:5px}
+#intro.home-v2 #titlePanel #titlePanelContent::-webkit-scrollbar-thumb,
+body #relayInfoPanel #relayInfoContent::-webkit-scrollbar-thumb{background:rgba(141,244,255,.28);border-radius:5px}
+
+/* Re-theme Options + Tutorial internals so they are one system, not legacy cards. */
+#intro.home-v2 .home-options-final,#intro.home-v2 .home-tutorial-content{display:grid!important;gap:10px!important;padding:0!important}
+#intro.home-v2 .home-options-zipper,#intro.home-v2 .tutorial-zipper{height:28px!important;margin:0 0 4px!important;opacity:.9}
+#intro.home-v2 .home-opt,#intro.home-v2 .tutorial-hero,#intro.home-v2 .tutorial-step,#intro.home-v2 .tutorial-category,#intro.home-v2 .tutorial-foot{border-color:rgba(141,244,255,.13)!important;background:linear-gradient(145deg,rgba(9,24,41,.88),rgba(4,11,21,.95))!important;box-shadow:inset 0 1px rgba(255,255,255,.035),0 8px 24px rgba(0,0,0,.16)!important}
+#intro.home-v2 .home-opt{border-radius:9px!important}
+#intro.home-v2 .home-opt-copy b,#intro.home-v2 .tutorial-hero b,#intro.home-v2 .tutorial-category[open] summary{color:#eaf9fd!important}
+#intro.home-v2 .home-section{color:var(--rr-cyan)!important;margin-top:7px!important;letter-spacing:1.6px!important}
+#intro.home-v2 .home-opt button,#intro.home-v2 .home-options-actions button{background:rgba(3,11,21,.9)!important;border-color:rgba(141,244,255,.2)!important;color:#d8eaf0!important}
+#intro.home-v2 .home-opt button:hover,#intro.home-v2 .home-opt button:focus-visible,#intro.home-v2 .home-options-actions button:hover,#intro.home-v2 .home-options-actions button:focus-visible{border-color:var(--rr-gold)!important;color:var(--rr-gold)!important}
+#intro.home-v2 .tutorial-category summary{color:#dcecf1!important}
+#intro.home-v2 .tutorial-category summary::after{color:var(--rr-cyan)!important}
+#intro.home-v2 .tutorial-category[open] summary{color:var(--rr-cyan)!important}
+#intro.home-v2 .tutorial-key{border-color:rgba(141,244,255,.22)!important;background:#071321!important;color:#eafcff!important}
+
+/* FAQ / latest update use exactly the same visual language. */
+body #relayInfoPanel .relay-faq-list,body #relayInfoPanel .relay-update-list{display:grid;gap:8px}
+body #relayInfoPanel .relay-faq-item,body #relayInfoPanel .relay-update-item{border:1px solid rgba(141,244,255,.12);border-radius:9px;background:linear-gradient(145deg,rgba(9,24,41,.88),rgba(4,11,21,.95));overflow:hidden}
+body #relayInfoPanel .relay-faq-question{width:100%;min-height:48px;padding:12px 14px;border:0;background:transparent;color:#e9f8fc;text-align:left;font:900 9px/1.3 'DM Mono',monospace;letter-spacing:.6px;cursor:pointer}
+body #relayInfoPanel .relay-faq-question:hover{color:var(--rr-cyan)}
+body #relayInfoPanel .relay-faq-answer{display:none;padding:0 14px 14px;color:#9fb2c1;font:700 8px/1.65 'DM Mono',monospace}
+body #relayInfoPanel .relay-faq-item.open .relay-faq-answer{display:block}
+body #relayInfoPanel .relay-update-meta{margin:0 0 10px;color:var(--rr-gold);font:900 8px/1 'DM Mono',monospace;letter-spacing:1.5px}
+body #relayInfoPanel .relay-update-item{padding:12px 14px;color:#b8c8d4;font:700 8px/1.55 'DM Mono',monospace}
+
+/* Keep Home navigation visually dominant and prevent hidden legacy buttons from occupying space. */
+#intro.home-v2 .main-menu,#intro.home-v2 .info-launcher{display:none!important}
+#intro.home-v2 .home-v2-content{z-index:100!important}
+#intro.home-v2 .home-v2-secondary button{min-height:52px!important}
+
+@media(max-width:700px){
+ #intro.home-v2 #titlePanel,body #relayInfoPanel{padding:9px!important}
+ #intro.home-v2 #titlePanel .title-panel-card,body #relayInfoPanel .relay-info-card{width:96vw!important;max-height:92dvh!important;border-radius:12px!important}
+ #intro.home-v2 #titlePanel #titlePanelEyebrow,body #relayInfoPanel .relay-info-eyebrow{padding:20px 52px 0 18px!important;font-size:7px!important}
+ #intro.home-v2 #titlePanel #titlePanelHeading,body #relayInfoPanel #relayInfoHeading{margin:7px 52px 14px 18px!important;font-size:32px!important}
+ #intro.home-v2 #titlePanel #titlePanelContent,body #relayInfoPanel #relayInfoContent{padding:0 18px 18px!important}
+ #intro.home-v2 #titlePanel .title-panel-card::after,body #relayInfoPanel .relay-info-card::after{display:none}
+ #intro.home-v2 .home-opt{grid-template-columns:minmax(0,1fr) 88px!important}
+}
+@media(max-width:390px){
+ #intro.home-v2 #titlePanel .title-panel-card,body #relayInfoPanel .relay-info-card{width:98vw!important}
+ #intro.home-v2 #titlePanel #titlePanelContent,body #relayInfoPanel #relayInfoContent{padding-left:13px!important;padding-right:13px!important}
+}
+@media(prefers-reduced-motion:reduce){#intro.home-v2 #titlePanel *,body #relayInfoPanel *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
