@@ -22,8 +22,8 @@
     intro.dataset.homeV3Built = '1';
     intro.classList.add('home-v3');
 
+    const legacyMenu = intro.querySelector('.main-menu');
     const launcher = intro.querySelector('.info-launcher');
-    if (launcher) launcher.style.display = 'none';
 
     const bg = document.createElement('div');
     bg.className = 'home-v3-bg';
@@ -56,39 +56,20 @@
       </main>
       <footer class="home-v3-footer"><span>RELAY RUNNER · <b>VERSION 1.1.0</b></span><span>A / D MOVE · SPACE JUMP · ESC PAUSE</span></footer>`;
 
-    intro.replaceChildren(bg, shell);
+    intro.replaceChildren(bg, shell, legacyMenu, launcher);
 
-    shell.querySelector('[data-v3-play]')?.addEventListener('click', e => {
-      e.preventDefault();
-      click('start');
-    });
-    shell.querySelector('[data-v3-continue]')?.addEventListener('click', e => {
-      e.preventDefault();
-      click('continue');
-    });
-    shell.querySelector('[data-v3-options]')?.addEventListener('click', e => {
-      e.preventDefault();
-      document.querySelector('[data-title-panel="controls"]')?.click();
-    });
-    shell.querySelector('[data-v3-tutorial]')?.addEventListener('click', e => {
-      e.preventDefault();
-      document.querySelector('[data-title-panel="tutorial"]')?.click();
-    });
-    shell.querySelector('[data-v3-faq]')?.addEventListener('click', e => {
-      e.preventDefault();
-      document.querySelector('[data-relay-info="faq"]')?.click();
-    });
-    shell.querySelector('[data-v3-exit]')?.addEventListener('click', e => {
-      e.preventDefault();
-      click('exitTitle');
-    });
+    shell.querySelector('[data-v3-play]')?.addEventListener('click', e => { e.preventDefault(); click('start'); });
+    shell.querySelector('[data-v3-continue]')?.addEventListener('click', e => { e.preventDefault(); click('continue'); });
+    shell.querySelector('[data-v3-options]')?.addEventListener('click', e => { e.preventDefault(); document.querySelector('[data-title-panel="controls"]')?.click(); });
+    shell.querySelector('[data-v3-tutorial]')?.addEventListener('click', e => { e.preventDefault(); document.querySelector('[data-title-panel="tutorial"]')?.click(); });
+    shell.querySelector('[data-v3-faq]')?.addEventListener('click', e => { e.preventDefault(); document.querySelector('[data-relay-info="faq"]')?.click(); });
+    shell.querySelector('[data-v3-exit]')?.addEventListener('click', e => { e.preventDefault(); click('exitTitle'); });
 
     const syncContinue = () => {
       const legacy = $('continue');
       const button = shell.querySelector('[data-v3-continue]');
       if (!legacy || !button) return;
-      const hidden = legacy.classList.contains('hidden') || getComputedStyle(legacy).display === 'none';
-      button.hidden = hidden;
+      button.hidden = legacy.classList.contains('hidden') || getComputedStyle(legacy).display === 'none';
     };
     syncContinue();
     if ($('continue')) new MutationObserver(syncContinue).observe($('continue'), {attributes:true,attributeFilter:['class','style','hidden']});
