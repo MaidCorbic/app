@@ -1,4 +1,4 @@
-/* AAA dark-tactical mobile options rail: 8 segments + drag/snap feedback. */
+/* AAA dark-tactical mobile options rail: 8 segments + drag/snap + gold lock ring feedback. */
 (() => {
   if (window.__relayHomeTacticalRailV1) return;
   window.__relayHomeTacticalRailV1 = true;
@@ -13,19 +13,26 @@
     #homeOptionsScrollbar.tactical-rail .tactical-segment{position:absolute;left:3px;width:16px;height:12px;display:grid;place-items:center;color:rgba(112,133,154,.7);font:800 6px/1 "DM Mono",monospace;letter-spacing:.4px;border:1px solid rgba(141,244,255,.12);border-radius:3px;background:rgba(4,12,21,.82);box-shadow:inset 0 1px rgba(255,255,255,.03);transition:color .14s ease,border-color .14s ease,box-shadow .14s ease,transform .14s ease,background .14s ease}
     #homeOptionsScrollbar.tactical-rail .tactical-segment.is-active{color:#e9fdff;border-color:rgba(141,244,255,.72);background:rgba(16,46,63,.92);box-shadow:0 0 9px rgba(141,244,255,.38),inset 0 0 7px rgba(141,244,255,.1);transform:scale(1.08)}
     #homeOptionsScrollbar.tactical-rail .tactical-segment.is-passed{color:rgba(141,244,255,.72);border-color:rgba(141,244,255,.28)}
-    #homeOptionsScrollbar.tactical-rail .home-scroll-thumb{left:2px;right:2px;min-height:46px!important;border:1px solid rgba(141,244,255,.9);background:linear-gradient(180deg,#eaffff,rgba(141,244,255,.82) 45%,rgba(48,151,190,.82));box-shadow:0 0 12px rgba(141,244,255,.65),0 0 28px rgba(56,189,248,.2),inset 0 1px rgba(255,255,255,.95);z-index:3}
+    #homeOptionsScrollbar.tactical-rail .home-scroll-thumb{left:2px;right:2px;min-height:46px!important;border:1px solid rgba(141,244,255,.9);background:linear-gradient(180deg,#eaffff,rgba(141,244,255,.82) 45%,rgba(48,151,190,.82));box-shadow:0 0 12px rgba(141,244,255,.65),0 0 28px rgba(56,189,248,.2),inset 0 1px rgba(255,255,255,.95);z-index:3;position:relative}
     #homeOptionsScrollbar.tactical-rail .home-scroll-thumb::before{height:2px;box-shadow:0 -5px rgba(255,255,255,.3),0 5px rgba(255,255,255,.3)}
+    #homeOptionsScrollbar.tactical-rail .home-scroll-thumb::after{content:"";position:absolute;inset:-6px;border:1px solid rgba(255,208,110,0);border-radius:50%;transform:scale(.72);opacity:0;pointer-events:none}
     #homeOptionsScrollbar.tactical-rail.is-dragging .home-scroll-thumb{filter:brightness(1.25);box-shadow:0 0 16px rgba(141,244,255,.9),0 0 34px rgba(56,189,248,.3),inset 0 1px rgba(255,255,255,1)}
+    #homeOptionsScrollbar.tactical-rail.is-lock-pulse .home-scroll-thumb::after{animation:tacticalGoldRing 480ms cubic-bezier(.18,.78,.24,1) forwards}
+    #homeOptionsScrollbar.tactical-rail.is-lock-pulse .home-scroll-thumb{box-shadow:0 0 16px rgba(141,244,255,.95),0 0 32px rgba(56,189,248,.3),inset 0 1px rgba(255,255,255,1),0 0 18px rgba(255,208,110,.32)}
     #homeOptionsScrollbar.tactical-rail .tactical-readout{position:absolute;right:25px;top:50%;transform:translateY(-50%);padding:4px 6px;color:#8df4ff;background:rgba(3,10,18,.94);border:1px solid rgba(141,244,255,.24);border-radius:4px;font:900 6px/1 "DM Mono",monospace;letter-spacing:.8px;opacity:0;pointer-events:none;white-space:nowrap;transition:opacity .14s ease,transform .14s ease}
     #homeOptionsScrollbar.tactical-rail.is-dragging .tactical-readout{opacity:1;transform:translate(-2px,-50%)}
+    #homeOptionsScrollbar.tactical-rail .tactical-lock{position:absolute;right:24px;top:50%;z-index:5;padding:5px 7px;color:#ffd06e;background:rgba(8,12,16,.96);border:1px solid rgba(255,208,110,.35);border-radius:5px;font:900 6px/1 "DM Mono",monospace;letter-spacing:.8px;opacity:0;transform:translate(4px,-50%) scale(.96);pointer-events:none;white-space:nowrap;text-shadow:0 0 8px rgba(255,208,110,.65);transition:opacity .12s ease,transform .12s ease}
+    #homeOptionsScrollbar.tactical-rail.is-lock-pulse .tactical-lock{opacity:1;transform:translate(0,-50%) scale(1)}
+    @keyframes tacticalGoldRing{0%{opacity:0;transform:scale(.55);border-color:rgba(255,208,110,0)}18%{opacity:1;border-color:rgba(255,208,110,.95)}100%{opacity:0;transform:scale(1.45);border-color:rgba(255,208,110,0)}}
     @media(max-width:700px){#homeOptionsScrollbar.tactical-rail{right:-1px!important;width:25px!important}.home-options-final{padding-right:9px!important}.home-opt{margin-right:3px!important}.home-section{padding-right:4px!important}}
     @media(max-width:380px){#homeOptionsScrollbar.tactical-rail{width:22px!important}.tactical-segment{transform:scale(.92)}}
-    @media(prefers-reduced-motion:reduce){#homeOptionsScrollbar.tactical-rail .tactical-segment,#homeOptionsScrollbar.tactical-rail .tactical-readout{transition:none!important}}
+    @media(prefers-reduced-motion:reduce){#homeOptionsScrollbar.tactical-rail .tactical-segment,#homeOptionsScrollbar.tactical-rail .tactical-readout{transition:none!important}#homeOptionsScrollbar.tactical-rail .home-scroll-thumb::after{animation:none!important}#homeOptionsScrollbar.tactical-rail.is-lock-pulse .tactical-lock{opacity:1;transform:translate(0,-50%) scale(1)}}
   `;
   document.head.appendChild(style);
 
-  let rail, thumb, track, content, card, segments, readout;
+  let rail, thumb, track, content, card, segments, readout, lockLabel;
   let lastActive = -1;
+  let lockTimer = 0;
   let observer;
 
   const install = () => {
@@ -51,6 +58,10 @@
     readout.className = 'tactical-readout';
     readout.textContent = 'SCROLL 01 / 08';
     rail.appendChild(readout);
+    lockLabel = document.createElement('span');
+    lockLabel.className = 'tactical-lock';
+    lockLabel.textContent = 'LOCKED // 00%';
+    rail.appendChild(lockLabel);
 
     content.addEventListener('scroll', sync, {passive:true});
     rail.addEventListener('pointerdown', onRailDown, {passive:false});
@@ -67,7 +78,6 @@
     const trackHeight = rail.clientHeight;
     const ratio = max ? content.scrollTop / max : 0;
     const thumbHeight = thumb.offsetHeight || Math.max(46, Math.min(trackHeight * .34, trackHeight * (content.clientHeight / Math.max(1, content.scrollHeight))));
-    const travel = Math.max(1, trackHeight - thumbHeight);
     const active = Math.min(7, Math.max(0, Math.round(ratio * 7)));
     segments.forEach((segment, i) => {
       segment.classList.toggle('is-active', i === active);
@@ -83,6 +93,18 @@
     }
     lastActive = active;
     rail.classList.toggle('has-overflow', max > 2);
+  };
+
+  const pulseLock = () => {
+    if (!rail || !content) return;
+    const max = Math.max(0, content.scrollHeight - content.clientHeight);
+    const pct = max ? Math.round((content.scrollTop / max) * 100) : 0;
+    if (lockLabel) lockLabel.textContent = `LOCKED // ${String(pct).padStart(2,'0')}%`;
+    rail.classList.remove('is-lock-pulse');
+    void rail.offsetWidth;
+    rail.classList.add('is-lock-pulse');
+    clearTimeout(lockTimer);
+    lockTimer = window.setTimeout(() => rail?.classList.remove('is-lock-pulse'), 520);
   };
 
   const onRailDown = event => {
@@ -115,6 +137,7 @@
       activeDrag = false;
       rail.classList.remove('is-dragging');
       thumb.classList.remove('is-dragging');
+      pulseLock();
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', end);
       window.removeEventListener('pointercancel', end);
