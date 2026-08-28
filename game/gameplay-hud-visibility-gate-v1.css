@@ -1,0 +1,56 @@
+/* Gameplay-only presentation gate.
+ * Keeps gameplay systems active, but prevents telemetry/presentation widgets
+ * from leaking onto Home, Pause, Finish or Game Over surfaces.
+ */
+
+/* Home / title screen: never show gameplay telemetry. */
+body:has(#intro:not(.hidden)) #relay-gameplay-new-layer,
+body:has(#intro:not(.hidden)) #relayP1Momentum,
+body:has(#intro:not(.hidden)) #relayP1DashStatus,
+body:has(#intro:not(.hidden)) #relayDashHud,
+body:has(#intro:not(.hidden)) #mobileDashButton {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Pause / result surfaces: keep gameplay clean while a modal owns focus. */
+body:has(#pauseMenu:not(.hidden)) #relay-gameplay-new-layer,
+body:has(#pauseMenu:not(.hidden)) #relayP1Momentum,
+body:has(#pauseMenu:not(.hidden)) #relayP1DashStatus,
+body:has(#pauseMenu:not(.hidden)) #relayDashHud,
+body:has(#finish:not(.hidden)) #relay-gameplay-new-layer,
+body:has(#finish:not(.hidden)) #relayP1Momentum,
+body:has(#finish:not(.hidden)) #relayP1DashStatus,
+body:has(#relayInfoPanel:not(.hidden)) #relay-gameplay-new-layer,
+body:has(#relayInfoPanel:not(.hidden)) #relayP1Momentum,
+body:has(#relayInfoPanel:not(.hidden)) #relayP1DashStatus,
+body:has(#gameOver:not(.hidden)) #relay-gameplay-new-layer,
+body:has(#gameOver:not(.hidden)) #relayP1Momentum,
+body:has(#gameOver:not(.hidden)) #relayP1DashStatus,
+body:has(#gameOver:not(.hidden)) #relayDashHud {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* The micro-decision and recap surfaces are gameplay-only presentation. */
+body:has(#intro:not(.hidden)) #relay-gameplay-new-layer .ng-chain,
+body:has(#intro:not(.hidden)) #relay-gameplay-new-layer .ng-event,
+body:has(#intro:not(.hidden)) #relay-gameplay-new-layer .ng-choice,
+body:has(#intro:not(.hidden)) #relay-gameplay-new-layer .ng-recap,
+body:has(#pauseMenu:not(.hidden)) #relay-gameplay-new-layer .ng-chain,
+body:has(#pauseMenu:not(.hidden)) #relay-gameplay-new-layer .ng-event,
+body:has(#pauseMenu:not(.hidden)) #relay-gameplay-new-layer .ng-choice,
+body:has(#pauseMenu:not(.hidden)) #relay-gameplay-new-layer .ng-recap {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Mobile Dash is a gameplay control, never part of the title/menu UI. */
+body:has(#intro:not(.hidden)) #mobileDashButton,
+body:has(#finish:not(.hidden)) #mobileDashButton,
+body:has(#gameOver:not(.hidden)) #mobileDashButton {
+  display: none !important;
+}
