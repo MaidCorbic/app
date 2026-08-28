@@ -1,4 +1,4 @@
-/* Final mobile/gameplay visual contract. */
+/* Final mobile/gameplay visual contract V2. */
 #relaySplash.relay-splash{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
 #relaySplash.relay-splash .relay-splash-art{display:block}
 #relaySplash.relay-splash .relay-splash-ui{text-align:left}
@@ -6,9 +6,39 @@
 #relaySplash.relay-splash .relay-splash-status{text-align:left}
 #relaySplash.relay-splash .relay-splash-brand{display:flex}
 #relay-flight-hud-v1,#relay-flight-hud-v1 *{display:none!important}
+
+html,body{max-width:100%;overflow-x:hidden}
 #play,#play *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent}
 #play{-webkit-touch-callout:none;overscroll-behavior:none;touch-action:manipulation}
 #phaser-game,#phaser-game canvas,.mobile-controls,.mobile-joystick,.mobile-actions,.mobile-actions button{touch-action:none!important}
+
+/* Any long Options/tutorial surface must remain reachable on phones. */
+@media(max-width:768px){
+  #titlePanel:has(.home-tutorial-content){
+    position:fixed!important;
+    inset:0!important;
+    width:100vw!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch!important;
+    overscroll-behavior-y:contain!important;
+    touch-action:pan-y!important;
+  }
+  #titlePanel:has(.home-tutorial-content) .title-panel-card{
+    max-height:none!important;
+    min-height:0!important;
+    height:auto!important;
+  }
+  #titlePanel:has(.home-tutorial-content) #titlePanelContent{
+    overflow:visible!important;
+    max-height:none!important;
+    height:auto!important;
+    flex:none!important;
+    touch-action:pan-y!important;
+  }
+}
 
 @media(max-width:768px) and (orientation:portrait){
   html body.is-touch section#play div.mobile-controls{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
@@ -17,21 +47,74 @@
 }
 
 @media(max-width:768px) and (orientation:landscape){
-  html body.is-touch section#play div.mobile-controls{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:clamp(10px,2vw,22px)!important;padding:0 max(10px,env(safe-area-inset-left,0px)) max(10px,env(safe-area-inset-bottom,0px))!important;box-sizing:border-box!important;pointer-events:none!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-joystick{pointer-events:auto!important;flex:0 0 auto!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions{pointer-events:auto!important;display:grid!important;grid-template-columns:repeat(4,var(--touch-size))!important;grid-template-rows:repeat(2,var(--touch-size))!important;align-items:center!important;justify-items:center!important;justify-content:end!important;gap:clamp(7px,1.35vw,12px)!important;width:max-content!important;height:max-content!important;margin:0!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{box-sizing:border-box!important;width:var(--touch-size)!important;height:var(--touch-size)!important;min-width:var(--touch-size)!important;min-height:var(--touch-size)!important;max-width:var(--touch-size)!important;max-height:var(--touch-size)!important;aspect-ratio:1/1!important;border-radius:50%!important;padding:0!important;margin:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-align:center!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button:nth-child(5){grid-column:2!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button:nth-child(6){grid-column:3!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button small{display:block!important;margin:0!important;padding:0!important;font-size:clamp(7px,1.45vw,9px)!important;line-height:1!important;font-weight:700!important;letter-spacing:.04em!important;opacity:.9!important}
+  html body.is-touch section#play div.mobile-controls{
+    display:flex!important;
+    position:absolute!important;
+    inset:0!important;
+    align-items:flex-end!important;
+    justify-content:space-between!important;
+    gap:0!important;
+    padding:0 max(12px,env(safe-area-inset-left,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))!important;
+    box-sizing:border-box!important;
+    pointer-events:none!important;
+  }
+  html body.is-touch section#play div.mobile-controls div.mobile-joystick{
+    pointer-events:auto!important;
+    flex:0 0 auto!important;
+    margin:0!important;
+  }
+  html body.is-touch section#play div.mobile-controls div.mobile-actions{
+    pointer-events:auto!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,var(--touch-size))!important;
+    grid-template-rows:repeat(2,var(--touch-size))!important;
+    align-items:center!important;
+    justify-items:center!important;
+    gap:clamp(6px,1.2vw,10px)!important;
+    width:max-content!important;
+    height:max-content!important;
+    margin:0!important;
+  }
+  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{
+    box-sizing:border-box!important;
+    width:var(--touch-size)!important;
+    height:var(--touch-size)!important;
+    min-width:var(--touch-size)!important;
+    min-height:var(--touch-size)!important;
+    max-width:var(--touch-size)!important;
+    max-height:var(--touch-size)!important;
+    aspect-ratio:1/1!important;
+    border-radius:50%!important;
+    padding:0!important;
+    margin:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:3px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-align:center!important;
+  }
+  html body.is-touch section#play div.mobile-controls div.mobile-actions>button small{
+    display:block!important;
+    margin:0!important;
+    padding:0!important;
+    font-size:clamp(7px,1.45vw,9px)!important;
+    line-height:1!important;
+    font-weight:700!important;
+    letter-spacing:.04em!important;
+    opacity:.9!important;
+  }
 }
 
 @media(max-width:420px) and (orientation:landscape){
-  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:46px;gap:5px!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;max-width:46px!important;max-height:46px!important}
+  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:45px;gap:5px!important}
+  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{width:45px!important;height:45px!important;min-width:45px!important;min-height:45px!important;max-width:45px!important;max-height:45px!important}
 }
 @media(min-width:421px) and (max-width:768px) and (orientation:landscape){
-  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:52px}
+  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:51px}
 }
 
 html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="jump"],
