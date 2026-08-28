@@ -120,7 +120,6 @@ import { loadState, saveState } from './src/state.js';
     const host = kind === 'home' ? root.querySelector('#titlePanelContent') : root.querySelector('#panelContent');
     if (!host) return false;
     host.innerHTML = build();
-    if (kind === 'pause') root.classList.add('relay-options-stable');
     return true;
   };
 
@@ -144,6 +143,7 @@ import { loadState, saveState } from './src/state.js';
     injectStyles();
     syncPresentation(readPresentation());
 
+    window.addEventListener('relay-options-open', homeOpen);
     document.addEventListener('click', event => {
       const homeButton = event.target.closest?.('[data-title-panel="controls"]');
       if (homeButton) window.setTimeout(homeOpen, 0);
@@ -154,8 +154,6 @@ import { loadState, saveState } from './src/state.js';
       if (toggleButton) {
         const key = toggleButton.dataset.finalToggle;
         const presentation = ['intelCards','allyIntel','eventPopups','tutorialHints'].includes(key);
-        // Pause settings already have the native main.js handler via data-setting when present;
-        // these final controls use the stable owner directly for deterministic feedback.
         toggle(key, presentation);
         rerender();
         return;
@@ -167,7 +165,7 @@ import { loadState, saveState } from './src/state.js';
       const full = event.target.closest?.('[data-final-fullscreen]');
       if (full) { (async()=>{ try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.(); else await document.exitFullscreen?.(); } catch {} })(); return; }
       const reset = event.target.closest?.('[data-final-reset]');
-      if (reset) { save({ muted:false,musicVolume:.55,sfxVolume:.7,screenShake:true,reducedMotion:false,rain:true,aiVoice:true,tutorialEnabled:true }); writePresentation({ ...presentationDefaults }); setLanguage('en'); window.dispatchEvent(new CustomEvent('relay-settings-change',{detail:{reset:true,source:'options-ui-stable-v2'}})); showToast('OPTIONS · RESET'); rerender(); return; }
+      if (reset) { save({ muted:false,musicVolume:.55,sfxVolume:.7,screenShake:true,reducedMotion:false,rain:true,aiVoice:true,tutorialEnabled:true }); writePresentation({ ...presentationDefaults }); setLanguage('en'); window.dispatchEvent(new CustomEvent('relay-settings-change',{detail:{reset:true,source:'options-ui-stable-v2'}})); rerender(); return; }
       const controls = event.target.closest?.('[data-final-controls]');
       if (controls) { const panel = controls.closest('.relay-stable-section')?.querySelector('[data-final-controls-panel]'); if (panel) panel.hidden = !panel.hidden; return; }
     });
