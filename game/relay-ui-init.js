@@ -7,6 +7,7 @@ import './signal-network-v1.css';
 import './city-response-v1.css';
 import './home-options-final-mobile-v1.css';
 import './home-options-card-motion-v1.css';
+import './home-options-event-delegation-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
