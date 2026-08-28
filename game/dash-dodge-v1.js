@@ -55,6 +55,7 @@ function dash(s) {
   p.setData?.('dashing', true);
   p.setData?.('invulnerable', true);
   s.dashing = true;
+  s.dashTimer = DASH_DURATION;
   s.game?.events?.emit('dash-start', { direction, duration:DASH_DURATION });
   if (!s.motionReduced) {
     s.cameras?.main?.shake?.(80, .002);
@@ -78,6 +79,7 @@ function update(s, delta) {
       body.setGravityY?.(st.originalGravity);
       p.setData?.('dashing', false);
       s.dashing = false;
+      s.dashTimer = 0;
       s.game?.events?.emit('dash-end');
     }
   }
@@ -106,14 +108,16 @@ if (!RunnerScene.prototype.__dashDodgeV1UpdatePatched) {
   RunnerScene.prototype.__dashDodgeV1UpdatePatched = true;
 }
 
-document.addEventListener('keydown', event => {
+const handleDashKey = event => {
   if (event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.code !== 'ShiftLeft') return;
   if (dash(scene())) event.preventDefault();
-}, true);
+};
+document.addEventListener('keydown', handleDashKey, true);
+window.addEventListener('keydown', handleDashKey, true);
 window.addEventListener('relay:dash', () => dash(scene()));
 window.addEventListener('blur', () => {
   const s = scene(); const st = states.get(s);
-  if (st?.dashTimer > 0) { st.dashTimer=0; st.invulnTimer=0; s.player?.body?.setGravityY?.(st.originalGravity); s.player?.setData?.('dashing',false); s.player?.setData?.('invulnerable',false); s.dashing=false; }
+  if (st?.dashTimer > 0) { st.dashTimer=0; st.invulnTimer=0; s.player?.body?.setGravityY?.(st.originalGravity); s.player?.setData?.('dashing',false); s.player?.setData?.('invulnerable',false); s.dashing=false; s.dashTimer=0; }
 });
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',installButton,{once:true}); else installButton();
