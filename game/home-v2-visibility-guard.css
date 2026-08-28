@@ -1,0 +1,17 @@
+/* Home V2 hard isolation: gameplay is never visually or interactively present behind Home. */
+body:has(#intro.home-v2:not(.hidden)) #play,
+body:has(#intro.home-v2:not(.hidden)) #play > *,
+body:has(#intro.home-v2:not(.hidden)) #phaser-game,
+body:has(#intro.home-v2:not(.hidden)) .hud,
+body:has(#intro.home-v2:not(.hidden)) .world-marker,
+body:has(#intro.home-v2:not(.hidden)) .input-guide,
+body:has(#intro.home-v2:not(.hidden)) .mobile-controls,
+body:has(#intro.home-v2:not(.hidden)) .rotate-prompt,
+body:has(#intro.home-v2:not(.hidden)) #pauseMenu,
+body:has(#intro.home-v2:not(.hidden)) #finish,
+body:has(#intro.home-v2:not(.hidden)) #gameOver,
+body:has(#intro.home-v2:not(.hidden)) #levelUp,
+body:has(#intro.home-v2:not(.hidden)) #abilityUnlock{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+body:has(#intro.home-v2:not(.hidden)) #play{display:none!important}
+body:has(#intro.home-v2:not(.hidden)){overflow:hidden!important}
+#intro.home-v2{z-index:9000!important}
