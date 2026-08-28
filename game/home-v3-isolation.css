@@ -1,0 +1,32 @@
+/* Home V3 isolation: legacy menu CSS must never style the new Home surface. */
+body.home-v3-active #intro,
+body.home-v3-active #intro .main-menu,
+body.home-v3-active #intro .menu-backdrop,
+body.home-v3-active #intro .main-menu-body,
+body.home-v3-active #intro .title-lockup,
+body.home-v3-active #intro .menu-actions,
+body.home-v3-active #intro .title-secondary{box-sizing:border-box}
+body.home-v3-active #intro .main-menu,
+body.home-v3-active #intro .menu-backdrop{display:none!important}
+body.home-v3-active #intro .home-v3-shell{display:flex!important}
+body.home-v3-active #play,
+body.home-v3-active #pauseMenu,
+body.home-v3-active #finish,
+body.home-v3-active #gameOver,
+body.home-v3-active #levelUp,
+body.home-v3-active #abilityUnlock,
+body.home-v3-active #titlePanel,
+body.home-v3-active #relayInfoPanel{pointer-events:none!important}
+body.home-v3-active #intro,
+body.home-v3-active #intro *{font-family:inherit}
+body.home-v3-active #intro .home-v3-play,
+body.home-v3-active #intro .home-v3-card,
+body.home-v3-active #intro .info-launcher button{pointer-events:auto!important}
+body.home-v3-active #intro .home-v3-title,
+body.home-v3-active #intro .home-v3-title em{transform:none!important;text-shadow:none!important}
+body.home-v3-active #intro button{appearance:none;-webkit-appearance:none}
+body.home-v3-active #intro .home-v3-shell,
+body.home-v3-active #intro .home-v3-bg,
+body.home-v3-active #intro .home-v3-grid,
+body.home-v3-active #intro .home-v3-glow,
+body.home-v3-active #intro .home-v3-scan{isolation:isolate}
