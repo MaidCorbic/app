@@ -1,0 +1,13 @@
+/* Subtle AAA card motion: fast, restrained, touch-safe. */
+.home-opt{will-change:transform,box-shadow;animation:relayCardIn 220ms cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--relay-card-index, 0) * 40ms)}
+.home-opt:hover{border-color:rgba(141,244,255,.26)!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 8px 22px rgba(0,0,0,.3),0 0 14px rgba(56,189,248,.08)!important}
+.home-opt:focus-within{border-color:rgba(141,244,255,.32)!important;box-shadow:inset 0 1px rgba(255,255,255,.06),0 8px 24px rgba(0,0,0,.32),0 0 16px rgba(56,189,248,.10)!important}
+.home-opt:active{transform:scale(.985)!important}
+.home-opt button{transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease,background .14s ease!important}
+.home-opt button:active{transform:scale(.96)!important}
+.home-opt button.is-on{position:relative;overflow:hidden}
+.home-opt button.is-on::after{content:"";position:absolute;inset:1px;border-radius:inherit;border:1px solid rgba(255,208,110,.55);opacity:0;transform:scale(.78);pointer-events:none}
+.home-opt button.is-on:active::after{animation:relayGoldConfirm 420ms ease-out}
+@keyframes relayCardIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes relayGoldConfirm{0%{opacity:0;transform:scale(.78)}18%{opacity:1}100%{opacity:0;transform:scale(1.08)}}
+@media(prefers-reduced-motion:reduce){.home-opt{animation:none!important;will-change:auto}.home-opt button{transition:none!important}.home-opt button.is-on:active::after{animation:none!important}}
