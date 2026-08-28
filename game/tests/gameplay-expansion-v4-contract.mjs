@@ -10,20 +10,20 @@ const required = [
   'trajectoryPreview', 'sonicPushPull', 'remoteCamera', 'objectRotation',
   'surfacePhaseMarking', 'impactBanking',
 ];
-for (const feature of required) {
-  assert.match(source, new RegExp(feature), `Missing V4 feature: ${feature}`);
-}
+for (const feature of required) assert.match(source, new RegExp(feature), `Missing V4 feature: ${feature}`);
 
-assert.match(source, /Friction Control|GRIP|SLICK/);
-assert.match(source, /Temperature State|THERMAL STATE/);
-assert.match(source, /Thermal Chain|lastTransfer/);
-assert.match(source, /Trajectory Preview|TRAJECTORY PREVIEW/);
-assert.match(source, /Remote Camera|REMOTE CAMERA/);
-assert.match(source, /Object Rotation|OBJECT ROTATION/);
-assert.match(source, /Surface Phase|SURFACE PHASE/);
-assert.match(source, /Impact Bank|IMPACT BANK/);
+assert.match(source, /GRIP/);
+assert.match(source, /SLICK/);
+assert.match(source, /THERMAL STATE/);
+assert.match(source, /lastTransfer/);
+assert.match(source, /TRAJECTORY PREVIEW/);
+assert.match(source, /REMOTE CAMERA/);
+assert.match(source, /OBJECT ROTATION/);
+assert.match(source, /SURFACE PHASE/);
+assert.match(source, /IMPACT BANK/);
 assert.match(source, /shutdown/);
 assert.match(source, /__relayGameplayExpansionV4SafeInstalled/);
+assert.doesNotMatch(source, /keydown-/);
 
 assert.match(loader, /installGameplayExpansion\(RunnerScene\)/);
 assert.match(loader, /installGameplayExpansionV2Safe\(RunnerScene\)/);
