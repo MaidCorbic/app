@@ -1,2 +1,2 @@
-// Legacy adapter: unified Options/Settings owns presentation and interaction.
-import './unified-options-ui-v1.js';
+// Legacy adapter: stable Options UI is now the single owner.
+import './options-ui-stable-v2.js';
