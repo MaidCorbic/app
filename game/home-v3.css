@@ -1,8 +1,7 @@
 /* Relay Runner Home V3 — full replacement for the legacy title surface. */
 #intro.home-v3{position:fixed!important;inset:0!important;z-index:500!important;display:block!important;overflow:hidden!important;background:#050a12!important;color:#eaf4fb!important}
 #intro.home-v3.hidden{display:none!important}
-#intro.home-v3 .main-menu{display:none!important}
-#intro.home-v3 .menu-backdrop{display:none!important}
+#intro.home-v3 .main-menu,#intro.home-v3 .menu-backdrop{display:none!important}
 #intro.home-v3 .info-launcher{position:absolute;top:max(18px,env(safe-area-inset-top));right:18px;z-index:20;display:flex;gap:8px}
 #intro.home-v3 .info-launcher button{min-width:44px;height:40px;border:1px solid rgba(141,244,255,.22);border-radius:8px;background:rgba(7,16,28,.82);color:#cfe7f0;font:800 9px/1 'DM Mono',monospace;letter-spacing:1px;backdrop-filter:blur(12px)}
 #intro.home-v3 .home-v3-bg{position:absolute;inset:0;overflow:hidden;background:radial-gradient(circle at 50% 12%,rgba(39,117,154,.25),transparent 35%),linear-gradient(180deg,#0b1b2a 0%,#07111d 48%,#03070d 100%)}
@@ -19,7 +18,7 @@
 #intro.home-v3 .home-v3-kicker{margin:0 0 14px;color:#ffd06e;font:800 9px/1.2 'DM Mono',monospace;letter-spacing:2.2px}
 #intro.home-v3 .home-v3-title{margin:0;font:950 clamp(54px,9vw,112px)/.78 Arial,sans-serif;letter-spacing:-6px;color:#f1f6fb;text-transform:uppercase}
 #intro.home-v3 .home-v3-title em{display:block;color:#ffd06e;font-style:normal;margin-left:clamp(18px,4vw,52px)}
-#intro.home-v3 .home-v3-copy{max-width:600px;margin:26px 0 0;color:#9cafbd;font:600 11px/1.65 'DM Mono',monospace}
+#intro.home-v3 .home-v3-copy{max-width:600px;margin:26px 0 0;color:#9cafbd;font:600 11px/1.65 'DM Mono',monospace;overflow-wrap:anywhere;white-space:normal}
 #intro.home-v3 .home-v3-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:28px;max-width:600px}
 #intro.home-v3 .home-v3-play{grid-column:1/-1;min-height:62px;border:1px solid rgba(255,208,110,.75);border-radius:7px;background:linear-gradient(135deg,#ffe19a,#ffbe43);color:#07101a;font:950 13px/1 'DM Mono',monospace;letter-spacing:2px;box-shadow:0 14px 45px rgba(255,190,67,.18);cursor:pointer;transition:transform .18s ease,filter .18s ease}
 #intro.home-v3 .home-v3-play:hover{transform:translateY(-2px);filter:brightness(1.04)}
@@ -30,11 +29,20 @@
 #intro.home-v3 .home-v3-card::after{content:'';position:absolute;right:-24px;top:-24px;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle,rgba(141,244,255,.14),transparent 65%)}
 #intro.home-v3 .home-v3-card:hover{transform:translateX(3px);border-color:rgba(141,244,255,.4);background:linear-gradient(145deg,rgba(10,31,50,.96),rgba(4,10,18,.96))}
 #intro.home-v3 .home-v3-card span{display:block;font:900 11px/1.2 'DM Mono',monospace;letter-spacing:1.2px}
-#intro.home-v3 .home-v3-card small{display:block;margin-top:7px;color:#708797;font:700 7px/1.2 'DM Mono',monospace;letter-spacing:.8px}
+#intro.home-v3 .home-v3-card small{display:block;margin-top:7px;color:#708797;font:700 7px/1.2 'DM Mono',monospace;letter-spacing:.8px;overflow-wrap:anywhere;white-space:normal}
 #intro.home-v3 .home-v3-footer{display:flex;justify-content:space-between;gap:16px;padding-top:16px;border-top:1px solid rgba(141,244,255,.08);color:#63798a;font:700 7px/1.3 'DM Mono',monospace;letter-spacing:1px}
 #intro.home-v3 .home-v3-footer b{color:#89a3b4;font-weight:800}
-body.home-v3-active #play{display:none!important}
-body.home-v3-active #toast{display:none!important}
+body.home-v3-active #play,body.home-v3-active #toast{display:none!important}
+#intro.home-v3,#intro.home-v3 *{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#titlePanelContent,#relayInfoContent{min-width:0;overflow-wrap:anywhere;white-space:normal}
+#titlePanelContent p,#titlePanelContent li,#relayInfoContent p,#relayInfoContent li{overflow-wrap:anywhere;word-break:normal;white-space:normal}
+#titlePanel:has(.home-options-final),#relayInfoPanel:has(.relay-info-card){box-sizing:border-box}
+#titlePanel:has(.home-options-final) .title-panel-card,#relayInfoPanel .relay-info-card{box-sizing:border-box;max-width:min(920px,96vw);max-height:min(92dvh,900px);overflow:hidden}
+#titlePanel:has(.home-options-final) #titlePanelContent,#relayInfoPanel #relayInfoContent{min-height:0;max-height:calc(min(92dvh,900px) - 150px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin}
+#titlePanel:has(.home-options-final) #titlePanelContent::-webkit-scrollbar,#relayInfoPanel #relayInfoContent::-webkit-scrollbar{width:7px}
+#titlePanel:has(.home-options-final) #titlePanelContent::-webkit-scrollbar-thumb,#relayInfoPanel #relayInfoContent::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(141,244,255,.55),rgba(255,208,110,.55));border-radius:999px}
+body,button,input,textarea,select{-webkit-user-select:none;user-select:none}
+input,textarea{user-select:text;-webkit-user-select:text}
 @media(max-width:760px){
   #intro.home-v3 .home-v3-shell{width:min(100% - 24px,560px);padding:18px 0 16px}
   #intro.home-v3 .home-v3-header{padding-right:104px}
@@ -45,7 +53,13 @@ body.home-v3-active #toast{display:none!important}
   #intro.home-v3 .home-v3-actions{margin-top:20px;gap:8px}
   #intro.home-v3 .home-v3-play{min-height:56px}
   #intro.home-v3 .home-v3-card{min-height:62px;padding:14px 15px}
-  #intro.home-v3 .home-v3-footer{font-size:6px}
+  #intro.home-v3 .home-v3-footer{font-size:6px;flex-wrap:wrap}
+  #titlePanel:has(.home-options-final),#relayInfoPanel{padding:6px!important}
+  #titlePanel:has(.home-options-final) .title-panel-card,#relayInfoPanel .relay-info-card{width:96vw!important;max-height:calc(100dvh - 12px)!important;border-radius:16px!important}
+  #titlePanel:has(.home-options-final) #titlePanelContent,#relayInfoPanel #relayInfoContent{max-height:calc(100dvh - 120px)!important;padding-right:3px}
+}
+@media(max-width:390px){
+  #titlePanel:has(.home-options-final) #titlePanelContent,#relayInfoPanel #relayInfoContent{max-height:calc(100dvh - 108px)!important}
 }
 @media(max-height:700px) and (orientation:landscape){
   #intro.home-v3 .home-v3-main{grid-template-columns:1.15fr .85fr;gap:30px}
