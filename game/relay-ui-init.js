@@ -67,3 +67,4 @@ import './wall-slide-v1.js';
 import './dynamic-environment-reactions-v1.js';
 import './production-unfreeze-v1.js';
 import './src/systems/mobile-input-single-owner-v1.js';
+import './src/systems/mobile-gameplay-stability-v1.js';

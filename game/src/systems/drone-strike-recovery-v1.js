@@ -2,11 +2,13 @@ import Phaser from 'phaser';
 
 const CONFIG = {
   missionUnlock: ['first-delivery','dead-drop','blackout','pursuit','signal-storm','corporate-lockdown','final-relay'],
-  droneCount: 2,
+  maxActiveDrones: 1,
   droneDetectRadius: 560,
   lockMs: 1050,
-  strikeDelayMs: 1550,
-  strikeCooldownMs: 4200,
+  strikeCooldownMs: 5200,
+  droneRetireMs: 1400,
+  droneRespawnCooldownMs: 3200,
+  spawnProtectionMs: 8000,
   zoneRadius: 92,
   zoneLifeMs: 2550,
   recoveryHoldMs: 900,
@@ -22,9 +24,13 @@ function emit(scene, name, detail = {}) {
   try { scene.events?.emit(name, { ...detail, source: 'drone-strike-recovery-v1' }); } catch { /* optional */ }
 }
 
+function spawnProtected(scene) {
+  return Number(scene?.time?.now) < Number(scene?.__relaySpawnProtectionUntil || 0);
+}
+
 function killPlayer(scene, reason = 'ATOMIC STRIKE') {
   const player = scene?.player;
-  if (!player || scene.__droneStrikeDeathLock) return;
+  if (!player || scene.__droneStrikeDeathLock || spawnProtected(scene)) return;
   scene.__droneStrikeDeathLock = true;
   try {
     player.setTint?.(0xff5a55);
@@ -62,12 +68,22 @@ function createDrone(scene, index) {
     phase: Math.random() * Math.PI * 2,
     lockedAt: 0,
     nextStrikeAt: 0,
+    retireAt: 0,
     targetX: null,
     targetY: null,
+    active: true,
   };
 
   scene.tweens.add({ targets: [glow, core], alpha: { from: .35, to: 1 }, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
   return state;
+}
+
+function retireDrone(scene, drone, now) {
+  if (!drone || !drone.active) return;
+  drone.active = false;
+  drone.root?.destroy(true);
+  scene.__droneNextSpawnAt = now + CONFIG.droneRespawnCooldownMs;
+  emit(scene, 'drone:retired', { index: drone.index });
 }
 
 function createZone(scene, x, y) {
@@ -76,7 +92,7 @@ function createZone(scene, x, y) {
   const inner = scene.add.circle(0, 0, CONFIG.zoneRadius * .52, 0xff162d, .14);
   const ring = scene.add.circle(0, 0, CONFIG.zoneRadius, 0xff5872, .55).setStrokeStyle(3, 0xff5872, .95);
   const core = scene.add.circle(0, 0, 18, 0xffe0e6, .82).setBlendMode(Phaser.BlendModes.ADD);
-  const label = scene.add.text(0, -CONFIG.zoneRadius - 20, 'STRIKE ZONE', {
+  const label = scene.add.text(0, -CONFIG.zoneRadius - 20, spawnProtected(scene) ? 'STRIKE · BLOCKED' : 'STRIKE ZONE', {
     fontFamily: 'monospace', fontSize: '12px', color: '#ffd4db',
     stroke: '#080d16', strokeThickness: 4,
   }).setOrigin(.5);
@@ -88,7 +104,7 @@ function createZone(scene, x, y) {
   const pulse = scene.tweens.add({ targets: [ring, core], scale: { from: .72, to: 1.15 }, alpha: { from: .35, to: 1 }, duration: 360, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
   const life = { zone, ring, pulse, bornAt: scene.time.now, detonated: false, x, y };
   scene.__droneZones.push(life);
-  emit(scene, 'drone:strike-warning', { x, y });
+  emit(scene, 'drone:strike-warning', { x, y, protected: spawnProtected(scene) });
   return life;
 }
 
@@ -97,11 +113,12 @@ function detonateZone(scene, life) {
   life.detonated = true;
   const player = scene.player;
   const dist = player ? Phaser.Math.Distance.Between(player.x, player.y, life.x, life.y) : Infinity;
+  const protectedHit = spawnProtected(scene) || Number(scene?.healthInvulnerable) > 0 || Number(scene?.respawnGrace) > 0;
   const blast = scene.add.circle(life.x, life.y, 24, 0xffd9df, .72).setDepth(60).setBlendMode(Phaser.BlendModes.ADD);
   scene.tweens.add({ targets: blast, radius: CONFIG.zoneRadius * 1.65, alpha: 0, duration: 420, ease: 'Cubic.Out', onComplete: () => blast.destroy() });
   scene.cameras?.main?.shake?.(420, .014);
-  emit(scene, 'drone:strike-detonate', { x: life.x, y: life.y, hit: dist <= CONFIG.zoneRadius });
-  if (dist <= CONFIG.zoneRadius) killPlayer(scene);
+  emit(scene, 'drone:strike-detonate', { x: life.x, y: life.y, hit: dist <= CONFIG.zoneRadius, protected: protectedHit });
+  if (dist <= CONFIG.zoneRadius && !protectedHit) killPlayer(scene);
   life.zone.destroy(true);
   scene.__droneZones = scene.__droneZones.filter(z => z !== life);
 }
@@ -113,6 +130,8 @@ function cleanup(scene) {
   scene.__droneUnits = [];
   scene.__droneZones = [];
   scene.__droneRecovery = null;
+  scene.__relaySpawnProtectionUntil = 0;
+  scene.__droneNextSpawnAt = 0;
 }
 
 export function installDroneStrikeRecovery(RunnerScene) {
@@ -126,9 +145,13 @@ export function installDroneStrikeRecovery(RunnerScene) {
     originalCreate.apply(this, args);
     if (!safeMission(this) || !this.player) return;
 
-    this.__droneUnits = [0, 1].slice(0, CONFIG.droneCount).map(i => createDrone(this, i));
+    this.__relaySpawnProtectionUntil = this.time.now + CONFIG.spawnProtectionMs;
+    this.__droneUnits = [];
     this.__droneZones = [];
+    this.__droneNextSpawnAt = this.time.now + 1600;
     this.__droneRecovery = { station: null, x: null, y: null, holdStarted: 0, cooldownUntil: 0 };
+
+    emit(this, 'drone:spawn-protection', { durationMs: CONFIG.spawnProtectionMs });
 
     const worldWidth = Math.max(2600, Number(this.physics?.world?.bounds?.width || this.cameras?.main?.getBounds?.().width || 6280));
     const stationX = Math.max(this.player.x + 680, Math.min(worldWidth - 360, Math.round(worldWidth * .56)));
@@ -154,11 +177,20 @@ export function installDroneStrikeRecovery(RunnerScene) {
   RunnerScene.prototype.update = function (...args) {
     originalUpdate.apply(this, args);
     const player = this.player;
-    if (!player || !this.__droneUnits) return;
+    if (!player || !this.__droneUnits || !this.__droneZones) return;
 
     const now = this.time.now;
-    for (const drone of this.__droneUnits) {
-      const desiredX = player.x + (drone.index ? 230 : -230);
+    const active = this.__droneUnits.filter(drone => drone?.active && drone.root?.active);
+    this.__droneUnits = active;
+
+    if (!active.length && now >= Number(this.__droneNextSpawnAt || 0) && !this.finished && !this.respawning) {
+      this.__droneUnits.push(createDrone(this, 0));
+      emit(this, 'drone:spawn', { index: 0 });
+    }
+
+    for (const drone of [...this.__droneUnits]) {
+      if (!drone.active) continue;
+      const desiredX = player.x + 230;
       const desiredY = player.y - 210 - Math.sin(now / 430 + drone.phase) * 34;
       drone.root.x = Phaser.Math.Linear(drone.root.x, desiredX, .035);
       drone.root.y = Phaser.Math.Linear(drone.root.y, desiredY, .045);
@@ -166,7 +198,7 @@ export function installDroneStrikeRecovery(RunnerScene) {
       drone.beam.alpha = Phaser.Math.Distance.Between(drone.root.x, drone.root.y, player.x, player.y) < CONFIG.droneDetectRadius ? .15 : .04;
 
       const dist = Phaser.Math.Distance.Between(drone.root.x, drone.root.y, player.x, player.y);
-      if (dist < CONFIG.droneDetectRadius) {
+      if (dist < CONFIG.droneDetectRadius && !this.cinematicActive) {
         if (!drone.lockedAt) {
           drone.lockedAt = now;
           drone.targetX = player.x;
@@ -174,15 +206,18 @@ export function installDroneStrikeRecovery(RunnerScene) {
           emit(this, 'drone:lock', { index: drone.index });
         }
         if (now - drone.lockedAt >= CONFIG.lockMs && now >= drone.nextStrikeAt) {
-          const x = Phaser.Math.Clamp(player.x + Phaser.Math.Between(-90, 90), 90, Math.max(90, (this.physics?.world?.bounds?.width || 6280) - 90));
+          const x = Phaser.Math.Clamp(player.x + Phaser.Math.Between(-110, 110), 90, Math.max(90, (this.physics?.world?.bounds?.width || 6280) - 90));
           const y = Phaser.Math.Clamp(player.y + Phaser.Math.Between(-12, 12), 430, 690);
           createZone(this, x, y);
           drone.nextStrikeAt = now + CONFIG.strikeCooldownMs;
+          drone.retireAt = now + CONFIG.droneRetireMs;
           drone.lockedAt = 0;
         }
       } else if (drone.lockedAt && now - drone.lockedAt > 800) {
         drone.lockedAt = 0;
       }
+
+      if (drone.retireAt && now >= drone.retireAt) retireDrone(this, drone, now);
     }
 
     for (const zone of [...(this.__droneZones || [])]) {
@@ -198,7 +233,7 @@ export function installDroneStrikeRecovery(RunnerScene) {
         recovery.station.list?.[1]?.setScale(.75 + progress * .45);
         recovery.station.list?.[2]?.setScale(.8 + progress * .6);
         if (progress >= 1) {
-          if (Number.isFinite(this.health)) this.health = Math.max(this.health, 100);
+          if (Number.isFinite(this.health)) this.health = Math.max(this.health, 3);
           this.healthInvulnerable = Math.max(this.healthInvulnerable || 0, 1300);
           this.respawnGrace = Math.max(this.respawnGrace || 0, 1300);
           if (player.body) player.body.setVelocity(Math.min(player.body.velocity.x, 0), Math.min(player.body.velocity.y, 0));
