@@ -9,7 +9,7 @@ import './home-v2.css';
     if (!intro || intro.dataset.homeV2Built === '1') return;
     intro.dataset.homeV2Built = '1';
     intro.classList.add('home-v2');
-
+    const app = window.RelayApp?.controller;
     const legacy = intro.querySelector('.main-menu');
     if (legacy) legacy.hidden = true;
 
@@ -46,18 +46,25 @@ import './home-v2.css';
     const status = document.createElement('div');
     status.className = 'home-v2-status';
     status.innerHTML = '<span><strong>●</strong> SYSTEM READY · NIGHT SHIFT</span><span>A / D MOVE · SPACE JUMP · ESC PAUSE</span>';
-
     intro.prepend(bg, header, content, status);
 
-    const click = (selector, action) => content.querySelector(selector)?.addEventListener('click', e => { e.preventDefault(); action(); });
-    const legacyClick = id => document.getElementById(id)?.click();
-
-    click('[data-home-play]', () => legacyClick('start'));
-    click('[data-home-continue]', () => legacyClick('continue'));
-    click('[data-home-exit]', () => legacyClick('exitTitle'));
-    click('[data-home-options]', () => document.querySelector('[data-title-panel="controls"]')?.click());
-    click('[data-home-tutorial]', () => document.querySelector('[data-title-panel="tutorial"]')?.click());
-    click('[data-home-faq]', () => document.querySelector('[data-relay-info="faq"]')?.click());
+    const controller = () => window.RelayApp?.controller;
+    const action = (name, fallback) => (...args) => { const c = controller(); if (c?.home?.[name]) return c.home[name](...args); fallback?.(...args); };
+    const fallbackClick = id => document.getElementById(id)?.click();
+    const actions = {
+      play: action('play', () => fallbackClick('start')),
+      continue: action('continue', () => fallbackClick('continue')),
+      exit: action('exit', () => fallbackClick('exitTitle')),
+      options: action('options'),
+      tutorial: action('tutorial'),
+      faq: action('faq')
+    };
+    content.querySelector('[data-home-play]')?.addEventListener('click', e => { e.preventDefault(); actions.play(); });
+    content.querySelector('[data-home-continue]')?.addEventListener('click', e => { e.preventDefault(); actions.continue(); });
+    content.querySelector('[data-home-exit]')?.addEventListener('click', e => { e.preventDefault(); actions.exit(); });
+    content.querySelector('[data-home-options]')?.addEventListener('click', e => { e.preventDefault(); actions.options(); });
+    content.querySelector('[data-home-tutorial]')?.addEventListener('click', e => { e.preventDefault(); actions.tutorial(); });
+    content.querySelector('[data-home-faq]')?.addEventListener('click', e => { e.preventDefault(); actions.faq(); });
 
     const syncContinue = () => {
       const legacyContinue = document.getElementById('continue');
@@ -76,17 +83,16 @@ import './home-v2.css';
       const target = event.target;
       if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
       if (event.key === 'Enter' && !document.querySelector('#titlePanel:not(.hidden),#relayInfoPanel:not(.hidden)')) {
-        const legacyContinue = document.getElementById('continue');
-        if (legacyContinue && !legacyContinue.classList.contains('hidden')) legacyClick('continue');
-        else legacyClick('start');
+        event.preventDefault();
+        const c = controller();
+        if (c) c.home[document.getElementById('continue')?.classList.contains('hidden') ? 'play' : 'continue']();
       }
       if (event.key === 'Escape') {
-        document.getElementById('closeTitlePanel')?.click();
-        document.querySelector('[data-relay-close]')?.click();
+        event.preventDefault();
+        controller()?.closePanels();
       }
     });
   };
-
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
   else boot();
 })();
