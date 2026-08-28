@@ -1,3 +1,3 @@
-// Legacy adapter: stable Options UI is now the single owner.
-import './options-runtime-safety-v1.js';
+// Stable Options entrypoint: one UI owner for Home and in-game Settings.
+import './audio-context-gate-v1.js';
 import './options-ui-stable-v2.js';
