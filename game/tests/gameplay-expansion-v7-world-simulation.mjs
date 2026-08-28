@@ -1,9 +1,8 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 
-const root = new URL('../', import.meta.url);
-const runtime = fs.readFileSync(new URL('../src/systems/gameplay-expansion-v7-world-simulation.js', root), 'utf8');
-const loader = fs.readFileSync(new URL('../gameplay-expansion-loader-v1.js', root), 'utf8');
+const runtime = fs.readFileSync(new URL('../src/systems/gameplay-expansion-v7-world-simulation.js', import.meta.url), 'utf8');
+const loader = fs.readFileSync(new URL('../gameplay-expansion-loader-v1.js', import.meta.url), 'utf8');
 
 const required = [
   'ECONOMY',
