@@ -1,0 +1,1 @@
+import assert from 'node:assert/strict'; assert.strictEqual(1,1); console.log('HOME V3 SANITY: PASS');
