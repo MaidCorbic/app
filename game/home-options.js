@@ -1,2 +1,2 @@
-// Legacy adapter: the unified Options renderer is now the single owner.
-import './unified-options-ui-v1.js';
+// Legacy adapter: stable Options UI is now the single owner.
+import './options-ui-stable-v2.js';
