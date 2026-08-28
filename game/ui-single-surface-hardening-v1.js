@@ -1,16 +1,15 @@
-/* UI surface hardening V1.
+/* UI surface hardening V2.
  * Home Options/Tutorial get one visible surface at a time.
- * PLAY gets a responsive zipper transition before handing off to gameplay.
+ * PLAY gets a responsive zipper reveal without taking ownership of gameplay start.
  */
 (() => {
   'use strict';
-  if (window.__relayUiSurfaceHardeningV1) return;
-  window.__relayUiSurfaceHardeningV1 = true;
+  if (window.__relayUiSurfaceHardeningV2) return;
+  window.__relayUiSurfaceHardeningV2 = true;
 
   const style = document.createElement('style');
-  style.id = 'relay-ui-surface-hardening-v1';
+  style.id = 'relay-ui-surface-hardening-v2';
   style.textContent = `
-    /* Never flash the legacy title-panel contents while the new renderer mounts. */
     #titlePanel.relay-surface-pending #titlePanelContent,
     #titlePanel.relay-surface-pending #titlePanelHeading,
     #titlePanel.relay-surface-pending #titlePanelEyebrow{visibility:hidden!important}
@@ -19,7 +18,6 @@
     #titlePanel .home-tutorial-content{visibility:visible!important}
     #titlePanel [data-final-toggle="tutorialHints"]{display:none!important}
 
-    /* Responsive zipper/reveal overlay. It covers the viewport, not the game canvas. */
     #relayPlayZip{position:fixed;inset:0;z-index:2147483000;display:grid;grid-template-columns:repeat(12,1fr);pointer-events:none;overflow:hidden;background:#02070d}
     #relayPlayZip[hidden]{display:none}
     #relayPlayZip i{display:block;height:100%;background:linear-gradient(180deg,#071525,#02070d 48%,#071525);transform:scaleY(1);transform-origin:center;box-shadow:inset 0 0 0 1px rgba(141,244,255,.08),0 0 18px rgba(141,244,255,.04);transition:transform .62s cubic-bezier(.77,0,.18,1)}
@@ -27,7 +25,7 @@
     #relayPlayZip.playing .zip-line{opacity:1;transform:translateX(-50%) scaleY(1)}
     #relayPlayZip.opening i{transform:scaleY(0)}
     #relayPlayZip.opening .zip-line{opacity:1;transform:translateX(-50%) scaleY(1)}
-    @media(max-width:768px){#relayPlayZip{grid-template-columns:repeat(8,1fr)}#relayPlayZip i{box-shadow:inset 0 0 0 1px rgba(141,244,255,.06)}}
+    @media(max-width:768px){#relayPlayZip{grid-template-columns:repeat(8,1fr)}}
     @media(max-width:420px){#relayPlayZip{grid-template-columns:repeat(6,1fr)}}
     @media(prefers-reduced-motion:reduce){#relayPlayZip i{transition-duration:.01ms}#relayPlayZip .zip-line{transition-duration:.01ms}}
   `;
@@ -78,30 +76,21 @@
 
   const play = document.getElementById('start');
   if (play) {
-    play.addEventListener('click', event => {
+    // Deliberately do NOT preventDefault/stopImmediatePropagation here. The
+    // gameplay intro owns the PLAY action; this listener is visual only.
+    play.addEventListener('click', () => {
       if (window.__relayPlayZipActive) return;
       window.__relayPlayZipActive = true;
-      event.preventDefault();
-      event.stopImmediatePropagation();
       zip.hidden = false;
       zip.classList.remove('opening');
       void zip.offsetWidth;
       zip.classList.add('playing');
+      window.setTimeout(() => zip.classList.add('opening'), 180);
       window.setTimeout(() => {
-        zip.classList.add('opening');
-        window.dispatchEvent(new CustomEvent('relay-play-transition-ready'));
-      }, 180);
-      window.setTimeout(() => {
-        document.dispatchEvent(new CustomEvent('relay-play-transition-complete'));
-        window.__relayPlayZipActive = false;
         zip.hidden = true;
         zip.classList.remove('playing', 'opening');
+        window.__relayPlayZipActive = false;
       }, 950);
-    }, true);
+    }, false);
   }
-
-  window.addEventListener('relay-play-transition-ready', () => {
-    // The cinematic intro owns the actual game start. This event is intentionally
-    // presentation-only so it cannot create a second gameplay start.
-  });
 })();
