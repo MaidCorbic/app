@@ -74,3 +74,4 @@ import './p2-character-presentation-v4.js';
 import './p2-ux-controls-v1.js';
 import './home-options-tactical-rail-v1.js';
 import './home-options-tactical-v1.js';
+import './home-options-command-header-v1.js';
