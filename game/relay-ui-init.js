@@ -69,5 +69,5 @@ import './production-unfreeze-v1.js';
 import './src/systems/mobile-input-single-owner-v1.js';
 import './src/systems/mobile-gameplay-stability-v1.js';
 import './p1-gameplay-correctness-v1.js';
-import './p2-character-presentation-v1.js';
+import './p2-character-presentation-v4.js';
 import './p2-ux-controls-v1.js';
