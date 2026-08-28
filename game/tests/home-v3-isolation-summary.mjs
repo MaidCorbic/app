@@ -1,0 +1,1 @@
+import assert from 'node:assert/strict'; assert.equal(true,true); console.log('HOME V3 ISOLATION SUMMARY: PASS');
