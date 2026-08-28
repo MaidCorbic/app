@@ -9,7 +9,7 @@ for (const feature of ['train', 'crane', 'traffic', 'zipline', 'throwable', 'las
 }
 
 for (const retired of ['companion', 'lightTraversal', 'courierHandoff']) {
-  assert.doesNotMatch(layout, new RegExp(retired), `Overlapping feature still assigned in layout: ${retired}`);
+  assert.doesNotMatch(layout, new RegExp(retired), `Retired overlapping feature still assigned: ${retired}`);
 }
 
 assert.match(source, /installZipline/);
