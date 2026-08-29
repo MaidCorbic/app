@@ -7,6 +7,7 @@ import './signal-network-v1.css';
 import './city-response-v1.css';
 import './gameplay-ui-visibility-v3.js';
 import './gameplay-hud-polish-v1.css';
+import './mobile-map-web-parity-all-levels-v1.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
