@@ -7,11 +7,13 @@ import './signal-network-v1.css';
 import './city-response-v1.css';
 import './gameplay-ui-visibility-v3.js';
 import './gameplay-hud-polish-v1.css';
+import './gameplay-hud-aaa-tactical-v1.css';
 import './mobile-map-all-levels-contract-v1.css';
 import './mobile-map-web-parity-all-levels-v1.css';
 import './mobile-top-card-map-legend-fix-v1.css';
 import './mobile-ui-cleanup-v1.css';
 import './map-aaa-tactical-redesign-v1.js';
+import './gameplay-hud-aaa-tactical-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
