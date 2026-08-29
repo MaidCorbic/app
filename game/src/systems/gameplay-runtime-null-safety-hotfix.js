@@ -1,13 +1,34 @@
-// Final runtime hardening for legacy V2/V4 gameplay systems.
+// Final runtime hardening for legacy V2/V4/V5 gameplay systems.
 // The guard runs before the legacy update chain and fail-closes only the
 // affected legacy subsystem when Phaser has already destroyed its objects.
 // No keyboard bindings are introduced or changed.
 const V2 = '__relayGameplayExpansionV2Safe';
 const V4 = '__relayGameplayExpansionV4Safe';
+const V5 = '__relayGameplayExpansionV5Safe';
 const NS = '__relayGameplayRuntimeNullSafety';
 
 function isLive(node) {
   return !!node && node.active !== false && node.destroyed !== true;
+}
+
+function isRenderSafe(node) {
+  if (!node || typeof node !== 'object') return true;
+  if (!isLive(node)) return false;
+
+  // Phaser Text/RenderTexture objects can remain active after their WebGL
+  // texture source has been torn down during a scene restart/shutdown.
+  // Calling setText() on those stale objects triggers the observed
+  // "Cannot read properties of null (reading glTexture)" error.
+  const texture = node.texture;
+  const source = texture?.source;
+  if (Array.isArray(source) && source.length) {
+    for (const entry of source) {
+      if (!entry) return false;
+      if ('glTexture' in entry && entry.glTexture == null) return false;
+    }
+  }
+
+  return true;
 }
 
 function hasV2InvalidState(scene) {
@@ -76,6 +97,38 @@ function hasV4InvalidState(scene) {
   return false;
 }
 
+function hasV5InvalidState(scene) {
+  const state = scene?.[V5];
+  if (!state || state.destroyed || !state.entities) return false;
+
+  const inspect = value => {
+    if (!value) return false;
+    if (Array.isArray(value)) return value.some(inspect);
+    if (value instanceof Set) {
+      for (const entry of value) if (inspect(entry)) return true;
+      return false;
+    }
+    if (typeof value !== 'object') return false;
+
+    // Phaser GameObjects are the only values we need to reject here.
+    if ('active' in value || 'destroyed' in value || 'texture' in value) {
+      return !isRenderSafe(value);
+    }
+
+    return false;
+  };
+
+  for (const entity of Object.values(state.entities)) {
+    if (inspect(entity)) return true;
+  }
+
+  for (const resource of state.resources || []) {
+    if (!isRenderSafe(resource)) return true;
+  }
+
+  return false;
+}
+
 function failClosed(state) {
   if (!state) return;
   state.destroyed = true;
@@ -89,6 +142,7 @@ function sanitize(scene) {
   if (!scene) return;
   if (hasV2InvalidState(scene)) failClosed(scene[V2]);
   if (hasV4InvalidState(scene)) failClosed(scene[V4]);
+  if (hasV5InvalidState(scene)) failClosed(scene[V5]);
 }
 
 export function installGameplayRuntimeNullSafety(SceneClass) {
