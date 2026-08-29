@@ -1,0 +1,34 @@
+/* Mobile map parity: reuse the existing web map visual presentation. */
+@media (max-width: 760px) {
+  #relayGameplayIntroFinalV3 {
+    padding: 0 !important;
+    place-items: stretch !important;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-shell {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
+    gap: 8px !important;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-map-wrap {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-map {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    display: block !important;
+    object-fit: contain !important;
+  }
+}

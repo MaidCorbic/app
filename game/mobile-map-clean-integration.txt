@@ -1,0 +1,1 @@
+The clean branch is based directly on current main and integrates the mobile map viewport/state bridge without the alternate drawn-map renderer.

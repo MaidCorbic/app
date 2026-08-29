@@ -1,0 +1,13 @@
+/* Mobile map contract: keep the existing web map renderer and only constrain its viewport. */
+@media (max-width: 760px) {
+  #relayGameplayIntroFinalV3 .map-briefing-shell,
+  #relayGameplayIntroFinalV3 .map-briefing-map-wrap,
+  #relayGameplayIntroFinalV3 .map-briefing-map {
+    box-sizing: border-box;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-map-wrap {
+    min-width: 0;
+    min-height: 0;
+  }
+}
