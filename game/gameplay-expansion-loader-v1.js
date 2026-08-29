@@ -8,6 +8,7 @@ import { installGameplayExpansionV5Safe } from './src/systems/gameplay-expansion
 import { installGameplayExpansionV6Safe } from './src/systems/gameplay-expansion-v6-safe.js';
 import { installGameplayExpansionV7WorldSimulation } from './src/systems/gameplay-expansion-v7-world-simulation.js';
 import { installGameplayExpansionV8Systems } from './src/systems/gameplay-expansion-v8-systems.js';
+import { installGameplayFeatureVisibility } from './src/systems/gameplay-feature-visibility.js';
 
 installGameplayExpansion(RunnerScene);
 installGameplayExpansionV2Safe(RunnerScene);
@@ -18,3 +19,4 @@ installGameplayExpansionV5Safe(RunnerScene);
 installGameplayExpansionV6Safe(RunnerScene);
 installGameplayExpansionV7WorldSimulation(RunnerScene);
 installGameplayExpansionV8Systems(RunnerScene);
+installGameplayFeatureVisibility(RunnerScene);
