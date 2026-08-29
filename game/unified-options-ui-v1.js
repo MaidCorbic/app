@@ -1,4 +1,5 @@
 import { loadState, saveState } from './src/state.js';
+import './options-polish-v2.css';
 
 (() => {
   'use strict';
@@ -83,9 +84,7 @@ import { loadState, saveState } from './src/state.js';
       #pauseMenu.relay-options-unified .menu-grid>aside{border-right:1px solid rgba(255,255,255,.06)}
       #pauseMenu.relay-options-unified .tab{transition:.14s}.relay-options-home-link{color:#6f879b;font:700 7px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
       #titlePanelContent.relay-legacy-cleared{display:none!important}
-      @media(max-width:760px){
-        #titlePanel.relay-options-unified{padding:6px}#titlePanel.relay-options-unified .title-panel-card{width:96vw;max-height:calc(100dvh - 12px);border-radius:16px}.relay-options-head{padding:17px 54px 13px 16px}.relay-options-title{font-size:23px}.relay-options-subtitle{font-size:7px}.relay-options-status{display:none}.relay-options-body{padding:12px 11px 14px}.relay-options-grid{grid-template-columns:1fr;gap:11px}.relay-options-section.full{grid-column:auto}.relay-option-card{padding:11px 10px}.relay-range{min-width:0;width:100%}.relay-action-row{grid-template-columns:1fr 1fr}.relay-action-row .relay-action:last-child{grid-column:1/-1}.relay-toggle{min-width:72px}.relay-select>button{min-width:125px}
-      }
+      @media(max-width:760px){#titlePanel.relay-options-unified{padding:6px}#titlePanel.relay-options-unified .title-panel-card{width:96vw;max-height:calc(100dvh - 12px);border-radius:16px}.relay-options-head{padding:17px 54px 13px 16px}.relay-options-title{font-size:23px}.relay-options-subtitle{font-size:7px}.relay-options-status{display:none}.relay-options-body{padding:12px 11px 14px}.relay-options-grid{grid-template-columns:1fr;gap:11px}.relay-options-section.full{grid-column:auto}.relay-option-card{padding:11px 10px}.relay-range{min-width:0;width:100%}.relay-action-row{grid-template-columns:1fr 1fr}.relay-action-row .relay-action:last-child{grid-column:1/-1}.relay-toggle{min-width:72px}.relay-select>button{min-width:125px}}
       @media(max-width:390px){.relay-options-head{padding:14px 50px 11px 13px}.relay-options-title{font-size:20px}.relay-options-body{padding:10px 8px 12px}.relay-option-card{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:9px}.relay-option-copy strong{font-size:8px}.relay-option-copy small{font-size:6.3px}.relay-toggle{min-width:68px;height:32px}.relay-language-menu{left:0;right:0;min-width:0}}
     `;
     document.head.appendChild(style);
@@ -140,43 +139,80 @@ import { loadState, saveState } from './src/state.js';
     host.innerHTML = buildContent();
     host.classList.remove('relay-legacy-cleared');
     const controls = host.querySelector('[data-unified-controls-panel]');
-    controls.hidden = true;
-    host.addEventListener('click', event => {
-      const toggle = event.target.closest('[data-unified-toggle]');
-      if (toggle) {
-        const key = toggle.dataset.unifiedToggle;
-        if (['intelCards','allyIntel','eventPopups','tutorialHints'].includes(key)) {
-          const prefs = readPresentation(); prefs[key] = !prefs[key]; writePresentation(prefs); syncPresentationClasses(prefs);
-        } else {
-          const current = getState();
-          const value = key === 'muted' ? !current.muted : !(current[key] ?? false);
-          savePatch({ [key]: value });
-          if (key === 'aiVoice' && !value) window.speechSynthesis?.cancel?.();
-          window.dispatchEvent(new CustomEvent('relay-settings-change', { detail:{ key, value } }));
+    if (controls) controls.hidden = true;
+
+    if (host.dataset.unifiedOptionsBound !== '1') {
+      host.dataset.unifiedOptionsBound = '1';
+      host.addEventListener('click', event => {
+        const action = event.target.closest('[data-unified-toggle],[data-unified-range],[data-unified-language],[data-unified-language-code],[data-unified-fullscreen],[data-unified-reset],[data-unified-controls]');
+        if (!action || !host.contains(action)) return;
+
+        if (action.matches('[data-unified-toggle]')) {
+          event.preventDefault();
+          const key = action.dataset.unifiedToggle;
+          if (['intelCards','allyIntel','eventPopups','tutorialHints'].includes(key)) {
+            const prefs = readPresentation();
+            prefs[key] = !prefs[key];
+            writePresentation(prefs);
+            syncPresentationClasses(prefs);
+          } else {
+            const current = getState();
+            const value = key === 'muted' ? !current.muted : !(current[key] ?? false);
+            savePatch({ [key]: value });
+            if (key === 'aiVoice' && !value) window.speechSynthesis?.cancel?.();
+            window.dispatchEvent(new CustomEvent('relay-settings-change', { detail:{ key, value } }));
+          }
+          renderOpenPanels();
+          return;
         }
-        renderOpenPanels();
-        return;
-      }
-      const range = event.target.closest('[data-unified-range]');
-      if (range) {
-        const value = Number(range.value);
-        savePatch({ [range.dataset.unifiedRange]: value });
-        window.dispatchEvent(new CustomEvent('relay-settings-change', { detail:{ key:range.dataset.unifiedRange, value } }));
-        const label = host.querySelector(`[data-range-value="${range.dataset.unifiedRange}"]`);
-        if (label) label.textContent = `${Math.round(value * 100)}%`;
-        return;
-      }
-      const langButton = event.target.closest('[data-unified-language]');
-      if (langButton) { event.stopPropagation(); host.querySelector('[data-unified-language-menu]')?.classList.toggle('hidden'); return; }
-      const langCode = event.target.closest('[data-unified-language-code]');
-      if (langCode) { setLanguage(langCode.dataset.unifiedLanguageCode); renderOpenPanels(); return; }
-      const fullscreen = event.target.closest('[data-unified-fullscreen]');
-      if (fullscreen) { (async()=>{ try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.(); else await document.exitFullscreen?.(); } catch {} })(); return; }
-      const reset = event.target.closest('[data-unified-reset]');
-      if (reset) { savePatch({ muted:false,musicVolume:.55,sfxVolume:.7,screenShake:true,reducedMotion:false,rain:true,aiVoice:true,tutorialEnabled:true }); writePresentation({ ...defaults }); setLanguage('en'); window.dispatchEvent(new CustomEvent('relay-settings-change',{detail:{reset:true}})); renderOpenPanels(); return; }
-      const controlsButton = event.target.closest('[data-unified-controls]');
-      if (controlsButton) { const panel = host.querySelector('[data-unified-controls-panel]'); if (panel) panel.hidden = !panel.hidden; return; }
-    }, { capture:false });
+
+        if (action.matches('[data-unified-range]')) {
+          const value = Number(action.value);
+          if (!Number.isFinite(value)) return;
+          savePatch({ [action.dataset.unifiedRange]: value });
+          window.dispatchEvent(new CustomEvent('relay-settings-change', { detail:{ key:action.dataset.unifiedRange, value } }));
+          const label = host.querySelector(`[data-range-value="${action.dataset.unifiedRange}"]`);
+          if (label) label.textContent = `${Math.round(value * 100)}%`;
+          return;
+        }
+
+        if (action.matches('[data-unified-language]')) {
+          event.preventDefault();
+          event.stopPropagation();
+          host.querySelector('[data-unified-language-menu]')?.classList.toggle('hidden');
+          return;
+        }
+
+        if (action.matches('[data-unified-language-code]')) {
+          event.preventDefault();
+          setLanguage(action.dataset.unifiedLanguageCode);
+          renderOpenPanels();
+          return;
+        }
+
+        if (action.matches('[data-unified-fullscreen]')) {
+          event.preventDefault();
+          (async()=>{ try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.(); else await document.exitFullscreen?.(); } catch {} })();
+          return;
+        }
+
+        if (action.matches('[data-unified-reset]')) {
+          event.preventDefault();
+          savePatch({ muted:false,musicVolume:.55,sfxVolume:.7,screenShake:true,reducedMotion:false,rain:true,aiVoice:true,tutorialEnabled:true });
+          writePresentation({ ...defaults });
+          setLanguage('en');
+          window.dispatchEvent(new CustomEvent('relay-settings-change',{detail:{reset:true}}));
+          renderOpenPanels();
+          return;
+        }
+
+        if (action.matches('[data-unified-controls]')) {
+          event.preventDefault();
+          const panel = host.querySelector('[data-unified-controls-panel]');
+          if (panel) panel.hidden = !panel.hidden;
+        }
+      }, { capture:false });
+    }
     return true;
   };
 
@@ -203,7 +239,6 @@ import { loadState, saveState } from './src/state.js';
   const init = () => {
     injectStyles();
     syncPresentationClasses(readPresentation());
-
     document.addEventListener('click', event => {
       const homeButton = event.target.closest('[data-title-panel="controls"]');
       if (homeButton) {
@@ -215,22 +250,16 @@ import { loadState, saveState } from './src/state.js';
         if (heading) { heading.textContent = 'OPTIONS'; heading.className = 'relay-options-title'; }
         renderHome();
       }
-
       const pauseSettings = event.target.closest('#pauseMenu [data-tab="settings"]');
-      if (pauseSettings) {
-        window.setTimeout(() => renderPause(), 0);
-      }
+      if (pauseSettings) window.setTimeout(() => renderPause(), 0);
     }, true);
-
     document.addEventListener('click', event => {
       if (!event.target.closest('.relay-select')) document.querySelectorAll('.relay-language-menu').forEach(menu => menu.classList.add('hidden'));
     });
-
     const titlePanel = document.getElementById('titlePanel');
     const pauseMenu = document.getElementById('pauseMenu');
     if (titlePanel) new MutationObserver(() => window.setTimeout(renderHome, 0)).observe(titlePanel,{attributes:true,attributeFilter:['class']});
     if (pauseMenu) new MutationObserver(() => window.setTimeout(renderPause, 0)).observe(pauseMenu,{attributes:true,attributeFilter:['class']});
-
     window.addEventListener('relay-settings-change', () => window.setTimeout(renderOpenPanels, 0));
   };
 
