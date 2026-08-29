@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+const source = await readFile(new URL('../src/systems/gameplay-deep-integration-v12.js', import.meta.url), 'utf8');
+assert.match(source, /export function installGameplayDeepIntegrationV12/);
+assert.match(source, /const FEATURES = \[/);
+assert.match(source, /for\(let i=0;i<20;i\+\+\)/);
+assert.match(source, /pointerdown/);
+assert.doesNotMatch(source, /keydown|keyup|input\.keyboard/);
+assert.match(source, /prototype\.update/);
+assert.match(source, /relay:gameplay:deep/);
+assert.match(source, /relay:gameplay:v11/);
+assert.match(source, /localStorage/);
+assert.match(source, /Phaser\.Scenes\.Events\.SHUTDOWN/);
+console.log('Deep gameplay runtime V12: PASS');

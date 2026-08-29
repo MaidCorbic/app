@@ -1,0 +1,1 @@
+Check pointer/touch interactions, state persistence, event integration, and no keyboard listener additions.

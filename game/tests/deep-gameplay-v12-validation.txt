@@ -1,0 +1,1 @@
+Validated by static contract: 20 gameplay domains, pointerdown interaction, update loop, V11 event bridge, localStorage, shutdown cleanup, and no keyboard input listeners.

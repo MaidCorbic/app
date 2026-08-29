@@ -1,0 +1,1 @@
+V12 links V1-V11 gameplay through persistent state, event reactions, passive movement effects, and touch/pointer choices.

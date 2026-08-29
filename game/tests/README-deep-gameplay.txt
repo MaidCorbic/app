@@ -1,0 +1,1 @@
+Run: node tests/gameplay-deep-integration-v12.contract.mjs

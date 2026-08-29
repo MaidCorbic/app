@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+const source=await readFile(new URL('../src/systems/gameplay-deep-integration-v12.js',import.meta.url),'utf8');
+const loader=await readFile(new URL('../gameplay-expansion-loader-v1.js',import.meta.url),'utf8');
+assert(source.includes('installGameplayDeepIntegrationV12'));
+assert(source.includes('for(let i=0;i<20;i++)'));
+assert(source.includes('pointerdown'));
+assert(!source.includes('keydown')&&!source.includes('keyup')&&!source.includes('input.keyboard'));
+assert(source.includes('relay:gameplay:v11')&&source.includes('relay:gameplay:deep'));
+assert(loader.includes('installGameplayDeepIntegrationV12(RunnerScene)'));
+console.log('Deep gameplay final: PASS');

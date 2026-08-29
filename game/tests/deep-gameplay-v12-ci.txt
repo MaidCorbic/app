@@ -1,0 +1,1 @@
+Deep gameplay V12 contract validates all twenty domains, pointer/touch interaction, event integration, persistence, cleanup, and unchanged keyboard controls.

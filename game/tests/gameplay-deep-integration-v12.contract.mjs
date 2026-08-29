@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+const source = await readFile(new URL('../src/systems/gameplay-deep-integration-v12.js', import.meta.url), 'utf8');
+const loader = await readFile(new URL('../gameplay-expansion-loader-v1.js', import.meta.url), 'utf8');
+assert.match(source, /FEATURES = \[/);
+assert.equal((source.match(/'[^']+'/g) || []).filter(x => x.length > 2).length >= 20, true);
+for (const token of ['NOISE','TRACKING','HEAT','OBSTACLE','ROUTES','MUTATION','COVER','MOMENTUM','RECOVERY','TACTICAL NOISE','CONTACT','METHOD','CARGO','EMERGENCY','OPPORTUNITY','CHAIN','DECOY CARGO','LOADOUT','TIME DEBT','MARKER']) assert.match(source, new RegExp(token));
+assert.match(source, /setInteractive\(\{useHandCursor:true\}\)/);
+assert.match(source, /pointerdown/);
+assert.doesNotMatch(source, /keydown|keyup|input\.keyboard/);
+assert.match(source, /localStorage/);
+assert.match(source, /Phaser\.Scenes\.Events\.SHUTDOWN/);
+assert.match(source, /prototype\.update/);
+assert.match(loader, /installGameplayDeepIntegrationV12/);
+console.log('Deep gameplay V12 contract: PASS');
