@@ -1,0 +1,1 @@
+Clean map integration final branch. Existing web renderer remains the source of truth for all campaign levels. Mobile only gets responsive viewport and live mission synchronization; controls and gameplay remain unchanged.
