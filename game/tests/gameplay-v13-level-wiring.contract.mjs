@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const file='game/src/systems/gameplay-v13-level-wiring-v1.js';
+const loader='game/gameplay-expansion-loader-v1.js';
+const v13='game/src/systems/gameplay-expansion-v13-34-systems.js';
+const src=fs.readFileSync(file,'utf8');
+const boot=fs.readFileSync(loader,'utf8');
+const systems=fs.readFileSync(v13,'utf8');
+const ids=[...systems.matchAll(/\['([A-Z0-9]+)','[^']+'\]/g)].map(m=>m[1]);
+const levelIds=[...src.matchAll(/\{ id:'([^']+)', active:/g)].map(m=>m[1]);
+assert.equal(ids.length,34,'V13 must define exactly 34 systems');
+assert.equal(levelIds.length,7,'all seven campaign missions must be wired');
+for(const id of ids) assert.match(src,new RegExp(`['"]${id}['"]`),`missing level wiring for ${id}`);
+assert.match(src,/missions/,'level wiring must use real mission data');
+assert.match(src,/gameplay:system-visible/,'each triggered system must be visible in gameplay');
+assert.match(src,/pointer|touch/i,'mobile visibility path must be touch-safe');
+assert.doesNotMatch(src,/addEventListener\(['"]keydown/,'must not add keyboard listeners');
+assert.doesNotMatch(src,/console\.(log|warn|error)/,'must not add console noise');
+assert.match(boot,/installGameplayV13LevelWiring/,'loader must install level wiring');
+assert.match(boot,/gameplay-v13-level-wiring-v1\.js/,'loader must import level wiring');
+console.log('V13 level wiring contract OK: 7 missions, 34 systems, visible triggers, no keyboard listener, no console logging.');
