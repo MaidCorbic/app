@@ -1,1 +1,0 @@
-All campaign levels use the existing live mission/scene map renderer. Mobile changes are responsive presentation only; keyboard and mobile controls remain unchanged.
