@@ -1,0 +1,1 @@
+Clean integration branch for resolving PR #324 against current main. Uses existing web map renderer; mobile changes are viewport/state bridge only. No alternate SVG map and no input changes.
