@@ -7,6 +7,8 @@ import './signal-network-v1.css';
 import './city-response-v1.css';
 import './gameplay-ui-visibility-v3.js';
 import './gameplay-hud-polish-v1.css';
+import './mobile-map-all-levels-contract-v1.css';
+import './mobile-map-web-parity-all-levels-v1.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -30,7 +32,7 @@ import './cargo-integrity-v2-visibility-v1.js';
 import './signal-network-v1.js';
 import './city-response-v1.js';
 import './gameplay-intro-final-v1.js';
-import './mobile-map-csgo-full-v1.js';
+import './mobile-map-web-parity-all-levels-v1.js';
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
 import './src/systems/death-retry-state-reset-v1.js';
