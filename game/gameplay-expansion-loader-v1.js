@@ -14,6 +14,7 @@ import { installGameplayExpansionV10 } from './src/systems/gameplay-expansion-v1
 import { installGameplayExpansionV11Twenty } from './src/systems/gameplay-expansion-v11-twenty.js';
 import { installGameplayDeepIntegrationV12 } from './src/systems/gameplay-deep-integration-v12.js';
 import { installGameplayExpansionV13 } from './src/systems/gameplay-expansion-v13-34-systems.js';
+import { installGameplayRuntimeNullSafety } from './src/systems/gameplay-runtime-null-safety-hotfix.js';
 
 installGameplayExpansion(RunnerScene);
 installGameplayExpansionV2Safe(RunnerScene);
@@ -30,3 +31,4 @@ installGameplayExpansionV10(RunnerScene);
 installGameplayExpansionV11Twenty(RunnerScene);
 installGameplayDeepIntegrationV12(RunnerScene);
 installGameplayExpansionV13(RunnerScene);
+installGameplayRuntimeNullSafety(RunnerScene);
