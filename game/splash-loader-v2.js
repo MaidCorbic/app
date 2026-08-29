@@ -1,33 +1,36 @@
-/* Production splash V6 — loader starts before the app and never depends on gameplay to animate. */
+/* Production splash V7. Never block game entry on Phaser/auth/runtime readiness. */
 (() => {
-  if (window.__relaySplashV6) return;
-  window.__relaySplashV6 = true;
+  if (window.__relaySplashV7) return;
+  window.__relaySplashV7 = true;
 
   const boot = () => {
     const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
     if (!splash) return;
+
     const bar = splash.querySelector('.relay-splash-progress');
     const pct = splash.querySelector('.relay-splash-percent');
     const label = splash.querySelector('.relay-splash-status');
     const image = splash.querySelector('#relaySplashArt, .relay-splash-art');
-    if (!bar || !pct || !label) return;
+    if (!bar || !pct || !label) {
+      window.setTimeout(() => splash.classList.add('is-hidden'), 1200);
+      return;
+    }
 
     let released = false;
     let progress = 0;
     const startedAt = performance.now();
     const MIN_MS = 900;
-    const MAX_MS = 5000;
+    const MAX_MS = 3000;
 
     splash.setAttribute('aria-busy', 'true');
     splash.classList.remove('is-hidden', 'is-leaving');
-    bar.style.width = '0%';
-    pct.textContent = '0%';
 
-    const setProgress = value => {
-      progress = Math.max(progress, Math.min(99, value));
+    const paint = value => {
+      if (released) return;
+      progress = Math.max(progress, Math.min(96, value));
       bar.style.width = `${progress}%`;
       pct.textContent = `${Math.round(progress)}%`;
-      label.textContent = progress >= 72 ? 'CONNECTING WORLD' : progress >= 35 ? 'LOADING GAME SYSTEMS' : 'INITIALIZING RELAY';
+      label.textContent = progress >= 70 ? 'CONNECTING WORLD' : progress >= 35 ? 'LOADING GAME SYSTEMS' : 'INITIALIZING RELAY';
     };
 
     const release = reason => {
@@ -43,21 +46,21 @@
       window.dispatchEvent(new CustomEvent('relay:splash-released', { detail: { reason } }));
     };
 
-    const imageReady = () => !image || image.complete || image.naturalWidth > 0;
     const tick = () => {
       if (released) return;
       const elapsed = performance.now() - startedAt;
-      const engineReady = !!document.querySelector('#phaser-game canvas');
       const pageReady = document.readyState === 'complete';
-      const target = Math.min(92, progress + (engineReady ? 1.8 : pageReady ? 1.0 : 0.7));
-      setProgress(target);
-      if (elapsed >= MIN_MS && (engineReady || elapsed >= MAX_MS)) return release(engineReady ? 'ready' : 'failsafe');
+      const imageReady = !image || image.complete || image.naturalWidth > 0;
+      paint(progress + (pageReady || imageReady ? 1.7 : 1.15));
+
+      /* Critical rule: Phaser, auth, Supabase, network and gameplay modules are NOT
+         prerequisites for leaving the splash. The user must always reach Home. */
+      if (elapsed >= MIN_MS && (pageReady || imageReady)) return release('ready');
+      if (elapsed >= MAX_MS) return release('failsafe');
       window.setTimeout(tick, 50);
     };
 
-    if (image && !imageReady()) {
-      image.addEventListener('error', () => { label.textContent = 'SAFE MODE'; }, { once: true });
-    }
+    if (image && !image.complete) image.addEventListener('load', tick, { once: true });
     tick();
   };
 
