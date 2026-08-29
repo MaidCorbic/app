@@ -1,0 +1,35 @@
+/* Home web/mobile click layer: keep modal panels above the Home V3 shell. */
+#titlePanel,
+#relayInfoPanel {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 5000 !important;
+  pointer-events: auto !important;
+}
+
+#titlePanel.hidden,
+#relayInfoPanel.hidden {
+  pointer-events: none !important;
+}
+
+#titlePanel .title-panel-card,
+#relayInfoPanel .relay-info-card {
+  position: relative;
+  z-index: 5001 !important;
+  pointer-events: auto !important;
+}
+
+#intro.home-v3 {
+  z-index: 500 !important;
+}
+
+#intro.home-v3.hidden {
+  pointer-events: none !important;
+}
+
+#intro.home-v3 .home-v3-card,
+#intro.home-v3 .faq-launcher,
+#intro.home-v3 .info-circle {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}
