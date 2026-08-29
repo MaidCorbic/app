@@ -1,0 +1,1 @@
+Static contract included in gameplay-deep-integration-v12.contract.mjs.
