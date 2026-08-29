@@ -6,7 +6,6 @@
   const boot = () => {
     const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
     if (!splash) return;
-
     const bar = splash.querySelector('.relay-splash-progress');
     const pct = splash.querySelector('.relay-splash-percent');
     const label = splash.querySelector('.relay-splash-status');
@@ -15,16 +14,13 @@
       window.setTimeout(() => splash.classList.add('is-hidden'), 1200);
       return;
     }
-
     let released = false;
     let progress = 0;
     const startedAt = performance.now();
     const MIN_MS = 900;
     const MAX_MS = 3000;
-
     splash.setAttribute('aria-busy', 'true');
     splash.classList.remove('is-hidden', 'is-leaving');
-
     const paint = value => {
       if (released) return;
       progress = Math.max(progress, Math.min(96, value));
@@ -32,7 +28,6 @@
       pct.textContent = `${Math.round(progress)}%`;
       label.textContent = progress >= 70 ? 'CONNECTING WORLD' : progress >= 35 ? 'LOADING GAME SYSTEMS' : 'INITIALIZING RELAY';
     };
-
     const release = reason => {
       if (released) return;
       released = true;
@@ -45,7 +40,6 @@
       window.setTimeout(() => splash.remove(), 420);
       window.dispatchEvent(new CustomEvent('relay:splash-released', { detail: { reason } }));
     };
-
     const tick = () => {
       if (released) return;
       const elapsed = performance.now() - startedAt;
@@ -56,11 +50,9 @@
       if (elapsed >= MAX_MS) return release('failsafe');
       window.setTimeout(tick, 50);
     };
-
     if (image && !image.complete) image.addEventListener('load', tick, { once: true });
     tick();
   };
-
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
 })();
