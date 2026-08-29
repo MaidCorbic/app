@@ -12,6 +12,7 @@ import { installGameplayFeatureVisibility } from './src/systems/gameplay-feature
 import { installGameplayExpansionV9MissionIntelligence } from './src/systems/gameplay-expansion-v9-mission-intelligence.js';
 import { installGameplayExpansionV10 } from './src/systems/gameplay-expansion-v10-perception.js';
 import { installGameplayExpansionV11Twenty } from './src/systems/gameplay-expansion-v11-twenty.js';
+import { installGameplayDeepIntegrationV12 } from './src/systems/gameplay-deep-integration-v12.js';
 
 installGameplayExpansion(RunnerScene);
 installGameplayExpansionV2Safe(RunnerScene);
@@ -26,3 +27,4 @@ installGameplayFeatureVisibility(RunnerScene);
 installGameplayExpansionV9MissionIntelligence(RunnerScene);
 installGameplayExpansionV10(RunnerScene);
 installGameplayExpansionV11Twenty(RunnerScene);
+installGameplayDeepIntegrationV12(RunnerScene);
