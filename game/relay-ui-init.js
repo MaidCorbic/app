@@ -11,6 +11,7 @@ import './mobile-map-all-levels-contract-v1.css';
 import './mobile-map-web-parity-all-levels-v1.css';
 import './mobile-top-card-map-legend-fix-v1.css';
 import './mobile-ui-cleanup-v1.css';
+import './map-aaa-tactical-redesign-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
