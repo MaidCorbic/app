@@ -1,50 +1,55 @@
-// V10 Perception Gameplay — four audited, distinct gameplay loops.
-// Self-contained, pointer/touch + keyboard, no ownership of existing movement keys.
+import Phaser from 'phaser';
 
-export function installGameplayExpansionV10({ root = document, gameState = {}, onEvent } = {}) {
-  if (!root || root.__gameplayV10) return root?.__gameplayV10;
+const KEY='relay.gameplay.v10.perception';
+const fresh=()=>({mirror:{angle:0,solved:false,hits:0},symbols:{sequence:[2,0,1],progress:0,solved:false},memory:{marks:[],revealed:false},camera:{captures:0,valid:0}});
+const load=()=>{try{return {...fresh(),...JSON.parse(localStorage.getItem(KEY)||'{}')};}catch{return fresh();}};
+const save=s=>{try{localStorage.setItem(KEY,JSON.stringify(s));}catch{}};
+const txt=(scene,x,y,t,size='9px',color='#e9fbff')=>scene.add.text(x,y,t,{fontFamily:'monospace',fontSize:size,fontStyle:'bold',color}).setOrigin(.5);
 
-  const state = gameState.v10Perception ||= {
-    mirror: { angle: 0, hits: 0 },
-    symbols: { progress: 0, solved: false },
-    memory: { revealed: false, marks: 0 },
-    camera: { composition: 0, captures: 0 },
-  };
-
-  const emit = (type, data = {}) => onEvent?.({ type, version: 'v10', ...data });
-  const q = (s) => root.querySelector?.(s);
-  const mk = (tag, cls, text) => { const e = root.createElement ? root.createElement(tag) : document.createElement(tag); e.className = cls; e.textContent = text; return e; };
-
-  const panel = mk('section', 'gameplay-v10-perception', '');
-  panel.setAttribute('aria-label', 'V10 Perception Gameplay');
-  panel.innerHTML = `
-    <div class="v10-title">PERCEPTION // FIELD MODULE</div>
-    <div class="v10-grid">
-      <button data-v10="mirror">MIRROR ROUTING <span>↻</span></button>
-      <button data-v10="symbols">SYMBOL TRANSLATION <span>◈</span></button>
-      <button data-v10="memory">MEMORY MAP <span>⌖</span></button>
-      <button data-v10="camera">PHOTO COMPOSITION <span>◎</span></button>
-    </div>
-    <div class="v10-readout" aria-live="polite">Select a field interaction.</div>`;
-
-  const style = root.createElement ? root.createElement('style') : document.createElement('style');
-  style.textContent = `.gameplay-v10-perception{position:fixed;left:16px;bottom:84px;z-index:4100;max-width:min(520px,calc(100vw - 32px));padding:12px;border:1px solid rgba(56,189,248,.55);border-radius:14px;background:rgba(3,10,20,.94);box-shadow:0 0 24px rgba(56,189,248,.18);font:600 12px/1.25 system-ui,sans-serif;color:#e5f6ff}.v10-title{letter-spacing:.14em;margin-bottom:9px}.v10-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.v10-grid button{min-height:44px;border:1px solid rgba(148,163,184,.35);border-radius:10px;background:rgba(15,23,42,.92);color:#e2e8f0;font-weight:800;cursor:pointer}.v10-grid button:hover,.v10-grid button:focus-visible{border-color:rgba(56,189,248,.9);box-shadow:0 0 14px rgba(56,189,248,.25);outline:none}.v10-grid span{opacity:.8;margin-left:5px}.v10-readout{margin-top:9px;min-height:30px;color:#bae6fd}@media(max-width:600px){.gameplay-v10-perception{left:10px;right:10px;bottom:76px;max-width:none}.v10-grid{grid-template-columns:1fr 1fr}.v10-grid button{min-height:48px;font-size:11px}}`;
-  root.head?.appendChild(style) || document.head.appendChild(style);
-  root.body?.appendChild(panel) || document.body.appendChild(panel);
-
-  const readout = panel.querySelector('.v10-readout');
-  const action = (name) => {
-    if (name === 'mirror') { state.mirror.angle = (state.mirror.angle + 90) % 360; state.mirror.hits++; readout.textContent = `Mirror aligned ${state.mirror.angle}° — reflection route updated.`; emit('mirror-route-updated', state.mirror); }
-    if (name === 'symbols') { state.symbols.progress = Math.min(3, state.symbols.progress + 1); state.symbols.solved = state.symbols.progress === 3; readout.textContent = state.symbols.solved ? 'Symbol translation verified — encoded route unlocked.' : `Translation ${state.symbols.progress}/3 — identify the next symbol.`; emit('symbol-translation', state.symbols); }
-    if (name === 'memory') { state.memory.revealed = !state.memory.revealed; if (state.memory.revealed) state.memory.marks++; readout.textContent = state.memory.revealed ? 'Memory map revealed — mark the landmark before leaving.' : `Memory map hidden — ${state.memory.marks} landmark(s) retained.`; emit('memory-map-toggle', state.memory); }
-    if (name === 'camera') { state.camera.composition = (state.camera.composition + 1) % 4; state.camera.captures++; readout.textContent = `Composition frame ${state.camera.composition + 1}/4 — ${state.camera.composition === 3 ? 'valid frame.' : 'reposition for a valid frame.'}`; emit('photo-composition', state.camera); }
-  };
-  panel.addEventListener('pointerdown', (e) => { const b = e.target.closest?.('[data-v10]'); if (b) { e.preventDefault(); action(b.dataset.v10); } });
-  const keys = { m: 'mirror', y: 'symbols', u: 'memory', p: 'camera' };
-  const keyHandler = (e) => { if (e.ctrlKey || e.metaKey || e.altKey) return; const target = e.target; if (target && /INPUT|TEXTAREA|SELECT/.test(target.tagName)) return; const n = keys[e.key.toLowerCase()]; if (n) { e.preventDefault(); action(n); } };
-  root.addEventListener?.('keydown', keyHandler);
-
-  root.__gameplayV10 = { state, panel, destroy() { panel.remove(); style.remove(); root.removeEventListener?.('keydown', keyHandler); delete root.__gameplayV10; } };
-  emit('v10-installed');
-  return root.__gameplayV10;
+export function installGameplayExpansionV10(RunnerScene){
+ if(!RunnerScene?.prototype||RunnerScene.prototype.__v10Installed)return;
+ RunnerScene.prototype.__v10Installed=true;
+ const originalCreate=RunnerScene.prototype.create, originalUpdate=RunnerScene.prototype.update;
+ RunnerScene.prototype.create=function(...args){
+  const result=originalCreate.apply(this,args),scene=this,state=load();
+  scene.__v10={state,objects:[],destroyed:false};
+  const w=scene.scale.width,h=scene.scale.height, ui=scene.add.container(0,0).setScrollFactor(0).setDepth(900);
+  const pw=Math.min(w-20,430),px=w-pw-10,py=12;
+  ui.add(scene.add.rectangle(px+pw/2,py+46,pw,76,0x06111e,.94).setStrokeStyle(1,0x7ee7ff,.7));
+  ui.add(txt(scene,px+14,py+17,'V10 // PERCEPTION', '11px','#7ee7ff').setOrigin(0));
+  ui.add(txt(scene,px+14,py+34,'M MIRROR   Y SYMBOLS   U MEMORY   P PHOTO','7px','#7896a4').setOrigin(0));
+  const status=txt(scene,px+14,py+57,'READY','8px','#a7dbe8').setOrigin(0); ui.add(status);
+  const setStatus=t=>status.setText(t);
+  const world=[];
+  const addWorld=o=>{world.push(o);return o;};
+  const baseX=Math.max(170,w*.35), baseY=Math.max(220,h*.45);
+  // Mirror routing: rotate a physical mirror; only the aligned angle energizes the receiver and opens a gate.
+  const mirror=addWorld(scene.add.rectangle(baseX,baseY,58,12,0x9eeaff,.9).setStrokeStyle(2,0x7ee7ff,1).setInteractive({useHandCursor:true}));
+  const receiver=addWorld(scene.add.circle(baseX+170,baseY,18,0x15283a,1).setStrokeStyle(2,0x7ee7ff,.8));
+  const gate=addWorld(scene.add.rectangle(baseX+250,baseY,22,100,0xff826e,.45).setStrokeStyle(2,0xff826e,.8));
+  const beam=addWorld(scene.add.graphics()); const ml=addWorld(txt(scene,baseX,baseY-30,'MIRROR // ROTATE','8px','#bfefff')); const rl=addWorld(txt(scene,baseX+170,baseY+32,'RECEIVER','7px','#9ec6d6'));
+  const renderMirror=()=>{beam.clear();beam.lineStyle(3,state.mirror.solved?0x8df4ff:0x49697a,state.mirror.solved?1:.65);beam.beginPath();beam.moveTo(baseX+30,baseY);beam.lineTo(baseX+170,baseY);beam.strokePath();gate.setAlpha(state.mirror.solved?.18:.65);mirror.angle=state.mirror.angle;};
+  const rotateMirror=()=>{state.mirror.angle=(state.mirror.angle+90)%360;state.mirror.hits++;state.mirror.solved=state.mirror.angle===180;save(state);renderMirror();setStatus(state.mirror.solved?'MIRROR ROUTE CONNECTED — GATE OPEN':'MIRROR ROTATED — ALIGN TO 180°');};
+  mirror.on('pointerdown',rotateMirror);
+  // Symbol translation: three physical glyph pads must be solved in the authored sequence.
+  const symbols=[2,0,1].map((id,i)=>{const x=baseX+i*62;const c=addWorld(scene.add.circle(x,baseY+120,22,0x0b1b2a,.98).setStrokeStyle(2,0xc4a0ff,.8).setInteractive({useHandCursor:true}));addWorld(txt(scene,x,baseY+120,['△','○','□'][id],'13px','#e9ddff'));c.on('pointerdown',()=>{if(state.symbols.solved)return;const expected=state.symbols.sequence[state.symbols.progress];if(id===expected){state.symbols.progress++;if(state.symbols.progress===3)state.symbols.solved=true;save(state);setStatus(state.symbols.solved?'SYMBOLS VERIFIED — ROUTE UNLOCKED':`SYMBOL ${state.symbols.progress}/3 VERIFIED`);}else{state.symbols.progress=0;save(state);setStatus('WRONG SYMBOL — SEQUENCE RESET');}});return c;});
+  addWorld(txt(scene,baseX+62,baseY+156,'SYMBOL SEQUENCE','7px','#c8b8e8'));
+  // Memory map: three world landmarks are marked by the player; the marks are persistent and visible.
+  const landmarkDefs=[['L1',baseX-150,baseY+210],['L2',baseX+30,baseY+250],['L3',baseX+210,baseY+205]];
+  const landmarks=landmarkDefs.map(([id,x,y])=>{const c=addWorld(scene.add.circle(x,y,14,0x12202e,.95).setStrokeStyle(2,0x65d9ff,.8).setInteractive({useHandCursor:true}));addWorld(txt(scene,x,y+27,id,'7px','#9edcf0'));c.on('pointerdown',()=>{if(!state.memory.marks.includes(id))state.memory.marks.push(id);save(state);c.setFillStyle(0x1e5062,1);setStatus(`MEMORY MARK ${id} SAVED — ${state.memory.marks.length}/3`);});return c;});
+  const memoryLine=addWorld(scene.add.graphics());
+  const renderMemory=()=>{memoryLine.clear();memoryLine.lineStyle(2,0x65d9ff,.55);state.memory.marks.forEach(id=>{const d=landmarkDefs.find(v=>v[0]===id);if(d)memoryLine.strokeCircle(d[1],d[2],18);});};
+  // Photo composition: physically move player into the target frame; capture validates distance and records success.
+  const target=addWorld(scene.add.rectangle(baseX+360,baseY+170,74,74,0xffd27a,.12).setStrokeStyle(2,0xffd27a,.9).setInteractive({useHandCursor:true}));
+  addWorld(txt(scene,baseX+360,baseY+220,'PHOTO TARGET','7px','#f3d89d'));
+  const frame=addWorld(scene.add.rectangle(w/2,h/2,220,150,0xffd27a,0).setStrokeStyle(2,0xffd27a,.65).setVisible(false).setScrollFactor(0).setDepth(905));
+  const capture=()=>{const p=scene.player;if(!p){setStatus('PHOTO: PLAYER TARGET UNAVAILABLE');return;}const d=Phaser.Math.Distance.Between(p.x,p.y,target.x,target.y);state.camera.captures++;if(d<=115){state.camera.valid++;save(state);frame.setVisible(true);scene.tweens.add({targets:frame,alpha:{from:.2,to:1},duration:120,yoyo:true});setStatus(`PHOTO VALID — ${state.camera.valid} CAPTURE${state.camera.valid===1?'':'S'}`);}else setStatus(`PHOTO INVALID — MOVE CLOSER (${Math.round(d)}px)`);};
+  target.on('pointerdown',capture);
+  const key=e=>{if(e.repeat)return;switch(e.code){case'KeyM':rotateMirror();break;case'KeyY':{const next=state.symbols.sequence[state.symbols.progress]??0;symbols[next].emit('pointerdown',{});break;}case'KeyU':state.memory.revealed=!state.memory.revealed;landmarks.forEach(c=>c.setAlpha(state.memory.revealed?1:.3));setStatus(state.memory.revealed?'MEMORY LANDMARKS REVEALED':'MEMORY LANDMARKS HIDDEN');break;case'KeyP':capture();break;}};
+  scene.input.keyboard?.on('keydown',key);
+  renderMirror();renderMemory();
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{scene.__v10.destroyed=true;scene.input.keyboard?.off('keydown',key);[ui,...world].forEach(o=>o?.destroy?.());});
+  return result;
+ };
+ RunnerScene.prototype.update=function(...args){const result=originalUpdate.apply(this,args);const v=this.__v10;if(v&&!v.destroyed){if(v.state.memory?.marks?.length){/* persistent world marks remain authoritative */} }return result;};
 }
