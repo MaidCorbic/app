@@ -1,159 +1,67 @@
-/* Production cinematic splash V3. Owns first-load presentation and fails open safely. */
+/* Production splash V7. Never block game entry on Phaser/auth/runtime readiness. */
 (() => {
-  if (window.__relaySplashV3) return;
-  window.__relaySplashV3 = true;
+  if (window.__relaySplashLoaderV7) return;
+  window.__relaySplashLoaderV7 = true;
 
   const boot = () => {
-    document.getElementById('bootLoader')?.remove();
-    const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
+    const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
     if (!splash) return;
 
-    if (!splash.classList.contains('relay-splash')) splash.classList.add('relay-splash');
-
-    if (!document.querySelector('link[data-relay-cinematic-v3]')) {
-      const css = document.createElement('link');
-      css.rel = 'stylesheet';
-      css.href = './cinematic-splash.css';
-      css.dataset.relayCinematicV3 = 'true';
-      document.head.appendChild(css);
-    }
-
-    const image = splash.querySelector('.relay-splash-art, #relaySplashArt');
     const bar = splash.querySelector('.relay-splash-progress');
     const pct = splash.querySelector('.relay-splash-percent');
     const label = splash.querySelector('.relay-splash-status');
-    if (!image || !bar || !pct || !label) return;
-
-    if (!splash.querySelector('.relay-splash-brand')) {
-      const brand = document.createElement('div');
-      brand.className = 'relay-splash-brand';
-      brand.innerHTML = '<b>R/</b><span>RELAY RUNNER</span>';
-      splash.appendChild(brand);
+    const image = splash.querySelector('#relaySplashArt, .relay-splash-art');
+    if (!bar || !pct || !label) {
+      window.setTimeout(() => splash.classList.add('is-hidden'), 1200);
+      return;
     }
 
-    const stages = [
-      [8, 'INITIALIZING RELAY'],
-      [26, 'LOADING INTERFACE'],
-      [48, 'LOADING GAME SYSTEMS'],
-      [68, 'CONNECTING WORLD'],
-      [86, 'PREPARING HOME'],
-    ];
-
+    let released = false;
     let progress = 0;
-    let imageReady = image.complete && image.naturalWidth > 0;
-    let pageReady = document.readyState === 'complete';
-    let engineReady = false;
-    let finishing = false;
-    let timedOut = false;
     const startedAt = performance.now();
-    const MIN_SPLASH_MS = 2200;
-    const MAX_SPLASH_MS = 7000;
+    const MIN_MS = 900;
+    const MAX_MS = 3000;
 
-    const setProgress = (value, text) => {
-      progress = Math.max(progress, Math.min(100, Math.round(value)));
+    splash.setAttribute('aria-busy', 'true');
+    splash.classList.remove('is-hidden', 'is-leaving');
+
+    const paint = value => {
+      if (released) return;
+      progress = Math.max(progress, Math.min(96, value));
       bar.style.width = `${progress}%`;
-      pct.textContent = `${progress}%`;
-      if (text) label.textContent = text;
+      pct.textContent = `${Math.round(progress)}%`;
+      label.textContent = progress >= 70 ? 'CONNECTING WORLD' : progress >= 35 ? 'LOADING GAME SYSTEMS' : 'INITIALIZING RELAY';
     };
 
-    const animateTo = (target, text) => new Promise(resolve => {
-      if (target <= progress) {
-        setProgress(target, text);
-        resolve();
-        return;
-      }
-      const from = progress;
-      const started = performance.now();
-      const duration = Math.max(180, Math.min(650, (target - from) * 10));
-      const frame = now => {
-        const t = Math.min(1, (now - started) / duration);
-        const eased = t * (2 - t);
-        setProgress(from + (target - from) * eased, text);
-        if (t < 1) requestAnimationFrame(frame);
-        else resolve();
-      };
-      requestAnimationFrame(frame);
-    });
-
-    const finish = async (forced = false) => {
-      if (finishing) return;
-      const elapsed = performance.now() - startedAt;
-      if (!forced && (!imageReady || !pageReady || !engineReady)) return;
-      if (!forced && elapsed < MIN_SPLASH_MS) {
-        window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed);
-        return;
-      }
-      finishing = true;
-      await animateTo(100, 'READY');
+    const release = reason => {
+      if (released) return;
+      released = true;
+      bar.style.width = '100%';
+      pct.textContent = '100%';
+      label.textContent = 'READY';
+      splash.dataset.relaySplashReleaseReason = reason;
       splash.setAttribute('aria-busy', 'false');
       splash.classList.add('is-hidden');
-      window.setTimeout(() => splash.remove(), 700);
+      window.setTimeout(() => splash.remove(), 420);
+      window.dispatchEvent(new CustomEvent('relay:splash-released', { detail: { reason } }));
     };
 
-    const markImageReady = () => {
-      if (imageReady) return;
-      imageReady = true;
-      animateTo(26, 'LOADING INTERFACE').then(() => finish());
+    const tick = () => {
+      if (released) return;
+      const elapsed = performance.now() - startedAt;
+      const pageReady = document.readyState === 'complete';
+      const imageReady = !image || image.complete || image.naturalWidth > 0;
+      paint(progress + (pageReady || imageReady ? 1.7 : 1.15));
+
+      /* Phaser, auth, Supabase, network and gameplay modules are never
+         prerequisites for leaving the splash. The user must always reach Home. */
+      if (elapsed >= MIN_MS && (pageReady || imageReady)) return release('ready');
+      if (elapsed >= MAX_MS) return release('failsafe');
+      window.setTimeout(tick, 50);
     };
 
-    if (imageReady) setProgress(26, 'LOADING INTERFACE');
-    else {
-      image.addEventListener('load', markImageReady, { once: true });
-      image.addEventListener('error', () => {
-        imageReady = true;
-        setProgress(22, 'USING SAFE MODE');
-        finish();
-      }, { once: true });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        animateTo(48, 'LOADING GAME SYSTEMS');
-      }, { once: true });
-    } else {
-      animateTo(48, 'LOADING GAME SYSTEMS');
-    }
-
-    if (!pageReady) {
-      window.addEventListener('load', () => {
-        pageReady = true;
-        animateTo(68, 'CONNECTING WORLD').then(finish);
-      }, { once: true });
-    } else {
-      setProgress(68, 'CONNECTING WORLD');
-    }
-
-    const checkEngine = () => {
-      const canvas = document.querySelector('#phaser-game canvas');
-      if (canvas) {
-        engineReady = true;
-        animateTo(86, 'PREPARING HOME').then(finish);
-        return;
-      }
-      if (!finishing) window.setTimeout(checkEngine, 60);
-    };
-    checkEngine();
-
-    const orientation = window.matchMedia('(orientation: landscape)');
-    const onOrientation = () => {
-      if (finishing) return;
-      imageReady = image.complete && image.naturalWidth > 0;
-    };
-    orientation.addEventListener?.('change', onOrientation);
-    window.addEventListener('resize', onOrientation, { passive: true });
-
-    window.setTimeout(() => {
-      if (finishing || timedOut) return;
-      timedOut = true;
-      label.textContent = 'STARTING HOME';
-      finish(true);
-    }, MAX_SPLASH_MS);
-
-    stages.forEach(([value, text], index) => {
-      window.setTimeout(() => {
-        if (!finishing && !timedOut) setProgress(value, text);
-      }, 220 + index * 360);
-    });
+    if (image && !image.complete) image.addEventListener('load', tick, { once: true });
+    tick();
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
