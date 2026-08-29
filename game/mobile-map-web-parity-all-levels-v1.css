@@ -1,0 +1,58 @@
+/* Relay Runner — mobile map parity for every campaign level.
+ * Keeps the existing web map visual language; changes only viewport geometry.
+ * No gameplay/input ownership is changed here.
+ */
+
+@media (max-width: 760px) {
+  #relayGameplayIntroFinalV3 {
+    padding: 0 !important;
+    place-items: stretch !important;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-shell {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
+    gap: 8px !important;
+    background: #02060c !important;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-head {
+    flex: 0 0 auto;
+    min-height: 48px;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-map-wrap {
+    width: 100% !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-map {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    display: block !important;
+    object-fit: contain !important;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-foot {
+    flex: 0 0 auto;
+    min-height: 24px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (min-width: 761px) {
+  #relayGameplayIntroFinalV3 .map-briefing-map {
+    object-fit: contain;
+  }
+}
