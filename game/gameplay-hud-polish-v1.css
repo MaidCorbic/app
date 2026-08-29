@@ -1,0 +1,13 @@
+/* Gameplay HUD polish V1 — presentation only. */
+#play .hud-route,#play .hud-progress,#play .hud-xp,#play .hud-actions>button{border-width:1px!important;border-color:rgba(141,244,255,.14)!important;background:rgba(4,13,25,.72)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 6px 16px rgba(0,0,0,.16)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#play .hud-route{min-width:0!important;padding:6px 9px!important;border-radius:8px!important}
+#play .hud-route small{font-size:7px!important;letter-spacing:1.1px!important}
+#play .hud-route b{font-size:10px!important;letter-spacing:.45px!important}
+#play .hud-progress{min-width:0!important;padding:6px 9px!important;border-radius:8px!important}
+#play .hud-progress>div{height:4px!important;margin-top:4px!important}
+#play .hud-xp{display:flex!important;visibility:visible!important;opacity:1!important;min-width:54px!important;padding:6px 8px!important;border-radius:8px!important;line-height:1!important}
+#play .hud-xp small{font-size:7px!important;letter-spacing:.8px!important}
+#play .hud-xp b{font-size:11px!important;letter-spacing:.7px!important}
+#play .hud-route:hover,#play .hud-progress:hover,#play .hud-actions:hover,#play .hud-actions>button:hover,#play .hud-route:focus-within,#play .hud-progress:focus-within{transform:none!important;filter:none!important}
+@media(max-width:880px),(hover:none) and (pointer:coarse){#play .hud-route{padding:6px 8px!important;border-radius:8px!important}#play .hud-progress{padding:6px 8px!important;border-radius:8px!important}#play .hud-xp{min-width:52px!important;padding:5px 7px!important}}
+@media(max-width:430px){#play .hud-route{padding:5px 7px!important;border-radius:7px!important}#play .hud-route small{font-size:6px!important}#play .hud-route b{font-size:9px!important;max-width:44vw!important}#play .hud-progress{padding:5px 7px!important;border-radius:7px!important}#play .hud-xp{min-width:48px!important;padding:5px 6px!important;border-radius:7px!important}#play .hud-xp b{font-size:10px!important}}
