@@ -18,10 +18,8 @@
     const style = document.createElement('style');
     style.id = 'home-v3-interaction-style';
     style.textContent = `
-      /* WebGL safety: keep Phaser's parent laid out while Home is visible. Do not use display:none. */
       body.home-v3-active #play{display:block!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;position:fixed!important;inset:0!important;width:100%!important;height:100%!important;z-index:0!important}
       body.home-v3-active #phaser-game{display:block!important;visibility:hidden!important;opacity:0!important;width:100%!important;height:100%!important;min-width:1px!important;min-height:1px!important}
-
       .home-v3-play{position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
       .home-v3-play:active{cursor:grabbing}
       .home-v3-play .home-v3-play-track{position:absolute;inset:0;pointer-events:none;opacity:.46;background:linear-gradient(90deg,transparent 0 6%,rgba(255,255,255,.07) 48%,transparent 100%);animation:homeV3PlaySweep 2.8s ease-in-out infinite}
@@ -90,6 +88,15 @@
     let pointerId = null;
     let startX = 0;
     let completed = false;
+    let maxTravel = 0;
+
+    const updateMetrics = () => {
+      const rect = button.getBoundingClientRect();
+      const knob = button.querySelector('.home-v3-play-knob');
+      const knobWidth = knob?.getBoundingClientRect().width || 42;
+      maxTravel = Math.max(1, rect.width - knobWidth - 14);
+      return maxTravel;
+    };
 
     const reset = () => {
       if (completed) return;
@@ -107,10 +114,11 @@
       pointerId = null;
       button.classList.remove('is-dragging');
       button.classList.add('is-armed','is-locked');
+      const max = updateMetrics();
       const knob = button.querySelector('.home-v3-play-knob');
       const fill = button.querySelector('.home-v3-play-fill');
       if (fill) fill.style.width = '100%';
-      if (knob) knob.style.transform = 'translateX(calc(100% - 56px))';
+      if (knob) knob.style.transform = `translateX(${max}px)`;
       window.setTimeout(() => nativeClick('#start'), 180);
     };
 
@@ -118,6 +126,7 @@
       if (completed) return;
       pointerId = event.pointerId;
       startX = event.clientX;
+      updateMetrics();
       button.setPointerCapture?.(pointerId);
       button.classList.add('is-dragging');
       event.preventDefault();
@@ -126,11 +135,9 @@
 
     button.addEventListener('pointermove', event => {
       if (event.pointerId !== pointerId || completed) return;
-      const rect = button.getBoundingClientRect();
+      const max = updateMetrics();
       const knob = button.querySelector('.home-v3-play-knob');
       const fill = button.querySelector('.home-v3-play-fill');
-      const knobWidth = knob?.getBoundingClientRect().width || 42;
-      const max = Math.max(1, rect.width - knobWidth - 14);
       const distance = Math.max(0, Math.min(max, event.clientX - startX));
       const percent = distance / max;
       if (knob) knob.style.transform = `translateX(${distance}px)`;
@@ -151,7 +158,6 @@
     button.addEventListener('pointercancel', reset);
     button.addEventListener('lostpointercapture', reset);
     button.addEventListener('click', event => {
-      /* The visual Play control is never a click-to-start control. */
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
