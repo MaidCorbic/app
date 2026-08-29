@@ -1,0 +1,19 @@
+/* Mobile UI cleanup: keep portrait gameplay focused and remove presentation-only status noise. */
+
+/* The P2 presentation status chip (READY / FALL / JUMP / etc.) is not gameplay UI. */
+#relayP2CharacterHud {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Portrait mobile keeps PAUSE only; SETTINGS remains available elsewhere when needed. */
+@media (max-width: 768px) and (orientation: portrait) {
+  body.is-touch .mobile-bottom-hud .mobile-menu-settings {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
