@@ -13,6 +13,7 @@ import { installGameplayExpansionV9MissionIntelligence } from './src/systems/gam
 import { installGameplayExpansionV10 } from './src/systems/gameplay-expansion-v10-perception.js';
 import { installGameplayExpansionV11Twenty } from './src/systems/gameplay-expansion-v11-twenty.js';
 import { installGameplayDeepIntegrationV12 } from './src/systems/gameplay-deep-integration-v12.js';
+import { installGameplayExpansionV13 } from './src/systems/gameplay-expansion-v13-34-systems.js';
 
 installGameplayExpansion(RunnerScene);
 installGameplayExpansionV2Safe(RunnerScene);
@@ -28,3 +29,4 @@ installGameplayExpansionV9MissionIntelligence(RunnerScene);
 installGameplayExpansionV10(RunnerScene);
 installGameplayExpansionV11Twenty(RunnerScene);
 installGameplayDeepIntegrationV12(RunnerScene);
+installGameplayExpansionV13(RunnerScene);
