@@ -1,71 +1,64 @@
-/* Production splash V5. Single owner for first-load presentation; visible progress is fail-open. */
+/* Production splash V6 — loader starts before the app and never depends on gameplay to animate. */
 (() => {
-  if (window.__relaySplashV5) return;
-  window.__relaySplashV5 = true;
+  if (window.__relaySplashV6) return;
+  window.__relaySplashV6 = true;
 
   const boot = () => {
-    const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
+    const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
     if (!splash) return;
-    const image = splash.querySelector('.relay-splash-art, #relaySplashArt');
     const bar = splash.querySelector('.relay-splash-progress');
     const pct = splash.querySelector('.relay-splash-percent');
     const label = splash.querySelector('.relay-splash-status');
-    if (!image || !bar || !pct || !label) return;
+    const image = splash.querySelector('#relaySplashArt, .relay-splash-art');
+    if (!bar || !pct || !label) return;
 
-    const fit = () => {
-      splash.style.width = '100dvw'; splash.style.height = '100dvh';
-      image.style.display = 'block'; image.style.position = 'absolute'; image.style.inset = '0';
-      image.style.width = '100dvw'; image.style.height = '100dvh';
-      image.style.minWidth = '100%'; image.style.minHeight = '100%';
-      image.style.maxWidth = 'none'; image.style.maxHeight = 'none';
-      image.style.objectFit = 'cover'; image.style.objectPosition = 'center';
-      image.style.transform = 'none'; image.style.animation = 'none'; image.style.opacity = '1';
-    };
-    fit();
-    splash.setAttribute('aria-busy', 'true');
-
-    let imageReady = image.complete && image.naturalWidth > 0;
-    let pageReady = document.readyState === 'complete';
-    let engineReady = !!document.querySelector('#phaser-game canvas');
     let released = false;
-    let visualProgress = 0;
+    let progress = 0;
     const startedAt = performance.now();
-    const MIN_SPLASH_MS = 700;
-    const MAX_SPLASH_MS = 5000;
+    const MIN_MS = 900;
+    const MAX_MS = 5000;
+
+    splash.setAttribute('aria-busy', 'true');
+    splash.classList.remove('is-hidden', 'is-leaving');
+    bar.style.width = '0%';
+    pct.textContent = '0%';
+
+    const setProgress = value => {
+      progress = Math.max(progress, Math.min(99, value));
+      bar.style.width = `${progress}%`;
+      pct.textContent = `${Math.round(progress)}%`;
+      label.textContent = progress >= 72 ? 'CONNECTING WORLD' : progress >= 35 ? 'LOADING GAME SYSTEMS' : 'INITIALIZING RELAY';
+    };
 
     const release = reason => {
       if (released) return;
       released = true;
-      bar.style.width = '100%'; pct.textContent = '100%'; label.textContent = 'READY';
+      bar.style.width = '100%';
+      pct.textContent = '100%';
+      label.textContent = 'READY';
       splash.dataset.relaySplashReleaseReason = reason;
-      splash.setAttribute('aria-busy', 'false'); splash.classList.add('is-hidden');
+      splash.setAttribute('aria-busy', 'false');
+      splash.classList.add('is-hidden');
       window.setTimeout(() => splash.remove(), 420);
       window.dispatchEvent(new CustomEvent('relay:splash-released', { detail: { reason } }));
     };
 
+    const imageReady = () => !image || image.complete || image.naturalWidth > 0;
     const tick = () => {
       if (released) return;
-      engineReady = engineReady || !!document.querySelector('#phaser-game canvas');
-      const realReady = imageReady && pageReady && engineReady;
       const elapsed = performance.now() - startedAt;
-      const readiness = 25 * Number(imageReady) + 35 * Number(pageReady) + 40 * Number(engineReady);
-      const target = realReady ? 100 : Math.min(92, Math.max(readiness, visualProgress + 0.35));
-      visualProgress = Math.min(100, target);
-      bar.style.width = `${visualProgress}%`;
-      pct.textContent = `${Math.round(visualProgress)}%`;
-      label.textContent = realReady ? 'READY' : visualProgress >= 60 ? 'CONNECTING WORLD' : visualProgress >= 25 ? 'LOADING GAME SYSTEMS' : 'INITIALIZING RELAY';
-      if (realReady && elapsed >= MIN_SPLASH_MS) return release('ready');
-      if (elapsed >= MAX_SPLASH_MS) return release('failsafe');
+      const engineReady = !!document.querySelector('#phaser-game canvas');
+      const pageReady = document.readyState === 'complete';
+      const target = Math.min(92, progress + (engineReady ? 1.8 : pageReady ? 1.0 : 0.7));
+      setProgress(target);
+      if (elapsed >= MIN_MS && (engineReady || elapsed >= MAX_MS)) return release(engineReady ? 'ready' : 'failsafe');
       window.setTimeout(tick, 50);
     };
 
-    if (!imageReady) {
-      image.addEventListener('load', () => { imageReady = true; tick(); }, { once: true });
-      image.addEventListener('error', () => { imageReady = true; label.textContent = 'SAFE MODE'; tick(); }, { once: true });
+    if (image && !imageReady()) {
+      image.addEventListener('error', () => { label.textContent = 'SAFE MODE'; }, { once: true });
     }
-    if (!pageReady) window.addEventListener('load', () => { pageReady = true; tick(); }, { once: true });
-
-    setTimeout(tick, 0);
+    tick();
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
