@@ -1,0 +1,44 @@
+/* Mobile gameplay presentation fix: remove stacked top cards while keeping the map and gameplay controls. */
+@media (max-width: 768px) {
+  html body.is-touch section#play #relay-feature-dock-v1,
+  html body.is-touch section#play .hud-route,
+  html body.is-touch section#play .hud-progress,
+  html body.is-touch section#play .hud-xp,
+  html body.is-touch section#play .rotate-prompt {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Keep the mission map; only the surrounding top HUD cards are removed. */
+  #relayGameplayIntroFinalV3 .map-briefing-map-wrap {
+    position: relative !important;
+  }
+
+  /* Legend lives below the map, never over the route. */
+  #relayGameplayIntroFinalV3 .map-briefing-foot {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    align-items: center !important;
+    min-height: 42px !important;
+    padding: 5px 4px 2px !important;
+  }
+
+  #relayGameplayIntroFinalV3 .map-briefing-foot::after {
+    content: "LEGEND  ·  ROUTE   CHECKPOINT   TARGET   THREAT   SIGNAL   YOU";
+    display: block !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    color: #9fb6c5 !important;
+    font: 700 6px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace !important;
+    letter-spacing: .08em !important;
+    text-align: center !important;
+    border-top: 1px solid rgba(141,244,255,.12) !important;
+    padding-top: 5px !important;
+  }
+}
