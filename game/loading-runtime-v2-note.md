@@ -1,1 +1,0 @@
-Loading V6 starts before gameplay modules. Progress animation is independent of Phaser readiness; Phaser only controls final release, with a 5-second fail-open.
