@@ -30,6 +30,7 @@ import './cargo-integrity-v2-visibility-v1.js';
 import './signal-network-v1.js';
 import './city-response-v1.js';
 import './gameplay-intro-final-v1.js';
+import './mobile-map-csgo-full-v1.js';
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
 import './src/systems/death-retry-state-reset-v1.js';
