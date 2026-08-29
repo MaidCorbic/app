@@ -53,3 +53,35 @@ html body.is-touch section#play div.mobile-controls div.mobile-actions>button[da
   #cargoIntegrityV2 .cargo-value{min-width:29px!important;font-size:9px!important;text-shadow:0 1px 3px #000}
   #cargoIntegrityV2 .cargo-foot,#cargoIntegrityV2 .cargo-flash{display:none!important}
 }
+
+/* Compact mobile HUD: keep existing gameplay controls/features, reduce visual chrome. */
+@media (max-width: 768px) {
+  /* Feature cards remain available through their existing actions, but never occupy the top viewport simultaneously. */
+  html body.is-touch section#play #relay-feature-dock-v1 {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Keep the existing orientation prompt useful, but compact and out of the main play lane. */
+  html body.is-touch section#play .rotate-prompt {
+    width: min(250px, calc(100vw - 28px)) !important;
+    max-width: calc(100vw - 28px) !important;
+    transform: translate(-50%, 0) scale(.88) !important;
+    transform-origin: top center !important;
+    margin: 0 !important;
+    z-index: 240 !important;
+  }
+
+  html body.is-touch section#play .rotate-prompt button,
+  html body.is-touch section#play .rotate-prompt .button,
+  html body.is-touch section#play .rotate-prompt [role="button"] {
+    min-height: 34px !important;
+  }
+
+  /* The mission objective remains the single persistent objective, but the existing panel is compact. */
+  html body.is-touch section#play #cargoIntegrityV2 {
+    max-width: 210px !important;
+  }
+}

@@ -54,12 +54,12 @@ function layout(state, scene, force = false) {
   const tutorial = tutorialBounds(scene);
   const baseW = 426, baseH = 166;
   if (mobile) {
-    /* Mobile HUD zone: compact card below the top header, centered away from player and controls. */
-    const pw = Math.min(286, Math.max(238, w - 28));
+    /* Compact mobile objective: keep one persistent objective without consuming the play lane. */
+    const pw = Math.min(250, Math.max(214, w - 32));
     const scale = pw / baseW;
     const actualH = baseH * scale;
-    const x = Math.max(14, (w - pw) / 2);
-    const y = Math.max(78, Math.min(104, h * .16));
+    const x = Math.max(16, (w - pw) / 2);
+    const y = Math.max(72, Math.min(88, h * .13));
     if (!force && state.x === x && state.y === y && state.scale === scale && state.tutorial === false) return;
     state.x = x; state.y = y; state.scale = scale; state.tutorial = false;
     state.c.setPosition(x, y).setScale(scale);
