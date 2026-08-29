@@ -33,7 +33,8 @@
     "test:special-event-reward": "node tests/special-event-reward.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs",
     "test:final-hardening": "node tests/final-hardening-contract.mjs",
-    "test:deep-gameplay": "node tests/gameplay-deep-integration-v12.contract.mjs"
+    "test:deep-gameplay": "node tests/gameplay-deep-integration-v12.contract.mjs",
+    "test:v13-level-wiring": "node tests/gameplay-v13-level-wiring.contract.mjs"
   },
   "engines": {"node": "^20.19.0 || >=22.12.0"},
   "dependencies": {"phaser": "^3.90.0", "vite": "^8.2.1"},
