@@ -36,7 +36,7 @@
 #game #pause{width:56px!important;min-width:56px!important;padding:0!important;border-radius:10px!important;color:var(--relay-gold-bright)!important;border-color:rgba(255,208,110,.40)!important;display:grid!important;place-items:center!important}
 #game #relayTimeIndicator{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 
-/* Legacy fixed HUD text is hidden by presentation-final-v1.js; systems remain alive. */
+/* Legacy fixed HUD is hidden by presentation-final-v1.js; underlying systems remain active. */
 #game .world-marker{display:none!important}
 #game .input-guide{display:none!important}
 
