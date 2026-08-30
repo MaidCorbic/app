@@ -6,31 +6,35 @@ import './unified-gameplay-ui-v1-polish.css';
 import './unified-gameplay-ui-v1.js';
 import './unified-gameplay-ui-v1-mobile.css';
 import './presentation-final-v1.css';
+import './update-center-v1.js';
 
-/* Final Home interaction owner. Existing gameplay/UI systems remain authoritative. */
+/* Single Home navigation owner. Existing gameplay, Options, FAQ and Exit systems remain authoritative. */
 (() => {
   'use strict';
-  if (window.__relayHomeFinalV1) return;
-  window.__relayHomeFinalV1 = true;
+  if (window.__relayHomeFinalV2) return;
+  window.__relayHomeFinalV2 = true;
 
   const $ = sel => document.querySelector(sel);
 
-  const call = (name, fallback) => {
-    try {
-      if (name === 'options' && window.relayUnifiedCinematicUI?.openOptions) return window.relayUnifiedCinematicUI.openOptions();
-      if (name === 'faq' && window.relayUnifiedCinematicUI?.openFAQ) return window.relayUnifiedCinematicUI.openFAQ();
-      if (name === 'update' && window.relayUpdateCenter?.open) return window.relayUpdateCenter.open();
-    } catch {}
-    if (typeof fallback === 'function') window.setTimeout(fallback, 0);
+  const openOptions = () => {
+    try { window.relayUnifiedCinematicUI?.openOptions?.(); } catch (error) { console.warn('[Relay Home] options open failed', error); }
+  };
+  const openFaq = () => {
+    try { window.relayUnifiedCinematicUI?.openFAQ?.(); } catch (error) { console.warn('[Relay Home] FAQ open failed', error); }
+  };
+  const openUpdate = () => {
+    try { window.relayUpdateCenter?.open?.(); } catch (error) { console.warn('[Relay Home] update open failed', error); }
   };
 
   const install = () => {
     const intro = $('#intro');
     const side = intro?.querySelector('.home-v3-side');
-    if (!side) return;
+    if (!intro || !side || intro.dataset.homeFinalV2Installed === '1') return;
+    intro.dataset.homeFinalV2Installed = '1';
 
+    /* Remove only duplicated/legacy Home launchers. The underlying panels remain intact. */
     intro.querySelector('.info-launcher')?.remove();
-    side.querySelectorAll('[data-v3-options],[data-v3-faq],[data-v3-exit],[data-unified-home]').forEach(node => node.remove());
+    side.querySelectorAll('[data-v3-options],[data-v3-faq],[data-v3-exit],[data-unified-home],.relay-home-nav-card').forEach(node => node.remove());
 
     const make = (id, label, detail, handler) => {
       const button = document.createElement('button');
@@ -47,13 +51,23 @@ import './presentation-final-v1.css';
     };
 
     side.append(
-      make('options', 'OPTIONS', 'SETTINGS · AUDIO · DISPLAY', () => call('options', () => $('#titlePanel') && window.relayUnifiedCinematicUI?.openOptions?.())),
-      make('faq', 'FAQ', 'HELP · GAME SYSTEMS', () => call('faq', () => window.relayUnifiedCinematicUI?.openFAQ?.())),
-      make('update', 'UPDATE', 'LATEST PATCHES · LIVE', () => call('update', () => window.relayUpdateCenter?.open?.())),
+      make('options', 'OPTIONS', 'SETTINGS · AUDIO · DISPLAY', openOptions),
+      make('faq', 'FAQ', 'HELP · GAME SYSTEMS', openFaq),
+      make('update', 'UPDATE', 'VERSION HISTORY · LIVE', openUpdate),
       make('exit', 'EXIT', 'CLOSE SESSION', () => $('#exitTitle')?.click()),
     );
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once:true });
-  else window.setTimeout(install, 0);
+  const start = () => {
+    install();
+    const intro = $('#intro');
+    if (!intro || intro.dataset.homeFinalV2Observer === '1') return;
+    intro.dataset.homeFinalV2Observer = '1';
+    new MutationObserver(() => {
+      if (!intro.querySelector('.home-v3-side .relay-home-nav-card')) install();
+    }).observe(intro, { childList:true, subtree:true });
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
+  else window.setTimeout(start, 0);
 })();
