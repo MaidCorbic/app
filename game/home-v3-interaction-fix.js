@@ -1,3 +1,13 @@
+import './unified-cinematic-ui-v1.css';
+import './unified-cinematic-ui-v1.js';
+import './unified-cinematic-ui-bridge-v1.js';
+import './unified-gameplay-ui-v1.css';
+import './unified-gameplay-ui-v1-polish.css';
+import './unified-gameplay-ui-v1.js';
+import './unified-gameplay-ui-v1-mobile.css';
+import './presentation-final-v1.css';
+import './update-center-v1.js';
+
 /* Final Home owner: one menu stack, direct actions, no legacy relay click chains. */
 (() => {
   'use strict';
