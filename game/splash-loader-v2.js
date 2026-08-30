@@ -1,9 +1,9 @@
-/* Production gameplay boot splash V6 — one owner, actual gameplay readiness. */
+/* Production gameplay boot splash V7 — one owner, real gameplay readiness, safe recovery. */
 (() => {
   'use strict';
 
-  if (window.__relaySplashV6) return;
-  window.__relaySplashV6 = true;
+  if (window.__relaySplashV7) return;
+  window.__relaySplashV7 = true;
 
   const boot = () => {
     const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
@@ -44,6 +44,7 @@
     const startedAt = performance.now();
     const MIN_VISIBLE_MS = 220;
     const MAX_BOOT_MS = 20000;
+    const RETRY_KEY = 'relay-runner-loader-retried';
 
     const setProgress = (value, text) => {
       progress = Math.max(progress, Math.min(100, Math.round(value)));
@@ -60,21 +61,25 @@
       }
       const from = progress;
       const started = performance.now();
-      const duration = Math.max(120, Math.min(420, (target - from) * 6));
+      const duration = Math.max(140, Math.min(420, (target - from) * 6));
       const frame = now => {
         if (finishing || failed) return resolve();
         const t = Math.min(1, (now - started) / duration);
         const eased = t * (2 - t);
         setProgress(from + (target - from) * eased, text);
-        if (t < 1) {
-          animationFrame = requestAnimationFrame(frame);
-        } else {
+        if (t < 1) animationFrame = requestAnimationFrame(frame);
+        else {
           animationFrame = 0;
           resolve();
         }
       };
       animationFrame = requestAnimationFrame(frame);
     });
+
+    const updateSizing = () => {
+      if (!finishing && !failed) applyArtworkSizing();
+    };
+    const mediaQuery = window.matchMedia('(orientation: landscape)');
 
     const cleanup = () => {
       if (pollTimer) window.clearTimeout(pollTimer);
@@ -96,7 +101,62 @@
       splash.classList.add('is-hidden');
       window.setTimeout(() => splash.remove(), 450);
       window.dispatchEvent(new CustomEvent('relay:splash-released', { detail: { reason } }));
-      try { sessionStorage.removeItem('relay-runner-loader-retried'); } catch {}
+      try { sessionStorage.removeItem(RETRY_KEY); } catch {}
+    };
+
+    const showFailure = reason => {
+      if (finishing || failed || !document.body.contains(splash)) return;
+      failed = true;
+      if (pollTimer) window.clearTimeout(pollTimer);
+      if (timeoutTimer) window.clearTimeout(timeoutTimer);
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+      setProgress(99, 'STARTUP INTERRUPTED');
+      pct.textContent = '—';
+      splash.setAttribute('aria-busy', 'true');
+
+      let message = splash.querySelector('[data-relay-loader-message]');
+      if (!message) {
+        message = document.createElement('p');
+        message.dataset.relayLoaderMessage = '';
+        Object.assign(message.style, {
+          margin: '12px auto 0', maxWidth: '520px', padding: '0 18px', textAlign: 'center',
+          fontSize: '12px', lineHeight: '1.5', letterSpacing: '.12em', textTransform: 'uppercase', opacity: '.78'
+        });
+        splash.querySelector('.relay-splash-ui')?.appendChild(message);
+      }
+      message.textContent = reason === 'boot-timeout'
+        ? 'The gameplay engine did not finish starting.'
+        : 'The game hit a startup error before gameplay was ready.';
+
+      let retry = splash.querySelector('[data-relay-loader-retry]');
+      if (!retry) {
+        retry = document.createElement('button');
+        retry.type = 'button';
+        retry.dataset.relayLoaderRetry = '';
+        retry.textContent = 'RETRY LOAD';
+        Object.assign(retry.style, {
+          display: 'block', margin: '16px auto 0', minWidth: '150px', padding: '10px 18px',
+          border: '1px solid rgba(56,189,248,.8)', borderRadius: '8px', background: 'rgba(3,12,24,.95)',
+          color: 'inherit', font: 'inherit', fontWeight: '800', letterSpacing: '.12em', cursor: 'pointer'
+        });
+        retry.addEventListener('click', () => {
+          try { sessionStorage.removeItem(RETRY_KEY); } catch {}
+          window.location.reload();
+        });
+        splash.querySelector('.relay-splash-ui')?.appendChild(retry);
+      }
+
+      console.error('[Relay Runner] Startup failed:', reason, window.relayLastRuntimeError || 'unknown');
+    };
+
+    const onWindowError = event => {
+      if (event.target !== window || finishing || failed || gameplayReady) return;
+      showFailure('runtime-error');
+    };
+
+    const onUnhandledRejection = event => {
+      if (finishing || failed || gameplayReady) return;
+      showFailure('unhandled-rejection');
     };
 
     const tryRelease = () => {
@@ -118,89 +178,6 @@
       void animateTo(30, 'LOADING ARTWORK').then(tryRelease);
     };
 
-    const showFailure = reason => {
-      if (finishing || failed || !document.body.contains(splash)) return;
-      failed = true;
-      if (pollTimer) window.clearTimeout(pollTimer);
-      if (timeoutTimer) window.clearTimeout(timeoutTimer);
-      if (animationFrame) cancelAnimationFrame(animationFrame);
-      setProgress(99, 'STARTUP INTERRUPTED');
-      pct.textContent = '—';
-      splash.setAttribute('aria-busy', 'true');
-
-      let message = splash.querySelector('[data-relay-loader-message]');
-      if (!message) {
-        message = document.createElement('p');
-        message.dataset.relayLoaderMessage = '';
-        message.style.margin = '12px auto 0';
-        message.style.maxWidth = '520px';
-        message.style.padding = '0 18px';
-        message.style.textAlign = 'center';
-        message.style.fontSize = '12px';
-        message.style.lineHeight = '1.5';
-        message.style.letterSpacing = '.12em';
-        message.style.textTransform = 'uppercase';
-        message.style.opacity = '.78';
-        splash.querySelector('.relay-splash-ui')?.appendChild(message);
-      }
-      message.textContent = reason === 'boot-timeout'
-        ? 'The gameplay engine did not finish starting.'
-        : 'The game hit a startup error before gameplay was ready.';
-
-      let retry = splash.querySelector('[data-relay-loader-retry]');
-      if (!retry) {
-        retry = document.createElement('button');
-        retry.type = 'button';
-        retry.dataset.relayLoaderRetry = '';
-        retry.textContent = 'RETRY LOAD';
-        retry.style.display = 'block';
-        retry.style.margin = '16px auto 0';
-        retry.style.minWidth = '150px';
-        retry.style.padding = '10px 18px';
-        retry.style.border = '1px solid rgba(56,189,248,.8)';
-        retry.style.borderRadius = '8px';
-        retry.style.background = 'rgba(3,12,24,.95)';
-        retry.style.color = 'inherit';
-        retry.style.font = 'inherit';
-        retry.style.fontWeight = '800';
-        retry.style.letterSpacing = '.12em';
-        retry.style.cursor = 'pointer';
-        retry.addEventListener('click', () => {
-          try { sessionStorage.removeItem('relay-runner-loader-retried'); } catch {}
-          window.location.reload();
-        });
-        splash.querySelector('.relay-splash-ui')?.appendChild(retry);
-      }
-
-      console.error('[Relay Runner] Startup failed:', reason);
-    };
-
-    const onWindowError = event => {
-      if (event.target !== window || finishing || failed || gameplayReady) return;
-      showFailure('runtime-error');
-    };
-
-    const onUnhandledRejection = event => {
-      if (finishing || failed || gameplayReady) return;
-      showFailure('unhandled-rejection');
-    };
-
-    const pollGameplayReady = () => {
-      if (finishing || failed) return;
-      if (window.strideReady) {
-        gameplayReady = true;
-        void animateTo(92, 'GAMEPLAY READY').then(tryRelease);
-        return;
-      }
-      setProgress(Math.max(progress, 65), 'LOADING GAMEPLAY');
-      pollTimer = window.setTimeout(pollGameplayReady, 80);
-    };
-
-    const updateSizing = () => {
-      if (!finishing && !failed) applyArtworkSizing();
-    };
-    const mediaQuery = window.matchMedia('(orientation: landscape)');
-
     window.addEventListener('resize', updateSizing, { passive: true });
     mediaQuery.addEventListener?.('change', updateSizing);
     window.addEventListener('error', onWindowError, true);
@@ -214,6 +191,27 @@
       image.addEventListener('load', markImageReady, { once: true });
       image.addEventListener('error', markImageReady, { once: true });
     }
+
+    const initialRuntimeError = window.relayLastRuntimeError;
+    if (initialRuntimeError && !gameplayReady) {
+      showFailure('runtime-error');
+      return;
+    }
+
+    const pollGameplayReady = () => {
+      if (finishing || failed) return;
+      if (window.relayLastRuntimeError && !window.strideReady) {
+        showFailure('runtime-error');
+        return;
+      }
+      if (window.strideReady) {
+        gameplayReady = true;
+        void animateTo(92, 'GAMEPLAY READY').then(tryRelease);
+        return;
+      }
+      setProgress(Math.max(progress, 65), 'LOADING GAMEPLAY');
+      pollTimer = window.setTimeout(pollGameplayReady, 80);
+    };
 
     if (gameplayReady) {
       void animateTo(92, 'GAMEPLAY READY').then(tryRelease);
@@ -229,9 +227,9 @@
         return;
       }
       let retried = false;
-      try { retried = sessionStorage.getItem('relay-runner-loader-retried') === '1'; } catch {}
+      try { retried = sessionStorage.getItem(RETRY_KEY) === '1'; } catch {}
       if (!retried) {
-        try { sessionStorage.setItem('relay-runner-loader-retried', '1'); } catch {}
+        try { sessionStorage.setItem(RETRY_KEY, '1'); } catch {}
         window.location.reload();
         return;
       }
