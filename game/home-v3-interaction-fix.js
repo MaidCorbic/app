@@ -3,6 +3,7 @@ import './unified-cinematic-ui-v1.js';
 import './unified-cinematic-ui-bridge-v1.js';
 import './unified-gameplay-ui-v1-polish.css';
 import './unified-gameplay-ui-v1.js';
+import './unified-gameplay-ui-v1-mobile.css';
 
 // Compatibility module kept for the existing script order. Unified UI owns
 // Options, FAQ, Pause and gameplay presentation; no second interaction router runs here.
