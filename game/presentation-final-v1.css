@@ -1,20 +1,11 @@
-/* Relay Runner final presentation pass: shared Map Menu / ultra-cinematic gold language. */
-:root{
-  --relay-gold:#ffd06e;
-  --relay-gold-bright:#ffe7a6;
-  --relay-gold-deep:#b47a1e;
-  --relay-black:#020305;
-  --relay-panel:#070a0f;
-  --relay-panel-2:#0b1017;
-  --relay-text:#f4f7fa;
-  --relay-muted:#84909d;
-}
+/* Final shared Map Menu / ultra-cinematic gold presentation layer. */
+:root{--relay-gold:#ffd06e;--relay-gold-bright:#ffe7a6;--relay-gold-deep:#b47a1e;--relay-black:#020305;--relay-panel:#070a0f;--relay-panel-2:#0b1017;--relay-text:#f4f7fa;--relay-muted:#84909d}
 
-/* HOME: one clean interactive stack; legacy top-right FAQ / INFO launcher is gone. */
+/* HOME: one authoritative menu stack. Home progress/loader markup is intentionally untouched. */
 #intro.home-v3 .info-launcher{display:none!important;visibility:hidden!important;pointer-events:none!important}
-#intro.home-v3 .home-v3-side{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;width:min(420px,100%)!important}
 #intro.home-v3 .home-v3-header{padding-right:0!important}
-#intro.home-v3 .relay-home-nav-card{position:relative;isolation:isolate;display:flex!important;align-items:center;justify-content:space-between;gap:18px;min-height:58px!important;padding:14px 16px!important;border:1px solid rgba(255,208,110,.24)!important;border-left:2px solid rgba(255,208,110,.48)!important;border-radius:10px!important;background:linear-gradient(145deg,rgba(7,10,15,.96),rgba(2,3,5,.98))!important;color:var(--relay-text)!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 14px 30px rgba(0,0,0,.26),0 0 22px rgba(255,208,110,.035)!important;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease,background .18s ease!important}
+#intro.home-v3 .home-v3-side{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;width:min(420px,100%)!important}
+#intro.home-v3 .relay-home-nav-card{position:relative;isolation:isolate;display:flex!important;align-items:center;justify-content:space-between;gap:18px;min-height:58px!important;padding:14px 16px!important;border:1px solid rgba(255,208,110,.24)!important;border-left:2px solid rgba(255,208,110,.48)!important;border-radius:10px!important;background:linear-gradient(145deg,rgba(7,10,15,.96),rgba(2,3,5,.98))!important;color:var(--relay-text)!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 14px 30px rgba(0,0,0,.26),0 0 22px rgba(255,208,110,.035)!important;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease!important;cursor:pointer}
 #intro.home-v3 .relay-home-nav-card::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,rgba(255,208,110,.10),transparent 45%);opacity:0;transition:opacity .18s ease}
 #intro.home-v3 .relay-home-nav-card:hover,#intro.home-v3 .relay-home-nav-card:focus-visible{transform:translateX(3px)!important;border-color:rgba(255,208,110,.58)!important;box-shadow:inset 0 1px rgba(255,255,255,.08),0 18px 36px rgba(0,0,0,.34),0 0 28px rgba(255,208,110,.10)!important;outline:none!important}
 #intro.home-v3 .relay-home-nav-card:hover::before,#intro.home-v3 .relay-home-nav-card:focus-visible::before{opacity:1}
@@ -25,33 +16,55 @@
 #intro.home-v3 .relay-home-nav-card[data-final-home="options"]{border-left-color:rgba(255,208,110,.85)!important}
 #intro.home-v3 .relay-home-nav-card[data-final-home="exit"]{border-left-color:rgba(180,122,30,.8)!important}
 
-/* GAMEPLAY: same visual language, but compact enough to preserve the world. */
-#game .hud{grid-template-columns:minmax(220px,280px) minmax(220px,280px) auto!important;justify-content:center!important;column-gap:10px!important;max-width:min(1040px,calc(100vw - 32px))!important}
-#game .hud-route,#game .hud-run{min-height:58px!important;box-sizing:border-box!important}
-#game .hud-route,#game .hud-run,#game .hud-xp,#game #pause{border-color:rgba(255,208,110,.22)!important;background:linear-gradient(145deg,rgba(7,10,15,.94),rgba(2,3,5,.98))!important;box-shadow:inset 0 1px rgba(255,255,255,.045),0 12px 26px rgba(0,0,0,.26),0 0 24px rgba(255,208,110,.035)!important}
-#game .hud-route .route-dot{background:var(--relay-gold)!important;box-shadow:0 0 13px rgba(255,208,110,.7)!important}
+/* GAMEPLAY HUD: equal-height, bounded columns; no scaling with long text. */
+#game .hud{width:min(930px,calc(100vw - 32px))!important;max-width:min(930px,calc(100vw - 32px))!important;display:grid!important;grid-template-columns:minmax(0,1fr) 208px 112px!important;align-items:stretch!important;justify-content:center!important;gap:8px!important;margin-inline:auto!important}
+#game .hud-route,#game .hud-run,#game .hud-xp,#game #pause{min-height:56px!important;max-height:56px!important;height:56px!important;box-sizing:border-box!important;border:1px solid rgba(255,208,110,.22)!important;background:linear-gradient(145deg,rgba(7,10,15,.94),rgba(2,3,5,.98))!important;box-shadow:inset 0 1px rgba(255,255,255,.045),0 12px 26px rgba(0,0,0,.26),0 0 24px rgba(255,208,110,.035)!important}
+#game .hud-route{display:flex!important;align-items:center!important;min-width:0!important;padding:9px 12px!important;overflow:hidden!important}
+#game .hud-route>div{min-width:0!important}
+#game .hud-route b{display:block!important;max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#game .hud-route .route-dot{flex:0 0 auto!important;background:var(--relay-gold)!important;box-shadow:0 0 13px rgba(255,208,110,.7)!important}
 #game .hud-route small,#game .hud-run>small{color:var(--relay-gold)!important}
-#game #pause{color:var(--relay-gold-bright)!important;border-color:rgba(255,208,110,.40)!important}
+#game .hud-run{display:grid!important;grid-template-columns:auto 1fr!important;grid-template-rows:auto auto!important;align-content:center!important;column-gap:8px!important;padding:8px 10px!important;overflow:hidden!important}
+#game .hud-run>span{grid-row:1 / span 2!important;align-self:center!important;color:var(--relay-text)!important;white-space:nowrap!important}
+#game .hud-run>small{align-self:end!important;white-space:nowrap!important}
+#game .hud-run>div{min-width:0!important;align-self:start!important}
+#game .hud-run>div i{display:block!important;width:100%!important;height:5px!important;border-radius:999px!important;background:linear-gradient(90deg,var(--relay-gold-deep),var(--relay-gold),var(--relay-gold-bright))!important;box-shadow:0 0 10px rgba(255,208,110,.18)!important}
+#game .hud-actions{display:grid!important;grid-template-columns:1fr 56px!important;gap:8px!important;min-width:0!important}
+#game .hud-xp{display:grid!important;place-items:center!important;grid-template-rows:auto auto!important;padding:7px 6px!important;border-radius:10px!important;overflow:hidden!important}
+#game .hud-xp small{font-size:7px!important;color:var(--relay-muted)!important}
+#game .hud-xp b{font-size:13px!important;color:var(--relay-gold-bright)!important}
+#game #pause{width:56px!important;min-width:56px!important;padding:0!important;border-radius:10px!important;color:var(--relay-gold-bright)!important;border-color:rgba(255,208,110,.40)!important;display:grid!important;place-items:center!important}
 #game #relayTimeIndicator{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 
-/* Compact Phaser mission objective presentation is handled by presentation-final-v1.js. */
+/* Legacy fixed HUD text is hidden by presentation-final-v1.js; systems remain alive. */
+#game .world-marker{display:none!important}
+#game .input-guide{display:none!important}
 
 @media(max-width:760px){
   #intro.home-v3 .home-v3-side{width:100%!important;gap:8px!important}
   #intro.home-v3 .relay-home-nav-card{min-height:54px!important;padding:12px 13px!important}
-  #game .hud{grid-template-columns:minmax(0,1fr) minmax(118px,132px) auto!important;max-width:calc(100vw - 16px)!important;gap:6px!important;padding:8px!important}
-  #game .hud-route,#game .hud-run{min-height:48px!important;padding:7px 8px!important}
-  #game .hud-route b{font-size:9px!important;max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  #game .hud-run{min-width:0!important}
+  #game .hud{width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;grid-template-columns:minmax(0,1fr) 132px 60px!important;gap:6px!important;padding:6px!important}
+  #game .hud-route,#game .hud-run,#game .hud-xp,#game #pause{height:48px!important;min-height:48px!important;max-height:48px!important}
+  #game .hud-route{padding:7px 8px!important}
+  #game .hud-route small,#game .hud-run>small{font-size:6px!important}
+  #game .hud-route b{font-size:9px!important}
+  #game .hud-run{grid-template-columns:auto 1fr!important;column-gap:6px!important;padding:6px 7px!important}
+  #game .hud-run>span{font-size:11px!important}
+  #game .hud-xp{display:none!important}
+  #game .hud-actions{grid-template-columns:1fr!important}
+  #game #pause{width:48px!important;min-width:48px!important;justify-self:end!important}
 }
 @media(max-width:520px){
-  #game .hud{grid-template-columns:minmax(0,1fr) 118px auto!important;max-width:calc(100vw - 12px)!important;padding:6px!important;gap:5px!important}
-  #game .hud-route,#game .hud-run{min-height:44px!important;padding:6px 7px!important;border-radius:10px!important}
-  #game .hud-route small,#game .hud-run>small{font-size:6px!important}
-  #game .hud-run>span{font-size:11px!important}
+  #game .hud{width:calc(100vw - 10px)!important;max-width:calc(100vw - 10px)!important;grid-template-columns:minmax(0,1fr) 116px 48px!important;gap:5px!important;padding:5px!important}
+  #game .hud-route,#game .hud-run,#game #pause{height:44px!important;min-height:44px!important;max-height:44px!important;border-radius:9px!important}
+  #game .hud-route{padding:6px 7px!important}
+  #game .hud-run{padding:6px!important}
+  #game .hud-run>span{font-size:10px!important}
+  #game .hud-run>div i{height:4px!important}
+  #game #pause{width:44px!important;min-width:44px!important}
 }
 @media(orientation:landscape) and (max-height:560px){
-  #game .hud{max-width:calc(100vw - 18px)!important;padding:6px 8px!important}
-  #game .hud-route,#game .hud-run{min-height:42px!important}
+  #game .hud{width:calc(100vw - 18px)!important;max-width:calc(100vw - 18px)!important;padding:4px 6px!important}
+  #game .hud-route,#game .hud-run,#game #pause{height:42px!important;min-height:42px!important;max-height:42px!important}
 }
 @media(prefers-reduced-motion:reduce){#intro.home-v3 .relay-home-nav-card{transition:none!important}.relay-home-nav-card::before{transition:none!important}}
