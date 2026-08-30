@@ -8,8 +8,6 @@
     const image = splash?.querySelector('.relay-splash-art, #relaySplashArt');
     if (!splash || !image) return;
     const mobilePortrait = window.matchMedia('(max-width:700px) and (orientation:portrait)').matches;
-    splash.style.width = '100vw';
-    splash.style.height = '100vh';
     splash.style.width = '100dvw';
     splash.style.height = '100dvh';
     image.style.display = 'block';
@@ -23,7 +21,7 @@
     image.style.maxHeight = 'none';
     image.style.objectFit = mobilePortrait ? 'contain' : 'cover';
     image.style.objectPosition = 'center';
-    image.style.transform = mobilePortrait ? 'scale(1)' : 'none';
+    image.style.transform = 'none';
     image.style.animation = 'none';
     image.style.opacity = '1';
   };
@@ -74,13 +72,14 @@
       const from = progress;
       const started = performance.now();
       const duration = Math.max(180, Math.min(650, (target - from) * 10));
-      const frame = now => {
-        const t = Math.min(1, (now - started) / duration);
+      const step = () => {
+        const t = Math.min(1, (performance.now() - started) / duration);
         const eased = t * (2 - t);
         setProgress(from + (target - from) * eased, text);
-        if (t < 1) requestAnimationFrame(frame); else resolve();
+        if (t < 1) window.setTimeout(step, 32);
+        else resolve();
       };
-      requestAnimationFrame(frame);
+      window.setTimeout(step, 0);
     });
 
     const finish = async (forced = false) => {

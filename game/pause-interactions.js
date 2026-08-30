@@ -37,10 +37,10 @@
       event.preventDefault();
       event.stopPropagation();
       openPause();
-      requestAnimationFrame(() => {
+      window.setTimeout(() => {
         const tab = pauseMenu.querySelector('[data-tab="settings"]');
         if (tab && !pauseMenu.classList.contains('hidden')) tab.click();
-      });
+      }, 0);
     });
 
     const visible = id => {
