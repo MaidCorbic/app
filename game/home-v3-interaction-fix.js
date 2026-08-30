@@ -8,66 +8,78 @@ import './unified-gameplay-ui-v1-mobile.css';
 import './presentation-final-v1.css';
 import './update-center-v1.js';
 
-/* Single Home navigation owner. Existing gameplay, Options, FAQ and Exit systems remain authoritative. */
+/* Single Home owner. Keep existing progress/loading markup untouched. */
 (() => {
   'use strict';
-  if (window.__relayHomeFinalV2) return;
-  window.__relayHomeFinalV2 = true;
+  if (window.__relayHomeFinalV3) return;
+  window.__relayHomeFinalV3 = true;
 
-  const $ = sel => document.querySelector(sel);
+  const intro = () => document.getElementById('intro');
+  const side = () => intro()?.querySelector('.home-v3-side');
+  const isHomeVisible = () => {
+    const el = intro();
+    return !!el && !el.classList.contains('hidden');
+  };
 
   const openOptions = () => {
-    try { window.relayUnifiedCinematicUI?.openOptions?.(); } catch (error) { console.warn('[Relay Home] options open failed', error); }
+    try { window.relayUnifiedCinematicUI?.openOptions?.(); } catch (error) { console.warn('[Relay Home] Options failed', error); }
   };
   const openFaq = () => {
-    try { window.relayUnifiedCinematicUI?.openFAQ?.(); } catch (error) { console.warn('[Relay Home] FAQ open failed', error); }
+    try { window.relayUnifiedCinematicUI?.openFAQ?.(); } catch (error) { console.warn('[Relay Home] FAQ failed', error); }
   };
   const openUpdate = () => {
-    try { window.relayUpdateCenter?.open?.(); } catch (error) { console.warn('[Relay Home] update open failed', error); }
+    try { window.relayUpdateCenter?.open?.(); } catch (error) { console.warn('[Relay Home] Update failed', error); }
+  };
+  const openExit = () => document.getElementById('exitTitle')?.click();
+
+  const makeButton = (id, label, detail, handler) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'home-v3-card relay-home-nav-card';
+    button.dataset.finalHome = id;
+    button.innerHTML = `<span>${label}</span><small>${detail}</small>`;
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      handler();
+    });
+    return button;
   };
 
   const install = () => {
-    const intro = $('#intro');
-    const side = intro?.querySelector('.home-v3-side');
-    if (!intro || !side || intro.dataset.homeFinalV2Installed === '1') return;
-    intro.dataset.homeFinalV2Installed = '1';
+    const root = intro();
+    const menu = side();
+    if (!root || !menu || !isHomeVisible()) return;
 
-    /* Remove only duplicated/legacy Home launchers. The underlying panels remain intact. */
-    intro.querySelector('.info-launcher')?.remove();
-    side.querySelectorAll('[data-v3-options],[data-v3-faq],[data-v3-exit],[data-unified-home],.relay-home-nav-card').forEach(node => node.remove());
-
-    const make = (id, label, detail, handler) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'home-v3-card relay-home-nav-card';
-      button.dataset.finalHome = id;
-      button.innerHTML = `<span>${label}</span><small>${detail}</small>`;
-      button.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        handler();
-      });
-      return button;
-    };
-
-    side.append(
-      make('options', 'OPTIONS', 'SETTINGS · AUDIO · DISPLAY', openOptions),
-      make('faq', 'FAQ', 'HELP · GAME SYSTEMS', openFaq),
-      make('update', 'UPDATE', 'VERSION HISTORY · LIVE', openUpdate),
-      make('exit', 'EXIT', 'CLOSE SESSION', () => $('#exitTitle')?.click()),
+    root.querySelectorAll('.info-launcher, [data-relay-info], [data-v3-options], [data-v3-faq], [data-v3-exit], [data-unified-home], .relay-home-nav-card').forEach(node => node.remove());
+    menu.replaceChildren(
+      makeButton('options', 'OPTIONS', 'SETTINGS · AUDIO · DISPLAY', openOptions),
+      makeButton('faq', 'FAQ', 'HELP · GAME SYSTEMS', openFaq),
+      makeButton('update', 'UPDATE', 'VERSION HISTORY · LIVE', openUpdate),
+      makeButton('exit', 'EXIT', 'CLOSE SESSION', openExit),
     );
+  };
+
+  const reconcile = () => {
+    const root = intro();
+    const menu = side();
+    if (!root || !menu || !isHomeVisible()) return;
+    const cards = [...menu.querySelectorAll('.relay-home-nav-card')];
+    const expected = ['options', 'faq', 'update', 'exit'];
+    const ids = cards.map(card => card.dataset.finalHome);
+    const valid = cards.length === 4 && expected.every((id, index) => ids[index] === id);
+    const legacy = !!root.querySelector('.info-launcher, [data-relay-info], [data-v3-options], [data-v3-faq], [data-v3-exit], [data-unified-home]');
+    if (!valid || legacy) install();
   };
 
   const start = () => {
     install();
-    const intro = $('#intro');
-    if (!intro || intro.dataset.homeFinalV2Observer === '1') return;
-    intro.dataset.homeFinalV2Observer = '1';
-    new MutationObserver(() => {
-      if (!intro.querySelector('.home-v3-side .relay-home-nav-card')) install();
-    }).observe(intro, { childList:true, subtree:true });
+    const root = intro();
+    if (!root || root.dataset.homeFinalV3Observer === '1') return;
+    root.dataset.homeFinalV3Observer = '1';
+    new MutationObserver(reconcile).observe(root, { childList: true, subtree: true });
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else window.setTimeout(start, 0);
 })();
