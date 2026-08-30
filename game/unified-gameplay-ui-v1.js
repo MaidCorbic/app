@@ -40,7 +40,6 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
     const side = document.querySelector('#intro .home-v3-side');
     if (launcher) { launcher.setAttribute('aria-hidden','true'); launcher.style.display = 'none'; }
     if (!side) return;
-
     const options = side.querySelector('[data-v3-options]');
     const legacyFaq = side.querySelector('[data-v3-faq]');
     const exit = side.querySelector('[data-v3-exit]');
@@ -64,15 +63,8 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 
     const faq = makeCard('faq','FAQ','HELP · GAME SYSTEMS',() => openInfoPanel('faq'));
     const update = makeCard('update','UPDATE','LATEST PATCHES · LIVE',() => openInfoPanel('update'));
-    if (options) {
-      options.after(faq);
-    } else if (exit) {
-      side.insertBefore(faq, exit);
-    } else {
-      side.append(faq);
-    }
+    if (options) options.after(faq); else if (exit) side.insertBefore(faq, exit); else side.append(faq);
     if (faq.nextElementSibling !== update) faq.after(update);
-    if (exit && update.nextElementSibling !== exit) exit.before(update.nextElementSibling === exit ? update : exit);
   };
 
   const refreshUpdates = () => { const custom = window.__relayLiveUpdates; writeUpdates(Array.isArray(custom) && custom.length ? custom : latestUpdates); openInfoPanel('update'); announce('UPDATE CHANNEL REFRESHED'); };
@@ -88,12 +80,25 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
   };
   const addLiveUpdate = update => { if (!update || typeof update !== 'object') return; const incoming = { id:update.id || `live-${Date.now()}`, version:update.version || 'LIVE', date:update.date || new Date().toISOString().slice(0,10), title:update.title || 'LIVE UPDATE', detail:update.detail || update.message || '' }; writeUpdates([incoming, ...readUpdates().filter(item => item.id !== incoming.id)]); if ($('relayUpdateCenter') && !$('relayUpdateCenter').classList.contains('hidden')) renderUpdateCenter(); announce(`NEW UPDATE · ${incoming.title}`); };
 
+  const abilityMap = { 'first-delivery': 'BODY SWAP · B', 'final-relay': 'BODY SWAP · B', 'dead-drop': 'MASS TRANSFER · X', blackout: 'PHASE SPLIT · V', pursuit: 'SCALE SHIFT · Z', 'signal-storm': 'CLONE POSITION · C', 'corporate-lockdown': 'RULE INJECTION · R' };
+  const currentMission = () => { const number = Number(($('missionNumber')?.textContent || '').replace(/\D/g,'')); return missions[number > 0 ? number - 1 : 0] || missions[0]; };
+  const syncMissionAbility = () => {
+    const play = $('play'); if (!play) return;
+    let host = $('relayGameplayAbility');
+    if (!host) { host = document.createElement('div'); host.id = 'relayGameplayAbility'; host.className = 'relay-gameplay-ability'; host.innerHTML = '<span></span><button type="button"></button>'; play.append(host); host.querySelector('button')?.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); const action = window.__relayBodySwapAction; if (host.dataset.action === 'bodySwap' && typeof action === 'function') action(); else announce('ABILITY NOT AVAILABLE'); }); }
+    const mission = currentMission();
+    const label = abilityMap[mission?.id];
+    host.classList.toggle('is-active', !!label && typeof window.__relayBodySwapAction === 'function');
+    if (label) { host.dataset.action = label.startsWith('BODY SWAP') ? 'bodySwap' : 'other'; host.querySelector('span').textContent = 'MISSION ABILITY'; host.querySelector('button').textContent = label; }
+  };
+
   const ensureGameplayElements = () => {
     const play = $('play'); if (!play) return;
     let intel = $('relayGameplayIntel'); if (!intel) { intel = document.createElement('section'); intel.id = 'relayGameplayIntel'; intel.className = 'relay-gameplay-intel'; intel.setAttribute('aria-live','polite'); intel.innerHTML = '<p class="intel-kicker">MISSION INTELLIGENCE</p><h3 class="intel-title"></h3><p class="intel-detail"></p><div class="intel-meta"></div>'; play.append(intel); }
     let rotate = $('relayRotateCard'); if (!rotate) { rotate = document.createElement('section'); rotate.id = 'relayRotateCard'; rotate.className = 'relay-rotate-card'; rotate.setAttribute('role','status'); rotate.innerHTML = '<div class="rotate-icon" aria-hidden="true">↻</div><h3>ROTATE YOUR DEVICE</h3><p>LANDSCAPE MODE RECOMMENDED<br>More space. Better control. Better run.</p><button type="button" data-relay-rotate-dismiss>CONTINUE</button>'; document.body.append(rotate); rotate.querySelector('[data-relay-rotate-dismiss]')?.addEventListener('click', () => { document.body.classList.add('rotate-dismissed'); rotate.classList.remove('is-visible'); }); }
+    syncMissionAbility();
   };
-  const getMission = () => { const number = Number(($('missionNumber')?.textContent || '').replace(/\D/g,'')); if (number >= 1 && missions[number - 1]) return missions[number - 1]; const title = ($('objective')?.textContent || '').trim().toLowerCase(); return missions.find(mission => mission.title.toLowerCase() === title) || missions[0]; };
+  const getMission = () => currentMission();
   const missionIntel = mission => {
     const base = {
       'first-delivery':['ROUTE ONLINE','Follow the low line, collect Signals and make the first relay handoff.',['LEVEL 01','SAFE ROUTE']],
@@ -104,20 +109,19 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
       'corporate-lockdown':['CORPORATE LOCKDOWN','Security systems are hostile. Clear gates quickly and protect the package.',['LEVEL 06','HIGH THREAT']],
       'final-relay':['FINAL RELAY','Everything converges here. Read the route, clear threats and complete the handoff.',['FINAL','APEX SPINE']],
     }[mission?.id] || ['MISSION INTELLIGENCE','Stay focused on the current objective and read the route cues.',[`LEVEL ${Math.max(1,missions.indexOf(mission)+1)}`,'LIVE']];
-    const abilityMap = { 'first-delivery':'BODY SWAP · B', 'signal-storm':'CLONE POSITION · C', blackout:'PHASE SPLIT · V', 'dead-drop':'MASS TRANSFER · X', pursuit:'SCALE SHIFT · Z', 'corporate-lockdown':'RULE INJECTION · R', 'final-relay':'BODY SWAP · B' };
-    if (abilityMap[mission?.id]) base[2].push(abilityMap[mission.id]);
+    const ability = abilityMap[mission?.id]; if (ability) base[2].push(ability);
     return base;
   };
   let intelTimer;
-  const showIntel = reason => { ensureGameplayElements(); const play = $('play'), intro = $('intro'), intel = $('relayGameplayIntel'), mission = getMission(); if (!intel || !mission || !play || intro && !intro.classList.contains('hidden')) return; const [title,detail,meta] = missionIntel(mission); intel.querySelector('.intel-title').textContent = title; intel.querySelector('.intel-detail').textContent = detail; intel.querySelector('.intel-meta').innerHTML = meta.map(item=>`<span class="intel-pill">${item}</span>`).join('') + `<span class="intel-pill">${String(reason || 'MISSION').toUpperCase()}</span>`; intel.classList.add('is-active'); window.clearTimeout(intelTimer); intelTimer = window.setTimeout(()=>intel.classList.remove('is-active'),4200); };
+  const showIntel = reason => { ensureGameplayElements(); const play = $('play'), intro = $('intro'), intel = $('relayGameplayIntel'), mission = getMission(); if (!intel || !mission || !play || intro && !intro.classList.contains('hidden')) return; const [title,detail,meta] = missionIntel(mission); intel.querySelector('.intel-title').textContent = title; intel.querySelector('.intel-detail').textContent = detail; intel.querySelector('.intel-meta').innerHTML = meta.map(item=>`<span class="intel-pill">${item}</span>`).join('') + `<span class="intel-pill">${String(reason || 'MISSION').toUpperCase()}</span>`; intel.classList.add('is-active'); syncMissionAbility(); window.clearTimeout(intelTimer); intelTimer = window.setTimeout(()=>intel.classList.remove('is-active'),4200); };
   const syncRotateCard = () => { ensureGameplayElements(); const rotate=$('relayRotateCard'), play=$('play'), intro=$('intro'), finish=$('finish'), gameOver=$('gameOver'); if (!rotate || !play) return; const gameplayVisible=!play.classList.contains('hidden') && !!intro?.classList.contains('hidden') && !!finish?.classList.contains('hidden') && !!gameOver?.classList.contains('hidden'); const shouldShow=!!(window.innerWidth<=760 || document.body.classList.contains('is-touch')) && window.matchMedia('(orientation: portrait)').matches && gameplayVisible && !document.body.classList.contains('rotate-dismissed'); rotate.classList.toggle('is-visible',shouldShow); };
-  const bindGameplayObservers = () => { ensureGameplayElements(); ['missionNumber','objective','routeIntel'].map(id=>$(id)).filter(Boolean).forEach(node=>new MutationObserver(()=>{showIntel('ROUTE UPDATE');syncRotateCard();}).observe(node,{childList:true,characterData:true,subtree:true})); window.addEventListener('resize',syncRotateCard,{passive:true}); window.addEventListener('orientationchange',()=>{document.body.classList.remove('rotate-dismissed');window.setTimeout(syncRotateCard,120)},{passive:true}); window.addEventListener('gameplay:v12:event',event=>showIntel(event.detail?.type || 'EVENT')); window.addEventListener('relay:mission-intelligence',event=>showIntel(event.detail?.reason || 'INTEL')); };
+  const bindGameplayObservers = () => { ensureGameplayElements(); ['missionNumber','objective','routeIntel'].map(id=>$(id)).filter(Boolean).forEach(node=>new MutationObserver(()=>{showIntel('ROUTE UPDATE');syncRotateCard();syncMissionAbility();}).observe(node,{childList:true,characterData:true,subtree:true})); window.addEventListener('resize',syncRotateCard,{passive:true}); window.addEventListener('orientationchange',()=>{document.body.classList.remove('rotate-dismissed');window.setTimeout(syncRotateCard,120)},{passive:true}); window.addEventListener('gameplay:v12:event',event=>showIntel(event.detail?.type || 'EVENT')); window.addEventListener('relay:mission-intelligence',event=>showIntel(event.detail?.reason || 'INTEL')); };
   const install = () => {
     if (!document.querySelector('link[href="./unified-gameplay-ui-v1.css"]')) { const link=document.createElement('link'); link.rel='stylesheet'; link.href='./unified-gameplay-ui-v1.css'; document.head.append(link); }
     if (!$('relayUpdateCenter')) { const host=document.createElement('section'); host.id='relayUpdateCenter'; host.className='relay-update-center hidden'; host.setAttribute('aria-label','Live updates'); document.body.append(host); }
     injectHomeLinks(); bindGameplayObservers(); syncRotateCard();
     window.relayUpdateCenter=Object.freeze({open:renderUpdateCenter,refresh:refreshUpdates,publish:addLiveUpdate});
-    window.relayGameplayUI=Object.freeze({showIntel,syncRotate:syncRotateCard});
+    window.relayGameplayUI=Object.freeze({showIntel,syncRotate:syncRotateCard,syncAbility:syncMissionAbility});
     window.addEventListener('relay:update',event=>addLiveUpdate(event.detail));
     window.addEventListener('relay:live-update',event=>addLiveUpdate(event.detail));
     window.addEventListener('storage',event=>{if(event.key===UPDATE_KEY && $('relayUpdateCenter') && !$('relayUpdateCenter').classList.contains('hidden')) renderUpdateCenter();});
