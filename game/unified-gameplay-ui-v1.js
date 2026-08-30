@@ -79,7 +79,7 @@ import { missions } from './src/missions.js';
   };
   const syncRotateCard = () => {
     ensureGameplayElements(); const rotate=$('relayRotateCard'), play=$('play'), intro=$('intro'), finish=$('finish'), gameOver=$('gameOver'); if (!rotate || !play) return;
-    const gameplayVisible=!play.classList.contains('hidden') && !!intro?.classList.contains('hidden') && !finish?.classList.contains('hidden') && !gameOver?.classList.contains('hidden');
+    const gameplayVisible=!play.classList.contains('hidden') && !!intro?.classList.contains('hidden') && !!finish?.classList.contains('hidden') && !!gameOver?.classList.contains('hidden');
     const shouldShow=!!(window.innerWidth<=760 || document.body.classList.contains('is-touch')) && window.matchMedia('(orientation: portrait)').matches && gameplayVisible && !document.body.classList.contains('rotate-dismissed'); rotate.classList.toggle('is-visible',shouldShow);
   };
   const bindGameplayObservers = () => {
@@ -92,7 +92,7 @@ import { missions } from './src/missions.js';
   };
   const install = () => {
     if (!document.querySelector('link[href="./unified-gameplay-ui-v1.css"]')) { const link=document.createElement('link'); link.rel='stylesheet'; link.href='./unified-gameplay-ui-v1.css'; document.head.append(link); }
-    const host=document.createElement('section'); host.id='relayUpdateCenter'; host.className='relay-update-center hidden'; host.setAttribute('aria-label','Live updates'); document.body.append(host);
+    if (!$('relayUpdateCenter')) { const host=document.createElement('section'); host.id='relayUpdateCenter'; host.className='relay-update-center hidden'; host.setAttribute('aria-label','Live updates'); document.body.append(host); }
     bindUpdateButton(); bindGameplayObservers(); syncRotateCard();
     window.relayUpdateCenter=Object.freeze({open:renderUpdateCenter,refresh:refreshUpdates,publish:addLiveUpdate});
     window.relayGameplayUI=Object.freeze({showIntel,syncRotate:syncRotateCard});
