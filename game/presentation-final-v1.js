@@ -3,8 +3,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 /* Final presentation-only cleanup. Gameplay state, progression and ability logic stay authoritative elsewhere. */
 (() => {
   'use strict';
-  if (window.__relayPresentationFinalV3) return;
-  window.__relayPresentationFinalV3 = true;
+  if (window.__relayPresentationFinalV2) return;
+  window.__relayPresentationFinalV2 = true;
 
   const viewport = scene => ({
     w: Number(scene?.scale?.gameSize?.width || scene?.scale?.width || window.innerWidth || 1280),
@@ -19,11 +19,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       || value === 'READY'
       || value === 'AFTERNOON'
       || /^\d{1,2}:\d{2}\s*[·•-]\s*CYCLE/i.test(value)
-      || /^MIDDAY CLEAR$/i.test(value)
-      || /^FLOW\s+\d{1,3}%/.test(value)
-      || /^CARGO INTEGRITY$/.test(value)
-      || /^STATIC CARGO$/.test(value)
-      || /^DELIVERY BEACON$/.test(value);
+      || /^MIDDAY CLEAR$/i.test(value);
   };
 
   const hideLegacyGameplayHud = scene => {
@@ -35,7 +31,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       if (keep.has(child)) continue;
       const fixed = child.scrollFactorX === 0 && child.scrollFactorY === 0;
       const bounds = child.getBounds?.();
-      if (!fixed || !bounds || !isLegacyHudText(child.text)) continue;
+      const fixedTop = fixed && bounds && bounds.y < Math.max(170, (scene.scale?.height || window.innerHeight || 720) * .26);
+      if (!fixedTop || !isLegacyHudText(child.text)) continue;
       child.setVisible(false);
       child.setAlpha?.(0);
       child.disableInteractive?.();
@@ -66,33 +63,30 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const { w, h } = viewport(scene);
     const mobile = w <= 760;
     const baseW = 426;
+    /* Compact objective: below the top HUD, centered, with equal web/mobile hierarchy. */
     const targetW = mobile ? Math.min(270, Math.max(214, w - 22)) : Math.min(286, Math.max(260, w * 0.26));
     const scale = targetW / baseW;
+    const actualH = 166 * scale;
     const x = Math.max(8, (w - targetW) / 2);
-    const y = mobile ? Math.max(82, Math.min(112, h * .14)) : Math.max(92, Math.min(128, h * .14));
+    const y = mobile ? Math.max(76, Math.min(98, h * .13)) : 92;
+    const key = `${w}x${h}:${mobile}:${targetW}`;
+    if (scene.__relayFinalObjectiveLayout === key) return;
+    scene.__relayFinalObjectiveLayout = key;
     state.c.setPosition(x, y).setScale(scale);
-    state.c.setDepth?.(90);
     styleObjective(state);
-    scene.__relayFinalObjectiveLayout = `${Math.round(w)}x${Math.round(h)}:${mobile}:${Math.round(targetW)}`;
-  };
-
-  const bindScene = scene => {
-    if (!scene || scene.__relayPresentationFinalV3Bound) return;
-    scene.__relayPresentationFinalV3Bound = true;
-    layoutObjective(scene);
-    hideLegacyGameplayHud(scene);
-    scene.events?.on?.('postupdate', () => {
-      if (!scene.sys?.isActive?.()) return;
-      layoutObjective(scene);
-      hideLegacyGameplayHud(scene);
-    });
-    scene.events?.once?.('shutdown', () => { scene.__relayPresentationFinalV3Bound = false; });
   };
 
   const originalCreate = RunnerScene.prototype.create;
   RunnerScene.prototype.create = function finalPresentationCreate(...args) {
     const result = originalCreate.apply(this, args);
-    try { bindScene(this); } catch (error) { console.warn('[Relay Presentation] create cleanup skipped', error); }
+    try { hideLegacyGameplayHud(this); layoutObjective(this); } catch (error) { console.warn('[Relay Presentation] create cleanup skipped', error); }
+    return result;
+  };
+
+  const originalUpdate = RunnerScene.prototype.update;
+  RunnerScene.prototype.update = function finalPresentationUpdate(...args) {
+    const result = originalUpdate.apply(this, args);
+    try { hideLegacyGameplayHud(this); layoutObjective(this); } catch {}
     return result;
   };
 })();
