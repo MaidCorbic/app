@@ -6,80 +6,55 @@ import './unified-gameplay-ui-v1-polish.css';
 import './unified-gameplay-ui-v1.js';
 import './unified-gameplay-ui-v1-mobile.css';
 import './presentation-final-v1.css';
-import './update-center-v1.js';
+import './presentation-final-v1.js';
 
-/* Single Home owner. Keep existing progress/loading markup untouched. */
+/* Final Home interaction owner. Existing gameplay/UI systems remain authoritative. */
 (() => {
   'use strict';
-  if (window.__relayHomeFinalV3) return;
-  window.__relayHomeFinalV3 = true;
+  if (window.__relayHomeFinalV1) return;
+  window.__relayHomeFinalV1 = true;
 
-  const intro = () => document.getElementById('intro');
-  const side = () => intro()?.querySelector('.home-v3-side');
-  const isHomeVisible = () => {
-    const el = intro();
-    return !!el && !el.classList.contains('hidden');
-  };
+  const $ = sel => document.querySelector(sel);
 
-  const openOptions = () => {
-    try { window.relayUnifiedCinematicUI?.openOptions?.(); } catch (error) { console.warn('[Relay Home] Options failed', error); }
-  };
-  const openFaq = () => {
-    try { window.relayUnifiedCinematicUI?.openFAQ?.(); } catch (error) { console.warn('[Relay Home] FAQ failed', error); }
-  };
-  const openUpdate = () => {
-    try { window.relayUpdateCenter?.open?.(); } catch (error) { console.warn('[Relay Home] Update failed', error); }
-  };
-  const openExit = () => document.getElementById('exitTitle')?.click();
-
-  const makeButton = (id, label, detail, handler) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'home-v3-card relay-home-nav-card';
-    button.dataset.finalHome = id;
-    button.innerHTML = `<span>${label}</span><small>${detail}</small>`;
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      handler();
-    });
-    return button;
+  const call = (name, fallback) => {
+    try {
+      if (name === 'options' && window.relayUnifiedCinematicUI?.openOptions) return window.relayUnifiedCinematicUI.openOptions();
+      if (name === 'faq' && window.relayUnifiedCinematicUI?.openFAQ) return window.relayUnifiedCinematicUI.openFAQ();
+      if (name === 'update' && window.relayUpdateCenter?.open) return window.relayUpdateCenter.open();
+    } catch {}
+    if (typeof fallback === 'function') window.setTimeout(fallback, 0);
   };
 
   const install = () => {
-    const root = intro();
-    const menu = side();
-    if (!root || !menu || !isHomeVisible()) return;
+    const intro = $('#intro');
+    const side = intro?.querySelector('.home-v3-side');
+    if (!side) return;
 
-    root.querySelectorAll('.info-launcher, [data-relay-info], [data-v3-options], [data-v3-faq], [data-v3-exit], [data-unified-home], .relay-home-nav-card').forEach(node => node.remove());
-    menu.replaceChildren(
-      makeButton('options', 'OPTIONS', 'SETTINGS · AUDIO · DISPLAY', openOptions),
-      makeButton('faq', 'FAQ', 'HELP · GAME SYSTEMS', openFaq),
-      makeButton('update', 'UPDATE', 'VERSION HISTORY · LIVE', openUpdate),
-      makeButton('exit', 'EXIT', 'CLOSE SESSION', openExit),
+    intro.querySelector('.info-launcher')?.remove();
+    side.querySelectorAll('[data-v3-options],[data-v3-faq],[data-v3-exit],[data-unified-home]').forEach(node => node.remove());
+
+    const make = (id, label, detail, handler) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'home-v3-card relay-home-nav-card';
+      button.dataset.finalHome = id;
+      button.innerHTML = `<span>${label}</span><small>${detail}</small>`;
+      button.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        handler();
+      });
+      return button;
+    };
+
+    side.append(
+      make('options', 'OPTIONS', 'SETTINGS · AUDIO · DISPLAY', () => call('options', () => $('#titlePanel') && window.relayUnifiedCinematicUI?.openOptions?.())),
+      make('faq', 'FAQ', 'HELP · GAME SYSTEMS', () => call('faq', () => window.relayUnifiedCinematicUI?.openFAQ?.())),
+      make('update', 'UPDATE', 'LATEST PATCHES · LIVE', () => call('update', () => window.relayUpdateCenter?.open?.())),
+      make('exit', 'EXIT', 'CLOSE SESSION', () => $('#exitTitle')?.click()),
     );
   };
 
-  const reconcile = () => {
-    const root = intro();
-    const menu = side();
-    if (!root || !menu || !isHomeVisible()) return;
-    const cards = [...menu.querySelectorAll('.relay-home-nav-card')];
-    const expected = ['options', 'faq', 'update', 'exit'];
-    const ids = cards.map(card => card.dataset.finalHome);
-    const valid = cards.length === 4 && expected.every((id, index) => ids[index] === id);
-    const legacy = !!root.querySelector('.info-launcher, [data-relay-info], [data-v3-options], [data-v3-faq], [data-v3-exit], [data-unified-home]');
-    if (!valid || legacy) install();
-  };
-
-  const start = () => {
-    install();
-    const root = intro();
-    if (!root || root.dataset.homeFinalV3Observer === '1') return;
-    root.dataset.homeFinalV3Observer = '1';
-    new MutationObserver(reconcile).observe(root, { childList: true, subtree: true });
-  };
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else window.setTimeout(start, 0);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once:true });
+  else window.setTimeout(install, 0);
 })();
