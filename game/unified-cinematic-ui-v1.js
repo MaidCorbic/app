@@ -1,4 +1,4 @@
-import { missions } from './missions.js';
+import { missions } from './src/missions.js';
 import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, saveState } from './src/state.js';
 
 (() => {
@@ -164,7 +164,7 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
     ['PROGRESSION','XP, levels, ranks, mastery, achievements, contracts, challenges and credits are persisted locally for this browser profile.'],
     ['MOBILE','The game uses the same visual menu system on mobile and web. Touch controls are shown only during gameplay and use dedicated pointer ownership.'],
   ];
-  const renderFaq = host => renderOverlay(host, { kicker:'RELAY RUNNER // KNOWLEDGE BASE', title:'FAQ', subtitle:'Route intelligence, controls and system guidance.', body:`<div class="relay-faq-grid">${faqData.map(([q,a]) => `<article class="relay-faq-item"><button class="relay-faq-question" type="button" data-faq-question><span>${q}</span><b>＋</b></button><div class="relay-faq-answer">${a}</div></article>`).join('')}</div>` });
+  const renderFaq = host => renderOverlay(host, { kicker:'RELAY RUNNER // KNOWLEDGE BASE', title:'FAQ', subtitle:'Route intelligence, controls and system guidance.', body:`<div class="relay-faq-grid">${faqData.map(([q,a]) => `<article class="relay-faq-item"><button class="relay-faq-question" type="button" data-faq-question aria-expanded="false"><span>${q}</span><b>＋</b></button><div class="relay-faq-answer">${a}</div></article>`).join('')}</div>` });
 
   const missionCard = (mission, index, state) => {
     const unlocked = !mission.unlockRequirement || state.completed.includes(mission.unlockRequirement);
@@ -245,16 +245,12 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
     const faq = target.closest('[data-v3-faq], [data-relay-info="faq"]');
     if (faq) { event.preventDefault(); event.stopPropagation(); openFaq(); return; }
     const pauseButton = target.closest('#pause, #mobilePauseButton');
-    if (pauseButton) {
-      event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
-      openPause('resume'); return;
-    }
+    if (pauseButton) { event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.(); openPause('resume'); return; }
     const settingsMobile = target.closest('#mobileSettingsButton');
     if (settingsMobile) { event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.(); openPause('settings'); return; }
 
     const close = target.closest('[data-unified-close]');
     if (close) { event.preventDefault(); event.stopPropagation(); if (close.closest('#pauseMenu')) hidePause(true); else closeAllOverlays(); return; }
-
     const pauseTab = target.closest('[data-pause-tab]');
     if (pauseTab) { event.preventDefault(); renderPause(pauseTab.dataset.pauseTab); return; }
     if (target.closest('[data-unified-resume]')) { event.preventDefault(); hidePause(true); return; }
