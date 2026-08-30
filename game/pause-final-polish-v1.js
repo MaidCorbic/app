@@ -1,2 +1,2 @@
-// Legacy adapter: unified Options/Settings owns presentation and interaction.
-import './unified-options-ui-v1.js';
+// Legacy adapter retained for script compatibility. The unified cinematic controller
+// now owns Options, FAQ and Pause presentation/interactions.
