@@ -1,45 +1,44 @@
-/* Production cinematic splash V4 — single owner, never waits for Phaser. */
+/* Production gameplay boot splash — one owner, real readiness signals. */
 (() => {
-  if (window.__relaySplashV4) return;
-  window.__relaySplashV4 = true;
+  'use strict';
+
+  if (window.__relaySplashV5) return;
+  window.__relaySplashV5 = true;
 
   const boot = () => {
     const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
     if (!splash) return;
+
     const image = splash.querySelector('.relay-splash-art, #relaySplashArt');
     const bar = splash.querySelector('.relay-splash-progress');
     const pct = splash.querySelector('.relay-splash-percent');
     const label = splash.querySelector('.relay-splash-status');
     if (!image || !bar || !pct || !label) return;
 
-    const setVisualSize = () => {
-      const portrait = window.matchMedia('(max-width:700px) and (orientation:portrait)').matches;
-      splash.style.width = '100dvw';
-      splash.style.height = '100dvh';
+    const isPortrait = () => window.matchMedia('(max-width:700px) and (orientation:portrait)').matches;
+    const applyArtworkSizing = () => {
       image.style.display = 'block';
       image.style.position = 'absolute';
       image.style.inset = '0';
-      image.style.width = '100dvw';
-      image.style.height = '100dvh';
-      image.style.minWidth = '100%';
-      image.style.minHeight = '100%';
-      image.style.maxWidth = 'none';
-      image.style.maxHeight = 'none';
-      image.style.objectFit = portrait ? 'contain' : 'cover';
+      image.style.width = '100%';
+      image.style.height = '100%';
+      image.style.maxWidth = '100%';
+      image.style.maxHeight = '100%';
+      image.style.objectFit = isPortrait() ? 'contain' : 'cover';
       image.style.objectPosition = 'center';
       image.style.transform = 'none';
       image.style.animation = 'none';
       image.style.opacity = '1';
     };
-    setVisualSize();
+
+    applyArtworkSizing();
 
     let progress = 0;
     let imageReady = image.complete && image.naturalWidth > 0;
-    let domReady = document.readyState !== 'loading';
+    let pageLoaded = document.readyState === 'complete';
+    let gameplayReady = Boolean(window.strideReady);
     let finishing = false;
     const startedAt = performance.now();
-    const MIN_MS = 900;
-    const MAX_MS = 3500;
 
     const setProgress = (value, text) => {
       progress = Math.max(progress, Math.min(100, Math.round(value)));
@@ -56,15 +55,15 @@
       }
       const from = progress;
       const started = performance.now();
-      const duration = Math.max(160, Math.min(500, (target - from) * 8));
-      const step = () => {
-        const t = Math.min(1, (performance.now() - started) / duration);
+      const duration = Math.max(120, Math.min(420, (target - from) * 6));
+      const frame = now => {
+        const t = Math.min(1, (now - started) / duration);
         const eased = t * (2 - t);
         setProgress(from + (target - from) * eased, text);
-        if (t < 1) window.setTimeout(step, 32);
+        if (t < 1) requestAnimationFrame(frame);
         else resolve();
       };
-      window.setTimeout(step, 0);
+      requestAnimationFrame(frame);
     });
 
     const release = async reason => {
@@ -77,58 +76,90 @@
       window.dispatchEvent(new CustomEvent('relay:splash-released', { detail: { reason } }));
     };
 
-    const tryRelease = reason => {
-      if (finishing || !domReady || !imageReady) return;
+    const readiness = () => {
+      // main.js sets strideReady only after RunnerScene emits runner-ready.
+      // Because main.js calls launch(0, true) during boot, this means the
+      // gameplay scene has completed its initial create/preparation pass
+      // before the splash is allowed to disappear.
+      gameplayReady = gameplayReady || Boolean(window.strideReady);
+      return imageReady && pageLoaded && gameplayReady;
+    };
+
+    const tryRelease = () => {
+      if (finishing || !readiness()) return;
       const elapsed = performance.now() - startedAt;
-      if (elapsed < MIN_MS) {
-        window.setTimeout(() => tryRelease(reason), MIN_MS - elapsed);
+      const minVisibleMs = 220;
+      if (elapsed < minVisibleMs) {
+        window.setTimeout(tryRelease, minVisibleMs - elapsed);
         return;
       }
-      release(reason);
+      release('gameplay-ready');
     };
 
     const markImageReady = () => {
       if (imageReady) return;
       imageReady = true;
-      animateTo(42, 'LOADING INTERFACE').then(() => tryRelease('image-and-dom-ready'));
+      applyArtworkSizing();
+      animateTo(25, 'LOADING ARTWORK').then(tryRelease);
     };
 
-    if (imageReady) setProgress(34, 'LOADING INTERFACE');
-    else {
+    if (imageReady) {
+      setProgress(25, 'LOADING ARTWORK');
+    } else {
       image.addEventListener('load', markImageReady, { once: true });
       image.addEventListener('error', () => {
+        // Splash artwork is cosmetic. A missing image must never block gameplay.
         imageReady = true;
-        setProgress(30, 'SAFE MODE');
-        tryRelease('image-error-safe-mode');
+        setProgress(24, 'LOADING GAME');
+        tryRelease();
       }, { once: true });
     }
 
-    if (!domReady) {
-      document.addEventListener('DOMContentLoaded', () => {
-        domReady = true;
-        animateTo(68, 'STARTING HOME').then(() => tryRelease('dom-ready'));
-      }, { once: true });
+    if (!pageLoaded) {
+      window.addEventListener('load', () => {
+        pageLoaded = true;
+        animateTo(55, 'LOADING PAGE').then(tryRelease);
+      }, { once: true, passive: true });
     } else {
-      animateTo(68, 'STARTING HOME');
+      setProgress(55, 'LOADING PAGE');
     }
 
-    window.setTimeout(() => {
+    const pollGameplayReady = () => {
       if (finishing) return;
-      release('hard-failsafe');
-    }, MAX_MS);
+      if (window.strideReady) {
+        gameplayReady = true;
+        animateTo(92, 'GAMEPLAY READY').then(tryRelease);
+        return;
+      }
+      setProgress(Math.max(progress, 68), 'INITIALIZING GAMEPLAY');
+      window.setTimeout(pollGameplayReady, 40);
+    };
+
+    if (gameplayReady) {
+      animateTo(92, 'GAMEPLAY READY').then(tryRelease);
+    } else {
+      pollGameplayReady();
+    }
 
     const updateSizing = () => {
-      if (!finishing) setVisualSize();
+      if (!finishing) applyArtworkSizing();
     };
     window.addEventListener('resize', updateSizing, { passive: true });
     window.matchMedia('(orientation: landscape)').addEventListener?.('change', updateSizing);
 
+    // Emergency only: normal release always waits for the real gameplay signal.
+    window.setTimeout(() => {
+      if (finishing) return;
+      if (window.strideReady) release('gameplay-ready-failsafe');
+      else release('boot-failsafe');
+    }, 10000);
+
     setProgress(8, 'INITIALIZING RELAY');
-    window.setTimeout(() => { if (!finishing) setProgress(20, 'LOADING INTERFACE'); }, 180);
-    window.setTimeout(() => { if (!finishing) setProgress(42, 'LOADING GAME SYSTEMS'); }, 420);
-    window.setTimeout(() => { if (!finishing) setProgress(68, 'STARTING HOME'); }, 680);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-  else boot();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
 })();
