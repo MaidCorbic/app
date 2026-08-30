@@ -6,7 +6,6 @@ import './unified-gameplay-ui-v1-polish.css';
 import './unified-gameplay-ui-v1.js';
 import './unified-gameplay-ui-v1-mobile.css';
 import './presentation-final-v1.css';
-import './presentation-final-v1.js';
 
 /* Final Home interaction owner. Existing gameplay/UI systems remain authoritative. */
 (() => {
