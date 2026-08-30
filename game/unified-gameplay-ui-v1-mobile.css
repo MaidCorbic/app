@@ -1,0 +1,24 @@
+@media(max-width:760px){
+  #game .hud{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;padding:10px 9px!important;max-width:calc(100vw - 18px)!important}
+  #game .hud-route{grid-column:1!important;min-width:0!important;padding:7px 8px!important}
+  #game .hud-route b{font-size:9px!important;max-width:100%!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #game .hud-run{grid-column:2!important;min-width:122px!important;max-width:122px!important;padding:7px 8px!important}
+  #game .hud-run>span{font-size:12px!important}
+  #game .hud-actions{grid-column:2!important;grid-row:1!important;position:absolute!important;right:9px!important;top:10px!important;gap:6px!important}
+  #game .hud-xp{display:none!important}
+  #game #pause{width:38px!important;height:38px!important}
+  .relay-gameplay-intel{top:74px!important;width:min(330px,calc(100vw - 18px))!important}
+}
+@media(max-width:520px){
+  #game .hud{grid-template-columns:minmax(0,1fr) 122px!important;padding:8px 8px!important}
+  #game .hud-route{padding:6px 7px!important}
+  #game .hud-route small{font-size:6px!important}
+  #game .hud-route b{font-size:9px!important;max-width:calc(100vw - 150px)!important}
+  #game .hud-run{padding:6px 7px!important;min-width:122px!important;max-width:122px!important}
+  #game .hud-run>span{font-size:12px!important}
+  #game .hud-run>small{font-size:6px!important}
+  #game .hud-actions{right:8px!important;top:8px!important}
+  #game #pause{width:36px!important;height:36px!important}
+  #game .world-marker{left:8px!important;bottom:8px!important;max-width:58vw!important}
+  .relay-gameplay-intel{top:70px!important;width:calc(100vw - 18px)!important;padding:10px 11px!important}
+}
