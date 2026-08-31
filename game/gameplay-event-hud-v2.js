@@ -1,9 +1,9 @@
-/* UPDATE 10 — Gameplay Event HUD V3
+/* UPDATE 10 — Gameplay Event HUD V4
    Presentation-only telemetry. Reads the existing Phaser event bus and DOM state.
    Does not own Signal, score, combo, progression or save state.
 */
 (() => {
-  const state = { root: null, hideTimer: 0, lastKey: '', lastAt: 0, bound: false, observed: new WeakSet(), gameBound: false };
+  const state = { root: null, hideTimer: 0, lastKey: '', lastAt: 0, bound: false, observed: new WeakSet(), games: new WeakMap() };
   const reduced = () => document.body.classList.contains('reduced-motion') || matchMedia('(prefers-reduced-motion: reduce)').matches;
   const text = selector => document.querySelector(selector)?.textContent?.trim() || '';
 
@@ -53,18 +53,32 @@
   }
 
   function bindGame(game) {
-    if (!game?.events?.on || state.gameBound) return;
-    state.gameBound = true;
-    game.events.on('feedback', feedback);
-    game.events.on('checkpoint', (signals, secrets, lost) => show(['CHECKPOINT', 'ROUTE SAVED', `${signals} SIGNALS · ${secrets} SECRETS${lost ? ` · ${lost} LOST` : ''}`, 'checkpoint', 1250]));
-    game.events.on('sector', data => show(['WORLD', `SECTOR ${data?.number || '?'}`, 'Relay Spire reached · route escalating', 'world', 1400]));
-    game.events.on('deaths', (count, limit) => show(['DAMAGE', 'RECOVERY USED', `${count} / ${limit} RECOVERIES`, 'danger', 1350]));
-    game.events.on('game-over', message => show(['MISSION', 'RUN INTERRUPTED', message || 'Recovery limit reached', 'danger', 1900]));
-    game.events.on('energy', value => { if (Number(value) <= 20) show(['SYSTEM', 'LOW ENERGY', `${Math.round(Number(value))}% REMAINING`, 'danger', 1350]); });
-    game.events.on('health', value => { if (Number(value) <= 1) show(['DAMAGE', 'CRITICAL HEALTH', `${Math.max(0, Number(value))} HP REMAINING`, 'danger', 1400]); });
-    game.events.on('combo', (value, best) => { if (Number(value) >= 2) show(['COMBAT', `COMBO ×${value}`, best ? `BEST FLOW ×${best}` : 'Combat chain active', 'combat', 900]); });
-    game.events.on('tutorial', message => show(['INTEL', 'NEW FIELD INSTRUCTION', message, 'world', 1700]));
-    game.events.on('narration', message => { if (message) show(['RADIO', 'INCOMING TRANSMISSION', message, 'world', 1800]); });
+    if (!game?.events?.on || state.games.has(game)) return;
+
+    const handlers = [
+      ['feedback', feedback],
+      ['checkpoint', (signals, secrets, lost) => show(['CHECKPOINT', 'ROUTE SAVED', `${signals} SIGNALS · ${secrets} SECRETS${lost ? ` · ${lost} LOST` : ''}`, 'checkpoint', 1250])],
+      ['sector', data => show(['WORLD', `SECTOR ${data?.number || '?'}`, 'Relay Spire reached · route escalating', 'world', 1400])],
+      ['deaths', (count, limit) => show(['DAMAGE', 'RECOVERY USED', `${count} / ${limit} RECOVERIES`, 'danger', 1350])],
+      ['game-over', message => show(['MISSION', 'RUN INTERRUPTED', message || 'Recovery limit reached', 'danger', 1900])],
+      ['energy', value => { if (Number(value) <= 20) show(['SYSTEM', 'LOW ENERGY', `${Math.round(Number(value))}% REMAINING`, 'danger', 1350]); }],
+      ['health', value => { if (Number(value) <= 1) show(['DAMAGE', 'CRITICAL HEALTH', `${Math.max(0, Number(value))} HP REMAINING`, 'danger', 1400]); }],
+      ['combo', (value, best) => { if (Number(value) >= 2) show(['COMBAT', `COMBO ×${value}`, best ? `BEST FLOW ×${best}` : 'Combat chain active', 'combat', 900]); }],
+      ['tutorial', message => show(['INTEL', 'NEW FIELD INSTRUCTION', message, 'world', 1700])],
+      ['narration', message => { if (message) show(['RADIO', 'INCOMING TRANSMISSION', message, 'world', 1800]); }],
+    ];
+
+    for (const [name, handler] of handlers) game.events.on(name, handler);
+    const binding = { handlers };
+    state.games.set(game, binding);
+
+    const scene = game.scene?.getScene?.('runner');
+    scene?.events?.once?.('shutdown', () => {
+      for (const [name, handler] of binding.handlers) game.events.off(name, handler);
+      state.games.delete(game);
+      state.lastKey = '';
+      state.lastAt = 0;
+    });
   }
 
   function observeNode(node, source) {
