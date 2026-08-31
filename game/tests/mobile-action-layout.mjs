@@ -7,13 +7,14 @@ const owner = await readFile(fileURLToPath(new URL('src/systems/mobile-input-sin
 const controller = await readFile(fileURLToPath(new URL('src/systems/mobile-controls-controller.js', root)), 'utf8');
 const index = await readFile(fileURLToPath(new URL('index.html', root)), 'utf8');
 
-assert.match(owner, /MOBILE INPUT SINGLE OWNER V7/);
+assert.match(owner, /MOBILE INPUT SINGLE OWNER V9/);
 assert.ok(owner.includes("jump: [32, ' ', 'Space']"));
 assert.ok(owner.includes("fire: [69, 'e', 'KeyE']"));
 assert.ok(owner.includes("sword: [81, 'q', 'KeyQ']"));
 assert.ok(owner.includes("dash: [16, 'Shift', 'ShiftLeft']"));
 assert.ok(owner.includes("build1: [49, '1', 'Digit1']"));
 assert.ok(owner.includes("gadget1: [51, '3', 'Digit3']"));
+assert.match(owner, /normalizeActionButtons/);
 assert.match(owner, /replaceWith\(clone\)/);
 assert.match(owner, /seen\.has\(action\)/);
 assert.match(controller, /DEPRECATED COMPATIBILITY SHIM/);

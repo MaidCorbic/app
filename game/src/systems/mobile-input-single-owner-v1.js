@@ -1,4 +1,4 @@
-// MOBILE INPUT SINGLE OWNER V8
+// MOBILE INPUT SINGLE OWNER V9
 // Replace legacy-bound DOM nodes before attaching the single mobile input owner.
 const ACTION_KEYS = Object.freeze({
   jump: [32, ' ', 'Space'], fire: [69, 'e', 'KeyE'], sword: [81, 'q', 'KeyQ'],
@@ -17,30 +17,35 @@ const keyEvent = (code, key, type, keyCode) => {
 const emit = ([keyCode, key, code], type) => window.dispatchEvent(keyEvent(code, key, type, keyCode));
 const replaceNode = node => { const clone = node.cloneNode(true); node.replaceWith(clone); return clone; };
 
-const install = () => {
-  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV8) return;
-  const root = document.querySelector('.mobile-controls');
-  if (!root) return;
-
+// Legacy boot code can temporarily add an action button before this single-owner
+// module runs. Normalize that DOM on every device so duplicate actions never remain
+// in the page, even when touch controls are hidden on desktop.
+const normalizeActionButtons = root => {
   const seen = new Set();
-  const actionButtons = [];
   root.querySelectorAll('[data-mobile-action]').forEach(node => {
     const action = node.dataset.mobileAction;
-    if (!ACTION_KEYS[action] || seen.has(action)) { node.remove(); return; }
-    seen.add(action); actionButtons.push(replaceNode(node));
+    if (!ACTION_KEYS[action] || seen.has(action)) node.remove();
+    else seen.add(action);
   });
+};
+
+const install = () => {
+  const root = document.querySelector('.mobile-controls');
+  if (!root) return;
+  normalizeActionButtons(root);
+  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV9) return;
+
+  const actionButtons = [];
+  root.querySelectorAll('[data-mobile-action]').forEach(node => actionButtons.push(replaceNode(node)));
 
   const joystickNode = root.querySelector('[data-mobile-joystick]');
   const joystick = joystickNode ? replaceNode(joystickNode) : null;
   const thumb = joystick?.querySelector('.mobile-joystick-thumb');
   if (!joystick || !thumb) return;
 
-  window.__relayMobileInputSingleOwnerV8 = true;
-  root.dataset.mobileControlsOwner = 'single-owner-v8';
+  window.__relayMobileInputSingleOwnerV9 = true;
+  root.dataset.mobileControlsOwner = 'single-owner-v9';
 
-  // One logical key state per action, regardless of how many fingers/pointers
-  // temporarily touch the same button. This prevents pointer A releasing a
-  // key that pointer B is still holding.
   const actionPointers = new Map();
   const pointerActions = new Map();
   const release = (button, pointerId) => {
@@ -92,9 +97,6 @@ const install = () => {
   let pointerId = null;
   let direction = null;
 
-  // Keep the existing keyboard path as a fallback, but also drive Phaser's
-  // actual Key objects. Synthetic DOM KeyboardEvents do not reliably update
-  // Phaser's internal isDown state on mobile/WebView browsers.
   const getScene = () => window.__relayRunnerScene?.input?.keyboard ? window.__relayRunnerScene : null;
   const setPhaserDirection = next => {
     const scene = getScene();
