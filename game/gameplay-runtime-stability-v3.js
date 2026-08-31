@@ -52,53 +52,52 @@
   }
 
   function hideLegacy(scene) {
-    const list = scene?.children?.list || [];
-    for (const child of list) {
-      const text = typeof child?.text === 'string' ? child.text.trim().toUpperCase() : '';
-      if (/DYNAMIC\s+CROWD/.test(text) || /^V10\b/.test(text) || /^ALT\+Q\s*\/\s*W\s*\/\s*E/.test(text)) {
-        const node = child.parentContainer?.setVisible ? child.parentContainer : child;
-        node.setVisible(false); child.setAlpha?.(0); child.disableInteractive?.();
+    const list=scene?.children?.list||[];
+    for(const child of list){
+      const text=typeof child?.text==='string'?child.text.trim().toUpperCase():'';
+      if(/DYNAMIC\s+CROWD/.test(text)||/^V10\b/.test(text)||/^ALT\+Q\s*\/\s*W\s*\/\s*E/.test(text)){
+        const node=child.parentContainer?.setVisible?child.parentContainer:child;node.setVisible(false);child.setAlpha?.(0);child.disableInteractive?.();
       }
     }
-    for (const child of list) {
-      if (child?.type !== 'Container' || !Array.isArray(child.list)) continue;
-      const texts = child.list.filter(n => typeof n?.text === 'string').map(n => n.text.toUpperCase());
-      if (texts.some(t => t.includes('LIVE MISSION INTEL') || t.includes('MISSION INTELLIGENCE'))) {
-        child.setVisible(false); child.setAlpha?.(0); child.disableInteractive?.();
-      }
+    for(const child of list){
+      if(child?.type!=='Container'||!Array.isArray(child.list))continue;
+      const texts=child.list.filter(n=>typeof n?.text==='string').map(n=>n.text.toUpperCase());
+      if(texts.some(t=>t.includes('LIVE MISSION INTEL')||t.includes('MISSION INTELLIGENCE'))){child.setVisible(false);child.setAlpha?.(0);child.disableInteractive?.();}
     }
   }
 
   function typeMission() {
-    if (!gameplay()) return;
-    const badge=q('#game .world-marker'), target=q('#worldGoal'); if(!badge||!target)return;
-    const source=(target.dataset.runtimeSource||target.textContent||'').trim().toUpperCase(); if(!source||badge.dataset.runtimeTyped===source)return;
-    badge.dataset.runtimeTyped=source; badge.classList.add('is-runtime-typing'); clearInterval(badge.__relayTypeTimer); target.textContent=''; let i=0;
-    badge.__relayTypeTimer=setInterval(()=>{if(!gameplay()){clearInterval(badge.__relayTypeTimer);return;}target.textContent=source.slice(0,++i);if(i>=source.length){clearInterval(badge.__relayTypeTimer);badge.classList.remove('is-runtime-typing');}},24);
+    if(!gameplay())return;
+    const badge=q('#game .world-marker'),target=q('#worldGoal');if(!badge||!target)return;
+    if(badge.__runtimeTypeTimer)return;
+    const current=String(target.textContent||'').trim().toUpperCase();if(!current)return;
+    if(badge.dataset.runtimeTyped===current)return;
+    badge.dataset.runtimeTyped=current;badge.classList.add('is-runtime-typing');target.textContent='';let i=0;
+    badge.__runtimeTypeTimer=setInterval(()=>{if(!gameplay()){clearInterval(badge.__runtimeTypeTimer);badge.__runtimeTypeTimer=0;return;}target.textContent=current.slice(0,++i);if(i>=current.length){clearInterval(badge.__runtimeTypeTimer);badge.__runtimeTypeTimer=0;badge.classList.remove('is-runtime-typing');}},24);
   }
 
-  function startMusic() {
-    let state={}; try{state=JSON.parse(localStorage.getItem('relay-runner-state')||'{}')||{};}catch{}
-    if(state.muted===true)return;
-    const volume=Number.isFinite(Number(state.musicVolume))?Math.max(.05,Math.min(.85,Number(state.musicVolume))):.55;
+  function startMusic(){
+    let settings={};try{settings=JSON.parse(localStorage.getItem('relay-runner-state')||'{}')||{};}catch{}
+    if(settings.muted===true)return;
+    const volume=Number.isFinite(Number(settings.musicVolume))?Math.max(.05,Math.min(.85,Number(settings.musicVolume))):.55;
     const music=window.relayAdaptiveMusic;
-    if(music){try{music.setEnabled?.(true);music.setVolume?.(volume);Promise.resolve(music.unlock?.()).then(ok=>{if(ok!==false&&gameplay())music.start?.();}).catch(()=>{});}catch{}}
+    if(!music)return;
+    try{music.setEnabled?.(true);music.setVolume?.(volume);Promise.resolve(music.unlock?.()).then(ok=>{if(ok!==false&&gameplay())music.start?.();}).catch(()=>{});}catch{}
   }
 
   function bindAudio(){
     const handler=e=>{if(e.type==='keydown'&&e.repeat)return;const t=e.target instanceof Element?e.target:null;if(t?.closest?.('#start,#continue,#launchJob,#again,#nextMission,#retry,[data-mobile-action]')||(e.type==='keydown'&&(e.key==='Enter'||e.code==='Space')))startMusic();};
-    document.addEventListener('pointerdown',handler,{capture:true,passive:true}); document.addEventListener('touchstart',handler,{capture:true,passive:true}); document.addEventListener('keydown',handler,{capture:true,passive:true});
+    document.addEventListener('pointerdown',handler,{capture:true,passive:true});
+    document.addEventListener('touchstart',handler,{capture:true,passive:true});
+    document.addEventListener('keydown',handler,{capture:true,passive:true});
     window.addEventListener('relay:runner-scene-ready',()=>{if(gameplay())startMusic();},{passive:true});
   }
 
   function boot(){
-    installHome(); bindAudio();
+    installStyles();installHome();bindAudio();
     const introObserver=new MutationObserver(()=>{const side=q('#intro .home-v3-side');if(side&&side.querySelectorAll('[data-runtime-home]').length!==4)installHome();});
     introObserver.observe(q('#intro')||document.body,{childList:true,subtree:true});
-    const mission=q('#worldGoal');
-    if(mission){const observer=new MutationObserver(()=>{mission.dataset.runtimeSource=mission.textContent||'';typeMission();});observer.observe(mission,{childList:true,characterData:true,subtree:true});}
     window.setInterval(()=>{if(gameplay()){hideLegacy(window.__relayRunnerScene);typeMission();}},180);
   }
-
   boot();
 })();
