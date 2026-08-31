@@ -60,9 +60,12 @@ if (!RunnerScene.prototype.__relayCoreStabilityV1Installed) {
     if (introVisible || titleVisible) return;
     const age = performance.now() - Number(scene.__webSceneStartedAt || performance.now());
     if (age < 450) return;
-    if (scene.cinematicActive || scene.inputEnabled === false) {
+    // A cinematic is an intentional gameplay block. Never force-unblock it from
+    // the generic web presentation watchdog. Only recover the non-cinematic case
+    // where input was disabled without an explicit intentional block marker.
+    if (scene.cinematicActive) return;
+    if (scene.inputEnabled === false) {
       if (scene.__relayIntentionalBlock === true) return;
-      scene.cinematicActive = false;
       scene.inputEnabled = true;
       try { scene.physics?.world?.resume?.(); } catch { /* already running */ }
       scene.player.body.enable = true;
