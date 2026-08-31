@@ -84,12 +84,10 @@
     button.setAttribute('aria-label', 'Swipe to deploy and start the game');
     button.setAttribute('aria-keyshortcuts', 'Swipe');
     button.innerHTML = '<span class="home-v3-play-track" aria-hidden="true"></span><span class="home-v3-play-fill" aria-hidden="true"></span><span class="home-v3-play-label">PLAY NOW</span><span class="home-v3-play-hint">SWIPE TO DEPLOY →</span><span class="home-v3-play-knob" aria-hidden="true">→</span>';
-
     let pointerId = null;
     let startX = 0;
     let completed = false;
     let maxTravel = 0;
-
     const updateMetrics = () => {
       const rect = button.getBoundingClientRect();
       const knob = button.querySelector('.home-v3-play-knob');
@@ -97,7 +95,6 @@
       maxTravel = Math.max(1, rect.width - knobWidth - 14);
       return maxTravel;
     };
-
     const reset = () => {
       if (completed) return;
       pointerId = null;
@@ -107,7 +104,6 @@
       if (knob) knob.style.transform = 'translateX(0)';
       if (fill) fill.style.width = '0%';
     };
-
     const complete = () => {
       if (completed) return;
       completed = true;
@@ -121,7 +117,6 @@
       if (knob) knob.style.transform = `translateX(${max}px)`;
       window.setTimeout(() => nativeClick('#start'), 180);
     };
-
     button.addEventListener('pointerdown', event => {
       if (completed) return;
       pointerId = event.pointerId;
@@ -132,7 +127,6 @@
       event.preventDefault();
       event.stopPropagation();
     }, { passive: false });
-
     button.addEventListener('pointermove', event => {
       if (event.pointerId !== pointerId || completed) return;
       const max = updateMetrics();
@@ -146,7 +140,6 @@
       event.preventDefault();
       event.stopPropagation();
     }, { passive: false });
-
     button.addEventListener('pointerup', event => {
       if (event.pointerId !== pointerId || completed) return;
       button.releasePointerCapture?.(event.pointerId);
@@ -154,19 +147,11 @@
       event.preventDefault();
       event.stopPropagation();
     }, { passive: false });
-
     button.addEventListener('pointercancel', reset);
     button.addEventListener('lostpointercapture', reset);
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-    });
+    button.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation(); });
     button.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.code === 'Space') {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      }
+      if (event.key === 'Enter' || event.code === 'Space') { event.preventDefault(); event.stopImmediatePropagation(); }
     });
   };
 
@@ -175,15 +160,11 @@
     if (!intro || intro.dataset.homeV3Built === '1') return;
     intro.dataset.homeV3Built = '1';
     intro.classList.add('home-v3');
-
     const legacyMenu = intro.querySelector('.main-menu');
-    const launcher = intro.querySelector('.info-launcher');
-
     const bg = document.createElement('div');
     bg.className = 'home-v3-bg';
     bg.setAttribute('aria-hidden', 'true');
     bg.innerHTML = '<i class="home-v3-grid"></i><i class="home-v3-glow"></i><i class="home-v3-scan"></i>';
-
     const shell = document.createElement('div');
     shell.className = 'home-v3-shell';
     shell.innerHTML = `
@@ -209,8 +190,7 @@
       </main>
       <footer class="home-v3-footer"><span>RELAY RUNNER · <b>VERSION 1.1.0</b></span><span>A / D MOVE · SPACE JUMP · ESC PAUSE</span></footer>`;
 
-    intro.replaceChildren(bg, shell, legacyMenu, launcher);
-
+    intro.replaceChildren(bg, shell, legacyMenu);
     installSwipePlay(shell.querySelector('[data-v3-play]'));
     bindLegacyAction(shell.querySelector('[data-v3-continue]'), '#continue');
     bindLegacyAction(shell.querySelector('[data-v3-options]'), '[data-title-panel="controls"]');
@@ -218,27 +198,21 @@
     bindLegacyAction(shell.querySelector('[data-v3-exit]'), '#exitTitle');
 
     const syncContinue = () => {
-      const legacy = $('continue');
-      const button = shell.querySelector('[data-v3-continue]');
-      if (!legacy || !button) return;
-      button.hidden = legacy.classList.contains('hidden') || getComputedStyle(legacy).display === 'none';
+      const source = $('continue');
+      const target = shell.querySelector('[data-v3-continue]');
+      if (!source || !target) return;
+      target.hidden = source.classList.contains('hidden');
     };
+    const observer = new MutationObserver(() => { syncSurface(); syncContinue(); removeTutorialSurface(); });
+    observer.observe(intro, { attributes:true, subtree:true, childList:true, attributeFilter:['class','hidden','style'] });
     syncContinue();
-    if ($('continue')) new MutationObserver(syncContinue).observe($('continue'), { attributes: true, attributeFilter: ['class','style','hidden'] });
-  };
-
-  const start = () => {
-    injectStyles();
-    build();
     removeTutorialSurface();
+    injectStyles();
     syncSurface();
-    const observer = new MutationObserver(() => {
-      syncSurface();
-      removeTutorialSurface();
-    });
-    observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class','style','hidden'] });
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
+  const boot = () => { build(); injectStyles(); syncSurface(); removeTutorialSurface(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true }); else boot();
+  window.addEventListener('relay:home-visible', boot);
+  window.addEventListener('relay:home-hidden', syncSurface);
 })();
