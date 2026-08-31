@@ -1,0 +1,18 @@
+/* Relay Runner — Competitive Plus / Subtle Neon
+ * Presentation-only feedback layer. Never owns gameplay state or input.
+ */
+#game #play{--cp-cyan:#8df4ff;--cp-amber:#ffd06e;--cp-red:#ff6478}
+#game #play .hud-route,#game #play .hud-progress,#game #play .hud-xp{transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+#game #play .hud-route.cp-active,#game #play .hud-progress.cp-active{border-color:rgba(141,244,255,.62)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 18px rgba(141,244,255,.13)!important}
+#game #play .world-marker{transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+#game #play .world-marker.cp-alert{border-color:rgba(255,208,110,.72)!important;box-shadow:0 0 22px rgba(255,208,110,.16)!important}
+#game #play .hud-xp.cp-gain{animation:cpXpGain .42s ease-out}
+#game #play .mobile-actions button.cp-feedback{animation:cpAction .24s ease-out}
+#game #play .cp-feedback-pulse{position:absolute!important;inset:0!important;z-index:68!important;pointer-events:none!important;opacity:0!important;border:1px solid currentColor!important;border-radius:14px!important;box-shadow:inset 0 0 22px currentColor,0 0 28px currentColor!important}
+#game #play .cp-feedback-pulse.is-cyan{color:rgba(141,244,255,.7)!important;animation:cpPulse .34s ease-out}
+#game #play .cp-feedback-pulse.is-amber{color:rgba(255,208,110,.72)!important;animation:cpPulse .4s ease-out}
+#game #play .cp-feedback-pulse.is-red{color:rgba(255,100,120,.8)!important;animation:cpPulse .46s ease-out}
+@keyframes cpXpGain{0%{transform:scale(1)}35%{transform:scale(1.055);border-color:rgba(255,208,110,.75)!important}100%{transform:scale(1)}}
+@keyframes cpAction{0%{transform:scale(1)}45%{transform:scale(.94);box-shadow:0 0 20px rgba(141,244,255,.28)}100%{transform:scale(1)}}
+@keyframes cpPulse{0%{opacity:0;transform:scale(.985)}25%{opacity:.72}100%{opacity:0;transform:scale(1.012)}}
+@media (prefers-reduced-motion:reduce){#game #play .hud-xp.cp-gain,#game #play .mobile-actions button.cp-feedback,#game #play .cp-feedback-pulse{animation:none!important}}
