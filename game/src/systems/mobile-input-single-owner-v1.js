@@ -1,4 +1,4 @@
-// MOBILE INPUT SINGLE OWNER V7
+// MOBILE INPUT SINGLE OWNER V8
 // Replace legacy-bound DOM nodes before attaching the single mobile input owner.
 const ACTION_KEYS = Object.freeze({
   jump: [32, ' ', 'Space'], fire: [69, 'e', 'KeyE'], sword: [81, 'q', 'KeyQ'],
@@ -18,7 +18,7 @@ const emit = ([keyCode, key, code], type) => window.dispatchEvent(keyEvent(code,
 const replaceNode = node => { const clone = node.cloneNode(true); node.replaceWith(clone); return clone; };
 
 const install = () => {
-  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV7) return;
+  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV8) return;
   const root = document.querySelector('.mobile-controls');
   if (!root) return;
 
@@ -35,24 +35,41 @@ const install = () => {
   const thumb = joystick?.querySelector('.mobile-joystick-thumb');
   if (!joystick || !thumb) return;
 
-  window.__relayMobileInputSingleOwnerV7 = true;
-  root.dataset.mobileControlsOwner = 'single-owner-v7';
+  window.__relayMobileInputSingleOwnerV8 = true;
+  root.dataset.mobileControlsOwner = 'single-owner-v8';
 
-  const activePointers = new Map();
+  // One logical key state per action, regardless of how many fingers/pointers
+  // temporarily touch the same button. This prevents pointer A releasing a
+  // key that pointer B is still holding.
+  const actionPointers = new Map();
+  const pointerActions = new Map();
   const release = (button, pointerId) => {
-    if (!activePointers.has(pointerId)) return;
-    activePointers.delete(pointerId);
     const action = button.dataset.mobileAction;
-    if (ACTION_KEYS[action]) emit(ACTION_KEYS[action], 'keyup');
-    button.classList.remove('is-active'); button.setAttribute('aria-pressed', 'false');
+    const pointers = actionPointers.get(action);
+    if (!pointers?.has(pointerId)) return;
+    pointers.delete(pointerId);
+    pointerActions.delete(pointerId);
+    if (pointers.size === 0) {
+      actionPointers.delete(action);
+      if (ACTION_KEYS[action]) emit(ACTION_KEYS[action], 'keyup');
+      button.classList.remove('is-active');
+      button.setAttribute('aria-pressed', 'false');
+    }
   };
+
   actionButtons.forEach(button => {
     button.setAttribute('aria-pressed', 'false');
     button.addEventListener('pointerdown', event => {
       event.preventDefault(); event.stopPropagation();
-      if (activePointers.has(event.pointerId)) return;
-      activePointers.set(event.pointerId, true); button.setPointerCapture?.(event.pointerId);
-      emit(ACTION_KEYS[button.dataset.mobileAction], 'keydown');
+      const action = button.dataset.mobileAction;
+      if (!ACTION_KEYS[action] || pointerActions.has(event.pointerId)) return;
+      let pointers = actionPointers.get(action);
+      if (!pointers) { pointers = new Set(); actionPointers.set(action, pointers); }
+      const wasEmpty = pointers.size === 0;
+      pointers.add(event.pointerId);
+      pointerActions.set(event.pointerId, action);
+      button.setPointerCapture?.(event.pointerId);
+      if (wasEmpty) emit(ACTION_KEYS[action], 'keydown');
       button.classList.add('is-active'); button.setAttribute('aria-pressed', 'true');
     }, { passive: false });
     button.addEventListener('pointerup', event => release(button, event.pointerId));
@@ -61,12 +78,11 @@ const install = () => {
   });
 
   const releaseAll = () => {
-    actionButtons.forEach(button => {
-      const key = ACTION_KEYS[button.dataset.mobileAction];
-      if (key && button.classList.contains('is-active')) emit(key, 'keyup');
-      button.classList.remove('is-active'); button.setAttribute('aria-pressed', 'false');
-    });
-    activePointers.clear();
+    for (const [action, pointers] of actionPointers) {
+      if (pointers.size && ACTION_KEYS[action]) emit(ACTION_KEYS[action], 'keyup');
+    }
+    actionPointers.clear(); pointerActions.clear();
+    actionButtons.forEach(button => { button.classList.remove('is-active'); button.setAttribute('aria-pressed', 'false'); });
   };
   window.addEventListener('blur', releaseAll); window.addEventListener('pagehide', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });

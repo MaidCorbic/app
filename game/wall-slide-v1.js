@@ -14,7 +14,7 @@ const WALL_LOCK_MS = 140;
 function activeScene() { return window.__relayRunnerScene || null; }
 function install(scene) {
   if (!scene?.player || states.has(scene)) return;
-  states.set(scene, { jumpHeld:false, sliding:false, side:0, lock:0, jumped:false });
+  states.set(scene, { jumpPressed:false, sliding:false, side:0, lock:0, jumped:false });
 }
 function airborne(body) {
   return !!body && !(body.blocked?.down || body.touching?.down);
@@ -26,8 +26,9 @@ function detectWall(body) {
 }
 function wallJump(scene, state) {
   const body = scene?.player?.body;
-  if (!body || !state.sliding || state.jumped || state.lock > 0) return false;
+  if (!body || !state.sliding || !state.jumpPressed || state.jumped || state.lock > 0) return false;
   const direction = -state.side;
+  state.jumpPressed = false;
   body.setVelocityX?.(direction * WALL_JUMP_X);
   body.setVelocityY?.(-WALL_JUMP_Y);
   state.jumped = true;
@@ -48,20 +49,24 @@ function update(scene, delta) {
   const body = scene?.player?.body;
   const player = scene?.player;
   if (!state || !body || !player?.active) return;
-  state.lock = Math.max(0, state.lock - (delta || 16.67));
+  const dt = Number.isFinite(delta) && delta > 0 ? Math.min(delta, 100) : 16.67;
+  state.lock = Math.max(0, state.lock - dt);
   const side = detectWall(body);
   const nextSliding = airborne(body) && side !== 0 && !scene.finished && !scene.respawning;
   state.sliding = nextSliding;
   state.side = side;
   if (nextSliding) {
-    const vy = body.velocity?.y || 0;
+    const vy = Number(body.velocity?.y) || 0;
     if (vy > MAX_FALL) body.setVelocityY?.(MAX_FALL);
     player.setData?.('wallSliding', true);
     scene.wallSliding = true;
-    if (state.jumpHeld) wallJump(scene, state);
+    wallJump(scene, state);
   } else {
     player.setData?.('wallSliding', false);
     scene.wallSliding = false;
+    // A jump pressed away from a wall belongs to the normal jump system.
+    // Do not carry that input forward and consume it when a wall is reached later.
+    state.jumpPressed = false;
     if (side === 0) state.jumped = false;
   }
   if (!airborne(body)) state.jumped = false;
@@ -72,31 +77,34 @@ const baseCreate = RunnerScene.prototype.create;
 const baseUpdate = RunnerScene.prototype.update;
 if (!RunnerScene.prototype.__wallSlideV1CreatePatched) {
   RunnerScene.prototype.create = function wallSlideCreate(...args) {
-    const result = baseCreate.apply(this,args);
-    try { install(this); window.__relayRunnerScene = this; } catch(error) { console.error('[WallSlide] create failed',error); }
+    const result = baseCreate.apply(this, args);
+    try { install(this); window.__relayRunnerScene = this; } catch (error) { console.error('[WallSlide] create failed', error); }
     return result;
   };
   RunnerScene.prototype.__wallSlideV1CreatePatched = true;
 }
 if (!RunnerScene.prototype.__wallSlideV1UpdatePatched) {
-  RunnerScene.prototype.update = function wallSlideUpdate(time,delta,...args) {
-    const result = baseUpdate.apply(this,[time,delta,...args]);
-    try { update(this,delta); } catch(error) { console.error('[WallSlide] update failed',error); }
+  RunnerScene.prototype.update = function wallSlideUpdate(time, delta, ...args) {
+    const result = baseUpdate.apply(this, [time, delta, ...args]);
+    try { update(this, delta); } catch (error) { console.error('[WallSlide] update failed', error); }
     return result;
   };
   RunnerScene.prototype.__wallSlideV1UpdatePatched = true;
 }
+
 document.addEventListener('keydown', event => {
-  if (!JUMP_CODES.has(event.code)) return;
+  if (event.repeat || !JUMP_CODES.has(event.code)) return;
   const state = states.get(activeScene());
-  if (state) state.jumpHeld = true;
+  // Wall-jump input is only armed while actually touching a wall.
+  // This keeps the base jump/coyote/buffer system authoritative elsewhere.
+  if (state && state.sliding) state.jumpPressed = true;
 }, true);
 document.addEventListener('keyup', event => {
   if (!JUMP_CODES.has(event.code)) return;
   const state = states.get(activeScene());
-  if (state) state.jumpHeld = false;
+  if (state) state.jumpPressed = false;
 }, true);
 window.addEventListener('blur', () => {
   const state = states.get(activeScene());
-  if (state) { state.jumpHeld=false; state.jumped=false; }
+  if (state) { state.jumpPressed = false; state.jumped = false; state.sliding = false; }
 });
