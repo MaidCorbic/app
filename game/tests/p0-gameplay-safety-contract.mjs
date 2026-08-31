@@ -34,13 +34,17 @@ assert.match(stability, /Number\.isFinite\(vy\)/);
 assert.match(stability, /Number\.isFinite\(scene\.player\.x\)/);
 assert.match(stability, /physics-recovered/);
 
+// Presentation recovery must never unlock an intentional cinematic block.
+assert.match(stability, /if \(scene\.cinematicActive\) return/);
+assert.match(stability, /if \(scene\.inputEnabled === false\)/);
+
 // Every enemy projectile group must use the same player-hit path.
 assert.match(enemyRuntime, /\[scene\.enemyProjectiles, scene\.eggs, scene\.comets\]/);
 assert.match(enemyRuntime, /Enemy ability hit the courier/);
 assert.match(enemyRuntime, /scene\.takeSciFiHit/);
 
 // Mobile input must have one owner and release held input on lifecycle loss.
-assert.match(mobile, /__relayMobileInputSingleOwnerV7/);
+assert.match(mobile, /__relayMobileInputSingleOwnerV9/);
 assert.match(mobile, /pagehide/);
 assert.match(mobile, /visibilitychange/);
 assert.match(mobile, /setPhaserDirection/);
