@@ -1,6 +1,4 @@
-/* Relay Runner — Competitive Plus / Subtle Neon runtime hooks.
- * Presentation-only. No gameplay state, physics or input ownership.
- */
+/* Relay Runner — Competitive Plus / Subtle Neon runtime hooks. */
 (() => {
   'use strict';
   const root = () => document.querySelector('#game #play');
