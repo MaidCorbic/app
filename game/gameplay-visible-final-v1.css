@@ -42,8 +42,8 @@
   #game #play .hud-actions>button{width:42px!important;height:40px!important}
   #game #play .world-marker{top:88px!important;left:10px!important;width:min(220px,54vw)!important;padding:7px 9px!important;border-radius:8px!important}
 
-  /* Single bottom geometry for the touch controls. */
-  body.is-touch #game #play .mobile-controls{position:absolute!important;left:max(10px,env(safe-area-inset-left,0px) + 8px)!important;right:max(10px,env(safe-area-inset-right,0px) + 8px)!important;bottom:max(18px,env(safe-area-inset-bottom,0px) + 14px)!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:10px!important;width:auto!important;box-sizing:border-box!important;pointer-events:none!important}
+  /* Keep the interactive action cluster above the separate Pause/Settings row. */
+  body.is-touch #game #play .mobile-controls{position:absolute!important;left:max(10px,env(safe-area-inset-left,0px) + 8px)!important;right:max(10px,env(safe-area-inset-right,0px) + 8px)!important;bottom:max(78px,env(safe-area-inset-bottom,0px) + 72px)!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:10px!important;width:auto!important;box-sizing:border-box!important;pointer-events:none!important}
   body.is-touch #game #play .mobile-joystick{flex:0 0 clamp(78px,22vw,96px)!important;width:clamp(78px,22vw,96px)!important;height:clamp(78px,22vw,96px)!important;margin:0!important;pointer-events:auto!important}
   body.is-touch #game #play .mobile-actions{flex:0 1 auto!important;display:grid!important;grid-template-columns:repeat(3,clamp(42px,12vw,54px))!important;grid-auto-rows:clamp(42px,12vw,54px)!important;gap:6px!important;min-width:0!important;max-width:calc(100vw - 112px)!important;pointer-events:none!important}
   body.is-touch #game #play .mobile-actions button{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;border-radius:14px!important;box-sizing:border-box!important;font-size:clamp(8px,2.2vw,10px)!important;letter-spacing:.25px!important;pointer-events:auto!important}
@@ -75,7 +75,7 @@
 @media (max-height:560px) and (orientation:landscape){
   #game #play .hud{padding:7px 10px!important}
   #game #play .world-marker{top:58px!important;width:200px!important}
-  body.is-touch #game #play .mobile-controls{bottom:max(8px,env(safe-area-inset-bottom,0px) + 6px)!important}
+  body.is-touch #game #play .mobile-controls{bottom:max(56px,env(safe-area-inset-bottom,0px) + 52px)!important}
   body.is-touch #game #play .mobile-actions{grid-template-columns:repeat(3,42px)!important;grid-auto-rows:42px!important;gap:5px!important}
   body.is-touch #game #play .mobile-joystick{width:76px!important;height:76px!important;flex-basis:76px!important}
   body.is-touch #mobileBottomHud{bottom:max(6px,env(safe-area-inset-bottom,0px) + 4px)!important;height:48px!important}
