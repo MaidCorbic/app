@@ -1,38 +1,68 @@
 FROM node:24.14.0-slim AS base
 
+# This will be set by the GitHub action to the folder containing this component.
+ARG FOLDER=/app
+
+# Enable corepack
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
 
+# Setup PNPM
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PNPM_HOME/bin:$PATH"
 ENV CI=true
 ENV PNPM_CONFIG_MINIMUM_RELEASE_AGE=0
 ENV PNPM_CONFIG_STRICT_DEP_BUILDS=false
 
-# Diploi invokes this Dockerfile with the repository root as the build context.
-# Copy the game component explicitly so /app/game is deterministic and the
-# root package-lock.json can never be selected by the Node build.
+# Install dependencies only when needed
 FROM base AS deps
-WORKDIR /app/game
-COPY game/package.json game/package-lock.json ./
-RUN npm ci
+COPY . /app
+WORKDIR ${FOLDER}
 
+# Install dependencies based on the preferred package manager
+RUN \
+  if [ -f yarn.lock ]; then \
+  yarn install --frozen-lockfile || yarn install; \
+  elif [ -f package-lock.json ]; then \
+  npm ci || npm install; \
+  elif [ -f pnpm-lock.yaml ]; then \
+  pnpm install --frozen-lockfile || pnpm install; \
+  elif [ -f package.json ]; then \
+  echo "Lockfile not found. Falling back to npm install (non-deterministic install)."; \
+  npm install; \
+  else \
+  echo "No package manifest found. Skipping install."; \
+  fi
+
+# Create the node_modules directory if it still does not exist
+RUN mkdir -p node_modules
+
+# Rebuild the source code only when needed
 FROM base AS builder
-WORKDIR /app/game
-COPY game/package.json game/package-lock.json ./
-COPY game/ ./
-COPY --from=deps /app/game/node_modules ./node_modules
-RUN npm run build
+COPY . /app
+WORKDIR ${FOLDER}
+COPY --from=deps ${FOLDER}/node_modules ./node_modules
 
+RUN \
+  if [ -f yarn.lock ]; then yarn run build; \
+  elif [ -f package-lock.json ]; then npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then pnpm run build; \
+  elif [ -f package.json ]; then npm run build; \
+  else echo "No package manifest found. Skipping build step."; \
+  fi
+
+# Production image, copy all the files and run "npm start"
 FROM base AS runner
-COPY --from=builder --chown=1000:1000 /app/game /app/game
-WORKDIR /app/game
+
+COPY --from=builder --chown=1000:1000 /app /app
+WORKDIR ${FOLDER}
 
 ENV NODE_ENV=production
+
 USER 1000:1000
+
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# CI trigger: verify the deterministic game build context.
 CMD ["npm", "start"]
