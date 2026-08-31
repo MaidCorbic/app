@@ -1,26 +1,30 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
 /*
- * GAMEPLAY RUNTIME AUTHORITY V1
+ * GAMEPLAY RUNTIME AUTHORITY V2
  *
  * This layer does not replace RunnerScene or any gameplay system. It only
- * establishes two hard runtime invariants after the existing feature modules
- * have installed themselves:
- *   1) transient UI cannot accidentally resume a scene that is intentionally
- *      blocked by an active pause/intel overlay;
+ * establishes hard runtime invariants after the existing feature modules have
+ * installed themselves:
+ *   1) transient UI cannot accidentally resume a scene intentionally blocked
+ *      by an active pause/intel overlay;
  *   2) legacy + mobile input adapters cannot emit the same one-shot action
- *      twice inside the same pointer gesture.
+ *      twice inside the same pointer gesture;
+ *   3) the legacy main.js music bed remains the single music owner. The
+ *      adaptive music module is kept loadable for compatibility, but it is
+ *      prevented from starting a second WebAudio music graph.
  *
  * The coordinator is intentionally defensive and scoped per live game/scene.
  */
 (() => {
   'use strict';
 
-  if (window.__relayRuntimeAuthorityV1) return;
-  window.__relayRuntimeAuthorityV1 = true;
+  if (window.__relayRuntimeAuthorityV2) return;
+  window.__relayRuntimeAuthorityV2 = true;
 
   const sceneState = new WeakMap();
   const gameState = new WeakMap();
+  let adaptiveLocked = false;
 
   function isElementVisible(node) {
     return !!node && !node.classList.contains('hidden') && !node.hidden;
@@ -28,19 +32,44 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   function hasBlockingOverlay(scene) {
     if (!scene) return false;
-
     const pauseMenu = document.getElementById('pauseMenu');
     if (isElementVisible(pauseMenu)) return true;
-
     if (scene.infoCard?.active || scene.__enemyDiscoveryActiveKey) return true;
-
     const intel = document.getElementById('enemyDiscovery');
     if (isElementVisible(intel)) return true;
-
     const gameplayIntro = document.getElementById('relayGameplayIntroFinalV1');
     if (isElementVisible(gameplayIntro)) return true;
-
     return false;
+  }
+
+  function lockAdaptiveMusicOwner() {
+    if (adaptiveLocked) return true;
+    const music = window.relayAdaptiveMusic;
+    if (!music) return false;
+
+    const original = {
+      start: typeof music.start === 'function' ? music.start.bind(music) : null,
+      stop: typeof music.stop === 'function' ? music.stop.bind(music) : null,
+      setEnabled: typeof music.setEnabled === 'function' ? music.setEnabled.bind(music) : null,
+    };
+
+    try { original.stop?.(true); } catch {}
+    try { original.setEnabled?.(false); } catch {}
+
+    music.start = () => false;
+    music.setEnabled = value => {
+      if (value) {
+        try { original.setEnabled?.(false); } catch {}
+        return false;
+      }
+      try { return original.setEnabled?.(false); } catch { return false; }
+    };
+    music.stop = (...args) => {
+      try { return original.stop?.(...args); } catch { return undefined; }
+    };
+    adaptiveLocked = true;
+    window.__relayAdaptiveMusicOwner = 'main-audio-bed';
+    return true;
   }
 
   function installResumeGuard(scene) {
@@ -51,13 +80,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const originalPause = plugin.pause?.bind(plugin);
     if (!originalResume || !originalPause) return;
 
-    const state = {
-      originalResume,
-      originalPause,
-      guarded: false,
-      queuedResume: false,
-      syncTimer: 0,
-    };
+    const state = { originalResume, originalPause, queuedResume: false, syncTimer: 0 };
     sceneState.set(scene, state);
 
     plugin.resume = function guardedResume(...args) {
@@ -66,22 +89,18 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         return scene;
       }
       state.queuedResume = false;
-      state.guarded = false;
       return originalResume(...args);
     };
 
     plugin.pause = function guardedPause(...args) {
-      state.guarded = true;
       return originalPause(...args);
     };
 
     const sync = () => {
       if (!scene.sys?.isActive?.() || scene.sys?.isSleeping?.()) return;
-      if (!scene.scene?.isPaused?.()) return;
-      if (!state.queuedResume) return;
+      if (!scene.scene?.isPaused?.() || !state.queuedResume) return;
       if (hasBlockingOverlay(scene)) return;
       state.queuedResume = false;
-      state.guarded = false;
       originalResume();
     };
 
@@ -101,17 +120,15 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const emitter = game.events;
     const originalEmit = emitter.emit.bind(emitter);
     const lastActionAt = new Map();
-    const state = { originalEmit };
-    gameState.set(game, state);
+    gameState.set(game, { originalEmit });
 
     emitter.emit = function guardedEmit(eventName, ...args) {
       if (eventName === 'mobile-action') {
         const action = String(args[0] || '');
         const now = performance.now();
-        const key = action || '__empty__';
-        const previous = lastActionAt.get(key) || -Infinity;
+        const previous = lastActionAt.get(action || '__empty__') || -Infinity;
         if (now - previous < 90) return false;
-        lastActionAt.set(key, now);
+        lastActionAt.set(action || '__empty__', now);
       }
       return originalEmit(eventName, ...args);
     };
@@ -125,6 +142,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   function attach(scene) {
     if (!scene?.game) return;
+    lockAdaptiveMusicOwner();
     installResumeGuard(scene);
     installInputDeduper(scene.game);
   }
@@ -145,4 +163,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     };
     RunnerScene.prototype.__relayRuntimeAuthorityCreateWrapped = true;
   }
+
+  window.setTimeout(lockAdaptiveMusicOwner, 0);
 })();
