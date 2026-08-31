@@ -10,47 +10,82 @@
   --relay-muted:#84909d;
 }
 
-/* HOME: one clean interactive stack; legacy top-right FAQ / INFO launcher is gone. */
-#intro.home-v3 .info-launcher{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#intro.home-v3 .info-launcher{display:flex!important;visibility:visible!important;pointer-events:auto!important;position:absolute!important;top:22px!important;right:24px!important;z-index:40!important;gap:8px!important;align-items:center!important}
+#intro.home-v3 .info-launcher .faq-launcher,
+#intro.home-v3 .info-launcher .info-circle{width:44px!important;height:44px!important;display:grid!important;place-items:center!important;border:1px solid rgba(255,208,110,.30)!important;background:linear-gradient(145deg,rgba(7,10,15,.96),rgba(2,3,5,.99))!important;color:#f4f7fa!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 12px 26px rgba(0,0,0,.30),0 0 24px rgba(255,208,110,.045)!important}
+#intro.home-v3 .info-launcher .faq-launcher:hover,
+#intro.home-v3 .info-launcher .info-circle:hover{border-color:rgba(255,208,110,.65)!important;color:var(--relay-gold-bright)!important;box-shadow:inset 0 1px rgba(255,255,255,.08),0 16px 30px rgba(0,0,0,.36),0 0 28px rgba(255,208,110,.12)!important}
+#intro.home-v3 .info-launcher .faq-launcher{border-radius:12px!important;padding:0!important;font:900 9px/1 'DM Mono',monospace!important;letter-spacing:1px!important}
+#intro.home-v3 .info-launcher .faq-glyph{font-size:15px!important}
+#intro.home-v3 .info-launcher .info-circle{border-radius:50%!important;padding:0!important}
 #intro.home-v3 .home-v3-side{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;width:min(420px,100%)!important}
 #intro.home-v3 .relay-home-nav-card{position:relative;isolation:isolate;display:flex!important;align-items:center;justify-content:space-between;gap:18px;min-height:58px!important;padding:14px 16px!important;border:1px solid rgba(255,208,110,.24)!important;border-left:2px solid rgba(255,208,110,.48)!important;border-radius:10px!important;background:linear-gradient(145deg,rgba(7,10,15,.96),rgba(2,3,5,.98))!important;color:var(--relay-text)!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 14px 30px rgba(0,0,0,.26),0 0 22px rgba(255,208,110,.035)!important;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease,background .18s ease!important}
+#intro.home-v3 .relay-home-nav-card[data-final-home="faq"],#intro.home-v3 .relay-home-nav-card[data-final-home="update"]{display:none!important}
 #intro.home-v3 .relay-home-nav-card::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,rgba(255,208,110,.10),transparent 45%);opacity:0;transition:opacity .18s ease}
 #intro.home-v3 .relay-home-nav-card:hover,#intro.home-v3 .relay-home-nav-card:focus-visible{transform:translateX(3px)!important;border-color:rgba(255,208,110,.58)!important;box-shadow:inset 0 1px rgba(255,255,255,.08),0 18px 36px rgba(0,0,0,.34),0 0 28px rgba(255,208,110,.10)!important;outline:none!important}
 #intro.home-v3 .relay-home-nav-card:hover::before,#intro.home-v3 .relay-home-nav-card:focus-visible::before{opacity:1}
 #intro.home-v3 .relay-home-nav-card span{display:block!important;color:var(--relay-text)!important;font:950 11px/1 'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:1.3px!important}
 #intro.home-v3 .relay-home-nav-card small{display:block!important;margin:0!important;color:var(--relay-muted)!important;font:750 7px/1.3 'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.9px!important;text-align:right!important}
-#intro.home-v3 .relay-home-nav-card[data-final-home="update"]{border-left-color:var(--relay-gold)!important}
-#intro.home-v3 .relay-home-nav-card[data-final-home="faq"]{border-left-color:rgba(255,231,166,.72)!important}
 #intro.home-v3 .relay-home-nav-card[data-final-home="options"]{border-left-color:rgba(255,208,110,.85)!important}
 #intro.home-v3 .relay-home-nav-card[data-final-home="exit"]{border-left-color:rgba(180,122,30,.8)!important}
 
-/* GAMEPLAY: same visual language, but compact enough to preserve the world. */
-#game .hud{grid-template-columns:minmax(220px,280px) minmax(220px,280px) auto!important;justify-content:center!important;column-gap:10px!important;max-width:min(1040px,calc(100vw - 32px))!important}
-#game .hud-route,#game .hud-run{min-height:58px!important;box-sizing:border-box!important}
-#game .hud-route,#game .hud-run,#game .hud-xp,#game #pause{border-color:rgba(255,208,110,.22)!important;background:linear-gradient(145deg,rgba(7,10,15,.94),rgba(2,3,5,.98))!important;box-shadow:inset 0 1px rgba(255,255,255,.045),0 12px 26px rgba(0,0,0,.26),0 0 24px rgba(255,208,110,.035)!important}
-#game .hud-route .route-dot{background:var(--relay-gold)!important;box-shadow:0 0 13px rgba(255,208,110,.7)!important}
-#game .hud-route small,#game .hud-run>small{color:var(--relay-gold)!important}
-#game #pause{color:var(--relay-gold-bright)!important;border-color:rgba(255,208,110,.40)!important}
+#game #play .hud{position:absolute!important;top:14px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(1100px,calc(100vw - 28px))!important;max-width:none!important;display:grid!important;grid-template-columns:minmax(190px,250px) minmax(300px,420px) minmax(100px,150px)!important;align-items:start!important;gap:10px!important;z-index:30!important;pointer-events:none!important}
+#game #play .hud>*{pointer-events:auto!important;min-width:0!important}
+#game .hud-route,#game .hud-run,#game .hud-xp,#game #pause{box-sizing:border-box!important;border:1px solid rgba(255,208,110,.25)!important;background:linear-gradient(145deg,rgba(7,10,15,.95),rgba(2,3,5,.98))!important;box-shadow:inset 0 1px rgba(255,255,255,.045),0 14px 28px rgba(0,0,0,.28),0 0 24px rgba(255,208,110,.035)!important;backdrop-filter:blur(7px)!important}
+#game .hud-route{min-height:50px!important;padding:10px 12px!important;border-radius:12px!important;display:flex!important;align-items:center!important;gap:10px!important}
+#game .hud-route .route-dot{flex:0 0 8px!important;width:8px!important;height:8px!important;background:var(--relay-gold)!important;box-shadow:0 0 14px rgba(255,208,110,.72)!important}
+#game .hud-route small,#game .hud-run>small{color:var(--relay-gold)!important;font:900 7px/1 'DM Mono',monospace!important;letter-spacing:1.2px!important}
+#game .hud-route b{display:block!important;margin-top:5px!important;color:#f4f7fa!important;font:900 11px/1.15 'DM Mono',monospace!important;letter-spacing:.5px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#game .hud-run{min-height:50px!important;padding:8px 10px!important;border-radius:12px!important;display:grid!important;grid-template-columns:auto 1fr;grid-template-rows:auto 8px;grid-template-areas:'label count' 'bar bar';align-items:center!important;column-gap:10px!important}
+#game .hud-run>small{grid-area:label!important}
+#game .hud-run>small::before{content:'FLOW · '!important;color:#7f8d9b!important}
+#game .hud-run>span{grid-area:count!important;justify-self:end!important;color:#fff3bf!important;font:950 13px/1 'DM Mono',monospace!important;letter-spacing:1px!important}
+#game .hud-run>div{grid-area:bar!important;min-width:0!important;height:5px!important;overflow:hidden!important;border:1px solid rgba(255,208,110,.14)!important;border-radius:999px!important;background:rgba(255,255,255,.04)!important}
+#game .hud-run>div>i{display:block!important;height:100%!important;border-radius:999px!important;background:linear-gradient(90deg,#b47a1e,#ffd06e,#fff0b5)!important;box-shadow:0 0 12px rgba(255,208,110,.32)!important}
+#game .hud-actions{display:flex!important;align-items:stretch!important;justify-content:flex-end!important;gap:8px!important}
+#game .hud-xp{min-width:92px!important;min-height:50px!important;padding:8px 10px!important;border-radius:12px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:flex-end!important}
+#game .hud-xp small{color:#7f8d9b!important;font:900 7px/1 'DM Mono',monospace!important;letter-spacing:1px!important}
+#game .hud-xp b{margin-top:5px!important;color:#f4f7fa!important;font:950 14px/1 'DM Mono',monospace!important}
+#game #pause{width:50px!important;min-width:50px!important;height:50px!important;border-radius:12px!important;color:var(--relay-gold-bright)!important;border-color:rgba(255,208,110,.45)!important;font:900 19px/1 'DM Mono',monospace!important}
+
 #game #relayTimeIndicator{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 
-/* Compact Phaser mission objective presentation is handled by presentation-final-v1.js. */
+#game #abilityUnlock:not(.hidden),#game #levelUp:not(.hidden){background:radial-gradient(circle at 50% 22%,rgba(255,208,110,.07),transparent 34%),rgba(1,3,7,.84)!important;backdrop-filter:blur(8px)!important;z-index:220!important}
+#game #abilityUnlock .system-card,#game #levelUp .system-card{position:relative!important;width:min(560px,calc(100vw - 36px))!important;max-width:560px!important;padding:32px 34px 30px!important;border:1px solid rgba(255,208,110,.36)!important;border-radius:18px!important;background:radial-gradient(circle at 82% 8%,rgba(255,208,110,.10),transparent 30%),linear-gradient(145deg,rgba(10,14,21,.98),rgba(2,4,8,.99))!important;box-shadow:0 34px 90px rgba(0,0,0,.72),0 0 60px rgba(255,208,110,.08),inset 0 1px rgba(255,255,255,.08)!important;overflow:hidden!important}
+#game #abilityUnlock .system-card::before,#game #levelUp .system-card::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,#ffd06e,#fff0b5,transparent)!important;box-shadow:0 0 18px rgba(255,208,110,.28)!important}
+#game #abilityUnlock .eyebrow,#game #levelUp .eyebrow{color:#ffd06e!important;font:900 9px/1 'DM Mono',monospace!important;letter-spacing:2px!important}
+#game #abilityUnlock #abilityName,#game #levelUp b{display:block!important;margin:14px 0 8px!important;color:#f7f9fb!important;font:950 clamp(24px,4vw,38px)/1.05 'DM Mono',monospace!important;letter-spacing:-.04em!important;text-shadow:0 0 24px rgba(255,208,110,.10)!important}
+#game #abilityUnlock #abilityControl,#game #abilityUnlock #abilityDetail,#game #levelUp span{display:block!important;color:#98a6b3!important;font:700 10px/1.6 'DM Mono',monospace!important;letter-spacing:.35px!important}
+#game #abilityUnlock #abilityControl{color:#ffe5a0!important;font-weight:900!important}
+#game #abilityUnlock .close,#game #levelUp .close{position:absolute!important;top:12px!important;right:12px!important;width:38px!important;height:38px!important;display:grid!important;place-items:center!important;border:1px solid rgba(255,208,110,.28)!important;border-radius:10px!important;background:rgba(255,208,110,.04)!important;color:#ffe8ad!important;font-size:20px!important;z-index:2!important}
+#game #abilityUnlock .close:hover,#game #levelUp .close:hover{border-color:rgba(255,208,110,.68)!important;box-shadow:0 0 22px rgba(255,208,110,.16)!important}
 
+@media(max-width:900px){
+  #game #play .hud{width:calc(100vw - 18px)!important;grid-template-columns:minmax(160px,1fr) minmax(210px,1.25fr) auto!important;gap:7px!important;top:10px!important}
+}
 @media(max-width:760px){
+  #intro.home-v3 .info-launcher{top:14px!important;right:14px!important;gap:6px!important}
+  #intro.home-v3 .info-launcher .faq-launcher,#intro.home-v3 .info-launcher .info-circle{width:38px!important;height:38px!important}
   #intro.home-v3 .home-v3-side{width:100%!important;gap:8px!important}
   #intro.home-v3 .relay-home-nav-card{min-height:54px!important;padding:12px 13px!important}
-  #game .hud{grid-template-columns:minmax(0,1fr) minmax(118px,132px) auto!important;max-width:calc(100vw - 16px)!important;gap:6px!important;padding:8px!important}
-  #game .hud-route,#game .hud-run{min-height:48px!important;padding:7px 8px!important}
-  #game .hud-route b{font-size:9px!important;max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  #game .hud-run{min-width:0!important}
+  #game #play .hud{top:8px!important;width:calc(100vw - 12px)!important;grid-template-columns:minmax(0,1fr) minmax(122px,136px) auto!important;gap:5px!important}
+  #game .hud-route{min-height:44px!important;padding:7px 8px!important}
+  #game .hud-route b{font-size:8px!important}
+  #game .hud-route small,#game .hud-run>small{font-size:6px!important}
+  #game .hud-run{min-height:44px!important;padding:6px 7px!important}
+  #game .hud-run>span{font-size:11px!important}
+  #game .hud-xp{display:none!important}
+  #game #pause{width:44px!important;min-width:44px!important;height:44px!important;border-radius:11px!important}
+  #game #abilityUnlock .system-card,#game #levelUp .system-card{width:min(520px,calc(100vw - 24px))!important;padding:28px 24px 26px!important;border-radius:16px!important}
 }
 @media(max-width:520px){
-  #game .hud{grid-template-columns:minmax(0,1fr) 118px auto!important;max-width:calc(100vw - 12px)!important;padding:6px!important;gap:5px!important}
-  #game .hud-route,#game .hud-run{min-height:44px!important;padding:6px 7px!important;border-radius:10px!important}
-  #game .hud-route small,#game .hud-run>small{font-size:6px!important}
-  #game .hud-run>span{font-size:11px!important}
+  #game #play .hud{grid-template-columns:minmax(0,1fr) 112px auto!important;top:6px!important}
+  #game .hud-run>small::before{content:''!important}
+  #game .hud-run>small{letter-spacing:.8px!important}
+  #game #abilityUnlock #abilityName,#game #levelUp b{font-size:25px!important}
 }
 @media(orientation:landscape) and (max-height:560px){
-  #game .hud{max-width:calc(100vw - 18px)!important;padding:6px 8px!important}
-  #game .hud-route,#game .hud-run{min-height:42px!important}
+  #game #play .hud{top:6px!important}
+  #game #abilityUnlock .system-card,#game #levelUp .system-card{padding:22px 24px!important}
 }
-@media(prefers-reduced-motion:reduce){#intro.home-v3 .relay-home-nav-card{transition:none!important}.relay-home-nav-card::before{transition:none!important}}
+@media(prefers-reduced-motion:reduce){#intro.home-v3 .relay-home-nav-card,#game .hud-run>div>i{transition:none!important}}

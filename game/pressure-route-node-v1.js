@@ -5,7 +5,31 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 // cargo, progression, or movement owner.
 
 const sceneState = new WeakMap();
-const distance = (a, b) => Math.hypot((a?.x || 0) - (b?.x || 0), (a?.y || 0) - (b?.y || 0));
+
+function hasBody(gameObject) {
+  return !!gameObject?.body && typeof gameObject.body === 'object';
+}
+
+function disableGate(gate) {
+  if (!gate?.active) return false;
+  if (hasBody(gate)) {
+    if (typeof gate.body.stop === 'function') gate.body.stop();
+    gate.body.enable = false;
+    return true;
+  }
+  return false;
+}
+
+function enableGate(gate) {
+  if (!gate?.active || !hasBody(gate)) return false;
+  if (typeof gate.enableBody === 'function') {
+    gate.enableBody(false, gate.x, gate.y, true, true);
+    gate.setImmovable?.(true);
+    return true;
+  }
+  gate.body.enable = true;
+  return true;
+}
 
 function setup(scene) {
   if (!scene?.player || sceneState.has(scene)) return;
@@ -27,6 +51,8 @@ function setup(scene) {
 function update(scene) {
   const state = sceneState.get(scene);
   if (!state || !scene.player?.active || scene.finished) return;
+  if (!state.plate?.active || !state.gate?.active) return;
+
   const now = Number(scene.elapsedMs || 0);
   const plateHit = Math.abs(scene.player.x - state.plate.x) < 34 && Math.abs(scene.player.y - state.plate.y) < 44;
 
@@ -34,7 +60,7 @@ function update(scene) {
     state.used = true;
     state.activeUntil = now + 2600;
     state.gate.setAlpha(.24);
-    state.gate.disableBody?.(true, true);
+    disableGate(state.gate);
     state.ring.setStrokeStyle(2, 0xaee37f, .9);
     scene.playerCue?.('ROUTE SWITCH · GATE OPEN', '#aee37f');
     scene.game?.events?.emit('feedback', 'signal');
@@ -42,7 +68,7 @@ function update(scene) {
 
   if (state.activeUntil && now >= state.activeUntil) {
     state.activeUntil = 0;
-    state.gate.enableBody?.(false, state.gate.x, state.gate.y, true, true);
+    enableGate(state.gate);
     state.gate.setAlpha(1);
     state.gate.setImmovable?.(true);
     state.ring.setStrokeStyle(1, 0xaee37f, .3);
