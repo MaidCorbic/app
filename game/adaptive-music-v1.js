@@ -14,7 +14,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   const s = {
     ctx:null, master:null, compressor:null, music:null, filter:null,
-    scene:null, cleanup:null, timer:0, running:false, unlocked:false,
+    scene:null, cleanup:null, timer:0, watchdog:0, running:false, unlocked:false,
     paused:false, enabled:true, volume:.42, intensity:0, target:0,
     step:0, next:0, tension:0
   };
@@ -108,22 +108,16 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       const bar=Math.floor(s.step/16)%4;
       const when=s.next;
       const chord=chords[bar];
-
-      // Warm bass + chord: this is the musical foundation, not noise.
       tone(chord[0]/2,beat*.72,.075,'triangle',when);
       if(i%4===0){
         tone(chord[1],beat*.72,.038,'sine',when);
         tone(chord[2],beat*.72,.030,'sine',when);
         kick(when,beat);
       }
-
-      // Main arcade arpeggio.
       if(i%2===0){
         const f=melody[(i/2+bar*3)%melody.length];
         tone(f,beat*.42,.050+s.intensity*.006,'square',when);
       }
-
-      // Higher energy adds a second melodic voice, never harsh noise.
       if(s.intensity>=1&&i%4===2){
         const f=melody[(i+bar)%melody.length]*.5;
         tone(f,beat*.55,.028,'triangle',when);
@@ -135,7 +129,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       if(s.intensity>=3&&i%2===1){
         tone(chord[(i/2)%3]*2,beat*.18,.022,'triangle',when);
       }
-
       s.step++;
       s.next+=beat/2;
     }
@@ -237,6 +230,13 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     if(document.hidden){s.paused=true;stop(true);}
     else{s.paused=false;if(s.unlocked&&s.scene)start();}
   });
+
+  // Recovery watchdog: if a valid gesture unlocked the context before Phaser
+  // finished booting, restart the existing scheduler as soon as the live scene is active.
+  s.watchdog=window.setInterval(()=>{
+    if(!s.enabled||!s.unlocked||s.paused||document.hidden)return;
+    if(s.scene?.sys?.isActive?.()&&!s.running)start();
+  },300);
 
   window.setInterval(()=>{
     const r=s.scene;
