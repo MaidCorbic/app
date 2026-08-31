@@ -36,42 +36,45 @@ function tutorialBounds(scene) {
 function buildPanel(scene, objective) {
   const c = scene.add.container(0, 0).setScrollFactor(0).setDepth(9200).setAlpha(0);
   c.setData?.('mobileLayoutRole', 'mission-objective');
-  const bg = scene.add.rectangle(0, 0, 426, 166, 0x07111f, .95).setOrigin(0).setStrokeStyle(1, 0x38bdf8, .72);
-  const accent = scene.add.rectangle(0, 0, 4, 166, 0x38bdf8, .92).setOrigin(0);
-  const kicker = scene.add.text(22, 18, 'MISSION OBJECTIVE', { fontFamily:'monospace', fontSize:'10px', color:'#8ecae6', letterSpacing:1.5 });
-  const title = scene.add.text(22, 43, objective.title, { fontFamily:'monospace', fontSize:'16px', fontStyle:'bold', color:'#e8f8ff', wordWrap:{width:378} });
-  const label = scene.add.text(22, 92, objective.label, { fontFamily:'monospace', fontSize:'9px', color:'#8fa6bb', letterSpacing:1.2 });
-  const progress = scene.add.text(22, 112, 'ROUTE PROGRESS  0%', { fontFamily:'monospace', fontSize:'11px', color:'#d6efff' });
-  const track = scene.add.rectangle(22, 143, 382, 6, 0x13243a, 1).setOrigin(0,.5);
-  const fill = scene.add.rectangle(22, 143, 0, 6, 0x38bdf8, 1).setOrigin(0,.5);
-  const status = scene.add.text(22, 153, 'OBJECTIVE IN PROGRESS', { fontFamily:'monospace', fontSize:'8px', color:'#6ebfe8', letterSpacing:1.2 });
-  c.add([bg,accent,kicker,title,label,progress,track,fill,status]);
-  return { c, bg, accent, kicker, title, label, progress, track, fill, status };
+
+  /* Gold command-card language: matches the established level/rank UI. */
+  const bg = scene.add.rectangle(0, 0, 426, 152, 0x070a0f, .97).setOrigin(0).setStrokeStyle(1, 0xffd06e, .72);
+  const inner = scene.add.rectangle(8, 8, 410, 136, 0x020305, .30).setOrigin(0).setStrokeStyle(1, 0xffd06e, .10);
+  const accent = scene.add.rectangle(0, 0, 3, 152, 0xffd06e, .94).setOrigin(0);
+  const topRail = scene.add.rectangle(22, 10, 382, 1, 0xffd06e, .22).setOrigin(0);
+  const kicker = scene.add.text(22, 18, 'MISSION OBJECTIVE', { fontFamily:'monospace', fontSize:'10px', color:'#ffd06e', letterSpacing:1.5 });
+  const title = scene.add.text(22, 42, objective.title, { fontFamily:'monospace', fontSize:'16px', fontStyle:'bold', color:'#f4f7fa', wordWrap:{width:378} });
+  const label = scene.add.text(22, 90, objective.label, { fontFamily:'monospace', fontSize:'9px', color:'#a89058', letterSpacing:1.2 });
+  const progress = scene.add.text(22, 108, 'ROUTE PROGRESS  0%', { fontFamily:'monospace', fontSize:'11px', color:'#ffe7a6' });
+  const track = scene.add.rectangle(22, 129, 382, 6, 0x11161b, 1).setOrigin(0,.5).setStrokeStyle(1, 0xffd06e, .12);
+  const fill = scene.add.rectangle(22, 129, 0, 6, 0xffd06e, 1).setOrigin(0,.5);
+  const status = scene.add.text(22, 141, 'OBJECTIVE IN PROGRESS', { fontFamily:'monospace', fontSize:'7px', color:'#89764b', letterSpacing:1.2 });
+  c.add([bg,inner,accent,topRail,kicker,title,label,progress,track,fill,status]);
+  return { c, bg, inner, accent, topRail, kicker, title, label, progress, track, fill, status };
 }
 
 function layout(state, scene, force = false) {
   const { w, h, mobile } = viewport(scene);
   const tutorial = tutorialBounds(scene);
-  const baseW = 426, baseH = 166;
+  const baseW = 426, baseH = 152;
   if (mobile) {
-    /* Compact mobile objective: keep one persistent objective without consuming the play lane. */
-    const pw = Math.min(250, Math.max(214, w - 32));
+    /* Lower-right on mobile, above touch controls and below the top HUD. */
+    const pw = Math.min(270, Math.max(220, w - 24));
     const scale = pw / baseW;
     const actualH = baseH * scale;
-    const x = Math.max(16, (w - pw) / 2);
-    const y = Math.max(72, Math.min(88, h * .13));
+    const x = Math.max(12, w - pw - 12);
+    const y = Math.max(86, h - actualH - 106);
     if (!force && state.x === x && state.y === y && state.scale === scale && state.tutorial === false) return;
     state.x = x; state.y = y; state.scale = scale; state.tutorial = false;
     state.c.setPosition(x, y).setScale(scale);
     return;
   }
-  let pw = Math.min(470, Math.max(360, w - 64));
+  const pw = Math.min(440, Math.max(380, w - 72));
   const scale = pw / baseW;
   const actualH = baseH * scale;
-  let x = Math.max(12, w - pw - 30);
-  const bottomReserve = 28;
-  let y = Math.max(82, h - actualH - bottomReserve);
-  if (tutorial && tutorial.right > x - 8 && tutorial.bottom > y - 8) y = Math.max(82, tutorial.y - actualH - 18);
+  const x = Math.max(18, w - pw - 28);
+  let y = Math.max(92, h - actualH - 28);
+  if (tutorial && tutorial.right > x - 8 && tutorial.bottom > y - 8) y = Math.max(92, tutorial.y - actualH - 18);
   if (!force && state.x === x && state.y === y && state.scale === scale && state.tutorial === !!tutorial) return;
   state.x = x; state.y = y; state.scale = scale; state.tutorial = !!tutorial;
   state.c.setPosition(x, y).setScale(scale);
@@ -91,8 +94,8 @@ function skinExistingHud(scene, state) {
     let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,minDepth=Infinity;
     items.forEach(item => { const b=item.getBounds(); minX=Math.min(minX,b.x); minY=Math.min(minY,b.y); maxX=Math.max(maxX,b.right); maxY=Math.max(maxY,b.bottom); minDepth=Math.min(minDepth, Number.isFinite(item.depth)?item.depth:9100); });
     const padX = kind === 'mission' ? 18 : 16, padY = 14;
-    const bg = scene.add.rectangle(minX-padX, minY-padY, (maxX-minX)+padX*2, (maxY-minY)+padY*2, 0x07111f, .88).setOrigin(0).setScrollFactor(0).setStrokeStyle(1, 0x38bdf8, .55).setDepth(minDepth - .01);
-    const rail = scene.add.rectangle(minX-padX, minY-padY, 3, (maxY-minY)+padY*2, 0x38bdf8, .8).setOrigin(0).setScrollFactor(0).setDepth(minDepth);
+    const bg = scene.add.rectangle(minX-padX, minY-padY, (maxX-minX)+padX*2, (maxY-minY)+padY*2, 0x070a0f, .88).setOrigin(0).setScrollFactor(0).setStrokeStyle(1, 0xffd06e, .34).setDepth(minDepth - .01);
+    const rail = scene.add.rectangle(minX-padX, minY-padY, 3, (maxY-minY)+padY*2, 0xffd06e, .82).setOrigin(0).setScrollFactor(0).setDepth(minDepth);
     state.hudSkins.push(bg, rail);
   }
   state.hudSkinned = true;
@@ -106,7 +109,7 @@ function reveal(state, scene) {
   layout(state, scene, true);
   state.c.setVisible(true);
   skinExistingHud(scene, state);
-  scene.tweens?.add?.({ targets:state.c, alpha:{from:0,to:1}, duration:160, ease:'Quad.easeOut' });
+  scene.tweens?.add?.({ targets:state.c, alpha:{from:0,to:1}, duration:180, ease:'Quad.easeOut' });
 }
 
 export function applyMissionObjective(scene, id = missionId(scene)) {
