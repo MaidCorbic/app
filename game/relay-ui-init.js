@@ -119,3 +119,4 @@ import './gameplay-home-hud-safe-v1.js';
 import './gameplay-home-hud-safe-v2.js';
 import './gameplay-audio-start-v2.js';
 import './runtime-authority-v1.js';
+import './gameplay-runtime-stability-v3.js';
