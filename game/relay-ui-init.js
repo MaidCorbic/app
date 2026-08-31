@@ -115,3 +115,4 @@ import './p1-gameplay-correctness-v1.js';
 import './p2-character-presentation-v4.js';
 import './p2-ux-controls-v1.js';
 import './relay-final-layout-v2.js';
+import './relay-gameplay-runtime-v3.js';
