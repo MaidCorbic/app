@@ -28,8 +28,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   const styleObjective = state => {
     if (!state) return;
-    state.bg?.setStrokeStyle?.(1, 0xffd06e, 0.62);
-    state.accent?.setFillStyle?.(0xffd06e, 0.92);
+    state.bg?.setStrokeStyle?.(1, 0xffd06e, 0.72);
+    state.accent?.setFillStyle?.(0xffd06e, 0.95);
     state.track?.setFillStyle?.(0x17130b, 1);
     state.fill?.setFillStyle?.(0xffd06e, 1);
     state.kicker?.setColor?.('#ffd06e');
@@ -44,16 +44,65 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const { w, h } = viewport(scene);
     const mobile = w <= 760;
     const baseW = 426;
-    const targetW = mobile ? Math.min(258, Math.max(214, w - 24)) : Math.min(338, Math.max(300, w * 0.30));
+    const targetW = mobile ? Math.min(270, Math.max(214, w - 28)) : Math.min(342, Math.max(292, w * 0.30));
     const scale = targetW / baseW;
-    const actualH = 166 * scale;
     const x = Math.max(10, (w - targetW) / 2);
-    const y = mobile ? Math.max(78, Math.min(94, h * 0.14)) : 96;
+    const y = mobile ? Math.max(76, Math.min(102, h * 0.14)) : 88;
     const key = `${w}x${h}:${mobile}`;
     if (scene.__relayFinalObjectiveLayout === key) return;
     scene.__relayFinalObjectiveLayout = key;
     state.c.setPosition(x, y).setScale(scale);
     styleObjective(state);
+  };
+
+  const closeElement = element => {
+    if (!element) return false;
+    const button = element.querySelector?.('[data-close], .close, #closeTitlePanel, #closeAbilityUnlock, [data-relay-close]');
+    if (button && typeof button.click === 'function') {
+      button.click();
+      return true;
+    }
+    element.classList.add('hidden');
+    element.classList.remove('relay-update-mode');
+    return true;
+  };
+
+  const closeTopOverlay = () => {
+    const selectors = [
+      '#abilityUnlock:not(.hidden)',
+      '#levelUp:not(.hidden)',
+      '#titlePanel:not(.hidden)',
+      '#relayInfoPanel:not(.hidden)',
+      '#pauseMenu:not(.hidden)'
+    ];
+    for (const selector of selectors) {
+      const element = document.querySelector(selector);
+      if (element) return closeElement(element);
+    }
+    return false;
+  };
+
+  const installDomHardening = () => {
+    document.documentElement.dataset.relayFinalUi = '1';
+
+    let icon = document.head.querySelector('link[data-relay-favicon]');
+    if (!icon) {
+      icon = document.createElement('link');
+      icon.rel = 'icon';
+      icon.type = 'image/x-icon';
+      icon.href = '/favicon.ico';
+      icon.dataset.relayFavicon = '1';
+      document.head.appendChild(icon);
+    }
+    document.title = 'Relay Runner';
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      if (closeTopOverlay()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, { capture:true });
   };
 
   const originalCreate = RunnerScene.prototype.create;
@@ -76,4 +125,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     } catch {}
     return result;
   };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installDomHardening, { once:true });
+  else installDomHardening();
 })();
