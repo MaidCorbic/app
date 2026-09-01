@@ -5,6 +5,7 @@
   const INTRO_ID = 'intro';
   const V3_CLASS = 'home-v3';
   const ROOT_ID = 'homeV3Root';
+  const CLEANUP_STYLE_ID = 'relay-home-v3-cleanup-style';
 
   function getIntro() {
     return document.getElementById(INTRO_ID);
@@ -13,6 +14,27 @@
   function clickCanonical(selector) {
     const button = document.querySelector(selector);
     if (button instanceof HTMLElement) button.click();
+  }
+
+  function installCleanupStyle() {
+    if (document.getElementById(CLEANUP_STYLE_ID)) return;
+    const style = document.createElement('style');
+    style.id = CLEANUP_STYLE_ID;
+    style.textContent = `
+      /* V3 owns the Home presentation. Retire the legacy title navigation. */
+      #intro.home-v3 .title-secondary{
+        display:none!important;
+        visibility:hidden!important;
+        pointer-events:none!important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function removeLegacyHomeNodes() {
+    const intro = getIntro();
+    if (!intro) return;
+    intro.querySelectorAll('.title-secondary > [data-safe-home], .title-secondary > #exitTitle').forEach(node => node.remove());
   }
 
   function buildHome() {
@@ -70,10 +92,6 @@
               <span>LATEST UPDATE</span>
               <small>PATCH NOTES / NEW FEATURES</small>
             </button>
-            <button class="home-v3-card" type="button" data-v3-options>
-              <span>SETTINGS</span>
-              <small>AUDIO / CONTROLS / GAME OPTIONS</small>
-            </button>
           </aside>
         </main>
 
@@ -120,9 +138,11 @@
   function activate() {
     const intro = getIntro();
     if (!intro) return;
+    installCleanupStyle();
     intro.classList.add(V3_CLASS);
     intro.setAttribute('aria-hidden', 'false');
     buildHome();
+    removeLegacyHomeNodes();
   }
 
   function boot() {
@@ -133,6 +153,7 @@
     new MutationObserver(() => {
       if (!intro.classList.contains(V3_CLASS)) activate();
       if (!document.getElementById(ROOT_ID)) buildHome();
+      removeLegacyHomeNodes();
     }).observe(intro, {
       childList: true,
       attributes: true,
