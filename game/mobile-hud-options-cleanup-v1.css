@@ -1,5 +1,4 @@
-/* Canonical gameplay presentation cleanup.
-   One gameplay HUD, one touch-control layer, one Options owner, one Home button set. */
+/* Canonical gameplay presentation cleanup. */
 #relay-gameplay-feel-v3,#relay-gameplay-feel-v3-style,#relay-gameplay-new-layer,#relayGameplayIntel,.relay-gameplay-intel,[data-relay-debug-hud],[data-mission-intelligence]{display:none!important;visibility:hidden!important;pointer-events:none!important}
 #play .input-guide,#play .mobile-bottom-hud,#play .relay-debug-hud,#play .relay-control-guide,#play .keyboard-hud,#play .control-hud{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 #play .mobile-controls{box-sizing:border-box!important;max-width:100vw!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;padding-bottom:max(8px,env(safe-area-inset-bottom,0px))!important;overflow:visible!important}
