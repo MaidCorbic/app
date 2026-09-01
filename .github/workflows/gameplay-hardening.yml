@@ -33,5 +33,5 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run final stability suite
-        run: npm run test:final-stability
+      - name: Run final release hardening
+        run: npm run test:release-hardening
