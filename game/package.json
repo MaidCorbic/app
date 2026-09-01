@@ -32,6 +32,7 @@
     "test:special-event-reward": "node tests/special-event-reward.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs",
     "test:final-hardening": "node tests/final-hardening-contract.mjs",
+    "test:final-stability": "node tests/final-stability-suite.mjs",
     "test:deep-gameplay": "node tests/gameplay-deep-integration-v12.contract.mjs",
     "test:v13-level-wiring": "node tests/gameplay-v13-level-wiring.contract.mjs",
     "test:runtime-authority": "node tests/runtime-authority-contract.mjs",
