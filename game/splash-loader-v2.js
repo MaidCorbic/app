@@ -1,38 +1,27 @@
 (() => {
   'use strict';
 
- const removeSplash = () => {
-  const splash =
-    document.getElementById('relaySplash') ||
-    document.querySelector('.relay-splash');
+  const removeSplash = () => {
+    const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
+    const intro = document.getElementById('intro');
 
-  const intro = document.getElementById('intro');
+    // Splash has exactly one job: reveal the existing Home screen.
+    if (intro) {
+      intro.hidden = false;
+      intro.classList.remove('hidden');
+      intro.setAttribute('aria-hidden', 'false');
+    }
 
+    document.body.classList.remove('home-v3-active');
 
-  /* Explicitly reveal the canonical Home screen. */
-  if (intro) {
-    intro.classList.remove('hidden');
-    intro.hidden = false;
-    intro.classList.add('home-v3');
-  }
-
-  document.body.classList.add('home-v3-active');
-
-  if (!splash) return;
-
-  splash.setAttribute('aria-busy', 'false');
-  splash.classList.add('is-hidden');
-
-  window.setTimeout(() => {
-    splash.remove();
-  }, 350);
-};
+    if (!splash) return;
+    splash.setAttribute('aria-busy', 'false');
+    splash.classList.add('is-hidden');
+    window.setTimeout(() => splash.remove(), 350);
+  };
 
   const start = () => {
-    const splash =
-      document.getElementById('relaySplash') ||
-      document.querySelector('.relay-splash');
-
+    const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
     if (!splash) return;
 
     const bar = splash.querySelector('.relay-splash-progress');
@@ -43,22 +32,8 @@
     if (pct) pct.textContent = '100%';
     if (label) label.textContent = 'READY';
 
-    /*
-     * Deliberately independent of:
-     * - image loading
-     * - window.load
-     * - DOMContentLoaded
-     * - Phaser
-     * - gameplay modules
-     * - readiness checks
-     */
-
-    window.setTimeout(removeSplash, 2000);
+    window.setTimeout(removeSplash, 1200);
   };
 
-  /*
-   * This file is loaded at the end of index.html,
-   * so the splash DOM already exists.
-   */
   start();
 })();
