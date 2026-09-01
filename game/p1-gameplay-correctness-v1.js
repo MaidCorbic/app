@@ -23,7 +23,11 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const state = locks.get(scene); if (!state) return;
     state.reasons.delete(reason);
     if (!state.reasons.size) {
-      if (state.pausedByP1 && scene.scene?.isPaused?.()) scene.scene.resume();
+      // Unified cinematic UI owns the pause-menu close/resume action. P1 keeps
+      // ownership of the freeze lock but must not race it with a second resume.
+      // Intel dismissal still resumes here because it is not owned by the menu UI.
+      const unifiedOwnsPauseResume = reason === 'pause-menu' && window.__relayUnifiedCinematicUiV1;
+      if (state.pausedByP1 && scene.scene?.isPaused?.() && !unifiedOwnsPauseResume) scene.scene.resume();
       state.pausedByP1 = false;
       scene.__relayP1Frozen = false;
     }
