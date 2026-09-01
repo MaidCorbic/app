@@ -17,6 +17,7 @@
         z-index:500!important;
       }
       #intro.${HOME_READY_CLASS}.hidden{display:block!important;}
+      #relaySplash.relay-splash-done{display:none!important;visibility:hidden!important;pointer-events:none!important;}
     `;
     document.head.appendChild(style);
   }
@@ -24,7 +25,6 @@
   function revealHome() {
     const intro = document.getElementById('intro');
     if (!intro) return false;
-
     installHomeReadyStyle();
     intro.hidden = false;
     intro.classList.remove('hidden');
@@ -33,25 +33,18 @@
     return true;
   }
 
-  function removeSplash() {
+  function finishSplash() {
     const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
-
-    // The canonical Home is the only screen revealed after loading.
     revealHome();
     document.body.classList.remove('home-v3-active');
-
     if (!splash) return;
-    splash.setAttribute('aria-busy', 'false');
-    splash.classList.add('is-hidden');
-    window.setTimeout(() => splash.remove(), 350);
 
-    // Give late-running UI modules a short window, then re-assert Home.
-    // This prevents a legacy Home/V3 observer from winning the handoff race.
-    [0, 100, 300, 700].forEach(delay => {
-      window.setTimeout(() => {
-        if (document.getElementById('relaySplash')) revealHome();
-      }, delay);
-    });
+    splash.setAttribute('aria-busy', 'false');
+    splash.classList.add('is-hidden', 'relay-splash-done');
+    splash.hidden = true;
+    splash.style.display = 'none';
+    splash.style.visibility = 'hidden';
+    splash.style.pointerEvents = 'none';
   }
 
   function start() {
@@ -69,7 +62,9 @@
     if (pct) pct.textContent = '100%';
     if (label) label.textContent = 'READY';
 
-    window.setTimeout(removeSplash, 1200);
+    // Do not wait for another timer/animation after 100%.
+    // The previous handoff could stall here when the main thread was busy.
+    finishSplash();
   }
 
   if (document.readyState === 'loading') {
