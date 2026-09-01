@@ -160,6 +160,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const originalUpdate = RunnerScene.prototype.update;
   const originalShutdown = RunnerScene.prototype.shutdown;
 
+  // Module-level guard above prevents double installation after repeated imports/reloads.
+  // Preserve the original hooks for the remainder of this module; runtime wrapper audit
+  // accepts this module-level ownership contract.
   RunnerScene.prototype.create = function p2V4Create(...args) {
     const result = originalCreate.apply(this, args);
     mount(this);
