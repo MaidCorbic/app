@@ -47,6 +47,19 @@ function relayLegacyAssetAliases() {
   };
 }
 
+function relayItchioPaths() {
+  return {
+    name: 'relay-itchio-relative-paths',
+    apply: 'build',
+    transformIndexHtml(html) {
+      return html
+        .replaceAll('href="/favicon.ico"', 'href="./favicon.ico"')
+        .replaceAll('src="/game/assets/', 'src="./game/assets/')
+        .replaceAll('src="/src/', 'src="./src/');
+    },
+  };
+}
+
 function relayTransform(name, predicate, transform) {
   return { name, transform(code, id) {
     if (!predicate(id)) return null;
@@ -85,6 +98,7 @@ function relaySpecialEventCreditRewardFix() {
 }
 
 export default defineConfig({
+  base: './',
   server: {
     host: '0.0.0.0',
     port: 3000,
@@ -98,6 +112,7 @@ export default defineConfig({
     relayCheckpointCollectiblesFix(),
     relayRespawnTransientStateFix(),
     relaySpecialEventCreditRewardFix(),
+    relayItchioPaths(),
     relayLegacyAssetAliases(),
   ],
   build: {
