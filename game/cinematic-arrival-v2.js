@@ -1,10 +1,10 @@
 import './canonical-ui-v1.css';
 import './cinematic-arrival-v2.css';
 
-/* Cinematic Arrival V4 — presentation stays cinematic; progress reflects real readiness. */
+/* Cinematic Arrival V5 — keep the mission card visible long enough to actually read. */
 (() => {
-  if (window.__relayCinematicArrivalV4) return;
-  window.__relayCinematicArrivalV4 = true;
+  if (window.__relayCinematicArrivalV5) return;
+  window.__relayCinematicArrivalV5 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
@@ -40,7 +40,10 @@ import './cinematic-arrival-v2.css';
 
     const image = splash.querySelector('#relaySplashArt,.relay-splash-art');
     const started = performance.now();
-    const MIN_MS = 900;
+    // The mission card animates in at 2.15s and its progress bar runs for 2.45s.
+    // Releasing at 0.9s removed the entire splash before the mission text appeared.
+    // Keep the splash alive for the full presentation, while still retaining a hard cap.
+    const MIN_MS = 3600;
     const MAX_MS = 5000;
     let released = false;
     let imageReady = Boolean(image?.complete && image.naturalWidth);
@@ -85,13 +88,14 @@ import './cinematic-arrival-v2.css';
         requestAnimationFrame(frame);
       }
 
-      if (performance.now() - started >= MAX_MS) {
+      const elapsed = performance.now() - started;
+      if (elapsed >= MAX_MS) {
         release('five-second-cap');
         return;
       }
 
-      if (engineReady && imageReady && domReady && pageReady && performance.now() - started >= MIN_MS) {
-        release('ready');
+      if (engineReady && imageReady && domReady && pageReady && elapsed >= MIN_MS) {
+        release('ready-after-presentation');
       } else {
         window.setTimeout(tick, 40);
       }
