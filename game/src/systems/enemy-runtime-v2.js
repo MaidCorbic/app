@@ -32,7 +32,18 @@ function cueAbility(scene, enemy, text, color) {
 function installProjectileProtection(scene) {
   if (scene.__enemyProjectileProtection) return;
   scene.__enemyProjectileProtection = true;
-  scene.physics.add.overlap(scene.player, scene.enemyProjectiles, (player, projectile) => { if (!projectile.active) return; projectile.destroy(); scene.takeSciFiHit('Enemy ability hit the courier.'); });
+  const hitPlayer = (player, projectile) => {
+    if (!projectile?.active || !scene.player?.active || scene.finished || scene.respawning) return;
+    projectile.destroy();
+    scene.takeSciFiHit('Enemy ability hit the courier.');
+  };
+  // All enemy-owned projectile groups must use the same hit path. The legacy
+  // RunnerScene loop creates `eggs` and `comets`, while newer enemy-runtime
+  // abilities use `enemyProjectiles`. Leaving the legacy groups unbound makes
+  // some enemy attacks visual-only and creates inconsistent combat rules.
+  [scene.enemyProjectiles, scene.eggs, scene.comets].forEach(group => {
+    if (group) scene.physics.add.overlap(scene.player, group, hitPlayer, undefined, scene);
+  });
 }
 function spawnBoss(scene) {
   if (!scene.mission.boss) return;

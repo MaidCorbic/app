@@ -26,6 +26,8 @@
       #intro.home-v3 .home-v3-side,
       #intro.home-v3 .relay-home-nav-card,
       #intro.home-v3 .relay-v4-home-btn { display:none!important; visibility:hidden!important; pointer-events:none!important; }
+      /* home-v3.js and safe-v2 both style the generated side menu. Keep it retired so the legacy title-secondary owner is the only visible stack. */
+      #intro.home-v3.home-v3 .home-v3-side.home-v3-side { display:none!important; visibility:hidden!important; opacity:0!important; pointer-events:none!important; }
       #intro.home-v3 .title-secondary{
         display:flex!important; flex-direction:column!important; align-items:stretch!important; justify-content:flex-start!important;
         gap:8px!important; width:min(420px,100%)!important; position:relative!important; z-index:100!important;
@@ -146,7 +148,6 @@
     const existingFaq = nav.querySelector('[data-safe-home="faq"]');
     const existingUpdate = nav.querySelector('[data-safe-home="update"]');
 
-    // Remove only known legacy/generated duplicates. Keep original Options and Exit nodes if present.
     qa('[data-v3-faq],[data-v3-update],[data-v3-options],[data-v3-exit],.relay-home-nav-card,.relay-v4-home-btn', nav).forEach(node => node.remove());
     qa('[data-safe-home="faq"],[data-safe-home="update"]', nav).forEach(node => node.remove());
 

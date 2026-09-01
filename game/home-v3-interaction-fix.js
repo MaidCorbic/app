@@ -50,11 +50,6 @@ import './presentation-final-v1.js';
       return button;
     };
 
-    side.append(
-      make('options', 'OPTIONS', 'SETTINGS · AUDIO · DISPLAY', () => call('options', () => window.relayUnifiedCinematicUI?.openOptions?.())),
-      make('exit', 'EXIT', 'CLOSE SESSION', () => $('#exitTitle')?.click()),
-    );
-
     const update = launcher?.querySelector('[data-relay-info="update"]');
     update?.addEventListener('click', event => {
       event.preventDefault();
