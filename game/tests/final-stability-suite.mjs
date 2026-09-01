@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 
 const commands = [
   'test:runtime-wrapper-order',
-  'test:p0-gameplay-safety',
   'test:runtime-authority',
   'test:mobile-input-single-owner',
   'test:mobile-action-layout',

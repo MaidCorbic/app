@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: game/package.json
 
@@ -33,5 +33,5 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run final stability suite
-        run: npm run test:final-stability
+      - name: Run final release hardening
+        run: npm run test:release-hardening
