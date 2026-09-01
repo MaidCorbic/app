@@ -1,143 +1,15 @@
 /* Canonical gameplay presentation cleanup.
    One gameplay HUD, one touch-control layer, one Options owner, one Home button set. */
-
-/* Duplicate telemetry/presentation HUD. */
-#relay-gameplay-feel-v3,
-#relay-gameplay-feel-v3-style,
-#relay-gameplay-new-layer,
-#relayGameplayIntel,
-.relay-gameplay-intel,
-[data-relay-debug-hud],
-[data-mission-intelligence] {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-/* Legacy keyboard guide: keyboard input remains functional; only its visual HUD is removed. */
-#play .input-guide {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* Never show legacy mobile/diagnostic button HUDs beside the canonical controls. */
-#play .mobile-bottom-hud,
-#play .relay-debug-hud,
-#play [data-relay-debug-hud],
-#play .relay-control-guide,
-#play .keyboard-hud,
-#play .control-hud {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-/* Canonical touch controls: reserve their bottom zone and keep every control inside the viewport. */
-#play .mobile-controls {
-  box-sizing: border-box !important;
-  max-width: 100vw !important;
-  max-height: calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) !important;
-  padding-bottom: max(8px, env(safe-area-inset-bottom,0px)) !important;
-  overflow: visible !important;
-}
-#play .mobile-actions button {
-  box-sizing: border-box !important;
-  min-width: 44px !important;
-  min-height: 44px !important;
-}
-
-/* Keep mission/HUD text out of the touch-action zone on compact phones. */
-@media (max-width: 760px) {
-  #play .hud {
-    padding-top: max(8px, env(safe-area-inset-top,0px)) !important;
-  }
-  #play .world-marker {
-    display: none !important;
-  }
-  #play .hud-route,
-  #play .hud-progress,
-  #play .hud-actions {
-    min-width: 0 !important;
-  }
-  #play .hud-route b,
-  #play .hud-route small {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-}
-
-/* One canonical Options implementation. */
-#titlePanel.relay-options-unified #titlePanelContent.relay-legacy-cleared {
-  display: none !important;
-}
-.relay-options-shell [data-legacy-option],
-.relay-options-shell .legacy-option,
-.relay-options-shell .legacy-options-actions,
-.relay-options-shell .duplicate-option,
-.relay-options-shell .duplicate-options {
-  display: none !important;
-}
-
-/* Options navigation: four functional tabs only, with no duplicate action rows. */
-@media (max-width: 760px) {
-  #pauseMenu.relay-options-unified .menu-grid > aside nav {
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 5px !important;
-  }
-  #pauseMenu.relay-options-unified .menu-grid > aside nav .tab {
-    min-width: 0 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-}
-
-/* Home: legacy markup is now the only Home surface. Keep the useful actions and prevent
-   accidental stacking from old generated Home layers. */
-#intro .main-menu {
-  position: relative;
-  z-index: 20;
-}
-#intro .title-secondary {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0,1fr)) !important;
-  gap: 10px !important;
-}
-#intro .title-secondary > .menu-option-button {
-  min-width: 0 !important;
-  min-height: 54px !important;
-  pointer-events: auto !important;
-  touch-action: manipulation !important;
-}
-#intro .menu-actions #start,
-#intro .menu-actions #continue,
-#intro .title-secondary > .menu-option-button {
-  pointer-events: auto !important;
-  touch-action: manipulation !important;
-}
-
-@media (max-width: 430px) {
-  #intro .title-secondary {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 7px !important;
-  }
-  #intro .title-secondary > .menu-option-button {
-    min-height: 50px !important;
-    padding: 8px !important;
-  }
-}
-
-/* Safe viewport handling for Android browser chrome and gesture areas. */
-@supports (height: 100dvh) {
-  #play,
-  #intro,
-  #pauseMenu,
-  #titlePanel,
-  #relayInfoPanel {
-    min-height: 100dvh;
-  }
-}
+#relay-gameplay-feel-v3,#relay-gameplay-feel-v3-style,#relay-gameplay-new-layer,#relayGameplayIntel,.relay-gameplay-intel,[data-relay-debug-hud],[data-mission-intelligence]{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#play .input-guide,#play .mobile-bottom-hud,#play .relay-debug-hud,#play .relay-control-guide,#play .keyboard-hud,#play .control-hud{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+#play .mobile-controls{box-sizing:border-box!important;max-width:100vw!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;padding-bottom:max(8px,env(safe-area-inset-bottom,0px))!important;overflow:visible!important}
+#play .mobile-actions button{box-sizing:border-box!important;min-width:44px!important;min-height:44px!important}
+#titlePanel.relay-options-unified #titlePanelContent.relay-legacy-cleared{display:none!important}
+.relay-options-shell [data-legacy-option],.relay-options-shell .legacy-option,.relay-options-shell .legacy-options-actions,.relay-options-shell .duplicate-option,.relay-options-shell .duplicate-options{display:none!important}
+#intro .main-menu{position:relative;z-index:20}
+#intro .title-secondary{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+#intro .title-secondary>.menu-option-button,#intro .menu-actions #start,#intro .menu-actions #continue{pointer-events:auto!important;touch-action:manipulation!important}
+#intro .title-secondary>.menu-option-button{min-width:0!important;min-height:54px!important}
+@media(max-width:760px){#play .hud{padding-top:max(8px,env(safe-area-inset-top,0px))!important}#play .world-marker{display:none!important}#play .hud-route,#play .hud-progress,#play .hud-actions{min-width:0!important}#play .hud-route b,#play .hud-route small{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}#pauseMenu.relay-options-unified .menu-grid>aside nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}#pauseMenu.relay-options-unified .menu-grid>aside nav .tab{min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}}
+@media(max-width:430px){#intro .title-secondary{grid-template-columns:1fr 1fr!important;gap:7px!important}#intro .title-secondary>.menu-option-button{min-height:50px!important;padding:8px!important}}
+@supports(height:100dvh){#play,#intro,#pauseMenu,#titlePanel,#relayInfoPanel{min-height:100dvh}}
