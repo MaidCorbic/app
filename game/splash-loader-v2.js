@@ -52,7 +52,7 @@
     const stages = [[8, 'INITIALIZING RELAY'], [26, 'LOADING INTERFACE'], [48, 'LOADING GAME SYSTEMS'], [68, 'CONNECTING WORLD'], [86, 'PREPARING HOME']];
     let progress = 0;
     let imageReady = image.complete && image.naturalWidth > 0;
-    let pageReady = document.readyState === 'complete';
+    let pageReady = true;
     let engineReady = false;
     let finishing = false;
     let timedOut = false;
@@ -124,8 +124,7 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => animateTo(48, 'LOADING GAME SYSTEMS'), { once: true });
     else animateTo(48, 'LOADING GAME SYSTEMS');
 
-    if (!pageReady) window.addEventListener('load', () => { pageReady = true; animateTo(68, 'CONNECTING WORLD').then(finish); }, { once: true });
-    else setProgress(68, 'CONNECTING WORLD');
+  setProgress(68, 'CONNECTING WORLD');
 
   const checkReadiness = () => {
   if (finishing) return;
