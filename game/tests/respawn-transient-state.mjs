@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = new URL('../', import.meta.url);
 const patch = await readFile(fileURLToPath(new URL('respawn-transient-state-patch.mjs', root)), 'utf8');
-const vite = await readFile(fileURLToPath(new URL('vite.config.mjs', root)), 'utf8');
+const vite = await readFile(fileURLToPath(new URL('vite.config.js', root)), 'utf8');
 
 for (const marker of [
   "this.alarmTimer = 0;",
