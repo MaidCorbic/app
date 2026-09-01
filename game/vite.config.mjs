@@ -47,52 +47,41 @@ function relayLegacyAssetAliases() {
   };
 }
 
+function relayTransform(name, predicate, transform) {
+  return { name, transform(code, id) {
+    if (!predicate(id)) return null;
+    const transformed = transform(code);
+    return transformed === code ? null : { code: transformed, map: null };
+  } };
+}
+
+function relayCargoStateImportFix() {
+  return relayTransform(
+    'relay-cargo-state-import-fix',
+    id => id.endsWith('/cargo-integrity-v2.js'),
+    code => code
+      .replace("import { packages } from './src/packages.js';", "import { packages } from './src/packages.js';\nimport { loadState, saveState } from './src/state.js';")
+      .replace("import('./src/state.js').then(({ loadState, saveState }) => {", "Promise.resolve().then(() => ({ loadState, saveState })).then(({ loadState, saveState }) => {")
+  );
+}
+
 function relaySeasonalProgressionFix() {
-  return { name: 'relay-seasonal-progression-fix', transform(code, id) {
-    if (!id.endsWith('/src/state.js')) return null;
-    const transformed = patchSeasonalProgression(code);
-    return transformed === code ? null : { code: transformed, map: null };
-  } };
+  return relayTransform('relay-seasonal-progression-fix', id => id.endsWith('/src/state.js'), patchSeasonalProgression);
 }
-
 function relayDeathReasonFix() {
-  return { name: 'relay-death-reason-fix', transform(code, id) {
-    if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
-    const transformed = patchDeathReason(code);
-    return transformed === code ? null : { code: transformed, map: null };
-  } };
+  return relayTransform('relay-death-reason-fix', id => id.endsWith('/src/scenes/RunnerScene.js'), patchDeathReason);
 }
-
 function relayInitialSpawnShieldFix() {
-  return { name: 'relay-initial-spawn-shield-fix', transform(code, id) {
-    if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
-    const transformed = patchInitialSpawnShield(code);
-    return transformed === code ? null : { code: transformed, map: null };
-  } };
+  return relayTransform('relay-initial-spawn-shield-fix', id => id.endsWith('/src/scenes/RunnerScene.js'), patchInitialSpawnShield);
 }
-
 function relayCheckpointCollectiblesFix() {
-  return { name: 'relay-checkpoint-collectibles-fix', transform(code, id) {
-    if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
-    const transformed = patchCheckpointCollectibles(code);
-    return transformed === code ? null : { code: transformed, map: null };
-  } };
+  return relayTransform('relay-checkpoint-collectibles-fix', id => id.endsWith('/src/scenes/RunnerScene.js'), patchCheckpointCollectibles);
 }
-
 function relayRespawnTransientStateFix() {
-  return { name: 'relay-respawn-transient-state-fix', transform(code, id) {
-    if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
-    const transformed = patchRespawnTransientState(code);
-    return transformed === code ? null : { code: transformed, map: null };
-  } };
+  return relayTransform('relay-respawn-transient-state-fix', id => id.endsWith('/src/scenes/RunnerScene.js'), patchRespawnTransientState);
 }
-
 function relaySpecialEventCreditRewardFix() {
-  return { name: 'relay-special-event-credit-reward-fix', transform(code, id) {
-    if (!id.endsWith('/src/state.js')) return null;
-    const transformed = patchSpecialEventCreditReward(code);
-    return transformed === code ? null : { code: transformed, map: null };
-  } };
+  return relayTransform('relay-special-event-credit-reward-fix', id => id.endsWith('/src/state.js'), patchSpecialEventCreditReward);
 }
 
 export default defineConfig({
@@ -102,6 +91,7 @@ export default defineConfig({
     allowedHosts: ['.diploi.me'],
   },
   plugins: [
+    relayCargoStateImportFix(),
     relaySeasonalProgressionFix(),
     relayDeathReasonFix(),
     relayInitialSpawnShieldFix(),
@@ -110,4 +100,18 @@ export default defineConfig({
     relaySpecialEventCreditRewardFix(),
     relayLegacyAssetAliases(),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        strictExecutionOrder: true,
+        codeSplitting: {
+          minSize: 20000,
+          groups: [
+            { name: 'phaser-vendor', test: /node_modules[\\/]phaser[\\/]/, priority: 20 },
+            { name: 'vendor', test: /node_modules[\\/]/, priority: 10 },
+          ],
+        },
+      },
+    },
+  },
 });
