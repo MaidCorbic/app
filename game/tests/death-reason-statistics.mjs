@@ -13,11 +13,6 @@ assert.match(transformed, /takeSciFiHit\(message, reason = 'hazard'\)/);
 assert.match(transformed, /this\.fail\('The courier collapsed\. Checkpoint health restored\.', reason\)/);
 assert.match(transformed, /this\.takeSciFiHit\('An enemy attack knocked the courier down\.', 'enemy'\)/);
 assert.match(transformed, /this\.takeSciFiHit\('A dinosaur charge knocked the courier down\.', 'enemy'\)/);
-
-// The RunnerScene fail implementation is wrapped by later runtime hardening layers,
-// so the canonical death-reason accounting replacement is asserted at the patch
-// contract level rather than requiring that internal implementation text to survive
-// every wrapper composition step.
 assert.match(patch, /const deathReason = reason \|\|/);
 assert.match(patch, /else if \(deathReason === 'enemy'\) this\.enemyHits/);
 assert.match(patch, /deathReason === 'collision' \|\| deathReason === 'enemy'/);
