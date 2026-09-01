@@ -9,6 +9,10 @@ assert.match(source, /clearTimeout\(timer\)/);
 assert.match(source, /MutationObserver/);
 assert.match(source, /attributeFilter: \['class'\]/);
 assert.match(source, /beforeunload/);
-assert.match(source, /Once the finish UI is visible/);
+assert.match(source, /function showRecoveredFinish\(scene\)/);
+assert.match(source, /handledRunKey/);
+assert.match(source, /play\?\.classList\.add\('hidden'\)/);
+assert.match(source, /finish\.classList\.remove\('hidden'\)/);
+assert.match(source, /runKey\(scene\)/);
 
 console.log('Mission finish recovery lifecycle contract: PASS');
