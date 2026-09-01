@@ -15,7 +15,6 @@ assert.match(source, /#play \.hud-vital/);
 assert.match(source, /@media \(max-width:880px\)/);
 assert.match(source, /@media \(max-width:430px\)/);
 assert.match(loader, /gameplay-ui-visibility-v3\.js/);
-
 assert.doesNotMatch(index, /class="input-guide"/);
 assert.doesNotMatch(index, /home-v3-interaction-fix\.js/);
 assert.doesNotMatch(index, /home-v3-guard\.js/);
