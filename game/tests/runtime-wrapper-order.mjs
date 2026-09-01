@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-const root = new URL('../', import.meta.url);
+const root = new URL('./', import.meta.url);
 const read = path => readFile(fileURLToPath(new URL(path, root)), 'utf8');
-const index = await read('../index.html');
-const ui = await read('../relay-ui-init.js');
-const main = await read('../src/main.js');
-const core = await read('../src/systems/core-stability.js');
-const runtime = await read('../runtime-authority-v1.js');
-const owner = await read('../src/systems/mobile-input-single-owner-v1.js');
+const index = await read('index.html');
+const ui = await read('relay-ui-init.js');
+const main = await read('src/main.js');
+const core = await read('src/systems/core-stability.js');
+const runtime = await read('runtime-authority-v1.js');
+const owner = await read('src/systems/mobile-input-single-owner-v1.js');
 
 const ordered = (source, first, second) => {
   const a = source.indexOf(first);
@@ -64,7 +64,7 @@ const wrapperFiles = [
 
 for (const file of wrapperFiles) {
   try {
-    const source = await read(`../${file}`);
+    const source = await read(file);
     if (!/RunnerScene\.prototype\.(create|update)/.test(source)) continue;
     const guarded = /if\s*\(\s*!?RunnerScene\.prototype\.__/.test(source)
       || /if\s*\(\s*!?window\.__/.test(source)
