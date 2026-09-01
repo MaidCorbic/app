@@ -92,10 +92,6 @@
               <span>LATEST UPDATE</span>
               <small>PATCH NOTES / NEW FEATURES</small>
             </button>
-            <button class="home-v3-card" type="button" data-v3-options>
-              <span>SETTINGS</span>
-              <small>AUDIO / CONTROLS / GAME OPTIONS</small>
-            </button>
           </aside>
         </main>
 
