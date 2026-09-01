@@ -9,6 +9,7 @@ const zoom = await readFile(fileURLToPath(new URL('src/systems/web-zoom-lock-v1.
 const splashLoader = await readFile(fileURLToPath(new URL('splash-loader-v2.js', root)), 'utf8');
 const splashCss = await readFile(fileURLToPath(new URL('cinematic-splash.css', root)), 'utf8');
 const runtime = await readFile(fileURLToPath(new URL('src/feature-runtime.js', root)), 'utf8');
+const vite = await readFile(fileURLToPath(new URL('vite.config.mjs', root)), 'utf8');
 
 assert.match(flight, /DEFAULT_FLIGHT_DURATION_MS = 8000/);
 assert.match(flight, /DEFAULT_GLIDE_WINDOW_MS = 1200/);
@@ -34,4 +35,8 @@ assert.match(splashCss, /height:100dvh/);
 assert.match(splashCss, /transform:none!important/);
 assert.match(splashCss, /animation:none!important/);
 assert.match(splashCss, /object-fit:cover!important/);
+assert.match(vite, /base:\s*['"]\.\/['"]/);
+assert.match(vite, /relay-itchio-relative-paths/);
+assert.match(vite, /href=\\"\.\/favicon\.ico\\"/);
+assert.match(vite, /src=\\"\.\/game\/assets\//);
 console.log('Final hardening contract: PASS');
