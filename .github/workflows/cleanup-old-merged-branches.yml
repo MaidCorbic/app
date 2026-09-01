@@ -1,0 +1,44 @@
+name: Cleanup old merged PR branches
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete only safe merged branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh api --paginate \
+            "repos/$REPO/pulls?state=closed&per_page=100" \
+            --jq '.[] | select(.merged_at != null) | select(.head.repo.full_name == "'"$REPO"'") | [.head.ref, .head.sha, .base.ref] | @tsv' \
+          | while IFS=$'\t' read -r branch merged_head base_ref; do
+              [ -n "$branch" ] || continue
+              [ "$branch" != "$DEFAULT_BRANCH" ] || continue
+
+              # Never delete a branch that currently has an open PR.
+              open_count="$(gh pr list --repo "$REPO" --state open --head "$branch" --json number --jq 'length')"
+              [ "$open_count" = "0" ] || continue
+
+              # Only delete when the branch still points exactly at the commit
+              # that was merged. If it moved afterward, leave it untouched.
+              current_sha="$(gh api "repos/$REPO/git/ref/heads/$branch" --jq '.object.sha' 2>/dev/null || true)"
+              [ -n "$current_sha" ] || continue
+              [ "$current_sha" = "$merged_head" ] || continue
+
+              echo "Deleting safely merged branch: $branch"
+              gh api --method DELETE "repos/$REPO/git/refs/heads/$branch"
+            done
