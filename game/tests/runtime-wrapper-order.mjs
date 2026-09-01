@@ -36,24 +36,14 @@ ordered(index, 'src/systems/core-stability.js', 'src/main.js');
 ordered(ui, "'./gameplay-core-v1.js'", "'./src/systems/mobile-input-single-owner-v1.js'");
 
 const wrapperFiles = [
-  'wall-slide-v1.js',
-  'route-mutation-v1.js',
-  'pressure-route-node-v1.js',
-  'timed-energy-trap-v1.js',
-  'temporary-world-distortion-v1.js',
-  'slide-jump-momentum-v1.js',
-  'dynamic-time-cycle-v1.js',
-  'presentation-final-v1.js',
-  'world-interaction-runtime-v2.js',
-  'src/systems/water-survival-v1.js',
-  'src/systems/player-visual-v2.js',
-  'src/systems/flight-vfx-v1.js',
-  'src/systems/enemy-progression-v1.js',
-  'src/systems/ghost-run-v1.js',
-  'src/systems/adaptive-mission-modifiers-v1.js',
-  'p1-gameplay-correctness-v1.js',
+  'wall-slide-v1.js','route-mutation-v1.js','pressure-route-node-v1.js',
+  'timed-energy-trap-v1.js','temporary-world-distortion-v1.js','slide-jump-momentum-v1.js',
+  'dynamic-time-cycle-v1.js','presentation-final-v1.js','world-interaction-runtime-v2.js',
+  'src/systems/water-survival-v1.js','src/systems/player-visual-v2.js','src/systems/flight-vfx-v1.js',
+  'src/systems/enemy-progression-v1.js','src/systems/ghost-run-v1.js',
+  'src/systems/adaptive-mission-modifiers-v1.js','p1-gameplay-correctness-v1.js',
   'p2-character-presentation-v4.js',
-].filter(Boolean);
+];
 
 for (const file of wrapperFiles) {
   try {
