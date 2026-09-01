@@ -2,6 +2,14 @@
 (() => {
   if (window.__relayCinematicArrivalV4) return;
   window.__relayCinematicArrivalV4 = true;
+  const ensureCanonicalUi = () => {
+    if (document.querySelector('link[data-relay-canonical-ui]')) return;
+    const css=document.createElement('link');
+    css.rel='stylesheet';
+    css.href='./canonical-ui-v1.css';
+    css.dataset.relayCanonicalUi='true';
+    document.head.appendChild(css);
+  };
   const start = () => {
     const splash=document.getElementById('relaySplash'); if(!splash)return;
     splash.classList.add('cinematic-arrival'); splash.setAttribute('aria-busy','true');
@@ -17,7 +25,7 @@
     const stateProgress=()=>25*Number(imageReady)+25*Number(domReady)+25*Number(pageReady)+25*Number(engineReady);
     const statusFor=p=>p>=100?'READY':p>=75?'PREPARING HOME':p>=50?'CONNECTING WORLD':p>=25?'LOADING GAME SYSTEMS':'INITIALIZING RELAY';
     const setProgress=p=>{progress=Math.max(progress,Math.min(100,Math.round(p)));bar.style.width=`${progress}%`;percent.textContent=`${progress}%`;label.textContent=statusFor(progress)};
-    const release=reason=>{if(released||!document.body.contains(splash))return;released=true;setProgress(100);splash.dataset.cinematicReleased='true';splash.classList.add('is-leaving');splash.setAttribute('aria-busy','false');window.setTimeout(()=>splash.remove(),420);window.dispatchEvent(new CustomEvent('relay:splash-released',{detail:{reason}}));};
+    const release=reason=>{if(released||!document.body.contains(splash))return;released=true;ensureCanonicalUi();setProgress(100);splash.dataset.cinematicReleased='true';splash.classList.add('is-leaving');splash.setAttribute('aria-busy','false');window.setTimeout(()=>splash.remove(),420);window.dispatchEvent(new CustomEvent('relay:splash-released',{detail:{reason}}));};
     const tick=()=>{if(released)return;const target=stateProgress();if(target>progress){const from=progress,to=target,t0=performance.now();const frame=now=>{const t=Math.min(1,(now-t0)/360);setProgress(from+(to-from)*(t*(2-t)));if(t<1&&!released)requestAnimationFrame(frame)};requestAnimationFrame(frame)};if(performance.now()-started>=MAX_MS){release('five-second-cap');return}if(engineReady&&imageReady&&domReady&&pageReady&&performance.now()-started>=MIN_MS)release('ready');else window.setTimeout(tick,40)};
     if(image){if(!imageReady)image.addEventListener('load',()=>{imageReady=true;tick()},{once:true});image.addEventListener('error',()=>{label.textContent='SAFE MODE';setProgress(25)},{once:true})}
     if(!domReady)document.addEventListener('DOMContentLoaded',()=>{domReady=true;tick()},{once:true});
