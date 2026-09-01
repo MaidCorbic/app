@@ -723,93 +723,97 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   /* =========================================================
      CANONICAL HOME NAVIGATION
      ========================================================= */
+function canonicalHomeButtons() {
+  const intro = $('intro');
+  const side = intro?.querySelector('.home-v3-side');
 
-  function canonicalHomeButtons() {
-    const intro = $('intro');
-    const side = intro?.querySelector('.home-v3-side');
-
-    if (!intro || !side) {
-      return;
-    }
-
-    intro
-      .querySelector('.info-launcher')
-      ?.remove();
-
-    const canonical = qa(
-      '#intro .relay-v4-home-btn'
-    );
-
-    const uniqueTypes = new Set(
-      canonical.map(
-        node => node.dataset.v4
-      )
-    );
-
-    if (
-      canonical.length === 4 &&
-      uniqueTypes.size === 4
-    ) {
-      return;
-    }
-
-    side
-      .querySelectorAll(
-        [
-          '[data-v3-faq]',
-          '[data-v3-update]',
-          '[data-v3-options]',
-          '[data-v3-exit]',
-          '[data-final-home]',
-          '[data-unified-home]',
-          '[data-unified-home-v3]',
-          '[data-final-home-v3]',
-          '.relay-v3-nav',
-          '.relay-home-nav-card'
-        ].join(',')
-      )
-      .forEach(node => node.remove());
-
-    qa('#intro .relay-v4-home-btn')
-      .forEach(node => node.remove());
-
-    side.append(
-      homeButton(
-        'options',
-        'OPTIONS',
-        'SETTINGS · AUDIO · DISPLAY',
-        () =>
-          window.relayUnifiedCinematicUI?.openOptions?.() ||
-          nativeClick(
-            '[data-title-panel="controls"]'
-          )
-      ),
-
-      homeButton(
-        'faq',
-        'FAQ',
-        'HELP · GAME SYSTEMS',
-        () =>
-          window.relayOpenInfo?.('faq')
-      ),
-
-      homeButton(
-        'update',
-        'UPDATE',
-        'LATEST PATCHES · LIVE',
-        () =>
-          window.relayOpenInfo?.('update')
-      ),
-
-      homeButton(
-        'exit',
-        'EXIT',
-        'CLOSE SESSION',
-        () =>
-          nativeClick('#exitTitle')
-      )
-    );
+  if (!intro || !side) {
+    return;
   }
+
+  // Remove the legacy Home navigation FIRST.
+  // Do this before checking whether the V4 navigation already exists.
+  side.querySelectorAll(
+    [
+      '[data-v3-faq]',
+      '[data-v3-update]',
+      '[data-v3-options]',
+      '[data-v3-exit]',
+      '[data-final-home]',
+      '[data-unified-home]',
+      '[data-unified-home-v3]',
+      '[data-final-home-v3]',
+      '[data-runtime-home]',
+      '.relay-v3-nav',
+      '.relay-home-nav-card'
+    ].join(',')
+  ).forEach(node => node.remove());
+
+  // The info launcher is not part of the canonical Home navigation.
+  intro.querySelector('.info-launcher')?.remove();
+
+  // Keep the V4 navigation intact if it is already correct.
+  const canonical = qa(
+    '#intro .relay-v4-home-btn'
+  );
+
+  const uniqueTypes = new Set(
+    canonical.map(
+      node => node.dataset.v4
+    )
+  );
+
+  if (
+    canonical.length === 4 &&
+    uniqueTypes.size === 4 &&
+    ['options', 'faq', 'update', 'exit'].every(
+      type => uniqueTypes.has(type)
+    )
+  ) {
+    return;
+  }
+
+  // If V4 is incomplete/corrupt, rebuild it cleanly.
+  qa('#intro .relay-v4-home-btn')
+    .forEach(node => node.remove());
+
+  side.append(
+    homeButton(
+      'options',
+      'OPTIONS',
+      'SETTINGS · AUDIO · DISPLAY',
+      () =>
+        window.relayUnifiedCinematicUI?.openOptions?.() ||
+        nativeClick(
+          '[data-title-panel="controls"]'
+        )
+    ),
+
+    homeButton(
+      'faq',
+      'FAQ',
+      'HELP · GAME SYSTEMS',
+      () =>
+        window.relayOpenInfo?.('faq')
+    ),
+
+    homeButton(
+      'update',
+      'UPDATE',
+      'LATEST PATCHES · LIVE',
+      () =>
+        window.relayOpenInfo?.('update')
+    ),
+
+    homeButton(
+      'exit',
+      'EXIT',
+      'CLOSE SESSION',
+      () =>
+        nativeClick('#exitTitle')
+    )
+  );
+}
 
 
   /* =========================================================
