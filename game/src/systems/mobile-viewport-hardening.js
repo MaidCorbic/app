@@ -1,4 +1,3 @@
-import './mobile-controls-bridge-v2.js';
 import { RunnerScene } from '../scenes/RunnerScene.js';
 import { installCharacterStateReactions } from './character-state-reactions-v1.js';
 
@@ -8,6 +7,9 @@ import { installCharacterStateReactions } from './character-state-reactions-v1.j
 installCharacterStateReactions(RunnerScene);
 
 // Mobile rotation hardening for Phaser + DOM layout.
+// Movement/input ownership is intentionally handled by the dedicated
+// mobile-input-single-owner system loaded after main boot. This module owns
+// viewport measurements only and never attaches gameplay input listeners.
 // The game itself stays on Phaser RESIZE so the canvas always fills its parent.
 // We only stabilize the browser measurements after rotation; we never switch
 // Phaser scale modes during runtime.
