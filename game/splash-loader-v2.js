@@ -1,28 +1,65 @@
 (() => {
   'use strict';
 
-  const removeSplash = () => {
-    const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
+  const HOME_READY_CLASS = 'relay-home-ready';
+  const HOME_READY_STYLE_ID = 'relay-home-ready-style';
+
+  function installHomeReadyStyle() {
+    if (document.getElementById(HOME_READY_STYLE_ID)) return;
+    const style = document.createElement('style');
+    style.id = HOME_READY_STYLE_ID;
+    style.textContent = `
+      #intro.${HOME_READY_CLASS}{
+        display:block!important;
+        visibility:visible!important;
+        opacity:1!important;
+        pointer-events:auto!important;
+        z-index:500!important;
+      }
+      #intro.${HOME_READY_CLASS}.hidden{display:block!important;}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function revealHome() {
     const intro = document.getElementById('intro');
+    if (!intro) return false;
 
-    // Splash has exactly one job: reveal the existing Home screen.
-    if (intro) {
-      intro.hidden = false;
-      intro.classList.remove('hidden');
-      intro.setAttribute('aria-hidden', 'false');
-    }
+    installHomeReadyStyle();
+    intro.hidden = false;
+    intro.classList.remove('hidden');
+    intro.classList.add(HOME_READY_CLASS);
+    intro.setAttribute('aria-hidden', 'false');
+    return true;
+  }
 
+  function removeSplash() {
+    const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
+
+    // The canonical Home is the only screen revealed after loading.
+    revealHome();
     document.body.classList.remove('home-v3-active');
 
     if (!splash) return;
     splash.setAttribute('aria-busy', 'false');
     splash.classList.add('is-hidden');
     window.setTimeout(() => splash.remove(), 350);
-  };
 
-  const start = () => {
+    // Give late-running UI modules a short window, then re-assert Home.
+    // This prevents a legacy Home/V3 observer from winning the handoff race.
+    [0, 100, 300, 700].forEach(delay => {
+      window.setTimeout(() => {
+        if (document.getElementById('relaySplash')) revealHome();
+      }, delay);
+    });
+  }
+
+  function start() {
     const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
-    if (!splash) return;
+    if (!splash) {
+      revealHome();
+      return;
+    }
 
     const bar = splash.querySelector('.relay-splash-progress');
     const pct = splash.querySelector('.relay-splash-percent');
@@ -33,7 +70,11 @@
     if (label) label.textContent = 'READY';
 
     window.setTimeout(removeSplash, 1200);
-  };
+  }
 
-  start();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
 })();
