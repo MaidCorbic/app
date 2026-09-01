@@ -170,62 +170,21 @@
     });
   };
 
-  const build = () => {
-    const intro = $('intro');
-    if (!intro || intro.dataset.homeV3Built === '1') return;
-    intro.dataset.homeV3Built = '1';
-    intro.classList.add('home-v3');
+ const build = () => {
+  const intro = $('intro');
 
-    const legacyMenu = intro.querySelector('.main-menu');
-    const launcher = intro.querySelector('.info-launcher');
+  if (!intro || intro.dataset.homeV3Built === '1') {
+    return;
+  }
 
-    const bg = document.createElement('div');
-    bg.className = 'home-v3-bg';
-    bg.setAttribute('aria-hidden', 'true');
-    bg.innerHTML = '<i class="home-v3-grid"></i><i class="home-v3-glow"></i><i class="home-v3-scan"></i>';
+  intro.dataset.homeV3Built = '1';
+  intro.classList.add('home-v3');
 
-    const shell = document.createElement('div');
-    shell.className = 'home-v3-shell';
-    shell.innerHTML = `
-      <header class="home-v3-header">
-        <div class="home-v3-brand"><span class="home-v3-mark">R/</span><span>RELAY RUNNER</span></div>
-        <div class="home-v3-status"><b>● SYSTEM READY</b><br>NIGHT SHIFT · ONLINE</div>
-      </header>
-      <main class="home-v3-main">
-        <section>
-          <p class="home-v3-kicker">ROOFTOP DELIVERY NETWORK · CHAPTER 01</p>
-          <h1 class="home-v3-title">RELAY<em>RUNNER</em></h1>
-          <p class="home-v3-copy">Run the sleeping city. Carry the signal farther than anyone else can. Build your route, master the night and keep the line open.</p>
-          <div class="home-v3-actions">
-            <button class="home-v3-play" type="button" data-v3-play></button>
-            <button class="home-v3-continue" type="button" data-v3-continue hidden>CONTINUE</button>
-          </div>
-        </section>
-        <nav class="home-v3-side" aria-label="Main menu">
-          <button class="home-v3-card" type="button" data-v3-options><span>OPTIONS</span><small>SETTINGS · AUDIO · DISPLAY</small></button>
-          <button class="home-v3-card" type="button" data-v3-faq><span>FAQ</span><small>HELP · GAME SYSTEMS</small></button>
-          <button class="home-v3-card" type="button" data-v3-exit><span>EXIT</span><small>CLOSE SESSION</small></button>
-        </nav>
-      </main>
-      <footer class="home-v3-footer"><span>RELAY RUNNER · <b>VERSION 1.1.0</b></span><span>A / D MOVE · SPACE JUMP · ESC PAUSE</span></footer>`;
-
-    intro.replaceChildren(bg, shell, legacyMenu, launcher);
-
-    installSwipePlay(shell.querySelector('[data-v3-play]'));
-    bindLegacyAction(shell.querySelector('[data-v3-continue]'), '#continue');
-    bindLegacyAction(shell.querySelector('[data-v3-options]'), '[data-title-panel="controls"]');
-    bindLegacyAction(shell.querySelector('[data-v3-faq]'), '[data-relay-info="faq"]');
-    bindLegacyAction(shell.querySelector('[data-v3-exit]'), '#exitTitle');
-
-    const syncContinue = () => {
-      const legacy = $('continue');
-      const button = shell.querySelector('[data-v3-continue]');
-      if (!legacy || !button) return;
-      button.hidden = legacy.classList.contains('hidden') || getComputedStyle(legacy).display === 'none';
-    };
-    syncContinue();
-    if ($('continue')) new MutationObserver(syncContinue).observe($('continue'), { attributes: true, attributeFilter: ['class','style','hidden'] });
-  };
+  // Keep the original Home title/menu from index.html.
+  // Do not create a second V3 title shell.
+  removeTutorialSurface();
+  syncSurface();
+};
 
   const start = () => {
     injectStyles();
