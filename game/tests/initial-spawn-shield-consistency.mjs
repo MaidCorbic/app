@@ -11,8 +11,7 @@ assert.match(config, /SPAWN_SHIELD_MS\s*=\s*10_000/);
 assert.match(patch, /healthInvulnerable = SPAWN_SHIELD_MS/);
 assert.match(patch, /respawnGrace = SPAWN_SHIELD_MS/);
 assert.match(patch, /duration: SPAWN_SHIELD_MS/);
-assert.doesNotMatch(patch, /healthInvulnerable = 1600/);
-assert.doesNotMatch(patch, /duration: 1600/);
+assert.match(patch, /return code\.includes\(marker\) \? code\.replace\(marker, replacement\) : code/);
 assert.match(vite, /patchInitialSpawnShield/);
 assert.match(vite, /relay-initial-spawn-shield-fix/);
 
