@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-const root = new URL('../', import.meta.url);
+const gameRoot = new URL('../', import.meta.url);
 const read = path => readFile(fileURLToPath(new URL(path, gameRoot)), 'utf8');
 const main = await read('src/main.js');
 const index = await read('index.html');
