@@ -24,7 +24,7 @@ assert.match(stability, /this\.healthInvulnerable/);
 assert.match(stability, /__relayRespawnInProgress/);
 assert.match(stability, /__relayLastHitFrame/);
 assert.match(stability, /game\.loop\.frame/);
-assert.match(stability, /if\s*\([^\n]*this\.respawning[^\n]*this\.finished/);
+assert.match(stability, /if\s*\([^\n]*this\.finished[^\n]*this\.respawning/);
 
 // Player physics must never propagate NaN/Infinity and invalid position must
 // recover through the existing checkpoint path. Normal values are untouched.
