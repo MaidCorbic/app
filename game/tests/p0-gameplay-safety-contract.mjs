@@ -75,10 +75,12 @@ assert.match(main, /\$\('nextMission'\)\.onclick/);
 assert.match(main, /\$\('retry'\)\.onclick/);
 assert.match(main, /launch\(missionIndex\)/);
 
-// Dash must not restore an obsolete gravity value over another system's
-// intentional gravity change during the dash window.
-assert.match(dash, /Restore gravity only if dash is still the owner/);
-assert.match(dash, /Number\(body\.gravity\?\.y\) === 0/);
-assert.match(dash, /Math\.min\(delta, 100\)/);
+// Dash must not restore gravity after another system has changed it while the
+// dash's own gravity override is inactive. The implementation's owner flag and
+// zero-gravity guard are the executable invariant.
+assert.match(dash, /gravityOverride/);
+assert.match(dash, /function releaseGravityOverride/);
+assert.match(dash, /Number\(body\.gravity\?\.y\)===0/);
+assert.match(dash, /Math\.min\(delta,100\)/);
 
 console.log('P0 gameplay safety contract: PASS');
