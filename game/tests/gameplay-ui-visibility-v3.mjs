@@ -16,9 +16,6 @@ assert.match(source, /@media \(max-width:880px\)/);
 assert.match(source, /@media \(max-width:430px\)/);
 assert.match(loader, /gameplay-ui-visibility-v3\.js/);
 
-// Canonical presentation contract: no legacy keyboard-guide DOM and no competing
-// Home V3/interaction bootstrap. Mobile action buttons remain the single functional
-// touch-control surface and unified-options-ui-v1 remains the single Options owner.
 assert.doesNotMatch(index, /class="input-guide"/);
 assert.doesNotMatch(index, /home-v3-interaction-fix\.js/);
 assert.doesNotMatch(index, /home-v3-guard\.js/);
