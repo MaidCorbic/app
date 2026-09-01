@@ -27,7 +27,7 @@ assert.match(zoom, /event\.preventDefault\(\)/);
 assert.match(zoom, /wheel/);
 assert.match(zoom, /gesturestart/);
 assert.match(splashLoader, /applyFirstPaintHardening/);
-assert.match(splashLoader, /image\.style\.objectFit = 'cover'/);
+assert.match(splashLoader, /image\.style\.objectFit = mobilePortrait \? 'contain' : 'cover'/);
 assert.match(splashLoader, /image\.style\.animation = 'none'/);
 assert.match(splashCss, /width:100dvw/);
 assert.match(splashCss, /height:100dvh/);
