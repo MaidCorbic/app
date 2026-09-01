@@ -42,7 +42,8 @@
     "test:runtime-lifecycle-dom-audit": "node tests/runtime-lifecycle-dom-audit.mjs",
     "test:final-stability-suite": "node tests/final-stability-suite.mjs",
     "test:final-stability": "npm run test:runtime-wrapper-order && npm run test:runtime-lifecycle-dom-audit && npm run test:p0-gameplay-safety && npm run test:runtime-authority && npm run test:mobile-input-single-owner && npm run test:mobile-action-layout && npm run test:mission-finish-recovery-lifecycle && npm run test:death-retry-state-reset && npm run test:respawn-shield-single-owner && npm run test:initial-spawn-shield-consistency && npm run test:checkpoint-collectible-recovery && npm run test:respawn-transient-state && npm run test:double-fall-statistics && npm run test:death-reason-statistics && npm run test:dash-physics-single-owner && npm run test:deep-gameplay && npm run test:v13-level-wiring && npm run test:gameplay-smoke",
-    "test:canonical-css": "node tests/canonical-css-contract.mjs"
+    "test:canonical-css": "node tests/canonical-css-contract.mjs",
+    "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:final-stability && npm run build"
   },
   "engines": {"node": "^20.19.0 || >=22.12.0"},
   "dependencies": {"phaser": "^3.90.0", "vite": "^8.2.1"},
