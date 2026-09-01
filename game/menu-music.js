@@ -5,3 +5,5 @@ import './world-atmosphere.js';
 import './world-atmosphere-test.js';
 import './home-ai-tutorial-options.js';
 import './runtime-ai-tutorial-settings.js';
+import './home-world-ui-polish-v1.css';
+import './home-world-ui-polish-v1.js';

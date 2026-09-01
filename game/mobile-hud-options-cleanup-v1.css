@@ -1,0 +1,49 @@
+/* Canonical gameplay presentation cleanup.
+   The game already has a real HUD and a real mobile action layer. Do not stack
+   a second telemetry/tutorial HUD on top of it. */
+
+/* Remove the duplicate FLOW / SIGNALS / threat presentation created by gameplay-feel-v3. */
+#relay-gameplay-feel-v3,
+#relay-gameplay-feel-v3-style {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Remove the old keyboard-guide strip from the gameplay surface.
+   Keyboard controls remain functional; this is presentation-only. */
+#play .input-guide {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* There is one canonical Options implementation: unified-options-ui-v1.
+   Legacy title/pause content must not render beside it. */
+#titlePanel.relay-options-unified #titlePanelContent.relay-legacy-cleared {
+  display: none !important;
+}
+
+/* Never allow accidental duplicate action controls if a legacy layer injects them. */
+.relay-options-shell [data-legacy-option],
+.relay-options-shell .legacy-option,
+.relay-options-shell .legacy-options-actions {
+  display: none !important;
+}
+
+/* Keep the in-game pause/settings navigation compact and single-row where space allows. */
+@media (max-width: 760px) {
+  #pauseMenu.relay-options-unified .menu-grid > aside nav {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  #pauseMenu.relay-options-unified .menu-grid > aside nav .tab {
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
