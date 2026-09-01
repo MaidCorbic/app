@@ -1,69 +1,133 @@
+/* Production cinematic splash V3. Owns first-load presentation and fails open safely. */
 (() => {
-  'use strict';
+  if (window.__relaySplashV3) return;
+  window.__relaySplashV3 = true;
 
-  const HOME_READY_CLASS = 'relay-home-ready';
-  const HOME_READY_STYLE_ID = 'relay-home-ready-style';
+  const applyFirstPaintHardening = () => {
+    const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
+    const image = splash?.querySelector('.relay-splash-art, #relaySplashArt');
+    if (!splash || !image) return;
+    const mobilePortrait = window.matchMedia('(max-width:700px) and (orientation:portrait)').matches;
+    splash.style.width = '100dvw';
+    splash.style.height = '100dvh';
+    image.style.display = 'block';
+    image.style.position = 'absolute';
+    image.style.inset = '0';
+    image.style.width = '100dvw';
+    image.style.height = '100dvh';
+    image.style.minWidth = '100%';
+    image.style.minHeight = '100%';
+    image.style.maxWidth = 'none';
+    image.style.maxHeight = 'none';
+    image.style.objectFit = mobilePortrait ? 'contain' : 'cover';
+    image.style.objectPosition = 'center';
+    image.style.transform = 'none';
+    image.style.animation = 'none';
+    image.style.opacity = '1';
+  };
 
-  function installHomeReadyStyle() {
-    if (document.getElementById(HOME_READY_STYLE_ID)) return;
-    const style = document.createElement('style');
-    style.id = HOME_READY_STYLE_ID;
-    style.textContent = `
-      #intro.${HOME_READY_CLASS}{
-        display:block!important;
-        visibility:visible!important;
-        opacity:1!important;
-        pointer-events:auto!important;
-        z-index:500!important;
-      }
-      #intro.${HOME_READY_CLASS}.hidden{display:block!important;}
-      #relaySplash.relay-splash-done{display:none!important;visibility:hidden!important;pointer-events:none!important;}
-    `;
-    document.head.appendChild(style);
-  }
+  applyFirstPaintHardening();
 
-  function revealHome() {
-    const intro = document.getElementById('intro');
-    if (!intro) return false;
-    installHomeReadyStyle();
-    intro.hidden = false;
-    intro.classList.remove('hidden');
-    intro.classList.add(HOME_READY_CLASS);
-    intro.setAttribute('aria-hidden', 'false');
-    return true;
-  }
-
-  function finishSplash() {
-    const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
-    revealHome();
-    document.body.classList.remove('home-v3-active');
+  const boot = () => {
+    applyFirstPaintHardening();
+    document.getElementById('bootLoader')?.remove();
+    const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
     if (!splash) return;
-    splash.setAttribute('aria-busy', 'false');
-    splash.classList.add('is-hidden', 'relay-splash-done');
-    splash.hidden = true;
-    splash.style.display = 'none';
-    splash.style.visibility = 'hidden';
-    splash.style.pointerEvents = 'none';
-  }
+    if (!splash.classList.contains('relay-splash')) splash.classList.add('relay-splash');
 
-  function start() {
-    const splash = document.getElementById('relaySplash') || document.querySelector('.relay-splash');
-    if (!splash) {
-      revealHome();
-      return;
-    }
+    const image = splash.querySelector('.relay-splash-art, #relaySplashArt');
     const bar = splash.querySelector('.relay-splash-progress');
     const pct = splash.querySelector('.relay-splash-percent');
     const label = splash.querySelector('.relay-splash-status');
-    if (bar) bar.style.width = '100%';
-    if (pct) pct.textContent = '100%';
-    if (label) label.textContent = 'READY';
-    finishSplash();
-  }
+    if (!image || !bar || !pct || !label) return;
+    applyFirstPaintHardening();
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start, { once: true });
-  } else {
-    start();
-  }
+    if (!splash.querySelector('.relay-splash-brand')) {
+      const brand = document.createElement('div');
+      brand.className = 'relay-splash-brand';
+      brand.innerHTML = '<b>R/</b><span>RELAY RUNNER</span>';
+      splash.appendChild(brand);
+    }
+
+    const stages = [[8, 'INITIALIZING RELAY'], [26, 'LOADING INTERFACE'], [48, 'LOADING GAME SYSTEMS'], [68, 'CONNECTING WORLD'], [86, 'PREPARING HOME']];
+    let progress = 0;
+    let imageReady = image.complete && image.naturalWidth > 0;
+    let pageReady = document.readyState === 'complete';
+    let engineReady = false;
+    let finishing = false;
+    let timedOut = false;
+    const startedAt = performance.now();
+    const MIN_SPLASH_MS = 2200;
+    const MAX_SPLASH_MS = 7000;
+
+    const setProgress = (value, text) => {
+      progress = Math.max(progress, Math.min(100, Math.round(value)));
+      bar.style.width = `${progress}%`;
+      pct.textContent = `${progress}%`;
+      if (text) label.textContent = text;
+    };
+
+    const animateTo = (target, text) => new Promise(resolve => {
+      if (target <= progress) { setProgress(target, text); resolve(); return; }
+      const from = progress;
+      const started = performance.now();
+      const duration = Math.max(180, Math.min(650, (target - from) * 10));
+      const step = () => {
+        const t = Math.min(1, (performance.now() - started) / duration);
+        const eased = t * (2 - t);
+        setProgress(from + (target - from) * eased, text);
+        if (t < 1) window.setTimeout(step, 32);
+        else resolve();
+      };
+      window.setTimeout(step, 0);
+    });
+
+    const finish = async (forced = false) => {
+      if (finishing) return;
+      const elapsed = performance.now() - startedAt;
+      if (!forced && (!imageReady || !pageReady || !engineReady)) return;
+      if (!forced && elapsed < MIN_SPLASH_MS) { window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed); return; }
+      finishing = true;
+      await animateTo(100, 'READY');
+      splash.setAttribute('aria-busy', 'false');
+      splash.classList.add('is-hidden');
+      window.setTimeout(() => splash.remove(), 700);
+    };
+
+    const markImageReady = () => {
+      if (imageReady) return;
+      imageReady = true;
+      animateTo(26, 'LOADING INTERFACE').then(() => finish());
+    };
+
+    if (imageReady) setProgress(26, 'LOADING INTERFACE');
+    else {
+      image.addEventListener('load', markImageReady, { once: true });
+      image.addEventListener('error', () => { imageReady = true; setProgress(22, 'USING SAFE MODE'); finish(); }, { once: true });
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => animateTo(48, 'LOADING GAME SYSTEMS'), { once: true });
+    else animateTo(48, 'LOADING GAME SYSTEMS');
+
+    if (!pageReady) window.addEventListener('load', () => { pageReady = true; animateTo(68, 'CONNECTING WORLD').then(finish); }, { once: true });
+    else setProgress(68, 'CONNECTING WORLD');
+
+    const checkEngine = () => {
+      const canvas = document.querySelector('#phaser-game canvas');
+      if (canvas) { engineReady = true; animateTo(86, 'PREPARING HOME').then(finish); return; }
+      if (!finishing) window.setTimeout(checkEngine, 60);
+    };
+    checkEngine();
+
+    const orientation = window.matchMedia('(orientation: landscape)');
+    const onOrientation = () => { if (finishing) return; imageReady = image.complete && image.naturalWidth > 0; applyFirstPaintHardening(); };
+    orientation.addEventListener?.('change', onOrientation);
+    window.addEventListener('resize', onOrientation, { passive: true });
+
+    window.setTimeout(() => { if (finishing || timedOut) return; timedOut = true; label.textContent = 'STARTING HOME'; finish(true); }, MAX_SPLASH_MS);
+    stages.forEach(([value, text], index) => window.setTimeout(() => { if (!finishing && !timedOut) setProgress(value, text); }, 220 + index * 360));
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })();

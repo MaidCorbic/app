@@ -82,6 +82,27 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     document.head.appendChild(style);
   };
 
+  const makeHomeButton = (side, id, label, detail, handler) => {
+    const button=document.createElement('button');
+    button.type='button'; button.className='home-v3-card relay-home-nav-card'; button.dataset.finalHome=id;
+    button.innerHTML=`<span>${label}</span><small>${detail}</small>`;
+    button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();handler();});
+    side.append(button);
+  };
+
+  const installHome = () => {
+    const intro=document.getElementById('intro'); const side=intro?.querySelector('.home-v3-side');
+    if(!intro||!side)return;
+    intro.querySelector('.info-launcher')?.remove();
+    const removeDuplicates=()=>side.querySelectorAll('[data-final-home="faq"],[data-final-home="update"],[data-final-home="options"],[data-final-home="exit"],[data-v3-faq],[data-v3-update],[data-v3-options],[data-v3-exit]').forEach((node,index,all)=>{if(index<all.length-4)node.remove();});
+    // Remove known legacy action cards, then create one canonical set.
+    side.querySelectorAll('[data-v3-faq],[data-v3-update],[data-v3-options],[data-v3-exit],[data-final-home]').forEach(node=>node.remove());
+    makeHomeButton(side,'options','OPTIONS','SETTINGS · AUDIO · DISPLAY',()=>window.relayUnifiedCinematicUI?.openOptions?.()||nativeClick('[data-title-panel="controls"]'));
+    makeHomeButton(side,'faq','FAQ','HELP · GAME SYSTEMS',()=>window.relayOpenInfo?.('faq'));
+    makeHomeButton(side,'update','UPDATE','LATEST PATCHES · LIVE',()=>window.relayOpenInfo?.('update'));
+    makeHomeButton(side,'exit','EXIT','CLOSE SESSION',()=>nativeClick('#exitTitle'));
+  };
+
   const hidePhaserDiagnosticUi=scene=>{
     const list=scene?.children?.list||[];
     for(const child of list){
@@ -127,6 +148,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     RunnerScene.prototype.__relayFinalLayoutV2Create=true;
   }
 
-  const boot=()=>{installStyles();window.setInterval(recoverStaleMovement,1400);};
+  const boot=()=>{installStyles();installHome();window.setInterval(recoverStaleMovement,1400);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
