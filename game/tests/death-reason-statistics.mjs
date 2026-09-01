@@ -10,7 +10,7 @@ const transformed = patchDeathReason(source);
 assert.notEqual(transformed, source, 'death-reason transform must change RunnerScene');
 assert.match(transformed, /takeSciFiHit\(message, reason = 'hazard'\)/);
 assert.match(transformed, /this\.fail\('The courier collapsed\. Checkpoint health restored\.', reason\)/);
-assert.match(transformed, /this\.fail\('An enemy attack knocked the courier down\.', 'enemy'\)/);
+assert.match(transformed, /this\.takeSciFiHit\('An enemy attack knocked the courier down\.', 'enemy'\)/);
 assert.match(transformed, /this\.takeSciFiHit\('A dinosaur charge knocked the courier down\.', 'enemy'\)/);
 assert.match(transformed, /const deathReason = reason \|\|/);
 assert.match(transformed, /else if \(deathReason === 'enemy'\) this\.enemyHits/);
