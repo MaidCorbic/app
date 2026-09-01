@@ -83,16 +83,31 @@
     });
 
     const finish = async (forced = false) => {
-      if (finishing) return;
-      const elapsed = performance.now() - startedAt;
-      if (!forced && (!imageReady || !pageReady || !engineReady)) return;
-      if (!forced && elapsed < MIN_SPLASH_MS) { window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed); return; }
-      finishing = true;
-      await animateTo(100, 'READY');
-      splash.setAttribute('aria-busy', 'false');
-      splash.classList.add('is-hidden');
-      window.setTimeout(() => splash.remove(), 700);
-    };
+  if (finishing) return;
+
+  const elapsed = performance.now() - startedAt;
+
+  // Splash must not depend on Phaser canvas creation.
+  // Image + document readiness are sufficient; forced timeout is the final failsafe.
+  if (!forced && (!imageReady || !pageReady)) return;
+
+  if (!forced && elapsed < MIN_SPLASH_MS) {
+    window.setTimeout(
+      () => finish(false),
+      MIN_SPLASH_MS - elapsed
+    );
+    return;
+  }
+
+  finishing = true;
+
+  await animateTo(100, 'READY');
+
+  splash.setAttribute('aria-busy', 'false');
+  splash.classList.add('is-hidden');
+
+  window.setTimeout(() => splash.remove(), 700);
+};
 
     const markImageReady = () => {
       if (imageReady) return;
@@ -112,12 +127,18 @@
     if (!pageReady) window.addEventListener('load', () => { pageReady = true; animateTo(68, 'CONNECTING WORLD').then(finish); }, { once: true });
     else setProgress(68, 'CONNECTING WORLD');
 
-    const checkEngine = () => {
-      const canvas = document.querySelector('#phaser-game canvas');
-      if (canvas) { engineReady = true; animateTo(86, 'PREPARING HOME').then(finish); return; }
-      if (!finishing) window.setTimeout(checkEngine, 60);
-    };
-    checkEngine();
+  const checkReadiness = () => {
+  if (finishing) return;
+
+  if (imageReady && pageReady) {
+    animateTo(86, 'PREPARING HOME').then(() => finish(false));
+    return;
+  }
+
+  window.setTimeout(checkReadiness, 60);
+};
+
+checkReadiness();
 
     const orientation = window.matchMedia('(orientation: landscape)');
     const onOrientation = () => { if (finishing) return; imageReady = image.complete && image.naturalWidth > 0; applyFirstPaintHardening(); };
