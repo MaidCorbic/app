@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-const root = new URL('./', import.meta.url);
+const root = new URL('../', import.meta.url);
 const read = path => readFile(fileURLToPath(new URL(path, root)), 'utf8');
 const index = await read('index.html');
 const ui = await read('relay-ui-init.js');
