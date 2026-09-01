@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = new URL('../', import.meta.url);
 const state = await readFile(fileURLToPath(new URL('src/state.js', root)), 'utf8');
 const patch = await readFile(fileURLToPath(new URL('special-event-credit-reward-patch.mjs', root)), 'utf8');
-const vite = await readFile(fileURLToPath(new URL('vite.config.js', root)), 'utf8');
+const vite = await readFile(fileURLToPath(new URL('vite.config.mjs', root)), 'utf8');
 
 assert.match(state, /const modifierXp = runStats\.modifier\?\.xpBonus \|\| 0;/);
 assert.match(state, /credits: state\.credits \+ credits \+ campaignCredits \+ rivalCredits,/);
