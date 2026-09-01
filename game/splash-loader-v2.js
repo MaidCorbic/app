@@ -7,7 +7,7 @@
     document.querySelector('.relay-splash');
 
   const intro = document.getElementById('intro');
-  const play = document.getElementById('play');
+
 
   /* Explicitly reveal the canonical Home screen. */
   if (intro) {
@@ -17,15 +17,6 @@
   }
 
   document.body.classList.add('home-v3-active');
-
-  /* Keep gameplay underneath Home until PLAY is pressed. */
-  if (play) {
-    play.classList.remove('is-active');
-    play.style.display = 'block';
-    play.style.visibility = 'hidden';
-    play.style.opacity = '0';
-    play.style.pointerEvents = 'none';
-  }
 
   if (!splash) return;
 
