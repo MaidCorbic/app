@@ -40,7 +40,8 @@ assert.match(enemyRuntime, /Enemy ability hit the courier/);
 assert.match(enemyRuntime, /scene\.takeSciFiHit/);
 
 // Mobile input must have one owner and release held input on lifecycle loss.
-assert.match(mobile, /__relayMobileInputSingleOwnerV7/);
+assert.match(mobile, /MOBILE INPUT SINGLE OWNER V9/);
+assert.match(mobile, /__relayMobileInputSingleOwnerV9/);
 assert.match(mobile, /pagehide/);
 assert.match(mobile, /visibilitychange/);
 assert.match(mobile, /setPhaserDirection/);
