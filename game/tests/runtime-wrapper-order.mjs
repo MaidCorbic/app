@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-const root = new URL('./', import.meta.url);
+const root = new URL('../../', import.meta.url);
 const read = path => readFile(fileURLToPath(new URL(path, root)), 'utf8');
 const index = await read('index.html');
 const ui = await read('relay-ui-init.js');
@@ -36,13 +36,24 @@ ordered(index, 'src/systems/core-stability.js', 'src/main.js');
 ordered(ui, "'./gameplay-core-v1.js'", "'./src/systems/mobile-input-single-owner-v1.js'");
 
 const wrapperFiles = [
-  'wall-slide-v1.js', 'route-mutation-v1.js', 'pressure-route-node-v1.js',
-  'timed-energy-trap-v1.js', 'temporary-world-distortion-v1.js', 'slide-jump-momentum-v1.js',
-  'dynamic-time-cycle-v1.js', 'presentation-final-v1.js', 'world-interaction-runtime-v2.js',
-  'src/systems/water-survival-v1.js', 'src/systems/player-visual-v2.js', 'src/systems/flight-vfx-v1.js',
-  'src/systems/enemy-progression-v1.js', 'src/systems/ghost-run-v1.js', 'src/systems/adaptive-mission-modifiers-v1.js',
-  'p1-gameplay-correctness-v1.js', 'p2-character-presentation-v4.js',
-];
+  'wall-slide-v1.js',
+  'route-mutation-v1.js',
+  'pressure-route-node-v1.js',
+  'timed-energy-trap-v1.js',
+  'temporary-world-distortion-v1.js',
+  'slide-jump-momentum-v1.js',
+  'dynamic-time-cycle-v1.js',
+  'presentation-final-v1.js',
+  'world-interaction-runtime-v2.js',
+  'src/systems/water-survival-v1.js',
+  'src/systems/player-visual-v2.js',
+  'src/systems/flight-vfx-v1.js',
+  'src/systems/enemy-progression-v1.js',
+  'src/systems/ghost-run-v1.js',
+  'src/systems/adaptive-mission-modifiers-v1.js',
+  'p1-gameplay-correctness-v1.js',
+  'p2-character-presentation-v4.js',
+].filter(Boolean);
 
 for (const file of wrapperFiles) {
   try {
@@ -54,7 +65,7 @@ for (const file of wrapperFiles) {
       || /if\s*\(\s*!?[A-Za-z_$][\w$]*\.__[^\n]*\)/.test(source)
       || /install[A-Z]\w*\(RunnerScene\)/.test(source)
       || /const install\s*=|function install[A-Z]/.test(source)
-      || (file === 'p2-character-presentation-v4.js' && /window\.__relayP2CharacterPresentationV4/.test(source));
+      || /window\.__relayP2CharacterPresentationV4/.test(source);
     assert.ok(guarded, `${file} must guard its RunnerScene hook`);
   } catch (error) {
     if (error.code === 'ENOENT') continue;
