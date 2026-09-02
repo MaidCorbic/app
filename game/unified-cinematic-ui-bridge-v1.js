@@ -25,9 +25,8 @@
       return;
     }
     if (info && visible('relayInfoPanel') && !isUnified('relayInfoPanel')) {
-      api.openFAQ();
-      return;
-    }
+  return;
+}
     if (pause && visible('pauseMenu') && !isUnified('pauseMenu')) {
       api.openPause('resume');
     }
