@@ -1,324 +1,391 @@
-<h1 align="center"> RUNNER RELAY </h1>
+<h1 align="center">RUNNER RELAY</h1>
 
 <p align="center">
-  <strong>Run. Progress. Compete. Repeat.</strong>
+  <strong>RUN THE CITY. CARRY THE SIGNAL.</strong>
 </p>
 
 <p align="center">
-  Turn every run into progression.
-  Earn XP, level up, unlock rewards and build your runner.
+  A rooftop running game built around movement, missions, XP and progression.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white">
-  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white">
-  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black">
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+  <a href="https://app-sooty-pi.vercel.app/">
+    <img src="https://img.shields.io/badge/PLAY-LIVE%20DEMO-f5c451?style=for-the-badge&logo=vercel&logoColor=white" alt="Play Live Demo">
+  </a>
+  <a href="https://github.com/MaidCorbic/app">
+    <img src="https://img.shields.io/badge/GITHUB-SOURCE-111827?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Source">
+  </a>
 </p>
 
 <p align="center">
-  <a href="#-features">Features</a> •
-  <a href="#-screenshots">Screenshots</a> •
-  <a href="#-getting-started">Getting Started</a> 
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" alt="HTML5">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" alt="CSS3">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/Phaser-3.90-6A1B9A?style=flat-square" alt="Phaser">
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite">
 </p>
 
 ---
 
-## 🎮 What is Runner Relay?
+## 🎮 PLAY RUNNER RELAY
 
-**Runner Relay** is a running-focused application that combines an interactive running experience with game-style progression.
+<p align="center">
+  <a href="https://app-sooty-pi.vercel.app/">
+    <strong>▶ PLAY THE LIVE BUILD</strong>
+  </a>
+</p>
 
-Instead of treating every run as an isolated activity, Runner Relay turns running into an ongoing player journey.
+Runner Relay is a game-first rooftop running experience built around movement, missions, signal recovery and player progression.
 
-The core loop is simple:
+> **RUN FARTHER. RECOVER THE SIGNAL. BUILD YOUR RUNNER.**
+
+---
+
+## ⚡ CORE GAME LOOP
 
 ```text
-        🏃 RUN
-          │
-          ▼
-       ⭐ EARN XP
-          │
-          ▼
-      📈 PROGRESS
-          │
-          ▼
-       🆙 LEVEL UP
-          │
-          ▼
-       🏆 REWARDS
-          │
-          ▼
-      🏃 RUN AGAIN
+              ┌───────────────┐
+              │      RUN      │
+              └───────┬───────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │    EXPLORE    │
+              └───────┬───────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │ RECOVER SIGNAL│
+              └───────┬───────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │    COMPLETE   │
+              │    MISSION    │
+              └───────┬───────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │    EARN XP    │
+              └───────┬───────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │    LEVEL UP   │
+              └───────┬───────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │    UNLOCKS    │
+              └───────┬───────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │    RUN AGAIN  │
+              └───────────────┘
 ```
 
-> **Don't just track your run. Build your runner.**
+---
+
+# ✨ FEATURES
+
+## 🏃 ROOFTOP MOVEMENT
+
+Move through the city using fast-paced gameplay systems built around:
+
+- Running
+- Jumping
+- Dash movement
+- Combat actions
+- Environmental interaction
+- Mobile touch controls
+
+The game is designed around movement first, keeping the player constantly moving through the world.
 
 ---
 
-## 🚀 Live Demo
+## 📡 SIGNAL MISSIONS
 
-> Add your deployed application URL here when available.
+Every run has a purpose.
 
-▶[ Try Runner Relay](https://app-sooty-pi.vercel.app/)
-
-No installation required when using the hosted version.
-
----
-
-## ✨ Features
-
-### 🏃 Running Experience
-
-Runner Relay is built around the runner and their journey.
-
-The application provides an interactive environment designed to make running feel more engaging than a traditional activity tracker.
-
-### ⭐ XP System
-
-Runs contribute to player progression through an experience point system.
-
-XP can be used as the foundation for:
-
-* Player progression
-* Level requirements
-* Rewards
-* Challenges
-* Achievements
-* Competitive systems
-
-### 📈 Player Levels
-
-Players have a persistent level that represents their progression.
+Recover signals, complete objectives and push the relay farther through the city.
 
 ```text
-XP
- │
- ├──► Level 1
- │
- ├──► Level 2
- │
- ├──► Level 3
- │
- ├──► Level 4
- │
- └──► Higher Levels
+MISSION
+   │
+   ├── OBJECTIVES
+   │
+   ├── SIGNALS
+   │
+   ├── DISTANCE
+   │
+   └── COMPLETION
 ```
-
-The goal is to make every session contribute toward a larger progression journey.
-
-### 💾 Persistent Progression
-
-Backend functionality is powered by **Supabase**, allowing player-related data and progression to be persisted.
-
-This provides a foundation for future systems such as:
-
-* Player profiles
-* Statistics
-* Achievements
-* Leaderboards
-* Challenges
-* Rewards
-
-### 🎮 Game Architecture
-
-The core application is organized around a dedicated `game/` directory.
-
-This makes it easier to expand the project with additional gameplay and progression systems as development continues.
 
 ---
 
-## 🎥 See It In Action
+## ⭐ XP & PROGRESSION
 
-Add a short gameplay GIF or video here once available.
-
-```md
-<p align="center">
-  <img src="docs/demo.gif" width="800">
-</p>
-```
-
-A short recording showing the following flow would work especially well:
+Your runs contribute to long-term progression.
 
 ```text
-Intro
-  ↓
-Tutorial
-  ↓
-Game
-  ↓
-Run
-  ↓
-XP
-  ↓
-Level Progression
+RUN
+ ↓
+MISSION XP
+ ↓
+TOTAL XP
+ ↓
+LEVEL
+ ↓
+UNLOCKS
+ ↓
+NEXT MISSION
 ```
 
----
-
-## 📸 Screenshots
-
-### 🏠 Introduction
-
-<p align="center">
-  <img src="docs/screenshots/intro.jpg" width="700">
-</p>
-
-### 📖 Tutorial
-
-<p align="center">
-  <img src="docs/screenshots/tutorial.jpg" width="700">
-</p>
-
-### 🎮 Game
-
-<p align="center">
-  <img src="docs/screenshots/game.jpg" width="700">
-</p>
+Progression can be expanded with additional missions, rewards, challenges and player systems.
 
 ---
 
-## 🧠 Progression System
+## 🎯 MISSION RESULTS
 
-The central idea behind Runner Relay is to make each run meaningful beyond the individual session.
+When a mission is complete, the game presents the results of the run.
 
 ```text
-┌─────────────┐
-│   🏃 RUN    │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│   ⭐ XP      │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  📈 LEVEL   │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  🏆 REWARD  │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  🏃 RUN     │
-│   AGAIN     │
-└─────────────┘
+┌────────────────────────────┐
+│      MISSION COMPLETE      │
+├────────────────────────────┤
+│ SIGNALS      04 / 04       │
+│ RATING       S              │
+│ SCORE        12850          │
+│ TIME         02:41          │
+│ XP           +120           │
+└────────────────────────────┘
 ```
-
-This system is designed to support future mechanics such as:
-
-* Experience milestones
-* Achievements
-* Daily challenges
-* Weekly challenges
-* Unlockable rewards
-* Competitive progression
-* Runner customization
 
 ---
 
-## 🧩 Architecture
+# 🎮 CONTROLS
 
-The project separates the application experience from backend persistence.
+## DESKTOP
 
 ```text
 ┌─────────────────────────────┐
-│       Runner Relay         │
-│          Frontend           │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│        Game Systems         │
-│                             │
-│  • Running                  │
-│  • XP                       │
-│  • Levels                   │
-│  • Progression              │
-│  • Future gameplay systems  │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│          Supabase           │
-│                             │
-│  • Player data              │
-│  • Progression              │
-│  • Persistent storage       │
+│ A / D       RUN             │
+│ SPACE       JUMP            │
+│ E           FIRE            │
+│ Q           SWORD           │
+│ SHIFT       DASH            │
 └─────────────────────────────┘
 ```
 
-The architecture is intentionally designed to leave room for additional gameplay systems without having to rebuild the entire application.
+## MOBILE
+
+```text
+┌─────────────────────────────┐
+│        VIRTUAL JOYSTICK     │
+│                             │
+│   JUMP     FIRE     DASH    │
+│                             │
+│   SWORD    BUILD    GEAR    │
+└─────────────────────────────┘
+```
 
 ---
 
-## 🛠️ Tech Stack
+# 📸 SCREENSHOTS
 
-| Technology        | Purpose                           |
-| ----------------- | --------------------------------- |
-| 🟧 **HTML5**      | Application structure             |
-| 🟦 **CSS3**       | Styling and UI                    |
-| 🟨 **JavaScript** | Core application and game logic   |
-| 🔷 **TypeScript** | Typed application logic           |
-| 🟩 **Supabase**   | Backend, database and persistence |
-| 🐳 **Docker**     | Containerization and deployment   |
-| 📦 **npm**        | Package management                |
-| 🐙 **GitHub**     | Source control and collaboration  |
+## 🏠 TITLE SCREEN
+
+<p align="center">
+  <img src="docs/screenshots/intro.jpg" width="900" alt="Runner Relay title screen">
+</p>
+
+## 📖 MISSION / TUTORIAL
+
+<p align="center">
+  <img src="docs/screenshots/tutorial.jpg" width="900" alt="Runner Relay mission briefing">
+</p>
+
+## 🎮 GAMEPLAY
+
+<p align="center">
+  <img src="docs/screenshots/game.jpg" width="900" alt="Runner Relay gameplay">
+</p>
 
 ---
 
-## 📁 Project Structure
+# 🎥 GAMEPLAY DEMO
+
+<p align="center">
+  <img src="docs/demo.gif" width="900" alt="Runner Relay gameplay demo">
+</p>
+
+Recommended gameplay sequence:
+
+```text
+BOOT
+  ↓
+TITLE SCREEN
+  ↓
+MISSION SELECT
+  ↓
+GAMEPLAY
+  ↓
+MOVEMENT
+  ↓
+SIGNAL RECOVERY
+  ↓
+MISSION COMPLETE
+  ↓
+RESULTS
+  ↓
+XP / PROGRESSION
+```
+
+---
+
+# 🧠 PROGRESSION SYSTEM
+
+Runner Relay is built around the idea that every run should matter.
+
+```text
+┌───────────────┐
+│      RUN      │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│    SIGNAL     │
+│    RECOVERY   │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│   MISSION     │
+│   COMPLETION  │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│      XP       │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│     LEVEL     │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│    UNLOCKS    │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│   NEXT RUN    │
+└───────────────┘
+```
+
+---
+
+# 🧩 GAME ARCHITECTURE
+
+```text
+RUNNER RELAY
+│
+├── HOME / TITLE
+│
+├── MISSION SYSTEMS
+│
+├── PLAYER SYSTEMS
+│
+├── GAMEPLAY
+│   ├── Movement
+│   ├── Jump
+│   ├── Dash
+│   ├── Combat
+│   └── Touch Input
+│
+├── PROGRESSION
+│   ├── XP
+│   ├── Levels
+│   ├── Unlocks
+│   └── Mission Results
+│
+└── UI / PRESENTATION
+    ├── HUD
+    ├── Menus
+    ├── Pause
+    ├── Settings
+    ├── Finish Screen
+    └── Mobile UI
+```
+
+---
+
+# 🛠️ TECH STACK
+
+| Technology | Purpose |
+|---|---|
+| HTML5 | Application structure |
+| CSS3 | UI and visual presentation |
+| JavaScript | Game and application logic |
+| Phaser 3.90 | 2D game engine |
+| Vite 8 | Development and production build |
+| Supabase | Backend / persistence |
+| npm | Package management |
+| Docker | Containerized workflow |
+| GitHub | Source control |
+| Vercel | Deployment |
+
+---
+
+# 📁 PROJECT STRUCTURE
 
 ```text
 app/
 │
 ├── game/
-│   └── Core Runner Relay application
+│   ├── gameplay/
+│   ├── systems/
+│   ├── missions/
+│   ├── progression/
+│   ├── UI/
+│   └── assets/
 │
 ├── supabase/
-│   └── Backend and database functionality
+│   └── backend / persistence
 │
 ├── docs/
-│   └── Screenshots and documentation assets
-│
-├── diploi.yaml
-│   └── Deployment configuration
+│   ├── screenshots/
+│   └── demo.gif
 │
 ├── package.json
-│   └── Project scripts and dependencies
-│
 ├── package-lock.json
-│   └── Dependency lock file
-│
-├── .gitignore
-│   └── Ignored files and environment configuration
-│
+├── Dockerfile
+├── diploi.yaml
 └── README.md
-    └── Project documentation
 ```
 
-> The structure may evolve as new systems are introduced.
+---
+
+# 🚀 GETTING STARTED
+
+## REQUIREMENTS
+
+Install:
+
+```text
+Node.js
+npm
+Git
+```
+
+Docker is optional.
 
 ---
 
-# 🚀 Getting Started
-
-## Requirements
-
-Before running Runner Relay locally, make sure you have:
-
-* [Node.js](https://nodejs.org/)
-* npm
-* Git
-* Docker, if using the containerized environment
-* A Supabase project, when backend configuration is required
-
----
-
-## 📥 Clone the Repository
+## 📥 CLONE
 
 ```bash
 git clone https://github.com/MaidCorbic/app.git
@@ -327,7 +394,7 @@ cd app
 
 ---
 
-## 📦 Install Dependencies
+## 📦 INSTALL
 
 ```bash
 npm install
@@ -335,165 +402,186 @@ npm install
 
 ---
 
-## ▶️ Start Development
-
-If the project uses a Vite development server:
+## ▶️ DEVELOPMENT
 
 ```bash
 npm run dev
 ```
 
-Otherwise, use the start script defined in `package.json`:
-
-```bash
-npm start
-```
-
-The exact available scripts can be found in `package.json`.
-
 ---
 
-## 🏗️ Production Build
-
-If a production build script is configured:
+## 🏗️ BUILD
 
 ```bash
 npm run build
 ```
 
-You can then preview or serve the generated application according to the project's deployment configuration.
+---
+
+## 🌐 PREVIEW
+
+```bash
+npm start
+```
 
 ---
 
-# 🐳 Docker
+# 🧪 TESTING
 
-Runner Relay can also be prepared for containerized deployment.
+Runner Relay includes automated checks for gameplay, progression and release stability.
 
-### Build the image
-
-```bash
-docker build -t Runner-relay .
-```
-
-### Run the container
+Run individual checks:
 
 ```bash
-docker run -p 3000:3000 Runner-relay
+npm run test:start-flow
+npm run test:missions
+npm run test:progression
+npm run test:gameplay-smoke
+npm run test:final-stability
 ```
 
-The exact port may vary depending on the application's Docker configuration.
+Run release hardening:
+
+```bash
+npm run test:release-hardening
+```
 
 ---
 
-# 🔐 Environment Variables
+# 🐳 DOCKER
 
-Never commit private credentials or secrets to GitHub.
+## BUILD
 
-Create a local environment file when required:
+```bash
+docker build -t runner-relay .
+```
+
+## RUN
+
+```bash
+docker run -p 3000:3000 runner-relay
+```
+
+---
+
+# 🔐 ENVIRONMENT
+
+Keep credentials outside the repository.
+
+Example:
 
 ```env
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-Use the exact environment variable names expected by the application.
+Never commit:
 
-### Security
+```text
+.env
+.env.local
+private keys
+service-role credentials
+```
 
-* Never commit `.env` files containing secrets.
-* Never expose Supabase service-role credentials in client-side code.
-* Use appropriate Supabase Row Level Security policies.
-* Keep production secrets outside the repository.
-
----
-
-# 🗺️ Roadmap
-
-Runner Relay is actively evolving.
-
-## ✅ Completed
-
-* [x] Core application
-* [x] Game structure
-* [x] Running experience
-* [x] XP progression foundation
-* [x] Player level system
-* [x] Supabase integration
-* [x] Persistent progression foundation
-* [x] Deployment configuration
-* [x] Improved UX / UI Home Screen
-
-
-## 🚧 In Progress
-
-* [ ] Player profiles
-* [ ] Achievements
-* [ ] Daily challenges
-* [ ] Advanced statistics
-
-
-## 🔮 Planned
-
-* [ ] Weekly challenges
-* [ ] Leaderboards
-* [ ] Rewards
-* [ ] Runner customization
-* [ ] Competitive features
-* [ ] Social features
-* [ ] Additional gameplay mechanics
-* [ ] Expanded progression systems
+Never expose Supabase service-role credentials in client-side code.
 
 ---
 
-# 🧪 Development Status
+# 🗺️ ROADMAP
 
-🚧 **Runner Relay is currently under active development.**
+## ✅ COMPLETED
 
-The project is continuously evolving, and gameplay systems, UI, backend functionality and progression mechanics may change as development continues.
+```text
+[x] Core Runner Relay experience
+[x] Rooftop gameplay
+[x] Mission system
+[x] XP progression
+[x] Level progression
+[x] Mission results
+[x] Pause / gameplay UI
+[x] Mobile controls
+[x] Production deployment
+[x] Release hardening
+```
 
-Some features described in the roadmap are planned rather than currently implemented.
+## 🚧 IN DEVELOPMENT
+
+```text
+[ ] Player profiles
+[ ] Achievements
+[ ] Advanced statistics
+[ ] Additional mission content
+```
+
+## 🔮 PLANNED
+
+```text
+[ ] Daily challenges
+[ ] Weekly challenges
+[ ] Leaderboards
+[ ] Additional rewards
+[ ] Runner customization
+[ ] Competitive systems
+[ ] Social features
+```
 
 ---
 
-# 🤝 Contributing
+# 📊 DEVELOPMENT STATUS
+
+> 🚧 **RUNNER RELAY IS IN ACTIVE DEVELOPMENT**
+
+The project is playable and continues to evolve.
+
+Gameplay systems, missions, UI and progression may change as new versions are introduced.
+
+---
+
+# 🤝 CONTRIBUTING
 
 Contributions, ideas and feedback are welcome.
 
-If you want to contribute:
+```text
+FORK
+  ↓
+CREATE BRANCH
+  ↓
+MAKE CHANGES
+  ↓
+RUN TESTS
+  ↓
+COMMIT
+  ↓
+OPEN PULL REQUEST
+```
 
-1. Fork the repository.
-2. Create a feature branch.
-3. Make your changes.
-4. Test your changes locally.
-5. Commit your changes.
-6. Open a pull request.
-
-For bugs and feature requests, please open an issue and provide as much useful context as possible.
+For bugs and feature requests, open an issue with enough information to reproduce the problem.
 
 ---
 
-# 🐛 Bug Reports
+# 🐛 BUG REPORTS
 
-When reporting a bug, include the following information:
+Use the following format:
 
-```text
+```md
 ### Description
 
 What happened?
 
 ### Steps to reproduce
 
-1. Open the application
+1. ...
 2. ...
 3. ...
 
 ### Expected behavior
 
-What should have happened?
+...
 
 ### Actual behavior
 
-What happened instead?
+...
 
 ### Environment
 
@@ -503,79 +591,80 @@ Device:
 Node.js version:
 ```
 
-Screenshots, console errors and reproduction steps are especially helpful.
+Screenshots and console errors are helpful when reporting UI or gameplay issues.
 
 ---
 
-# 💡 Feature Requests
+# 💡 FEATURE REQUESTS
 
 Have an idea for Runner Relay?
 
 Open an issue and describe:
 
-* What you would like to add
-* Why it would improve the application
-* How you imagine the feature working
-* Screenshots or examples, if relevant
+```text
+WHAT
+What should be added?
 
-Ideas related to running, progression, competition and game mechanics are especially welcome.
+WHY
+Why would it improve the game?
+
+HOW
+How should the feature work?
+
+REFERENCE
+Screenshots / examples / inspiration
+```
 
 ---
 
-# 🎯 Vision
+# 🎯 THE VISION
 
-The long-term vision for Runner Relay is to combine:
+Runner Relay brings together:
 
 ```text
-🏃 Running
-   +
-🎮 Game Mechanics
-   +
-📈 Progression
-   +
-🏆 Competition
-   +
-🤝 Social Features
+        🏃 RUNNING
+             +
+        🎮 GAMEPLAY
+             +
+        📡 SIGNALS
+             +
+        📈 PROGRESSION
+             +
+        🏆 COMPETITION
+             +
+        🌃 THE CITY
 ```
 
 into one experience.
 
-The goal isn't simply to track a run.
+The goal isn't simply to run.
 
-The goal is to create a system where every run contributes to something bigger.
+The goal is to create a world where **every run moves the relay forward**.
 
-> **Run. Progress. Compete. Repeat.**
+> **RUN THE CITY. CARRY THE SIGNAL.**
 
 ---
 
-# 👨‍💻 Author
+# 👤 AUTHOR
 
 Built by **MaidCorbic**.
 
 <p align="center">
   <a href="https://github.com/MaidCorbic">
-    <img src="https://img.shields.io/badge/GitHub-MaidCorbic-181717?style=for-the-badge&logo=github&logoColor=white">
+    <img src="https://img.shields.io/badge/GitHub-MaidCorbic-111827?style=for-the-badge&logo=github&logoColor=white" alt="MaidCorbic GitHub">
   </a>
 </p>
 
 ---
 
-# 📄 License
+# 📄 LICENSE
 
-Add your project's license here.
-
-For example, if the project is released under MIT:
-
-```text
-MIT License
-```
-
-See the `LICENSE` file for the full license text.
+See the repository license for the applicable terms.
 
 ---
 
 <p align="center">
-  <strong>🏃 Runner Relay</strong>
+  <strong>RUNNER RELAY</strong>
   <br>
-  Run. Progress. Compete. Repeat.
+  <sub>RUN THE CITY. CARRY THE SIGNAL.</sub>
 </p>
