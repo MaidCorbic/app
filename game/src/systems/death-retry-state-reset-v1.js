@@ -1,63 +1,35 @@
 import { RunnerScene } from '../scenes/RunnerScene.js';
 
-// BUGFIX: death/retry must clear transient movement/physics state without
-// changing progression, checkpoints, unlocked content, or mission state.
+// BUGFIX: death/retry must clear transient movement state without changing
+// progression, checkpoints, unlocked content, or existing gameplay features.
 (() => {
-  if (window.__relayDeathRetryStateResetV2) return;
-  window.__relayDeathRetryStateResetV2 = true;
+  if (window.__relayDeathRetryStateResetV1) return;
+  window.__relayDeathRetryStateResetV1 = true;
 
   const originalRespawn = RunnerScene.prototype.respawnCheckpoint;
   const originalFail = RunnerScene.prototype.fail;
 
-  const clearKeyState = scene => {
-    const keys = scene?.keys || {};
-    const cursors = scene?.cursors || {};
-    for (const key of Object.values(keys)) {
-      if (key && typeof key === 'object' && 'isDown' in key) key.isDown = false;
-    }
-    for (const key of Object.values(cursors)) {
-      if (key && typeof key === 'object' && 'isDown' in key) key.isDown = false;
-    }
-  };
-
   const resetTransientState = scene => {
     scene.mobileDirection = null;
     Object.keys(scene.mobileActions || {}).forEach(key => { scene.mobileActions[key] = false; });
-    clearKeyState(scene);
 
     for (const key of [
       'isCrouching', 'isSliding', 'isDashing', 'isWallSliding',
       'wallSliding', 'wallJumping', 'slideJumping', 'dashActive',
-      'crouchHeld', 'slideHeld', 'dashHeld', 'dashing',
-      'wallJumpTimer', 'wallSlideTimer', 'slideTimer', 'dashTimer'
+      'crouchHeld', 'slideHeld', 'dashHeld'
     ]) {
-      if (key in scene) scene[key] = typeof scene[key] === 'number' ? 0 : false;
+      if (key in scene) scene[key] = false;
     }
 
     const player = scene.player;
     if (!player) return;
     for (const key of [
       'crouching', 'sliding', 'dashing', 'wallSliding', 'wallJumping',
-      'slideJumping', 'dashActive', 'crouchHeld', 'slideHeld', 'dashHeld',
-      'invulnerable'
+      'slideJumping', 'dashActive', 'crouchHeld', 'slideHeld', 'dashHeld'
     ]) player.setData?.(key, false);
 
-    player.setAngle?.(0);
-    player.setRotation?.(0);
-    player.setScale?.(1);
-    player.setAlpha?.(1);
-    player.setFlipY?.(false);
-    player.clearTint?.();
-
-    const body = player.body;
-    body?.setAcceleration?.(0, 0);
-    body?.setVelocity?.(0, 0);
-    body?.setAngularVelocity?.(0);
-    if (body) body.allowRotation = false;
-
-    // Give authoritative feature systems a lifecycle boundary. Dash owns a
-    // WeakMap state, so clearing RunnerScene fields alone is insufficient.
-    try { window.dispatchEvent(new CustomEvent('relay:runner-transient-reset', { detail: { scene } })); } catch {}
+    player.setAngle?.(0).setRotation?.(0).setScale?.(1).setAlpha?.(1).setFlipY?.(false).clearTint?.();
+    player.body?.setAcceleration?.(0, 0).setVelocity?.(0, 0);
   };
 
   RunnerScene.prototype.respawnCheckpoint = function deathRetryStateResetRespawn(...args) {

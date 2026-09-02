@@ -36,7 +36,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       #game #play .hud>*{min-width:0!important;pointer-events:auto!important}
       #game #play .hud-route,#game #play .hud-run,#game #play .hud-xp,#game #play #pause{box-sizing:border-box!important;border:1px solid rgba(255,208,110,.25)!important;background:linear-gradient(145deg,rgba(7,10,15,.96),rgba(2,3,5,.985))!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 16px 34px rgba(0,0,0,.28),0 0 28px rgba(255,208,110,.04)!important;backdrop-filter:blur(8px)!important}
       #game #play .hud-route{min-height:50px!important;padding:9px 12px!important;border-radius:12px!important;display:flex!important;align-items:center!important;gap:10px!important}
-      #game #play .hud-route .route-dot{flex:0 0 8px!important;width:8px!important;height:8px!important;background:#ffd06e!important;box-shadow:0 0 14px rgba(255,208,110,.25)!important}
+      #game #play .hud-route .route-dot{flex:0 0 8px!important;width:8px!important;height:8px!important;background:#ffd06e!important;box-shadow:0 0 14px rgba(255,208,110,.75)!important}
       #game #play .hud-route small{display:block!important;color:#ffd06e!important;font:900 7px/1 'DM Mono',monospace!important;letter-spacing:1.35px!important}
       #game #play .hud-route b{display:block!important;margin-top:5px!important;color:#f4f7fa!important;font:950 11px/1.12 'DM Mono',monospace!important;letter-spacing:.45px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
       #game #play .hud-run{min-height:50px!important;padding:9px 12px!important;border-radius:12px!important;display:grid!important;grid-template-columns:1fr auto!important;grid-template-rows:auto 6px!important;grid-template-areas:'label count' 'bar bar'!important;align-items:center!important;column-gap:10px!important}
@@ -44,13 +44,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       #game #play .hud-run>small::before{content:''!important}
       #game #play .hud-run>span{grid-area:count!important;justify-self:end!important;color:#fff3bf!important;font:950 14px/1 'DM Mono',monospace!important;letter-spacing:1px!important}
       #game #play .hud-run>div{grid-area:bar!important;width:100%!important;height:5px!important;min-width:0!important;overflow:hidden!important;border:1px solid rgba(255,208,110,.16)!important;border-radius:99px!important;background:rgba(255,255,255,.045)!important}
-      #game #play .hud-run>div>i{
-  display:block!important;
-  height:100%!important;
-  border-radius:99px!important;
-  background:linear-gradient(90deg,#b47a1e,#ffd06e,#fff0b5)!important;
-  box-shadow:0 0 12px rgba(255,208,110,.32)!important;
-}
+      #game #play .hud-run>div>i{display:block!important;height:100%!important;border-radius:99px!important;background:linear-gradient(90deg,#b47a1e,#ffd06e,#fff0b5)!important;box-shadow:0 0 12px rgba(255,208,110,.32)!important}
       #game #play .hud-actions{display:flex!important;align-items:stretch!important;justify-content:flex-end!important;gap:8px!important}
       #game #play .hud-xp{min-width:86px!important;min-height:50px!important;padding:7px 10px!important;border-radius:12px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;text-align:center!important}
       #game #play .hud-xp small{display:block!important;color:#8d98a3!important;font:900 7px/1 'DM Mono',monospace!important;letter-spacing:1px!important;text-align:center!important}

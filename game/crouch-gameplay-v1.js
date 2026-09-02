@@ -24,19 +24,10 @@ function installMobileButton() {
   const style = document.createElement('style');
   style.id = 'crouch-gameplay-v1-style';
   style.textContent = `#${MOBILE_BUTTON_ID}{border:1px solid rgba(141,244,255,.34);border-radius:10px;background:linear-gradient(145deg,rgba(8,24,42,.96),rgba(3,10,20,.97));color:#eafcff;min-height:52px;padding:9px 11px;font:inherit;text-align:center;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden;transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease}#${MOBILE_BUTTON_ID}:before{content:"";position:absolute;inset:-35%;background:radial-gradient(circle,rgba(141,244,255,.18),transparent 62%);opacity:0;transition:opacity .12s ease}#${MOBILE_BUTTON_ID} small{display:block;margin-top:4px;font-size:8px;opacity:.58;letter-spacing:.08em;position:relative}#${MOBILE_BUTTON_ID}.is-held{border-color:#aee37f;color:#efffdc;box-shadow:0 0 18px rgba(174,227,127,.35),0 0 42px rgba(141,244,255,.12),inset 0 0 16px rgba(174,227,127,.08);transform:scale(.97)}#${MOBILE_BUTTON_ID}.is-held:before{opacity:1}@media(min-width:769px){#${MOBILE_BUTTON_ID}{display:none}}`;
-  if (!document.getElementById('crouch-gameplay-v1-style')) document.head.appendChild(style);
+  document.head.appendChild(style);
 
-  const release = event => {
-    event?.preventDefault?.();
-    button.classList.remove('is-held');
-    window.dispatchEvent(new CustomEvent('relay:crouch-end'));
-  };
-  const press = event => {
-    event.preventDefault();
-    button.classList.add('is-held');
-    window.dispatchEvent(new CustomEvent('relay:crouch-start'));
-    try { button.setPointerCapture?.(event.pointerId); } catch { /* optional */ }
-  };
+  const press = event => { event.preventDefault(); button.classList.add('is-held'); window.dispatchEvent(new CustomEvent('relay:crouch-start')); button.setPointerCapture?.(event.pointerId); };
+  const release = event => { event.preventDefault(); button.classList.remove('is-held'); window.dispatchEvent(new CustomEvent('relay:crouch-end')); };
   button.addEventListener('pointerdown', press, { passive:false });
   button.addEventListener('pointerup', release, { passive:false });
   button.addEventListener('pointercancel', release, { passive:false });
@@ -57,48 +48,6 @@ function canStand(scene, state) {
     const p = platform.body;
     return right > p.x && left < p.x + p.width && bottom > p.y && top < p.y + p.height;
   });
-}
-
-function captureCollider(state, body) {
-  if (!body || state.colliderCaptured) return;
-  state.standingHeight = Number(body.height) || state.standingHeight || 48;
-  state.standingOffsetX = Number(body.offset?.x) || 0;
-  state.standingOffsetY = Number(body.offset?.y) || 0;
-  state.standingWidth = Number(body.width) || 24;
-  state.colliderCaptured = true;
-}
-
-function restoreCollider(scene, state) {
-  const body = scene?.player?.body;
-  if (!body || !state.colliderCaptured) return;
-  body.setSize(state.standingWidth, state.standingHeight, false);
-  body.setOffset(state.standingOffsetX, state.standingOffsetY);
-}
-
-function resetCrouchState(scene, state, { restoreBody = true, emit = true } = {}) {
-  if (!scene || !state) return;
-  const player = scene.player;
-  const wasCrouching = Boolean(state.crouching || scene.crouching);
-  const wasSliding = Boolean(state.slideTimer > 0 || scene.sliding);
-  state.keyDown = false;
-  state.mobileHeld = false;
-  state.crouching = false;
-  state.slideTimer = 0;
-  state.slideElapsed = 0;
-  state.slideTrailTimer = 0;
-  state.slideDustTimer = 0;
-  state.slideSpeed = 0;
-  scene.crouching = false;
-  scene.sliding = false;
-  if (restoreBody && player?.body) restoreCollider(scene, state);
-  if (player) {
-    player.setData('crouching', false);
-    player.setData('sliding', false);
-    player.setScale(player.scaleX, state.originalScaleY);
-    player.rotation = 0;
-  }
-  if (emit && wasSliding) scene.game?.events?.emit('crouch-slide', false);
-  if (emit && wasCrouching) scene.game?.events?.emit('crouch', false);
 }
 
 function startSlide(scene, state) {
@@ -150,7 +99,7 @@ function updateSlide(scene, state, delta) {
   const progress = Math.max(0, Math.min(1, state.slideElapsed / 560));
   const ease = 1 - progress;
   const speed = Math.max(260, state.slideSpeed * (0.34 + ease * 0.66));
-  if (Number.isFinite(speed) && Number.isFinite(state.slideDirection)) body.setVelocityX(state.slideDirection * speed);
+  body.setVelocityX(state.slideDirection * speed);
   player.setScale(player.scaleX, state.originalScaleY * (0.64 + ease * 0.08));
   player.rotation = state.slideDirection * (-0.075 + progress * 0.11);
 
@@ -183,7 +132,6 @@ function setCrouch(scene, active) {
   if (!state) return false;
   const player = scene.player;
   const body = player.body;
-  captureCollider(state, body);
 
   if (active) {
     if (state.crouching) {
@@ -191,9 +139,13 @@ function setCrouch(scene, active) {
       return true;
     }
     state.crouching = true;
+    state.standingHeight = body.height;
+    state.standingOffsetY = body.offset.y;
+    state.standingDisplayHeight = player.displayHeight || 64;
+    state.originalScaleY = player.scaleY || 1;
     const crouchHeight = Math.max(22, Math.round(state.standingHeight * .58));
-    body.setSize(state.standingWidth, crouchHeight, false);
-    body.setOffset(state.standingOffsetX, state.standingOffsetY + state.standingHeight - crouchHeight);
+    body.setSize(body.width, crouchHeight, false);
+    body.setOffset(body.offset.x, state.standingOffsetY + state.standingHeight - crouchHeight);
     player.y += state.standingDisplayHeight * .21;
     player.setScale(player.scaleX, state.originalScaleY * .72);
     player.setData('crouching', true);
@@ -206,7 +158,8 @@ function setCrouch(scene, active) {
   stopSlide(scene, state);
   if (!state.crouching || !canStand(scene, state)) return !state.crouching;
   state.crouching = false;
-  restoreCollider(scene, state);
+  body.setSize(body.width, state.standingHeight, false);
+  body.setOffset(body.offset.x, state.standingOffsetY);
   player.y -= state.standingDisplayHeight * .21;
   player.setScale(player.scaleX, state.originalScaleY);
   player.rotation = 0;
@@ -230,11 +183,8 @@ function installForScene(scene) {
     slideSpeed:0,
     slideTrailTimer:0,
     slideDustTimer:0,
-    colliderCaptured:false,
-    standingHeight:Number(body?.height) || 48,
-    standingWidth:Number(body?.width) || 24,
-    standingOffsetX:Number(body?.offset?.x) || 0,
-    standingOffsetY:Number(body?.offset?.y) || 0,
+    standingHeight:body?.height || 48,
+    standingOffsetY:body?.offset?.y || 0,
     standingDisplayHeight:scene.player.displayHeight || 64,
     originalScaleY:scene.player.scaleY || 1,
   });
@@ -244,18 +194,12 @@ function installForScene(scene) {
 
 function updateScene(scene, delta) {
   const state = sceneState.get(scene);
-  if (!state) return;
-  // Death/respawn/finish must always clear transient crouch state. Otherwise a
-  // reused player can respawn with a crouched collider and a held slide state.
-  if (scene.respawning || scene.finished || !scene.player?.active) {
-    if (state.crouching || state.slideTimer > 0 || scene.crouching || scene.sliding) resetCrouchState(scene, state);
-    return;
-  }
+  if (!state || !scene.player?.active) return;
   const wants = state.keyDown || state.mobileHeld;
   if (wants) setCrouch(scene, true);
   else if (state.crouching) setCrouch(scene, false);
   scene.crouching = state.crouching;
-  updateSlide(scene, state, delta);
+  updateSlide(scene, state, delta || 16.67);
 }
 
 const originalCreate = RunnerScene.prototype.create;
@@ -290,6 +234,6 @@ document.addEventListener('keyup', event => {
 function activeScene() { return window.__relayRunnerScene || null; }
 window.addEventListener('relay:crouch-start', () => { const state = sceneState.get(activeScene()); if (state) state.mobileHeld = true; });
 window.addEventListener('relay:crouch-end', () => { const state = sceneState.get(activeScene()); if (state) state.mobileHeld = false; });
-window.addEventListener('blur', () => { const scene = activeScene(); const state = sceneState.get(scene); if (state) resetCrouchState(scene, state); document.getElementById(MOBILE_BUTTON_ID)?.classList.remove('is-held'); });
+window.addEventListener('blur', () => { const scene = activeScene(); const state = sceneState.get(scene); if (state) { state.keyDown=false; state.mobileHeld=false; stopSlide(scene, state); } document.getElementById(MOBILE_BUTTON_ID)?.classList.remove('is-held'); });
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',installMobileButton,{once:true}); else installMobileButton();

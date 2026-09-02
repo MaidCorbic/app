@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = new URL('../', import.meta.url);
 const config = await readFile(fileURLToPath(new URL('src/config/gameplay-timing.js', root)), 'utf8');
 const patch = await readFile(fileURLToPath(new URL('initial-spawn-shield-patch.mjs', root)), 'utf8');
-const vite = await readFile(fileURLToPath(new URL('vite.config.mjs', root)), 'utf8');
+const vite = await readFile(fileURLToPath(new URL('vite.config.js', root)), 'utf8');
 
 assert.match(config, /SPAWN_SHIELD_MS\s*=\s*10_000/);
 assert.match(patch, /healthInvulnerable = SPAWN_SHIELD_MS/);
