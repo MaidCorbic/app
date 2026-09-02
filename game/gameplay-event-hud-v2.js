@@ -36,34 +36,157 @@
     clearTimeout(state.hideTimer); state.hideTimer = setTimeout(() => root.classList.remove('is-visible'), duration);
   }
 
-  function feedback(kind) {
-    const map = {
-      warning: ['THREAT', 'ENVIRONMENT WARNING', 'Hostile activity detected', 'danger', 1450],
-      chase: ['THREAT', 'PURSUIT ACTIVE', 'Interceptor pressure detected', 'danger', 1650],
-      hit: ['DAMAGE', 'IMPACT DETECTED', 'Recovery sequence initiated', 'danger', 1450],
-      jump: ['MOVEMENT', 'JUMP EXECUTED', 'Traversal action confirmed', 'movement', 800],
-      wallJump: ['MOVEMENT', 'WALL JUMP', 'Traversal action confirmed', 'movement', 850],
-      vault: ['MOVEMENT', 'VAULT', 'Traversal action confirmed', 'movement', 850],
-      slide: ['MOVEMENT', 'SLIDE', 'Traversal action confirmed', 'movement', 800],
-      dash: ['MOVEMENT', 'DASH', 'Burst movement executed', 'combat', 900],
-      gadget: ['EQUIPMENT', 'GEAR DEPLOYED', 'Equipment action confirmed', 'gear', 950],
-      complete: ['MISSION', 'DELIVERY COMPLETE', 'Relay linked · results ready', 'complete', 1900],
-    };
-    if (map[kind]) show(map[kind]);
+ function feedback(kind) {
+  const map = {
+    warning: [
+      'THREAT',
+      'ENVIRONMENT WARNING',
+      'HOSTILE ACTIVITY DETECTED',
+      'danger',
+      1450
+    ],
+
+    chase: [
+      'THREAT',
+      'PURSUIT ACTIVE',
+      'INTERCEPTOR PRESSURE DETECTED',
+      'danger',
+      1650
+    ],
+
+    hit: [
+      'DAMAGE',
+      'IMPACT DETECTED',
+      'RECOVERY SEQUENCE INITIATED',
+      'danger',
+      1450
+    ],
+
+    jump: [
+      'MOVEMENT',
+      'JUMP',
+      'TRAVERSAL ACTION CONFIRMED',
+      'movement',
+      700
+    ],
+
+    wallJump: [
+      'MOVEMENT',
+      'WALL JUMP',
+      'TRAVERSAL ACTION CONFIRMED',
+      'movement',
+      750
+    ],
+
+    vault: [
+      'MOVEMENT',
+      'VAULT',
+      'OBSTACLE CLEARED',
+      'movement',
+      750
+    ],
+
+    slide: [
+      'MOVEMENT',
+      'SLIDE',
+      'LOW-PROFILE TRAVERSAL',
+      'movement',
+      700
+    ],
+
+    dash: [
+      'MOVEMENT',
+      'DASH',
+      'BURST MOVEMENT EXECUTED',
+      'combat',
+      900
+    ],
+
+    gadget: [
+      'EQUIPMENT',
+      'GEAR DEPLOYED',
+      'EQUIPMENT ACTION CONFIRMED',
+      'gear',
+      950
+    ],
+
+    complete: [
+      'MISSION',
+      'DELIVERY COMPLETE',
+      'RELAY LINKED · RESULTS READY',
+      'complete',
+      1900
+    ]
+  };
+
+  if (map[kind]) {
+    show(map[kind]);
   }
+}
 
   function bindGame(game) {
     if (!game?.events?.on || state.games.has(game)) return;
 
     const handlers = [
       ['feedback', feedback],
-      ['checkpoint', (signals, secrets, lost) => show(['CHECKPOINT', 'ROUTE SAVED', `${signals} SIGNALS · ${secrets} SECRETS${lost ? ` · ${lost} LOST` : ''}`, 'checkpoint', 1250])],
-      ['sector', data => show(['WORLD', `SECTOR ${data?.number || '?'}`, 'Relay Spire reached · route escalating', 'world', 1400])],
+    ['checkpoint', (signals, secrets, lost) =>
+  show([
+    'CHECKPOINT',
+    'CHECKPOINT SECURED',
+    `${signals} SIGNALS · ${secrets} SECRETS${lost ? ` · ${lost} LOST` : ''}`,
+    'checkpoint',
+    1500
+  ])
+],
+      ['sector', data =>
+  show([
+    'WORLD',
+    `SECTOR ${data?.number || '?'}`,
+    'NEW AREA REACHED · THREAT LEVEL ESCALATING',
+    'world',
+    1450
+  ])
+],
       ['deaths', (count, limit) => show(['DAMAGE', 'RECOVERY USED', `${count} / ${limit} RECOVERIES`, 'danger', 1350])],
       ['game-over', message => show(['MISSION', 'RUN INTERRUPTED', message || 'Recovery limit reached', 'danger', 1900])],
-      ['energy', value => { if (Number(value) <= 20) show(['SYSTEM', 'LOW ENERGY', `${Math.round(Number(value))}% REMAINING`, 'danger', 1350]); }],
-      ['health', value => { if (Number(value) <= 1) show(['DAMAGE', 'CRITICAL HEALTH', `${Math.max(0, Number(value))} HP REMAINING`, 'danger', 1400]); }],
-      ['combo', (value, best) => { if (Number(value) >= 2) show(['COMBAT', `COMBO ×${value}`, best ? `BEST FLOW ×${best}` : 'Combat chain active', 'combat', 900]); }],
+     ['energy', value => {
+  if (Number(value) <= 20)
+    show([
+      'SYSTEM',
+      'ENERGY CRITICAL',
+      `${Math.max(0, Math.round(Number(value)))}% REMAINING`,
+      'danger',
+      1350
+    ]);
+}],
+     ['health', value => {
+  const hp = Number(value);
+
+  if (hp <= 1) {
+    show([
+      'DAMAGE',
+      'CRITICAL HEALTH',
+      `${Math.max(0, hp)} HP REMAINING`,
+      'danger',
+      1450
+    ]);
+  }
+}],
+      ['combo', (value, best) => {
+  const combo = Number(value);
+
+  if (combo >= 2) {
+    show([
+      'COMBAT',
+      `COMBO ×${combo}`,
+      best
+        ? `BEST FLOW ×${best}`
+        : 'COMBAT CHAIN ACTIVE',
+      'combat',
+      combo >= 5 ? 1150 : 900
+    ]);
+  }
+}],
       ['tutorial', message => show(['INTEL', 'NEW FIELD INSTRUCTION', message, 'world', 1700])],
       ['narration', message => { if (message) show(['RADIO', 'INCOMING TRANSMISSION', message, 'world', 1800]); }],
     ];
@@ -90,14 +213,52 @@
         if (value.startsWith('SIGNAL CAPTURED')) return;
         if (value.includes('CHECKPOINT')) show(['CHECKPOINT', 'ROUTE SAVED', next, 'checkpoint', 1250]);
         else if (value.includes('SECRET FOUND')) show(['DISCOVERY', 'SECRET FOUND', next, 'discovery', 1250]);
-        else if (value.includes('CHASE')) show(['THREAT', 'CHASE ACTIVE', next, 'danger', 1550]);
-        else if (value.includes('SECURITY') || value.includes('HOSTILE') || value.includes('ALERT')) show(['THREAT', 'HOSTILE ALERT', next, 'danger', 1500]);
+       else if (value.includes('CHASE'))
+  show([
+    'THREAT',
+    'PURSUIT ACTIVE',
+    next,
+    'danger',
+    1650
+  ]);
+       else if (
+  value.includes('SECURITY') ||
+  value.includes('HOSTILE') ||
+  value.includes('ALERT')
+)
+  show([
+    'THREAT',
+    'HOSTILE CONTACT',
+    next,
+    'danger',
+    1550
+  ]);
         else if (value.includes('READY')) show(['SYSTEM', 'ABILITY READY', next, 'ready', 950]);
         else if (value.includes('ENERGY')) show(['SYSTEM', 'ENERGY EVENT', next, 'energy', 950]);
         else if (value.includes('GADGET') || value.includes('TURRET') || value.includes('SHIELD') || value.includes('KINETIC')) show(['EQUIPMENT', 'GEAR DEPLOYED', next, 'gear', 1050]);
         else if (value.includes('SECTOR')) show(['WORLD', 'SECTOR REACHED', next, 'world', 1400]);
-        else if (value.includes('COMPLETE') || value.includes('LINKED')) show(['MISSION', 'RELAY LINKED', next, 'complete', 1700]);
-        else if (value.includes('LOST') || value.includes('FAILED')) show(['MISSION', 'ROUTE INTERRUPTED', next, 'danger', 1500]);
+        else if (
+  value.includes('COMPLETE') ||
+  value.includes('LINKED')
+)
+  show([
+    'MISSION',
+    'MISSION COMPLETE',
+    next,
+    'complete',
+    1900
+  ]);
+        else if (
+  value.includes('LOST') ||
+  value.includes('FAILED')
+)
+  show([
+    'MISSION',
+    'RUN INTERRUPTED',
+    next,
+    'danger',
+    1600
+  ]);
       }
     });
     observer.observe(node, { childList: true, characterData: true, subtree: true });
