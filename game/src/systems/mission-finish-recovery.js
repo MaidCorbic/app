@@ -4,6 +4,7 @@ import { completeMission, loadState, saveState } from '../state.js';
 const RECOVERY_DELAY = 360;
 let timer = null;
 let observer = null;
+let handledRunKey = null;
 
 const getElement = id => document.getElementById(id);
 const setText = (id, value) => {
@@ -18,6 +19,14 @@ function formatTime(ms) {
   return `${String(Math.floor(value / 60000)).padStart(2, '0')}:${String(Math.floor(value / 1000) % 60).padStart(2, '0')}.${Math.floor(value % 1000 / 100)}`;
 }
 
+function runKey(scene) {
+  const runId = scene?.runId;
+  if (runId !== undefined && runId !== null) return `run:${runId}`;
+  const startedAt = Number(scene?.__webSceneStartedAt);
+  if (Number.isFinite(startedAt) && startedAt > 0) return `started:${startedAt}`;
+  return `mission:${scene?.mission?.id || 'unknown'}`;
+}
+
 function stopPolling() {
   if (timer !== null) {
     window.clearTimeout(timer);
@@ -25,7 +34,7 @@ function stopPolling() {
   }
 }
 
-function schedulePoll(delay = 350) {
+function schedulePoll(delay = RECOVERY_DELAY) {
   stopPolling();
   timer = window.setTimeout(tick, delay);
 }
@@ -34,12 +43,14 @@ function showRecoveredFinish(scene) {
   const finish = getElement('finish');
   const play = getElement('play');
   const mission = scene?.mission;
+  const key = runKey(scene);
   if (!finish?.classList || !mission?.id || !scene?.finished || !finish.classList.contains('hidden')) return false;
+  if (handledRunKey === key) return false;
 
-  let state = loadState();
   const missionIndex = missions.findIndex(item => item.id === mission.id);
   if (missionIndex < 0) return false;
 
+  let state = loadState();
   const alreadyPersisted = Boolean(state.missionStats?.[mission.id]?.completed);
   if (!alreadyPersisted) {
     const runStats = {
@@ -63,18 +74,19 @@ function showRecoveredFinish(scene) {
     saveState(state);
   }
 
-  window.dispatchEvent(new CustomEvent('relay:mission-complete', { detail: { scene, missionId: mission.id } }));
+  handledRunKey = key;
+  window.dispatchEvent(new CustomEvent('relay:mission-complete', { detail: { scene, missionId: mission.id, runId: scene.runId ?? null, recovered: true } }));
   const performanceResult = window.__missionFlowPerformanceV1?.finalize?.(scene) || window.__missionFlowPerformanceV1?.latest || null;
   if (!performanceResult) console.warn('[Relay Runner] Performance V1 did not produce a completion result.', mission.id);
 
   const stat = state.missionStats?.[mission.id] || { bestRating: 1, bestScore: (scene.collected || 0) * 100, bestTime: scene.elapsedMs };
   const breakdown = state.lastXpBreakdown || {};
   setText('finishRating', '★'.repeat(Math.max(1, stat.bestRating || 1)));
-  setText('finishSignals', `${scene.collected || 0} / ${mission.signals?.length || 0} SIGNALS`);
+  setText('finishSignals', `${scene.collected || 0} / ${mission.signals?.length || 0} SIGNALS RECOVERED`);
   setText('finishXp', `+${breakdown.total || 0} XP`);
   setText('finishScore', `RUN SCORE ${(scene.collected || 0) * 100 + (scene.secretsCollected || 0) * 250} · BEST ${stat.bestScore || 0}`);
   setText('finishTime', `TIME ${formatTime(scene.elapsedMs)} · BEST ${formatTime(stat.bestTime)}`);
-  setText('finishLine', mission.unlocks ? `${mission.unlocks} is now available in the mission terminal.` : 'The final relay hums awake across the city.');
+  setText('finishLine', mission.unlocks ? `NEXT ROUTE UNLOCKED · ${mission.unlocks} is now available in the mission terminal.` : 'RELAY STATUS STABLE · THE FINAL RELAY IS BACK ONLINE.');
 
   const next = getElement('nextMission');
   const hasNext = missionIndex + 1 < missions.length && (!missions[missionIndex + 1].unlockRequirement || state.completed.includes(missions[missionIndex + 1].unlockRequirement));
@@ -97,8 +109,6 @@ function tick() {
     try { showRecoveredFinish(scene); }
     catch (error) { console.error('[Relay Runner] Mission finish recovery failed.', error); }
   }
-  // Once the finish UI is visible, polling is no longer necessary. The observer
-  // below rearms recovery when a new run hides the finish overlay again.
   if (finish && !finish.classList.contains('hidden')) stopPolling();
   else schedulePoll();
 }
@@ -108,8 +118,10 @@ function installLifecycleObserver() {
   const finish = getElement('finish');
   if (!finish) return;
   observer = new MutationObserver(() => {
-    if (finish.classList.contains('hidden')) schedulePoll(RECOVERY_DELAY);
-    else stopPolling();
+    if (finish.classList.contains('hidden')) {
+      handledRunKey = null;
+      schedulePoll(RECOVERY_DELAY);
+    } else stopPolling();
   });
   observer.observe(finish, { attributes: true, attributeFilter: ['class'] });
 }
