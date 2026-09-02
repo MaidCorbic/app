@@ -70,24 +70,27 @@
       #play .hud-xp,
       #play .hud-actions>button {
         position:relative;
-        border:1px solid rgba(141,244,255,.24);
+        border:1px solid rgba(255,208,110,.24);
         background:linear-gradient(145deg,rgba(4,13,25,.94),rgba(11,26,43,.82));
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 10px 26px rgba(0,0,0,.28),0 0 24px rgba(25,200,245,.06);
+       box-shadow:
+  inset 0 1px 0 rgba(255,255,255,.07),
+  0 10px 26px rgba(0,0,0,.28),
+  0 0 24px rgba(255,208,110,.06);
         backdrop-filter:blur(10px);
       }
       #play .hud-route { min-width:0; padding:9px 12px; border-radius:12px; display:flex; align-items:center; gap:9px; }
       #play .hud-route::after { content:""; position:absolute; inset:1px; border-radius:11px; box-shadow:inset 0 0 0 1px rgba(255,208,110,.04); pointer-events:none; }
-      #play .hud-route .route-dot { width:7px; height:7px; flex:0 0 auto; box-shadow:0 0 14px rgba(141,244,255,.95); }
-      #play .hud-route small { color:#8df4ff; letter-spacing:.18em; font-weight:800; }
-      #play .hud-route b { display:block; margin-top:2px; letter-spacing:.06em; text-shadow:0 0 12px rgba(141,244,255,.08); }
+      #play .hud-route .route-dot { width:7px; height:7px; flex:0 0 auto; box-shadow:0 0 14px rgba(255,208,110,.75); }
+      #play .hud-route small { color:#ffd06e; letter-spacing:.18em; font-weight:800; }
+      #play .hud-route b { display:block; margin-top:2px; letter-spacing:.06em; text-shadow:0 0 12px rgba(255,208,110,.08); }
       #play .hud-progress { min-width:0; padding:9px 12px; border-radius:12px; }
       #play .hud-progress > div { height:5px; margin-top:5px; border-radius:999px; background:rgba(220,232,241,.08); overflow:hidden; box-shadow:inset 0 0 7px rgba(0,0,0,.6); }
-      #play .hud-progress i { border-radius:999px; box-shadow:0 0 12px rgba(141,244,255,.85),0 0 3px rgba(255,255,255,.32); transition:width .22s ease; }
+      #play .hud-progress i { border-radius:999px; box-shadow: 0 0 12px rgba(255,208,110,.85), 0 0 3px rgba(255,255,255,.32); transition:width .22s ease; }
       #play .hud-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; pointer-events:auto; }
       #play .hud-xp { min-width:58px; padding:8px 10px; border-radius:11px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.05; }
       #play .hud-xp small { color:#8ba0b8; letter-spacing:.15em; }
       #play .hud-xp b { color:#f7d98a; text-shadow:0 0 12px rgba(247,217,138,.4); letter-spacing:.08em; }
-      #play .hud-actions>button { width:46px; height:42px; border-radius:11px; color:#e6fbff; transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease; flex:0 0 auto; pointer-events:auto; }
+      #play .hud-actions>button { width:46px; height:42px; border-radius:11px; color:#ffe7a6; transition:transform .12s ease,box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 12px 28px rgba(0,0,0,.34), 0 0 26px rgba(255,208,110,.18); pointer-events:auto; }
       #play .hud-actions>button:hover,
       #play .hud-actions>button:focus-visible { transform:translateY(-1px); border-color:rgba(141,244,255,.72); box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 12px 28px rgba(0,0,0,.34),0 0 26px rgba(141,244,255,.18); }
       #play .world-marker { padding:8px 12px; border:1px solid rgba(247,217,138,.24); border-radius:9px; background:linear-gradient(90deg,rgba(7,14,24,.9),rgba(7,14,24,.48)); box-shadow:0 10px 26px rgba(0,0,0,.25),0 0 20px rgba(247,217,138,.04); }
