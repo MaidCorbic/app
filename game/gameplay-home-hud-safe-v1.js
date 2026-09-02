@@ -164,9 +164,6 @@
       return button;
     };
 
-    const faq = make('faq', 'FAQ', 'HELP · GAME SYSTEMS', () => window.relayOpenInfo?.('faq'));
-    const update = make('update', 'UPDATE', 'LATEST PATCHES · LIVE', () => window.relayOpenInfo?.('update'));
-
     if (options) nav.appendChild(options);
     else nav.appendChild(make('options', 'OPTIONS', 'SETTINGS · CONTROLS', () => nativeClick(q('[data-title-panel="controls"]'))));
     nav.appendChild(faq);
