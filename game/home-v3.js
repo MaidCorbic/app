@@ -201,7 +201,7 @@
             <button class="home-v3-continue" type="button" data-v3-continue hidden>CONTINUE</button>
           </div>
         </section>
-        <nav class="home-v3-side" aria-label="Main menu">
+       <nav class="home-v3-side" aria-label="Main menu"></nav>
           <button class="home-v3-card" type="button" data-v3-options><span>OPTIONS</span><small>SETTINGS · AUDIO · DISPLAY</small></button>
           <button class="home-v3-card" type="button" data-v3-exit><span>EXIT</span><small>CLOSE SESSION</small></button>
         </nav>
