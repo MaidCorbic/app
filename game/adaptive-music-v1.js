@@ -24,7 +24,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,
     C5:523.25,D5:587.33,E5:659.25,G5:783.99,A5:880
   };
-  // Four bright arcade progressions; each intensity keeps the same musical identity.
   const chords=[
     [N.C4,N.E4,N.G4], [N.A3,N.C4,N.E4], [N.F3,N.A3,N.C4], [N.G3,N.B3,N.D4]
   ];
@@ -114,18 +113,18 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         tone(chord[2],beat*.72,.030,'sine',when);
         kick(when,beat);
       }
-     if(i%2===0){
-  const f=melody[(i/2+bar*3)%melody.length];
-  tone(f,beat*.42,.040+s.intensity*.004,'triangle',when);
-}
+      if(i%2===0){
+        const f=melody[(i/2+bar*3)%melody.length];
+        tone(f,beat*.42,.040+s.intensity*.004,'triangle',when);
+      }
       if(s.intensity>=1&&i%4===2){
         const f=melody[(i+bar)%melody.length]*.5;
         tone(f,beat*.55,.028,'triangle',when);
       }
       if(s.intensity>=2&&i%4===3){
-  const f=melody[(i+5+bar)%melody.length];
-  tone(f,beat*.24,.025,'triangle',when);
-}
+        const f=melody[(i+5+bar)%melody.length];
+        tone(f,beat*.24,.025,'triangle',when);
+      }
       if(s.intensity>=3&&i%2===1){
         tone(chord[(i/2)%3]*2,beat*.18,.022,'triangle',when);
       }
@@ -222,6 +221,14 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     RunnerScene.prototype.__relayAdaptiveMusicV3Wrapped=true;
   }
 
+  const bindReadyScene=event=>{
+    const scene=event?.detail?.scene||window.__relayRunnerScene;
+    if(scene) bind(scene);
+    if(s.unlocked&&!s.paused) start();
+  };
+  window.addEventListener('relay:runner-scene-ready',bindReadyScene,{passive:true});
+  if(window.__relayRunnerScene) bindReadyScene({detail:{scene:window.__relayRunnerScene}});
+
   const gesture=()=>{ unlock(); };
   document.addEventListener('pointerdown',gesture,{capture:true,passive:true});
   document.addEventListener('touchstart',gesture,{capture:true,passive:true});
@@ -231,8 +238,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     else{s.paused=false;if(s.unlocked&&s.scene)start();}
   });
 
-  // Recovery watchdog: if a valid gesture unlocked the context before Phaser
-  // finished booting, restart the existing scheduler as soon as the live scene is active.
   s.watchdog=window.setInterval(()=>{
     if(!s.enabled||!s.unlocked||s.paused||document.hidden)return;
     if(s.scene?.sys?.isActive?.()&&!s.running)start();
