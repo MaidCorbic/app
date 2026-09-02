@@ -29,6 +29,7 @@
       /* Only the duplicate lower FAQ/UPDATE cards are retired. The existing top HOME navigation remains untouched. */
       #intro.home-v3 .title-secondary > [data-safe-home="faq"],
       #intro.home-v3 .title-secondary > [data-safe-home="update"] { display:none!important; visibility:hidden!important; pointer-events:none!important; }
+      /* home-v3.js and safe-v2 both style the generated side menu. Keep it retired so the legacy title-secondary owner is the only visible stack. */
       #intro.home-v3.home-v3 .home-v3-side.home-v3-side { display:none!important; visibility:hidden!important; opacity:0!important; pointer-events:none!important; }
       #intro.home-v3 .title-secondary{
         display:flex!important; flex-direction:column!important; align-items:stretch!important; justify-content:flex-start!important;
@@ -58,6 +59,7 @@
       #relayInfoPanel.hidden,#titlePanel.hidden{pointer-events:none!important;}
       #relayInfoPanel:not(.hidden),#titlePanel:not(.hidden){pointer-events:auto!important;}
 
+      /* GAMEPLAY — remove secondary/diagnostic button HUDs and keep the objective fixed. */
       #game #play .input-guide,
       #game #play .mobile-bottom-hud,
       #game #play .relay-debug-hud,
@@ -78,6 +80,8 @@
       }
       #game .world-marker span{display:block!important;color:#ffd06e!important;font:900 6px/1 'DM Mono',monospace!important;letter-spacing:1.35px!important;}
       #game .world-marker b{display:block!important;margin-top:4px!important;color:#f4f7fa!important;font:900 9px/1.15 'DM Mono',monospace!important;letter-spacing:.45px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+
+      /* Ensure the main HUD remains the only top HUD on desktop and mobile. */
       #game #play .hud{z-index:300!important;pointer-events:none!important;}
       #game #play .hud > *{pointer-events:auto!important;}
       #game #play .hud-route,#game #play .hud-progress,#game #play .hud-xp,#game #play #pause{
@@ -86,9 +90,17 @@
       }
       #game #play .hud-progress>div{background:rgba(255,255,255,.045)!important;border-color:rgba(255,208,110,.16)!important;}
       #game #play .hud-progress i{background:linear-gradient(90deg,#b47a1e,#ffd06e,#fff0b5)!important;box-shadow:0 0 12px rgba(255,208,110,.28)!important;}
-      @media(max-width:900px){#game .world-marker{left:10px!important;top:67px!important;width:min(250px,44vw)!important;}}
-      @media(max-width:760px){#game .world-marker{left:8px!important;top:58px!important;width:min(218px,49vw)!important;padding:7px 9px!important;}#intro.home-v3 .title-secondary > button{min-height:50px!important;padding:11px 12px!important;}}
-      @media(max-width:520px){#game .world-marker{left:8px!important;top:54px!important;width:min(202px,55vw)!important;}}
+
+      @media(max-width:900px){
+        #game .world-marker{left:10px!important;top:67px!important;width:min(250px,44vw)!important;}
+      }
+      @media(max-width:760px){
+        #game .world-marker{left:8px!important;top:58px!important;width:min(218px,49vw)!important;padding:7px 9px!important;}
+        #intro.home-v3 .title-secondary > button{min-height:50px!important;padding:11px 12px!important;}
+      }
+      @media(max-width:520px){
+        #game .world-marker{left:8px!important;top:54px!important;width:min(202px,55vw)!important;}
+      }
     `;
     document.head.appendChild(style);
   };
@@ -100,15 +112,22 @@
     const scene = window.__relayRunnerScene;
     const list = scene?.children?.list;
     if (!Array.isArray(list)) return;
+
     for (const child of list) {
       const text = typeof child?.text === 'string' ? child.text.trim() : '';
       const normalized = text.toUpperCase();
       if (!text) continue;
       if (/DYNAMIC\s+CROWD/.test(normalized) || /^V10\b/.test(normalized) || /MISSION\s+INTELLIGENCE/.test(normalized)) {
-        try { child.disableInteractive?.(); child.setVisible?.(false); child.setAlpha?.(0); child.setActive?.(false); } catch {}
+        try {
+          child.disableInteractive?.();
+          child.setVisible?.(false);
+          child.setAlpha?.(0);
+          child.setActive?.(false);
+        } catch {}
         try { child.parentContainer?.setVisible?.(false); } catch {}
       }
     }
+
     for (const container of list) {
       const children = container?.list;
       if (container?.type !== 'Container' || !Array.isArray(children)) continue;
@@ -116,7 +135,9 @@
         const text = typeof node?.text === 'string' ? node.text.trim().toUpperCase() : '';
         return /DYNAMIC\s+CROWD/.test(text) || /^V10\b/.test(text) || /MISSION\s+INTELLIGENCE/.test(text);
       });
-      if (hasHiddenLabel) { try { container.setVisible(false); container.setAlpha(0); container.setActive(false); } catch {} }
+      if (hasHiddenLabel) {
+        try { container.setVisible(false); container.setAlpha(0); container.setActive(false); } catch {}
+      }
     }
   };
 
@@ -124,22 +145,31 @@
     const intro = $('intro');
     const nav = intro?.querySelector('.title-secondary');
     if (!intro || !nav || intro.classList.contains('hidden')) return;
+
     const options = nav.querySelector('[data-title-panel="controls"]');
     const exit = nav.querySelector('#exitTitle');
     const existingFaq = nav.querySelector('[data-safe-home="faq"]');
     const existingUpdate = nav.querySelector('[data-safe-home="update"]');
+
     qa('[data-v3-faq],[data-v3-update],[data-v3-options],[data-v3-exit],.relay-home-nav-card,.relay-v4-home-btn', nav).forEach(node => node.remove());
     qa('[data-safe-home="faq"],[data-safe-home="update"]', nav).forEach(node => node.remove());
+
     const make = (kind, label, detail, action) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.dataset.safeHome = kind;
       button.innerHTML = `<span>${label}</span><small>${detail}</small>`;
-      button.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); try { action(); } catch {} });
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        try { action(); } catch {}
+      });
       return button;
     };
+
     const faq = make('faq', 'FAQ', 'HELP · GAME SYSTEMS', () => window.relayOpenInfo?.('faq'));
     const update = make('update', 'UPDATE', 'LATEST PATCHES · LIVE', () => window.relayOpenInfo?.('update'));
+
     if (options) nav.appendChild(options);
     else nav.appendChild(make('options', 'OPTIONS', 'SETTINGS · CONTROLS', () => nativeClick(q('[data-title-panel="controls"]'))));
     nav.appendChild(faq);
@@ -152,9 +182,20 @@
     const panel = $('relayInfoPanel');
     if (!panel || panel.dataset.safeHardened === '1') return;
     panel.dataset.safeHardened = '1';
-    const close = () => { panel.classList.add('hidden'); panel.classList.remove('relay-update-mode'); };
-    panel.addEventListener('click', (event) => { const target = event.target; if (target?.closest?.('[data-relay-close]') || target === panel) close(); });
-    window.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+
+    const close = () => {
+      panel.classList.add('hidden');
+      panel.classList.remove('relay-update-mode');
+    };
+
+    panel.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target?.closest?.('[data-relay-close]') || target === panel) close();
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') close();
+    });
   };
 
   const boot = () => {
