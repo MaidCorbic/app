@@ -675,6 +675,95 @@
     margin: 20px auto 24px !important;
   }
 }
+
+/* ZIPPER FIX V2 */
+.home-v3-play {
+  position: relative !important;
+  min-height: 116px !important;
+  height: 116px !important;
+  box-sizing: border-box !important;
+  padding: 16px 18px 18px !important;
+  border-radius: 15px !important;
+  overflow: visible !important;
+  isolation: isolate;
+}
+
+.home-v3-play .home-v3-play-label {
+  position: relative !important;
+  z-index: 5 !important;
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  text-align: center !important;
+  font-size: 16px !important;
+  line-height: 1.15 !important;
+  letter-spacing: .17em !important;
+  font-weight: 900 !important;
+}
+
+.home-v3-play .home-v3-play-hint {
+  position: relative !important;
+  z-index: 5 !important;
+  display: block !important;
+  width: 100% !important;
+  margin: 5px 0 12px !important;
+  text-align: center !important;
+  font-size: 8px !important;
+  line-height: 1.2 !important;
+  letter-spacing: .18em !important;
+  white-space: nowrap !important;
+}
+
+.home-v3-play .home-v3-play-track {
+  position: relative !important;
+  z-index: 2 !important;
+  width: auto !important;
+  height: 8px !important;
+  margin: 10px 18px 0 !important;
+  border-radius: 999px !important;
+  overflow: visible !important;
+}
+
+.home-v3-play .home-v3-play-fill {
+  height: 100% !important;
+  border-radius: inherit !important;
+}
+
+.home-v3-play .home-v3-play-knob {
+  position: relative !important;
+  z-index: 6 !important;
+  width: 50px !important;
+  height: 50px !important;
+  margin-top: -25px !important;
+  flex: 0 0 auto !important;
+}
+
+@media (max-width: 700px) {
+  .home-v3-play {
+    min-height: 104px !important;
+    height: 104px !important;
+    padding: 14px 14px 16px !important;
+  }
+
+  .home-v3-play .home-v3-play-label {
+    font-size: 13px !important;
+  }
+
+  .home-v3-play .home-v3-play-hint {
+    margin-bottom: 10px !important;
+    font-size: 7px !important;
+  }
+
+  .home-v3-play .home-v3-play-track {
+    margin-inline: 14px !important;
+  }
+
+  .home-v3-play .home-v3-play-knob {
+    width: 46px !important;
+    height: 46px !important;
+    margin-top: -23px !important;
+  }
+}
     `;
     document.head.appendChild(style);
   };
