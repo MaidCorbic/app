@@ -764,6 +764,10 @@
     margin-top: -23px !important;
   }
 }
+/* REMOVE DUPLICATE HOME FAQ ONLY */
+#intro.home-v3 .home-v3-side [data-v3-faq] {
+  display: none !important;
+}
     `;
     document.head.appendChild(style);
   };
