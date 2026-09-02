@@ -115,7 +115,6 @@ import './p1-gameplay-correctness-v1.js';
 import './p2-character-presentation-v4.js';
 import './p2-ux-controls-v1.js';
 import './relay-final-layout-v2.js';
-import './gameplay-home-hud-safe-v1.js';
 import './gameplay-home-hud-safe-v2.js';
 import './gameplay-audio-start-v2.js';
 import './runtime-authority-v1.js';
