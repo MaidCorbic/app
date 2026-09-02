@@ -5,7 +5,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 // This layer owns one player visual state, wings, and a compact visible HUD.
 (() => {
   'use strict';
-  if (!RunnerScene.prototype || window.__relayP2CharacterPresentationV4) return;
+  if (!RunnerScene?.prototype || window.__relayP2CharacterPresentationV4) return;
   window.__relayP2CharacterPresentationV4 = true;
 
   const states = new WeakMap();
@@ -19,15 +19,14 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const style = document.createElement('style');
     style.id = 'relay-p2-character-v4-style';
     style.textContent = `
-#relayP2CharacterHud{position:fixed;left:50%;bottom:clamp(92px,11vh,124px);z-index:960;display:grid;grid-template-columns:auto auto;gap:4px 8px;align-items:center;padding:7px 11px;border:1px solid rgba(174,227,127,.35);border-radius:8px;background:rgba(23,35,51,.96);opacity:0;transform:translateX(-50%) translateY(8px);transition:opacity .3s ease,transform .3s ease;pointer-events:none}
+#relayP2CharacterHud{position:fixed;left:50%;bottom:clamp(92px,11vh,124px);z-index:960;display:grid;grid-template-columns:auto auto;gap:4px 8px;align-items:center;padding:7px 11px;border:1px solid rgba(141,244,255,.22);border-radius:13px;background:rgba(3,10,20,.78);backdrop-filter:blur(10px);box-shadow:0 10px 28px rgba(0,0,0,.32);transform:translateX(-50%) translateY(7px);opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease}
 #relayP2CharacterHud.show{opacity:.96;transform:translateX(-50%) translateY(0)}
 #relayP2CharacterHud .dot{grid-row:1/span 2;width:6px;height:6px;border-radius:50%;background:#8df4ff;box-shadow:0 0 12px rgba(141,244,255,.75)}
 #relayP2CharacterHud.flight .dot{background:#aee37f;box-shadow:0 0 14px rgba(174,227,127,.85)}
 #relayP2CharacterHud.dash .dot{background:#ffd06e;box-shadow:0 0 14px rgba(255,208,110,.9)}
 #relayP2CharacterHud .label{font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;color:#e7fbff;white-space:nowrap}
 #relayP2CharacterHud .detail{font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;color:#7892a8;white-space:nowrap}
-.relay-p2-flight-button{display:none;position:fixed;right:14px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:965;width:60px;height:54px;border:1px solid rgba(174,227,127,.55);border-radius:6px;background:rgba(23,35,51,.92);cursor:pointer;transition:all .2s ease;font:600 11px ui-system-ui,-apple-system,sans-serif;color:#e7fbff;text-transform:uppercase;letter-spacing:.08em}
-.relay-p2-flight-button:hover{border-color:rgba(174,227,127,.75);background:rgba(23,35,51,.98)}
+.relay-p2-flight-button{display:none;position:fixed;right:14px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:965;width:60px;height:54px;border:1px solid rgba(174,227,127,.55);border-radius:15px;background:linear-gradient(145deg,rgba(14,32,18,.98),rgba(5,14,9,.99));color:#efffdc;font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;box-shadow:0 0 18px rgba(174,227,127,.12),0 12px 28px rgba(0,0,0,.42);touch-action:manipulation}
 .relay-p2-flight-button.active{border-color:#aee37f;box-shadow:0 0 26px rgba(174,227,127,.35),0 12px 28px rgba(0,0,0,.42);transform:scale(.95)}
 @media(max-width:520px){#relayP2CharacterHud{bottom:158px}.relay-p2-flight-button{display:block}}
 @media(max-width:380px){#relayP2CharacterHud{bottom:143px;padding:6px 8px}.#relayP2CharacterHud .detail{font-size:6px}.relay-p2-flight-button{right:9px;width:54px;height:50px}}
@@ -160,9 +159,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const originalUpdate = RunnerScene.prototype.update;
   const originalShutdown = RunnerScene.prototype.shutdown;
 
-  // Module-level guard above prevents double installation after repeated imports/reloads.
-  // Preserve the original hooks for the remainder of this module; runtime wrapper audit
-  // accepts this module-level ownership contract.
   RunnerScene.prototype.create = function p2V4Create(...args) {
     const result = originalCreate.apply(this, args);
     mount(this);

@@ -1,4 +1,4 @@
-// MOBILE INPUT SINGLE OWNER V9
+// MOBILE INPUT SINGLE OWNER V7
 // Replace legacy-bound DOM nodes before attaching the single mobile input owner.
 const ACTION_KEYS = Object.freeze({
   jump: [32, ' ', 'Space'], fire: [69, 'e', 'KeyE'], sword: [81, 'q', 'KeyQ'],
@@ -17,64 +17,42 @@ const keyEvent = (code, key, type, keyCode) => {
 const emit = ([keyCode, key, code], type) => window.dispatchEvent(keyEvent(code, key, type, keyCode));
 const replaceNode = node => { const clone = node.cloneNode(true); node.replaceWith(clone); return clone; };
 
-// Legacy boot code can temporarily add an action button before this single-owner
-// module runs. Normalize that DOM on every device so duplicate actions never remain
-// in the page, even when touch controls are hidden on desktop.
-const normalizeActionButtons = root => {
-  const seen = new Set();
-  root.querySelectorAll('[data-mobile-action]').forEach(node => {
-    const action = node.dataset.mobileAction;
-    if (!ACTION_KEYS[action] || seen.has(action)) node.remove();
-    else seen.add(action);
-  });
-};
-
 const install = () => {
+  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV7) return;
   const root = document.querySelector('.mobile-controls');
   if (!root) return;
-  normalizeActionButtons(root);
-  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV9) return;
 
+  const seen = new Set();
   const actionButtons = [];
-  root.querySelectorAll('[data-mobile-action]').forEach(node => actionButtons.push(replaceNode(node)));
+  root.querySelectorAll('[data-mobile-action]').forEach(node => {
+    const action = node.dataset.mobileAction;
+    if (!ACTION_KEYS[action] || seen.has(action)) { node.remove(); return; }
+    seen.add(action); actionButtons.push(replaceNode(node));
+  });
 
   const joystickNode = root.querySelector('[data-mobile-joystick]');
   const joystick = joystickNode ? replaceNode(joystickNode) : null;
   const thumb = joystick?.querySelector('.mobile-joystick-thumb');
   if (!joystick || !thumb) return;
 
-  window.__relayMobileInputSingleOwnerV9 = true;
-  root.dataset.mobileControlsOwner = 'single-owner-v9';
+  window.__relayMobileInputSingleOwnerV7 = true;
+  root.dataset.mobileControlsOwner = 'single-owner-v7';
 
-  const actionPointers = new Map();
-  const pointerActions = new Map();
+  const activePointers = new Map();
   const release = (button, pointerId) => {
+    if (!activePointers.has(pointerId)) return;
+    activePointers.delete(pointerId);
     const action = button.dataset.mobileAction;
-    const pointers = actionPointers.get(action);
-    if (!pointers?.has(pointerId)) return;
-    pointers.delete(pointerId);
-    pointerActions.delete(pointerId);
-    if (pointers.size === 0) {
-      actionPointers.delete(action);
-      if (ACTION_KEYS[action]) emit(ACTION_KEYS[action], 'keyup');
-      button.classList.remove('is-active');
-      button.setAttribute('aria-pressed', 'false');
-    }
+    if (ACTION_KEYS[action]) emit(ACTION_KEYS[action], 'keyup');
+    button.classList.remove('is-active'); button.setAttribute('aria-pressed', 'false');
   };
-
   actionButtons.forEach(button => {
     button.setAttribute('aria-pressed', 'false');
     button.addEventListener('pointerdown', event => {
       event.preventDefault(); event.stopPropagation();
-      const action = button.dataset.mobileAction;
-      if (!ACTION_KEYS[action] || pointerActions.has(event.pointerId)) return;
-      let pointers = actionPointers.get(action);
-      if (!pointers) { pointers = new Set(); actionPointers.set(action, pointers); }
-      const wasEmpty = pointers.size === 0;
-      pointers.add(event.pointerId);
-      pointerActions.set(event.pointerId, action);
-      button.setPointerCapture?.(event.pointerId);
-      if (wasEmpty) emit(ACTION_KEYS[action], 'keydown');
+      if (activePointers.has(event.pointerId)) return;
+      activePointers.set(event.pointerId, true); button.setPointerCapture?.(event.pointerId);
+      emit(ACTION_KEYS[button.dataset.mobileAction], 'keydown');
       button.classList.add('is-active'); button.setAttribute('aria-pressed', 'true');
     }, { passive: false });
     button.addEventListener('pointerup', event => release(button, event.pointerId));
@@ -83,11 +61,12 @@ const install = () => {
   });
 
   const releaseAll = () => {
-    for (const [action, pointers] of actionPointers) {
-      if (pointers.size && ACTION_KEYS[action]) emit(ACTION_KEYS[action], 'keyup');
-    }
-    actionPointers.clear(); pointerActions.clear();
-    actionButtons.forEach(button => { button.classList.remove('is-active'); button.setAttribute('aria-pressed', 'false'); });
+    actionButtons.forEach(button => {
+      const key = ACTION_KEYS[button.dataset.mobileAction];
+      if (key && button.classList.contains('is-active')) emit(key, 'keyup');
+      button.classList.remove('is-active'); button.setAttribute('aria-pressed', 'false');
+    });
+    activePointers.clear();
   };
   window.addEventListener('blur', releaseAll); window.addEventListener('pagehide', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
@@ -97,6 +76,9 @@ const install = () => {
   let pointerId = null;
   let direction = null;
 
+  // Keep the existing keyboard path as a fallback, but also drive Phaser's
+  // actual Key objects. Synthetic DOM KeyboardEvents do not reliably update
+  // Phaser's internal isDown state on mobile/WebView browsers.
   const getScene = () => window.__relayRunnerScene?.input?.keyboard ? window.__relayRunnerScene : null;
   const setPhaserDirection = next => {
     const scene = getScene();

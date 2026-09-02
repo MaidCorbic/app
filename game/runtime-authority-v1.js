@@ -12,8 +12,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
  *      twice inside the same pointer gesture;
  *   3) the legacy main.js music bed remains the single music owner. The
  *      adaptive music module is kept loadable for compatibility, but it is
- *      prevented from starting a second WebAudio music graph;
- *   4) completion events from an older run cannot leak into a restarted run.
+ *      prevented from starting a second WebAudio music graph.
  *
  * The coordinator is intentionally defensive and scoped per live game/scene.
  */
@@ -131,16 +130,6 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         if (now - previous < 90) return false;
         lastActionAt.set(action || '__empty__', now);
       }
-
-      if (eventName === 'complete') {
-        const activeScene = game.scene?.getScene?.('runner');
-        const emittedRunId = args.length ? args[args.length - 1] : undefined;
-        const activeRunId = activeScene?.runId;
-        if (!activeScene || activeScene.finished === false && activeScene.respawning === true) return false;
-        if (activeRunId != null && emittedRunId != null && String(activeRunId) !== String(emittedRunId)) return false;
-        if (!activeScene?.sys?.isActive?.() && !activeScene?.sys?.isPaused?.()) return false;
-      }
-
       return originalEmit(eventName, ...args);
     };
 
