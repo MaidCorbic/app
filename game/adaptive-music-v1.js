@@ -15,7 +15,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const s = {
     ctx:null, master:null, compressor:null, music:null, filter:null,
     scene:null, cleanup:null, timer:0, watchdog:0, running:false, unlocked:false,
-    paused:false, enabled:true, volume:.42, intensity:0, target:0,
+    paused:false, enabled:true, volume:.32, intensity:0, target:0,
     step:0, next:0, tension:0
   };
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -38,15 +38,15 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     s.compressor=s.ctx.createDynamicsCompressor();
     s.compressor.threshold.value=-18;
     s.compressor.knee.value=16;
-    s.compressor.ratio.value=4;
+    s.compressor.ratio.value=3;
     s.compressor.attack.value=.008;
     s.compressor.release.value=.16;
     s.filter=s.ctx.createBiquadFilter();
     s.filter.type='lowpass';
-    s.filter.frequency.value=2100;
+    s.filter.frequency.value=1800;
     s.filter.Q.value=.45;
     s.music=s.ctx.createGain();
-    s.music.gain.value=.9;
+    s.music.gain.value=.75;
     s.music.connect(s.filter).connect(s.compressor).connect(s.master).connect(s.ctx.destination);
     return s.ctx;
   }
@@ -66,7 +66,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const t=s.ctx.currentTime;
     s.master.gain.cancelScheduledValues(t);
     s.master.gain.setValueAtTime(Math.max(.0001,s.master.gain.value),t);
-    s.master.gain.linearRampToValueAtTime(clamp(value,.0001,.8),t+fade);
+    s.master.gain.linearRampToValueAtTime(clamp(value,.0001,.6),t+fade);
   }
 
   function tone(freq,dur,gain,type,when){
@@ -92,7 +92,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       o.frequency.setValueAtTime(110,when);
       o.frequency.exponentialRampToValueAtTime(52,when+.11);
       g.gain.setValueAtTime(.0001,when);
-      g.gain.exponentialRampToValueAtTime(.09,when+.008);
+      g.gain.exponentialRampToValueAtTime(.055,when+.008);
       g.gain.exponentialRampToValueAtTime(.0001,when+Math.min(.16,beat*.45));
       o.connect(g).connect(s.music); o.start(when); o.stop(when+.18);
     }catch{}
@@ -114,18 +114,18 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         tone(chord[2],beat*.72,.030,'sine',when);
         kick(when,beat);
       }
-      if(i%2===0){
-        const f=melody[(i/2+bar*3)%melody.length];
-        tone(f,beat*.42,.050+s.intensity*.006,'square',when);
-      }
+     if(i%2===0){
+  const f=melody[(i/2+bar*3)%melody.length];
+  tone(f,beat*.42,.040+s.intensity*.004,'triangle',when);
+}
       if(s.intensity>=1&&i%4===2){
         const f=melody[(i+bar)%melody.length]*.5;
         tone(f,beat*.55,.028,'triangle',when);
       }
       if(s.intensity>=2&&i%4===3){
-        const f=melody[(i+5+bar)%melody.length];
-        tone(f,beat*.24,.035,'square',when);
-      }
+  const f=melody[(i+5+bar)%melody.length];
+  tone(f,beat*.24,.025,'triangle',when);
+}
       if(s.intensity>=3&&i%2===1){
         tone(chord[(i/2)%3]*2,beat*.18,.022,'triangle',when);
       }
