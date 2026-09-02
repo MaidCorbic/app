@@ -112,14 +112,37 @@
     requestAnimationFrame(frame);
   }
 
-  function startMusic(){
-    let settings={};try{settings=JSON.parse(localStorage.getItem('relay-runner-state')||'{}')||{};}catch{}
-    if(settings.muted===true)return;
-    const volume=Number.isFinite(Number(settings.musicVolume))?Math.max(.05,Math.min(.85,Number(settings.musicVolume))):.55;
-    const music=window.relayAdaptiveMusic;
-    if(!music)return;
-    try{music.setEnabled?.(true);music.setVolume?.(volume);Promise.resolve(music.unlock?.()).then(ok=>{if(ok!==false&&gameplay())music.start?.();}).catch(()=>{});}catch{}
-  }
+ function startMusic() {
+  let settings = {};
+
+  try {
+    settings = JSON.parse(
+      localStorage.getItem('relay-runner-state') || '{}'
+    ) || {};
+  } catch {}
+
+  if (settings.muted === true) return;
+
+  const music = window.relayAdaptiveMusic;
+  if (!music) return;
+
+  const volume = Number.isFinite(Number(settings.musicVolume))
+    ? Math.max(0.05, Math.min(0.85, Number(settings.musicVolume)))
+    : 0.55;
+
+  try {
+    music.setEnabled?.(true);
+    music.setVolume?.(volume);
+
+    Promise.resolve(music.unlock?.())
+      .then(ok => {
+        if (ok === false) return;
+        if (!gameplay()) return;
+        music.start?.();
+      })
+      .catch(() => {});
+  } catch {}
+}
 
   function bindAudio(){
     const handler=e=>{if(e.type==='keydown'&&e.repeat)return;const t=e.target instanceof Element?e.target:null;if(t?.closest?.('#start,#continue,#launchJob,#again,#nextMission,#retry,[data-mobile-action]')||(e.type==='keydown'&&(e.key==='Enter'||e.code==='Space')))startMusic();};
