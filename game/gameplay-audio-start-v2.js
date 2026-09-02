@@ -4,75 +4,168 @@
  */
 (() => {
   'use strict';
+
   if (window.__relayGameplayAudioStartV3) return;
   window.__relayGameplayAudioStartV3 = true;
 
   const readState = () => {
     try {
-      const value = JSON.parse(localStorage.getItem('relay-runner-state') || 'null');
+      const value = JSON.parse(
+        localStorage.getItem('relay-runner-state') || 'null'
+      );
+
       return value && typeof value === 'object' ? value : {};
-    } catch { return {}; }
+    } catch {
+      return {};
+    }
   };
 
   const apply = () => {
     const music = window.relayAdaptiveMusic;
+
     if (!music) return false;
+
     try {
       const state = readState();
+
       if (state.muted === true) {
         music.setEnabled?.(false);
         return true;
       }
-      const volume = Number.isFinite(Number(state.musicVolume)) ? Number(state.musicVolume) : 0.55;
+
+      const volume = Number.isFinite(Number(state.musicVolume))
+        ? Number(state.musicVolume)
+        : 0.55;
+
       music.setEnabled?.(true);
       music.setVolume?.(volume);
+
       const unlock = music.unlock;
+
       if (typeof unlock === 'function') {
-        Promise.resolve(unlock.call(music)).then(ok => {
-          try {
-            if (ok !== false && document.getElementById('intro')?.classList.contains('hidden')) music.start?.();
-          } catch {}
-        }).catch(() => {});
-      } else if (document.getElementById('intro')?.classList.contains('hidden')) {
+        Promise.resolve(unlock.call(music))
+          .then(ok => {
+            try {
+              if (
+                ok !== false &&
+                document
+                  .getElementById('intro')
+                  ?.classList.contains('hidden')
+              ) {
+                music.start?.();
+              }
+            } catch {}
+          })
+          .catch(() => {});
+      } else if (
+        document
+          .getElementById('intro')
+          ?.classList.contains('hidden')
+      ) {
         music.start?.();
       }
+
       return true;
     } catch {
       return false;
     }
   };
 
-  const start = () => {
-    let tries = 0;
-    const retry = () => {
-      const applied = apply();
-      const state = window.relayAdaptiveMusic?.getState?.();
-      if (state?.running || state?.enabled === false || ++tries >= 40) return;
-      window.setTimeout(retry, 150);
-    };
-    retry();
+let startTimer = 0;
+let starting = false;
+
+const start = () => {
+  if (starting) return;
+
+  const current = window.relayAdaptiveMusic?.getState?.();
+
+  if (current?.running || current?.enabled === false) {
+    return;
+  }
+
+  starting = true;
+
+  let tries = 0;
+
+  const retry = () => {
+    const applied = apply();
+    const state = window.relayAdaptiveMusic?.getState?.();
+
+    if (
+      state?.running ||
+      state?.enabled === false ||
+      ++tries >= 40
+    ) {
+      starting = false;
+      startTimer = 0;
+      return;
+    }
+
+    startTimer = window.setTimeout(retry, 150);
   };
 
+  retry();
+};
   const isPlayGesture = event => {
     const target = event.target;
+
     if (!(target instanceof Element)) return false;
-    return !!target.closest('#start,#continue,[data-v3-play],[data-v3-continue],[data-final-home="options"],[data-action="play"],[data-action="continue"]');
+
+    return !!target.closest(
+      '#start,' +
+      '#continue,' +
+      '[data-v3-play],' +
+      '[data-v3-continue],' +
+      '[data-action="play"],' +
+      '[data-action="continue"]'
+    );
   };
 
-  document.addEventListener('pointerdown', event => {
-    if (isPlayGesture(event)) start();
-  }, { capture:true, passive:true });
-  document.addEventListener('click', event => {
-    if (isPlayGesture(event)) start();
-  }, { capture:true, passive:true });
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Enter' || event.code === 'Space') start();
-  }, { capture:true, passive:true });
+  document.addEventListener(
+    'pointerdown',
+    event => {
+      if (isPlayGesture(event)) {
+        start();
+      }
+    },
+    {
+      capture: true,
+      passive: true
+    }
+  );
 
-  window.addEventListener('relay:runner-scene-ready', () => start(), { passive:true });
+  document.addEventListener(
+    'keydown',
+    event => {
+      if (event.key === 'Enter' || event.code === 'Space') {
+        start();
+      }
+    },
+    {
+      capture: true,
+      passive: true
+    }
+  );
+
+  window.addEventListener(
+    'relay:runner-scene-ready',
+    () => start(),
+    {
+      passive: true
+    }
+  );
+
   window.setTimeout(() => {
-    if (document.getElementById('intro')?.classList.contains('hidden')) start();
+    if (
+      document
+        .getElementById('intro')
+        ?.classList.contains('hidden')
+    ) {
+      start();
+    }
   }, 500);
 
-  window.relayGameplayAudioStartV3 = { start };
+  window.relayGameplayAudioStartV3 = {
+    start
+  };
 })();
