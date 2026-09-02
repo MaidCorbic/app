@@ -772,6 +772,12 @@
 #intro.home-v3 .title-secondary > [data-safe-home="update"] {
   display: none !important;
 }
+/* REMOVE DUPLICATE RUNTIME HOME NAV */
+#intro.home-v3 .home-v3-side .relay-runtime-home-btn {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
     `;
     document.head.appendChild(style);
   };
