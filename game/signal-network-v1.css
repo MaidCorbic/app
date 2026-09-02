@@ -13,8 +13,8 @@
   opacity: 0;
   transition: opacity .18s ease, transform .22s cubic-bezier(.2,.75,.2,1);
   font: 800 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
-  color: #eaffff;
-  --network-accent: #8df4ff;
+  color: #fff4cf;
+  --network-accent: #ffd06e;
 }
 
 #signalNetworkV1.is-visible {
@@ -90,7 +90,7 @@
 #signalNetworkV1 .signal-network-detail {
   min-height: 9px;
   margin-top: 6px;
-  color: rgba(221,241,248,.72);
+  color: rgba(247,217,138,.72);
   font-size: 8px;
   letter-spacing: .08em;
 }
