@@ -49,9 +49,8 @@ let runSettled = false;
 const game = new Phaser.Game({ type: Phaser.AUTO, parent: 'phaser-game', width: 1280, height: 720, backgroundColor: '#091225', physics: { default: 'arcade', arcade: { gravity: { y: 1600 }, debug: false } }, scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }, scene: [] });
 game.scene.add('runner', RunnerScene, false);
 document.addEventListener('keydown', event => { if (event.key !== 'Escape') return; const runner = game.scene.getScene('runner'); if (runner?.infoCard) { event.preventDefault(); event.stopImmediatePropagation(); runner.dismissIntelCard(); } }, true);
-document.querySelectorAll('[data-mobile-action]').forEach(button => button.addEventListener('pointerdown', event => { event.preventDefault(); button.classList.add('is-active'); game.events.emit('mobile-action', button.dataset.mobileAction); window.setTimeout(() => button.classList.remove('is-active'), 100); }));
-document.querySelector('[data-mobile-action="sword"]')?.insertAdjacentHTML('beforebegin', '<button type="button" data-mobile-action="fire">FIRE<small>E</small></button>');
-document.querySelector('[data-mobile-action="fire"]')?.addEventListener('pointerdown', event => { event.preventDefault(); event.currentTarget.classList.add('is-active'); game.events.emit('mobile-action', 'fire'); window.setTimeout(() => event.currentTarget.classList.remove('is-active'), 100); });
+// Mobile input ownership lives exclusively in src/systems/mobile-input-single-owner-v1.js.
+// Do not create a second action dispatcher or inject duplicate buttons here.
 document.querySelector('[data-rotate-dismiss]')?.addEventListener('click', () => document.body.classList.add('rotate-dismissed'));
 window.addEventListener('orientationchange', () => document.body.classList.remove('rotate-dismissed'));
 const joystick = document.querySelector('[data-mobile-joystick]');
@@ -61,7 +60,12 @@ if (joystick && joystickThumb) {
   const deadzone = 10;
   let activePointerId = null;
   let currentDirection = null;
-  const setDirection = direction => { if (direction !== currentDirection) { currentDirection = direction; game.events.emit('mobile-move', direction); } };
+  const setDirection = direction => {
+    if (direction !== currentDirection) {
+      currentDirection = direction;
+      game.events.emit('mobile-move', direction);
+    }
+  };
   const moveThumb = (clientX, clientY) => {
     const rect = joystick.getBoundingClientRect();
     const dx = clientX - (rect.left + rect.width / 2);
@@ -81,17 +85,21 @@ if (joystick && joystickThumb) {
     setDirection(null);
   };
   joystick.addEventListener('pointerdown', event => {
+    if (activePointerId !== null) return;
     activePointerId = event.pointerId;
     joystick.setPointerCapture?.(activePointerId);
     joystick.classList.add('is-active');
     moveThumb(event.clientX, event.clientY);
     event.preventDefault();
-  });
+  }, { passive: false });
   const trackDrag = event => { if (event.pointerId === activePointerId) { moveThumb(event.clientX, event.clientY); event.preventDefault(); } };
-  joystick.addEventListener('pointermove', trackDrag);
+  joystick.addEventListener('pointermove', trackDrag, { passive: false });
   window.addEventListener('pointermove', trackDrag, { passive: false });
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('pointercancel', endDrag);
+  window.addEventListener('blur', () => endDrag());
+  window.addEventListener('pagehide', () => endDrag());
+  document.addEventListener('visibilitychange', () => { if (document.hidden) endDrag(); });
 }
 let audioContext;
 let audioBed;
@@ -212,7 +220,7 @@ function renderStreak() {
   const outcome = $('finish').querySelector('.outcome');
   let finishStreak = outcome.querySelector('.finish-streak');
   if (!finishStreak) { finishStreak = document.createElement('p'); finishStreak.className = 'finish-streak'; outcome.querySelector('.reward').after(finishStreak); }
-  finishStreak.textContent = state.lastStreakBonus ? `NIGHT STREAK ${state.streak} · +${state.lastStreakBonus} BONUS XP` : `NIGHT STREAK ${state.streak} · RETURN TOMORROW FOR A BONUS`;
+  finishStreak.textContent = state.lastStreakBonus ? `NIGHT STREAK ${state.streak} · +${state.lastStreakBonus} BONUS XP` : `NIGHT STREAK ${state.streak || 0}`;
 }
 function renderHomeProgress() { if ($('homeXp')) $('homeXp').textContent = state.xp; if ($('homeCompleted')) $('homeCompleted').textContent = state.completed.length; if ($('homeSignals')) $('homeSignals').textContent = state.signals; $('continue').classList.toggle('hidden', !(state.xp || state.signals || state.completed.length)); renderMissionPreview(); renderStreak(); }
 function missionUnlocked(index) { const requirement = missions[index].unlockRequirement; return !requirement || state.completed.includes(requirement); }

@@ -8,7 +8,7 @@ const STORAGE_KEY = 'relay-signal-network-v1';
 const ROOT_ID = 'signalNetworkV1';
 
 export const NODE_PROFILES = [
-  { kind: 'SCAN', label: 'UPLINK SCAN', short: 'SCAN', accent: 0x8df4ff, css: '#8df4ff', description: 'Reveals the next signal chain.', reward: 'SIGNAL MAP' },
+ { kind: 'SCAN', label: 'UPLINK SCAN', short: 'SCAN', accent: 0xffd06e, css: '#ffd06e', description: 'Reveals the next signal chain.', reward: 'SIGNAL MAP' },
   { kind: 'BOOST', label: 'POWER SURGE', short: 'SURGE', accent: 0xffd06e, css: '#ffd06e', description: 'Restores combat resources and kicks the run forward.', reward: 'RESOURCE SURGE' },
   { kind: 'LINK', label: 'NETWORK LINK', short: 'LINK', accent: 0xc8b5ff, css: '#c8b5ff', description: 'Synchronizes the district relay.', reward: 'NETWORK STABLE' },
 ];
@@ -78,7 +78,7 @@ function nodeLabel(scene, node) {
   else node.text.setText(text);
 }
 
-function toast(text, accent = '#8df4ff', duration = 1300) {
+function toast(text, accent = '#ffd06e', duration = 1300) {
   const root = document.getElementById(ROOT_ID);
   if (!root) return;
   root.style.setProperty('--network-accent', accent);
@@ -139,7 +139,7 @@ function createNodeVisual(scene, node) {
 
 function drawLink(scene, from, to) {
   const beam = scene.add.graphics().setDepth(27);
-  beam.lineStyle(1, 0x8df4ff, .14);
+  beam.lineStyle(1, 0xffd06e, .14);
   beam.lineBetween(from.position[0], from.position[1], to.position[0], to.position[1]);
   return beam;
 }
@@ -154,12 +154,12 @@ function revealSignals(scene) {
   const playerX = Number(scene.player?.x || 0);
   const ahead = signals.filter(([x]) => Number(x) > playerX + 120).slice(0, 4);
   ahead.forEach(([x, y], index) => {
-    const marker = scene.add.circle(x, y, 22, 0x8df4ff, .04).setStrokeStyle(2, 0x8df4ff, .82).setDepth(29);
-    const tag = scene.add.text(x, y - 30, `UPLINK ${String(index + 1).padStart(2, '0')}`, { fontFamily: 'DM Mono', fontSize: '8px', color: '#8df4ff', stroke: '#030914', strokeThickness: 4 }).setOrigin(.5).setDepth(30);
+    const marker = scene.add.circle(x, y, 22, 0xffd06e, .04).setStrokeStyle(2, 0xffd06e, .82).setDepth(29);
+    const tag = scene.add.text(x, y - 30, `UPLINK ${String(index + 1).padStart(2, '0')}`, { fontFamily: 'DM Mono', fontSize: '8px', color: '#ffd06e', stroke: '#030914', strokeThickness: 4 }).setOrigin(.5).setDepth(30);
     scene.tweens.add({ targets: [marker, tag], alpha: 0, scale: 1.45, delay: 4200, duration: 700, onComplete: () => { marker.destroy(); tag.destroy(); } });
     scene.tweens.add({ targets: marker, scale: 1.35, yoyo: true, repeat: 5, duration: 340, ease: 'Sine.inOut' });
   });
-  toast('UPLINK SCAN COMPLETE', '#8df4ff', 1450);
+  toast('UPLINK SCAN COMPLETE', '#ffd06e', 1450);
   scene.game?.events?.emit?.('signal-network', { type: 'scan', count: ahead.length });
 }
 
@@ -207,7 +207,7 @@ function setNodeActive(scene, node) {
 
 function completeNetwork(scene, state) {
   if (state.current.stable) {
-    toast('NETWORK ALREADY STABLE', '#eaffff', 1150);
+    toast('NETWORK ALREADY STABLE', '#ffd06e', 1150);
     return;
   }
   state.current.stable = true;
@@ -216,9 +216,9 @@ function completeNetwork(scene, state) {
   scene.__signalNetworkStable = true;
   const goalX = scene.mission.goal?.x || scene.goal?.x || scene.player?.x || 0;
   const goalY = scene.mission.goal?.y || scene.goal?.y || scene.player?.y || 0;
-  const burst = scene.add.circle(goalX, goalY, 18, 0xc8b5ff, .12).setStrokeStyle(2, 0xeaffff, .85).setDepth(28);
+  const burst = scene.add.circle(goalX, goalY, 18, 0xc8b5ff, .12).setStrokeStyle(2, 0xffd06e, .85).setDepth(28);
   scene.tweens.add({ targets: burst, scale: 7, alpha: 0, duration: 1150, onComplete: () => burst.destroy() });
-  toast('NETWORK STABLE // DISTRICT LINKED', '#eaffff', 1850);
+  toast('NETWORK STABLE // DISTRICT LINKED', '#ffd06e', 1850);
   scene.game?.events?.emit?.('signal-network-complete', { missionId: scene.mission.id, linkedNodes: state.current.linked.length, version: VERSION });
 }
 
