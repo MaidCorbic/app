@@ -43,13 +43,14 @@
   };
 
   const start = () => {
-    if (apply()) return;
     let tries = 0;
     const retry = () => {
-      if (apply() || ++tries >= 20) return;
+      const applied = apply();
+      const state = window.relayAdaptiveMusic?.getState?.();
+      if (state?.running || state?.enabled === false || ++tries >= 40) return;
       window.setTimeout(retry, 150);
     };
-    window.setTimeout(retry, 0);
+    retry();
   };
 
   const isPlayGesture = event => {
