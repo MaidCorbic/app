@@ -203,7 +203,6 @@
         </section>
         <nav class="home-v3-side" aria-label="Main menu">
           <button class="home-v3-card" type="button" data-v3-options><span>OPTIONS</span><small>SETTINGS · AUDIO · DISPLAY</small></button>
-          <button class="home-v3-card" type="button" data-v3-faq><span>FAQ</span><small>HELP · GAME SYSTEMS</small></button>
           <button class="home-v3-card" type="button" data-v3-exit><span>EXIT</span><small>CLOSE SESSION</small></button>
         </nav>
       </main>
