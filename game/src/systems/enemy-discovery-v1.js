@@ -76,6 +76,29 @@ text-shadow:0 0 16px rgba(255,208,110,.12)}
   outline:none;
   transform:translateY(-1px);
 }
+#game .relay-enemy-card button{
+  border-color:rgba(255,208,110,.55)!important;
+  background:linear-gradient(
+    135deg,
+    rgba(255,208,110,.12),
+    rgba(255,208,110,.035)
+  )!important;
+  color:#ffe7a6!important;
+  box-shadow:0 0 22px rgba(255,208,110,.08)!important;
+}
+
+#game .relay-enemy-card button:hover,
+#game .relay-enemy-card button:focus-visible{
+  border-color:#ffd06e!important;
+  background:linear-gradient(
+    135deg,
+    rgba(255,208,110,.18),
+    rgba(255,208,110,.055)
+  )!important;
+  color:#fff0b5!important;
+  box-shadow:0 0 26px rgba(255,208,110,.18)!important;
+  outline:none!important;
+}
     @media(max-width:700px){.relay-enemy-discovery{padding:14px;align-items:end;padding-bottom:max(18px,env(safe-area-inset-bottom) + 12px)}.relay-enemy-card{width:min(460px,calc(100vw - 28px));padding:18px}.relay-enemy-card h2{font-size:23px}}
   `;
   document.head.appendChild(style);
