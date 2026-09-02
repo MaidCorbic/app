@@ -622,17 +622,6 @@
   const boot = () => {
     injectStyle();
     installHome();
-
-    /*
-      Legacy scripts can execute later.
-      Re-check periodically and restore
-      the exact FINAL four-button structure.
-    */
-
-    window.setInterval(
-      enforceFinalHome,
-      500
-    );
   };
 
   if (
