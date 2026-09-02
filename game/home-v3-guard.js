@@ -768,6 +768,10 @@
 #intro.home-v3 .home-v3-side [data-v3-faq] {
   display: none !important;
 }
+/* HIDE ONLY THE DUPLICATE HOME UPDATE CARD */
+#intro.home-v3 .title-secondary > [data-safe-home="update"] {
+  display: none !important;
+}
     `;
     document.head.appendChild(style);
   };
