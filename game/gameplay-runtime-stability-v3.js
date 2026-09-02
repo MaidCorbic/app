@@ -156,7 +156,13 @@
     installHome(); bindAudio(); smoothCountdown();
 const introObserver = new MutationObserver(() => {
   const side = q('#intro .home-v3-side');
-  if (side && side.querySelectorAll('[data-runtime-home]').length !== 4) {
+  if (!side) return;
+
+  const duplicates = side.querySelectorAll(
+    '[data-runtime-home],[data-final-home],[data-v3-faq],[data-v3-update],[data-v3-options],[data-v3-exit],[data-unified-home]'
+  );
+
+  if (duplicates.length) {
     installHome();
   }
 });
