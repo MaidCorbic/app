@@ -19,21 +19,102 @@ const style = `
   animation:finishPanelIn .32s ease-out both;
 }
 #finish{z-index:70!important;background:radial-gradient(circle at 50% 24%,rgba(255,208,110,.08),rgba(3,8,16,.96) 48%,rgba(1,4,9,.99))!important;overflow:auto!important}
-#finish .outcome{position:relative;z-index:71;width:min(720px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;padding:clamp(20px,4vw,34px)!important;border:1px solid rgba(255,208,110,.22);background:linear-gradient(145deg,rgba(8,18,32,.98),rgba(3,8,15,.98));box-shadow:0 28px 90px rgba(0,0,0,.55),0 0 55px rgba(255,208,110,.055);box-sizing:border-box}
+##finish .outcome{position:relative;z-index:71;width:min(820px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;padding:clamp(20px,4vw,34px)!important;border:1px solid rgba(255,208,110,.22);background:linear-gradient(145deg,rgba(8,18,32,.98),rgba(3,8,15,.98));box-shadow:0 28px 90px rgba(0,0,0,.55),0 0 55px rgba(255,208,110,.055);box-sizing:border-box}
 #finish .outcome > h1,
 #finish .outcome > h2,
 #finish .outcome .title{
   color:#fff0b5!important;
+  font-size:clamp(38px,5vw,64px);
+  line-height:.94;
+  letter-spacing:.10em;
   text-shadow:
     0 0 8px rgba(255,208,110,.18),
     0 0 22px rgba(255,208,110,.12);
-  letter-spacing:.10em;
+  margin:8px 0 14px;
 }
-.${RESULT_CLASS}{margin:18px auto 14px;width:min(100%,620px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:left}
+#finish .outcome > .eyebrow {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: .22em;
+  font-weight: 800;
+  text-transform: uppercase;
+  opacity: .82;
+}
+#finish #finishLine {
+  margin: 0 auto 22px;
+  width: min(100%, 600px);
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: .04em;
+  text-align: center;
+  opacity: .78;
+}
+#finish .reward {
+  margin-top: 4px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+#finish .reward > b {
+  display: block;
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .04em;
+  margin-bottom: 7px;
+}
+
+#finish .reward > span {
+  display: block;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  opacity: .72;
+}
+#finish .finish-summary {
+  display: grid;
+  gap: 9px;
+  width: min(100%, 620px);
+  margin: 18px auto 0;
+}
+
+#finish .finish-summary-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 30px;
+}
+
+#finish .finish-summary-line strong {
+  flex: 0 0 auto;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: .14em;
+  white-space: nowrap;
+  opacity: .72;
+}
+
+#finish .finish-summary-line i,
+#finish .finish-summary-line small {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.${RESULT_CLASS}{margin:18px auto 14px;width:min(100%,700px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;text-align:left}text-align:left}
 .${RESULT_CLASS} .mission-result-card{padding:10px 12px;border:1px solid rgba(255,208,110,.16);background:rgba(8,12,18,.62);border-radius:10px;min-width:0}
-.${RESULT_CLASS} .mission-result-label{display:block;font-size:9px;letter-spacing:.16em;opacity:.62;margin-bottom:4px}
-.${RESULT_CLASS} .mission-result-value{display:block;font-size:16px;font-weight:800;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.${RESULT_CLASS} .mission-result-sub{display:block;font-size:9px;opacity:.52;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.${RESULT_CLASS} .mission-result-label{display:block;font-size:11px;letter-spacing:.16em;opacity:.62;margin-bottom:4px}
+.${RESULT_CLASS} .mission-result-value{display:block;font-size:19px;font-weight:800;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.${RESULT_CLASS} .mission-result-sub{display:block;font-size:10px;opacity:.52;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .${RESULT_CLASS} .mission-result-wide{grid-column:span 2}
 .${RESULT_CLASS} .mission-result-total{border-color:rgba(255,208,110,.30);background:rgba(255,208,110,.055)}
 .${RESULT_CLASS} .mission-result-performance{border-color:rgba(255,208,110,.28);background:linear-gradient(145deg,rgba(255,208,110,.075),rgba(8,18,38,.68))}
