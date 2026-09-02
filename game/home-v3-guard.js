@@ -509,8 +509,8 @@
   }
 
   #intro .home-v3-play {
-    width: min(560px, 100%);
-    margin-inline: auto;
+ width: min(500px, 100%) !important;
+  margin-inline: auto;
   }
 
   #intro .title-secondary {
@@ -676,52 +676,83 @@
   }
 }
 
-/* ZIPPER FIX V2 */
+/* ZIPPER FIX V4 — COMPACT */
 .home-v3-play {
   position: relative !important;
-  min-height: 116px !important;
-  height: 116px !important;
+
+  width: min(500px, 100%) !important;
+
+min-height: 64px !important;
+height: 64px !important;
+max-height: 64px !important;
+
   box-sizing: border-box !important;
-  padding: 16px 18px 18px !important;
-  border-radius: 15px !important;
-  overflow: visible !important;
-  isolation: isolate;
+
+  padding: 8px 14px !important;
+  margin: 6px auto 0 !important;
+
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
 }
 
 .home-v3-play .home-v3-play-label {
   position: relative !important;
   z-index: 5 !important;
+
   display: block !important;
   width: 100% !important;
+
   margin: 0 !important;
+  padding: 0 0 0 42px !important;
+
   text-align: center !important;
-  font-size: 16px !important;
-  line-height: 1.15 !important;
-  letter-spacing: .17em !important;
+
+  font-size: 15px !important;
+  line-height: 1 !important;
+  letter-spacing: .14em !important;
   font-weight: 900 !important;
+
+  white-space: nowrap !important;
 }
 
 .home-v3-play .home-v3-play-hint {
-  position: relative !important;
+  position: absolute !important;
   z-index: 5 !important;
+
+  right: 16px !important;
+  top: 50% !important;
+  transform: translateY(12px) !important;
+
   display: block !important;
-  width: 100% !important;
-  margin: 5px 0 12px !important;
-  text-align: center !important;
-  font-size: 8px !important;
-  line-height: 1.2 !important;
-  letter-spacing: .18em !important;
+  width: auto !important;
+
+  margin: 0 !important;
+
+  text-align: right !important;
+
+  font-size: 7px !important;
+  line-height: 1 !important;
+  letter-spacing: .14em !important;
+
   white-space: nowrap !important;
 }
 
 .home-v3-play .home-v3-play-track {
-  position: relative !important;
+  position: absolute !important;
   z-index: 2 !important;
+
+  left: 16px !important;
+  right: 16px !important;
+  bottom: 8px !important;
+
   width: auto !important;
-  height: 8px !important;
-  margin: 10px 18px 0 !important;
+  height: 4px !important;
+
+  margin: 0 !important;
+
   border-radius: 999px !important;
-  overflow: visible !important;
+  overflow: hidden !important;
 }
 
 .home-v3-play .home-v3-play-fill {
@@ -730,38 +761,58 @@
 }
 
 .home-v3-play .home-v3-play-knob {
-  position: relative !important;
+  position: absolute !important;
   z-index: 6 !important;
-  width: 50px !important;
-  height: 50px !important;
-  margin-top: -25px !important;
+
+ left: 6px !important;
+  top: 50% !important;
+
+width: 38px !important;
+height: 38px !important;
+margin-top: -19px !important;
+
   flex: 0 0 auto !important;
+
+  border-radius: 11px !important;
 }
 
 @media (max-width: 700px) {
   .home-v3-play {
-    min-height: 104px !important;
-    height: 104px !important;
-    padding: 14px 14px 16px !important;
+    width: 100% !important;
+
+    min-height: 64px !important;
+    height: 64px !important;
+    max-height: 64px !important;
+
+    padding: 7px 10px !important;
+    margin-top: 10px !important;
   }
 
   .home-v3-play .home-v3-play-label {
+    padding-left: 36px !important;
     font-size: 13px !important;
   }
 
   .home-v3-play .home-v3-play-hint {
-    margin-bottom: 10px !important;
-    font-size: 7px !important;
+    right: 11px !important;
+    transform: translateY(10px) !important;
+    font-size: 6px !important;
+    letter-spacing: .10em !important;
   }
 
   .home-v3-play .home-v3-play-track {
-    margin-inline: 14px !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 8px !important;
+    height: 4px !important;
   }
 
   .home-v3-play .home-v3-play-knob {
-    width: 46px !important;
-    height: 46px !important;
-    margin-top: -23px !important;
+    left: 6px !important;
+    width: 38px !important;
+    height: 38px !important;
+    margin-top: -19px !important;
+    border-radius: 10px !important;
   }
 }
 /* REMOVE DUPLICATE HOME FAQ ONLY */
