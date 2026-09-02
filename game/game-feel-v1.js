@@ -5,47 +5,116 @@
   const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const getCanvas = () => document.querySelector('#game canvas, canvas');
 
-  const style = document.createElement('style');
-  style.textContent = `
-    .relay-gf-press { transform: translateY(1px) scale(.985) !important; filter: brightness(1.08) !important; }
-    .relay-gf-flash { animation: relayGfFlash .18s ease-out both; }
-    .relay-gf-pulse { animation: relayGfPulse .24s ease-out both; }
-    @keyframes relayGfFlash { 0% { opacity: .96; } 100% { opacity: 1; } }
-    @keyframes relayGfPulse { 0% { filter: brightness(1); } 35% { filter: brightness(1.12); } 100% { filter: brightness(1); } }
-  `;
-  document.head.appendChild(style);
+ const style = document.createElement('style');
 
-  const pressTargets = [
-    '#pauseBtn', '#settingsBtn', '#resumeBtn', '#restartBtn',
-    '[data-action="dash"]', '[data-action="jump"]', '[data-action="attack"]',
-    '[data-control="dash"]', '[data-control="jump"]', '[data-control="attack"]'
-  ];
+style.id = 'relay-game-feel-v1-style';
 
-  document.addEventListener('pointerdown', event => {
-    const target = event.target.closest?.(pressTargets.join(','));
-    if (!target) return;
-    target.classList.add('relay-gf-press');
-    window.setTimeout(() => target.classList.remove('relay-gf-press'), 120);
-  }, { passive: true });
+style.textContent = `
+  .relay-gf-pulse {
+    animation: relayGfPulse .20s ease-out both;
+  }
 
-  const flash = (kind = 'pulse') => {
-    const canvas = getCanvas();
-    if (!canvas || reducedMotion()) return;
-    canvas.classList.remove('relay-gf-flash', 'relay-gf-pulse');
-    void canvas.offsetWidth;
-    canvas.classList.add(kind === 'impact' ? 'relay-gf-flash' : 'relay-gf-pulse');
-    window.setTimeout(() => canvas.classList.remove('relay-gf-flash', 'relay-gf-pulse'), 280);
-  };
+  .relay-gf-impact {
+    animation: relayGfImpact .16s ease-out both;
+  }
 
-  const aliases = {
-    'relay:signal': 'pulse',
-    'relay:checkpoint': 'pulse',
-    'relay:combo': 'pulse',
-    'relay:hit': 'impact',
-    'relay:dash': 'impact',
-    'relay:death': 'impact',
-    'relay:mission-complete': 'pulse'
-  };
+  .relay-gf-danger {
+    animation: relayGfDanger .26s ease-out both;
+  }
+
+  .relay-gf-complete {
+    animation: relayGfComplete .42s ease-out both;
+  }
+
+  @keyframes relayGfPulse {
+    0%   { filter: brightness(1); }
+    35%  { filter: brightness(1.14); }
+    100% { filter: brightness(1); }
+  }
+
+  @keyframes relayGfImpact {
+    0%   {
+      filter: brightness(1);
+      transform: scale(1);
+    }
+
+    35% {
+      filter: brightness(1.18);
+      transform: scale(1.003);
+    }
+
+    100% {
+      filter: brightness(1);
+      transform: scale(1);
+    }
+  }
+
+  @keyframes relayGfDanger {
+    0%   { filter: brightness(1); }
+    25%  { filter: brightness(1.20); }
+    55%  { filter: brightness(.96); }
+    100% { filter: brightness(1); }
+  }
+
+  @keyframes relayGfComplete {
+    0%   { filter: brightness(1); }
+    35%  { filter: brightness(1.22); }
+    70%  { filter: brightness(1.08); }
+    100% { filter: brightness(1); }
+  }
+`;
+
+document.head.appendChild(style);
+
+
+
+ const flash = (kind = 'pulse') => {
+  const canvas = getCanvas();
+
+  if (!canvas || reducedMotion()) return;
+
+  canvas.classList.remove(
+    'relay-gf-pulse',
+    'relay-gf-impact',
+    'relay-gf-danger',
+    'relay-gf-complete'
+  );
+
+  void canvas.offsetWidth;
+
+  const className =
+    kind === 'impact'
+      ? 'relay-gf-impact'
+      : kind === 'danger'
+        ? 'relay-gf-danger'
+        : kind === 'complete'
+          ? 'relay-gf-complete'
+          : 'relay-gf-pulse';
+
+  canvas.classList.add(className);
+
+  window.setTimeout(() => {
+    canvas.classList.remove(
+      'relay-gf-pulse',
+      'relay-gf-impact',
+      'relay-gf-danger',
+      'relay-gf-complete'
+    );
+  }, kind === 'complete' ? 500 : 300);
+};
+
+const aliases = {
+  'relay:signal': 'pulse',
+  'relay:checkpoint': 'pulse',
+  'relay:combo': 'pulse',
+
+  'relay:hit': 'impact',
+  'relay:dash': 'impact',
+
+  'relay:death': 'danger',
+
+  'relay:mission-complete': 'complete'
+};
 
   Object.keys(aliases).forEach(type => window.addEventListener(type, () => flash(aliases[type])));
   window.relayGameFeelV1 = { flash };
