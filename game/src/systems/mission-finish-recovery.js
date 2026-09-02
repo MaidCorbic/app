@@ -82,11 +82,11 @@ function showRecoveredFinish(scene) {
   const stat = state.missionStats?.[mission.id] || { bestRating: 1, bestScore: (scene.collected || 0) * 100, bestTime: scene.elapsedMs };
   const breakdown = state.lastXpBreakdown || {};
   setText('finishRating', '★'.repeat(Math.max(1, stat.bestRating || 1)));
-  setText('finishSignals', `${scene.collected || 0} / ${mission.signals?.length || 0} SIGNALS`);
+  setText('finishSignals', `${scene.collected || 0} / ${mission.signals?.length || 0} SIGNALS RECOVERED`);
   setText('finishXp', `+${breakdown.total || 0} XP`);
   setText('finishScore', `RUN SCORE ${(scene.collected || 0) * 100 + (scene.secretsCollected || 0) * 250} · BEST ${stat.bestScore || 0}`);
   setText('finishTime', `TIME ${formatTime(scene.elapsedMs)} · BEST ${formatTime(stat.bestTime)}`);
-  setText('finishLine', mission.unlocks ? `${mission.unlocks} is now available in the mission terminal.` : 'The final relay hums awake across the city.');
+  setText('finishLine', mission.unlocks ? `NEXT ROUTE UNLOCKED · ${mission.unlocks} is now available in the mission terminal.` : 'RELAY STATUS STABLE · THE FINAL RELAY IS BACK ONLINE.');
 
   const next = getElement('nextMission');
   const hasNext = missionIndex + 1 < missions.length && (!missions[missionIndex + 1].unlockRequirement || state.completed.includes(missions[missionIndex + 1].unlockRequirement));
