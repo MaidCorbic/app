@@ -1,24 +1,21 @@
 /* =========================================================
    RELAY FINAL LAYOUT V2
-   FINAL HOME STRUCTURE
+   FINAL HOME OWNER
 
-   HOME:
-   - OPTIONS
-   - EXIT
+   FINAL ORDER:
+   1. OPTIONS
+   2. UPDATE
+   3. FAQ
+   4. EXIT
 
-   TOP INFO:
-   - FAQ
-   - UPDATE
-
-   IMPORTANT:
-   .info-launcher is intentionally preserved.
-   FAQ + UPDATE are NOT duplicated inside .home-v3-side.
+   ONE HOME MENU ONLY.
    ========================================================= */
 
 (() => {
   'use strict';
 
   const STYLE_ID = 'relay-final-layout-v2-style';
+  const HOME_SELECTOR = '#intro.home-v3 .home-v3-side';
 
   /* =========================================================
      HELPERS
@@ -50,12 +47,21 @@
       return false;
     }
 
-    node.click();
-    return true;
+    try {
+      HTMLElement.prototype.click.call(node);
+      return true;
+    } catch {
+      try {
+        node.click();
+        return true;
+      } catch {
+        return false;
+      }
+    }
   };
 
   /* =========================================================
-     FINAL HOME BUTTON CREATOR
+     CREATE FINAL HOME BUTTON
      ========================================================= */
 
   const makeHomeButton = (
@@ -65,14 +71,15 @@
     subtitle,
     action
   ) => {
-    if (!side) return null;
-
     const button = document.createElement('button');
 
     button.type = 'button';
-    button.className = 'home-v3-card';
+
+    button.className =
+      'home-v3-card relay-home-nav-card';
+
     button.dataset.finalHome = key;
-    button.setAttribute('data-final-home', key);
+    button.dataset.finalHomeButton = key;
 
     button.innerHTML = `
       <span>${title}</span>
@@ -83,7 +90,7 @@
       'click',
       (event) => {
         event.preventDefault();
-        event.stopPropagation();
+        event.stopImmediatePropagation();
 
         try {
           action?.();
@@ -94,7 +101,9 @@
           );
         }
       },
-      false
+      {
+        capture: true
+      }
     );
 
     side.appendChild(button);
@@ -103,52 +112,89 @@
   };
 
   /* =========================================================
+     REMOVE ALL LEGACY HOME CONTENT
+     ========================================================= */
+
+  const cleanHome = (intro, side) => {
+    /* -------------------------------------------------------
+       REMOVE OLD TOP LAUNCHER
+       ------------------------------------------------------- */
+
+    intro
+      .querySelectorAll('.info-launcher')
+      .forEach((node) => node.remove());
+
+    /* -------------------------------------------------------
+       REMOVE OLD TITLE SECONDARY MENU
+       ------------------------------------------------------- */
+
+    intro
+      .querySelectorAll('.title-secondary')
+      .forEach((node) => node.remove());
+
+    /* -------------------------------------------------------
+       REMOVE EVERY KNOWN HOME BUTTON TYPE
+       ------------------------------------------------------- */
+
+    const legacySelectors = [
+      '[data-v3-options]',
+      '[data-v3-update]',
+      '[data-v3-faq]',
+      '[data-v3-exit]',
+
+      '[data-final-home]',
+      '[data-final-home-button]',
+
+      '[data-unified-home]',
+
+      '[data-runtime-home]',
+      '[data-safe-home]',
+
+      '.relay-home-nav-card',
+      '.relay-v4-home-btn',
+      '.relay-runtime-home-btn',
+
+      '[data-home-button]',
+      '[data-home-action]',
+
+      '.home-nav-card',
+      '.home-action-card'
+    ];
+
+    qsa(
+      legacySelectors.join(','),
+      side
+    ).forEach((node) => {
+      node.remove();
+    });
+  };
+
+  /* =========================================================
      INSTALL FINAL HOME
      ========================================================= */
 
   const installHome = () => {
-    const intro = document.getElementById('intro');
-    const side = intro?.querySelector('.home-v3-side');
+    const intro =
+      document.getElementById('intro');
 
-    if (!intro || !side) {
+    if (!intro) return;
+
+    const side =
+      intro.querySelector('.home-v3-side');
+
+    if (!side) {
       console.warn(
-        '[relay-final-layout-v2] Home container not found.'
+        '[relay-final-layout-v2] .home-v3-side not found.'
       );
       return;
     }
 
-    /*
-      IMPORTANT:
+    /* Clean everything first. */
+    cleanHome(intro, side);
 
-      DO NOT REMOVE .info-launcher.
-
-      FAQ + UPDATE belong to the top launcher in index.html.
-      Removing it would destroy the intended FINAL layout.
-    */
-
-    /* -------------------------------------------------------
-       REMOVE OLD / DUPLICATE HOME BUTTONS
-       ------------------------------------------------------- */
-
-    side
-      .querySelectorAll(
-        [
-          '[data-v3-faq]',
-          '[data-v3-update]',
-          '[data-v3-options]',
-          '[data-v3-exit]',
-          '[data-final-home]'
-        ].join(',')
-      )
-      .forEach((node) => node.remove());
-
-    /* -------------------------------------------------------
-       FINAL HOME BUTTONS
-
-       ONLY:
-       OPTIONS
-       EXIT
-       ------------------------------------------------------- */
+    /* =====================================================
+       FINAL ORDER
+       ===================================================== */
 
     makeHomeButton(
       side,
@@ -157,13 +203,62 @@
       'SETTINGS · AUDIO · DISPLAY',
       () => {
         if (
-          window.relayUnifiedCinematicUI?.openOptions
+          window.relayUnifiedCinematicUI
+            ?.openOptions
         ) {
           window.relayUnifiedCinematicUI.openOptions();
           return;
         }
 
-        nativeClick('[data-title-panel="controls"]');
+        nativeClick(
+          '[data-title-panel="controls"]'
+        );
+      }
+    );
+
+    makeHomeButton(
+      side,
+      'update',
+      'UPDATE',
+      'LATEST PATCHES · LIVE',
+      () => {
+        if (
+          window.relayOpenInfo
+        ) {
+          window.relayOpenInfo('update');
+          return;
+        }
+
+        nativeClick(
+          '[data-relay-info="update"]'
+        );
+      }
+    );
+
+    makeHomeButton(
+      side,
+      'faq',
+      'FAQ',
+      'HELP · GAME SYSTEMS',
+      () => {
+        if (
+          window.relayUnifiedCinematicUI
+            ?.openFAQ
+        ) {
+          window.relayUnifiedCinematicUI.openFAQ();
+          return;
+        }
+
+        if (
+          window.relayOpenInfo
+        ) {
+          window.relayOpenInfo('faq');
+          return;
+        }
+
+        nativeClick(
+          '[data-relay-info="faq"]'
+        );
       }
     );
 
@@ -177,17 +272,10 @@
       }
     );
 
-    /*
-      FINAL RESULT:
-
-      .home-v3-side
-      ├── OPTIONS
-      └── EXIT
-
-      .info-launcher
-      ├── FAQ
-      └── UPDATE
-    */
+    console.info(
+      '[relay-final-layout-v2] FINAL:',
+      'OPTIONS → UPDATE → FAQ → EXIT'
+    );
   };
 
   /* =========================================================
@@ -195,143 +283,336 @@
      ========================================================= */
 
   const injectStyle = () => {
-    if (document.getElementById(STYLE_ID)) {
-      return;
-    }
+    let style =
+      document.getElementById(STYLE_ID);
 
-    const style = document.createElement('style');
+    if (style) return;
+
+    style =
+      document.createElement('style');
 
     style.id = STYLE_ID;
 
     style.textContent = `
       /* =====================================================
-         RELAY FINAL LAYOUT V2
-         HOME BUTTON SAFETY
+         REMOVE COMPETING HOME UI
+         ===================================================== */
+
+      #intro.home-v3 .info-launcher,
+      #intro.home-v3 .title-secondary {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* =====================================================
+         FINAL HOME
          ===================================================== */
 
       #intro.home-v3 .home-v3-side {
         display: flex !important;
+
         flex-direction: column !important;
+
         align-items: stretch !important;
-        gap: 12px !important;
-      }
 
-      #intro.home-v3 .home-v3-side .home-v3-card {
-        width: 100% !important;
-        min-height: 64px !important;
-
-        display: flex !important;
-        flex-direction: column !important;
         justify-content: center !important;
-        align-items: flex-start !important;
+
+        gap: 10px !important;
+
+        width: min(
+          420px,
+          calc(100vw - 32px)
+        ) !important;
+
+        margin-left: auto !important;
+        margin-right: auto !important;
 
         box-sizing: border-box !important;
 
+        position: relative !important;
+
+        z-index: 300 !important;
+
+        visibility: visible !important;
+        opacity: 1 !important;
+
+        pointer-events: auto !important;
+      }
+
+      /* =====================================================
+         FINAL BUTTONS
+         ===================================================== */
+
+      #intro.home-v3
+      .home-v3-side
+      .relay-home-nav-card {
+        position: relative !important;
+
+        display: flex !important;
+
+        flex-direction: column !important;
+
+        align-items: flex-start !important;
+
+        justify-content: center !important;
+
+        width: 100% !important;
+
+        min-height: 62px !important;
+
+        box-sizing: border-box !important;
+
+        padding: 11px 18px !important;
+
+        margin: 0 !important;
+
         overflow: hidden !important;
+
+        border-radius: 10px !important;
+
+        cursor: pointer !important;
+
+        touch-action: manipulation !important;
+
+        user-select: none !important;
+
+        -webkit-tap-highlight-color: transparent !important;
 
         text-align: left !important;
+
+        transition:
+          transform .16s ease,
+          filter .16s ease,
+          box-shadow .16s ease !important;
       }
 
-      #intro.home-v3 .home-v3-side .home-v3-card > span {
+      /* =====================================================
+         TITLE
+         ===================================================== */
+
+      #intro.home-v3
+      .home-v3-side
+      .relay-home-nav-card > span {
         display: block !important;
 
         width: 100% !important;
+
+        min-width: 0 !important;
+
+        overflow: hidden !important;
 
         white-space: nowrap !important;
-        overflow: hidden !important;
+
         text-overflow: ellipsis !important;
 
-        line-height: 1.1 !important;
+        line-height: 1.15 !important;
+
+        font-size: 15px !important;
+
+        font-weight: 800 !important;
+
+        letter-spacing: .12em !important;
       }
 
-      #intro.home-v3 .home-v3-side .home-v3-card > small {
+      /* =====================================================
+         SUBTITLE
+         ===================================================== */
+
+      #intro.home-v3
+      .home-v3-side
+      .relay-home-nav-card > small {
         display: block !important;
 
         width: 100% !important;
+
+        min-width: 0 !important;
 
         margin-top: 5px !important;
 
-        white-space: nowrap !important;
         overflow: hidden !important;
+
+        white-space: nowrap !important;
+
         text-overflow: ellipsis !important;
 
-        line-height: 1.2 !important;
+        line-height: 1.15 !important;
+
+        font-size: 9px !important;
+
+        letter-spacing: .07em !important;
+
+        opacity: .72 !important;
       }
 
-      /* -----------------------------------------------------
-         FAQ / UPDATE TOP LAUNCHER
+      /* =====================================================
+         INTERACTION
+         ===================================================== */
 
-         Keep these visible and independent from Home cards.
-         ----------------------------------------------------- */
+      #intro.home-v3
+      .home-v3-side
+      .relay-home-nav-card:hover {
+        transform: translateX(4px) !important;
 
-      #intro.home-v3 .info-launcher {
-        position: relative !important;
-        z-index: 20 !important;
+        filter: brightness(1.12) !important;
       }
 
-      #intro.home-v3 .info-launcher button {
-        box-sizing: border-box !important;
+      #intro.home-v3
+      .home-v3-side
+      .relay-home-nav-card:active {
+        transform:
+          translateX(2px)
+          scale(.985) !important;
+
+        filter: brightness(.94) !important;
       }
 
-      /* -----------------------------------------------------
-         MOBILE SAFETY
-         ----------------------------------------------------- */
+      #intro.home-v3
+      .home-v3-side
+      .relay-home-nav-card:focus-visible {
+        outline: 2px solid currentColor !important;
+
+        outline-offset: 3px !important;
+      }
+
+      /* =====================================================
+         MOBILE
+         ===================================================== */
 
       @media (max-width: 768px) {
 
         #intro.home-v3 .home-v3-side {
           width: min(
             360px,
-            calc(100vw - 32px)
+            calc(100vw - 24px)
           ) !important;
 
-          margin-left: auto !important;
-          margin-right: auto !important;
-
-          gap: 10px !important;
+          gap: 9px !important;
         }
 
-        #intro.home-v3 .home-v3-side .home-v3-card {
-          min-height: 60px !important;
+        #intro.home-v3
+        .home-v3-side
+        .relay-home-nav-card {
+          min-height: 58px !important;
+
+          padding:
+            10px 16px !important;
         }
 
-        #intro.home-v3 .home-v3-side .home-v3-card > span {
-          font-size: 15px !important;
-          letter-spacing: .08em !important;
+        #intro.home-v3
+        .home-v3-side
+        .relay-home-nav-card > span {
+          font-size: 14px !important;
+
+          letter-spacing: .10em !important;
         }
 
-        #intro.home-v3 .home-v3-side .home-v3-card > small {
-          font-size: 9px !important;
+        #intro.home-v3
+        .home-v3-side
+        .relay-home-nav-card > small {
+          font-size: 8px !important;
+
           letter-spacing: .06em !important;
         }
       }
 
-      /* -----------------------------------------------------
-         EXTRA SMALL PHONES
-         ----------------------------------------------------- */
+      /* =====================================================
+         SMALL PHONES
+         ===================================================== */
 
       @media (max-width: 380px) {
 
         #intro.home-v3 .home-v3-side {
-          width: calc(100vw - 24px) !important;
-          gap: 8px !important;
+          width: calc(100vw - 20px) !important;
+
+          gap: 7px !important;
         }
 
-        #intro.home-v3 .home-v3-side .home-v3-card {
-          min-height: 56px !important;
+        #intro.home-v3
+        .home-v3-side
+        .relay-home-nav-card {
+          min-height: 54px !important;
+
+          padding:
+            9px 14px !important;
         }
 
-        #intro.home-v3 .home-v3-side .home-v3-card > span {
-          font-size: 14px !important;
+        #intro.home-v3
+        .home-v3-side
+        .relay-home-nav-card > span {
+          font-size: 13px !important;
         }
 
-        #intro.home-v3 .home-v3-side .home-v3-card > small {
-          font-size: 8px !important;
+        #intro.home-v3
+        .home-v3-side
+        .relay-home-nav-card > small {
+          font-size: 7px !important;
         }
       }
     `;
 
     document.head.appendChild(style);
+  };
+
+  /* =========================================================
+     VERIFY FINAL HOME
+     ========================================================= */
+
+  const enforceFinalHome = () => {
+    const intro =
+      document.getElementById('intro');
+
+    const side =
+      intro?.querySelector('.home-v3-side');
+
+    if (!intro || !side) return;
+
+    /* Kill competing menus again. */
+    intro
+      .querySelectorAll(
+        '.title-secondary, .info-launcher'
+      )
+      .forEach((node) => node.remove());
+
+    /*
+      Remove anything that is not one of
+      our four FINAL buttons.
+    */
+
+    qsa(
+      [
+        '[data-v3-options]',
+        '[data-v3-update]',
+        '[data-v3-faq]',
+        '[data-v3-exit]',
+        '[data-unified-home]',
+        '[data-runtime-home]',
+        '[data-safe-home]',
+        '.relay-v4-home-btn',
+        '.relay-runtime-home-btn'
+      ].join(','),
+      side
+    ).forEach((node) => {
+      node.remove();
+    });
+
+    const buttons =
+      qsa(
+        '.relay-home-nav-card',
+        side
+      );
+
+    const correct =
+      buttons.length === 4 &&
+      buttons[0]?.dataset.finalHome === 'options' &&
+      buttons[1]?.dataset.finalHome === 'update' &&
+      buttons[2]?.dataset.finalHome === 'faq' &&
+      buttons[3]?.dataset.finalHome === 'exit';
+
+    if (!correct) {
+      installHome();
+    }
   };
 
   /* =========================================================
@@ -341,11 +622,18 @@
   const boot = () => {
     injectStyle();
     installHome();
-  };
 
-  /* =========================================================
-     INITIAL LOAD
-     ========================================================= */
+    /*
+      Legacy scripts can execute later.
+      Re-check periodically and restore
+      the exact FINAL four-button structure.
+    */
+
+    window.setInterval(
+      enforceFinalHome,
+      500
+    );
+  };
 
   if (
     document.readyState === 'complete' ||
@@ -366,7 +654,8 @@
 
   window.relayFinalLayoutV2 = {
     installHome,
-    injectStyle
+    injectStyle,
+    enforceFinalHome
   };
 
 })();
