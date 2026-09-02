@@ -154,8 +154,11 @@
 
   function boot(){
     installHome(); bindAudio(); smoothCountdown();
-   const introObserver = new MutationObserver(() => {
-  installHome();
+const introObserver = new MutationObserver(() => {
+  const side = q('#intro .home-v3-side');
+  if (side && side.querySelectorAll('[data-runtime-home]').length !== 4) {
+    installHome();
+  }
 });
 
 introObserver.observe(q('#intro') || document.body, {
