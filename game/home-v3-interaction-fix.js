@@ -27,10 +27,7 @@ import './presentation-final-v1.js';
 
   const install = () => {
     const intro = $('#intro');
-    const side = intro?.querySelector('.home-v3-side');
-    if (!side) return;
-
-    side.querySelectorAll('[data-v3-options],[data-v3-faq],[data-v3-update],[data-v3-exit],[data-unified-home],[data-final-home="faq"],[data-final-home="update"],[data-final-home="exit"],[data-final-home="options"]').forEach(node => node.remove());
+   
 
     const launcher = intro.querySelector('.info-launcher');
     launcher?.querySelector('[data-relay-info="faq"]')?.setAttribute('aria-label', 'Open FAQ');
