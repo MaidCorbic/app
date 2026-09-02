@@ -56,23 +56,16 @@
     q('#titlePanel')?.classList.add('hidden');
   };
 
-  function installHome() {
-    const side = q('#intro .home-v3-side');
-    if (!side) return;
-    side.querySelectorAll('[data-runtime-home],[data-final-home],[data-v3-faq],[data-v3-update],[data-v3-options],[data-v3-exit],[data-unified-home]').forEach(node => node.remove());
-    const make = (id,label,detail,handler) => {
-      const b=document.createElement('button'); b.type='button'; b.className='relay-runtime-home-btn'; b.dataset.runtimeHome=id;
-      b.innerHTML=`<span>${label}</span><small>${detail}</small>`;
-      b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();closePanels();handler();},{capture:true});
-      return b;
-    };
-    side.append(
-      make('options','OPTIONS','SETTINGS · AUDIO · DISPLAY',()=>q('#intro [data-title-panel="controls"]')?.click()),
-      make('faq','FAQ','HELP · GAME SYSTEMS',()=>window.relayOpenInfo?.('faq')),
-      make('update','UPDATE','LATEST PATCHES · LIVE',()=>window.relayOpenInfo?.('update')),
-      make('exit','EXIT','CLOSE SESSION',()=>q('#exitTitle')?.click())
-    );
-  }
+ function installHome() {
+  const side = q('#intro .home-v3-side');
+  if (!side) return;
+
+  side
+    .querySelectorAll(
+      '[data-runtime-home],[data-final-home],[data-v3-faq],[data-v3-update],[data-v3-options],[data-v3-exit],[data-unified-home]'
+    )
+    .forEach(node => node.remove());
+}
 
   function hideLegacy(scene) {
     const list=scene?.children?.list||[];
@@ -138,8 +131,14 @@
 
   function boot(){
     installHome(); bindAudio(); smoothCountdown();
-    const introObserver=new MutationObserver(()=>{const side=q('#intro .home-v3-side');if(side&&side.querySelectorAll('[data-runtime-home]').length!==4)installHome();});
-    introObserver.observe(q('#intro')||document.body,{childList:true,subtree:true});
+   const introObserver = new MutationObserver(() => {
+  installHome();
+});
+
+introObserver.observe(q('#intro') || document.body, {
+  childList: true,
+  subtree: true
+});
     window.setInterval(()=>{if(gameplay()){hideLegacy(window.__relayRunnerScene);typeMission()}},180);
   }
   boot();
