@@ -49,8 +49,6 @@
       }
       #intro.home-v3 .title-secondary > button span{font:950 10px/1 'DM Mono',ui-monospace,monospace!important;letter-spacing:1.2px!important;}
       #intro.home-v3 .title-secondary > button small{font:750 7px/1.2 'DM Mono',ui-monospace,monospace!important;letter-spacing:.8px!important;color:#87929f!important;text-align:right!important;}
-      #intro.home-v3 .title-secondary > [data-safe-home="faq"]{border-left-color:#fff0b5!important}
-      #intro.home-v3 .title-secondary > [data-safe-home="update"]{border-left-color:#ffd06e!important}
       #intro.home-v3 .title-secondary > [data-title-panel="controls"]{border-left-color:#ffe7a6!important}
       #intro.home-v3 .title-secondary > #exitTitle{border-left-color:#b47a1e!important}
       #relayInfoPanel.hidden,#titlePanel.hidden{pointer-events:none!important;}
@@ -145,8 +143,6 @@
 
     const options = nav.querySelector('[data-title-panel="controls"]');
     const exit = nav.querySelector('#exitTitle');
-    const existingFaq = nav.querySelector('[data-safe-home="faq"]');
-    const existingUpdate = nav.querySelector('[data-safe-home="update"]');
 
     qa('[data-v3-faq],[data-v3-update],[data-v3-options],[data-v3-exit],.relay-home-nav-card,.relay-v4-home-btn', nav).forEach(node => node.remove());
     qa('[data-safe-home="faq"],[data-safe-home="update"]', nav).forEach(node => node.remove());
@@ -164,13 +160,8 @@
       return button;
     };
 
-    const faq = make('faq', 'FAQ', 'HELP · GAME SYSTEMS', () => window.relayOpenInfo?.('faq'));
-    const update = make('update', 'UPDATE', 'LATEST PATCHES · LIVE', () => window.relayOpenInfo?.('update'));
-
     if (options) nav.appendChild(options);
     else nav.appendChild(make('options', 'OPTIONS', 'SETTINGS · CONTROLS', () => nativeClick(q('[data-title-panel="controls"]'))));
-    nav.appendChild(faq);
-    nav.appendChild(update);
     if (exit) nav.appendChild(exit);
     else nav.appendChild(make('exit', 'EXIT', 'CLOSE SESSION', () => nativeClick($('exitTitle'))));
   };
