@@ -25,6 +25,14 @@ export function installGameplayExpansionV9MissionIntelligence(RunnerScene){
   const bw=(pw-42)/3;
   const flash=b=>{b.bg.setStrokeStyle(2,b.color,1);scene.tweens?.add?.({targets:b.bg,alpha:{from:.45,to:1},duration:110,yoyo:true,repeat:2});};
   defs.forEach((d,i)=>{const x=px+14+bw/2+i*(bw+7),y=py+58,bg=scene.add.rectangle(x,y,bw,54,0x0b1b2a,.98).setStrokeStyle(1,d[3],.8).setInteractive({useHandCursor:true}).setScrollFactor(0).setDepth(701);const key=label(scene,x,y-17,d[0],{fontSize:'12px'}).setScrollFactor(0).setDepth(702);const t=label(scene,x,y-1,d[1],{fontSize:'7px'}).setScrollFactor(0).setDepth(702);const sub=label(scene,x,y+13,d[2],{fontSize:'6px',color:'#86a9b8'}).setScrollFactor(0).setDepth(702);buttons.push({bg,key,t,sub,color:d[3]});});
+  buttons.forEach(({ bg, key, t, sub }) => {
+  bg.setVisible(false);
+  key.setVisible(false);
+  t.setVisible(false);
+  sub.setVisible(false);
+
+  bg.disableInteractive?.();
+});
   const worldY=Math.max(185,Math.min(h-120,h*.38)), colors=[0x65d9ff,0xffc65d,0xbda0ff];
   const sources=[0,1,2].map(i=>{const x=w*(.18+i*.14),c=scene.add.circle(x,worldY,16,0x0a1724,.96).setStrokeStyle(2,colors[i],.9).setInteractive({useHandCursor:true}).setDepth(610);const l=label(scene,x,worldY+31,`SOURCE ${i+1}`,{fontSize:'7px',color:'#b8d8e3'}).setDepth(611);c.on('pointerdown',()=>verify(i));return{c,l};});
   scene.add.rectangle(w*.32,worldY,w*.28,2,0x477086,.55).setDepth(609);
