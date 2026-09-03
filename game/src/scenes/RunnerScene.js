@@ -5897,7 +5897,241 @@ export class RunnerScene extends Phaser.Scene {
       );
     }
   }
+  /**
+   * Runtime maintenance for player-deployed build systems.
+   * Keeps turrets firing and removes expired/stray projectiles without
+   * changing the collision or progression systems created elsewhere.
+   */
+  updateBuilds() {
+    if (!this.player) return;
 
+    const now = Number.isFinite(this.elapsedMs)
+      ? this.elapsedMs
+      : 0;
+
+    if (this.turrets?.active) {
+      this.turrets.getChildren().forEach(turret => {
+        if (!turret?.active) return;
+
+        const expires = turret.getData('expires');
+
+        if (
+          Number.isFinite(expires) &&
+          now >= expires
+        ) {
+          turret.destroy();
+          return;
+        }
+
+        if (!this.enemies?.active) return;
+
+        const target = this.enemies
+          .getChildren()
+          .filter(enemy => enemy?.active)
+          .find(enemy =>
+            Math.abs(enemy.x - turret.x) < 460 &&
+            Math.abs(enemy.y - turret.y) < 220
+          );
+
+        const nextShot =
+          Number(
+            turret.getData('nextShot')
+          ) || 0;
+
+        if (
+          !target ||
+          now < nextShot ||
+          !this.plasma?.active
+        ) {
+          return;
+        }
+
+        const dx =
+          target.x - turret.x;
+
+        const dy =
+          target.y - turret.y;
+
+        const distance =
+          Math.max(
+            1,
+            Math.hypot(dx, dy)
+          );
+
+        const speed = 720;
+
+        const bolt =
+          this.plasma
+            .create(
+              turret.x,
+              turret.y - 10,
+              'plasma'
+            )
+            .setDepth(12);
+
+        if (!bolt?.body) {
+          bolt?.destroy();
+          return;
+        }
+
+        bolt.setData(
+          'power',
+          1
+        );
+
+        bolt.setData(
+          'createdAt',
+          now
+        );
+
+        bolt.body
+          .setAllowGravity(false)
+          .setVelocity(
+            dx / distance * speed,
+            dy / distance * speed
+          );
+
+        turret.setData(
+          'nextShot',
+          now + 620
+        );
+
+        this.add
+          .circle(
+            turret.x,
+            turret.y,
+            7,
+            0x8df4ff,
+            .24
+          )
+          .setDepth(11);
+      });
+    }
+
+    const prune = (
+      group,
+      maxAge,
+      maxDistance
+    ) => {
+      if (!group?.active) return;
+
+      group
+        .getChildren()
+        .forEach(object => {
+          if (!object?.active) return;
+
+          const createdAt =
+            Number(
+              object.getData?.(
+                'createdAt'
+              )
+            );
+
+          const tooOld =
+            Number.isFinite(
+              createdAt
+            ) &&
+            now - createdAt >
+              maxAge;
+
+          const tooFar =
+            Math.abs(
+              object.x -
+                this.player.x
+            ) >
+              maxDistance ||
+            Math.abs(
+              object.y -
+                this.player.y
+            ) >
+              720;
+
+          if (
+            tooOld ||
+            tooFar
+          ) {
+            object.destroy();
+          }
+        });
+    };
+
+    prune(
+      this.plasma,
+      1800,
+      1100
+    );
+
+    prune(
+      this.kineticBalls,
+      1800,
+      1300
+    );
+  }
+
+  /**
+   * Keeps the introductory combat teaching labels attached to their enemies
+   * and hides them when the player moves away.
+   */
+  updateCombatTutorial() {
+    if (
+      !this.enemies?.active ||
+      !this.player
+    ) {
+      return;
+    }
+
+    this.enemies
+      .getChildren()
+      .forEach(enemy => {
+        if (!enemy?.active) return;
+
+        const label =
+          enemy.getData(
+            'tutorialLabel'
+          );
+
+        if (
+          !label ||
+          !label.active
+        ) {
+          return;
+        }
+
+        label.setPosition(
+          enemy.x,
+          enemy.y - 62
+        );
+
+        const route =
+          enemy.getData(
+            'route'
+          )?.type;
+
+        const show =
+          this.mission?.id ===
+            'first-delivery' &&
+          (
+            route ===
+              'enemy-runner' ||
+            route ===
+              'chicken'
+          ) &&
+          Math.abs(
+            enemy.x -
+              this.player.x
+          ) < 360 &&
+          Math.abs(
+            enemy.y -
+              this.player.y
+          ) < 170;
+
+        label.setAlpha(
+          show
+            ? 1
+            : 0
+        );
+      });
+  }
   updateNarrative() {
     const beats =
       this.mission.story
