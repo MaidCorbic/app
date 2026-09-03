@@ -37,13 +37,16 @@
       max(8px, env(safe-area-inset-bottom))
       !important;
 
-    width: max-content !important;
+    width: auto !important;
     height: max-content !important;
 
     margin: 0 !important;
     padding: 0 !important;
 
-    display: block !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
 
     pointer-events: none !important;
 
@@ -65,21 +68,19 @@
 
     position: absolute !important;
 
-    width: 1px !important;
-    height: 1px !important;
-
-    min-width: 1px !important;
-    min-height: 1px !important;
+    width: clamp(78px, 21vw, 112px) !important;
+    height: clamp(78px, 21vw, 112px) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
 
     margin: 0 !important;
     padding: 0 !important;
 
-    opacity: 0 !important;
-    visibility: hidden !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 
-    pointer-events: none !important;
-
-    overflow: hidden !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
 
     transform: none !important;
     translate: none !important;
