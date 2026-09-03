@@ -1,210 +1,12 @@
 /* ============================================================
-   MOBILE LANDSCAPE HUD — FINAL LAYOUT V1
+   MOBILE LANDSCAPE — CONTROLS 3 x 2
    ============================================================ */
 
 @media (max-width: 768px) and (orientation: landscape) {
 
-  /* ----------------------------------------------------------
-     TOP HUD
-     MISSION = LEFT
-     SIGNALS = CENTER
-     XP = RIGHT
-     PAUSE = TOP RIGHT
-     ---------------------------------------------------------- */
-
-  html body.is-touch section#play .hud {
-    position: fixed !important;
-    top: 8px !important;
-    left: 8px !important;
-    right: 8px !important;
-
-    width: calc(100vw - 16px) !important;
-    height: auto !important;
-
-    display: grid !important;
-
-    grid-template-columns:
-      minmax(190px, 1fr)
-      minmax(150px, 190px)
-      auto !important;
-
-    grid-template-rows: auto auto !important;
-
-    align-items: start !important;
-    gap: 6px 8px !important;
-
-    padding: 0 !important;
-
-    pointer-events: none !important;
-  }
-
-  html body.is-touch section#play .hud > * {
-    pointer-events: auto !important;
-  }
-
-
-  /* ----------------------------------------------------------
-     MISSION — TOP LEFT
-     ---------------------------------------------------------- */
-
-  html body.is-touch section#play .hud-route {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 300px !important;
-
-    justify-self: start !important;
-
-    margin: 0 !important;
-  }
-
-
-  /* ----------------------------------------------------------
-     SIGNALS — NEXT TO MISSION / CENTER
-     ---------------------------------------------------------- */
-
-  html body.is-touch section#play .hud-progress {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-
-    width: 170px !important;
-    min-width: 150px !important;
-    max-width: 190px !important;
-
-    justify-self: center !important;
-
-    margin: 0 !important;
-
-    padding: 7px 10px !important;
-  }
-
-
-  html body.is-touch section#play .hud-progress > span {
-    font-size: 13px !important;
-  }
-
-  html body.is-touch section#play .hud-progress > small {
-    font-size: 7px !important;
-  }
-
-
-  /* ----------------------------------------------------------
-     ACTIONS — REMOVE OLD FLOW / XP / PAUSE FLEX CONFLICT
-     ---------------------------------------------------------- */
-
-  html body.is-touch section#play .hud-actions {
-    grid-column: 3 !important;
-    grid-row: 1 !important;
-
-    display: flex !important;
-    align-items: flex-start !important;
-    justify-content: flex-end !important;
-
-    gap: 6px !important;
-
-    margin: 0 !important;
-    min-width: 0 !important;
-  }
-
-
-  /* FLOW stays available but does not push XP/Pause around. */
-
-  html body.is-touch section#play .hud-actions .combo {
-    display: none !important;
-  }
-
-  html body.is-touch section#play .hud-actions .plasma,
-  html body.is-touch section#play .hud-actions .health {
-    display: none !important;
-  }
-
-
-  /* ----------------------------------------------------------
-     XP — SMALL RIGHT HUD
-     ---------------------------------------------------------- */
-
-  html body.is-touch section#play .hud-actions .hud-xp {
-    display: flex !important;
-
-    width: 54px !important;
-    min-width: 54px !important;
-    height: 38px !important;
-
-    padding: 5px !important;
-    margin: 0 !important;
-
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-
-  /* ----------------------------------------------------------
-     PAUSE — TOP RIGHT
-     ---------------------------------------------------------- */
-
-  html body.is-touch section#play #pause {
-    display: grid !important;
-
-    width: 42px !important;
-    min-width: 42px !important;
-
-    height: 38px !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-
-    place-items: center !important;
-  }
-
-
-  /* ==========================================================
-     TOUCH CONTROLS — BEAUTIFUL 3 × 2 GRID
-     ========================================================== */
-
-  html body.is-touch section#play div.mobile-controls {
-    position: fixed !important;
-
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 10px !important;
-
-    width: 100% !important;
-    height: auto !important;
-
-    display: flex !important;
-
-    align-items: flex-end !important;
-    justify-content: space-between !important;
-
-    padding:
-      0
-      max(12px, env(safe-area-inset-left, 0px))
-      max(12px, env(safe-area-inset-bottom, 0px))
-      !important;
-
-    box-sizing: border-box !important;
-
-    pointer-events: none !important;
-  }
-
-
-  /* LEFT JOYSTICK */
-
-  html body.is-touch section#play div.mobile-controls .mobile-joystick {
-    pointer-events: auto !important;
-
-    flex: 0 0 auto !important;
-
-    margin: 0 !important;
-  }
-
-
-  /* RIGHT BUTTON AREA */
-
-  html body.is-touch section#play div.mobile-controls .mobile-actions {
-    pointer-events: auto !important;
+  html body.is-touch section#play
+  div.mobile-controls
+  div.mobile-actions {
 
     display: grid !important;
 
@@ -223,13 +25,14 @@
     height: max-content !important;
 
     margin: 0 !important;
+
+    pointer-events: auto !important;
   }
 
 
-  /* EVERY BUTTON SAME SIZE */
-
-  html body.is-touch section#play div.mobile-controls .mobile-actions > button {
-    box-sizing: border-box !important;
+  html body.is-touch section#play
+  div.mobile-controls
+  div.mobile-actions > button {
 
     width: var(--touch-size) !important;
     height: var(--touch-size) !important;
@@ -246,13 +49,14 @@
     display: flex !important;
 
     flex-direction: column !important;
-
     align-items: center !important;
     justify-content: center !important;
 
     gap: 3px !important;
 
     border-radius: 50% !important;
+
+    box-sizing: border-box !important;
 
     overflow: hidden !important;
 
@@ -262,21 +66,26 @@
   }
 
 
-  /* NO MORE OLD COLUMN OFFSETS */
+  /* UKLANJA STARI 4-COLUMN RASPORED */
 
-  html body.is-touch section#play div.mobile-controls
-  .mobile-actions > button:nth-child(5),
+  html body.is-touch section#play
+  div.mobile-controls
+  div.mobile-actions > button:nth-child(5),
 
-  html body.is-touch section#play div.mobile-controls
-  .mobile-actions > button:nth-child(6) {
+  html body.is-touch section#play
+  div.mobile-controls
+  div.mobile-actions > button:nth-child(6) {
+
     grid-column: auto !important;
   }
 
 
-  /* BUTTON TEXT */
+  /* TEKST U BUTTONIMA */
 
-  html body.is-touch section#play div.mobile-controls
-  .mobile-actions > button small {
+  html body.is-touch section#play
+  div.mobile-controls
+  div.mobile-actions > button small {
+
     display: block !important;
 
     margin: 0 !important;
@@ -294,32 +103,268 @@
 }
 
 
-/* ------------------------------------------------------------
-   SMALL LANDSCAPE PHONES
-   ------------------------------------------------------------ */
+/* MALI LANDSCAPE TELEFONI */
 
 @media (max-width: 420px) and (orientation: landscape) {
 
-  html body.is-touch section#play div.mobile-controls
-  .mobile-actions {
+  html body.is-touch section#play
+  div.mobile-controls
+  div.mobile-actions {
+
     --touch-size: 43px !important;
+
     gap: 5px !important;
   }
-
 }
 
 
-/* ------------------------------------------------------------
-   NORMAL LANDSCAPE PHONES
-   ------------------------------------------------------------ */
+/* VEĆI LANDSCAPE TELEFONI */
 
 @media (min-width: 421px) and (max-width: 768px)
 and (orientation: landscape) {
 
-  html body.is-touch section#play div.mobile-controls
-  .mobile-actions {
+  html body.is-touch section#play
+  div.mobile-controls
+  div.mobile-actions {
+
     --touch-size: 49px !important;
+
     gap: 7px !important;
   }
-
 }
+
+/* ============================================================
+   MOBILE LANDSCAPE — TOP HUD
+   MISSION / SIGNALS / FLOW / XP / PAUSE
+   ============================================================ */
+
+@media (max-width: 768px) and (orientation: landscape) {
+
+  /* ----------------------------------------------------------
+     MAIN HUD
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud {
+    position: fixed !important;
+
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+
+    width: calc(100vw - 16px) !important;
+
+    display: grid !important;
+
+    grid-template-columns:
+      minmax(165px, 1fr)
+      minmax(105px, 125px)
+      minmax(85px, 105px)
+      48px
+      42px !important;
+
+    grid-template-rows: auto !important;
+
+    align-items: start !important;
+
+    gap: 6px !important;
+
+    padding: 0 !important;
+
+    pointer-events: none !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     MISSION — LEFT
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-route {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 260px !important;
+
+    margin: 0 !important;
+
+    justify-self: start !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     SIGNALS — CENTER
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-progress {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 125px !important;
+
+    margin: 0 !important;
+
+    justify-self: center !important;
+
+    padding: 7px 9px !important;
+  }
+
+
+  html body.is-touch section#play .hud-progress > span {
+    font-size: 12px !important;
+    line-height: 1 !important;
+  }
+
+  html body.is-touch section#play .hud-progress > small {
+    font-size: 7px !important;
+    line-height: 1 !important;
+  }
+
+  html body.is-touch section#play .hud-progress > div {
+    height: 3px !important;
+    margin-top: 4px !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     ACTIONS BECOMES TRANSPARENT GRID CONTAINER
+     Its children become individual HUD grid items.
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-actions {
+    display: contents !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     FLOW — CENTER
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-actions .combo {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+
+    display: flex !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 105px !important;
+
+    margin: 0 !important;
+
+    justify-self: center !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     REMOVE EXTRA VITALS
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-actions .plasma,
+  html body.is-touch section#play .hud-actions .health {
+    display: none !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     XP
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-actions .hud-xp {
+    grid-column: 4 !important;
+    grid-row: 1 !important;
+
+    display: flex !important;
+
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+
+    height: 38px !important;
+
+    margin: 0 !important;
+    padding: 4px !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    justify-self: end !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     PAUSE — TOP RIGHT
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play #pause {
+    grid-column: 5 !important;
+    grid-row: 1 !important;
+
+    display: grid !important;
+
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+
+    height: 38px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    place-items: center !important;
+
+    justify-self: end !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     STOP HUD CHILDREN FROM OVERFLOWING
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-route,
+  html body.is-touch section#play .hud-progress,
+  html body.is-touch section#play .hud-actions .combo,
+  html body.is-touch section#play .hud-actions .hud-xp {
+
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+}
+
+
+/* ------------------------------------------------------------
+   SMALL LANDSCAPE — TIGHTER TOP HUD
+   ------------------------------------------------------------ */
+
+@media (max-width: 420px) and (orientation: landscape) {
+
+  html body.is-touch section#play .hud {
+    grid-template-columns:
+      minmax(135px, 1fr)
+      92px
+      76px
+      44px
+      40px !important;
+
+    gap: 4px !important;
+  }
+
+  html body.is-touch section#play .hud-route {
+    padding: 6px 8px !important;
+  }
+
+  html body.is-touch section#play .hud-progress {
+    padding: 6px 7px !important;
+  }
+
+  html body.is-touch section#play .hud-actions .combo {
+    padding: 5px 6px !important;
+  }
+
+  html body.is-touch section#play .hud-actions .hud-xp {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 36px !important;
+  }
