@@ -149,224 +149,89 @@
     const style = document.createElement('style');
 
     style.textContent = `
-      /* ==========================================================
-         DEFAULT MOBILE / PORTRAIT
-         Keep the existing bottom Pause + Settings HUD.
-         ========================================================== */
-
-      body.is-touch #play .hud-actions > #pause {
-        display: none !important;
-      }
-
+      /* Mobile in-game menu controls: keep them clear of gameplay controls. */
       .mobile-bottom-hud {
         position: fixed;
-        inset:
-          auto
-          12px
-          calc(env(safe-area-inset-bottom, 0px) + 18px);
-
-        z-index: 900;
-
+        top: max(58px, calc(env(safe-area-inset-top, 0px) + 54px));
+        right: max(10px, calc(env(safe-area-inset-right, 0px) + 10px));
+        bottom: auto;
+        left: auto;
+        z-index: 1200;
         display: none;
-
-        align-items: flex-end;
-        justify-content: space-between;
-
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
         pointer-events: none;
       }
 
-      .mobile-bottom-hud.is-active {
-        display: flex;
+      .mobile-bottom-hud.is-active { display: flex; }
+
+      .mobile-menu-button {
+        width: 54px;
+        height: 54px;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 4px;
+        border: 1px solid rgba(255, 208, 110, .70);
+        border-radius: 14px;
+        background: linear-gradient(145deg, rgba(28, 22, 10, .98), rgba(7, 6, 3, .99));
+        color: #fff0b5;
+        box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 24px rgba(255,208,110,.18), inset 0 1px 0 rgba(255,255,255,.09);
+        font: 900 17px/1 "DM Mono", monospace;
+        pointer-events: auto;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        cursor: pointer;
+        transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
       }
 
+      .mobile-menu-button small {
+        font: 900 6px/1 "DM Mono", monospace;
+        letter-spacing: 1px;
+        color: #d4bf70;
+      }
 
-      /* ==========================================================
-         LANDSCAPE MOBILE
-         Use the ORIGINAL HUD Pause at the top.
-         Hide the separate bottom HUD.
-         ========================================================== */
+      .mobile-menu-button:active { transform: scale(.92); }
+      .mobile-menu-button:focus-visible { outline: none; border-color: #fff; }
 
       @media (orientation: landscape) {
-
         body.is-touch #play .hud-actions > #pause {
           display: grid !important;
-
           place-items: center !important;
-
           visibility: visible !important;
           opacity: 1 !important;
-
           pointer-events: auto !important;
         }
 
         body.is-touch #mobileBottomHud {
           display: none !important;
-
           visibility: hidden !important;
-
           opacity: 0 !important;
-
           pointer-events: none !important;
         }
       }
 
-
-      /* ==========================================================
-         MOBILE MENU BUTTONS
-         ========================================================== */
-
-      .mobile-menu-button {
-        width: 62px;
-        height: 62px;
-
-        padding: 0;
-
-        display: grid;
-        place-items: center;
-        align-content: center;
-
-        gap: 4px;
-
-        border:
-          1px solid
-          rgba(255, 208, 110, .70);
-
-        border-radius: 16px;
-
-        background:
-          linear-gradient(
-            145deg,
-            rgba(28, 22, 10, .98),
-            rgba(7, 6, 3, .99)
-          );
-
-        color: #fff0b5;
-
-        box-shadow:
-          0 10px 28px rgba(0, 0, 0, .5),
-          0 0 24px rgba(255, 208, 110, .18),
-          inset 0 1px 0 rgba(255, 255, 255, .09);
-
-        font:
-          900 19px/1
-          "DM Mono",
-          monospace;
-
-        pointer-events: auto;
-
-        touch-action: manipulation;
-
-        -webkit-tap-highlight-color: transparent;
-
-        cursor: pointer;
-
-        transition:
-          transform .12s ease,
-          box-shadow .12s ease,
-          border-color .12s ease;
-      }
-
-
-      .mobile-menu-button small {
-        font:
-          900 7px/1
-          "DM Mono",
-          monospace;
-
-        letter-spacing: 1.2px;
-
-        color: #caa85a;
-      }
-
-
-      .mobile-menu-button:active {
-        transform: scale(.92);
-      }
-
-
-      .mobile-menu-button:focus-visible {
-        outline: none;
-
-        transform: translateY(-2px);
-
-        border-color: #fff;
-      }
-
-
-      .mobile-menu-settings {
-        border-color:
-          rgba(255, 208, 110, .7);
-
-        color: #fff0b5;
-
-        box-shadow:
-          0 10px 28px rgba(0, 0, 0, .5),
-          0 0 24px rgba(255, 208, 110, .16),
-          inset 0 1px 0 rgba(255, 255, 255, .09);
-      }
-
-
-      .mobile-menu-settings small {
-        color: #d4bf70;
-      }
-
-
-      /* ==========================================================
-         SMALL PHONES
-         ========================================================== */
-
-      @media (max-width: 380px) {
-
+      @media (orientation: portrait) and (max-width: 380px) {
         .mobile-bottom-hud {
-          inset:
-            auto
-            8px
-            calc(env(safe-area-inset-bottom, 0px) + 14px);
+          top: max(54px, calc(env(safe-area-inset-top, 0px) + 50px));
+          right: max(7px, calc(env(safe-area-inset-right, 0px) + 7px));
+          gap: 6px;
         }
 
         .mobile-menu-button {
-          width: 54px;
-          height: 54px;
-
-          border-radius: 14px;
-
-          font-size: 17px;
-        }
-
-        .mobile-menu-button small {
-          font-size: 6px;
-        }
-      }
-
-
-      /* ==========================================================
-         VERY SHORT LANDSCAPE
-         ========================================================== */
-
-      @media (orientation: landscape) and (max-height: 560px) {
-
-        .mobile-bottom-hud {
-          bottom: 12px;
-        }
-
-        .mobile-menu-button {
-          width: 50px;
-          height: 50px;
-
+          width: 48px;
+          height: 48px;
           border-radius: 12px;
+          font-size: 15px;
         }
+
+        .mobile-menu-button small { font-size: 5px; }
       }
-
-
-      /* ==========================================================
-         REDUCED MOTION
-         ========================================================== */
 
       @media (prefers-reduced-motion: reduce) {
-
-        .mobile-menu-button {
-          transition: none;
-        }
+        .mobile-menu-button { transition: none; }
       }
     `;
 
