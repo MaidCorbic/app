@@ -40,26 +40,98 @@ export function installPlayerVisualV2(RunnerScene) {
       this.tweens.add({ targets: [coreGlow, aura], scale: { from: .9, to: 1.12 }, alpha: { from: .08, to: .18 }, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
       this.tweens.add({ targets: visorLine, alpha: { from: .55, to: 1 }, duration: 720, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
     }
+
+    let lastMode = 'idle';
+    let lastAirborne = false;
+    let lastVelocityY = 0;
+    let lastGroundFeedbackAt = -Infinity;
+
+    const triggerLandingFeedback = (player, velocityY) => {
+      if (this.motionReduced || !player?.active) return;
+
+      const now = this.time?.now ?? performance.now();
+      if (now - lastGroundFeedbackAt < 170) return;
+      lastGroundFeedbackAt = now;
+
+      const impact = Phaser.Math.Clamp(Math.abs(velocityY || 0), 180, 720);
+      const radius = 15 + (impact / 720) * 11;
+      const ring = this.add
+        .circle(player.x, player.y + 28, radius, 0x8df4ff, .12)
+        .setStrokeStyle(2, 0x8df4ff, .52)
+        .setDepth(11);
+
+      this.tweens.add({
+        targets: ring,
+        scale: 1.55 + (impact / 720) * .35,
+        alpha: 0,
+        duration: 150 + (impact / 720) * 70,
+        ease: 'Quad.Out',
+        onComplete: () => ring.destroy(),
+      });
+
+      const bounceStrength = Phaser.Math.Clamp(impact / 720, .25, 1);
+      root.setScale(player.flipX ? -(1 + .06 * bounceStrength) : 1 + .06 * bounceStrength, .94);
+      this.tweens.add({
+        targets: root,
+        scaleX: player.flipX ? -1 : 1,
+        scaleY: 1,
+        duration: 140,
+        ease: 'Quad.Out',
+      });
+    };
+
+    const triggerStatePulse = mode => {
+      if (this.motionReduced || !this.player?.active || mode === lastMode) return;
+
+      if (mode === 'jump' || mode === 'fall') {
+        aura.setAlpha(.11);
+      }
+
+      if (mode === 'hit') {
+        core.setFillStyle(0xff826e, 1);
+        this.tweens.add({
+          targets: [coreGlow, shoulderLightL, shoulderLightR],
+          alpha: { from: .2, to: .65 },
+          duration: 90,
+          yoyo: true,
+          ease: 'Quad.Out',
+        });
+      }
+    };
+
     const updateVisual = () => {
       const player = this.player;
       if (!player || !this.playerVisualV2) return;
       const key = player.anims?.currentAnim?.key || 'runner-idle';
       const mode = key.replace('runner-', '');
-      root.setPosition(player.x, player.y - 4);
+      const bodyVelocityY = Number(player.body?.velocity?.y) || 0;
       const airborne = mode === 'jump' || mode === 'fall';
       const running = mode === 'run';
       const dash = mode === 'dash';
       const hit = mode === 'hit';
+
+      triggerStatePulse(mode);
+
+      if (lastAirborne && !airborne && Math.abs(lastVelocityY) > 180) {
+        triggerLandingFeedback(player, lastVelocityY);
+      }
+
+      root.setPosition(player.x, player.y - 4);
       const baseScaleX = dash ? 1.14 : running ? 1.035 : 1;
       root.setScale(player.flipX ? -baseScaleX : baseScaleX, dash ? .88 : 1);
       root.setAngle(mode === 'jump' ? -3 : mode === 'fall' ? 3 : hit ? 7 : 0);
       shadow.setScale(airborne ? .7 : 1, airborne ? .7 : 1);
-      aura.setAlpha(dash ? .16 : running ? .075 : .055);
+      aura.setAlpha(dash ? .16 : running ? .075 : airborne ? .10 : .055);
       core.setFillStyle(dash ? 0xffd06e : hit ? 0xff826e : 0x9cf7ff, 1);
       stripe.setAlpha(dash ? 1 : .78);
       visorLine.setAlpha(hit ? .35 : .95);
       coat.setAlpha(dash ? .7 : 1);
+
+      lastMode = mode;
+      lastAirborne = airborne;
+      lastVelocityY = bodyVelocityY;
     };
+
     this.playerVisualV2 = { root, update: updateVisual };
     updateVisual();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
