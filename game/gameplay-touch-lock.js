@@ -5,9 +5,27 @@
   window.__relayGameplayTouchLockV1 = true;
 
   const gameplay = () => document.getElementById('play');
-  const isGameplayTarget = target => {
+   const isGameplayTarget = target => {
     const root = gameplay();
-    return !!root && !!target && (target === root || root.contains(target));
+    if (!root || !target || !root.contains(target)) return false;
+
+    /*
+     * Mobile bottom HUD + canonical pause menu remain interactive.
+     * The touch/selection lock must never interfere with their buttons,
+     * tabs, or overlays.
+     */
+    if (
+      target.closest('#mobileBottomHud') ||
+      target.closest('#mobilePauseButton') ||
+      target.closest('#mobileSettingsButton') ||
+      target.closest('#pauseMenu') ||
+      target.closest('#pause') ||
+      target.closest('[data-tab]')
+    ) {
+      return false;
+    }
+
+    return true;
   };
 
   ['copy', 'cut', 'dragstart', 'selectstart', 'contextmenu'].forEach(type => {
