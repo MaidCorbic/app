@@ -1,87 +1,395 @@
-/* Final mobile/gameplay visual contract. */
-#relaySplash.relay-splash{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
-#relaySplash.relay-splash .relay-splash-art{display:block}
-#relaySplash.relay-splash .relay-splash-ui{text-align:left}
-#relaySplash.relay-splash .relay-splash-meta{display:flex;align-items:flex-end;justify-content:space-between}
-#relaySplash.relay-splash .relay-splash-status{text-align:left}
-#relaySplash.relay-splash .relay-splash-brand{display:flex}
-#relay-flight-hud-v1,#relay-flight-hud-v1 *{display:none!important}
-#play,#play *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent}
-#play{-webkit-touch-callout:none;overscroll-behavior:none;touch-action:manipulation}
-#phaser-game,#phaser-game canvas,.mobile-controls,.mobile-joystick,.mobile-actions,.mobile-actions button{touch-action:none!important}
+/* ============================================================
+   FINAL MOBILE LANDSCAPE CONTROLS
+   7 BUTTONS = 4 TOP + 3 CENTERED BOTTOM
+   PURE CSS GRID
+   NO TRANSFORM
+   NO MARGIN HACK
+   NO OVERLAP
+   JOYSTICK HIDDEN VISUALLY
+   MOBILE LANDSCAPE ONLY
+   ============================================================ */
 
-@media(max-width:768px) and (orientation:portrait){
-  html body.is-touch section#play div.mobile-controls{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
-  html body.is-touch section#play div.mobile-controls *{pointer-events:none!important}
-  html body.is-touch section#play .rotate-prompt{display:flex!important}
-}
+@media (max-width: 768px) and (orientation: landscape) {
 
-@media(max-width:768px) and (orientation:landscape){
-  html body.is-touch section#play div.mobile-controls{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:clamp(10px,2vw,22px)!important;padding:0 max(10px,env(safe-area-inset-left,0px)) max(10px,env(safe-area-inset-bottom,0px))!important;box-sizing:border-box!important;pointer-events:none!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-joystick{pointer-events:auto!important;flex:0 0 auto!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions{pointer-events:auto!important;display:grid!important;grid-template-columns:repeat(4,var(--touch-size))!important;grid-template-rows:repeat(2,var(--touch-size))!important;align-items:center!important;justify-items:center!important;justify-content:end!important;gap:clamp(7px,1.35vw,12px)!important;width:max-content!important;height:max-content!important;margin:0!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{box-sizing:border-box!important;width:var(--touch-size)!important;height:var(--touch-size)!important;min-width:var(--touch-size)!important;min-height:var(--touch-size)!important;max-width:var(--touch-size)!important;max-height:var(--touch-size)!important;aspect-ratio:1/1!important;border-radius:50%!important;padding:0!important;margin:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-align:center!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button:nth-child(5){grid-column:2!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button:nth-child(6){grid-column:3!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button small{display:block!important;margin:0!important;padding:0!important;font-size:clamp(7px,1.45vw,9px)!important;line-height:1!important;font-weight:700!important;letter-spacing:.04em!important;opacity:.9!important}
-}
+  /* ==========================================================
+     CONTROLS CONTAINER
+     ========================================================== */
 
-@media(max-width:420px) and (orientation:landscape){
-  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:46px;gap:5px!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;max-width:46px!important;max-height:46px!important}
-}
-@media(min-width:421px) and (max-width:768px) and (orientation:landscape){
-  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:52px}
-}
+  html body.is-touch section#play div.mobile-controls {
+    position: fixed !important;
 
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="jump"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="fire"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="sword"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="dash"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="build1"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="gadget1"]{border-radius:50%!important;overflow:hidden!important}
+    left: auto !important;
+    right: max(8px, env(safe-area-inset-right)) !important;
 
-@media(max-width:768px){
-  #cargoIntegrityV2{left:14px!important;right:auto!important;top:78px!important;transform:none!important;width:min(250px,42vw)!important;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))!important}
-  #cargoIntegrityV2 .cargo-card{padding:3px 0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
-  #cargoIntegrityV2 .cargo-head{margin-bottom:4px!important;gap:8px!important}
-  #cargoIntegrityV2 .cargo-label{font-size:7px!important;letter-spacing:.12em!important;text-shadow:0 1px 3px #000}
-  #cargoIntegrityV2 .cargo-type{font-size:7px!important;text-shadow:0 1px 3px #000}
-  #cargoIntegrityV2 .cargo-row{gap:7px!important}
-  #cargoIntegrityV2 .cargo-track{height:4px!important;border:0!important;background:rgba(3,9,20,.35)!important;box-shadow:none!important}
-  #cargoIntegrityV2 .cargo-fill{box-shadow:0 0 8px color-mix(in srgb,var(--cargo-accent) 45%,transparent)!important}
-  #cargoIntegrityV2 .cargo-value{min-width:29px!important;font-size:9px!important;text-shadow:0 1px 3px #000}
-  #cargoIntegrityV2 .cargo-foot,#cargoIntegrityV2 .cargo-flash{display:none!important}
-}
+    top: auto !important;
+    bottom: max(8px, env(safe-area-inset-bottom)) !important;
 
-/* Compact mobile HUD: keep existing gameplay controls/features, reduce visual chrome. */
-@media (max-width: 768px) {
-  /* Feature cards remain available through their existing actions, but never occupy the top viewport simultaneously. */
-  html body.is-touch section#play #relay-feature-dock-v1 {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
+    width: auto !important;
+    height: auto !important;
 
-  /* Keep the existing orientation prompt useful, but compact and out of the main play lane. */
-  html body.is-touch section#play .rotate-prompt {
-    width: min(250px, calc(100vw - 28px)) !important;
-    max-width: calc(100vw - 28px) !important;
-    transform: translate(-50%, 0) scale(.88) !important;
-    transform-origin: top center !important;
     margin: 0 !important;
-    z-index: 240 !important;
+    padding: 0 !important;
+
+    display: block !important;
+
+    pointer-events: none !important;
+
+    z-index: 600 !important;
   }
 
-  html body.is-touch section#play .rotate-prompt button,
-  html body.is-touch section#play .rotate-prompt .button,
-  html body.is-touch section#play .rotate-prompt [role="button"] {
-    min-height: 34px !important;
+
+  /* ==========================================================
+     JOYSTICK
+     KEEP IN DOM / JS
+     HIDE VISUALLY
+     ========================================================== */
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-joystick {
+    position: absolute !important;
+
+    width: 1px !important;
+    height: 1px !important;
+
+    min-width: 1px !important;
+    min-height: 1px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    opacity: 0 !important;
+    visibility: hidden !important;
+
+    pointer-events: none !important;
+
+    overflow: hidden !important;
+
+    transform: none !important;
+    translate: none !important;
   }
 
-  /* The mission objective remains the single persistent objective, but the existing panel is compact. */
-  html body.is-touch section#play #cargoIntegrityV2 {
-    max-width: 210px !important;
+
+  /* ==========================================================
+     6-COLUMN GRID
+
+     TOP:
+     ●   ●   ●   ●
+
+     BOTTOM:
+       ●   ●   ●
+
+     Each button occupies 2 grid columns.
+     Bottom row starts at columns 2, 3, 4 equivalent
+     through explicit placement.
+     ========================================================== */
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions {
+    position: relative !important;
+
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(8, 24px) !important;
+
+    grid-template-rows:
+      repeat(2, 48px) !important;
+
+    column-gap: 0 !important;
+    row-gap: 7px !important;
+
+    width: max-content !important;
+    height: max-content !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+
+    align-items: center !important;
+    justify-items: center !important;
+
+    pointer-events: auto !important;
+
+    z-index: 602 !important;
+  }
+
+
+  /* ==========================================================
+     TOP ROW
+     ========================================================== */
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button:nth-child(1) {
+    grid-column: 1 / span 2 !important;
+    grid-row: 1 !important;
+  }
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button:nth-child(2) {
+    grid-column: 3 / span 2 !important;
+    grid-row: 1 !important;
+  }
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button:nth-child(3) {
+    grid-column: 5 / span 2 !important;
+    grid-row: 1 !important;
+  }
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button:nth-child(4) {
+    grid-column: 7 / span 2 !important;
+    grid-row: 1 !important;
+  }
+
+
+  /* ==========================================================
+     BOTTOM ROW
+     
+       ●   ●   ●
+     ========================================================== */
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button:nth-child(5) {
+    grid-column: 2 / span 2 !important;
+    grid-row: 2 !important;
+  }
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button:nth-child(6) {
+    grid-column: 4 / span 2 !important;
+    grid-row: 2 !important;
+  }
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button:nth-child(7) {
+    grid-column: 6 / span 2 !important;
+    grid-row: 2 !important;
+  }
+
+
+  /* ==========================================================
+     ALL BUTTONS
+     ========================================================== */
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button {
+    position: relative !important;
+
+    box-sizing: border-box !important;
+
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 3px !important;
+
+    border-radius: 50% !important;
+
+    overflow: hidden !important;
+
+    line-height: 1 !important;
+
+    text-align: center !important;
+
+    white-space: nowrap !important;
+
+    transform: none !important;
+    translate: none !important;
+
+    pointer-events: auto !important;
+
+    touch-action: manipulation !important;
+
+    z-index: 603 !important;
+  }
+
+
+  /* ==========================================================
+     BUTTON LABELS
+     ========================================================== */
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button small {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 7px !important;
+    line-height: 1 !important;
+
+    letter-spacing: .04em !important;
+
+    text-align: center !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+  }
+
+
+  /* ==========================================================
+     REMOVE OLD POSITIONING
+     ========================================================== */
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button {
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+  }
+}
+
+
+/* ============================================================
+   SMALL LANDSCAPE
+   ============================================================ */
+
+@media (max-width: 420px) and (orientation: landscape) {
+
+  html body.is-touch section#play div.mobile-controls {
+    right: max(6px, env(safe-area-inset-right)) !important;
+    bottom: max(6px, env(safe-area-inset-bottom)) !important;
+  }
+
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions {
+    grid-template-columns:
+      repeat(8, 20px) !important;
+
+    grid-template-rows:
+      repeat(2, 40px) !important;
+
+    row-gap: 5px !important;
+  }
+
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+  }
+
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button small {
+    font-size: 6px !important;
+  }
+}
+
+
+/* ============================================================
+   WIDE LANDSCAPE
+   ============================================================ */
+
+@media (min-width: 600px) and (max-width: 768px)
+       and (orientation: landscape) {
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions {
+    grid-template-columns:
+      repeat(8, 26px) !important;
+
+    grid-template-rows:
+      repeat(2, 52px) !important;
+
+    row-gap: 7px !important;
+  }
+
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button {
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL LANDSCAPE
+   ============================================================ */
+
+@media (max-width: 360px) and (orientation: landscape) {
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions {
+    grid-template-columns:
+      repeat(8, 18px) !important;
+
+    grid-template-rows:
+      repeat(2, 36px) !important;
+
+    row-gap: 4px !important;
+  }
+
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button {
+    width: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+  }
+
+
+  html body.is-touch section#play
+  div.mobile-controls
+  .mobile-actions > button small {
+    font-size: 5px !important;
   }
 }
