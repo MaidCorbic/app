@@ -1,17 +1,235 @@
-.home-streak {
+/* ============================================================
+   STREAK HUD — GAMING / TACTICAL POLISH
+   ------------------------------------------------------------
+   Presentation-only.
+   Does NOT change streak calculation or gameplay logic.
+   ============================================================ */
+
+.home-streak,
+.finish-streak {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+
   margin: 14px 0 0;
+  padding: 6px 11px;
+
+  border: 1px solid rgba(255, 208, 110, 0.34);
+  border-radius: 7px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 208, 110, 0.12),
+      rgba(8, 18, 30, 0.90)
+    );
+
   color: #ffd06e;
-  font: 800 8px 'DM Mono', monospace;
+
+  font:
+    800 8px/1.2
+    'DM Mono',
+    monospace;
+
   letter-spacing: 1px;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+
+  text-shadow:
+    0 0 7px rgba(255, 208, 110, 0.28);
+
+  box-shadow:
+    0 0 14px rgba(255, 208, 110, 0.08),
+    0 8px 20px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  overflow: hidden;
+
+  isolation: isolate;
 }
+
+/* ============================================================
+   TOP ENERGY LINE
+   ============================================================ */
+
+.home-streak::before,
+.finish-streak::before {
+  content: "";
+
+  position: absolute;
+
+  left: 8px;
+  right: 8px;
+  top: 0;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 224, 150, 0.85),
+      transparent
+    );
+
+  opacity: 0.8;
+
+  pointer-events: none;
+}
+
+/* ============================================================
+   HUD SCAN TEXTURE
+   ============================================================ */
+
+.home-streak::after,
+.finish-streak::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.018) 0,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+
+  opacity: 0.28;
+
+  pointer-events: none;
+
+  z-index: -1;
+}
+
+/* ============================================================
+   FINISH STREAK
+   ============================================================ */
 
 .finish-streak {
-  margin: 14px 0 0;
-  color: #ffd06e;
-  font: 800 9px 'DM Mono', monospace;
-  letter-spacing: .8px;
+  margin-top: 14px;
+
+  padding: 7px 12px;
+
+  border-color:
+    rgba(255, 208, 110, 0.42);
+
+  font-size: 9px;
+
+  letter-spacing: 0.8px;
+
+  box-shadow:
+    0 0 18px rgba(255, 208, 110, 0.10),
+    0 10px 24px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
+/* ============================================================
+   HOVER / FOCUS — ONLY IF INTERACTIVE
+   ============================================================ */
+
+.home-streak:hover,
+.finish-streak:hover {
+  border-color:
+    rgba(255, 220, 135, 0.55);
+
+  text-shadow:
+    0 0 10px rgba(255, 208, 110, 0.42);
+
+  box-shadow:
+    0 0 20px rgba(255, 208, 110, 0.12),
+    0 10px 26px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
 @media (max-width: 650px) {
-  .home-streak { margin-top: 10px; }
+  .home-streak {
+    margin-top: 10px;
+
+    padding: 5px 9px;
+
+    font-size: 7.5px;
+
+    letter-spacing: 0.85px;
+  }
+
+  .finish-streak {
+    margin-top: 10px;
+
+    padding: 6px 10px;
+
+    font-size: 8px;
+
+    letter-spacing: 0.7px;
+  }
+}
+
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 420px) {
+  .home-streak,
+  .finish-streak {
+    max-width: calc(100vw - 28px);
+
+    padding-left: 8px;
+    padding-right: 8px;
+
+    white-space: normal;
+
+    text-align: center;
+
+    line-height: 1.25;
+  }
+
+  .home-streak {
+    font-size: 7px;
+    letter-spacing: 0.7px;
+  }
+
+  .finish-streak {
+    font-size: 7.5px;
+    letter-spacing: 0.6px;
+  }
+}
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 350px) {
+  .home-streak,
+  .finish-streak {
+    max-width: calc(100vw - 22px);
+
+    padding: 5px 7px;
+
+    letter-spacing: 0.5px;
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .home-streak,
+  .finish-streak {
+    transition: none !important;
+  }
 }
