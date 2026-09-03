@@ -171,56 +171,182 @@
   };
 
   const build = () => {
-    const intro = $('intro');
-    if (!intro || intro.dataset.homeV3Built === '1') return;
-    intro.dataset.homeV3Built = '1';
-    intro.classList.add('home-v3');
+  const intro = $('intro');
+  if (!intro || intro.dataset.homeV3Built === '1') return;
 
-    const legacyMenu = intro.querySelector('.main-menu');
-    const launcher = intro.querySelector('.info-launcher');
+  intro.dataset.homeV3Built = '1';
+  intro.classList.add('home-v3');
 
-    const bg = document.createElement('div');
-    bg.className = 'home-v3-bg';
-    bg.setAttribute('aria-hidden', 'true');
-    bg.innerHTML = '<i class="home-v3-grid"></i><i class="home-v3-glow"></i><i class="home-v3-scan"></i>';
+  /*
+   * REMOVE OLD HOME ELEMENTS
+   *
+   * relay-final-layout-v2.js is the only owner
+   * of the four final Home buttons.
+   */
+  intro
+    .querySelectorAll(
+      '.main-menu, .info-launcher, .title-secondary'
+    )
+    .forEach((node) => node.remove());
 
-    const shell = document.createElement('div');
-    shell.className = 'home-v3-shell';
-    shell.innerHTML = `
-      <header class="home-v3-header">
-        <div class="home-v3-brand"><span class="home-v3-mark">R/</span><span>RELAY RUNNER</span></div>
-        <div class="home-v3-status"><b>● SYSTEM READY</b><br>NIGHT SHIFT · ONLINE</div>
-      </header>
-      <main class="home-v3-main">
-        <section>
-          <p class="home-v3-kicker">ROOFTOP DELIVERY NETWORK · CHAPTER 01</p>
-          <h1 class="home-v3-title">RELAY<em>RUNNER</em></h1>
-          <p class="home-v3-copy">Run the sleeping city. Carry the signal farther than anyone else can. Build your route, master the night and keep the line open.</p>
-          <div class="home-v3-actions">
-            <button class="home-v3-play" type="button" data-v3-play></button>
-            <button class="home-v3-continue" type="button" data-v3-continue hidden>CONTINUE</button>
-          </div>
-        </section>
-       <nav class="home-v3-side" aria-label="Main menu"></nav>
-        
-      </main>
-      <footer class="home-v3-footer"><span>RELAY RUNNER · <b>VERSION 1.1.0</b></span><span>W / D MOVE · SPACE JUMP · ESC PAUSE</span></footer>`;
+  /*
+   * BACKGROUND
+   */
+  const bg = document.createElement('div');
+  bg.className = 'home-v3-bg';
+  bg.setAttribute('aria-hidden', 'true');
 
-    intro.replaceChildren(bg, shell, legacyMenu, launcher);
+  bg.innerHTML = `
+    <i class="home-v3-grid"></i>
+    <i class="home-v3-glow"></i>
+    <i class="home-v3-scan"></i>
+  `;
 
-    installSwipePlay(shell.querySelector('[data-v3-play]'));
-    bindLegacyAction(shell.querySelector('[data-v3-continue]'), '#continue');
-  
+  /*
+   * HOME SHELL
+   */
+  const shell = document.createElement('div');
+  shell.className = 'home-v3-shell';
 
-    const syncContinue = () => {
-      const legacy = $('continue');
-      const button = shell.querySelector('[data-v3-continue]');
-      if (!legacy || !button) return;
-      button.hidden = legacy.classList.contains('hidden') || getComputedStyle(legacy).display === 'none';
-    };
-    syncContinue();
-    if ($('continue')) new MutationObserver(syncContinue).observe($('continue'), { attributes: true, attributeFilter: ['class','style','hidden'] });
+  shell.innerHTML = `
+    <header class="home-v3-header">
+
+      <div class="home-v3-brand">
+        <span class="home-v3-mark">R/</span>
+        <span>RELAY RUNNER</span>
+      </div>
+
+      <div class="home-v3-status">
+        <b>● SYSTEM READY</b><br>
+        NIGHT SHIFT · ONLINE
+      </div>
+
+    </header>
+
+    <main class="home-v3-main">
+
+      <section>
+
+        <p class="home-v3-kicker">
+          ROOFTOP DELIVERY NETWORK · CHAPTER 01
+        </p>
+
+        <h1 class="home-v3-title">
+          RELAY<em>RUNNER</em>
+        </h1>
+
+        <p class="home-v3-copy">
+          Run the sleeping city. Carry the signal farther than anyone else can.
+          Build your route, master the night and keep the line open.
+        </p>
+
+        <div class="home-v3-actions">
+
+          <button
+            class="home-v3-play"
+            type="button"
+            data-v3-play>
+          </button>
+
+          <button
+            class="home-v3-continue"
+            type="button"
+            data-v3-continue
+            hidden>
+            CONTINUE
+          </button>
+
+        </div>
+
+      </section>
+
+      <!--
+        FINAL HOME BUTTONS ARE NOT CREATED HERE.
+
+        relay-final-layout-v2.js creates exactly:
+
+        OPTIONS
+        UPDATE
+        FAQ
+        EXIT
+      -->
+
+      <nav
+        class="home-v3-side"
+        aria-label="Main menu">
+      </nav>
+
+    </main>
+
+    <footer class="home-v3-footer">
+
+      <span>
+        RELAY RUNNER · <b>VERSION 1.1.0</b>
+      </span>
+
+      <span>
+        W / D MOVE · SPACE JUMP · ESC PAUSE
+      </span>
+
+    </footer>
+  `;
+
+  /*
+   * IMPORTANT:
+   *
+   * Do NOT put legacyMenu or launcher back here.
+   *
+   * This is what was causing the duplicate buttons.
+   */
+  intro.replaceChildren(bg, shell);
+
+  /*
+   * PLAY / SWIPE
+   */
+  installSwipePlay(
+    shell.querySelector('[data-v3-play]')
+  );
+
+  /*
+   * CONTINUE
+   */
+  bindLegacyAction(
+    shell.querySelector('[data-v3-continue]'),
+    '#continue'
+  );
+
+  /*
+   * SYNC CONTINUE
+   */
+  const syncContinue = () => {
+    const legacy = $('continue');
+    const button = shell.querySelector(
+      '[data-v3-continue]'
+    );
+
+    if (!legacy || !button) return;
+
+    button.hidden =
+      legacy.classList.contains('hidden') ||
+      getComputedStyle(legacy).display === 'none';
   };
+
+  syncContinue();
+
+  if ($('continue')) {
+    new MutationObserver(syncContinue).observe(
+      $('continue'),
+      {
+        attributes: true,
+        attributeFilter: [
+          'class',
+          'style',
+          'hidden'
+        ]
+      }
+    );
+  }
+};
 
   const start = () => {
     injectStyles();
