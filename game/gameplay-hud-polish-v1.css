@@ -1,13 +1,779 @@
-/* Gameplay HUD polish V1 — presentation only. */
-#play .hud-route,#play .hud-progress,#play .hud-xp,#play .hud-actions>button{border-width:1px!important;border-color:rgba(141,244,255,.14)!important;background:rgba(4,13,25,.72)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 6px 16px rgba(0,0,0,.16)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-#play .hud-route{min-width:0!important;padding:6px 9px!important;border-radius:8px!important}
-#play .hud-route small{font-size:7px!important;letter-spacing:1.1px!important}
-#play .hud-route b{font-size:10px!important;letter-spacing:.45px!important}
-#play .hud-progress{min-width:0!important;padding:6px 9px!important;border-radius:8px!important}
-#play .hud-progress>div{height:4px!important;margin-top:4px!important}
-#play .hud-xp{display:flex!important;visibility:visible!important;opacity:1!important;min-width:54px!important;padding:6px 8px!important;border-radius:8px!important;line-height:1!important}
-#play .hud-xp small{font-size:7px!important;letter-spacing:.8px!important}
-#play .hud-xp b{font-size:11px!important;letter-spacing:.7px!important}
-#play .hud-route:hover,#play .hud-progress:hover,#play .hud-actions:hover,#play .hud-actions>button:hover,#play .hud-route:focus-within,#play .hud-progress:focus-within{transform:none!important;filter:none!important}
-@media(max-width:880px),(hover:none) and (pointer:coarse){#play .hud-route{padding:6px 8px!important;border-radius:8px!important}#play .hud-progress{padding:6px 8px!important;border-radius:8px!important}#play .hud-xp{min-width:52px!important;padding:5px 7px!important}}
-@media(max-width:430px){#play .hud-route{padding:5px 7px!important;border-radius:7px!important}#play .hud-route small{font-size:6px!important}#play .hud-route b{font-size:9px!important;max-width:44vw!important}#play .hud-progress{padding:5px 7px!important;border-radius:7px!important}#play .hud-xp{min-width:48px!important;padding:5px 6px!important;border-radius:7px!important}#play .hud-xp b{font-size:10px!important}}
+/* ==========================================================================
+   Gameplay HUD Polish V2 — FINAL
+   Presentation only.
+   No gameplay state, movement, score, combo, progression or input ownership.
+   ========================================================================== */
+
+#play .hud-route,
+#play .hud-progress,
+#play .hud-xp,
+#play .hud-actions > button{
+  box-sizing:border-box!important;
+  border:1px solid rgba(141,244,255,.20)!important;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(4,13,25,.94),
+      rgba(9,25,42,.84)
+    )!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    inset 0 0 0 1px rgba(141,244,255,.025),
+    0 8px 20px rgba(0,0,0,.24),
+    0 0 18px rgba(25,200,245,.045)!important;
+  backdrop-filter:blur(8px)!important;
+  -webkit-backdrop-filter:blur(8px)!important;
+}
+
+#play .hud{
+  position:relative!important;
+  box-sizing:border-box!important;
+}
+
+#play .hud-route,
+#play .hud-progress,
+#play .hud-xp{
+  min-width:0!important;
+}
+
+#play .hud-route{
+  padding:7px 10px!important;
+  border-radius:10px!important;
+  overflow:hidden!important;
+}
+
+#play .hud-route small{
+  display:block!important;
+  max-width:100%!important;
+  font-size:7px!important;
+  line-height:1.1!important;
+  letter-spacing:1.15px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+#play .hud-route b{
+  display:block!important;
+  max-width:100%!important;
+  margin-top:2px!important;
+  font-size:10px!important;
+  line-height:1.15!important;
+  letter-spacing:.45px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+#play .hud-progress{
+  position:relative!important;
+  padding:7px 10px!important;
+  border-radius:10px!important;
+  overflow:hidden!important;
+}
+
+#play .hud-progress > div{
+  position:relative!important;
+  height:4px!important;
+  margin-top:5px!important;
+  overflow:hidden!important;
+  border-radius:999px!important;
+  background:rgba(220,232,241,.07)!important;
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,.28)!important;
+}
+
+#play .hud-progress i{
+  display:block!important;
+  height:100%!important;
+  border-radius:inherit!important;
+  box-shadow:
+    0 0 12px rgba(141,244,255,.78),
+    0 0 4px rgba(255,255,255,.18)!important;
+  transform-origin:left center!important;
+}
+
+#play .hud-xp{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:58px!important;
+  padding:7px 8px!important;
+  border-radius:10px!important;
+  line-height:1!important;
+  overflow:hidden!important;
+}
+
+#play .hud-xp small{
+  display:block!important;
+  font-size:7px!important;
+  line-height:1.05!important;
+  letter-spacing:.9px!important;
+  white-space:nowrap!important;
+}
+
+#play .hud-xp b{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:11px!important;
+  line-height:1!important;
+  letter-spacing:.7px!important;
+  white-space:nowrap!important;
+}
+
+/* --------------------------------------------------------------------------
+   HUD actions
+   -------------------------------------------------------------------------- */
+
+#play .hud-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:7px!important;
+  min-width:0!important;
+}
+
+#play .hud-actions > button{
+  flex:0 0 auto!important;
+  width:44px!important;
+  height:42px!important;
+  padding:0!important;
+  border-radius:11px!important;
+  display:grid!important;
+  place-items:center!important;
+  line-height:1!important;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease,
+    filter .16s ease!important;
+}
+
+/* Prevent accidental visual movement from older layers. */
+#play .hud-route:hover,
+#play .hud-progress:hover,
+#play .hud-xp:hover,
+#play .hud-actions:hover,
+#play .hud-actions > button:hover,
+#play .hud-route:focus-within,
+#play .hud-progress:focus-within,
+#play .hud-xp:focus-within{
+  transform:none!important;
+}
+
+/* --------------------------------------------------------------------------
+   Gameplay Event HUD
+   -------------------------------------------------------------------------- */
+
+#play #gameplayEventHud,
+#play .gameplay-event-hud{
+  position:relative!important;
+  grid-column:1 / -1!important;
+  grid-row:auto!important;
+  justify-self:center!important;
+  align-self:start!important;
+  box-sizing:border-box!important;
+  width:min(370px,calc(100vw - 32px))!important;
+  max-width:370px!important;
+  margin:8px auto 0!important;
+  padding:0!important;
+  pointer-events:none!important;
+  z-index:20!important;
+  isolation:isolate!important;
+}
+
+#play .gameplay-event-card{
+  position:relative!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-height:68px!important;
+
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1fr)!important;
+  grid-template-rows:auto auto auto!important;
+  column-gap:10px!important;
+  align-items:center!important;
+
+  padding:10px 12px 11px!important;
+
+  overflow:hidden!important;
+  border:1px solid rgba(141,244,255,.22)!important;
+  border-radius:12px!important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(3,11,22,.97),
+      rgba(7,22,37,.93)
+    )!important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    inset 0 0 20px rgba(141,244,255,.018),
+    0 14px 34px rgba(0,0,0,.30),
+    0 0 28px rgba(25,200,245,.055)!important;
+}
+
+/* Tactical glass highlight. */
+#play .gameplay-event-card::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  pointer-events:none!important;
+  border-radius:inherit!important;
+  background:
+    linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255,255,255,.035) 42%,
+      transparent 68%
+    )!important;
+  opacity:.8!important;
+}
+
+/* Technical corner accent. */
+#play .gameplay-event-card::after{
+  content:""!important;
+  position:absolute!important;
+  top:0!important;
+  right:0!important;
+  z-index:0!important;
+  width:46px!important;
+  height:22px!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(
+      135deg,
+      transparent 0 48%,
+      currentColor 49% 51%,
+      transparent 52%
+    )!important;
+  opacity:.24!important;
+}
+
+/* --------------------------------------------------------------------------
+   Event icon
+   -------------------------------------------------------------------------- */
+
+#play .gameplay-event-icon{
+  position:relative!important;
+  z-index:2!important;
+
+  grid-column:1!important;
+  grid-row:1 / span 3!important;
+
+  width:30px!important;
+  height:30px!important;
+  box-sizing:border-box!important;
+
+  display:grid!important;
+  place-items:center!important;
+
+  border:1px solid currentColor!important;
+  border-radius:9px!important;
+
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(255,255,255,.045),
+      transparent 68%
+    )!important;
+
+  box-shadow:
+    inset 0 0 12px rgba(255,255,255,.025),
+    0 0 14px currentColor!important;
+
+  opacity:.86!important;
+}
+
+#play .gameplay-event-icon i{
+  display:block!important;
+  width:8px!important;
+  height:8px!important;
+  border-radius:50%!important;
+  background:currentColor!important;
+  box-shadow:
+    0 0 7px currentColor,
+    0 0 16px currentColor!important;
+}
+
+/* --------------------------------------------------------------------------
+   Event copy
+   -------------------------------------------------------------------------- */
+
+#play .gameplay-event-copy{
+  position:relative!important;
+  z-index:2!important;
+
+  grid-column:2!important;
+  min-width:0!important;
+  max-width:100%!important;
+
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:2px!important;
+}
+
+#play .gameplay-event-head{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  min-width:0!important;
+  max-width:100%!important;
+}
+
+#play #gameplayEventType,
+#play #gameplayEventValue,
+#play #gameplayEventTitle,
+#play #gameplayEventDetail{
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+#play #gameplayEventType{
+  flex:1 1 auto!important;
+  font-size:7px!important;
+  line-height:1.1!important;
+  letter-spacing:1.2px!important;
+  font-weight:700!important;
+  white-space:nowrap!important;
+}
+
+#play #gameplayEventValue{
+  flex:0 0 auto!important;
+  max-width:45%!important;
+  font-size:7px!important;
+  line-height:1!important;
+  letter-spacing:.9px!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  opacity:.84!important;
+}
+
+#play #gameplayEventTitle{
+  display:block!important;
+  font-size:12px!important;
+  line-height:1.15!important;
+  letter-spacing:.45px!important;
+  font-weight:850!important;
+  white-space:nowrap!important;
+}
+
+#play #gameplayEventDetail{
+  display:block!important;
+  font-size:7px!important;
+  line-height:1.2!important;
+  letter-spacing:.42px!important;
+  font-weight:500!important;
+  white-space:nowrap!important;
+  opacity:.68!important;
+}
+
+/* --------------------------------------------------------------------------
+   Event progress meter
+   -------------------------------------------------------------------------- */
+
+#play .gameplay-event-meter{
+  position:absolute!important;
+  z-index:3!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+
+  height:2px!important;
+  overflow:hidden!important;
+  border-radius:0 0 12px 12px!important;
+
+  background:rgba(255,255,255,.035)!important;
+}
+
+#play .gameplay-event-meter i{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+
+  transform-origin:left center!important;
+  transform:scaleX(1)!important;
+
+  background:currentColor!important;
+
+  box-shadow:
+    0 0 10px currentColor!important;
+}
+
+/* --------------------------------------------------------------------------
+   Scan / tactical line
+   -------------------------------------------------------------------------- */
+
+#play .gameplay-event-scan{
+  position:absolute!important;
+  z-index:1!important;
+  top:0!important;
+  left:-25%!important;
+  width:30%!important;
+  height:1px!important;
+  pointer-events:none!important;
+
+  background:currentColor!important;
+  box-shadow:0 0 10px currentColor!important;
+  opacity:.28!important;
+}
+
+#play .gameplay-event-hud.is-pop .gameplay-event-scan{
+  animation:relayGameplayEventScan .7s linear both!important;
+}
+
+@keyframes relayGameplayEventScan{
+  from{
+    transform:translateX(0);
+    opacity:0;
+  }
+
+  15%{
+    opacity:.28;
+  }
+
+  55%{
+    opacity:.45;
+  }
+
+  to{
+    transform:translateX(500%);
+    opacity:0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Event line / grid
+   -------------------------------------------------------------------------- */
+
+#play .gameplay-event-line{
+  position:absolute!important;
+  z-index:1!important;
+  inset:0!important;
+  pointer-events:none!important;
+  opacity:.26!important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(141,244,255,.08) 48%,
+      transparent 100%
+    )!important;
+}
+
+#play .gameplay-event-grid{
+  position:absolute!important;
+  z-index:1!important;
+  right:8px!important;
+  bottom:7px!important;
+  width:42px!important;
+  height:17px!important;
+  pointer-events:none!important;
+
+  opacity:.16!important;
+
+  background:
+    linear-gradient(
+      90deg,
+      currentColor 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      0deg,
+      currentColor 1px,
+      transparent 1px
+    )!important;
+
+  background-size:7px 7px!important;
+}
+
+/* --------------------------------------------------------------------------
+   Event colour states
+   -------------------------------------------------------------------------- */
+
+#play .gameplay-event-hud[data-type="danger"]{
+  color:#ff6670!important;
+}
+
+#play .gameplay-event-hud[data-type="combat"]{
+  color:#ffd06e!important;
+}
+
+#play .gameplay-event-hud[data-type="checkpoint"]{
+  color:#aee37f!important;
+}
+
+#play .gameplay-event-hud[data-type="complete"]{
+  color:#8df4ff!important;
+}
+
+#play .gameplay-event-hud[data-type="movement"]{
+  color:#8df4ff!important;
+}
+
+#play .gameplay-event-hud[data-type="gear"]{
+  color:#cbb8ff!important;
+}
+
+#play .gameplay-event-hud[data-type="world"],
+#play .gameplay-event-hud[data-type="discovery"],
+#play .gameplay-event-hud[data-type="ready"],
+#play .gameplay-event-hud[data-type="energy"]{
+  color:#8df4ff!important;
+}
+
+/* --------------------------------------------------------------------------
+   Event animation
+   -------------------------------------------------------------------------- */
+
+#play .gameplay-event-hud.is-pop .gameplay-event-card{
+  animation:
+    relayGameplayEventPopV2
+    .28s
+    cubic-bezier(.16,.82,.24,1)
+    both!important;
+}
+
+@keyframes relayGameplayEventPopV2{
+  0%{
+    opacity:0;
+    transform:translateY(-7px) scale(.975);
+    filter:brightness(.88);
+  }
+
+  45%{
+    opacity:1;
+    transform:translateY(0) scale(1.012);
+    filter:brightness(1.12);
+  }
+
+  72%{
+    transform:translateY(0) scale(.998);
+    filter:brightness(1.04);
+  }
+
+  100%{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    filter:brightness(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Mobile / tablet
+   -------------------------------------------------------------------------- */
+
+@media(max-width:880px),
+(hover:none) and (pointer:coarse){
+
+  #play .hud{
+    box-sizing:border-box!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:7px!important;
+    padding:9px 10px!important;
+  }
+
+  #play .hud-route{
+    grid-column:1!important;
+    padding:7px 9px!important;
+    border-radius:9px!important;
+  }
+
+  #play .hud-progress{
+    grid-column:1!important;
+    padding:7px 9px!important;
+    border-radius:9px!important;
+  }
+
+  #play .hud-actions{
+    grid-column:2!important;
+    grid-row:1 / span 2!important;
+    align-self:center!important;
+  }
+
+  #play .hud-actions > button{
+    width:43px!important;
+    height:41px!important;
+  }
+
+  #play #gameplayEventHud,
+  #play .gameplay-event-hud{
+    width:min(350px,calc(100vw - 26px))!important;
+    max-width:350px!important;
+    margin-top:7px!important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Small phones
+   -------------------------------------------------------------------------- */
+
+@media(max-width:430px){
+
+  #play .hud{
+    padding:7px 8px!important;
+    gap:6px!important;
+  }
+
+  #play .hud-route{
+    padding:6px 8px!important;
+    border-radius:8px!important;
+  }
+
+  #play .hud-route small{
+    font-size:6px!important;
+    letter-spacing:.95px!important;
+  }
+
+  #play .hud-route b{
+    font-size:9px!important;
+    letter-spacing:.35px!important;
+    max-width:46vw!important;
+  }
+
+  #play .hud-progress{
+    padding:6px 8px!important;
+    border-radius:8px!important;
+  }
+
+  #play .hud-progress > div{
+    height:4px!important;
+    margin-top:4px!important;
+  }
+
+  #play .hud-xp{
+    min-width:47px!important;
+    padding:6px!important;
+    border-radius:8px!important;
+  }
+
+  #play .hud-xp small{
+    font-size:6px!important;
+  }
+
+  #play .hud-xp b{
+    font-size:10px!important;
+  }
+
+  #play .hud-actions{
+    gap:5px!important;
+  }
+
+  #play .hud-actions > button{
+    width:39px!important;
+    height:37px!important;
+    border-radius:9px!important;
+  }
+
+  #play #gameplayEventHud,
+  #play .gameplay-event-hud{
+    width:calc(100vw - 16px)!important;
+    max-width:none!important;
+    margin-top:5px!important;
+  }
+
+  #play .gameplay-event-card{
+    min-height:59px!important;
+    grid-template-columns:29px minmax(0,1fr)!important;
+    column-gap:8px!important;
+    padding:8px 9px 9px!important;
+    border-radius:9px!important;
+  }
+
+  #play .gameplay-event-icon{
+    width:26px!important;
+    height:26px!important;
+    border-radius:8px!important;
+  }
+
+  #play .gameplay-event-icon i{
+    width:7px!important;
+    height:7px!important;
+  }
+
+  #play #gameplayEventType{
+    font-size:6px!important;
+    letter-spacing:1px!important;
+  }
+
+  #play #gameplayEventValue{
+    font-size:6px!important;
+    letter-spacing:.75px!important;
+  }
+
+  #play #gameplayEventTitle{
+    font-size:10px!important;
+    letter-spacing:.3px!important;
+  }
+
+  #play #gameplayEventDetail{
+    font-size:6px!important;
+    letter-spacing:.32px!important;
+  }
+
+  #play .gameplay-event-grid{
+    right:6px!important;
+    bottom:5px!important;
+    width:32px!important;
+    height:13px!important;
+    background-size:6px 6px!important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Very small phones
+   -------------------------------------------------------------------------- */
+
+@media(max-width:360px){
+
+  #play .hud-route b{
+    max-width:42vw!important;
+  }
+
+  #play .hud-actions > button{
+    width:36px!important;
+    height:35px!important;
+  }
+
+  #play .gameplay-event-card{
+    grid-template-columns:27px minmax(0,1fr)!important;
+    column-gap:7px!important;
+    padding:7px 8px 8px!important;
+  }
+
+  #play .gameplay-event-icon{
+    width:24px!important;
+    height:24px!important;
+  }
+
+  #play #gameplayEventTitle{
+    font-size:9px!important;
+  }
+
+  #play #gameplayEventDetail{
+    font-size:5.5px!important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------- */
+
+@media(prefers-reduced-motion:reduce){
+
+  #play .hud-actions > button{
+    transition:none!important;
+  }
+
+  #play .gameplay-event-hud.is-pop .gameplay-event-card,
+  #play .gameplay-event-hud.is-pop .gameplay-event-scan{
+    animation:none!important;
+  }
+}
