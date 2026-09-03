@@ -195,7 +195,6 @@ if (!RunnerScene.prototype.__relayCoreStabilityV1Installed) {
   };
 
   RunnerScene.prototype.update = function stableUpdate(time, delta) {
-    ensureWebKeyboardRefs(this);
     recoverWebPresentationState(this);
     update.call(this, time, delta);
     sanitizePlayerPhysics(this);
