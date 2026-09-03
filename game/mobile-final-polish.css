@@ -393,3 +393,434 @@
     font-size: 5px !important;
   }
 }
+
+/* ============================================================
+   RUNNER RELAY — FINAL MOBILE LANDSCAPE CONTROLS
+   KORAK 3
+   7 BUTTONS = 4 TOP + 3 CENTERED BOTTOM
+
+   Desktop: untouched
+   Portrait: untouched
+   Landscape mobile only
+   ============================================================ */
+
+@media (max-width: 760px) and (orientation: landscape) {
+
+  /* ----------------------------------------------------------
+     CONTROL CONTAINER
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play .mobile-controls {
+
+    position: fixed !important;
+
+    left: auto !important;
+    top: auto !important;
+
+    right:
+      max(8px, env(safe-area-inset-right))
+      !important;
+
+    bottom:
+      max(8px, env(safe-area-inset-bottom))
+      !important;
+
+    width: auto !important;
+    height: auto !important;
+
+    display: block !important;
+
+    z-index: 600 !important;
+
+    pointer-events: none !important;
+
+    overflow: visible !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     JOYSTICK
+     Keep it in DOM for JS/input ownership,
+     but do not visually show it.
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play .mobile-controls .mobile-joystick {
+
+    position: absolute !important;
+
+    width: 1px !important;
+    height: 1px !important;
+
+    min-width: 1px !important;
+    min-height: 1px !important;
+
+    opacity: 0 !important;
+
+    visibility: hidden !important;
+
+    pointer-events: none !important;
+
+    overflow: hidden !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     7-BUTTON GRID
+     
+     8 columns:
+     
+     TOP:
+     [1][2] [3][4] [5][6] [7][8]
+       1     2     3     4
+
+     BOTTOM:
+       [2][3] [4][5] [6][7]
+          5     6     7
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions {
+
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(8, 24px) !important;
+
+    grid-template-rows:
+      repeat(2, 48px) !important;
+
+    column-gap: 0 !important;
+
+    row-gap: 7px !important;
+
+    width: max-content !important;
+
+    height: max-content !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    position: relative !important;
+
+    box-sizing: border-box !important;
+
+    align-items: center !important;
+
+    justify-items: center !important;
+
+    pointer-events: none !important;
+
+    overflow: visible !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     EVERY BUTTON
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button {
+
+    width: 48px !important;
+
+    min-width: 48px !important;
+
+    max-width: 48px !important;
+
+    height: 48px !important;
+
+    min-height: 48px !important;
+
+    max-height: 48px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 50% !important;
+
+    transform: none !important;
+
+    position: relative !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    pointer-events: auto !important;
+
+    touch-action: manipulation !important;
+
+    overflow: hidden !important;
+
+    z-index: 2 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     TOP ROW — BUTTON 1
+     JUMP
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button:nth-child(2) {
+
+    grid-column: 1 / span 2 !important;
+    grid-row: 1 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     TOP ROW — BUTTON 2
+     FIRE
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button:nth-child(3) {
+
+    grid-column: 3 / span 2 !important;
+    grid-row: 1 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     TOP ROW — BUTTON 3
+     SWORD / FLY
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button:nth-child(4) {
+
+    grid-column: 5 / span 2 !important;
+    grid-row: 1 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     TOP ROW — BUTTON 4
+     DASH
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button:nth-child(5) {
+
+    grid-column: 7 / span 2 !important;
+    grid-row: 1 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     BOTTOM ROW — BUTTON 5
+     BUILD
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button:nth-child(6) {
+
+    grid-column: 2 / span 2 !important;
+    grid-row: 2 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     BOTTOM ROW — BUTTON 6
+     SETTINGS / GEAR
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button:nth-child(7) {
+
+    grid-column: 4 / span 2 !important;
+    grid-row: 2 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     BOTTOM ROW — BUTTON 7
+     CROUCH
+     
+     IMPORTANT:
+     Crouch is dynamically appended by crouch-gameplay-v1.js,
+     so it becomes the 8th child when the hidden joystick
+     occupies the first child position.
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  #mobileCrouchButton {
+
+    grid-column: 6 / span 2 !important;
+    grid-row: 2 !important;
+
+    z-index: 3 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     BUTTON TEXT
+     Prevent overlapping labels.
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button
+  small {
+
+    display: block !important;
+
+    max-width: 100% !important;
+
+    padding: 0 3px !important;
+
+    box-sizing: border-box !important;
+
+    font-size: 6px !important;
+
+    line-height: 1 !important;
+
+    letter-spacing: .3px !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+
+    pointer-events: none !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     NO TRANSFORM / NO NEGATIVE MARGINS
+     ---------------------------------------------------------- */
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button {
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    left: auto !important;
+    right: auto !important;
+
+    top: auto !important;
+    bottom: auto !important;
+  }
+}
+
+
+/* ============================================================
+   SHORT LANDSCAPE
+   ============================================================ */
+
+@media (max-width: 760px)
+  and (orientation: landscape)
+  and (max-height: 560px) {
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions {
+
+    grid-template-columns:
+      repeat(8, 20px) !important;
+
+    grid-template-rows:
+      repeat(2, 40px) !important;
+
+    row-gap: 6px !important;
+  }
+
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button {
+
+    width: 40px !important;
+
+    min-width: 40px !important;
+
+    max-width: 40px !important;
+
+    height: 40px !important;
+
+    min-height: 40px !important;
+
+    max-height: 40px !important;
+  }
+
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button
+  small {
+
+    font-size: 5px !important;
+
+    letter-spacing: .2px !important;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL LANDSCAPE
+   ============================================================ */
+
+@media (max-width: 360px)
+  and (orientation: landscape) {
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions {
+
+    grid-template-columns:
+      repeat(8, 18px) !important;
+
+    grid-template-rows:
+      repeat(2, 36px) !important;
+
+    row-gap: 5px !important;
+  }
+
+
+  html body.is-touch #play
+  .mobile-controls
+  .mobile-actions
+  button {
+
+    width: 36px !important;
+
+    min-width: 36px !important;
+
+    max-width: 36px !important;
+
+    height: 36px !important;
+
+    min-height: 36px !important;
+
+    max-height: 36px !important;
+  }
+}
