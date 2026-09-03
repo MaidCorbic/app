@@ -26,16 +26,10 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
     body.moves = true;
     body.allowGravity = true;
     body.checkCollision.none = false;
-    body.setAcceleration?.(0, 0);
 
     if (!Number.isFinite(scene.player.x) || !Number.isFinite(scene.player.y)) {
       const spawn = scene.safeCheckpointSpawn?.(Number(scene.mission?.spawn?.x) || 120) || scene.mission?.spawn || { x: 120, y: 520 };
       scene.player.setPosition?.(spawn.x, spawn.y);
-    }
-
-    const vx = Number(body.velocity?.x) || 0;
-    if (Math.abs(vx) > (scene.__relayMobileSpawnMaxVX || 0)) {
-      body.setVelocityX?.(0);
     }
     return true;
   };
@@ -46,7 +40,7 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
     scene.__relayMobileStabilityStartedAt = performance.now();
     scene.__relayMobileStabilityLastY = Number(scene.player?.y) || 0;
     scene.__relayMobileStabilitySettled = false;
-    scene.__relayMobileSpawnMaxVX = 120;
+  
 
     const settle = () => {
       if (!scene?.sys?.isActive?.() || scene.finished || scene.respawning) return true;
@@ -107,10 +101,6 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
 
   const originalUpdate = RunnerScene.prototype.update;
   RunnerScene.prototype.update = function mobileGameplayStabilityUpdate(...args) {
-    const result = originalUpdate?.apply(this, args);
-    if (this.__relayMobileStabilityArmed && !this.finished && !this.respawning && !this.cinematicActive) {
-      safe(this);
-    }
-    return result;
+    return originalUpdate?.apply(this, args);
   };
 })();
