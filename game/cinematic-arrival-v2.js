@@ -28,17 +28,10 @@ import './cinematic-arrival-v2.css';
     particles.className = 'arrival-particles';
     particles.innerHTML = '<i></i>'.repeat(10);
 
-    const copy = document.createElement('div');
-    copy.className = 'arrival-copy';
-    copy.innerHTML = '<div class="arrival-center"><p class="arrival-kicker">CHAPTER 01 // NIGHT SHIFT</p><h1 class="arrival-title"><span>THE NIGHT</span><br><em>IS ONLINE.</em></h1><div class="arrival-line"></div><p class="arrival-message">THE CITY IS SLEEPING. THE NETWORK IS NOT.<br>ONE RUNNER. ONE SIGNAL.</p><div class="arrival-mission"><small>MISSION 01 // OLD QUARTER</small><b>ROOFTOP RELAY</b><span>FOLLOW THE RELAY · RESTORE THE SIGNAL</span><i></i></div></div>';
-
-    splash.append(signal, particles, copy);
+    splash.append(signal, particles);
 
     const image = splash.querySelector('#relaySplashArt,.relay-splash-art');
     const started = performance.now();
-    // The mission card animates in at 2.15s and its progress bar runs for 2.45s.
-    // Releasing at 0.9s removed the entire splash before the mission text appeared.
-    // Keep the splash alive for the full presentation, while still retaining a hard cap.
     const MIN_MS = 3600;
     const MAX_MS = 5000;
     let released = false;
