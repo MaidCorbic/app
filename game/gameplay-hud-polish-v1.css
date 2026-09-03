@@ -777,3 +777,168 @@
     animation:none!important;
   }
 }
+
+/* ============================================================
+   DESKTOP HUD — FINAL LAYOUT
+   MISSION LEFT / FLOW CENTER / XP + PAUSE RIGHT
+   ============================================================ */
+
+@media (min-width: 881px) {
+
+  #play .hud {
+    display: grid !important;
+
+    grid-template-columns:
+      minmax(250px, 300px)
+      minmax(320px, 1fr)
+      auto
+      auto !important;
+
+    align-items: start !important;
+
+    column-gap: 10px !important;
+
+    padding: 12px 16px !important;
+  }
+
+  /* MISSION — LIJEVO */
+  #play .hud-route {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+
+    width: 100% !important;
+    min-width: 250px !important;
+    max-width: 300px !important;
+
+    justify-self: start !important;
+  }
+
+  /* FLOW — SREDINA */
+  #play .hud-progress {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+
+    width: min(520px, 100%) !important;
+    min-width: 320px !important;
+
+    justify-self: center !important;
+  }
+
+  /* XP — DESNO */
+  #play .hud-xp {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+
+    min-width: 66px !important;
+
+    justify-self: end !important;
+  }
+
+  /* PAUSE — SKROZ DESNO */
+  #play .hud-actions {
+    grid-column: 4 !important;
+    grid-row: 1 !important;
+
+    margin-left: 0 !important;
+
+    justify-self: end !important;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  #play .hud-actions > button {
+    width: 44px !important;
+    height: 42px !important;
+    flex: 0 0 44px !important;
+  }
+}
+
+/* ============================================================
+   GRAPPLE HUD — HIDE VISUAL PANEL ONLY
+   Grapple gameplay/input remains untouched.
+   ============================================================ */
+
+#play .grapple,
+#play .grapple-panel,
+#play .grapple-hud,
+#play #grapple,
+#play #grapplePanel,
+#play [data-feature="grapple"],
+#play [data-feature-action="grapple"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ============================================================
+   MISSION INTELLIGENCE Q / W / E — HIDE UI ONLY
+   Gameplay systems remain untouched.
+   ============================================================ */
+
+#play .relay-gameplay-intel,
+#play #relayGameplayIntel,
+#play .mission-intelligence,
+#play #missionIntelligence,
+#play [data-relay-mission-intelligence],
+#play [data-mission-intelligence] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ============================================================
+   MISSION TEXT — STABLE TYPEWRITER PRESENTATION
+   ============================================================ */
+
+#game .world-marker {
+  animation: none !important;
+  transform: none !important;
+}
+
+#game .world-marker b {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+
+  transition: none !important;
+
+  text-shadow:
+    0 0 10px rgba(255, 208, 110, 0.12) !important;
+}
+
+#game .world-marker.is-typing b {
+  animation: none !important;
+}
+
+/* Blinking cursor while text is being written */
+#game .world-marker.is-typing b::after {
+  content: "_" !important;
+
+  display: inline-block !important;
+
+  margin-left: 2px !important;
+
+  color: #ffd06e !important;
+
+  animation:
+    relayMissionCursor
+    0.7s
+    steps(1, end)
+    infinite !important;
+}
+
+@keyframes relayMissionCursor {
+  0%,
+  48% {
+    opacity: 1;
+  }
+
+  49%,
+  100% {
+    opacity: 0;
+  }
+}
