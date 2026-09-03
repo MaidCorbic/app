@@ -18,24 +18,63 @@ if (!window.__relayMobileBlackScreenFix) {
   }, true);
 
   const originalCreate = RunnerScene.prototype.create;
-  RunnerScene.prototype.create = function mobileSafeCreate(...args) {
+    RunnerScene.prototype.create = function mobileSafeCreate(...args) {
     const result = originalCreate.apply(this, args);
-    if (isTouch()) {
+
+      if (isTouch()) {
       const width = Math.max(1, this.scale.width);
       const height = Math.max(720, this.scale.height);
-      this.__mobileWorldSurface = this.add.rectangle(width / 2, height / 2, width, height, 0x07101e, 1).setScrollFactor(0).setDepth(-1000);
-      this.cameras.main.setBounds(0, 0, this.worldWidth, height);
+
+      this.__mobileWorldSurface = this.add
+        .rectangle(
+          width / 2,
+          height / 2,
+          width,
+          height,
+          0x07101e,
+          1
+        )
+        .setScrollFactor(0)
+        .setDepth(-1000);
+
+      this.cameras.main.setBounds(
+        0,
+        0,
+        this.worldWidth || 6280,
+        height
+      );
+
       this.cameras.main.setBackgroundColor('#07101e');
     }
     return result;
   };
 
+  let lastSurfaceWidth = 0;
+  let lastSurfaceHeight = 0;
+
   window.addEventListener('resize', () => {
     const scene = window.__relayRunnerScene;
     if (!isTouch() || !scene?.scene?.isActive?.() || !scene.cameras?.main) return;
+
     const width = Math.max(1, scene.scale.width);
     const height = Math.max(720, scene.scale.height);
-    scene.__mobileWorldSurface?.setPosition(width / 2, height / 2).setSize(width, height);
-    scene.cameras.main.setBounds(0, 0, scene.worldWidth || 6280, height);
+
+    if (width === lastSurfaceWidth && height === lastSurfaceHeight) {
+      return;
+    }
+
+    lastSurfaceWidth = width;
+    lastSurfaceHeight = height;
+
+    scene.__mobileWorldSurface
+      ?.setPosition(width / 2, height / 2)
+      .setSize(width, height);
+
+    scene.cameras.main.setBounds(
+      0,
+      0,
+      scene.worldWidth || 6280,
+      height
+    );
   }, { passive: true });
 }
