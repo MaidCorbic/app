@@ -25,15 +25,55 @@
     const now = performance.now(); const key = `${event[0]}|${event[1]}|${event[2]}`;
     if (key === state.lastKey && now - state.lastAt < 280) return;
     state.lastKey = key; state.lastAt = now;
-    const [type, title, detail, kind = 'event', duration = kind === 'danger' ? 1500 : 1100] = event;
-    root.dataset.type = kind;
-    root.style.setProperty('--event-duration', `${duration}ms`);
-    root.querySelector('#gameplayEventType').textContent = type;
-    root.querySelector('#gameplayEventTitle').textContent = title;
-    root.querySelector('#gameplayEventDetail').textContent = detail;
-    root.querySelector('#gameplayEventValue').textContent = kind === 'danger' ? 'WARNING' : kind === 'complete' ? 'SECURED' : kind === 'combat' ? 'COMBAT' : 'LIVE';
+   const [
+  type,
+  title,
+  detail,
+  kind = 'event',
+  duration = kind === 'danger' ? 1500 : 1100
+] = event;
+
+const safeDuration = Math.min(
+  3000,
+  Math.max(350, Number(duration) || 1100)
+);
+
+root.dataset.type = String(kind || 'event');
+root.style.setProperty(
+  '--event-duration',
+  `${safeDuration}ms`
+);
+root.querySelector('#gameplayEventType').textContent =
+  String(type || 'EVENT');
+
+root.querySelector('#gameplayEventTitle').textContent =
+  String(title || 'SYSTEM UPDATE');
+
+root.querySelector('#gameplayEventDetail').textContent =
+  String(detail || 'GAMEPLAY TELEMETRY');
+ const statusLabel = {
+  danger: 'WARNING',
+  complete: 'SECURED',
+  combat: 'COMBAT',
+  movement: 'ACTION',
+  gear: 'GEAR',
+  checkpoint: 'SAVED',
+  world: 'SECTOR',
+  discovery: 'FOUND',
+  ready: 'READY',
+  energy: 'ENERGY',
+  event: 'LIVE'
+};
+
+root.querySelector('#gameplayEventValue').textContent =
+  statusLabel[kind] || 'LIVE';
     root.classList.remove('is-visible', 'is-pop'); if (!reduced()) void root.offsetWidth; root.classList.add('is-visible'); if (!reduced()) root.classList.add('is-pop');
-    clearTimeout(state.hideTimer); state.hideTimer = setTimeout(() => root.classList.remove('is-visible'), duration);
+  clearTimeout(state.hideTimer);
+
+state.hideTimer = setTimeout(
+  () => root.classList.remove('is-visible'),
+  safeDuration
+);
   }
 
  function feedback(kind) {
@@ -54,12 +94,12 @@
       1650
     ],
 
-    hit: [
+       hit: [
       'DAMAGE',
       'IMPACT DETECTED',
-      'RECOVERY SEQUENCE INITIATED',
-      'danger',
-      1450
+      'KINETIC IMPACT REGISTERED',
+      'combat',
+      850
     ],
 
     jump: [
@@ -110,12 +150,12 @@
       950
     ],
 
-    complete: [
+      complete: [
       'MISSION',
-      'DELIVERY COMPLETE',
+      'MISSION COMPLETE',
       'RELAY LINKED · RESULTS READY',
       'complete',
-      1900
+      2100
     ]
   };
 
@@ -172,20 +212,45 @@
     ]);
   }
 }],
-      ['combo', (value, best) => {
+    ['combo', (value, best) => {
   const combo = Number(value);
 
-  if (combo >= 2) {
-    show([
-      'COMBAT',
-      `COMBO ×${combo}`,
-      best
-        ? `BEST FLOW ×${best}`
-        : 'COMBAT CHAIN ACTIVE',
-      'combat',
-      combo >= 5 ? 1150 : 900
-    ]);
+  if (!Number.isFinite(combo) || combo < 2) {
+    return;
   }
+
+  const safeCombo = Math.max(2, Math.floor(combo));
+  const bestCombo = Number(best);
+
+  const title =
+    safeCombo >= 10
+      ? 'OVERDRIVE'
+      : safeCombo >= 7
+        ? 'KILL FLOW'
+        : safeCombo >= 5
+          ? 'HIGH FLOW'
+          : 'COMBAT';
+
+  const detail = Number.isFinite(bestCombo) && bestCombo >= safeCombo
+    ? `BEST FLOW ×${Math.floor(bestCombo)}`
+    : 'COMBAT CHAIN ACTIVE';
+
+  const duration =
+    safeCombo >= 10
+      ? 1350
+      : safeCombo >= 7
+        ? 1200
+        : safeCombo >= 5
+          ? 1100
+          : 900;
+
+  show([
+    'COMBAT',
+    `${title} · COMBO ×${safeCombo}`,
+    detail,
+    'combat',
+    duration
+  ]);
 }],
       ['tutorial', message => show(['INTEL', 'NEW FIELD INSTRUCTION', message, 'world', 1700])],
       ['narration', message => { if (message) show(['RADIO', 'INCOMING TRANSMISSION', message, 'world', 1800]); }],
