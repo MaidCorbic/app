@@ -1,87 +1,325 @@
-/* Final mobile/gameplay visual contract. */
-#relaySplash.relay-splash{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
-#relaySplash.relay-splash .relay-splash-art{display:block}
-#relaySplash.relay-splash .relay-splash-ui{text-align:left}
-#relaySplash.relay-splash .relay-splash-meta{display:flex;align-items:flex-end;justify-content:space-between}
-#relaySplash.relay-splash .relay-splash-status{text-align:left}
-#relaySplash.relay-splash .relay-splash-brand{display:flex}
-#relay-flight-hud-v1,#relay-flight-hud-v1 *{display:none!important}
-#play,#play *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent}
-#play{-webkit-touch-callout:none;overscroll-behavior:none;touch-action:manipulation}
-#phaser-game,#phaser-game canvas,.mobile-controls,.mobile-joystick,.mobile-actions,.mobile-actions button{touch-action:none!important}
+/* ============================================================
+   MOBILE LANDSCAPE HUD — FINAL LAYOUT V1
+   ============================================================ */
 
-@media(max-width:768px) and (orientation:portrait){
-  html body.is-touch section#play div.mobile-controls{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
-  html body.is-touch section#play div.mobile-controls *{pointer-events:none!important}
-  html body.is-touch section#play .rotate-prompt{display:flex!important}
-}
+@media (max-width: 768px) and (orientation: landscape) {
 
-@media(max-width:768px) and (orientation:landscape){
-  html body.is-touch section#play div.mobile-controls{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:clamp(10px,2vw,22px)!important;padding:0 max(10px,env(safe-area-inset-left,0px)) max(10px,env(safe-area-inset-bottom,0px))!important;box-sizing:border-box!important;pointer-events:none!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-joystick{pointer-events:auto!important;flex:0 0 auto!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions{pointer-events:auto!important;display:grid!important;grid-template-columns:repeat(4,var(--touch-size))!important;grid-template-rows:repeat(2,var(--touch-size))!important;align-items:center!important;justify-items:center!important;justify-content:end!important;gap:clamp(7px,1.35vw,12px)!important;width:max-content!important;height:max-content!important;margin:0!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{box-sizing:border-box!important;width:var(--touch-size)!important;height:var(--touch-size)!important;min-width:var(--touch-size)!important;min-height:var(--touch-size)!important;max-width:var(--touch-size)!important;max-height:var(--touch-size)!important;aspect-ratio:1/1!important;border-radius:50%!important;padding:0!important;margin:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-align:center!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button:nth-child(5){grid-column:2!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button:nth-child(6){grid-column:3!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button small{display:block!important;margin:0!important;padding:0!important;font-size:clamp(7px,1.45vw,9px)!important;line-height:1!important;font-weight:700!important;letter-spacing:.04em!important;opacity:.9!important}
-}
+  /* ----------------------------------------------------------
+     TOP HUD
+     MISSION = LEFT
+     SIGNALS = CENTER
+     XP = RIGHT
+     PAUSE = TOP RIGHT
+     ---------------------------------------------------------- */
 
-@media(max-width:420px) and (orientation:landscape){
-  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:46px;gap:5px!important}
-  html body.is-touch section#play div.mobile-controls div.mobile-actions>button{width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;max-width:46px!important;max-height:46px!important}
-}
-@media(min-width:421px) and (max-width:768px) and (orientation:landscape){
-  html body.is-touch section#play div.mobile-controls div.mobile-actions{--touch-size:52px}
-}
+  html body.is-touch section#play .hud {
+    position: fixed !important;
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
 
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="jump"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="fire"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="sword"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="dash"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="build1"],
-html body.is-touch section#play div.mobile-controls div.mobile-actions>button[data-mobile-action="gadget1"]{border-radius:50%!important;overflow:hidden!important}
+    width: calc(100vw - 16px) !important;
+    height: auto !important;
 
-@media(max-width:768px){
-  #cargoIntegrityV2{left:14px!important;right:auto!important;top:78px!important;transform:none!important;width:min(250px,42vw)!important;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))!important}
-  #cargoIntegrityV2 .cargo-card{padding:3px 0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
-  #cargoIntegrityV2 .cargo-head{margin-bottom:4px!important;gap:8px!important}
-  #cargoIntegrityV2 .cargo-label{font-size:7px!important;letter-spacing:.12em!important;text-shadow:0 1px 3px #000}
-  #cargoIntegrityV2 .cargo-type{font-size:7px!important;text-shadow:0 1px 3px #000}
-  #cargoIntegrityV2 .cargo-row{gap:7px!important}
-  #cargoIntegrityV2 .cargo-track{height:4px!important;border:0!important;background:rgba(3,9,20,.35)!important;box-shadow:none!important}
-  #cargoIntegrityV2 .cargo-fill{box-shadow:0 0 8px color-mix(in srgb,var(--cargo-accent) 45%,transparent)!important}
-  #cargoIntegrityV2 .cargo-value{min-width:29px!important;font-size:9px!important;text-shadow:0 1px 3px #000}
-  #cargoIntegrityV2 .cargo-foot,#cargoIntegrityV2 .cargo-flash{display:none!important}
-}
+    display: grid !important;
 
-/* Compact mobile HUD: keep existing gameplay controls/features, reduce visual chrome. */
-@media (max-width: 768px) {
-  /* Feature cards remain available through their existing actions, but never occupy the top viewport simultaneously. */
-  html body.is-touch section#play #relay-feature-dock-v1 {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
+    grid-template-columns:
+      minmax(190px, 1fr)
+      minmax(150px, 190px)
+      auto !important;
+
+    grid-template-rows: auto auto !important;
+
+    align-items: start !important;
+    gap: 6px 8px !important;
+
+    padding: 0 !important;
+
     pointer-events: none !important;
   }
 
-  /* Keep the existing orientation prompt useful, but compact and out of the main play lane. */
-  html body.is-touch section#play .rotate-prompt {
-    width: min(250px, calc(100vw - 28px)) !important;
-    max-width: calc(100vw - 28px) !important;
-    transform: translate(-50%, 0) scale(.88) !important;
-    transform-origin: top center !important;
+  html body.is-touch section#play .hud > * {
+    pointer-events: auto !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     MISSION — TOP LEFT
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-route {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 300px !important;
+
+    justify-self: start !important;
+
     margin: 0 !important;
-    z-index: 240 !important;
   }
 
-  html body.is-touch section#play .rotate-prompt button,
-  html body.is-touch section#play .rotate-prompt .button,
-  html body.is-touch section#play .rotate-prompt [role="button"] {
-    min-height: 34px !important;
+
+  /* ----------------------------------------------------------
+     SIGNALS — NEXT TO MISSION / CENTER
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-progress {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+
+    width: 170px !important;
+    min-width: 150px !important;
+    max-width: 190px !important;
+
+    justify-self: center !important;
+
+    margin: 0 !important;
+
+    padding: 7px 10px !important;
   }
 
-  /* The mission objective remains the single persistent objective, but the existing panel is compact. */
-  html body.is-touch section#play #cargoIntegrityV2 {
-    max-width: 210px !important;
+
+  html body.is-touch section#play .hud-progress > span {
+    font-size: 13px !important;
   }
+
+  html body.is-touch section#play .hud-progress > small {
+    font-size: 7px !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     ACTIONS — REMOVE OLD FLOW / XP / PAUSE FLEX CONFLICT
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-actions {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-end !important;
+
+    gap: 6px !important;
+
+    margin: 0 !important;
+    min-width: 0 !important;
+  }
+
+
+  /* FLOW stays available but does not push XP/Pause around. */
+
+  html body.is-touch section#play .hud-actions .combo {
+    display: none !important;
+  }
+
+  html body.is-touch section#play .hud-actions .plasma,
+  html body.is-touch section#play .hud-actions .health {
+    display: none !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     XP — SMALL RIGHT HUD
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play .hud-actions .hud-xp {
+    display: flex !important;
+
+    width: 54px !important;
+    min-width: 54px !important;
+    height: 38px !important;
+
+    padding: 5px !important;
+    margin: 0 !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     PAUSE — TOP RIGHT
+     ---------------------------------------------------------- */
+
+  html body.is-touch section#play #pause {
+    display: grid !important;
+
+    width: 42px !important;
+    min-width: 42px !important;
+
+    height: 38px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    place-items: center !important;
+  }
+
+
+  /* ==========================================================
+     TOUCH CONTROLS — BEAUTIFUL 3 × 2 GRID
+     ========================================================== */
+
+  html body.is-touch section#play div.mobile-controls {
+    position: fixed !important;
+
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 10px !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    display: flex !important;
+
+    align-items: flex-end !important;
+    justify-content: space-between !important;
+
+    padding:
+      0
+      max(12px, env(safe-area-inset-left, 0px))
+      max(12px, env(safe-area-inset-bottom, 0px))
+      !important;
+
+    box-sizing: border-box !important;
+
+    pointer-events: none !important;
+  }
+
+
+  /* LEFT JOYSTICK */
+
+  html body.is-touch section#play div.mobile-controls .mobile-joystick {
+    pointer-events: auto !important;
+
+    flex: 0 0 auto !important;
+
+    margin: 0 !important;
+  }
+
+
+  /* RIGHT BUTTON AREA */
+
+  html body.is-touch section#play div.mobile-controls .mobile-actions {
+    pointer-events: auto !important;
+
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(3, var(--touch-size)) !important;
+
+    grid-template-rows:
+      repeat(2, var(--touch-size)) !important;
+
+    align-items: center !important;
+    justify-items: center !important;
+
+    gap: 7px !important;
+
+    width: max-content !important;
+    height: max-content !important;
+
+    margin: 0 !important;
+  }
+
+
+  /* EVERY BUTTON SAME SIZE */
+
+  html body.is-touch section#play div.mobile-controls .mobile-actions > button {
+    box-sizing: border-box !important;
+
+    width: var(--touch-size) !important;
+    height: var(--touch-size) !important;
+
+    min-width: var(--touch-size) !important;
+    min-height: var(--touch-size) !important;
+
+    max-width: var(--touch-size) !important;
+    max-height: var(--touch-size) !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 3px !important;
+
+    border-radius: 50% !important;
+
+    overflow: hidden !important;
+
+    line-height: 1 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+
+  /* NO MORE OLD COLUMN OFFSETS */
+
+  html body.is-touch section#play div.mobile-controls
+  .mobile-actions > button:nth-child(5),
+
+  html body.is-touch section#play div.mobile-controls
+  .mobile-actions > button:nth-child(6) {
+    grid-column: auto !important;
+  }
+
+
+  /* BUTTON TEXT */
+
+  html body.is-touch section#play div.mobile-controls
+  .mobile-actions > button small {
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 8px !important;
+    line-height: 1 !important;
+
+    font-weight: 800 !important;
+
+    letter-spacing: .05em !important;
+
+    white-space: nowrap !important;
+  }
+}
+
+
+/* ------------------------------------------------------------
+   SMALL LANDSCAPE PHONES
+   ------------------------------------------------------------ */
+
+@media (max-width: 420px) and (orientation: landscape) {
+
+  html body.is-touch section#play div.mobile-controls
+  .mobile-actions {
+    --touch-size: 43px !important;
+    gap: 5px !important;
+  }
+
+}
+
+
+/* ------------------------------------------------------------
+   NORMAL LANDSCAPE PHONES
+   ------------------------------------------------------------ */
+
+@media (min-width: 421px) and (max-width: 768px)
+and (orientation: landscape) {
+
+  html body.is-touch section#play div.mobile-controls
+  .mobile-actions {
+    --touch-size: 49px !important;
+    gap: 7px !important;
+  }
+
 }
