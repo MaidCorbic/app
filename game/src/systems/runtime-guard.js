@@ -16,9 +16,35 @@ window.relayMissionValidation = { ok: errors.length === 0, errors, missionCount:
 
 // Production mode: never replace the game with a recovery overlay. A runtime error is
 // logged for diagnostics while the normal game UI remains intact.
+let lastRuntimeSignature = '';
+let lastRuntimeReportAt = 0;
+
 const report = (error, title = 'GAME RUNTIME ERROR') => {
+  const message = String(
+    error?.stack ||
+    error?.reason?.stack ||
+    error?.reason ||
+    error ||
+    'Unknown runtime error'
+  );
+
+  const signature = `${title}|${message}`;
+  const now = Date.now();
+
+  if (signature === lastRuntimeSignature && now - lastRuntimeReportAt < 2000) {
+    return;
+  }
+
+  lastRuntimeSignature = signature;
+  lastRuntimeReportAt = now;
+
   console.error(`[Relay Runner] ${title}`, error);
-  window.relayLastRuntimeError = { title, error: String(error?.stack || error?.reason?.stack || error?.reason || error || 'Unknown runtime error'), at: Date.now() };
+
+  window.relayLastRuntimeError = {
+    title,
+    error: message,
+    at: now
+  };
 };
 
 if (errors.length) report(errors.join('\n'), 'MISSION DATA ERROR');
@@ -26,13 +52,31 @@ window.addEventListener('error', event => report(event.error || event.message));
 window.addEventListener('unhandledrejection', event => report(event.reason));
 
 const start = document.getElementById('start');
+let bootWatchdog = null;
+
 start?.addEventListener('click', () => {
+  if (bootWatchdog) {
+    clearInterval(bootWatchdog);
+    bootWatchdog = null;
+  }
+
   const started = Date.now();
-  const timer = setInterval(() => {
-    if (window.strideReady || !document.getElementById('start')) return clearInterval(timer);
+
+  bootWatchdog = setInterval(() => {
+    if (window.strideReady || !document.getElementById('start')) {
+      clearInterval(bootWatchdog);
+      bootWatchdog = null;
+      return;
+    }
+
     if (Date.now() - started > 10000) {
-      clearInterval(timer);
-      report('RunnerScene did not report ready within 10 seconds.', 'MISSION FAILED TO BOOT');
+      clearInterval(bootWatchdog);
+      bootWatchdog = null;
+
+      report(
+        'RunnerScene did not report ready within 10 seconds.',
+        'MISSION FAILED TO BOOT'
+      );
     }
   }, 250);
 }, { capture: true });
@@ -61,8 +105,33 @@ if (speech && window.SpeechSynthesisUtterance) {
     item.utterance.onerror = () => { active = false; setTimeout(pump, 90); };
     nativeSpeak(item.utterance);
   };
-  speech.cancel = () => { nativeCancel(); queue.length = 0; active = false; };
-  speech.speak = utterance => {
+  try {
+    speech.cancel = () => {
+      nativeCancel();
+      queue.length = 0;
+      active = false;
+    };
+
+    speech.speak = utterance => {
+      const text = String(utterance?.text || '').trim();
+      if (!text || isNoise(text)) return;
+
+      const now = Date.now();
+      if (text === lastText && now - lastAt < 900) return;
+
+      lastText = text;
+      lastAt = now;
+      queue.push({ utterance });
+
+      if (queue.length > 6) {
+        queue.splice(0, queue.length - 6);
+      }
+
+      pump();
+    };
+  } catch (error) {
+    console.warn('[Relay Runner] Speech synthesis hooks unavailable:', error);
+  }
     const text = String(utterance?.text || '').trim(); if (!text || isNoise(text)) return;
     const now = Date.now(); if (text === lastText && now - lastAt < 900) return;
     lastText = text; lastAt = now; queue.push({ utterance }); if (queue.length > 6) queue.splice(0, queue.length - 6); pump();
