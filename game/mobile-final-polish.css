@@ -368,3 +368,54 @@ and (orientation: landscape) {
     min-width: 44px !important;
     height: 36px !important;
   }
+/* ============================================================
+   MOBILE HOME — RESTORE FULL HOME SURFACE
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+  html body.home-v3-active #intro {
+    position: fixed !important;
+    inset: 0 !important;
+
+    width: 100vw !important;
+    height: 100dvh !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    z-index: 500 !important;
+
+    background: #05080d !important;
+  }
+
+  html body.home-v3-active #intro > * {
+    box-sizing: border-box !important;
+  }
+
+  html body.home-v3-active #intro .home-v3-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+
+    min-height: 100% !important;
+
+    overflow: hidden !important;
+  }
+
+  html body.home-v3-active #intro #play {
+    display: none !important;
+  }
+
+  html body.home-v3-active #play {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+}
