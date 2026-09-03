@@ -169,26 +169,37 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
          GAMEPLAY TOP HUD
          ========================================================= */
 
-      #play .hud{
-        position:absolute!important;
-        top:10px!important;
-        left:50%!important;
-        right:auto!important;
-        transform:translateX(-50%)!important;
-        width:min(1180px,calc(100vw - 24px))!important;
-        max-width:none!important;
-        padding:0!important;
-        margin:0!important;
-        display:grid!important;
-        grid-template-columns:
-          minmax(0,1fr)
-          minmax(182px,228px)
-          auto!important;
-        gap:9px!important;
-        align-items:start!important;
-        z-index:300!important;
-        pointer-events:none!important;
-      }
+   #play .hud{
+    position:absolute!important;
+    top:10px!important;
+    left:50%!important;
+    right:auto!important;
+    transform:translateX(-50%)!important;
+
+    width:min(1180px,calc(100vw - 24px))!important;
+    max-width:none!important;
+
+    padding:0!important;
+    margin:0!important;
+
+    display:grid!important;
+
+    /*
+      DESKTOP:
+      ROUTE | SIGNALS | XP + PAUSE
+    */
+    grid-template-columns:
+        minmax(300px, 1.10fr)
+        minmax(250px, .95fr)
+        minmax(210px, .55fr)!important;
+
+    gap:12px!important;
+
+    align-items:start!important;
+
+    z-index:300!important;
+    pointer-events:none!important;
+}
 
       #play .hud>*{
         pointer-events:auto!important;
@@ -294,10 +305,16 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
       #play .hud-actions{
         display:flex!important;
-        justify-content:flex-end!important;
-        align-items:stretch!important;
-        gap:7px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:8px!important;
       }
+
+      @media(min-width:901px){
+    #play .hud-actions{
+        transform:translateX(-28px)!important;
+    }
+}
 
       #play .hud-xp{
         min-width:82px!important;
