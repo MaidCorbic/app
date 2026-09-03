@@ -15,15 +15,82 @@ function ensureUi() {
     if (!document.getElementById('world-interaction-style')) {
       const style = document.createElement('style');
       style.id = 'world-interaction-style';
-      style.textContent = `
-        #worldInteractButton{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:100000;display:none;min-width:180px;padding:13px 22px;border:2px solid #8df4ff;border-radius:14px;background:rgba(4,15,28,.98);box-shadow:0 0 14px rgba(141,244,255,.48),0 0 30px rgba(25,200,245,.22),inset 0 0 15px rgba(141,244,255,.08);color:#e9fdff;font:900 13px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-align:center;text-transform:uppercase;pointer-events:auto;touch-action:manipulation}
-        #worldInteractButton.is-visible{display:block;animation:relayInteractPulse 1s ease-in-out infinite alternate}
-        #worldInteractButton.is-active{border-color:#aee37f;color:#efffdc}
-        #worldInteractButton small{display:block;margin-top:6px;color:#8df4ff;font-size:9px;letter-spacing:.08em}
-        @keyframes relayInteractPulse{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.035)}}
-        @media(min-width:769px){#worldInteractButton{bottom:30px;min-width:160px}}
-        @media(prefers-reduced-motion:reduce){#worldInteractButton{animation:none}}
-      `;
+     style.textContent = `
+  #worldInteractButton{
+    position:fixed;
+    left:50%;
+    bottom:calc(132px + env(safe-area-inset-bottom,0px));
+    transform:translateX(-50%);
+    z-index:180;
+    display:none;
+    min-width:174px;
+    min-height:52px;
+    padding:11px 20px;
+    border:1px solid rgba(141,244,255,.9);
+    border-radius:14px;
+    background:
+      linear-gradient(145deg,rgba(4,15,28,.98),rgba(7,30,48,.97));
+    box-shadow:
+      0 0 10px rgba(141,244,255,.38),
+      0 0 26px rgba(25,200,245,.20),
+      inset 0 0 18px rgba(141,244,255,.07);
+    color:#e9fdff;
+    font:900 12px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.12em;
+    text-align:center;
+    text-transform:uppercase;
+    pointer-events:auto;
+    touch-action:manipulation;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  #worldInteractButton.is-visible{
+    display:block;
+    animation:relayInteractPulse 1s ease-in-out infinite alternate;
+  }
+
+  #worldInteractButton.is-active{
+    border-color:#aee37f;
+    color:#efffdc;
+    box-shadow:
+      0 0 12px rgba(174,227,127,.55),
+      0 0 30px rgba(174,227,127,.24),
+      inset 0 0 18px rgba(174,227,127,.08);
+  }
+
+  #worldInteractButton small{
+    display:block;
+    margin-top:6px;
+    color:#8df4ff;
+    font-size:9px;
+    letter-spacing:.08em;
+    line-height:1.2;
+  }
+
+  @keyframes relayInteractPulse{
+    from{
+      transform:translateX(-50%) scale(1);
+    }
+    to{
+      transform:translateX(-50%) scale(1.035);
+    }
+  }
+
+  @media(min-width:769px){
+    #worldInteractButton{
+      bottom:30px;
+      min-width:160px;
+    }
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    #worldInteractButton{
+      animation:none;
+    }
+  }
+`;
       document.head.appendChild(style);
     }
     button = document.createElement('button');
