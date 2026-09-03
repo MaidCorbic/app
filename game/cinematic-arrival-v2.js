@@ -20,10 +20,6 @@ import './cinematic-arrival-v2.css';
     if (!ui || !label || !percent || !bar) return;
     if (splash.querySelector('.arrival-copy')) return;
 
-    const status = document.createElement('div');
-    status.className = 'arrival-status';
-    status.textContent = 'RELAY NETWORK // SECURE CHANNEL';
-
     const signal = document.createElement('div');
     signal.className = 'arrival-signal';
     signal.innerHTML = '<i></i><i></i><i></i><span>SYNC</span>';
@@ -36,7 +32,7 @@ import './cinematic-arrival-v2.css';
     copy.className = 'arrival-copy';
     copy.innerHTML = '<div class="arrival-center"><p class="arrival-kicker">CHAPTER 01 // NIGHT SHIFT</p><h1 class="arrival-title"><span>THE NIGHT</span><br><em>IS ONLINE.</em></h1><div class="arrival-line"></div><p class="arrival-message">THE CITY IS SLEEPING. THE NETWORK IS NOT.<br>ONE RUNNER. ONE SIGNAL.</p><div class="arrival-mission"><small>MISSION 01 // OLD QUARTER</small><b>ROOFTOP RELAY</b><span>FOLLOW THE RELAY · RESTORE THE SIGNAL</span><i></i></div></div>';
 
-    splash.append(status, signal, particles, copy);
+    splash.append(signal, particles, copy);
 
     const image = splash.querySelector('#relaySplashArt,.relay-splash-art');
     const started = performance.now();
