@@ -1,24 +1,878 @@
-@media(max-width:760px){
-  #game .hud{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;padding:10px 9px!important;max-width:calc(100vw - 18px)!important}
-  #game .hud-route{grid-column:1!important;min-width:0!important;padding:7px 8px!important}
-  #game .hud-route b{font-size:9px!important;max-width:100%!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #game .hud-run{grid-column:2!important;min-width:122px!important;max-width:122px!important;padding:7px 8px!important}
-  #game .hud-run>span{font-size:12px!important}
-  #game .hud-actions{grid-column:2!important;grid-row:1!important;position:absolute!important;right:9px!important;top:10px!important;gap:6px!important}
-  #game .hud-xp{display:none!important}
-  #game #pause{width:38px!important;height:38px!important}
-  .relay-gameplay-intel{top:74px!important;width:min(330px,calc(100vw - 18px))!important}
+/* ============================================================
+   RUNNER RELAY — UNIFIED MOBILE GAMEPLAY UI
+   KORAK 2
+   Mobile landscape HUD:
+   MISSION | SIGNALS | FLOW | XP | PAUSE
+
+   Desktop: untouched
+   Portrait: preserved
+   Landscape: dedicated layout
+   ============================================================ */
+
+
+/* ============================================================
+   MOBILE BASE
+   ============================================================ */
+
+@media (max-width: 760px) {
+
+  #game .hud {
+    position: relative !important;
+
+    display: grid !important;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto !important;
+
+    gap: 7px !important;
+
+    padding: 10px 9px !important;
+
+    max-width:
+      calc(100vw - 18px) !important;
+
+    box-sizing: border-box !important;
+
+    align-items: center !important;
+  }
+
+
+  #game .hud-route {
+    grid-column: 1 !important;
+
+    min-width: 0 !important;
+
+    padding: 7px 8px !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+  }
+
+
+  #game .hud-route b {
+    display: block !important;
+
+    font-size: 9px !important;
+
+    max-width: 100% !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+  }
+
+
+  #game .hud-run {
+    grid-column: 2 !important;
+
+    min-width: 122px !important;
+
+    max-width: 122px !important;
+
+    padding: 7px 8px !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+  }
+
+
+  #game .hud-run > span {
+    font-size: 12px !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  #game .hud-run > small {
+    white-space: nowrap !important;
+  }
+
+
+  /* ==========================================================
+     HUD ACTIONS
+     ========================================================== */
+
+  #game .hud-actions {
+
+    grid-column: 2 !important;
+
+    grid-row: 1 !important;
+
+    position: absolute !important;
+
+    right: 9px !important;
+
+    top: 10px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: flex-end !important;
+
+    gap: 6px !important;
+
+    z-index: 50 !important;
+  }
+
+
+  /* ==========================================================
+     XP — RESTORED
+     ========================================================== */
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp {
+
+    display: flex !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    position: relative !important;
+
+    width: auto !important;
+
+    min-width: 58px !important;
+
+    max-width: 72px !important;
+
+    height: 38px !important;
+
+    padding: 5px 8px !important;
+
+    box-sizing: border-box !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    flex: 0 0 auto !important;
+
+    overflow: hidden !important;
+  }
+
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp b {
+
+    display: block !important;
+
+    font-size: 11px !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp small {
+
+    display: block !important;
+
+    font-size: 6px !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  /* ==========================================================
+     ORIGINAL PAUSE
+     ========================================================== */
+
+  html body.is-touch #game #play .hud .hud-actions > #pause {
+
+    display: grid !important;
+
+    place-items: center !important;
+
+    width: 44px !important;
+
+    min-width: 44px !important;
+
+    height: 40px !important;
+
+    min-height: 40px !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    pointer-events: auto !important;
+
+    flex: 0 0 auto !important;
+  }
+
+
+  /* ==========================================================
+     MISSION INTELLIGENCE
+     Keep hidden — Q / W / E buttons must not return.
+     ========================================================== */
+
+  #game .relay-gameplay-intel {
+
+    top: 74px !important;
+
+    width:
+      min(330px, calc(100vw - 18px)) !important;
+
+    box-sizing: border-box !important;
+  }
 }
-@media(max-width:520px){
-  #game .hud{grid-template-columns:minmax(0,1fr) 122px!important;padding:8px 8px!important}
-  #game .hud-route{padding:6px 7px!important}
-  #game .hud-route small{font-size:6px!important}
-  #game .hud-route b{font-size:9px!important;max-width:calc(100vw - 150px)!important}
-  #game .hud-run{padding:6px 7px!important;min-width:122px!important;max-width:122px!important}
-  #game .hud-run>span{font-size:12px!important}
-  #game .hud-run>small{font-size:6px!important}
-  #game .hud-actions{right:8px!important;top:8px!important}
-  #game #pause{width:36px!important;height:36px!important}
-  #game .world-marker{left:8px!important;bottom:8px!important;max-width:58vw!important}
-  .relay-gameplay-intel{top:70px!important;width:calc(100vw - 18px)!important;padding:10px 11px!important}
+
+
+/* ============================================================
+   MOBILE LANDSCAPE
+   ============================================================ */
+
+@media (max-width: 760px) and (orientation: landscape) {
+
+  #game .hud {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    min-height: 52px !important;
+
+    padding:
+      6px
+      max(10px, env(safe-area-inset-left))
+      6px
+      max(10px, env(safe-area-inset-right)) !important;
+
+    display: flex !important;
+
+    flex-direction: row !important;
+
+    align-items: center !important;
+
+    justify-content: flex-start !important;
+
+    gap: 7px !important;
+
+    box-sizing: border-box !important;
+  }
+
+
+  /* ==========================================================
+     MISSION — LEFT
+     ========================================================== */
+
+  #game .hud-route {
+
+    order: 1 !important;
+
+    flex: 1 1 auto !important;
+
+    min-width: 120px !important;
+
+    max-width: 32vw !important;
+
+    padding: 6px 9px !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+  }
+
+
+  #game .hud-route small {
+
+    display: block !important;
+
+    font-size: 6px !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+  }
+
+
+  #game .hud-route b {
+
+    display: block !important;
+
+    font-size: 9px !important;
+
+    line-height: 1.15 !important;
+
+    max-width: 100% !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+  }
+
+
+  /* ==========================================================
+     SIGNALS / FLOW
+     ========================================================== */
+
+  #game .hud-run {
+
+    order: 2 !important;
+
+    flex: 0 1 auto !important;
+
+    min-width: 122px !important;
+
+    max-width: 190px !important;
+
+    width: auto !important;
+
+    padding: 6px 9px !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+  }
+
+
+  #game .hud-run > span {
+
+    display: block !important;
+
+    font-size: 12px !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+  }
+
+
+  #game .hud-run > small {
+
+    display: block !important;
+
+    font-size: 6px !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+  }
+
+
+  /* ==========================================================
+     ACTION CLUSTER — RIGHT
+     XP + PAUSE
+     ========================================================== */
+
+  #game .hud-actions {
+
+    order: 3 !important;
+
+    position: relative !important;
+
+    top: auto !important;
+
+    right: auto !important;
+
+    margin-left: auto !important;
+
+    flex: 0 0 auto !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: flex-end !important;
+
+    gap: 6px !important;
+
+    z-index: 100 !important;
+  }
+
+
+  /* ==========================================================
+     XP
+     ========================================================== */
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp {
+
+    display: flex !important;
+
+    width: 64px !important;
+
+    min-width: 64px !important;
+
+    max-width: 64px !important;
+
+    height: 40px !important;
+
+    padding: 5px 8px !important;
+
+    box-sizing: border-box !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    flex-direction: column !important;
+
+    flex: 0 0 64px !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    overflow: hidden !important;
+  }
+
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp b {
+
+    font-size: 11px !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp small {
+
+    margin-top: 2px !important;
+
+    font-size: 6px !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  /* ==========================================================
+     PAUSE
+     ========================================================== */
+
+  html body.is-touch #game #play .hud .hud-actions > #pause {
+
+    display: grid !important;
+
+    place-items: center !important;
+
+    width: 44px !important;
+
+    min-width: 44px !important;
+
+    height: 40px !important;
+
+    min-height: 40px !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+
+    flex: 0 0 44px !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    pointer-events: auto !important;
+  }
+
+
+  /* ==========================================================
+     REMOVE BOTTOM MOBILE HUD IN LANDSCAPE
+     ========================================================== */
+
+  html body.is-touch #game #mobileBottomHud {
+
+    display: none !important;
+
+    visibility: hidden !important;
+
+    opacity: 0 !important;
+
+    pointer-events: none !important;
+  }
+
+
+  /* ==========================================================
+     MISSION INTELLIGENCE PANEL
+     ========================================================== */
+
+  #game .relay-gameplay-intel {
+
+    top: 62px !important;
+
+    left: 50% !important;
+
+    transform: translateX(-50%) !important;
+
+    width:
+      min(330px, calc(100vw - 20px)) !important;
+
+    max-height:
+      calc(100vh - 100px) !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+  }
 }
+
+
+/* ============================================================
+   SHORT LANDSCAPE
+   ============================================================ */
+
+@media (max-width: 760px)
+  and (orientation: landscape)
+  and (max-height: 560px) {
+
+  #game .hud {
+
+    min-height: 46px !important;
+
+    padding:
+      5px
+      max(8px, env(safe-area-inset-left))
+      5px
+      max(8px, env(safe-area-inset-right)) !important;
+
+    gap: 5px !important;
+  }
+
+
+  #game .hud-route {
+
+    min-width: 100px !important;
+
+    max-width: 30vw !important;
+
+    padding: 5px 7px !important;
+  }
+
+
+  #game .hud-route small {
+
+    font-size: 5px !important;
+  }
+
+
+  #game .hud-route b {
+
+    font-size: 8px !important;
+  }
+
+
+  #game .hud-run {
+
+    min-width: 105px !important;
+
+    max-width: 150px !important;
+
+    padding: 5px 7px !important;
+  }
+
+
+  #game .hud-run > span {
+
+    font-size: 10px !important;
+  }
+
+
+  #game .hud-run > small {
+
+    font-size: 5px !important;
+  }
+
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp {
+
+    width: 58px !important;
+
+    min-width: 58px !important;
+
+    max-width: 58px !important;
+
+    height: 36px !important;
+
+    flex-basis: 58px !important;
+  }
+
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp b {
+
+    font-size: 10px !important;
+  }
+
+
+  html body.is-touch #game #play .hud .hud-actions > #pause {
+
+    width: 40px !important;
+
+    min-width: 40px !important;
+
+    height: 36px !important;
+
+    min-height: 36px !important;
+
+    flex-basis: 40px !important;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL LANDSCAPE
+   ============================================================ */
+
+@media (max-width: 520px)
+  and (orientation: landscape) {
+
+  #game .hud {
+
+    gap: 4px !important;
+  }
+
+
+  #game .hud-route {
+
+    min-width: 88px !important;
+
+    max-width: 27vw !important;
+  }
+
+
+  #game .hud-run {
+
+    min-width: 96px !important;
+
+    max-width: 140px !important;
+  }
+
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp {
+
+    width: 54px !important;
+
+    min-width: 54px !important;
+
+    max-width: 54px !important;
+
+    flex-basis: 54px !important;
+  }
+
+
+  html body.is-touch #game #play .hud .hud-actions > #pause {
+
+    width: 38px !important;
+
+    min-width: 38px !important;
+
+    height: 34px !important;
+
+    min-height: 34px !important;
+
+    flex-basis: 38px !important;
+  }
+}
+
+
+/* ============================================================
+   PORTRAIT — PRESERVE EXISTING BEHAVIOUR
+   ============================================================ */
+
+@media (max-width: 760px) and (orientation: portrait) {
+
+  #game .hud {
+
+    display: grid !important;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto !important;
+
+    gap: 7px !important;
+
+    padding: 10px 9px !important;
+  }
+
+
+  #game .hud-route {
+
+    grid-column: 1 !important;
+
+    min-width: 0 !important;
+
+    padding: 7px 8px !important;
+  }
+
+
+  #game .hud-run {
+
+    grid-column: 2 !important;
+
+    min-width: 122px !important;
+
+    max-width: 122px !important;
+
+    padding: 7px 8px !important;
+  }
+
+
+  #game .hud-actions {
+
+    grid-column: 2 !important;
+
+    grid-row: 1 !important;
+
+    position: absolute !important;
+
+    right: 9px !important;
+
+    top: 10px !important;
+
+    gap: 6px !important;
+  }
+
+
+  #game .hud-xp {
+
+    display: none !important;
+  }
+
+
+  #game #pause {
+
+    width: 38px !important;
+
+    height: 38px !important;
+  }
+
+
+  .relay-gameplay-intel {
+
+    top: 74px !important;
+
+    width:
+      min(330px, calc(100vw - 18px)) !important;
+  }
+}
+
+
+/* ============================================================
+   SMALL PORTRAIT
+   ============================================================ */
+
+@media (max-width: 520px) and (orientation: portrait) {
+
+  #game .hud {
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      122px !important;
+
+    padding: 8px 8px !important;
+  }
+
+
+  #game .hud-route {
+
+    padding: 6px 7px !important;
+  }
+
+
+  #game .hud-route small {
+
+    font-size: 6px !important;
+  }
+
+
+  #game .hud-route b {
+
+    font-size: 9px !important;
+
+    max-width:
+      calc(100vw - 150px) !important;
+  }
+
+
+  #game .hud-run {
+
+    padding: 6px 7px !important;
+
+    min-width: 122px !important;
+
+    max-width: 122px !important;
+  }
+
+
+  #game .hud-run > span {
+
+    font-size: 12px !important;
+  }
+
+
+  #game .hud-run > small {
+
+    font-size: 6px !important;
+  }
+
+
+  #game .hud-actions {
+
+    right: 8px !important;
+
+    top: 8px !important;
+  }
+
+
+  #game #pause {
+
+    width: 36px !important;
+
+    height: 36px !important;
+  }
+
+
+  #game .world-marker {
+
+    left: 8px !important;
+
+    bottom: 8px !important;
+
+    max-width: 58vw !important;
+  }
+
+
+  .relay-gameplay-intel {
+
+    top: 70px !important;
+
+    width:
+      calc(100vw - 18px) !important;
+
+    padding: 10px 11px !important;
+  }
+    }
