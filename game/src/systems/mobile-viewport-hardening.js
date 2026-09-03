@@ -30,11 +30,38 @@ if (!mobile()) {
 
   const measure = () => {
     const vv = window.visualViewport;
-    const width = Math.max(1, Math.round(vv?.width || window.innerWidth || root.clientWidth));
-    const height = Math.max(1, Math.round(vv?.height || window.innerHeight || root.clientHeight));
+
+    const windowWidth = Math.max(
+      1,
+      Math.round(window.innerWidth || root.clientWidth)
+    );
+
+    const windowHeight = Math.max(
+      1,
+      Math.round(window.innerHeight || root.clientHeight)
+    );
+
+    const viewportWidth = Math.max(
+      1,
+      Math.round(vv?.width || windowWidth)
+    );
+
+    const viewportHeight = Math.max(
+      1,
+      Math.round(vv?.height || windowHeight)
+    );
+
+    /*
+     * Use the browser window as the gameplay layout authority.
+     * visualViewport is allowed to report a smaller temporary area
+     * (browser chrome / keyboard / transition), but it must not
+     * unexpectedly shrink the entire game surface.
+     */
+    const width = Math.max(windowWidth, viewportWidth);
+    const height = Math.max(windowHeight, viewportHeight);
+
     return { width, height };
   };
-
   const apply = () => {
     const { width, height } = measure();
     const key = `${width}x${height}`;
