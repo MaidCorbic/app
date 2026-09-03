@@ -132,8 +132,5 @@ if (speech && window.SpeechSynthesisUtterance) {
   } catch (error) {
     console.warn('[Relay Runner] Speech synthesis hooks unavailable:', error);
   }
-    const text = String(utterance?.text || '').trim(); if (!text || isNoise(text)) return;
-    const now = Date.now(); if (text === lastText && now - lastAt < 900) return;
-    lastText = text; lastAt = now; queue.push({ utterance }); if (queue.length > 6) queue.splice(0, queue.length - 6); pump();
-  };
+    
 }
