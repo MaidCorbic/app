@@ -807,3 +807,25 @@
     animation: none !important;
   }
           }
+
+/* ============================================================
+   CARGO — FINAL DESKTOP POSITION
+   ============================================================ */
+
+@media (min-width: 881px) {
+  #cargoIntegrityV2 {
+    left: 16px !important;
+    bottom: 88px !important;
+  }
+}
+
+/* ============================================================
+   CARGO — MOBILE SAFE POSITION
+   ============================================================ */
+
+@media (max-width: 880px) {
+  #cargoIntegrityV2 {
+    left: 12px !important;
+    bottom: 145px !important;
+  }
+}
