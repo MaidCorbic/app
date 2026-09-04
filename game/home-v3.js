@@ -1,239 +1,256 @@
-/* Home V3: presentation shell only; gameplay remains owned by main.js. */
+/*
+ * Runner Relay — Home V4 presentation owner.
+ *
+ * Contract:
+ * - Home owns presentation only.
+ * - #start / #continue remain the authoritative gameplay entry points.
+ * - Options / FAQ / Update remain owned by existing systems.
+ * - The intro surface is rebuilt once, without duplicating gameplay UI.
+ */
 (() => {
-  if (window.__relayHomeV3) return;
-  window.__relayHomeV3 = true;
+  'use strict';
+
+  if (window.__relayHomeV4) return;
+  window.__relayHomeV4 = true;
 
   const $ = id => document.getElementById(id);
-  const homeVisible = () => !!$('intro') && !$('intro').classList.contains('hidden');
+  const introVisible = () => {
+    const intro = $('intro');
+    return !!intro && !intro.classList.contains('hidden');
+  };
 
-  const nativeClick = selector => {
+  const clickExisting = selector => {
     const target = document.querySelector(selector);
-    if (!target) return false;
-    HTMLElement.prototype.click.call(target);
-    return true;
+    if (!(target instanceof HTMLElement) || target.disabled) return false;
+    try {
+      HTMLElement.prototype.click.call(target);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
-  const injectStyles = () => {
-    if (document.getElementById('home-v3-interaction-style')) return;
-    const style = document.createElement('style');
-    style.id = 'home-v3-interaction-style';
-    style.textContent = `
-      body.home-v3-active #play{display:block!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;position:fixed!important;inset:0!important;width:100%!important;height:100%!important;z-index:0!important}
-      body.home-v3-active #phaser-game{display:block!important;visibility:hidden!important;opacity:0!important;width:100%!important;height:100%!important;min-width:1px!important;min-height:1px!important}
-      .home-v3-play{position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
-      .home-v3-play:active{cursor:grabbing}
-      .home-v3-play .home-v3-play-track{position:absolute;inset:0;pointer-events:none;opacity:.46;background:linear-gradient(90deg,transparent 0 6%,rgba(255,255,255,.07) 48%,transparent 100%);animation:homeV3PlaySweep 2.8s ease-in-out infinite}
-      .home-v3-play .home-v3-play-fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,rgba(255,255,255,.03),rgba(255,208,110,.34));pointer-events:none;transition:width .08s linear}
-      .home-v3-play .home-v3-play-label{position:relative;z-index:3;display:block;padding-left:42px;pointer-events:none}
-      .home-v3-play .home-v3-play-hint{position:absolute;right:18px;top:50%;z-index:3;transform:translateY(-50%);color:rgba(255,248,226,.72);font:800 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;pointer-events:none;transition:opacity .18s ease}
-      .home-v3-play .home-v3-play-knob{position:absolute;left:7px;top:50%;z-index:4;width:42px;height:42px;margin-top:-21px;border:1px solid rgba(255,255,255,.62);border-radius:12px;background:linear-gradient(145deg,#fff5d0,#ffd06e);color:#08111b;display:grid;place-items:center;font:950 15px/1 ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 0 22px rgba(255,208,110,.32),inset 0 1px rgba(255,255,255,.88);transform:translateX(0);transition:transform .08s linear,box-shadow .16s ease}
-      .home-v3-play .home-v3-play-knob::after{content:"";position:absolute;inset:-5px;border:1px solid rgba(255,208,110,.17);border-radius:15px;animation:homeV3PlayPulse 1.8s ease-in-out infinite}
-      .home-v3-play.is-dragging .home-v3-play-knob{box-shadow:0 0 34px rgba(255,208,110,.74),inset 0 1px rgba(255,255,255,.95)}
-      .home-v3-play.is-armed .home-v3-play-fill{width:100%!important}
-      .home-v3-play.is-armed .home-v3-play-hint{opacity:0}
-      .home-v3-play.is-armed{cursor:progress}
-      .home-v3-play.is-locked{pointer-events:none;filter:saturate(.9);opacity:.78}
-      .home-v3-play:focus-visible{outline:2px solid rgba(255,208,110,.9);outline-offset:3px}
-      .home-v3-shell [data-v3-tutorial],#intro [data-title-panel="tutorial"],#intro .home-tutorial-button{display:none!important}
-      #titlePanelContent [data-unified-toggle="tutorialEnabled"],#titlePanelContent .relay-option-card:has([data-unified-toggle="tutorialEnabled"]){display:none!important}
-      @keyframes homeV3PlaySweep{0%,100%{transform:translateX(-18%);opacity:.1}50%{transform:translateX(18%);opacity:.38}}
-      @keyframes homeV3PlayPulse{0%,100%{transform:scale(.92);opacity:.25}50%{transform:scale(1.05);opacity:.75}}
-      @media(max-width:700px){
-        .home-v3-play{min-height:64px}
-        .home-v3-play .home-v3-play-knob{left:6px;width:40px;height:40px;margin-top:-20px;border-radius:11px}
-        .home-v3-play .home-v3-play-label{padding-left:38px}
-        .home-v3-play .home-v3-play-hint{right:13px;font-size:7px;letter-spacing:.11em}
+  const openOptions = () => {
+    try {
+      if (typeof window.relayUnifiedCinematicUI?.openOptions === 'function') {
+        window.relayUnifiedCinematicUI.openOptions();
+        return true;
       }
-      @media(prefers-reduced-motion:reduce){.home-v3-play .home-v3-play-track,.home-v3-play .home-v3-play-knob::after{animation:none}.home-v3-play .home-v3-play-knob{transition:none}}
-    `;
-    document.head.appendChild(style);
+    } catch {}
+    return clickExisting('[data-title-panel="controls"]');
   };
 
-  const syncSurface = () => {
-    const visible = homeVisible();
+  const openFaq = () => {
+    try {
+      if (typeof window.relayUnifiedCinematicUI?.openFAQ === 'function') {
+        window.relayUnifiedCinematicUI.openFAQ();
+        return true;
+      }
+    } catch {}
+    return clickExisting('[data-relay-info="faq"]');
+  };
+
+  const openUpdate = () => {
+    try {
+      if (typeof window.relayOpenInfo === 'function') {
+        window.relayOpenInfo('update');
+        return true;
+      }
+    } catch {}
+    return clickExisting('[data-relay-info="update"]');
+  };
+
+  const setHomeState = () => {
+    const visible = introVisible();
     document.body.classList.toggle('home-v3-active', visible);
+    $('intro')?.classList.toggle('home-v3', visible);
+  };
+
+  const bindOnce = (node, event, handler) => {
+    if (!(node instanceof HTMLElement)) return;
+    const key = `homeV4Bound${event}`;
+    if (node.dataset[key] === '1') return;
+    node.dataset[key] = '1';
+    node.addEventListener(event, handler);
+  };
+
+  const buildHome = () => {
     const intro = $('intro');
-    if (intro) intro.classList.toggle('home-v3', visible);
-  };
+    if (!intro || intro.dataset.homeV4Built === '1') return;
 
-  const removeTutorialSurface = () => {
-    document.querySelectorAll('#intro [data-title-panel="tutorial"],#intro .home-tutorial-button,#intro [data-v3-tutorial]').forEach(node => node.remove());
-    document.querySelectorAll('#titlePanelContent [data-unified-toggle="tutorialEnabled"]').forEach(node => node.closest('.relay-option-card')?.remove());
-  };
-
-  const bindLegacyAction = (button, selector) => {
-    if (!button || button.dataset.homeV3Action === '1') return;
-    button.dataset.homeV3Action = '1';
-    let handledAt = 0;
-    const activate = event => {
-      const now = performance.now();
-      if (now - handledAt < 260) return;
-      handledAt = now;
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      nativeClick(selector);
-    };
-    button.addEventListener('pointerup', activate, { passive: false });
-    button.addEventListener('click', activate);
-  };
-
-  const installSwipePlay = button => {
-    if (!button || button.dataset.swipeReady === '1') return;
-    button.dataset.swipeReady = '1';
-    button.setAttribute('aria-label', 'Swipe to deploy and start the game');
-    button.setAttribute('aria-keyshortcuts', 'Swipe');
-    button.innerHTML = '<span class="home-v3-play-track" aria-hidden="true"></span><span class="home-v3-play-fill" aria-hidden="true"></span><span class="home-v3-play-label">PLAY NOW</span><span class="home-v3-play-hint">SWIPE TO DEPLOY →</span><span class="home-v3-play-knob" aria-hidden="true">→</span>';
-
-    let pointerId = null;
-    let startX = 0;
-    let completed = false;
-    let maxTravel = 0;
-
-    const updateMetrics = () => {
-      const rect = button.getBoundingClientRect();
-      const knob = button.querySelector('.home-v3-play-knob');
-      const knobWidth = knob?.getBoundingClientRect().width || 42;
-      maxTravel = Math.max(1, rect.width - knobWidth - 14);
-      return maxTravel;
-    };
-
-    const reset = () => {
-      if (completed) return;
-      pointerId = null;
-      button.classList.remove('is-dragging');
-      const knob = button.querySelector('.home-v3-play-knob');
-      const fill = button.querySelector('.home-v3-play-fill');
-      if (knob) knob.style.transform = 'translateX(0)';
-      if (fill) fill.style.width = '0%';
-    };
-
-    const complete = () => {
-      if (completed) return;
-      completed = true;
-      pointerId = null;
-      button.classList.remove('is-dragging');
-      button.classList.add('is-armed','is-locked');
-      const max = updateMetrics();
-      const knob = button.querySelector('.home-v3-play-knob');
-      const fill = button.querySelector('.home-v3-play-fill');
-      if (fill) fill.style.width = '100%';
-      if (knob) knob.style.transform = `translateX(${max}px)`;
-      window.setTimeout(() => nativeClick('#start'), 180);
-    };
-
-    button.addEventListener('pointerdown', event => {
-      if (completed) return;
-      pointerId = event.pointerId;
-      startX = event.clientX;
-      updateMetrics();
-      button.setPointerCapture?.(pointerId);
-      button.classList.add('is-dragging');
-      event.preventDefault();
-      event.stopPropagation();
-    }, { passive: false });
-
-    button.addEventListener('pointermove', event => {
-      if (event.pointerId !== pointerId || completed) return;
-      const max = updateMetrics();
-      const knob = button.querySelector('.home-v3-play-knob');
-      const fill = button.querySelector('.home-v3-play-fill');
-      const distance = Math.max(0, Math.min(max, event.clientX - startX));
-      const percent = distance / max;
-      if (knob) knob.style.transform = `translateX(${distance}px)`;
-      if (fill) fill.style.width = `${percent * 100}%`;
-      if (percent >= 0.84) complete();
-      event.preventDefault();
-      event.stopPropagation();
-    }, { passive: false });
-
-    button.addEventListener('pointerup', event => {
-      if (event.pointerId !== pointerId || completed) return;
-      button.releasePointerCapture?.(event.pointerId);
-      reset();
-      event.preventDefault();
-      event.stopPropagation();
-    }, { passive: false });
-
-    button.addEventListener('pointercancel', reset);
-    button.addEventListener('lostpointercapture', reset);
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-    });
-    button.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.code === 'Space') {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      }
-    });
-  };
-
-  const build = () => {
-    const intro = $('intro');
-    if (!intro || intro.dataset.homeV3Built === '1') return;
-    intro.dataset.homeV3Built = '1';
+    intro.dataset.homeV4Built = '1';
     intro.classList.add('home-v3');
+    intro.replaceChildren();
 
-    const legacyMenu = intro.querySelector('.main-menu');
-    const launcher = intro.querySelector('.info-launcher');
-
-    const bg = document.createElement('div');
-    bg.className = 'home-v3-bg';
-    bg.setAttribute('aria-hidden', 'true');
-    bg.innerHTML = '<i class="home-v3-grid"></i><i class="home-v3-glow"></i><i class="home-v3-scan"></i>';
+    const scene = document.createElement('div');
+    scene.className = 'home-v4-scene';
+    scene.setAttribute('aria-hidden', 'true');
+    scene.innerHTML = `
+      <div class="home-v4-art"></div>
+      <div class="home-v4-sky"></div>
+      <div class="home-v4-vignette"></div>
+      <div class="home-v4-grid"></div>
+      <div class="home-v4-scan"></div>
+      <div class="home-v4-signal"></div>
+      <div class="home-v4-float-line"></div>
+      <div class="home-v4-badge">LIVE RELAY CHANNEL // 01</div>
+    `;
 
     const shell = document.createElement('div');
-    shell.className = 'home-v3-shell';
+    shell.className = 'home-v4-shell';
     shell.innerHTML = `
-      <header class="home-v3-header">
-        <div class="home-v3-brand"><span class="home-v3-mark">R/</span><span>RELAY RUNNER</span></div>
-        <div class="home-v3-status"><b>● SYSTEM READY</b><br>NIGHT SHIFT · ONLINE</div>
+      <header class="home-v4-topbar">
+        <div class="home-v4-brand" aria-label="Relay Runner">
+          <span class="home-v4-brand-mark">R/</span>
+          <span>RELAY RUNNER</span>
+        </div>
+        <div class="home-v4-status" aria-label="System status">
+          <span class="home-v4-status-dot"></span>
+          <b>SYSTEM ONLINE</b>
+          <span>NIGHT SHIFT</span>
+        </div>
       </header>
-      <main class="home-v3-main">
-        <section>
-          <p class="home-v3-kicker">ROOFTOP DELIVERY NETWORK · CHAPTER 01</p>
-          <h1 class="home-v3-title">RELAY<em>RUNNER</em></h1>
-          <p class="home-v3-copy">Run the sleeping city. Carry the signal farther than anyone else can. Build your route, master the night and keep the line open.</p>
-          <div class="home-v3-actions">
-            <button class="home-v3-play" type="button" data-v3-play></button>
-            <button class="home-v3-continue" type="button" data-v3-continue hidden>CONTINUE</button>
+
+      <main class="home-v4-main">
+        <section class="home-v4-copy" aria-labelledby="homeV4Title">
+          <p class="home-v4-kicker">CHAPTER 01 / OLD QUARTER</p>
+          <h1 id="homeV4Title" class="home-v4-title">RELAY<span>RUNNER</span></h1>
+          <p class="home-v4-subline">ROOFTOP RELAY // LIVE NETWORK</p>
+          <p class="home-v4-description">Run the sleeping city. Carry the signal farther than anyone else can. Keep the line open.</p>
+
+          <div class="home-v4-actions" aria-label="Main menu">
+            <button id="start" class="home-v4-primary" type="button">
+              <span class="home-v4-primary-content">
+                <span>START RUN</span>
+                <span class="home-v4-arrow-key" aria-hidden="true">ENTER</span>
+                <span class="home-v4-primary-arrow" aria-hidden="true">→</span>
+              </span>
+            </button>
+
+            <button id="continue" class="home-v4-secondary hidden" type="button">
+              <span>CONTINUE</span>
+              <small>RESUME LAST RUN</small>
+            </button>
           </div>
+          <p class="home-v4-micro"><b>DEPLOYMENT READY</b> · PRESS ENTER TO BEGIN</p>
         </section>
-       <nav class="home-v3-side" aria-label="Main menu"></nav>
-        
+
+        <section class="home-v4-mission-wrap" aria-label="Current mission">
+          <article class="home-v4-mission">
+            <div class="home-v4-mission-head">
+              <span class="home-v4-mission-label">ACTIVE MISSION</span>
+              <span class="home-v4-mission-code">RR-01 / NIGHT</span>
+            </div>
+            <h2 class="home-v4-mission-title">FOLLOW<br>THE RELAY</h2>
+            <p class="home-v4-mission-sub">RECONNECT THE SIGNAL CHAIN ACROSS OLD QUARTER.</p>
+
+            <div class="home-v4-mission-progress">
+              <div class="home-v4-progress-meta">
+                <span>SIGNAL RECOVERY</span>
+                <strong id="homeV4SignalValue">02 / 08</strong>
+              </div>
+              <div class="home-v4-progress-bar" aria-hidden="true"><div id="homeV4SignalFill" class="home-v4-progress-fill"></div></div>
+            </div>
+
+            <div class="home-v4-stat-grid">
+              <div class="home-v4-stat"><small>MISSION XP</small><b>+120</b></div>
+              <div class="home-v4-stat"><small>BEST RATING</small><b>A</b></div>
+            </div>
+          </article>
+        </section>
       </main>
-      <footer class="home-v3-footer"><span>RELAY RUNNER · <b>VERSION 1.1.0</b></span><span>W / D MOVE · SPACE JUMP · ESC PAUSE</span></footer>`;
 
-    intro.replaceChildren(bg, shell, legacyMenu, launcher);
+      <footer class="home-v4-bottom">
+        <div class="home-v4-bottom-left">
+          <button class="home-v4-utility" type="button" data-home-v4-action="faq">? &nbsp;FAQ</button>
+          <button class="home-v4-utility" type="button" data-home-v4-action="update">↗ &nbsp;UPDATE</button>
+          <button class="home-v4-utility" type="button" data-home-v4-action="options">⚙ &nbsp;OPTIONS</button>
+        </div>
+        <div class="home-v4-bottom-meta">RELAY NETWORK <b>ONLINE</b> · V1.1.0</div>
+      </footer>
 
-    installSwipePlay(shell.querySelector('[data-v3-play]'));
-    bindLegacyAction(shell.querySelector('[data-v3-continue]'), '#continue');
-  
+      <!-- Compatibility anchor retained for systems that still query #exitTitle. -->
+      <button id="exitTitle" type="button" aria-hidden="true" tabindex="-1" class="home-v4-compat-anchor">EXIT</button>
+    `;
 
+    intro.append(scene, shell);
+
+    bindOnce(shell.querySelector('[data-home-v4-action="faq"]'), 'click', event => {
+      event.preventDefault();
+      openFaq();
+    });
+    bindOnce(shell.querySelector('[data-home-v4-action="update"]'), 'click', event => {
+      event.preventDefault();
+      openUpdate();
+    });
+    bindOnce(shell.querySelector('[data-home-v4-action="options"]'), 'click', event => {
+      event.preventDefault();
+      openOptions();
+    });
+
+    const start = shell.querySelector('#start');
+    bindOnce(start, 'keydown', event => {
+      if (event.key === 'Enter' || event.code === 'Space') {
+        event.preventDefault();
+        clickExisting('#start');
+      }
+    });
+
+    const continueButton = shell.querySelector('#continue');
+    const sourceContinue = $('continue');
     const syncContinue = () => {
-      const legacy = $('continue');
-      const button = shell.querySelector('[data-v3-continue]');
-      if (!legacy || !button) return;
-      button.hidden = legacy.classList.contains('hidden') || getComputedStyle(legacy).display === 'none';
+      if (!continueButton || !sourceContinue || continueButton === sourceContinue) return;
+      continueButton.classList.toggle('hidden', sourceContinue.classList.contains('hidden') || getComputedStyle(sourceContinue).display === 'none');
     };
     syncContinue();
-    if ($('continue')) new MutationObserver(syncContinue).observe($('continue'), { attributes: true, attributeFilter: ['class','style','hidden'] });
-  };
+    if (sourceContinue && sourceContinue !== continueButton && !sourceContinue.dataset.homeV4Observed) {
+      sourceContinue.dataset.homeV4Observed = '1';
+      new MutationObserver(syncContinue).observe(sourceContinue, {attributes:true, attributeFilter:['class','style','hidden']});
+    }
 
-  const start = () => {
-    injectStyles();
-    build();
-    removeTutorialSurface();
-    syncSurface();
-    const observer = new MutationObserver(() => {
-      syncSurface();
-      removeTutorialSurface();
+    bindOnce(continueButton, 'click', event => {
+      event.preventDefault();
+      clickExisting('#continue');
     });
-    observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class','style','hidden'] });
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
+  const installKeyboard = () => {
+    if (document.documentElement.dataset.homeV4Keys === '1') return;
+    document.documentElement.dataset.homeV4Keys = '1';
+    document.addEventListener('keydown', event => {
+      if (!introVisible() || event.repeat) return;
+      if (event.key === 'Enter') {
+        const active = document.activeElement;
+        const tag = active?.tagName;
+        if (tag !== 'BUTTON' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+          event.preventDefault();
+          clickExisting('#start');
+        }
+      }
+      if (event.key === 'Escape') {
+        const title = $('titlePanel');
+        const info = $('relayInfoPanel');
+        if (!title?.classList.contains('hidden')) title.classList.add('hidden');
+        if (!info?.classList.contains('hidden')) info.classList.add('hidden');
+      }
+    });
+  };
+
+  const boot = () => {
+    buildHome();
+    setHomeState();
+    installKeyboard();
+
+    const intro = $('intro');
+    if (intro && intro.dataset.homeV4Observed !== '1') {
+      intro.dataset.homeV4Observed = '1';
+      new MutationObserver(setHomeState).observe(intro, {
+        attributes:true,
+        attributeFilter:['class','style','hidden']
+      });
+    }
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
+  else boot();
 })();
