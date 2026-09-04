@@ -1,0 +1,60 @@
+name: Itch.io HTML5 Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-itch:
+    name: Build itch.io ZIP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: itch-io-release
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game
+        run: npm ci
+
+      - name: Build production
+        working-directory: game
+        run: npm run build
+
+      - name: Validate itch.io package
+        working-directory: game
+        run: |
+          test -f dist/index.html
+          if grep -RInE '(^|["'\''(=])/(src|game|assets|favicon)' dist --exclude='*.map'; then
+            echo "ERROR: absolute game paths found in dist"
+            exit 1
+          fi
+          test "$(find dist -type f | wc -l)" -le 1000
+
+      - name: Create itch.io ZIP
+        working-directory: game
+        run: |
+          rm -f Runner-Relay-itch.zip
+          cd dist
+          zip -qr ../Runner-Relay-itch.zip .
+          cd ..
+          unzip -l Runner-Relay-itch.zip | head -40
+
+      - name: Upload itch.io package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Runner-Relay-itch-html5
+          path: game/Runner-Relay-itch.zip
+          if-no-files-found: error
+          retention-days: 14
