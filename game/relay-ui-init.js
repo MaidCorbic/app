@@ -19,7 +19,7 @@ const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
   document.querySelector('#intro .title-lockup')?.replaceChildren(
     Object.assign(document.createElement('p'), { className: 'eyebrow', textContent: 'SESSION CLOSED' }),
-    Object.assign(document.createElement('h1'), { innerHTML: 'SEE YOU<br><em>SOON.</em>' }),
+    Object.assign(document.createElement('h1'), { innerHTML: 'SEE YOU<br><em>SOON</em>' }),
     Object.assign(document.createElement('p'), { className: 'menu-tagline', textContent: 'The relay is offline. You can close this browser tab.' })
   );
 });
@@ -115,7 +115,6 @@ import './src/systems/mobile-gameplay-stability-v1.js';
 import './p1-gameplay-correctness-v1.js';
 import './p2-character-presentation-v4.js';
 import './p2-ux-controls-v1.js';
-import './relay-final-layout-v2.js';
 import './gameplay-home-hud-safe-v2.js';
 import './gameplay-audio-start-v2.js';
 import './runtime-authority-v1.js';
