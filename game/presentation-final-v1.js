@@ -327,7 +327,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
       icon.rel = 'icon';
       icon.type = 'image/x-icon';
-      icon.href = '/favicon.ico';
+      icon.href = './favicon.ico';
 
       icon.dataset.relayFavicon = '1';
 
