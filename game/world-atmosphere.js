@@ -1,206 +1,1082 @@
-(() => {
-  if (window.__relayWorldAtmosphereInstalled) return;
-  window.__relayWorldAtmosphereInstalled = true;
+/* =========================================================
+   WORLD ATMOSPHERE — FINAL GAMING / CINEMATIC VERSION
+   Visual-only:
+   - Home panel untouched
+   - Options untouched
+   - Gameplay untouched
+   - JS controls actual time / atmosphere state
+   ========================================================= */
 
-  const root = document.getElementById('intro');
-  if (!root) return;
+#intro.intro{
+  isolation:isolate;
+  position:relative;
 
-  const stylesheet = document.createElement('link');
-  stylesheet.rel = 'stylesheet';
-  stylesheet.href = './world-atmosphere.css';
-  document.head.appendChild(stylesheet);
+  --atm-sky-top:#07111f;
+  --atm-sky-mid:#101f34;
+  --atm-horizon:#203b55;
+  --atm-ground:#04080f;
 
-  const backdrop = root.querySelector('.menu-backdrop');
-  const moon = root.querySelector('.backdrop-moon');
-  const sun = document.createElement('div');
-  sun.className = 'backdrop-sun';
-  sun.setAttribute('aria-hidden', 'true');
-  root.appendChild(sun);
+  --atm-glow:rgba(116,182,232,.12);
+  --atm-city-back:#0a1728;
+  --atm-city-front:#07101d;
 
-  const sunStyle = document.createElement('style');
-  sunStyle.textContent = `
-    #intro.intro .backdrop-sun{position:absolute;z-index:1;width:clamp(70px,9vw,130px);aspect-ratio:1;border-radius:50%;left:var(--relay-sun-x,50%);top:var(--relay-sun-y,20%);transform:translate(-50%,-50%);background:radial-gradient(circle at 42% 38%,#fffdf0 0 20%,#ffe8a6 45%,#ffc45f 72%,rgba(255,174,62,0) 100%);box-shadow:0 0 35px 12px rgba(255,194,92,.28),0 0 110px 38px rgba(255,154,63,.16);opacity:0;pointer-events:none;transition:left 1.8s ease,top 1.8s ease,opacity 1.8s ease,filter 1.8s ease,background 1.8s ease,box-shadow 1.8s ease;animation:relay-sun-pulse 6s ease-in-out infinite}
-    #intro.intro .backdrop-sun::after{content:"";position:absolute;inset:-30%;border-radius:50%;background:radial-gradient(circle,rgba(255,220,140,.16),transparent 68%);filter:blur(8px)}
-    @keyframes relay-sun-pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.04)}}
-    @media(max-width:700px){#intro.intro .backdrop-sun{width:clamp(58px,15vw,94px);box-shadow:0 0 28px 9px rgba(255,194,92,.24),0 0 75px 24px rgba(255,154,63,.13)}}
-    @media(max-width:420px){#intro.intro .backdrop-sun{width:60px}}
-    @media(prefers-reduced-motion:reduce){#intro.intro .backdrop-sun{animation:none!important;transition:none!important}}
-  `;
-  document.head.appendChild(sunStyle);
+  --atm-window:rgba(255,208,110,.16);
+  --atm-city-light:.48;
 
-  const getHour = () => {
-    const override = window.__relayAtmosphereDebugHour;
-    if (Number.isFinite(override)) return override;
-    const now = new Date();
-    return now.getHours() + now.getMinutes() / 60;
-  };
+  --atm-fog:rgba(137,172,205,.09);
+  --atm-rain:.68;
 
-  const getTheme = () => {
-    const hour = getHour();
-    if (hour >= 5 && hour < 8) return 'dawn';
-    if (hour >= 8 && hour < 18) return 'day';
-    if (hour >= 18 && hour < 20) return 'dusk';
-    if (hour >= 20 && hour < 23) return 'night';
-    return 'deep-night';
-  };
+  --atm-moon:#f7dfb0;
+  --atm-moon-opacity:1;
+  --atm-moon-glow:rgba(249,201,121,.18);
 
-  const hexToRgb = hex => {
-    const value = hex.replace('#', '');
-    const normalized = value.length === 3 ? value.split('').map(char => char + char).join('') : value;
-    const number = Number.parseInt(normalized, 16);
-    return { r: (number >> 16) & 255, g: (number >> 8) & 255, b: number & 255 };
-  };
+  --atm-star:rgba(220,238,255,.62);
+  --atm-vignette:rgba(2,5,10,.56);
 
-  const rgbToHex = ({ r, g, b }) => {
-    const channel = value => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, '0');
-    return `#${channel(r)}${channel(g)}${channel(b)}`;
-  };
+  background:#02050a;
 
-  const mixHex = (from, to, amount) => {
-    const a = hexToRgb(from);
-    const b = hexToRgb(to);
-    return rgbToHex({
-      r: a.r + (b.r - a.r) * amount,
-      g: a.g + (b.g - a.g) * amount,
-      b: a.b + (b.b - a.b) * amount
-    });
-  };
+  transition:
+    background-color 1.8s ease,
+    color 1.8s ease;
+}
 
-  const DAYLIGHT_STOPS = [
-    { hour: 5,  skyTop: '#10172d', skyMid: '#4c526b', horizon: '#e08a70', glow: '#ff9b68', cityBack: '#35445a', cityFront: '#1d2d40', window: '#d8ad73', fog: '#d9a18e' },
-    { hour: 7,  skyTop: '#385a78', skyMid: '#a17f88', horizon: '#f0c092', glow: '#ffd49b', cityBack: '#596d7b', cityFront: '#394e5d', window: '#d8bd91', fog: '#ddd6cf' },
-    { hour: 10, skyTop: '#4f8fb7', skyMid: '#9ec3cf', horizon: '#d9ded6', glow: '#fff0c8', cityBack: '#647c89', cityFront: '#435b69', window: '#c9b995', fog: '#e3e9e7' },
-    { hour: 13, skyTop: '#72acd0', skyMid: '#b8d3dc', horizon: '#e7e7df', glow: '#fff8df', cityBack: '#788f9b', cityFront: '#586f7c', window: '#b9a98c', fog: '#edf2ef' },
-    { hour: 16, skyTop: '#659bbd', skyMid: '#b0c3c7', horizon: '#e2d0b9', glow: '#ffe0a6', cityBack: '#667d89', cityFront: '#485f6d', window: '#cdb48b', fog: '#e4e6df' },
-    { hour: 18, skyTop: '#352c47', skyMid: '#805263', horizon: '#e18461', glow: '#ff9a5d', cityBack: '#35465a', cityFront: '#1d2d42', window: '#e9ae62', fog: '#d9a092' },
-    { hour: 20, skyTop: '#040b17', skyMid: '#0a1a2d', horizon: '#173b58', glow: '#56aae4', cityBack: '#0d2338', cityFront: '#081628', window: '#ffcf70', fog: '#6f9cc2' }
-  ];
 
-  const interpolateStop = hour => {
-    const clamped = Math.min(20, Math.max(5, hour));
-    for (let index = 0; index < DAYLIGHT_STOPS.length - 1; index += 1) {
-      const from = DAYLIGHT_STOPS[index];
-      const to = DAYLIGHT_STOPS[index + 1];
-      if (clamped >= from.hour && clamped <= to.hour) {
-        const amount = (clamped - from.hour) / (to.hour - from.hour);
-        return Object.fromEntries(Object.keys(from).filter(key => key !== 'hour').map(key => [key, mixHex(from[key], to[key], amount)]));
-      }
+/* =========================================================
+   MAIN SKY
+   ========================================================= */
+
+#intro.intro .menu-backdrop{
+  background:
+    radial-gradient(
+      circle at var(--relay-sun-x,68%) var(--relay-sun-y,17%),
+      var(--atm-glow),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 82% 14%,
+      var(--atm-moon-glow),
+      transparent 19%
+    ),
+    radial-gradient(
+      ellipse at 50% 63%,
+      var(--atm-glow),
+      transparent 48%
+    ),
+    linear-gradient(
+      180deg,
+      var(--atm-sky-top) 0%,
+      var(--atm-sky-mid) 45%,
+      var(--atm-horizon) 75%,
+      var(--atm-ground) 100%
+    );
+
+  transition:
+    background 2s ease,
+    filter 2s ease;
+}
+
+
+/* =========================================================
+   STARS + FOG + ATMOSPHERIC PARTICLES
+   ========================================================= */
+
+#intro.intro .menu-backdrop::before{
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:0;
+
+  background:
+    radial-gradient(circle at 8% 16%,
+      var(--atm-star) 0 1px,
+      transparent 1.8px),
+
+    radial-gradient(circle at 17% 27%,
+      var(--atm-star) 0 1px,
+      transparent 1.8px),
+
+    radial-gradient(circle at 27% 11%,
+      var(--atm-star) 0 1px,
+      transparent 1.8px),
+
+    radial-gradient(circle at 39% 22%,
+      var(--atm-star) 0 1px,
+      transparent 1.8px),
+
+    radial-gradient(circle at 51% 9%,
+      var(--atm-star) 0 1px,
+      transparent 1.8px),
+
+    radial-gradient(circle at 63% 27%,
+      var(--atm-star) 0 1px,
+      transparent 1.8px),
+
+    radial-gradient(circle at 75% 12%,
+      var(--atm-star) 0 1px,
+      transparent 1.8px),
+
+    radial-gradient(circle at 88% 25%,
+      var(--atm-star) 0 1px,
+      transparent 1.8px),
+
+    radial-gradient(circle at 94% 10%,
+      var(--atm-star) 0 1px,
+      transparent 1.8px),
+
+    radial-gradient(
+      ellipse at 20% 72%,
+      var(--atm-fog),
+      transparent 32%
+    ),
+
+    radial-gradient(
+      ellipse at 76% 67%,
+      var(--atm-fog),
+      transparent 35%
+    ),
+
+    radial-gradient(
+      ellipse at 50% 84%,
+      var(--atm-fog),
+      transparent 42%
+    );
+
+  opacity:.72;
+
+  pointer-events:none;
+
+  transition:
+    opacity 2s ease,
+    filter 2s ease;
+}
+
+
+/* =========================================================
+   CINEMATIC VIGNETTE
+   ========================================================= */
+
+#intro.intro .menu-backdrop::after{
+  content:"";
+  position:absolute;
+  z-index:7;
+  inset:0;
+
+  background:
+    radial-gradient(
+      ellipse at 50% 43%,
+      transparent 18%,
+      rgba(2,5,10,.025) 55%,
+      var(--atm-vignette) 100%
+    ),
+
+    linear-gradient(
+      180deg,
+      rgba(2,5,10,.02) 0%,
+      transparent 48%,
+      var(--atm-ground) 100%
+    );
+
+  pointer-events:none;
+
+  transition:
+    background 2s ease,
+    opacity 2s ease;
+}
+
+
+/* =========================================================
+   MOON
+   ========================================================= */
+
+#intro.intro .backdrop-moon{
+  z-index:1;
+
+  width:clamp(130px,16vw,230px);
+
+  left:auto;
+  right:clamp(9%,16vw,18%);
+  top:10%;
+
+  transform:none;
+
+  background:var(--atm-moon);
+
+  opacity:var(--atm-moon-opacity);
+
+  box-shadow:
+    0 0 34px 10px var(--atm-moon-glow),
+    0 0 72px 20px var(--atm-moon-glow),
+    0 0 150px 46px var(--atm-moon-glow);
+
+  animation:
+    relay-moon-breathe 7s ease-in-out infinite;
+
+  transition:
+    background 2s ease,
+    box-shadow 2s ease,
+    opacity 2s ease,
+    filter 2s ease;
+}
+
+
+@keyframes relay-moon-breathe{
+
+  0%,
+  100%{
+    transform:translateY(0) scale(1);
+    filter:brightness(1);
+  }
+
+  50%{
+    transform:translateY(-4px) scale(1.018);
+    filter:brightness(1.045);
+  }
+
+}
+
+
+/* =========================================================
+   ORBIT / SCI-FI RINGS
+   ========================================================= */
+
+#intro.intro .backdrop-orbit{
+  z-index:1;
+
+  opacity:.24;
+
+  pointer-events:none;
+
+  filter:
+    drop-shadow(0 0 8px rgba(120,190,240,.12));
+
+  transition:
+    border-color 2s ease,
+    opacity 2s ease,
+    filter 2s ease;
+}
+
+
+#intro.intro .orbit-one{
+  border-color:
+    rgba(210,226,244,.18);
+}
+
+
+#intro.intro .orbit-two{
+  border-color:
+    var(--atm-window);
+
+  opacity:.24;
+
+  filter:
+    drop-shadow(0 0 12px var(--atm-window));
+}
+
+
+/* =========================================================
+   BACK CITY
+   ========================================================= */
+
+#intro.intro .city-one{
+  z-index:4;
+
+  height:38%;
+
+  left:-2%;
+  right:-2%;
+
+  background-color:
+    var(--atm-city-back);
+
+  background-image:
+
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 42px,
+      var(--atm-window) 43px 46px,
+      transparent 47px 82px
+    ),
+
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 91px,
+      rgba(108,178,225,.08) 92px 94px,
+      transparent 95px 145px
+    ),
+
+    linear-gradient(
+      180deg,
+      transparent 0 8%,
+      rgba(160,195,220,.08) 9%,
+      transparent 11%
+    );
+
+  box-shadow:
+    inset 0 18px 42px rgba(137,180,215,.06),
+    0 -18px 48px rgba(30,90,130,.12),
+    0 -32px 90px rgba(20,45,70,.14);
+
+  transition:
+    background-color 2s ease,
+    background-image 2s ease,
+    box-shadow 2s ease;
+}
+
+
+/* =========================================================
+   BACK CITY WINDOWS
+   ========================================================= */
+
+#intro.intro .city-one::after{
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  right:0;
+  bottom:0;
+
+  height:58%;
+
+  opacity:var(--atm-city-light);
+
+  background:
+
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 28px,
+      var(--atm-window) 29px 31px,
+      transparent 32px 63px
+    ),
+
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 18px,
+      rgba(255,214,145,.055) 19px 20px,
+      transparent 21px 34px
+    );
+
+  -webkit-mask-image:
+    linear-gradient(
+      180deg,
+      transparent,
+      #000 24%,
+      #000
+    );
+
+  mask-image:
+    linear-gradient(
+      180deg,
+      transparent,
+      #000 24%,
+      #000
+    );
+
+  pointer-events:none;
+
+  transition:
+    opacity 2s ease;
+}
+
+
+/* =========================================================
+   FRONT CITY
+   ========================================================= */
+
+#intro.intro .city-two{
+  z-index:5;
+
+  height:25%;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20,50,75,.12),
+      transparent 30%
+    ),
+    var(--atm-city-front);
+
+  box-shadow:
+    inset 0 18px 38px rgba(0,0,0,.30),
+    0 -18px 50px rgba(0,0,0,.20),
+    0 -4px 22px rgba(50,130,180,.07);
+
+  transition:
+    background 2s ease,
+    box-shadow 2s ease;
+}
+
+
+/* =========================================================
+   FRONT CITY WINDOWS
+   ========================================================= */
+
+#intro.intro .city-two::before{
+  content:"";
+
+  position:absolute;
+
+  inset:18% 0 0;
+
+  background:
+
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 38px,
+      rgba(255,207,112,.13) 39px 42px,
+      transparent 43px 78px
+    ),
+
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 15px,
+      rgba(255,207,112,.065) 16px 18px,
+      transparent 19px 31px
+    );
+
+  opacity:var(--atm-city-light);
+
+  -webkit-mask-image:
+    linear-gradient(
+      180deg,
+      transparent,
+      #000 14%
+    );
+
+  mask-image:
+    linear-gradient(
+      180deg,
+      transparent,
+      #000 14%
+    );
+
+  pointer-events:none;
+
+  transition:
+    opacity 2s ease;
+}
+
+
+/* =========================================================
+   RAIN
+   ========================================================= */
+
+#intro.intro .backdrop-rain{
+  z-index:6;
+
+  opacity:var(--atm-rain);
+
+  mix-blend-mode:screen;
+
+  filter:
+    brightness(1.08)
+    contrast(1.04);
+
+  transition:
+    opacity 2s ease,
+    filter 2s ease;
+}
+
+
+/* =========================================================
+   ATMOSPHERE SHIFT
+   ========================================================= */
+
+#intro.intro.atmosphere-shift .menu-backdrop::before{
+  animation:
+    relay-atmosphere-breathe 1.5s ease both;
+}
+
+
+@keyframes relay-atmosphere-breathe{
+
+  0%{
+    opacity:.30;
+    filter:blur(0);
+  }
+
+  45%{
+    opacity:1;
+    filter:blur(.15px);
+  }
+
+  100%{
+    opacity:.72;
+    filter:blur(0);
+  }
+
+}
+
+
+/* =========================================================
+   DAWN
+   ========================================================= */
+
+#intro.intro[data-atmosphere=dawn]{
+
+  --atm-sky-top:#111a34;
+  --atm-sky-mid:#5a526b;
+  --atm-horizon:#dc8a6d;
+  --atm-ground:#18131c;
+
+  --atm-glow:rgba(255,151,94,.34);
+
+  --atm-city-back:#34475d;
+  --atm-city-front:#1c2e42;
+
+  --atm-window:rgba(255,209,135,.16);
+
+  --atm-city-light:.34;
+
+  --atm-fog:rgba(255,190,157,.20);
+
+  --atm-rain:.08;
+
+  --atm-moon:#ffe2b0;
+  --atm-moon-opacity:0;
+
+  --atm-moon-glow:
+    rgba(255,190,126,.12);
+
+  --atm-star:
+    rgba(255,232,206,.20);
+
+  --atm-vignette:
+    rgba(24,15,15,.38);
+}
+
+
+/* =========================================================
+   DAY
+   ========================================================= */
+
+#intro.intro[data-atmosphere=day]{
+
+  --atm-sky-top:#2c638b;
+  --atm-sky-mid:#72a0b4;
+  --atm-horizon:#bdcfcc;
+  --atm-ground:#26363e;
+
+  --atm-glow:rgba(255,225,184,.30);
+
+  --atm-city-back:#4a697b;
+  --atm-city-front:#2c4659;
+
+  --atm-window:
+    rgba(255,228,169,.065);
+
+  --atm-city-light:.08;
+
+  --atm-fog:
+    rgba(225,239,242,.16);
+
+  --atm-rain:.012;
+
+  --atm-moon:#f1eee4;
+  --atm-moon-opacity:0;
+
+  --atm-moon-glow:transparent;
+
+  --atm-star:transparent;
+
+  --atm-vignette:
+    rgba(8,15,20,.18);
+}
+
+
+/* =========================================================
+   DUSK
+   ========================================================= */
+
+#intro.intro[data-atmosphere=dusk]{
+
+  --atm-sky-top:#1a1b31;
+  --atm-sky-mid:#65435b;
+  --atm-horizon:#c86a58;
+  --atm-ground:#130b15;
+
+  --atm-glow:
+    rgba(255,113,77,.36);
+
+  --atm-city-back:#263a50;
+  --atm-city-front:#14263c;
+
+  --atm-window:
+    rgba(255,190,111,.34);
+
+  --atm-city-light:.72;
+
+  --atm-fog:
+    rgba(224,150,142,.17);
+
+  --atm-rain:.15;
+
+  --atm-moon:#ffe0ad;
+  --atm-moon-opacity:0;
+
+  --atm-moon-glow:
+    rgba(255,165,107,.12);
+
+  --atm-star:
+    rgba(255,220,200,.26);
+
+  --atm-vignette:
+    rgba(15,8,14,.52);
+}
+
+
+/* =========================================================
+   NIGHT
+   ========================================================= */
+
+#intro.intro[data-atmosphere=night]{
+
+  --atm-sky-top:#030a17;
+  --atm-sky-mid:#091a2e;
+  --atm-horizon:#153e5d;
+  --atm-ground:#03070e;
+
+  --atm-glow:
+    rgba(72,164,230,.20);
+
+  --atm-city-back:#0c263d;
+  --atm-city-front:#07182a;
+
+  --atm-window:
+    rgba(255,207,112,.28);
+
+  --atm-city-light:.78;
+
+  --atm-fog:
+    rgba(100,153,195,.12);
+
+  --atm-rain:.62;
+
+  --atm-moon:#f6dfb2;
+  --atm-moon-opacity:1;
+
+  --atm-moon-glow:
+    rgba(249,201,121,.22);
+
+  --atm-star:
+    rgba(212,235,255,.72);
+
+  --atm-vignette:
+    rgba(2,5,10,.60);
+}
+
+
+/* =========================================================
+   DEEP NIGHT
+   ========================================================= */
+
+#intro.intro[data-atmosphere=deep-night]{
+
+  --atm-sky-top:#01040b;
+  --atm-sky-mid:#030b17;
+  --atm-horizon:#09283f;
+  --atm-ground:#010409;
+
+  --atm-glow:
+    rgba(53,130,190,.14);
+
+  --atm-city-back:#061827;
+  --atm-city-front:#020b16;
+
+  --atm-window:
+    rgba(106,186,235,.16);
+
+  --atm-city-light:.46;
+
+  --atm-fog:
+    rgba(66,112,151,.11);
+
+  --atm-rain:.82;
+
+  --atm-moon:#dce7ef;
+  --atm-moon-opacity:.82;
+
+  --atm-moon-glow:
+    rgba(119,168,205,.16);
+
+  --atm-star:
+    rgba(197,224,247,.58);
+
+  --atm-vignette:
+    rgba(1,3,7,.76);
+}
+
+
+/* =========================================================
+   DAY — SPECIAL LIGHTING
+   ========================================================= */
+
+#intro.intro[data-atmosphere=day] .backdrop-moon,
+#intro.intro[data-atmosphere=dawn] .backdrop-moon,
+#intro.intro[data-atmosphere=dusk] .backdrop-moon{
+  opacity:0!important;
+}
+
+
+#intro.intro[data-atmosphere=day] .backdrop-orbit{
+  opacity:.08;
+}
+
+
+#intro.intro[data-atmosphere=day] .menu-backdrop::before{
+  opacity:.20;
+}
+
+
+#intro.intro[data-atmosphere=day] .backdrop-rain{
+  opacity:.01;
+}
+
+
+/* =========================================================
+   DAWN CINEMATIC OVERLAY
+   ========================================================= */
+
+#intro.intro[data-atmosphere=dawn] .menu-backdrop::after{
+
+  background:
+
+    radial-gradient(
+      ellipse at 50% 55%,
+      transparent 16%,
+      rgba(36,25,25,.025) 60%,
+      var(--atm-vignette) 100%
+    ),
+
+    linear-gradient(
+      180deg,
+      rgba(255,160,100,.09),
+      transparent 56%,
+      rgba(20,18,22,.20) 100%
+    );
+}
+
+
+/* =========================================================
+   DAY CINEMATIC OVERLAY
+   ========================================================= */
+
+#intro.intro[data-atmosphere=day] .menu-backdrop::after{
+
+  background:
+
+    radial-gradient(
+      ellipse at 50% 45%,
+      transparent 18%,
+      rgba(20,35,45,.018) 62%,
+      var(--atm-vignette) 100%
+    ),
+
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.10),
+      transparent 58%,
+      rgba(8,15,20,.14) 100%
+    );
+}
+
+
+/* =========================================================
+   DUSK CINEMATIC OVERLAY
+   ========================================================= */
+
+#intro.intro[data-atmosphere=dusk] .menu-backdrop::after{
+
+  background:
+
+    radial-gradient(
+      ellipse at 50% 44%,
+      transparent 19%,
+      rgba(25,12,20,.045) 60%,
+      var(--atm-vignette) 100%
+    ),
+
+    linear-gradient(
+      180deg,
+      rgba(255,122,82,.11),
+      transparent 53%,
+      rgba(9,8,15,.32) 100%
+    );
+}
+
+
+/* =========================================================
+   NIGHT CINEMATIC OVERLAY
+   ========================================================= */
+
+#intro.intro[data-atmosphere=night] .menu-backdrop::after{
+
+  background:
+
+    radial-gradient(
+      ellipse at 50% 43%,
+      transparent 17%,
+      rgba(2,5,10,.08) 57%,
+      var(--atm-vignette) 100%
+    ),
+
+    linear-gradient(
+      180deg,
+      rgba(0,5,12,.04),
+      transparent 50%,
+      rgba(0,2,6,.40) 100%
+    );
+}
+
+
+/* =========================================================
+   DEEP NIGHT OVERLAY
+   ========================================================= */
+
+#intro.intro[data-atmosphere=deep-night] .menu-backdrop::after{
+
+  background:
+
+    radial-gradient(
+      ellipse at 50% 43%,
+      transparent 14%,
+      rgba(1,3,7,.14) 56%,
+      var(--atm-vignette) 100%
+    ),
+
+    linear-gradient(
+      180deg,
+      rgba(0,2,6,.10),
+      transparent 50%,
+      rgba(0,2,6,.58) 100%
+    );
+}
+
+
+/* =========================================================
+   NIGHT CITY BOOST
+   ========================================================= */
+
+#intro.intro[data-atmosphere=night] .city-one,
+#intro.intro[data-atmosphere=deep-night] .city-one{
+
+  box-shadow:
+    inset 0 18px 42px rgba(50,130,180,.06),
+    0 -20px 60px rgba(20,75,110,.20),
+    0 -2px 18px rgba(80,170,225,.08);
+}
+
+
+#intro.intro[data-atmosphere=night] .city-two,
+#intro.intro[data-atmosphere=deep-night] .city-two{
+
+  box-shadow:
+    inset 0 18px 38px rgba(0,0,0,.34),
+    0 -22px 55px rgba(0,0,0,.26),
+    0 -3px 22px rgba(50,145,205,.08);
+}
+
+
+/* =========================================================
+   NIGHT STARS BOOST
+   ========================================================= */
+
+#intro.intro[data-atmosphere=night] .menu-backdrop::before{
+
+  opacity:.78;
+
+  filter:
+    drop-shadow(0 0 3px rgba(180,225,255,.16));
+}
+
+
+#intro.intro[data-atmosphere=deep-night] .menu-backdrop::before{
+
+  opacity:.88;
+
+  filter:
+    drop-shadow(0 0 4px rgba(150,210,255,.14));
+}
+
+
+/* =========================================================
+   MOBILE — 900px
+   ========================================================= */
+
+@media(max-width:900px){
+
+  #intro.intro .backdrop-moon{
+
+    width:clamp(105px,19vw,175px);
+
+    right:8%;
+    top:9%;
+  }
+
+
+  #intro.intro .backdrop-orbit{
+    opacity:.14;
+  }
+
+
+  #intro.intro .city-one{
+    height:34%;
+  }
+
+
+  #intro.intro .city-two{
+    height:23%;
+  }
+
+
+  #intro.intro .menu-backdrop::before{
+    opacity:.52;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE — 700px
+   ========================================================= */
+
+@media(max-width:700px){
+
+  #intro.intro .backdrop-moon{
+
+    width:108px;
+
+    right:6%;
+    top:8%;
+
+    box-shadow:
+      0 0 28px 10px var(--atm-moon-glow),
+      0 0 65px 20px var(--atm-moon-glow),
+      0 0 105px 30px var(--atm-moon-glow);
+  }
+
+
+  #intro.intro .city-one{
+    height:31%;
+  }
+
+
+  #intro.intro .city-two{
+    height:20%;
+  }
+
+
+  #intro.intro .city-one::after{
+    opacity:
+      calc(var(--atm-city-light) * .76);
+  }
+
+
+  #intro.intro .city-two::before{
+    opacity:
+      calc(var(--atm-city-light) * .76);
+  }
+
+
+  #intro.intro .backdrop-rain{
+    opacity:
+      calc(var(--atm-rain) * .60);
+  }
+
+
+  #intro.intro .menu-backdrop::before{
+
+    filter:blur(.2px);
+
+    opacity:.42;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE — 420px
+   ========================================================= */
+
+@media(max-width:420px){
+
+  #intro.intro .backdrop-moon{
+
+    width:84px;
+
+    right:5%;
+    top:7%;
+  }
+
+
+  #intro.intro .city-one{
+    height:28%;
+  }
+
+
+  #intro.intro .city-two{
+    height:18%;
+  }
+
+
+  #intro.intro .menu-backdrop::before{
+    opacity:.38;
+  }
+
+}
+
+
+/* =========================================================
+   LANDSCAPE MOBILE
+   ========================================================= */
+
+@media(orientation:landscape) and (max-height:560px){
+
+  #intro.intro .backdrop-moon{
+
+    top:6%;
+
+    width:
+      clamp(70px,15vw,140px);
+  }
+
+
+  #intro.intro .city-one{
+    height:34%;
+  }
+
+
+  #intro.intro .city-two{
+    height:22%;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+  #intro.intro *{
+
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+
+    scroll-behavior:auto!important;
+  }
+
+
+  #intro.intro .menu-backdrop,
+  #intro.intro .menu-backdrop::before,
+  #intro.intro .menu-backdrop::after,
+  #intro.intro .backdrop-moon,
+  #intro.intro .city-one,
+  #intro.intro .city-two,
+  #intro.intro .backdrop-rain{
+
+    transition:none!important;
+  }
+
     }
-    return DAYLIGHT_STOPS[DAYLIGHT_STOPS.length - 1];
-  };
-
-  const applySceneDirect = (hour, palette, theme) => {
-    if (!backdrop) return;
-
-    let scene;
-    if (theme === 'night') {
-      scene = { top: '#040b17', mid: '#0a1a2d', horizon: '#173b58', ground: '#04080f', glow: 'rgba(86,170,228,.18)' };
-    } else if (theme === 'deep-night') {
-      scene = { top: '#01050d', mid: '#040c18', horizon: '#0b263e', ground: '#02050a', glow: 'rgba(69,133,187,.12)' };
-    } else {
-      scene = { top: palette.skyTop, mid: palette.skyMid, horizon: palette.horizon, ground: hour < 7 ? '#17121b' : hour < 18 ? '#38484b' : '#120b14', glow: `rgb(${hexToRgb(palette.glow).r} ${hexToRgb(palette.glow).g} ${hexToRgb(palette.glow).b} / .28)` };
-    }
-
-    const sunX = root.style.getPropertyValue('--relay-sun-x').trim() || '50%';
-    const sunY = root.style.getPropertyValue('--relay-sun-y').trim() || '20%';
-    const sunGlow = theme === 'dawn' || theme === 'dusk' || theme === 'day'
-      ? `radial-gradient(circle at ${sunX} ${sunY},${scene.glow},transparent 25%)`
-      : 'none';
-    const nightGlow = theme === 'night' || theme === 'deep-night'
-      ? `radial-gradient(circle at 82% 14%,${theme === 'night' ? 'rgba(249,201,121,.18)' : 'rgba(119,168,205,.12)'},transparent 19%)`
-      : 'none';
-
-    backdrop.style.background = `${sunGlow},${nightGlow},radial-gradient(ellipse at 50% 67%,${scene.glow},transparent 48%),linear-gradient(180deg,${scene.top} 0%,${scene.mid} 48%,${scene.horizon} 76%,${scene.ground} 100%)`;
-    root.style.backgroundColor = scene.ground;
-  };
-
-  const applyRealisticDaylight = hour => {
-    const theme = getTheme();
-    if (hour < 5 || hour >= 20) {
-      ['--atm-sky-top', '--atm-sky-mid', '--atm-horizon', '--atm-glow', '--atm-city-back', '--atm-city-front', '--atm-window', '--atm-fog', '--atm-city-light', '--atm-rain'].forEach(variable => root.style.removeProperty(variable));
-      return;
-    }
-
-    const palette = interpolateStop(hour);
-    root.style.setProperty('--atm-sky-top', palette.skyTop);
-    root.style.setProperty('--atm-sky-mid', palette.skyMid);
-    root.style.setProperty('--atm-horizon', palette.horizon);
-    root.style.setProperty('--atm-glow', palette.glow);
-    root.style.setProperty('--atm-city-back', palette.cityBack);
-    root.style.setProperty('--atm-city-front', palette.cityFront);
-    root.style.setProperty('--atm-window', palette.window);
-    root.style.setProperty('--atm-fog', palette.fog);
-    root.style.setProperty('--atm-vignette', hour < 7 ? 'rgba(24,15,15,.22)' : hour < 18 ? 'rgba(8,15,20,.12)' : 'rgba(15,8,14,.3)');
-
-    const noonDistance = Math.abs(hour - 12) / 7;
-    const daylight = Math.max(0, 1 - noonDistance * 0.22);
-    root.style.setProperty('--atm-city-light', `${(0.04 + (1 - daylight) * 0.16).toFixed(3)}`);
-    root.style.setProperty('--atm-rain', `${Math.max(0.01, 0.06 - daylight * 0.045).toFixed(3)}`);
-    applySceneDirect(hour, palette, theme);
-  };
-
-  const updateCelestialBodies = (hour, theme) => {
-    const sunVisible = hour >= 5 && hour < 20;
-    const moonVisible = hour >= 20 || hour < 5;
-
-    if (moon) moon.style.opacity = moonVisible ? '' : '0';
-    if (!sunVisible) {
-      sun.style.opacity = '0';
-      if (backdrop && (theme === 'night' || theme === 'deep-night')) applySceneDirect(hour, interpolateStop(Math.max(5, Math.min(20, hour))), theme);
-      return;
-    }
-
-    const progress = Math.min(1, Math.max(0, (hour - 5) / 15));
-    const x = 9 + progress * 82;
-    const y = 72 - Math.sin(progress * Math.PI) * 61;
-    root.style.setProperty('--relay-sun-x', `${x}%`);
-    root.style.setProperty('--relay-sun-y', `${y}%`);
-
-    const daylightPalette = interpolateStop(hour);
-    const sunWarmth = hour < 8 ? 0.85 : hour < 16 ? 0.05 : hour < 19 ? 0.72 : 1;
-    const core = sunWarmth > 0.5 ? '#fff1cf' : '#fffdf5';
-    const edge = sunWarmth > 0.5 ? '#ffad57' : '#ffd978';
-    sun.style.background = `radial-gradient(circle at 42% 38%,${core} 0 20%,#ffe9a7 45%,${edge} 72%,rgba(255,174,62,0) 100%)`;
-    sun.style.boxShadow = `0 0 35px 12px ${daylightPalette.glow}66,0 0 110px 38px ${daylightPalette.glow}33`;
-    sun.style.opacity = '1';
-    sun.dataset.theme = theme;
-    applySceneDirect(hour, daylightPalette, theme);
-  };
-
-  const update = () => {
-    const hour = getHour();
-    const next = getTheme();
-    const previous = root.dataset.atmosphere;
-    root.dataset.atmosphere = next;
-    applyRealisticDaylight(hour);
-    updateCelestialBodies(hour, next);
-
-    if (previous && previous !== next) {
-      root.classList.remove('atmosphere-shift');
-      void root.offsetWidth;
-      root.classList.add('atmosphere-shift');
-      window.setTimeout(() => root.classList.remove('atmosphere-shift'), 1400);
-    }
-
-    window.dispatchEvent(new CustomEvent('relay-atmosphere-change', {
-      detail: { theme: next, hour }
-    }));
-  };
-
-  window.__relayUpdateAtmosphere = update;
-  window.__relaySetAtmosphereDebugHour = hour => {
-    if (!Number.isFinite(hour)) return;
-    window.__relayAtmosphereDebugHour = hour;
-    update();
-  };
-  window.__relayClearAtmosphereDebug = () => {
-    delete window.__relayAtmosphereDebugHour;
-    update();
-  };
-
-  update();
-  window.setInterval(update, 60 * 1000);
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) update();
-  });
-})();
