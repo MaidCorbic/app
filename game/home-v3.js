@@ -1,239 +1,261 @@
-/* Home V3: presentation shell only; gameplay remains owned by main.js. */
+/*
+ * Relay Runner Home — Concept 6 presentation owner.
+ *
+ * Contract:
+ * - Home owns presentation only.
+ * - Existing gameplay entry points (#start / #continue) remain authoritative.
+ * - Existing Options / FAQ / Update systems remain authoritative.
+ * - No duplicate visible controls are created.
+ */
 (() => {
-  if (window.__relayHomeV3) return;
-  window.__relayHomeV3 = true;
+  'use strict';
+
+  if (window.__relayHomeConcept6) return;
+  window.__relayHomeConcept6 = true;
 
   const $ = id => document.getElementById(id);
-  const homeVisible = () => !!$('intro') && !$('intro').classList.contains('hidden');
 
-  const nativeClick = selector => {
+  const isHomeVisible = () => {
+    const intro = $('intro');
+    return !!intro && !intro.classList.contains('hidden');
+  };
+
+  const clickExisting = selector => {
     const target = document.querySelector(selector);
-    if (!target) return false;
-    HTMLElement.prototype.click.call(target);
-    return true;
+    if (!(target instanceof HTMLElement) || target.disabled) return false;
+    try {
+      HTMLElement.prototype.click.call(target);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
-  const injectStyles = () => {
-    if (document.getElementById('home-v3-interaction-style')) return;
-    const style = document.createElement('style');
-    style.id = 'home-v3-interaction-style';
-    style.textContent = `
-      body.home-v3-active #play{display:block!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;position:fixed!important;inset:0!important;width:100%!important;height:100%!important;z-index:0!important}
-      body.home-v3-active #phaser-game{display:block!important;visibility:hidden!important;opacity:0!important;width:100%!important;height:100%!important;min-width:1px!important;min-height:1px!important}
-      .home-v3-play{position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
-      .home-v3-play:active{cursor:grabbing}
-      .home-v3-play .home-v3-play-track{position:absolute;inset:0;pointer-events:none;opacity:.46;background:linear-gradient(90deg,transparent 0 6%,rgba(255,255,255,.07) 48%,transparent 100%);animation:homeV3PlaySweep 2.8s ease-in-out infinite}
-      .home-v3-play .home-v3-play-fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,rgba(255,255,255,.03),rgba(255,208,110,.34));pointer-events:none;transition:width .08s linear}
-      .home-v3-play .home-v3-play-label{position:relative;z-index:3;display:block;padding-left:42px;pointer-events:none}
-      .home-v3-play .home-v3-play-hint{position:absolute;right:18px;top:50%;z-index:3;transform:translateY(-50%);color:rgba(255,248,226,.72);font:800 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;pointer-events:none;transition:opacity .18s ease}
-      .home-v3-play .home-v3-play-knob{position:absolute;left:7px;top:50%;z-index:4;width:42px;height:42px;margin-top:-21px;border:1px solid rgba(255,255,255,.62);border-radius:12px;background:linear-gradient(145deg,#fff5d0,#ffd06e);color:#08111b;display:grid;place-items:center;font:950 15px/1 ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 0 22px rgba(255,208,110,.32),inset 0 1px rgba(255,255,255,.88);transform:translateX(0);transition:transform .08s linear,box-shadow .16s ease}
-      .home-v3-play .home-v3-play-knob::after{content:"";position:absolute;inset:-5px;border:1px solid rgba(255,208,110,.17);border-radius:15px;animation:homeV3PlayPulse 1.8s ease-in-out infinite}
-      .home-v3-play.is-dragging .home-v3-play-knob{box-shadow:0 0 34px rgba(255,208,110,.74),inset 0 1px rgba(255,255,255,.95)}
-      .home-v3-play.is-armed .home-v3-play-fill{width:100%!important}
-      .home-v3-play.is-armed .home-v3-play-hint{opacity:0}
-      .home-v3-play.is-armed{cursor:progress}
-      .home-v3-play.is-locked{pointer-events:none;filter:saturate(.9);opacity:.78}
-      .home-v3-play:focus-visible{outline:2px solid rgba(255,208,110,.9);outline-offset:3px}
-      .home-v3-shell [data-v3-tutorial],#intro [data-title-panel="tutorial"],#intro .home-tutorial-button{display:none!important}
-      #titlePanelContent [data-unified-toggle="tutorialEnabled"],#titlePanelContent .relay-option-card:has([data-unified-toggle="tutorialEnabled"]){display:none!important}
-      @keyframes homeV3PlaySweep{0%,100%{transform:translateX(-18%);opacity:.1}50%{transform:translateX(18%);opacity:.38}}
-      @keyframes homeV3PlayPulse{0%,100%{transform:scale(.92);opacity:.25}50%{transform:scale(1.05);opacity:.75}}
-      @media(max-width:700px){
-        .home-v3-play{min-height:64px}
-        .home-v3-play .home-v3-play-knob{left:6px;width:40px;height:40px;margin-top:-20px;border-radius:11px}
-        .home-v3-play .home-v3-play-label{padding-left:38px}
-        .home-v3-play .home-v3-play-hint{right:13px;font-size:7px;letter-spacing:.11em}
+  const openOptions = () => {
+    try {
+      if (typeof window.relayUnifiedCinematicUI?.openOptions === 'function') {
+        window.relayUnifiedCinematicUI.openOptions();
+        return true;
       }
-      @media(prefers-reduced-motion:reduce){.home-v3-play .home-v3-play-track,.home-v3-play .home-v3-play-knob::after{animation:none}.home-v3-play .home-v3-play-knob{transition:none}}
-    `;
-    document.head.appendChild(style);
+    } catch {}
+    return clickExisting('[data-title-panel="controls"]');
   };
 
-  const syncSurface = () => {
-    const visible = homeVisible();
+  const openFaq = () => {
+    try {
+      if (typeof window.relayUnifiedCinematicUI?.openFAQ === 'function') {
+        window.relayUnifiedCinematicUI.openFAQ();
+        return true;
+      }
+    } catch {}
+    return clickExisting('[data-relay-info="faq"]');
+  };
+
+  const openUpdate = () => {
+    try {
+      if (typeof window.relayOpenInfo === 'function') {
+        window.relayOpenInfo('update');
+        return true;
+      }
+    } catch {}
+    return clickExisting('[data-relay-info="update"]');
+  };
+
+  const syncHomeState = () => {
+    const visible = isHomeVisible();
     document.body.classList.toggle('home-v3-active', visible);
     const intro = $('intro');
-    if (intro) intro.classList.toggle('home-v3', visible);
+    intro?.classList.toggle('home-v3', visible);
   };
 
-  const removeTutorialSurface = () => {
-    document.querySelectorAll('#intro [data-title-panel="tutorial"],#intro .home-tutorial-button,#intro [data-v3-tutorial]').forEach(node => node.remove());
-    document.querySelectorAll('#titlePanelContent [data-unified-toggle="tutorialEnabled"]').forEach(node => node.closest('.relay-option-card')?.remove());
+  const syncContinue = () => {
+    const legacy = $('continue');
+    const button = document.querySelector('#intro [data-home-action="continue"]');
+    if (!legacy || !button) return;
+
+    const shouldShow = !legacy.classList.contains('hidden')
+      && legacy.getAttribute('aria-hidden') !== 'true'
+      && getComputedStyle(legacy).display !== 'none';
+
+    button.hidden = !shouldShow;
   };
 
-  const bindLegacyAction = (button, selector) => {
-    if (!button || button.dataset.homeV3Action === '1') return;
-    button.dataset.homeV3Action = '1';
-    let handledAt = 0;
-    const activate = event => {
-      const now = performance.now();
-      if (now - handledAt < 260) return;
-      handledAt = now;
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      nativeClick(selector);
-    };
-    button.addEventListener('pointerup', activate, { passive: false });
-    button.addEventListener('click', activate);
-  };
+  const bindAction = (button, action) => {
+    if (!(button instanceof HTMLElement) || button.dataset.bound === '1') return;
+    button.dataset.bound = '1';
 
-  const installSwipePlay = button => {
-    if (!button || button.dataset.swipeReady === '1') return;
-    button.dataset.swipeReady = '1';
-    button.setAttribute('aria-label', 'Swipe to deploy and start the game');
-    button.setAttribute('aria-keyshortcuts', 'Swipe');
-    button.innerHTML = '<span class="home-v3-play-track" aria-hidden="true"></span><span class="home-v3-play-fill" aria-hidden="true"></span><span class="home-v3-play-label">PLAY NOW</span><span class="home-v3-play-hint">SWIPE TO DEPLOY →</span><span class="home-v3-play-knob" aria-hidden="true">→</span>';
-
-    let pointerId = null;
-    let startX = 0;
-    let completed = false;
-    let maxTravel = 0;
-
-    const updateMetrics = () => {
-      const rect = button.getBoundingClientRect();
-      const knob = button.querySelector('.home-v3-play-knob');
-      const knobWidth = knob?.getBoundingClientRect().width || 42;
-      maxTravel = Math.max(1, rect.width - knobWidth - 14);
-      return maxTravel;
-    };
-
-    const reset = () => {
-      if (completed) return;
-      pointerId = null;
-      button.classList.remove('is-dragging');
-      const knob = button.querySelector('.home-v3-play-knob');
-      const fill = button.querySelector('.home-v3-play-fill');
-      if (knob) knob.style.transform = 'translateX(0)';
-      if (fill) fill.style.width = '0%';
-    };
-
-    const complete = () => {
-      if (completed) return;
-      completed = true;
-      pointerId = null;
-      button.classList.remove('is-dragging');
-      button.classList.add('is-armed','is-locked');
-      const max = updateMetrics();
-      const knob = button.querySelector('.home-v3-play-knob');
-      const fill = button.querySelector('.home-v3-play-fill');
-      if (fill) fill.style.width = '100%';
-      if (knob) knob.style.transform = `translateX(${max}px)`;
-      window.setTimeout(() => nativeClick('#start'), 180);
-    };
-
-    button.addEventListener('pointerdown', event => {
-      if (completed) return;
-      pointerId = event.pointerId;
-      startX = event.clientX;
-      updateMetrics();
-      button.setPointerCapture?.(pointerId);
-      button.classList.add('is-dragging');
-      event.preventDefault();
-      event.stopPropagation();
-    }, { passive: false });
-
-    button.addEventListener('pointermove', event => {
-      if (event.pointerId !== pointerId || completed) return;
-      const max = updateMetrics();
-      const knob = button.querySelector('.home-v3-play-knob');
-      const fill = button.querySelector('.home-v3-play-fill');
-      const distance = Math.max(0, Math.min(max, event.clientX - startX));
-      const percent = distance / max;
-      if (knob) knob.style.transform = `translateX(${distance}px)`;
-      if (fill) fill.style.width = `${percent * 100}%`;
-      if (percent >= 0.84) complete();
-      event.preventDefault();
-      event.stopPropagation();
-    }, { passive: false });
-
-    button.addEventListener('pointerup', event => {
-      if (event.pointerId !== pointerId || completed) return;
-      button.releasePointerCapture?.(event.pointerId);
-      reset();
-      event.preventDefault();
-      event.stopPropagation();
-    }, { passive: false });
-
-    button.addEventListener('pointercancel', reset);
-    button.addEventListener('lostpointercapture', reset);
     button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-      event.stopImmediatePropagation();
-    });
-    button.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.code === 'Space') {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      }
+      if (action === 'options') openOptions();
+      if (action === 'faq') openFaq();
+      if (action === 'update') openUpdate();
     });
   };
 
   const build = () => {
     const intro = $('intro');
-    if (!intro || intro.dataset.homeV3Built === '1') return;
-    intro.dataset.homeV3Built = '1';
+    if (!intro || intro.dataset.homeConcept6Built === '1') return;
+
+    intro.dataset.homeConcept6Built = '1';
     intro.classList.add('home-v3');
 
-    const legacyMenu = intro.querySelector('.main-menu');
-    const launcher = intro.querySelector('.info-launcher');
+    intro.replaceChildren();
 
     const bg = document.createElement('div');
     bg.className = 'home-v3-bg';
     bg.setAttribute('aria-hidden', 'true');
-    bg.innerHTML = '<i class="home-v3-grid"></i><i class="home-v3-glow"></i><i class="home-v3-scan"></i>';
+    bg.innerHTML = `
+      <div class="home-v3-backdrop"></div>
+      <div class="home-v3-moon"></div>
+      <div class="home-v3-skyline home-v3-skyline-back"></div>
+      <div class="home-v3-skyline home-v3-skyline-front"></div>
+      <div class="home-v3-rooftop"></div>
+      <div class="home-v3-atmosphere home-v3-atmosphere-one"></div>
+      <div class="home-v3-atmosphere home-v3-atmosphere-two"></div>
+      <div class="home-v3-rain"></div>
+    `;
 
     const shell = document.createElement('div');
     shell.className = 'home-v3-shell';
     shell.innerHTML = `
       <header class="home-v3-header">
-        <div class="home-v3-brand"><span class="home-v3-mark">R/</span><span>RELAY RUNNER</span></div>
-        <div class="home-v3-status"><b>● SYSTEM READY</b><br>NIGHT SHIFT · ONLINE</div>
+        <div class="home-v3-brand" aria-label="Relay Runner">
+          <span class="home-v3-brand-mark">R/</span>
+          <span>RELAY RUNNER</span>
+        </div>
+        <div class="home-v3-status" aria-label="System status">
+          <span class="home-v3-status-dot"></span>
+          <span>SYSTEM ONLINE</span>
+        </div>
       </header>
-      <main class="home-v3-main">
-        <section>
-          <p class="home-v3-kicker">ROOFTOP DELIVERY NETWORK · CHAPTER 01</p>
-          <h1 class="home-v3-title">RELAY<em>RUNNER</em></h1>
-          <p class="home-v3-copy">Run the sleeping city. Carry the signal farther than anyone else can. Build your route, master the night and keep the line open.</p>
-          <div class="home-v3-actions">
-            <button class="home-v3-play" type="button" data-v3-play></button>
-            <button class="home-v3-continue" type="button" data-v3-continue hidden>CONTINUE</button>
+
+      <main class="home-v3-stage">
+        <section class="home-v3-copy-block" aria-labelledby="homeV3Title">
+          <p class="home-v3-overline">NIGHT SHIFT</p>
+          <h1 id="homeV3Title" class="home-v3-title">RELAY<span>RUNNER</span></h1>
+          <p class="home-v3-subline">ROOFTOP RELAY // CHAPTER 01</p>
+
+          <div class="home-v3-actions" aria-label="Main menu">
+            <button id="start" class="home-v3-primary" type="button">
+              <span>PLAY NOW</span>
+              <b aria-hidden="true">→</b>
+            </button>
+
+            <button id="continue" class="home-v3-secondary home-v3-secondary-accent hidden" type="button" data-home-action="continue">
+              <span>CONTINUE</span>
+              <b aria-hidden="true">→</b>
+            </button>
+
+            <button class="home-v3-secondary" type="button" data-home-action="options">
+              <span>OPTIONS</span>
+              <small>SETTINGS</small>
+            </button>
           </div>
         </section>
-       <nav class="home-v3-side" aria-label="Main menu"></nav>
-        
+
+        <section class="home-v3-hero" aria-hidden="true">
+          <div class="home-v3-hero-glow"></div>
+          <div class="home-v3-runner-shadow"></div>
+          <div class="home-v3-runner">
+            <svg viewBox="0 0 260 430" role="presentation" focusable="false">
+              <defs>
+                <linearGradient id="runnerSuit" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#f3fbff" stop-opacity=".98"/>
+                  <stop offset=".42" stop-color="#86e8ff" stop-opacity=".9"/>
+                  <stop offset="1" stop-color="#164b69" stop-opacity=".55"/>
+                </linearGradient>
+                <linearGradient id="runnerDark" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#0b1724"/>
+                  <stop offset="1" stop-color="#02060c"/>
+                </linearGradient>
+                <filter id="runnerGlow" x="-70%" y="-30%" width="240%" height="180%">
+                  <feGaussianBlur stdDeviation="7" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <g filter="url(#runnerGlow)" opacity=".98">
+                <path d="M144 32c17 0 31 13 31 31s-14 31-31 31-31-13-31-31 14-31 31-31Z" fill="url(#runnerDark)" stroke="#9aefff" stroke-opacity=".62" stroke-width="3"/>
+                <path d="M123 96 160 88l31 69-35 22-21-40-24 76-28 56-26-9 33-72 18-96Z" fill="url(#runnerDark)" stroke="#83e7ff" stroke-opacity=".55" stroke-width="3"/>
+                <path d="m126 111-31 50-48 15 7 23 57-18 38-48Z" fill="url(#runnerSuit)" stroke="#aef3ff" stroke-opacity=".52" stroke-width="3"/>
+                <path d="m173 112 42 54 31 8-7 24-45-10-42-43Z" fill="url(#runnerSuit)" stroke="#aef3ff" stroke-opacity=".5" stroke-width="3"/>
+                <path d="m136 201-41 86-54 75 18 17 67-63 52-80Z" fill="url(#runnerDark)" stroke="#67dfff" stroke-opacity=".6" stroke-width="3"/>
+                <path d="m166 190 34 68 42 44-15 19-64-41-42-63Z" fill="url(#runnerDark)" stroke="#67dfff" stroke-opacity=".6" stroke-width="3"/>
+                <path d="m52 353-28 30 13 15 39-29Z" fill="#8ce9ff" fill-opacity=".82"/>
+                <path d="m226 300 28 14-8 19-36-15Z" fill="#8ce9ff" fill-opacity=".82"/>
+                <path d="M105 109h39l9 27-39 12Z" fill="#ffd06e" fill-opacity=".85"/>
+                <path d="M114 160h48" stroke="#ffd06e" stroke-opacity=".65" stroke-width="4" stroke-linecap="round"/>
+              </g>
+            </svg>
+          </div>
+          <div class="home-v3-hero-label home-v3-hero-label-top">RUNNER // 01</div>
+          <div class="home-v3-hero-label home-v3-hero-label-bottom">SIGNAL CARRIER</div>
+        </section>
       </main>
-      <footer class="home-v3-footer"><span>RELAY RUNNER · <b>VERSION 1.1.0</b></span><span>W / D MOVE · SPACE JUMP · ESC PAUSE</span></footer>`;
 
-    intro.replaceChildren(bg, shell, legacyMenu, launcher);
+      <footer class="home-v3-footer">
+        <div class="home-v3-footer-left">
+          <button class="home-v3-utility" type="button" data-home-action="faq">FAQ</button>
+          <button class="home-v3-utility" type="button" data-home-action="update">UPDATE</button>
+        </div>
+        <div class="home-v3-footer-right">RELAY RUNNER · v1.1.0</div>
+      </footer>
 
-    installSwipePlay(shell.querySelector('[data-v3-play]'));
-    bindLegacyAction(shell.querySelector('[data-v3-continue]'), '#continue');
-  
+      <div class="home-v3-keyline" aria-hidden="true"></div>
 
-    const syncContinue = () => {
-      const legacy = $('continue');
-      const button = shell.querySelector('[data-v3-continue]');
-      if (!legacy || !button) return;
-      button.hidden = legacy.classList.contains('hidden') || getComputedStyle(legacy).display === 'none';
-    };
+      <!-- Compatibility anchor retained for existing systems that query it. -->
+      <button id="exitTitle" type="button" aria-hidden="true" tabindex="-1" class="home-v3-compat-anchor">EXIT</button>
+    `;
+
+    intro.append(bg, shell);
+
+    bindAction(shell.querySelector('[data-home-action="options"]'), 'options');
+    bindAction(shell.querySelector('[data-home-action="faq"]'), 'faq');
+    bindAction(shell.querySelector('[data-home-action="update"]'), 'update');
+
+    const continueButton = shell.querySelector('#continue');
+    continueButton?.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      clickExisting('#continue');
+    }, { capture: true });
+
     syncContinue();
-    if ($('continue')) new MutationObserver(syncContinue).observe($('continue'), { attributes: true, attributeFilter: ['class','style','hidden'] });
   };
 
-  const start = () => {
-    injectStyles();
+  const boot = () => {
     build();
-    removeTutorialSurface();
-    syncSurface();
-    const observer = new MutationObserver(() => {
-      syncSurface();
-      removeTutorialSurface();
+    syncHomeState();
+
+    const intro = $('intro');
+    if (intro && !intro.dataset.homeConcept6Observed) {
+      intro.dataset.homeConcept6Observed = '1';
+      new MutationObserver(() => {
+        syncHomeState();
+        syncContinue();
+      }).observe(intro, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+        attributeFilter: ['class', 'style', 'hidden']
+      });
+    }
+
+    document.addEventListener('keydown', event => {
+      if (!isHomeVisible() || event.repeat) return;
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        clickExisting('#start');
+      }
+      if (event.key === 'Escape') {
+        const title = $('titlePanel');
+        const info = $('relayInfoPanel');
+        if (!title?.classList.contains('hidden')) title.classList.add('hidden');
+        if (!info?.classList.contains('hidden')) info.classList.add('hidden');
+      }
     });
-    observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class','style','hidden'] });
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
+  // index.html loads this module at the end of <body>, so the Home DOM exists now.
+  boot();
 })();
