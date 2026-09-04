@@ -85,7 +85,6 @@ import './src/systems/world-variation-game-feel-v1.js';
 import './src/systems/barrier-gameplay-visual-cleanup-v1.js';
 import './src/systems/city-backdrop-replacement-v1.js';
 import './src/systems/dynamic-world-mechanics-v2.js';
-import './src/systems/viewport-sync.js';
 import './world-interaction-runtime-v2.js';
 import './environmental-force-zone-v1.js';
 import './timed-energy-trap-v1.js';
