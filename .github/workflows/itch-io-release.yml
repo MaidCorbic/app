@@ -1,4 +1,5 @@
 name: Itch.io HTML5 Release
+# itch.io validation v2
 
 on:
   push:
