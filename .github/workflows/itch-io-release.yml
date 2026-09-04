@@ -39,8 +39,12 @@ jobs:
         working-directory: game
         run: |
           test -f dist/index.html
-          if grep -RInE '(^|["'\''(=])/(src|game|assets|favicon)' dist --exclude='*.map'; then
-            echo "ERROR: absolute game paths found in dist"
+          if grep -RInE '<(script|link|img)[^>]+(src|href)="/|url\(/' dist --include='*.html' --include='*.css'; then
+            echo "ERROR: absolute asset URLs found in HTML/CSS"
+            exit 1
+          fi
+          if grep -RInE '(^|["'\''(=])/(src|game|assets|favicon)/' dist --include='*.js' --include='*.html' --include='*.css' --exclude='*.map'; then
+            echo "ERROR: absolute game asset paths found in dist"
             exit 1
           fi
           test "$(find dist -type f | wc -l)" -le 1000
