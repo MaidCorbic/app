@@ -1,3 +1,5 @@
+import { GAME_VERSION, UPDATE_CHANNEL } from './src/config/release.js';
+
 export const RELAY_FAQ = [
   ['How do I play?', 'Use A/D or the left/right side of the joystick to move, SPACE or JUMP to jump. On mobile, use the touch controls.'],
   ['How do I complete a mission?', 'Follow the mission objective, collect the required signals and reach the delivery beacon. When complete, use NEXT MISSION to continue.'],
@@ -12,7 +14,7 @@ export const RELAY_FAQ = [
 ];
 
 export const LATEST_UPDATE = {
-  version: 'LATEST UPDATE // GAMEPLAY',
+  version: `${UPDATE_CHANNEL} // v${GAME_VERSION}`,
   title: 'ENEMY AWARENESS',
   items: [
     'Enemy AI now uses one movement controller for smoother, frame-rate-safe movement.',
