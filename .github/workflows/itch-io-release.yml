@@ -1,6 +1,9 @@
 name: Itch.io HTML5 Release
 
 on:
+  push:
+    branches:
+      - itch-io-release
   workflow_dispatch:
 
 permissions:
