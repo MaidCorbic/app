@@ -41,8 +41,9 @@
     "test:runtime-lifecycle-dom-audit": "node tests/runtime-lifecycle-dom-audit.mjs",
     "test:final-stability-suite": "node tests/final-stability-suite.mjs",
     "test:canonical-css": "node tests/canonical-css-contract.mjs",
-    "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:mobile-orientation-release && npm run test:final-stability && npm run build",
-    "test:mobile-orientation-release": "node tests/mobile-orientation-release-contract.mjs"
+    "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:mobile-orientation-release && npm run test:final-stability && npm run test:mobile-orientation-browser",
+    "test:mobile-orientation-release": "node tests/mobile-orientation-release-contract.mjs",
+    "test:mobile-orientation-browser": "npm run build && node tests/mobile-orientation-browser.mjs"
   },
   "engines": {
     "node": "24.x"
