@@ -2132,7 +2132,7 @@ console.log('[BARRIER BODY]', {
   undefined,
   this
 );
-
+}
   createMovingGates() {
     this.movingGates =
       this.physics.add.group();
