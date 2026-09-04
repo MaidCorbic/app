@@ -1,21 +1,22 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-// FINAL AUDIO FIX V3
-// Main gameplay feedback remains the SFX owner for jump/dash/fire/signal/hit/
-// completion events. This module owns only contextual projectile/enemy sounds.
-// Adaptive music owns music separately. One module must not synthesize the same
-// one-shot feedback as another module.
+// FINAL AUDIO FIX V4
+// Global gameplay SFX owner.
+// Owns contextual projectile/enemy sounds.
+// Adaptive music remains a separate music system.
 //
-// AUDIO AUTOPLAY HARDENING:
-// - AudioContext is NOT created before a trusted user gesture.
-// - Context is created only after unlock().
-// - Existing relayAudioAutoplayGuard is used when available.
-// - All gesture listeners are passive because they do not call preventDefault().
+// AUDIO:
+// - AudioContext is created only after a real user gesture.
+// - Any real pointer/touch/keyboard gesture can unlock audio.
+// - Audio automatically resumes when possible.
+// - FX remains enabled globally after unlock.
+// - No external audio assets are required.
+
 (() => {
   'use strict';
 
-  if (window.__relayAudioFeedbackV7) return;
-  window.__relayAudioFeedbackV7 = true;
+  if (window.__relayAudioFeedbackV8) return;
+  window.__relayAudioFeedbackV8 = true;
 
   const AC =
     window.AudioContext ||
@@ -25,6 +26,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   let ctx = null;
   let master = null;
+
   let unlocked = false;
   let activeScene = null;
   let pollTimer = null;
@@ -33,8 +35,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const cooldown = new Map();
 
   /*
-   * Create the AudioContext only after the browser has received
-   * a trusted user gesture.
+   * Create AudioContext only after a trusted user gesture.
    */
   const getContext = () => {
     if (!unlocked) {
@@ -46,6 +47,11 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         ctx = new AC();
 
         master = ctx.createGain();
+
+        /*
+         * Global FX volume.
+         * 0.78 = strong but not painfully loud.
+         */
         master.gain.value = 0.78;
 
         master.connect(
@@ -62,15 +68,18 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   };
 
   /*
-   * Unlock audio after a real user gesture.
+   * GLOBAL AUDIO UNLOCK
+   *
+   * Any real user interaction can unlock the
+   * browser audio engine.
    */
   const unlock = async () => {
     try {
       unlocked = true;
 
       /*
-       * Use the existing global audio guard when available.
-       * This keeps all audio systems aligned.
+       * Keep the existing global relay audio guard
+       * synchronized with this audio owner.
        */
       try {
         window.relayAudioAutoplayGuard?.unlock?.();
@@ -97,6 +106,35 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     }
   };
 
+  /*
+   * Make sure audio is still running.
+   */
+  const ensureRunning = async () => {
+    if (!unlocked) {
+      return false;
+    }
+
+    const audio = getContext();
+
+    if (!audio) {
+      return false;
+    }
+
+    try {
+      if (audio.state !== 'running') {
+        await audio.resume();
+      }
+    } catch {}
+
+    unlocked =
+      audio.state === 'running';
+
+    return unlocked;
+  };
+
+  /*
+   * Basic procedural FX tone.
+   */
   const beep = (
     frequency,
     duration,
@@ -166,10 +204,14 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     } catch {}
   };
 
+  /*
+   * Contextual gameplay FX.
+   */
   const play = kind => {
     if (!unlocked) return;
 
     switch (kind) {
+
       case 'gun':
         beep(
           115,
@@ -252,6 +294,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     }
   };
 
+  /*
+   * Prevent projectile spam from creating
+   * hundreds of sounds per second.
+   */
   const playCooldown = (
     kind,
     ms = 120
@@ -423,25 +469,22 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const attachScene = scene => {
     if (
       !scene?.game ||
-      scene.__relayAudioV7Attached
+      scene.__relayAudioV8Attached
     ) {
       return;
     }
 
-    scene.__relayAudioV7Attached =
+    scene.__relayAudioV8Attached =
       true;
 
     activeScene = scene;
 
     /*
-     * This call is now safe:
-     * getContext() refuses to create AudioContext
-     * until unlocked === true.
-     *
-     * It can therefore fail harmlessly during
-     * initial scene creation.
+     * Do NOT force-create audio here.
+     * Audio will be unlocked globally by the
+     * user's first real gesture.
      */
-    unlock().catch(() => {});
+    ensureRunning().catch(() => {});
 
     if (pollTimer) {
       clearInterval(
@@ -475,6 +518,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     );
   };
 
+  /*
+   * Connect to RunnerScene.
+   */
   const originalCreate =
     RunnerScene.prototype.create;
 
@@ -482,7 +528,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     typeof originalCreate ===
       'function' &&
     !RunnerScene.prototype
-      .__relayAudioV7CreateWrapped
+      .__relayAudioV8CreateWrapped
   ) {
     RunnerScene.prototype.create =
       function audioReadyCreate(
@@ -500,35 +546,51 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       };
 
     RunnerScene.prototype
-      .__relayAudioV7CreateWrapped =
+      .__relayAudioV8CreateWrapped =
       true;
   }
 
   /*
-   * Unlock only after an actual relevant user gesture.
+   * =====================================================
+   * GLOBAL USER GESTURE UNLOCK
+   * =====================================================
+   *
+   * IMPORTANT:
+   * We intentionally do NOT check the clicked element.
+   *
+   * Any genuine user interaction can unlock audio.
    */
-  const unlockOnGesture =
-    event => {
-      const target =
-        event.target?.closest?.(
-          '#play,' +
-            '[data-mobile-action],' +
-            '[data-action],' +
-            '[data-control],' +
-            '#pauseBtn,' +
-            '#settingsBtn,' +
-            '#resumeBtn,' +
-            '#restartBtn'
-        );
 
-      if (target) {
-        unlock().catch(() => {});
+  const unlockFromPointer =
+    () => {
+      unlock().catch(
+        () => {}
+      );
+    };
+
+  const unlockFromTouch =
+    () => {
+      unlock().catch(
+        () => {}
+      );
+    };
+
+  const unlockFromKeyboard =
+    event => {
+      if (
+        event.isTrusted === false
+      ) {
+        return;
       }
+
+      unlock().catch(
+        () => {}
+      );
     };
 
   document.addEventListener(
     'pointerdown',
-    unlockOnGesture,
+    unlockFromPointer,
     {
       capture: true,
       passive: true
@@ -537,7 +599,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   document.addEventListener(
     'touchstart',
-    unlockOnGesture,
+    unlockFromTouch,
     {
       capture: true,
       passive: true
@@ -546,37 +608,85 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   document.addEventListener(
     'keydown',
-    event => {
-      if (
-        event.key ===
-          'Enter' ||
-        event.code ===
-          'Space' ||
-        event.key ===
-          'Shift'
-      ) {
-        unlock().catch(
-          () => {}
-        );
-      }
-    },
+    unlockFromKeyboard,
     {
       capture: true,
       passive: true
     }
   );
 
+  /*
+   * Resume audio when the document becomes visible again.
+   */
+  document.addEventListener(
+    'visibilitychange',
+    () => {
+      if (
+        !document.hidden &&
+        unlocked
+      ) {
+        ensureRunning().catch(
+          () => {}
+        );
+      }
+    }
+  );
+
+  /*
+   * Small safety watchdog.
+   */
+  window.setInterval(
+    () => {
+      if (
+        !unlocked ||
+        document.hidden
+      ) {
+        return;
+      }
+
+      if (
+        ctx &&
+        ctx.state !== 'running'
+      ) {
+        ensureRunning().catch(
+          () => {}
+        );
+      }
+    },
+    1000
+  );
+
+  /*
+   * Public global FX API.
+   */
   window.relayAudioV2 = {
     ensure: unlock,
     unlock,
     play,
 
     startMusic: () => {},
-    stopMusic: () => {}
+    stopMusic: () => {},
+
+    getState: () => ({
+      unlocked,
+      running:
+        !!ctx &&
+        ctx.state === 'running',
+      hasContext:
+        !!ctx,
+      fxEnabled:
+        !!master
+    })
   };
 
+  /*
+   * Legacy compatibility.
+   *
+   * Menu music is intentionally NOT controlled here.
+   */
   window.relayMenuMusic = {
     start: () => {},
     stop: () => {}
   };
+
 })();
