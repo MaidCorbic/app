@@ -2,7 +2,9 @@
 import './systems/audio-context-gesture-gate-v1.js';
 import '../flight-hud-v1.js';
 import './systems/web-zoom-lock-v1.js';
+
 import { RunnerScene } from './scenes/RunnerScene.js';
+
 import { installMissionFeatureGating } from './systems/mission-feature-gating-v1.js';
 import { installEnemyRuntime } from './systems/enemy-runtime-v2.js';
 import { installEnemyLayout } from './systems/enemy-layout-v2.js';
@@ -14,7 +16,29 @@ import { installGrappleTraversal } from './systems/grapple-traversal-v1.js';
 import { installTeleportNetwork } from './systems/teleport-network-v1.js';
 import { installBiohazardContamination } from './systems/biohazard-contamination-v1.js';
 import { installAutonomousCharacter } from './systems/autonomous-character-v1.js';
-import { installPlayerVisualV2 } from './systems/player-visual-v2.js';
+
+/*
+ * PLAYER VISUAL
+ *
+ * IMPORTANT:
+ * Do NOT install player-visual-v2 here.
+ *
+ * Cyber character presentation is owned by:
+ *
+ *   p2-character-presentation-v4.js
+ *
+ * PlayerVisualV2 creates another visual character and
+ * causes the original character + Cyber character to overlap.
+ *
+ * Therefore there is intentionally NO:
+ *
+ *   import { installPlayerVisualV2 } ...
+ *
+ * and NO:
+ *
+ *   installPlayerVisualV2(RunnerScene);
+ */
+
 import { installCharacterStateReactions } from './systems/character-state-reactions-v1.js';
 import { installEnemyDiscovery } from './systems/enemy-discovery-v1.js';
 import { installEnemyDialogue } from './systems/enemy-dialogue-v1.js';
@@ -44,45 +68,67 @@ import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.j
 import { installWaterSurvival } from './systems/water-survival-v1.js';
 import { installForwardCollapseZone } from './systems/forward-collapse-zone-v1.js';
 
+
 if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   RunnerScene.prototype.__relayFeatureRuntimeInstalled = true;
+
   installMissionFeatureGating(RunnerScene);
+
   installEnemyLayout(RunnerScene);
   installEnemyRuntime(RunnerScene);
   installEnemyAIAwareness(RunnerScene);
+
   installGhostRun(RunnerScene);
   installWorldMemory(RunnerScene);
   installReactiveCourierEncounter(RunnerScene);
+
   installGrappleTraversal(RunnerScene);
   installTeleportNetwork(RunnerScene);
   installBiohazardContamination(RunnerScene);
   installAutonomousCharacter(RunnerScene);
-  installPlayerVisualV2(RunnerScene);
+
+  /*
+   * PLAYER VISUAL V2 IS INTENTIONALLY NOT INSTALLED.
+   *
+   * Cyber V4 is the single visible player presentation.
+   */
+
   installCharacterStateReactions(RunnerScene);
+
   installEnemyDiscovery(RunnerScene);
   installEnemyDialogue(RunnerScene);
   installEnemyProgression(RunnerScene);
+
   installPuzzleEngine(RunnerScene);
   installPuzzleProgression(RunnerScene);
+
   installLockedZones(RunnerScene);
   installLockedGate(RunnerScene);
   installWorldProgression(RunnerScene);
+
   installEnemyPuzzleIntegration(RunnerScene);
   installMissionProgressionPolish(RunnerScene);
+
   installFireWater(RunnerScene);
   installPowerFailure(RunnerScene);
   installFlashlight(RunnerScene);
+
   installWireRepairRoom(RunnerScene);
   installWireRepairRoomVisual(RunnerScene);
+
   installSafeRoom(RunnerScene);
   installSafeRoomVisual(RunnerScene);
+
   installHealthRestoreZones(RunnerScene);
   installEmergencySystemsGuide(RunnerScene);
+
   installFlightHoverGlide(RunnerScene);
   installFlightHudBridge(RunnerScene);
   installFlightVfx(RunnerScene);
+
   installEarthquakeEvents(RunnerScene);
   installEarthquakeCinematic(RunnerScene);
+
   installDroneStrikeRecovery(RunnerScene);
   installWaterSurvival(RunnerScene);
   installForwardCollapseZone(RunnerScene);
