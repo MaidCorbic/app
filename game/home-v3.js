@@ -64,20 +64,7 @@
   const syncHomeState = () => {
     const visible = isHomeVisible();
     document.body.classList.toggle('home-v3-active', visible);
-    const intro = $('intro');
-    intro?.classList.toggle('home-v3', visible);
-  };
-
-  const syncContinue = () => {
-    const legacy = $('continue');
-    const button = document.querySelector('#intro [data-home-action="continue"]');
-    if (!legacy || !button) return;
-
-    const shouldShow = !legacy.classList.contains('hidden')
-      && legacy.getAttribute('aria-hidden') !== 'true'
-      && getComputedStyle(legacy).display !== 'none';
-
-    button.hidden = !shouldShow;
+    $('intro')?.classList.toggle('home-v3', visible);
   };
 
   const bindAction = (button, action) => {
@@ -99,7 +86,6 @@
 
     intro.dataset.homeConcept6Built = '1';
     intro.classList.add('home-v3');
-
     intro.replaceChildren();
 
     const bg = document.createElement('div');
@@ -142,7 +128,7 @@
               <b aria-hidden="true">→</b>
             </button>
 
-            <button id="continue" class="home-v3-secondary home-v3-secondary-accent hidden" type="button" data-home-action="continue">
+            <button id="continue" class="home-v3-secondary home-v3-secondary-accent hidden" type="button">
               <span>CONTINUE</span>
               <b aria-hidden="true">→</b>
             </button>
@@ -203,7 +189,7 @@
 
       <div class="home-v3-keyline" aria-hidden="true"></div>
 
-      <!-- Compatibility anchor retained for existing systems that query it. -->
+      <!-- Compatibility anchor retained for systems that still query #exitTitle. -->
       <button id="exitTitle" type="button" aria-hidden="true" tabindex="-1" class="home-v3-compat-anchor">EXIT</button>
     `;
 
@@ -212,15 +198,6 @@
     bindAction(shell.querySelector('[data-home-action="options"]'), 'options');
     bindAction(shell.querySelector('[data-home-action="faq"]'), 'faq');
     bindAction(shell.querySelector('[data-home-action="update"]'), 'update');
-
-    const continueButton = shell.querySelector('#continue');
-    continueButton?.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      clickExisting('#continue');
-    }, { capture: true });
-
-    syncContinue();
   };
 
   const boot = () => {
@@ -230,13 +207,8 @@
     const intro = $('intro');
     if (intro && !intro.dataset.homeConcept6Observed) {
       intro.dataset.homeConcept6Observed = '1';
-      new MutationObserver(() => {
-        syncHomeState();
-        syncContinue();
-      }).observe(intro, {
+      new MutationObserver(syncHomeState).observe(intro, {
         attributes: true,
-        childList: true,
-        subtree: true,
         attributeFilter: ['class', 'style', 'hidden']
       });
     }
