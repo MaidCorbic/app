@@ -85,6 +85,8 @@ function relaySpecialEventCreditRewardFix() {
 }
 
 export default defineConfig({
+  // Relative asset URLs keep the production build self-contained for static hosts such as itch.io.
+  base: './',
   server: {
     host: '0.0.0.0',
     port: 3000,
