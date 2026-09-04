@@ -2051,7 +2051,14 @@ export class RunnerScene extends Phaser.Scene {
             y + 32,
             'barrier'
           );
-
+console.log('[BARRIER BODY]', {
+  x: barrier.x,
+  y: barrier.y,
+  width: barrier.body?.width,
+  height: barrier.body?.height,
+  offsetX: barrier.body?.offset?.x,
+  offsetY: barrier.body?.offset?.y
+});
         const warning =
           this.add.text(
             x - 115,
@@ -2092,18 +2099,39 @@ export class RunnerScene extends Phaser.Scene {
       }
     );
 
-    this.physics.add.overlap(
-      this.player,
-      this.barriers,
-      () =>
-        this.tryVault() ||
-        this.fail(
-          'A live barrier cut the delivery short.'
-        ),
-      undefined,
-      this
+  this.physics.add.overlap(
+  this.player,
+  this.barriers,
+  (player, barrier) => {
+    if (!player?.active || !barrier?.active) return;
+    if (this.respawning || this.finished) return;
+
+    // One barrier contact = one gameplay decision.
+    if (barrier.__relayBarrierContactLock) return;
+
+    barrier.__relayBarrierContactLock = true;
+
+    const vaulted = this.tryVault();
+
+    if (!vaulted) {
+      this.fail(
+        'A live barrier cut the delivery short.'
+      );
+    }
+
+    // Allow future contact after the current interaction has settled.
+    this.time.delayedCall(
+      220,
+      () => {
+        if (barrier?.active) {
+          barrier.__relayBarrierContactLock = false;
+        }
+      }
     );
-  }
+  },
+  undefined,
+  this
+);
 
   createMovingGates() {
     this.movingGates =
@@ -5181,50 +5209,41 @@ export class RunnerScene extends Phaser.Scene {
     );
   }
 
-  tryVault() {
-    const body =
-      this.player.body;
+ tryVault() {
+  const body = this.player.body;
 
-    if (
-      !this.abilities.has(
-        'vault'
-      ) ||
-      this.vaultCooldown > 0 ||
-      !body.blocked.down ||
-      Math.abs(
-        body.velocity.x
-      ) < 130 ||
-      !this.useEnergy(
-        12,
-        'vault'
-      )
-    ) {
-      return false;
-    }
+  const grounded =
+    body.blocked.down ||
+    body.touching.down;
 
-    this.vaultCooldown = 450;
-
-    body.setVelocityY(
-      -510
-    );
-
-    this.player.setTint(
-      0xb9f5ff
-    );
-
-    this.time.delayedCall(
-      180,
-      () =>
-        this.player.clearTint()
-    );
-
-    this.game.events.emit(
-      'feedback',
-      'vault'
-    );
-
-    return true;
+  if (
+    !this.abilities.has('vault') ||
+    this.vaultCooldown > 0 ||
+    !grounded ||
+    Math.abs(body.velocity.x) < 130 ||
+    !this.useEnergy(12, 'vault')
+  ) {
+    return false;
   }
+
+  this.vaultCooldown = 450;
+
+  body.setVelocityY(-510);
+
+  this.player.setTint(0xb9f5ff);
+
+  this.time.delayedCall(
+    180,
+    () => this.player?.active && this.player.clearTint()
+  );
+
+  this.game.events.emit(
+    'feedback',
+    'vault'
+  );
+
+  return true;
+}
 
   updateEnemies(delta) {
     if (!this.enemies)
