@@ -1,11 +1,32 @@
-// UPDATE 10 — WORLD VARIATION + GAME FEEL + PLATFORM CLARITY
-// UPDATE 10.3 — BUILDING SILHOUETTE + HERO ARCHITECTURE
-// UPDATE 10.4 — COMBO + HIT FEEDBACK POLISH
-// Visual/feedback-only layer. It never creates or changes physics bodies, collision rules,
-// player movement, mobile controls, viewport policy, mission state, or progression.
-// IMPORTANT: platform and barrier visuals below are intentionally preserved exactly.
-// UPDATE 10.3 changes ONLY the background city presentation.
-// UPDATE 10.4 changes ONLY local visual feedback.
+// ============================================================
+// UPDATE 11 — CYBERPUNK CITY / WORLD VARIATION / GAME FEEL
+// ============================================================
+// Visual-only layer.
+// NEVER creates physics bodies.
+// NEVER changes collision rules.
+// NEVER changes player movement.
+// NEVER changes platforms/barriers gameplay.
+// NEVER changes missions/progression.
+// NEVER changes viewport/mobile controls.
+//
+// UPDATE 11 adds:
+// - deeper 3-layer cyberpunk skyline
+// - more building archetypes
+// - rooftop machinery
+// - antennas / dishes / towers
+// - neon facade strips
+// - windows with deterministic variation
+// - billboards
+// - pipes / cables / infrastructure
+// - large landmark architecture
+// - atmospheric haze
+// - stronger silhouette separation
+// - safe scene cleanup
+//
+// IMPORTANT:
+// Platform and barrier gameplay visuals remain preserved.
+// ============================================================
+
 
 const STYLE = {
   'first-delivery': {
@@ -58,6 +79,7 @@ const STYLE = {
   }
 };
 
+
 const FALLBACK_STYLE = {
   edge: 0x8df4ff,
   bright: 0xdffcff,
@@ -65,13 +87,50 @@ const FALLBACK_STYLE = {
   accent: 0xaee37f
 };
 
+
 const stateByScene = new WeakMap();
+
 
 const getStyle = scene =>
   STYLE[scene?.mission?.id] || FALLBACK_STYLE;
 
+
+// ============================================================
+// SAFE GRAPHICS HELPERS
+// ============================================================
+
+function safeDestroy(object) {
+  try {
+    object?.destroy?.();
+  } catch (_) {
+    // Visual cleanup must never break the scene.
+  }
+}
+
+
+function safeSetDepth(object, depth) {
+  try {
+    object?.setDepth?.(depth);
+  } catch (_) {}
+}
+
+
+function safeScroll(object, factor) {
+  try {
+    object?.setScrollFactor?.(factor);
+  } catch (_) {}
+}
+
+
+// ============================================================
+// PLATFORM VISUAL
+// PRESERVED GAMEPLAY-ADJACENT VISUAL LAYER
+// ============================================================
+
 function addPlatformVisual(scene, platform, index, style) {
-  if (!platform?.active || !scene?.add) return null;
+  if (!platform?.active || !scene?.add) {
+    return null;
+  }
 
   const width = Math.max(
     24,
@@ -90,31 +149,45 @@ function addPlatformVisual(scene, platform, index, style) {
     platform.getData?.('relayPlatformType') ||
     (index % 3 === 0 ? 'roof' : 'street');
 
-  const g = scene.add.graphics().setDepth(4);
+  const g = scene.add
+    .graphics()
+    .setDepth(4);
 
-  // PRESERVED — existing platform readability layer.
-  g.fillStyle(style.dark, .82).fillRect(
+  // PRESERVED.
+  g.fillStyle(
+    style.dark,
+    .82
+  ).fillRect(
     left,
     top + 5,
     width,
     Math.max(4, height - 5)
   );
 
-  g.fillStyle(style.edge, .92).fillRect(
+  g.fillStyle(
+    style.edge,
+    .92
+  ).fillRect(
     left,
     top,
     width,
     4
   );
 
-  g.fillStyle(style.bright, .42).fillRect(
+  g.fillStyle(
+    style.bright,
+    .42
+  ).fillRect(
     left + 5,
     top + 4,
     Math.max(8, width - 10),
     2
   );
 
-  g.fillStyle(style.edge, .62).fillRect(
+  g.fillStyle(
+    style.edge,
+    .62
+  ).fillRect(
     left,
     top + height - 4,
     width,
@@ -133,7 +206,9 @@ function addPlatformVisual(scene, platform, index, style) {
   ) {
     g.fillStyle(
       style.accent,
-      type === 'roof' ? .24 : .13
+      type === 'roof'
+        ? .24
+        : .13
     ).fillRect(
       x,
       top + 9,
@@ -142,15 +217,36 @@ function addPlatformVisual(scene, platform, index, style) {
     );
   }
 
-  g.fillStyle(style.bright, .72)
-    .fillRect(left + 7, top - 2, 8, 2)
-    .fillRect(left + width - 15, top - 2, 8, 2);
+  g.fillStyle(
+    style.bright,
+    .72
+  )
+    .fillRect(
+      left + 7,
+      top - 2,
+      8,
+      2
+    )
+    .fillRect(
+      left + width - 15,
+      top - 2,
+      8,
+      2
+    );
 
   return g;
 }
 
+
+// ============================================================
+// BARRIER VISUAL
+// PRESERVED
+// ============================================================
+
 function addBarrierVisual(scene, barrier, index, style) {
-  if (!barrier?.active || !scene?.add) return null;
+  if (!barrier?.active || !scene?.add) {
+    return null;
+  }
 
   const w = Math.max(
     40,
@@ -165,52 +261,69 @@ function addBarrierVisual(scene, barrier, index, style) {
   const x = barrier.x;
   const y = barrier.y;
 
-  const g = scene.add.graphics().setDepth(7);
+  const g = scene.add
+    .graphics()
+    .setDepth(7);
 
-  // PRESERVED — existing obstacle/vault readability layer.
-  g.fillStyle(0x030914, .38)
-    .fillEllipse(
-      x,
-      y + h * .48,
-      w * 1.15,
-      8
-    );
+  // PRESERVED.
+  g.fillStyle(
+    0x030914,
+    .38
+  ).fillEllipse(
+    x,
+    y + h * .48,
+    w * 1.15,
+    8
+  );
 
-  g.fillStyle(style.dark, .94)
-    .fillRoundedRect(
-      x - w / 2 - 3,
-      y - h / 2 - 3,
-      w + 6,
-      h + 6,
-      7
-    );
+  g.fillStyle(
+    style.dark,
+    .94
+  ).fillRoundedRect(
+    x - w / 2 - 3,
+    y - h / 2 - 3,
+    w + 6,
+    h + 6,
+    7
+  );
 
-  g.lineStyle(2, style.edge, .95)
-    .strokeRoundedRect(
-      x - w / 2 - 3,
-      y - h / 2 - 3,
-      w + 6,
-      h + 6,
-      7
-    );
+  g.lineStyle(
+    2,
+    style.edge,
+    .95
+  ).strokeRoundedRect(
+    x - w / 2 - 3,
+    y - h / 2 - 3,
+    w + 6,
+    h + 6,
+    7
+  );
 
-  g.fillStyle(style.edge, .95)
-    .fillRect(
-      x - w / 2,
-      y - h / 2 - 5,
-      w,
-      5
-    );
+  g.fillStyle(
+    style.edge,
+    .95
+  ).fillRect(
+    x - w / 2,
+    y - h / 2 - 5,
+    w,
+    5
+  );
 
-  g.fillStyle(style.bright, .34)
-    .fillRect(
-      x - w / 2 + 5,
-      y - h / 2 + 5,
-      w - 10,
-      3
-    );
+  g.fillStyle(
+    style.bright,
+    .34
+  ).fillRect(
+    x - w / 2 + 5,
+    y - h / 2 + 5,
+    w - 10,
+    3
+  );
 
-  g.lineStyle(2, style.bright, .8);
+  g.lineStyle(
+    2,
+    style.bright,
+    .8
+  );
 
   g.lineBetween(
     x - 11,
@@ -241,55 +354,1057 @@ function addBarrierVisual(scene, barrier, index, style) {
   return g;
 }
 
-function addDistrictVariation(scene, style) {
-  if (!scene?.add || !scene.worldWidth) {
+
+// ============================================================
+// UPDATE 11 — DETERMINISTIC HASH
+// ============================================================
+
+function createWorldRandomizer(scene, id, worldWidth) {
+  const seedBase =
+    id
+      .split('')
+      .reduce(
+        (sum, char) =>
+          sum + char.charCodeAt(0),
+        0
+      ) +
+    Math.floor(worldWidth);
+
+  const hash = value => {
+    let n =
+      (value ^ seedBase) | 0;
+
+    n = Math.imul(
+      n ^ (n >>> 16),
+      0x45d9f3b
+    );
+
+    n = Math.imul(
+      n ^ (n >>> 16),
+      0x45d9f3b
+    );
+
+    return (
+      n ^
+      (n >>> 16)
+    ) >>> 0;
+  };
+
+  const pick = (
+    value,
+    max
+  ) => {
+    if (max <= 1) {
+      return 0;
+    }
+
+    return hash(value) % max;
+  };
+
+  const range = (
+    value,
+    min,
+    max
+  ) => {
+    if (max <= min) {
+      return min;
+    }
+
+    return (
+      min +
+      pick(
+        value,
+        max - min + 1
+      )
+    );
+  };
+
+  return {
+    hash,
+    pick,
+    range
+  };
+}
+
+
+// ============================================================
+// UPDATE 11 — FAR SKYLINE
+// ============================================================
+
+function drawFarBuilding(
+  g,
+  x,
+  base,
+  width,
+  height,
+  variant,
+  style,
+  random,
+  index
+) {
+  const roof =
+    base - height;
+
+  // Main distant silhouette.
+  g.fillStyle(
+    style.dark,
+    .30
+  ).fillRect(
+    x,
+    roof,
+    width,
+    height
+  );
+
+  // Slight crown variation.
+  if (variant === 0) {
+    g.fillStyle(
+      style.dark,
+      .34
+    ).fillRect(
+      x + width * .22,
+      roof - 18,
+      width * .56,
+      18
+    );
+  }
+
+  if (variant === 1) {
+    g.fillStyle(
+      style.dark,
+      .36
+    ).fillRect(
+      x + width * .34,
+      roof - 30,
+      width * .32,
+      30
+    );
+  }
+
+  if (variant === 2) {
+    g.fillStyle(
+      style.dark,
+      .32
+    ).fillRect(
+      x - 10,
+      roof + 26,
+      10,
+      height - 26
+    );
+
+    g.fillStyle(
+      style.dark,
+      .32
+    ).fillRect(
+      x + width,
+      roof + 16,
+      12,
+      height - 16
+    );
+  }
+
+  // Extremely sparse far windows.
+  const windows =
+    1 +
+    random.pick(
+      index * 31 + 19,
+      3
+    );
+
+  for (
+    let w = 0;
+    w < windows;
+    w += 1
+  ) {
+    if (
+      random.pick(
+        index * 97 + w * 13,
+        5
+      ) > 1
+    ) {
+      continue;
+    }
+
+    g.fillStyle(
+      style.bright,
+      .035
+    ).fillRect(
+      x +
+        18 +
+        w *
+          Math.max(
+            24,
+            width / 3
+          ),
+      roof + 30,
+      7,
+      3
+    );
+  }
+
+  // Occasional antenna.
+  if (
+    random.pick(
+      index * 41 + 8,
+      7
+    ) === 0
+  ) {
+    const cx =
+      x +
+      width * .5;
+
+    g.lineStyle(
+      1,
+      style.edge,
+      .08
+    ).lineBetween(
+      cx,
+      roof,
+      cx,
+      roof - 34
+    );
+  }
+}
+
+
+// ============================================================
+// UPDATE 11 — MID BUILDING WINDOWS
+// ============================================================
+
+function drawBuildingWindows(
+  g,
+  left,
+  roof,
+  width,
+  height,
+  archetype,
+  style,
+  random,
+  buildingIndex,
+  missionId
+) {
+  const rows = Math.max(
+    3,
+    Math.floor(
+      (height - 70) / 46
+    )
+  );
+
+  const cols = Math.max(
+    2,
+    Math.floor(
+      (width - 42) / 38
+    )
+  );
+
+  for (
+    let row = 0;
+    row < rows;
+    row += 1
+  ) {
+    for (
+      let col = 0;
+      col < cols;
+      col += 1
+    ) {
+      const chance =
+        random.pick(
+          buildingIndex * 10000 +
+            row * 173 +
+            col * 47,
+          12
+        );
+
+      // Blackout = dramatically fewer lights.
+      const threshold =
+        missionId === 'blackout'
+          ? 1
+          : 4;
+
+      if (
+        chance >
+        threshold
+      ) {
+        continue;
+      }
+
+      const usableWidth =
+        Math.max(
+          20,
+          width - 42
+        );
+
+      const wx =
+        left +
+        21 +
+        col *
+          (
+            usableWidth /
+            Math.max(
+              1,
+              cols - 1
+            )
+          );
+
+      const wy =
+        roof +
+        42 +
+        row * 46;
+
+      const ww =
+        archetype === 4
+          ? 5
+          : archetype === 6
+            ? 10
+            : 8;
+
+      const wh =
+        archetype === 3
+          ? 3
+          : 5;
+
+      const alpha =
+        missionId === 'signal-storm'
+          ? .18
+          : missionId === 'blackout'
+            ? .075
+            : .14;
+
+      g.fillStyle(
+        random.pick(
+          buildingIndex +
+            row +
+            col,
+          3
+        ) === 0
+          ? style.bright
+          : style.accent,
+        alpha
+      ).fillRect(
+        wx,
+        wy,
+        ww,
+        wh
+      );
+
+      // Occasional vertical window pair.
+      if (
+        random.pick(
+          buildingIndex * 71 +
+            row * 19 +
+            col * 7,
+          9
+        ) === 0
+      ) {
+        g.fillStyle(
+          style.bright,
+          alpha * .65
+        ).fillRect(
+          wx,
+          wy + 8,
+          ww,
+          3
+        );
+      }
+    }
+  }
+}
+
+
+// ============================================================
+// UPDATE 11 — ROOFTOP MACHINERY
+// ============================================================
+
+function drawRooftopMachine(
+  g,
+  left,
+  roof,
+  width,
+  style,
+  random,
+  index
+) {
+  const type =
+    random.pick(
+      index * 113 + 17,
+      5
+    );
+
+  const cx =
+    left +
+    width *
+      (
+        .25 +
+        random.pick(
+          index * 37 + 5,
+          50
+        ) /
+          100
+      );
+
+  if (type === 0) {
+    // Cooling unit.
+    const mw = 34;
+    const mh = 18;
+
+    g.fillStyle(
+      style.dark,
+      .98
+    ).fillRoundedRect(
+      cx - mw / 2,
+      roof - mh,
+      mw,
+      mh,
+      3
+    );
+
+    g.lineStyle(
+      1,
+      style.edge,
+      .18
+    ).strokeRoundedRect(
+      cx - mw / 2,
+      roof - mh,
+      mw,
+      mh,
+      3
+    );
+
+    g.lineStyle(
+      1,
+      style.bright,
+      .14
+    );
+
+    for (
+      let i = -10;
+      i <= 10;
+      i += 7
+    ) {
+      g.lineBetween(
+        cx + i,
+        roof - 14,
+        cx + i,
+        roof - 5
+      );
+    }
+
+  } else if (type === 1) {
+    // Antenna mast.
+    g.lineStyle(
+      2,
+      style.edge,
+      .22
+    ).lineBetween(
+      cx,
+      roof,
+      cx,
+      roof - 44
+    );
+
+    g.lineStyle(
+      1,
+      style.bright,
+      .14
+    ).lineBetween(
+      cx - 12,
+      roof - 25,
+      cx + 12,
+      roof - 25
+    );
+
+    g.fillStyle(
+      style.edge,
+      .28
+    ).fillCircle(
+      cx,
+      roof - 47,
+      2
+    );
+
+  } else if (type === 2) {
+    // Satellite dish.
+    g.fillStyle(
+      style.dark,
+      .98
+    ).fillEllipse(
+      cx,
+      roof - 15,
+      30,
+      18
+    );
+
+    g.lineStyle(
+      1,
+      style.edge,
+      .22
+    ).strokeEllipse(
+      cx,
+      roof - 15,
+      30,
+      18
+    );
+
+    g.lineStyle(
+      2,
+      style.edge,
+      .20
+    ).lineBetween(
+      cx,
+      roof - 7,
+      cx + 10,
+      roof + 2
+    );
+
+    g.fillStyle(
+      style.bright,
+      .22
+    ).fillCircle(
+      cx + 12,
+      roof + 4,
+      2
+    );
+
+  } else if (type === 3) {
+    // Neon service box.
+    g.fillStyle(
+      style.dark,
+      .98
+    ).fillRect(
+      cx - 22,
+      roof - 24,
+      44,
+      24
+    );
+
+    g.fillStyle(
+      style.accent,
+      .18
+    ).fillRect(
+      cx - 16,
+      roof - 17,
+      32,
+      4
+    );
+
+    g.fillStyle(
+      style.edge,
+      .22
+    ).fillRect(
+      cx - 16,
+      roof - 8,
+      18,
+      3
+    );
+
+  } else {
+    // Water / fuel cylinder.
+    g.fillStyle(
+      style.dark,
+      .98
+    ).fillRoundedRect(
+      cx - 11,
+      roof - 30,
+      22,
+      30,
+      7
+    );
+
+    g.lineStyle(
+      1,
+      style.edge,
+      .20
+    ).strokeRoundedRect(
+      cx - 11,
+      roof - 30,
+      22,
+      30,
+      7
+    );
+
+    g.fillStyle(
+      style.bright,
+      .12
+    ).fillRect(
+      cx - 6,
+      roof - 22,
+      12,
+      3
+    );
+  }
+}
+
+
+// ============================================================
+// UPDATE 11 — NEON FACADE
+// ============================================================
+
+function drawFacadeAccent(
+  g,
+  left,
+  roof,
+  width,
+  height,
+  archetype,
+  style,
+  random,
+  index
+) {
+  const mode =
+    random.pick(
+      index * 67 + 3,
+      5
+    );
+
+  if (mode === 0) {
+    g.fillStyle(
+      style.edge,
+      .13
+    ).fillRect(
+      left + 10,
+      roof + 14,
+      4,
+      Math.min(
+        170,
+        height - 20
+      )
+    );
+
+  } else if (mode === 1) {
+    g.fillStyle(
+      style.accent,
+      .14
+    ).fillRect(
+      left + width - 15,
+      roof + 22,
+      4,
+      Math.min(
+        150,
+        height - 30
+      )
+    );
+
+  } else if (mode === 2) {
+    const bandY =
+      roof +
+      55 +
+      random.pick(
+        index * 19,
+        Math.max(
+          1,
+          Math.floor(
+            Math.max(
+              20,
+              height - 100
+            ) /
+              60
+          )
+        )
+      ) *
+        60;
+
+    g.fillStyle(
+      style.edge,
+      .15
+    ).fillRect(
+      left + 18,
+      bandY,
+      Math.max(
+        30,
+        width - 36
+      ),
+      3
+    );
+
+  } else if (mode === 3) {
+    g.lineStyle(
+      1,
+      style.bright,
+      .10
+    ).lineBetween(
+      left + width * .34,
+      roof + 18,
+      left + width * .34,
+      roof + height
+    );
+
+    g.lineStyle(
+      1,
+      style.edge,
+      .08
+    ).lineBetween(
+      left + width * .67,
+      roof + 18,
+      left + width * .67,
+      roof + height
+    );
+
+  } else {
+    // Small architectural corner light.
+    g.fillStyle(
+      style.bright,
+      .16
+    ).fillRect(
+      left + 15,
+      roof + 12,
+      Math.min(
+        42,
+        width - 30
+      ),
+      3
+    );
+  }
+}
+
+
+// ============================================================
+// UPDATE 11 — BILLBOARD
+// ============================================================
+
+function drawBillboard(
+  g,
+  x,
+  y,
+  width,
+  height,
+  style,
+  random,
+  index
+) {
+  const boardW =
+    Math.max(
+      58,
+      width
+    );
+
+  const boardH =
+    Math.max(
+      24,
+      height
+    );
+
+  // Support structure.
+  g.lineStyle(
+    2,
+    style.dark,
+    .95
+  ).lineBetween(
+    x + boardW * .28,
+    y + boardH,
+    x + boardW * .28,
+    y + boardH + 32
+  );
+
+  g.lineStyle(
+    2,
+    style.dark,
+    .95
+  ).lineBetween(
+    x + boardW * .72,
+    y + boardH,
+    x + boardW * .72,
+    y + boardH + 32
+  );
+
+  // Outer frame.
+  g.fillStyle(
+    style.dark,
+    .98
+  ).fillRoundedRect(
+    x,
+    y,
+    boardW,
+    boardH,
+    4
+  );
+
+  g.lineStyle(
+    2,
+    style.edge,
+    .22
+  ).strokeRoundedRect(
+    x,
+    y,
+    boardW,
+    boardH,
+    4
+  );
+
+  // Screen.
+  g.fillStyle(
+    style.edge,
+    .08
+  ).fillRect(
+    x + 7,
+    y + 6,
+    boardW - 14,
+    boardH - 12
+  );
+
+  // Neon bars.
+  const flip =
+    random.pick(
+      index * 97 + 11,
+      2
+    ) === 0;
+
+  g.fillStyle(
+    flip
+      ? style.accent
+      : style.bright,
+    .18
+  ).fillRect(
+    x + 12,
+    y + 11,
+    Math.max(
+      22,
+      boardW * .52
+    ),
+    4
+  );
+
+  g.fillStyle(
+    style.edge,
+    .13
+  ).fillRect(
+    x + 12,
+    y + 20,
+    Math.max(
+      18,
+      boardW * .30
+    ),
+    3
+  );
+
+  // Small corner indicator.
+  g.fillStyle(
+    style.edge,
+    .28
+  ).fillCircle(
+    x + boardW - 11,
+    y + 11,
+    2
+  );
+}
+
+
+// ============================================================
+// UPDATE 11 — CABLE / PIPE NETWORK
+// ============================================================
+
+function drawInfrastructure(
+  g,
+  worldWidth,
+  style,
+  random
+) {
+  const count =
+    Math.ceil(
+      worldWidth / 480
+    );
+
+  for (
+    let i = 0;
+    i < count;
+    i += 1
+  ) {
+    const x =
+      80 +
+      i * 480;
+
+    const length =
+      190 +
+      random.pick(
+        i * 31 + 13,
+        130
+      );
+
+    const y =
+      245 +
+      random.pick(
+        i * 47 + 7,
+        105
+      );
+
+    const variant =
+      random.pick(
+        i * 61 + 9,
+        4
+      );
+
+    if (variant === 0) {
+      // Main suspended cable.
+      g.lineStyle(
+        2,
+        style.edge,
+        .095
+      ).lineBetween(
+        x,
+        y,
+        x + length * .45,
+        y + 25
+      );
+
+      g.lineStyle(
+        1,
+        style.bright,
+        .055
+      ).lineBetween(
+        x + length * .45,
+        y + 25,
+        x + length,
+        y + 5
+      );
+
+    } else if (variant === 1) {
+      // Parallel service pipe.
+      g.lineStyle(
+        4,
+        style.dark,
+        .90
+      ).lineBetween(
+        x,
+        y,
+        x + length,
+        y
+      );
+
+      g.lineStyle(
+        1,
+        style.edge,
+        .14
+      ).lineBetween(
+        x,
+        y - 2,
+        x + length,
+        y - 2
+      );
+
+      for (
+        let p = x + 25;
+        p < x + length;
+        p += 55
+      ) {
+        g.lineStyle(
+          1,
+          style.edge,
+          .12
+        ).lineBetween(
+          p,
+          y - 8,
+          p,
+          y + 8
+        );
+      }
+
+    } else if (variant === 2) {
+      // Vertical service lines.
+      const vx =
+        x +
+        random.pick(
+          i * 19,
+          Math.max(
+            30,
+            Math.floor(
+              length
+            )
+          )
+        );
+
+      g.lineStyle(
+        1,
+        style.bright,
+        .08
+      ).lineBetween(
+        vx,
+        y + 5,
+        vx,
+        y + 88
+      );
+
+      g.fillStyle(
+        style.edge,
+        .18
+      ).fillCircle(
+        vx,
+        y + 92,
+        2
+      );
+
+    } else {
+      // Broken cable segment.
+      g.lineStyle(
+        1,
+        style.edge,
+        .07
+      ).lineBetween(
+        x,
+        y + 18,
+        x + length * .35,
+        y - 2
+      );
+
+      g.lineStyle(
+        1,
+        style.edge,
+        .06
+      ).lineBetween(
+        x + length * .58,
+        y + 8,
+        x + length,
+        y + 25
+      );
+    }
+  }
+}
+
+
+// ============================================================
+// UPDATE 11 — MAIN CITY
+// ============================================================
+
+function addDistrictVariation(
+  scene,
+  style
+) {
+  if (
+    !scene?.add ||
+    !scene.worldWidth
+  ) {
     return null;
   }
 
-  // UPDATE 10.3: clean architectural pass.
-  // The old city is not rendered underneath this layer.
-  // We use one main skyline, a quiet distant horizon,
-  // and a small number of foreground architectural accents.
-  // No per-frame generation, no particles, no physics, no gameplay objects.
+  const id =
+    scene.mission?.id || '';
 
-  const id = scene.mission?.id || '';
+  const worldWidth =
+    Math.max(
+      800,
+      scene.worldWidth || 0
+    );
 
-  const worldWidth = Math.max(
-    800,
-    scene.worldWidth || 0
-  );
+  const random =
+    createWorldRandomizer(
+      scene,
+      id,
+      worldWidth
+    );
 
   const base = 610;
 
-  const seedBase =
-    id.split('').reduce(
-      (sum, char) => sum + char.charCodeAt(0),
-      0
-    ) + worldWidth;
-
-  const hash = value => {
-    let n = (value ^ seedBase) | 0;
-
-    n = Math.imul(
-      n ^ (n >>> 16),
-      0x45d9f3b
-    );
-
-    n = Math.imul(
-      n ^ (n >>> 16),
-      0x45d9f3b
-    );
-
-    return (n ^ (n >>> 16)) >>> 0;
-  };
-
-  const pick = (value, max) =>
-    hash(value) % max;
+  // ----------------------------------------------------------
+  // PARALLAX LAYERS
+  // ----------------------------------------------------------
 
   const far = scene.add
     .graphics()
-    .setScrollFactor(.16)
-    .setDepth(0);
+    .setScrollFactor(.13)
+    .setDepth(-2);
+
+  const farGlow = scene.add
+    .graphics()
+    .setScrollFactor(.18)
+    .setDepth(-1.5);
 
   const mid = scene.add
     .graphics()
@@ -306,258 +1421,268 @@ function addDistrictVariation(scene, style) {
     .setScrollFactor(.36)
     .setDepth(2);
 
-  // ---------- FAR CITY: skyline mass only ----------
-  // Quiet silhouettes establish distance without creating ghost duplicates.
+  // ----------------------------------------------------------
+  // FAR HORIZON
+  // ----------------------------------------------------------
+
+  far.fillStyle(
+    style.dark,
+    .10
+  ).fillRect(
+    -500,
+    280,
+    worldWidth + 1000,
+    330
+  );
 
   for (
-    let x = -260, i = 0;
-    x < worldWidth + 420;
-    x += 175, i += 1
+    let x = -320, i = 0;
+    x < worldWidth + 500;
+    x += 135, i += 1
   ) {
-    const w =
-      90 +
-      pick(i * 19 + 3, 70);
+    const width =
+      72 +
+      random.pick(
+        i * 17 + 2,
+        78
+      );
 
-    const h =
-      76 +
-      pick(i * 31 + 11, 96);
+    const height =
+      68 +
+      random.pick(
+        i * 23 + 9,
+        110
+      );
 
-    const roof = base - h;
-    const cx = x + w * .5;
-
-    far.fillStyle(
-      style.dark,
-      .42
-    ).fillRect(
+    drawFarBuilding(
+      far,
       x,
-      roof,
-      w,
-      h
+      base,
+      width,
+      height,
+      random.pick(
+        i * 41 + 6,
+        3
+      ),
+      style,
+      random,
+      i
     );
-
-    if (pick(i + 41, 5) === 0) {
-      far.fillStyle(
-        style.dark,
-        .58
-      ).fillRect(
-        x + w * .38,
-        roof - 24,
-        w * .24,
-        24
-      );
-
-      far.lineStyle(
-        1,
-        style.edge,
-        .10
-      ).lineBetween(
-        cx,
-        roof - 24,
-        cx,
-        roof - 54
-      );
-    }
-
-    // Only a handful of windows;
-    // far architecture should read as atmosphere.
-    if (pick(i + 77, 3) !== 0) {
-      for (
-        let col = 0;
-        col < Math.max(2, Math.floor(w / 42));
-        col += 1
-      ) {
-        if (
-          pick(
-            i * 17 + col * 13,
-            5
-          ) > 1
-        ) {
-          continue;
-        }
-
-        far.fillStyle(
-          style.bright,
-          .045
-        ).fillRect(
-          x + 18 + col * 36,
-          roof + 32,
-          7,
-          3
-        );
-
-        if (
-          pick(
-            i * 23 + col * 19,
-            4
-          ) === 0
-        ) {
-          far.fillStyle(
-            style.bright,
-            .04
-          ).fillRect(
-            x + 18 + col * 36,
-            roof + 68,
-            7,
-            3
-          );
-        }
-      }
-    }
   }
 
-  // ---------- MID CITY: primary readable architecture ----------
-  // Seven deterministic building families prevent the repetitive rectangle look.
+  // Far horizon lights.
+  for (
+    let x = -200, i = 0;
+    x < worldWidth + 400;
+    x += 280, i += 1
+  ) {
+    const y =
+      430 +
+      random.pick(
+        i * 29 + 11,
+        80
+      );
+
+    farGlow.fillStyle(
+      style.accent,
+      .035
+    ).fillRect(
+      x,
+      y,
+      90 +
+        random.pick(
+          i * 13,
+          60
+        ),
+      3
+    );
+  }
+
+  // ----------------------------------------------------------
+  // MID CITY — MANY ARCHETYPES
+  // ----------------------------------------------------------
+
+  const buildingSpacing = 188;
 
   for (
-    let x = -190, i = 0;
-    x < worldWidth + 360;
-    x += 215, i += 1
+    let x = -220, i = 0;
+    x < worldWidth + 440;
+    x += buildingSpacing, i += 1
   ) {
-    const archetype = pick(
-      i * 37 + 5,
-      7
-    );
+    const archetype =
+      random.pick(
+        i * 37 + 5,
+        10
+      );
 
-    const w =
-      130 +
-      pick(i * 13 + 8, 78);
+    const width =
+      118 +
+      random.pick(
+        i * 13 + 8,
+        98
+      );
 
-    const h =
-      138 +
-      pick(i * 23 + 2, 164);
+    const height =
+      150 +
+      random.pick(
+        i * 23 + 2,
+        190
+      );
 
-    const roof = base - h;
     const left = x;
-    const right = x + w;
-    const cx = left + w * .5;
+    const right =
+      x + width;
 
-    // Solid main mass.
+    const roof =
+      base - height;
+
+    const cx =
+      left +
+      width * .5;
+
+    // --------------------------------------------------------
+    // BASE MASS
+    // --------------------------------------------------------
+
     mid.fillStyle(
       style.dark,
-      .94
+      .96
     ).fillRect(
       left,
       roof,
-      w,
-      h
+      width,
+      height
     );
 
-    // Building silhouette pass:
-    // crowns, shoulders, setbacks and service wings.
+    // --------------------------------------------------------
+    // ARCHETYPE 0 — TOWER CROWN
+    // --------------------------------------------------------
 
     if (archetype === 0) {
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .20,
-        roof - 34,
-        w * .60,
-        34
+        left + width * .18,
+        roof - 32,
+        width * .64,
+        32
       );
 
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .35,
-        roof - 52,
-        w * .30,
-        18
+        left + width * .37,
+        roof - 58,
+        width * .26,
+        26
       );
 
       mid.lineStyle(
         2,
         style.edge,
-        .14
+        .20
       ).lineBetween(
         cx,
-        roof - 52,
+        roof - 58,
         cx,
-        roof - 78
+        roof - 92
       );
+
+    // --------------------------------------------------------
+    // ARCHETYPE 1 — OFFSET TOWER
+    // --------------------------------------------------------
 
     } else if (archetype === 1) {
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .58,
+        left + width * .56,
         roof + 18,
-        w * .42,
-        h - 18
+        width * .44,
+        height - 18
       );
 
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left - 14,
-        roof + 54,
-        14,
-        h - 54
-      );
-
-      mid.fillStyle(
-        style.edge,
-        .11
-      ).fillRect(
-        left + w * .58,
-        roof + 18,
-        3,
-        h - 18
-      );
-
-    } else if (archetype === 2) {
-      mid.fillStyle(
-        style.dark,
-        .98
-      ).fillRect(
-        left - 18,
-        roof + 40,
-        18,
-        h - 40
-      );
-
-      mid.fillStyle(
-        style.dark,
-        .98
-      ).fillRect(
-        right,
-        roof + 22,
-        17,
-        h - 22
+        left - 16,
+        roof + 62,
+        16,
+        height - 62
       );
 
       mid.fillStyle(
         style.edge,
         .12
       ).fillRect(
+        left + width * .56,
+        roof + 18,
+        3,
+        height - 18
+      );
+
+    // --------------------------------------------------------
+    // ARCHETYPE 2 — SHOULDERS
+    // --------------------------------------------------------
+
+    } else if (archetype === 2) {
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        left - 20,
+        roof + 44,
+        20,
+        height - 44
+      );
+
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        right,
+        roof + 24,
+        20,
+        height - 24
+      );
+
+      mid.fillStyle(
+        style.edge,
+        .13
+      ).fillRect(
         left + 12,
         roof + 22,
-        w - 24,
+        width - 24,
         5
       );
+
+    // --------------------------------------------------------
+    // ARCHETYPE 3 — STACKED CROWN
+    // --------------------------------------------------------
 
     } else if (archetype === 3) {
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .12,
-        roof - 22,
-        w * .76,
-        22
+        left + width * .10,
+        roof - 24,
+        width * .80,
+        24
       );
 
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .34,
-        roof - 44,
-        w * .32,
-        22
+        left + width * .32,
+        roof - 48,
+        width * .36,
+        24
       );
 
       mid.lineStyle(
@@ -565,98 +1690,250 @@ function addDistrictVariation(scene, style) {
         style.bright,
         .12
       ).lineBetween(
-        left + w * .34,
-        roof - 44,
-        left + w * .66,
-        roof - 44
+        left + width * .32,
+        roof - 48,
+        left + width * .68,
+        roof - 48
       );
+
+    // --------------------------------------------------------
+    // ARCHETYPE 4 — SPLIT BLOCK
+    // --------------------------------------------------------
 
     } else if (archetype === 4) {
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .10,
-        roof + 26,
-        w * .25,
-        h - 26
+        left + width * .08,
+        roof + 28,
+        width * .24,
+        height - 28
       );
 
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        right - w * .25,
-        roof + 48,
-        w * .25,
-        h - 48
+        right - width * .25,
+        roof + 52,
+        width * .25,
+        height - 52
       );
 
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .34,
-        roof - 12,
-        w * .32,
-        12
+        left + width * .32,
+        roof - 14,
+        width * .36,
+        14
       );
+
+    // --------------------------------------------------------
+    // ARCHETYPE 5 — CENTRAL SPIRE
+    // --------------------------------------------------------
 
     } else if (archetype === 5) {
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .22,
-        roof - 16,
-        w * .56,
-        16
+        left + width * .18,
+        roof - 18,
+        width * .64,
+        18
       );
 
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .39,
-        roof - 38,
-        w * .22,
-        22
+        left + width * .39,
+        roof - 44,
+        width * .22,
+        26
+      );
+
+      mid.lineStyle(
+        2,
+        style.edge,
+        .22
+      ).lineBetween(
+        cx,
+        roof - 44,
+        cx,
+        roof - 86
+      );
+
+    // --------------------------------------------------------
+    // ARCHETYPE 6 — INDUSTRIAL BLOCK
+    // --------------------------------------------------------
+
+    } else if (archetype === 6) {
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        left - 12,
+        roof + 72,
+        12,
+        height - 72
+      );
+
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        right,
+        roof + 46,
+        14,
+        height - 46
       );
 
       mid.fillStyle(
         style.edge,
-        .13
+        .12
       ).fillRect(
-        left + w * .31,
-        roof - 10,
-        w * .38,
-        4
+        left + 18,
+        roof + 70,
+        width - 36,
+        6
       );
+
+    // --------------------------------------------------------
+    // ARCHETYPE 7 — TERRACED BUILDING
+    // --------------------------------------------------------
+
+    } else if (archetype === 7) {
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        left + width * .12,
+        roof - 20,
+        width * .76,
+        20
+      );
+
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        left + width * .22,
+        roof - 38,
+        width * .56,
+        18
+      );
+
+      mid.fillStyle(
+        style.edge,
+        .14
+      ).fillRect(
+        left + width * .30,
+        roof - 34,
+        width * .40,
+        3
+      );
+
+    // --------------------------------------------------------
+    // ARCHETYPE 8 — NARROW NEON TOWER
+    // --------------------------------------------------------
+
+    } else if (archetype === 8) {
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        left + width * .15,
+        roof + 38,
+        width * .70,
+        height - 38
+      );
+
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        left + width * .29,
+        roof + 8,
+        width * .42,
+        30
+      );
+
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        left + width * .40,
+        roof - 18,
+        width * .20,
+        26
+      );
+
+      mid.fillStyle(
+        style.accent,
+        .19
+      ).fillRect(
+        left + width * .24,
+        roof + 92,
+        5,
+        Math.min(
+          160,
+          height - 120
+        )
+      );
+
+    // --------------------------------------------------------
+    // ARCHETYPE 9 — MEGA BLOCK
+    // --------------------------------------------------------
 
     } else {
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .66,
-        roof + 34,
-        w * .34,
-        h - 34
+        left - 24,
+        roof + 54,
+        24,
+        height - 54
       );
 
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
-        left + w * .16,
-        roof + 18,
-        w * .20,
-        h - 18
+        right,
+        roof + 34,
+        24,
+        height - 34
+      );
+
+      mid.fillStyle(
+        style.dark,
+        .99
+      ).fillRect(
+        left + width * .20,
+        roof - 16,
+        width * .60,
+        16
+      );
+
+      mid.fillStyle(
+        style.edge,
+        .12
+      ).fillRect(
+        left + 16,
+        roof + 24,
+        width - 32,
+        4
       );
     }
 
-    // Facade framing:
-    // a few large architectural planes, not a grid.
+    // --------------------------------------------------------
+    // ARCHITECTURAL FRAME
+    // --------------------------------------------------------
 
     mid.fillStyle(
       style.edge,
@@ -664,240 +1941,155 @@ function addDistrictVariation(scene, style) {
     ).fillRect(
       left + 10,
       roof + 12,
-      w - 20,
+      width - 20,
       4
     );
 
     mid.lineStyle(
       1,
       style.edge,
-      .10
+      .08
     ).lineBetween(
-      left + w * .27,
+      left + width * .27,
       roof + 14,
-      left + w * .27,
+      left + width * .27,
       base
     );
 
     mid.lineStyle(
       1,
       style.edge,
-      .07
+      .065
     ).lineBetween(
-      left + w * .73,
+      left + width * .73,
       roof + 14,
-      left + w * .73,
+      left + width * .73,
       base
     );
 
-    // Sparse window clusters with deterministic gaps.
+    // --------------------------------------------------------
+    // WINDOWS
+    // --------------------------------------------------------
 
-    const rows = Math.max(
-      2,
-      Math.floor((h - 58) / 48)
+    drawBuildingWindows(
+      mid,
+      left,
+      roof,
+      width,
+      height,
+      archetype,
+      style,
+      random,
+      i,
+      id
     );
 
-    const cols = Math.max(
-      2,
-      Math.floor((w - 38) / 36)
+    // --------------------------------------------------------
+    // NEON FACADE
+    // --------------------------------------------------------
+
+    drawFacadeAccent(
+      mid,
+      left,
+      roof,
+      width,
+      height,
+      archetype,
+      style,
+      random,
+      i
     );
 
-    for (
-      let row = 0;
-      row < rows;
-      row += 1
-    ) {
-      for (
-        let col = 0;
-        col < cols;
-        col += 1
-      ) {
-        const chance = pick(
-          i * 1000 +
-          row * 41 +
-          col * 17,
-          10
-        );
-
-        if (
-          chance >
-          (id === 'blackout' ? 1 : 3)
-        ) {
-          continue;
-        }
-
-        const wx =
-          left +
-          19 +
-          col *
-            ((w - 38) /
-              Math.max(1, cols - 1));
-
-        const wy =
-          roof +
-          40 +
-          row * 48;
-
-        const ww =
-          archetype === 4 ? 6 : 8;
-
-        mid.fillStyle(
-          id === 'signal-storm'
-            ? style.bright
-            : style.accent,
-          id === 'blackout'
-            ? .09
-            : .15
-        ).fillRect(
-          wx,
-          wy,
-          ww,
-          5
-        );
-      }
-    }
-
-    // Rooftop identity:
-    // one strong piece per building.
+    // --------------------------------------------------------
+    // ROOFTOP EDGE
+    // --------------------------------------------------------
 
     mid.fillStyle(
       style.edge,
-      .18
+      .20
     ).fillRect(
       left + 12,
       roof - 5,
-      w - 24,
+      width - 24,
       5
     );
 
+    // --------------------------------------------------------
+    // ROOFTOP MACHINERY
+    // --------------------------------------------------------
+
     if (
-      archetype === 0 ||
-      archetype === 5
+      random.pick(
+        i * 83 + 21,
+        4
+      ) !== 0
     ) {
-      mid.fillStyle(
-        style.bright,
-        .11
-      ).fillRect(
-        cx - 22,
-        roof - 13,
-        44,
-        8
-      );
-
-      mid.lineStyle(
-        2,
-        style.edge,
-        .22
-      ).lineBetween(
-        cx,
-        roof - 5,
-        cx,
-        roof - 48
-      );
-
-      mid.fillStyle(
-        style.edge,
-        .30
-      ).fillCircle(
-        cx,
-        roof - 51,
-        2
-      );
-
-    } else if (
-      archetype === 1 ||
-      archetype === 4
-    ) {
-      mid.fillStyle(
-        style.edge,
-        .13
-      ).fillRect(
-        left + 20,
-        roof - 12,
-        36,
-        8
-      );
-
-      mid.lineStyle(
-        1,
-        style.bright,
-        .17
-      ).lineBetween(
-        left + 38,
-        roof - 12,
-        left + 38,
-        roof - 40
-      );
-
-    } else if (
-      archetype === 2
-    ) {
-      mid.fillStyle(
-        style.accent,
-        .11
-      ).fillRect(
-        left + 18,
-        roof - 17,
-        40,
-        12
-      );
-
-      mid.fillStyle(
-        style.edge,
-        .22
-      ).fillCircle(
-        left + 38,
-        roof - 23,
-        6
+      drawRooftopMachine(
+        mid,
+        left,
+        roof,
+        width,
+        style,
+        random,
+        i
       );
     }
 
-    // Mission-specific accents stay subtle and do not touch gameplay.
+    // --------------------------------------------------------
+    // MISSION-SPECIFIC ARCHITECTURE
+    // --------------------------------------------------------
 
     if (
       id === 'corporate-lockdown' ||
       id === 'final-relay'
     ) {
+      // Corporate glass panel.
       mid.fillStyle(
         style.edge,
-        .08
+        .075
       ).fillRect(
         left + 16,
-        roof + 24,
-        w - 32,
-        46
-      );
-
-      mid.fillStyle(
-        style.bright,
-        .14
-      ).fillRect(
-        left + 25,
-        roof + 35,
-        Math.max(26, w - 50),
-        4
+        roof + 26,
+        width - 32,
+        56
       );
 
       mid.lineStyle(
         1,
         style.edge,
-        .12
+        .14
       ).strokeRect(
-        left + 12,
-        roof + 16,
-        w - 24,
-        64
+        left + 13,
+        roof + 20,
+        width - 26,
+        68
       );
 
-    } else if (id === 'dead-drop') {
+      mid.fillStyle(
+        style.bright,
+        .12
+      ).fillRect(
+        left + 25,
+        roof + 38,
+        Math.max(
+          28,
+          width - 50
+        ),
+        4
+      );
+
+    } else if (
+      id === 'dead-drop'
+    ) {
+      // Hidden rooftop relay.
       mid.fillStyle(
         style.accent,
-        .11
+        .12
       ).fillRect(
-        left + w * .20,
-        roof - 16,
-        w * .60,
-        11
+        left + width * .20,
+        roof - 14,
+        width * .60,
+        10
       );
 
       mid.lineStyle(
@@ -906,145 +2098,245 @@ function addDistrictVariation(scene, style) {
         .16
       ).lineBetween(
         cx,
-        roof - 16,
+        roof - 14,
         cx,
-        roof - 58
+        roof - 54
       );
 
-    } else if (id === 'signal-storm') {
+    } else if (
+      id === 'signal-storm'
+    ) {
+      // Signal dish / energy receiver.
       mid.lineStyle(
         2,
         style.edge,
-        .13
+        .16
       ).lineBetween(
         left + 14,
-        roof + 10,
+        roof + 12,
         right - 14,
         roof - 22
       );
 
       mid.fillStyle(
         style.bright,
-        .10
+        .11
       ).fillCircle(
         cx,
-        roof + 10,
-        Math.min(15, w * .08)
+        roof + 12,
+        Math.min(
+          16,
+          width * .08
+        )
       );
 
-    } else if (id === 'blackout') {
+    } else if (
+      id === 'blackout'
+    ) {
+      // Emergency blackout strips.
       mid.fillStyle(
         style.edge,
-        .06
+        .055
       ).fillRect(
         left + 18,
         roof + 20,
-        w - 36,
+        width - 36,
         3
       );
 
-    } else {
       mid.fillStyle(
-        style.accent,
-        .08
+        style.bright,
+        .035
+      ).fillRect(
+        left + 22,
+        roof + 58,
+        width - 44,
+        2
+      );
+
+    } else if (
+      id === 'pursuit'
+    ) {
+      // Warning stripe.
+      mid.fillStyle(
+        style.edge,
+        .10
       ).fillRect(
         left + 18,
-        roof + 30,
-        Math.max(24, w * .24),
+        roof + 92,
+        width - 36,
+        5
+      );
+
+    } else {
+      // Generic urban signage.
+      if (
+        random.pick(
+          i * 71 + 41,
+          4
+        ) === 0
+      ) {
+        mid.fillStyle(
+          style.accent,
+          .08
+        ).fillRect(
+          left + 18,
+          roof + 30,
+          Math.max(
+            24,
+            width * .24
+          ),
+          8
+        );
+      }
+    }
+
+    // --------------------------------------------------------
+    // OCCASIONAL BILLBOARD
+    // --------------------------------------------------------
+
+    if (
+      random.pick(
+        i * 107 + 31,
         8
+      ) === 0
+    ) {
+      drawBillboard(
+        mid,
+        left +
+          width *
+            .55,
+        roof +
+          70 +
+          random.pick(
+            i * 17,
+            50
+          ),
+        Math.min(
+          88,
+          width * .55
+        ),
+        28,
+        style,
+        random,
+        i
       );
     }
   }
 
-  // ---------- HERO ARCHITECTURE: three dominant landmarks ----------
-  // These are large, opaque silhouettes with deliberate identity.
-  // They are part of the backdrop only and never become collision or gameplay objects.
+  // ==========================================================
+  // HERO LANDMARKS
+  // ==========================================================
 
-  const heroSpacing = Math.max(
-    520,
-    Math.floor(worldWidth / 3)
-  );
+  const heroSpacing =
+    Math.max(
+      560,
+      Math.floor(
+        worldWidth / 3
+      )
+    );
 
   const heroPositions = [
-    heroSpacing * .65,
-    heroSpacing * 1.55,
-    heroSpacing * 2.45
+    heroSpacing * .62,
+    heroSpacing * 1.48,
+    heroSpacing * 2.34
   ];
 
   heroPositions.forEach(
-    (center, heroIndex) => {
-      if (center > worldWidth + 260) {
+    (
+      center,
+      heroIndex
+    ) => {
+      if (
+        center >
+        worldWidth + 300
+      ) {
         return;
       }
 
-      const hero = pick(
-        heroIndex * 73 +
-        id.length * 11,
-        4
-      );
+      const heroType =
+        random.pick(
+          heroIndex * 73 +
+            id.length * 11,
+          6
+        );
 
-      const w =
-        210 +
-        pick(
+      const width =
+        220 +
+        random.pick(
           heroIndex * 29 + 17,
-          70
+          100
         );
 
-      const h =
-        250 +
-        pick(
+      const height =
+        270 +
+        random.pick(
           heroIndex * 43 + 23,
-          105
+          130
         );
 
-      const left = center - w / 2;
-      const right = center + w / 2;
-      const roof = base - h;
+      const left =
+        center -
+        width / 2;
 
-      // Main silhouette.
+      const right =
+        center +
+        width / 2;
+
+      const roof =
+        base -
+        height;
+
+      // ------------------------------------------------------
+      // MAIN HERO BODY
+      // ------------------------------------------------------
 
       mid.fillStyle(
         style.dark,
-        .98
+        .99
       ).fillRect(
         left,
         roof + 34,
-        w,
-        h - 34
+        width,
+        height - 34
       );
 
-      if (hero === 0) {
-        // Relay tower / communications crown.
+      // ------------------------------------------------------
+      // HERO 0 — RELAY TOWER
+      // ------------------------------------------------------
 
+      if (
+        heroType === 0
+      ) {
         mid.fillStyle(
           style.dark,
-          .99
+          .995
         ).fillRect(
-          left + w * .20,
+          left + width * .18,
           roof,
-          w * .60,
+          width * .64,
           34
         );
 
         mid.fillStyle(
           style.dark,
-          .99
+          .995
         ).fillRect(
-          left + w * .37,
-          roof - 28,
-          w * .26,
-          28
+          left + width * .37,
+          roof - 34,
+          width * .26,
+          34
         );
 
         mid.lineStyle(
           3,
           style.edge,
-          .18
+          .22
         ).lineBetween(
           center,
-          roof - 28,
+          roof - 34,
           center,
-          roof - 92
+          roof - 105
         );
 
         mid.lineStyle(
@@ -1052,62 +2344,66 @@ function addDistrictVariation(scene, style) {
           style.bright,
           .16
         ).lineBetween(
-          center - 18,
-          roof - 56,
-          center + 18,
-          roof - 56
+          center - 22,
+          roof - 62,
+          center + 22,
+          roof - 62
         );
 
         mid.fillStyle(
           style.edge,
-          .28
+          .30
         ).fillCircle(
           center,
-          roof - 96,
+          roof - 108,
           3
         );
 
-      } else if (hero === 1) {
-        // Corporate monolith with a large inset face.
+      // ------------------------------------------------------
+      // HERO 1 — CORPORATE MONOLITH
+      // ------------------------------------------------------
 
+      } else if (
+        heroType === 1
+      ) {
         mid.fillStyle(
           style.dark,
-          .99
+          .995
         ).fillRect(
-          left + w * .16,
+          left + width * .14,
           roof,
-          w * .68,
+          width * .72,
           34
         );
 
         mid.fillStyle(
           style.edge,
-          .12
+          .11
         ).fillRect(
-          left + w * .24,
+          left + width * .22,
           roof + 62,
-          w * .52,
-          92
+          width * .56,
+          104
         );
 
         mid.lineStyle(
           2,
           style.bright,
-          .12
+          .14
         ).strokeRect(
-          left + w * .24,
+          left + width * .22,
           roof + 62,
-          w * .52,
-          92
+          width * .56,
+          104
         );
 
         mid.fillStyle(
           style.accent,
-          .14
+          .15
         ).fillRect(
-          left + w * .31,
-          roof + 82,
-          w * .38,
+          left + width * .30,
+          roof + 84,
+          width * .40,
           8
         );
 
@@ -1115,43 +2411,57 @@ function addDistrictVariation(scene, style) {
           style.bright,
           .10
         ).fillRect(
-          left + w * .31,
-          roof + 104,
-          w * .24,
+          left + width * .30,
+          roof + 108,
+          width * .26,
           5
         );
 
-      } else if (hero === 2) {
-        // Industrial tower with stepped shoulders and a service mast.
+        mid.fillStyle(
+          style.edge,
+          .08
+        ).fillRect(
+          left + width * .30,
+          roof + 132,
+          width * .40,
+          3
+        );
 
+      // ------------------------------------------------------
+      // HERO 2 — INDUSTRIAL MEGA TOWER
+      // ------------------------------------------------------
+
+      } else if (
+        heroType === 2
+      ) {
         mid.fillStyle(
           style.dark,
-          .99
+          .995
         ).fillRect(
-          left - 18,
-          roof + 62,
-          18,
-          h - 62
+          left - 20,
+          roof + 64,
+          20,
+          height - 64
         );
 
         mid.fillStyle(
           style.dark,
-          .99
+          .995
         ).fillRect(
           right,
-          roof + 28,
-          20,
-          h - 28
+          roof + 30,
+          22,
+          height - 30
         );
 
         mid.fillStyle(
           style.dark,
-          .99
+          .995
         ).fillRect(
-          left + w * .24,
+          left + width * .22,
           roof,
-          w * .52,
-          32
+          width * .56,
+          34
         );
 
         mid.fillStyle(
@@ -1159,8 +2469,8 @@ function addDistrictVariation(scene, style) {
           .13
         ).fillRect(
           left + 20,
-          roof + 74,
-          w - 40,
+          roof + 78,
+          width - 40,
           6
         );
 
@@ -1169,9 +2479,9 @@ function addDistrictVariation(scene, style) {
           style.edge,
           .18
         ).lineBetween(
-          left + 32,
-          roof + 74,
-          left + 32,
+          left + 34,
+          roof + 78,
+          left + 34,
           base
         );
 
@@ -1180,69 +2490,242 @@ function addDistrictVariation(scene, style) {
           style.edge,
           .12
         ).lineBetween(
-          right - 32,
-          roof + 74,
-          right - 32,
+          right - 34,
+          roof + 78,
+          right - 34,
           base
         );
 
-      } else {
-        // Narrow neon spire with a stepped crown.
+        // Industrial rooftop mast.
+        mid.lineStyle(
+          2,
+          style.bright,
+          .12
+        ).lineBetween(
+          center,
+          roof,
+          center,
+          roof - 65
+        );
 
+      // ------------------------------------------------------
+      // HERO 3 — NEON SPIRE
+      // ------------------------------------------------------
+
+      } else if (
+        heroType === 3
+      ) {
         mid.fillStyle(
           style.dark,
-          .99
+          .995
         ).fillRect(
-          left + w * .16,
+          left + width * .14,
           roof + 42,
-          w * .68,
-          h - 42
+          width * .72,
+          height - 42
         );
 
         mid.fillStyle(
           style.dark,
-          .99
+          .995
         ).fillRect(
-          left + w * .28,
-          roof + 12,
-          w * .44,
-          30
+          left + width * .28,
+          roof + 10,
+          width * .44,
+          32
         );
 
         mid.fillStyle(
           style.dark,
-          .99
+          .995
         ).fillRect(
-          left + w * .40,
-          roof - 12,
-          w * .20,
-          24
+          left + width * .40,
+          roof - 18,
+          width * .20,
+          28
         );
 
         mid.fillStyle(
           style.accent,
-          .18
+          .20
         ).fillRect(
-          left + w * .25,
+          left + width * .24,
           roof + 92,
           6,
-          Math.min(150, h - 120)
+          Math.min(
+            180,
+            height - 120
+          )
+        );
+
+        mid.fillStyle(
+          style.edge,
+          .14
+        ).fillRect(
+          right - width * .24 - 6,
+          roof + 118,
+          6,
+          Math.min(
+            130,
+            height - 150
+          )
         );
 
         mid.lineStyle(
           2,
           style.bright,
-          .15
+          .16
         ).lineBetween(
           center,
-          roof - 12,
+          roof - 18,
           center,
-          roof - 62
+          roof - 76
+        );
+
+      // ------------------------------------------------------
+      // HERO 4 — BRIDGE TOWER
+      // ------------------------------------------------------
+
+      } else if (
+        heroType === 4
+      ) {
+        const towerW =
+          width * .28;
+
+        mid.fillStyle(
+          style.dark,
+          .995
+        ).fillRect(
+          left + width * .10,
+          roof,
+          towerW,
+          height
+        );
+
+        mid.fillStyle(
+          style.dark,
+          .995
+        ).fillRect(
+          right -
+            width * .10 -
+            towerW,
+          roof + 35,
+          towerW,
+          height - 35
+        );
+
+        mid.fillStyle(
+          style.dark,
+          .995
+        ).fillRect(
+          left + width * .28,
+          roof + 72,
+          width * .44,
+          22
+        );
+
+        mid.lineStyle(
+          2,
+          style.edge,
+          .15
+        ).lineBetween(
+          left + width * .20,
+          roof + 70,
+          left + width * .50,
+          roof + 22
+        );
+
+        mid.lineStyle(
+          2,
+          style.edge,
+          .15
+        ).lineBetween(
+          right - width * .20,
+          roof + 70,
+          left + width * .50,
+          roof + 22
+        );
+
+      // ------------------------------------------------------
+      // HERO 5 — SIGNAL CITADEL
+      // ------------------------------------------------------
+
+      } else {
+        mid.fillStyle(
+          style.dark,
+          .995
+        ).fillRect(
+          left + width * .12,
+          roof + 38,
+          width * .76,
+          height - 38
+        );
+
+        mid.fillStyle(
+          style.dark,
+          .995
+        ).fillRect(
+          left + width * .25,
+          roof,
+          width * .50,
+          38
+        );
+
+        mid.fillStyle(
+          style.edge,
+          .10
+        ).fillRect(
+          left + width * .20,
+          roof + 72,
+          width * .60,
+          100
+        );
+
+        mid.lineStyle(
+          2,
+          style.edge,
+          .17
+        ).strokeRect(
+          left + width * .20,
+          roof + 72,
+          width * .60,
+          100
+        );
+
+        mid.fillStyle(
+          style.bright,
+          .12
+        ).fillRect(
+          center - width * .20,
+          roof + 98,
+          width * .40,
+          5
+        );
+
+        mid.lineStyle(
+          2,
+          style.edge,
+          .17
+        ).lineBetween(
+          center,
+          roof,
+          center,
+          roof - 78
+        );
+
+        mid.fillStyle(
+          style.edge,
+          .25
+        ).fillCircle(
+          center,
+          roof - 82,
+          3
         );
       }
 
-      // Hero facade windows:
-      // grouped bands instead of repetitive grids.
+      // ------------------------------------------------------
+      // HERO WINDOW BANDS
+      // ------------------------------------------------------
 
       for (
         let band = roof + 70;
@@ -1250,8 +2733,9 @@ function addDistrictVariation(scene, style) {
         band += 54
       ) {
         if (
-          pick(
-            heroIndex * 200 + band,
+          random.pick(
+            heroIndex * 200 +
+              Math.floor(band),
             5
           ) > 2
         ) {
@@ -1264,82 +2748,148 @@ function addDistrictVariation(scene, style) {
         ).fillRect(
           left + 24,
           band,
-          w - 48,
+          width - 48,
           5
         );
 
         mid.fillStyle(
           style.accent,
-          .08
+          .075
         ).fillRect(
           left + 24,
           band + 10,
-          Math.max(30, (w - 48) * .42),
+          Math.max(
+            30,
+            (width - 48) * .42
+          ),
           4
         );
       }
 
-      // Hero rooftop rail and equipment line.
-
+      // Hero rooftop line.
       mid.fillStyle(
         style.edge,
-        .22
+        .24
       ).fillRect(
         left + 16,
         roof - 4,
-        w - 32,
+        width - 32,
         4
+      );
+
+      // Small rooftop machines.
+      drawRooftopMachine(
+        mid,
+        left,
+        roof,
+        width,
+        style,
+        random,
+        heroIndex + 500
       );
     }
   );
 
-  // ---------- NEAR CITY: accents only, never full building duplicates ----------
-  // Foreground depth is created by a few large ducts, signs and rooftop machines.
+  // ==========================================================
+  // BILLBOARD ZONE
+  // ==========================================================
 
   for (
-    let x = 150, i = 0;
-    x < worldWidth + 300;
-    x += 620, i += 1
+    let x = 250, i = 0;
+    x < worldWidth + 400;
+    x += 720, i += 1
   ) {
-    const accent = pick(
-      i * 51 + id.length,
-      4
+    if (
+      random.pick(
+        i * 113 + 4,
+        3
+      ) === 0
+    ) {
+      continue;
+    }
+
+    drawBillboard(
+      near,
+      x,
+      285 +
+        random.pick(
+          i * 23 + 7,
+          90
+        ),
+      90 +
+        random.pick(
+          i * 19 + 2,
+          55
+        ),
+      32 +
+        random.pick(
+          i * 11 + 3,
+          10
+        ),
+      style,
+      random,
+      i + 1000
     );
+  }
+
+  // ==========================================================
+  // NEAR CITY ACCENTS
+  // ==========================================================
+
+  for (
+    let x = 110, i = 0;
+    x < worldWidth + 420;
+    x += 540, i += 1
+  ) {
+    const accentType =
+      random.pick(
+        i * 51 + id.length,
+        6
+      );
 
     const y =
-      300 +
-      pick(i * 17 + 9, 100);
+      285 +
+      random.pick(
+        i * 17 + 9,
+        120
+      );
 
-    const w =
-      90 +
-      pick(i * 31 + 3, 70);
+    const width =
+      100 +
+      random.pick(
+        i * 31 + 3,
+        90
+      );
 
-    if (accent === 0) {
+    if (
+      accentType === 0
+    ) {
+      // Suspended rail.
       near.lineStyle(
-        4,
-        style.edge,
-        .16
+        5,
+        style.dark,
+        .92
       ).lineBetween(
         x,
         y,
-        x + w,
+        x + width,
         y
       );
 
       near.lineStyle(
         1,
-        style.bright,
-        .12
+        style.edge,
+        .20
       ).lineBetween(
         x + 10,
-        y + 8,
-        x + w - 10,
-        y + 8
+        y - 1,
+        x + width - 10,
+        y - 1
       );
 
       near.fillStyle(
         style.edge,
-        .22
+        .25
       ).fillCircle(
         x,
         y,
@@ -1348,202 +2898,412 @@ function addDistrictVariation(scene, style) {
 
       near.fillStyle(
         style.edge,
-        .22
+        .25
       ).fillCircle(
-        x + w,
+        x + width,
         y,
         3
       );
 
-    } else if (accent === 1) {
+    } else if (
+      accentType === 1
+    ) {
+      // Service sign.
       near.fillStyle(
         style.dark,
-        .92
+        .95
       ).fillRoundedRect(
         x,
         y,
-        w,
-        34,
-        4
+        width,
+        36,
+        5
       );
 
       near.lineStyle(
         2,
         style.edge,
-        .20
+        .22
       ).strokeRoundedRect(
         x,
         y,
-        w,
-        34,
-        4
+        width,
+        36,
+        5
       );
 
       near.fillStyle(
         style.accent,
-        .16
+        .18
       ).fillRect(
         x + 12,
         y + 11,
-        w - 24,
+        width - 24,
         5
       );
 
-    } else if (accent === 2) {
+      near.fillStyle(
+        style.bright,
+        .08
+      ).fillRect(
+        x + 12,
+        y + 22,
+        Math.max(
+          20,
+          width * .38
+        ),
+        3
+      );
+
+    } else if (
+      accentType === 2
+    ) {
+      // Ventilation unit.
       near.fillStyle(
         style.dark,
-        .94
+        .96
       ).fillRect(
         x,
         y,
-        46,
-        38
+        48,
+        42
+      );
+
+      near.lineStyle(
+        1,
+        style.edge,
+        .20
+      ).strokeRect(
+        x,
+        y,
+        48,
+        42
       );
 
       near.fillStyle(
         style.edge,
-        .22
+        .18
       ).fillCircle(
-        x + 23,
-        y + 19,
-        13
+        x + 24,
+        y + 21,
+        14
       );
 
       near.lineStyle(
         1,
         style.bright,
-        .16
-      ).lineBetween(
-        x + 23,
-        y,
-        x + 23,
-        y - 32
+        .13
+      ).strokeCircle(
+        x + 24,
+        y + 21,
+        14
       );
 
-    } else {
+    } else if (
+      accentType === 3
+    ) {
+      // Large diagonal pipe.
       near.lineStyle(
-        2,
+        6,
+        style.dark,
+        .95
+      ).lineBetween(
+        x,
+        y + 44,
+        x + width,
+        y - 10
+      );
+
+      near.lineStyle(
+        1,
         style.edge,
         .16
       ).lineBetween(
         x,
         y + 40,
-        x + w,
+        x + width,
+        y - 14
+      );
+
+    } else if (
+      accentType === 4
+    ) {
+      // Rooftop antenna cluster.
+      near.lineStyle(
+        2,
+        style.edge,
+        .19
+      ).lineBetween(
+        x + 24,
+        y + 38,
+        x + 24,
+        y - 24
+      );
+
+      near.lineStyle(
+        1,
+        style.bright,
+        .13
+      ).lineBetween(
+        x + 8,
+        y + 5,
+        x + 40,
+        y + 5
+      );
+
+      near.lineStyle(
+        1,
+        style.bright,
+        .10
+      ).lineBetween(
+        x + 12,
+        y - 8,
+        x + 36,
+        y - 8
+      );
+
+      near.fillStyle(
+        style.edge,
+        .24
+      ).fillCircle(
+        x + 24,
+        y - 27,
+        2
+      );
+
+    } else {
+      // Cable frame.
+      near.lineStyle(
+        2,
+        style.edge,
+        .13
+      ).lineBetween(
+        x,
+        y + 42,
+        x + width,
         y - 8
       );
 
       near.lineStyle(
         1,
         style.bright,
-        .10
+        .08
       ).lineBetween(
-        x + 24,
-        y + 30,
-        x + 24,
-        y - 6
+        x + 22,
+        y + 32,
+        x + 22,
+        y - 5
       );
 
       near.lineStyle(
         1,
         style.bright,
-        .10
+        .08
       ).lineBetween(
-        x + w - 24,
-        y + 6,
-        x + w - 24,
+        x + width - 22,
+        y + 7,
+        x + width - 22,
         y - 20
       );
     }
   }
 
-  // ---------- CITY INFRASTRUCTURE ----------
-  // Very sparse links add scale without drawing a wireframe over the scene.
+  // ==========================================================
+  // INFRASTRUCTURE
+  // ==========================================================
+
+  drawInfrastructure(
+    near,
+    worldWidth,
+    style,
+    random
+  );
+
+  // ==========================================================
+  // FOREGROUND SILHOUETTE BITS
+  // ==========================================================
 
   for (
-    let i = 0;
-    i < Math.ceil(worldWidth / 560);
-    i += 1
+    let x = -120, i = 0;
+    x < worldWidth + 300;
+    x += 760, i += 1
   ) {
-    const x1 =
-      120 +
-      i * 560;
+    const type =
+      random.pick(
+        i * 43 + 12,
+        3
+      );
 
-    const x2 = Math.min(
-      worldWidth + 160,
-      x1 +
-        260 +
-        pick(i * 17 + 77, 80)
-    );
+    const w =
+      120 +
+      random.pick(
+        i * 27 + 3,
+        80
+      );
+
+    const h =
+      80 +
+      random.pick(
+        i * 17 + 4,
+        70
+      );
 
     const y =
-      258 +
-      pick(i * 29 + 9, 78);
+      base -
+      h;
 
-    near.lineStyle(
-      2,
-      style.edge,
-      .10
-    ).lineBetween(
-      x1,
-      y,
-      (x1 + x2) / 2,
-      y + 22
-    );
+    if (
+      type === 0
+    ) {
+      near.fillStyle(
+        style.dark,
+        .58
+      ).fillRect(
+        x,
+        y,
+        w,
+        h
+      );
 
-    near.lineStyle(
-      1,
-      style.bright,
-      .07
-    ).lineBetween(
-      (x1 + x2) / 2,
-      y + 22,
-      x2,
-      y + 4
-    );
+      near.fillStyle(
+        style.edge,
+        .08
+      ).fillRect(
+        x + 12,
+        y + 12,
+        w - 24,
+        4
+      );
+
+    } else if (
+      type === 1
+    ) {
+      near.fillStyle(
+        style.dark,
+        .58
+      ).fillRect(
+        x,
+        y + 24,
+        w,
+        h - 24
+      );
+
+      near.fillStyle(
+        style.dark,
+        .60
+      ).fillRect(
+        x + w * .18,
+        y,
+        w * .64,
+        24
+      );
+
+    } else {
+      near.fillStyle(
+        style.dark,
+        .55
+      ).fillRoundedRect(
+        x,
+        y + 28,
+        w,
+        h - 28,
+        5
+      );
+
+      near.lineStyle(
+        1,
+        style.edge,
+        .10
+      ).strokeRoundedRect(
+        x,
+        y + 28,
+        w,
+        h - 28,
+        5
+      );
+    }
   }
 
-  // ---------- ATMOSPHERE ----------
-  // Minimal haze only.
-  // It must not create a second skyline silhouette.
+  // ==========================================================
+  // ATMOSPHERE
+  // ==========================================================
 
   haze.fillStyle(
     style.dark,
-    .014
+    .018
   ).fillRect(
-    -240,
-    438,
-    worldWidth + 520,
-    72
+    -400,
+    390,
+    worldWidth + 800,
+    90
   );
 
   haze.fillStyle(
     style.bright,
-    .008
+    .009
   ).fillRect(
-    -240,
-    510,
-    worldWidth + 520,
-    44
+    -400,
+    470,
+    worldWidth + 800,
+    60
+  );
+
+  haze.fillStyle(
+    style.edge,
+    .005
+  ).fillRect(
+    -400,
+    520,
+    worldWidth + 800,
+    55
+  );
+
+  // Thin horizon line.
+  haze.fillStyle(
+    style.edge,
+    .025
+  ).fillRect(
+    -400,
+    base - 2,
+    worldWidth + 800,
+    2
   );
 
   return {
     far,
+    farGlow,
     mid,
     near,
     haze
   };
 }
 
-function relayComboPulse(scene, combo) {
-  if (!scene?.add || !scene?.player?.active) {
+
+// ============================================================
+// COMBO PULSE
+// ============================================================
+
+function relayComboPulse(
+  scene,
+  combo
+) {
+  if (
+    !scene?.add ||
+    !scene?.player?.active
+  ) {
     return;
   }
 
-  const style = getStyle(scene);
-  const value = Math.max(
-    2,
-    Math.floor(Number(combo) || 2)
-  );
+  const style =
+    getStyle(scene);
+
+  const value =
+    Math.max(
+      2,
+      Math.floor(
+        Number(combo) || 2
+      )
+    );
 
   const radius =
     value >= 10
@@ -1568,40 +3328,57 @@ function relayComboPulse(scene, combo) {
         ? 240
         : 210;
 
-  const ring = scene.add
-    .circle(
-      scene.player.x,
-      scene.player.y,
-      radius,
-      style.edge,
-      0
-    )
-    .setStrokeStyle(
-      2,
-      style.bright,
-      .58
-    )
-    .setDepth(12);
+  const ring =
+    scene.add
+      .circle(
+        scene.player.x,
+        scene.player.y,
+        radius,
+        style.edge,
+        0
+      )
+      .setStrokeStyle(
+        2,
+        style.bright,
+        .58
+      )
+      .setDepth(12);
 
-  scene.tweens.add({
+  scene.tweens?.add?.({
     targets: ring,
     scale,
     alpha: 0,
     duration,
     ease: 'Cubic.Out',
-    onComplete: () => ring.destroy(),
+    onComplete: () => {
+      safeDestroy(ring);
+    }
   });
 }
 
-function comboFeedback(scene, combo) {
-  if (!scene?.active || !scene?.player?.active) {
+
+// ============================================================
+// COMBO FEEDBACK
+// ============================================================
+
+function comboFeedback(
+  scene,
+  combo
+) {
+  if (
+    !scene?.active ||
+    !scene?.player?.active
+  ) {
     return;
   }
 
-  const safeCombo = Number(combo);
+  const safeCombo =
+    Number(combo);
 
   if (
-    !Number.isFinite(safeCombo) ||
+    !Number.isFinite(
+      safeCombo
+    ) ||
     safeCombo < 2
   ) {
     return;
@@ -1609,22 +3386,34 @@ function comboFeedback(scene, combo) {
 
   relayComboPulse(
     scene,
-    Math.floor(safeCombo)
+    Math.floor(
+      safeCombo
+    )
   );
 }
 
+
+// ============================================================
+// SETUP
+// ============================================================
+
 function setup(scene) {
-  if (!scene || stateByScene.has(scene)) {
+  if (
+    !scene ||
+    stateByScene.has(scene)
+  ) {
     return;
   }
 
-  const style = getStyle(scene);
+  const style =
+    getStyle(scene);
 
   const state = {
     style,
     platforms: [],
     barriers: [],
-    background: null
+    background: null,
+    cleanup: null
   };
 
   stateByScene.set(
@@ -1632,110 +3421,156 @@ function setup(scene) {
     state
   );
 
+  // ----------------------------------------------------------
+  // BACKGROUND
+  // ----------------------------------------------------------
+
   state.background =
     addDistrictVariation(
       scene,
       style
     );
 
-  // IMPORTANT:
-  // existing gameplay-adjacent visuals are untouched.
+  // ----------------------------------------------------------
+  // PLATFORM VISUALS
+  // ----------------------------------------------------------
 
   scene.platforms
     ?.getChildren?.()
     .forEach(
-      (platform, index) => {
-        state.platforms.push(
+      (
+        platform,
+        index
+      ) => {
+        const visual =
           addPlatformVisual(
             scene,
             platform,
             index,
             style
-          )
-        );
+          );
+
+        if (visual) {
+          state.platforms.push(
+            visual
+          );
+        }
       }
     );
+
+  // ----------------------------------------------------------
+  // BARRIER VISUALS
+  // ----------------------------------------------------------
 
   scene.barriers
     ?.getChildren?.()
     .forEach(
-      (barrier, index) => {
-        state.barriers.push(
+      (
+        barrier,
+        index
+      ) => {
+        const visual =
           addBarrierVisual(
             scene,
             barrier,
             index,
             style
-          )
-        );
+          );
+
+        if (visual) {
+          state.barriers.push(
+            visual
+          );
+        }
       }
     );
+
+  // ----------------------------------------------------------
+  // GAME FEEDBACK EVENTS
+  // ----------------------------------------------------------
 
   const events =
     scene.game?.events;
 
   if (events) {
-    const onFeedback = kind => {
-      if (
-        !scene.active ||
-        !scene.player?.active
-      ) {
-        return;
-      }
+    const onFeedback =
+      kind => {
+        if (
+          !scene.active ||
+          !scene.player?.active
+        ) {
+          return;
+        }
 
-      if (kind === 'gadget') {
-        scene.gadgetPulse?.(
-          style.edge,
-          13,
-          190
-        );
-      }
-
-      if (kind === 'hit') {
-        const pulse = scene.add
-          .circle(
-            scene.player.x,
-            scene.player.y,
-            18,
+        // Gadget feedback.
+        if (
+          kind === 'gadget'
+        ) {
+          scene.gadgetPulse?.(
             style.edge,
-            .12
-          )
-          .setStrokeStyle(
-            2,
-            style.bright,
-            .46
-          )
-          .setDepth(11);
+            13,
+            190
+          );
+        }
 
-        scene.tweens.add({
-          targets: pulse,
-          scale: 2.25,
-          alpha: 0,
-          duration: 180,
-          ease: 'Quad.Out',
-          onComplete: () => pulse.destroy(),
-        });
+        // Hit feedback.
+        if (
+          kind === 'hit'
+        ) {
+          const pulse =
+            scene.add
+              .circle(
+                scene.player.x,
+                scene.player.y,
+                18,
+                style.edge,
+                .12
+              )
+              .setStrokeStyle(
+                2,
+                style.bright,
+                .46
+              )
+              .setDepth(11);
 
-        scene.player.setTint?.(
-          style.edge
-        );
-
-        scene.time?.delayedCall?.(
-          90,
-          () => {
-            if (scene.player?.active) {
-              scene.player.clearTint?.();
+          scene.tweens?.add?.({
+            targets: pulse,
+            scale: 2.25,
+            alpha: 0,
+            duration: 180,
+            ease: 'Quad.Out',
+            onComplete: () => {
+              safeDestroy(
+                pulse
+              );
             }
-          }
-        );
-      }
-    };
+          });
 
-    const onCombo = combo =>
-      comboFeedback(
-        scene,
-        combo
-      );
+          scene.player.setTint?.(
+            style.edge
+          );
+
+          scene.time?.delayedCall?.(
+            90,
+            () => {
+              if (
+                scene.player?.active
+              ) {
+                scene.player
+                  .clearTint?.();
+              }
+            }
+          );
+        }
+      };
+
+    const onCombo =
+      combo => {
+        comboFeedback(
+          scene,
+          combo
+        );
+      };
 
     events.on(
       'feedback',
@@ -1747,89 +3582,150 @@ function setup(scene) {
       onCombo
     );
 
-    state.cleanup = () => {
-      events.off(
-        'feedback',
-        onFeedback
-      );
+    state.cleanup =
+      () => {
+        events.off(
+          'feedback',
+          onFeedback
+        );
 
-      events.off(
-        'combo',
-        onCombo
-      );
-    };
+        events.off(
+          'combo',
+          onCombo
+        );
+      };
   }
 
+  // ----------------------------------------------------------
+  // PUBLIC COMBO API
+  // ----------------------------------------------------------
+
   scene.relayComboPulse =
-    combo =>
+    combo => {
       relayComboPulse(
         scene,
         combo
       );
+    };
+
+  // ----------------------------------------------------------
+  // SAFE SCENE SHUTDOWN
+  // ----------------------------------------------------------
 
   scene.events?.once?.(
     'shutdown',
     () => {
+      // Stop event listeners first.
       state.cleanup?.();
 
+      // Remove platform visual layers.
       state.platforms.forEach(
-        item => item?.destroy?.()
+        item => {
+          safeDestroy(
+            item
+          );
+        }
       );
 
+      // Remove barrier visual layers.
       state.barriers.forEach(
-        item => item?.destroy?.()
+        item => {
+          safeDestroy(
+            item
+          );
+        }
       );
 
-      state.background?.far?.destroy?.();
-      state.background?.mid?.destroy?.();
-      state.background?.near?.destroy?.();
-      state.background?.haze?.destroy?.();
+      // ------------------------------------------------------
+      // IMPORTANT:
+      // COMPLETE UPDATE 11 BACKGROUND CLEANUP
+      // ------------------------------------------------------
 
+      safeDestroy(
+        state.background?.far
+      );
+
+      safeDestroy(
+        state.background?.farGlow
+      );
+
+      safeDestroy(
+        state.background?.mid
+      );
+
+      safeDestroy(
+        state.background?.near
+      );
+
+      safeDestroy(
+        state.background?.haze
+      );
+
+      // Remove public helper.
       if (
         scene.relayComboPulse
       ) {
-        delete scene.relayComboPulse;
+        try {
+          delete scene.relayComboPulse;
+        } catch (_) {
+          scene.relayComboPulse =
+            undefined;
+        }
       }
 
-      stateByScene.delete(scene);
+      // Finally release state.
+      stateByScene.delete(
+        scene
+      );
     }
   );
 }
 
+
+// ============================================================
+// INSTALL
+// ============================================================
+
 function install() {
   if (
-    window.__relayUpdate10WorldVariation
+    window.__relayUpdate11WorldVariation
   ) {
     return;
   }
 
-  window.__relayUpdate10WorldVariation =
+  window.__relayUpdate11WorldVariation =
     true;
 
-  const ready = event => {
-    const scene =
-      event?.detail?.scene ||
-      window.__relayRunnerScene;
+  const ready =
+    event => {
+      const scene =
+        event?.detail?.scene ||
+        window.__relayRunnerScene;
 
-    if (scene) {
-      setup(scene);
-    }
-  };
+      if (scene) {
+        setup(scene);
+      }
+    };
 
   window.addEventListener(
     'relay:runner-scene-ready',
     ready
   );
 
-  // Defensive fallback for environments
-  // that expose the scene before the custom event.
-
-  if (window.__relayRunnerScene) {
+  // Defensive fallback.
+  if (
+    window.__relayRunnerScene
+  ) {
     setup(
       window.__relayRunnerScene
     );
   }
 }
+
+
+// ============================================================
+// DOM READY
+// ============================================================
 
 if (
   document.readyState ===
@@ -1838,8 +3734,10 @@ if (
   document.addEventListener(
     'DOMContentLoaded',
     install,
-    { once: true }
+    {
+      once: true
+    }
   );
 } else {
   install();
-}
+        }
