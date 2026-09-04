@@ -1,32 +1,48 @@
 // ============================================================
-// UPDATE 11 — CYBERPUNK CITY / WORLD VARIATION / GAME FEEL
+// UPDATE 12 — CYBERPUNK CITY / ADVANCED BARRIER VISUALS
 // ============================================================
-// Visual-only layer.
-// NEVER creates physics bodies.
-// NEVER changes collision rules.
-// NEVER changes player movement.
-// NEVER changes platforms/barriers gameplay.
-// NEVER changes missions/progression.
-// NEVER changes viewport/mobile controls.
+// VISUAL-ONLY LAYER
 //
-// UPDATE 11 adds:
-// - deeper 3-layer cyberpunk skyline
-// - more building archetypes
+// NEVER:
+// - creates physics bodies
+// - changes collision rules
+// - changes player movement
+// - changes platforms/barriers gameplay
+// - changes missions/progression
+// - changes viewport/mobile controls
+//
+// UPDATE 12:
+// - deeper cyberpunk skyline
+// - varied buildings
 // - rooftop machinery
 // - antennas / dishes / towers
 // - neon facade strips
-// - windows with deterministic variation
+// - deterministic windows
 // - billboards
-// - pipes / cables / infrastructure
-// - large landmark architecture
+// - pipes / cables
+// - landmarks
 // - atmospheric haze
-// - stronger silhouette separation
-// - safe scene cleanup
+// - ADVANCED BARRIER VISUALS
+// - barrier warning lights
+// - hazard stripes
+// - industrial frames
+// - bolts / panels
+// - energy cores
+// - vents
+// - cables
+// - animated neon pulse
+// - safe cleanup
 //
 // IMPORTANT:
-// Platform and barrier gameplay visuals remain preserved.
+// Existing physics objects are NEVER replaced.
+// Existing barrier dimensions/position are preserved.
+// All new objects are graphics-only.
 // ============================================================
 
+
+// ============================================================
+// MISSION STYLE
+// ============================================================
 
 const STYLE = {
   'first-delivery': {
@@ -96,15 +112,13 @@ const getStyle = scene =>
 
 
 // ============================================================
-// SAFE GRAPHICS HELPERS
+// SAFE HELPERS
 // ============================================================
 
 function safeDestroy(object) {
   try {
     object?.destroy?.();
-  } catch (_) {
-    // Visual cleanup must never break the scene.
-  }
+  } catch (_) {}
 }
 
 
@@ -124,36 +138,58 @@ function safeScroll(object, factor) {
 
 // ============================================================
 // PLATFORM VISUAL
-// PRESERVED GAMEPLAY-ADJACENT VISUAL LAYER
 // ============================================================
 
-function addPlatformVisual(scene, platform, index, style) {
-  if (!platform?.active || !scene?.add) {
+function addPlatformVisual(
+  scene,
+  platform,
+  index,
+  style
+) {
+  if (
+    !platform?.active ||
+    !scene?.add
+  ) {
     return null;
   }
 
   const width = Math.max(
     24,
-    platform.displayWidth || platform.width || 24
+    platform.displayWidth ||
+      platform.width ||
+      24
   );
 
   const height = Math.max(
     8,
-    platform.displayHeight || platform.height || 8
+    platform.displayHeight ||
+      platform.height ||
+      8
   );
 
-  const left = platform.x - width / 2;
-  const top = platform.y - height / 2;
+  const left =
+    platform.x -
+    width / 2;
+
+  const top =
+    platform.y -
+    height / 2;
 
   const type =
-    platform.getData?.('relayPlatformType') ||
-    (index % 3 === 0 ? 'roof' : 'street');
+    platform.getData?.(
+      'relayPlatformType'
+    ) ||
+    (
+      index % 3 === 0
+        ? 'roof'
+        : 'street'
+    );
 
-  const g = scene.add
-    .graphics()
-    .setDepth(4);
+  const g =
+    scene.add
+      .graphics()
+      .setDepth(4);
 
-  // PRESERVED.
   g.fillStyle(
     style.dark,
     .82
@@ -161,7 +197,10 @@ function addPlatformVisual(scene, platform, index, style) {
     left,
     top + 5,
     width,
-    Math.max(4, height - 5)
+    Math.max(
+      4,
+      height - 5
+    )
   );
 
   g.fillStyle(
@@ -180,7 +219,10 @@ function addPlatformVisual(scene, platform, index, style) {
   ).fillRect(
     left + 5,
     top + 4,
-    Math.max(8, width - 10),
+    Math.max(
+      8,
+      width - 10
+    ),
     2
   );
 
@@ -194,10 +236,14 @@ function addPlatformVisual(scene, platform, index, style) {
     4
   );
 
-  const step = Math.max(
-    30,
-    Math.min(54, width / 6)
-  );
+  const step =
+    Math.max(
+      30,
+      Math.min(
+        54,
+        width / 6
+      )
+    );
 
   for (
     let x = left + 10;
@@ -212,7 +258,10 @@ function addPlatformVisual(scene, platform, index, style) {
     ).fillRect(
       x,
       top + 9,
-      Math.min(18, step - 8),
+      Math.min(
+        18,
+        step - 8
+      ),
       3
     );
   }
@@ -239,46 +288,114 @@ function addPlatformVisual(scene, platform, index, style) {
 
 
 // ============================================================
-// BARRIER VISUAL
-// PRESERVED
+// ADVANCED BARRIER VISUAL
+// ============================================================
+// IMPORTANT:
+//
+// This function does NOT alter:
+// - barrier.x
+// - barrier.y
+// - barrier.width
+// - barrier.height
+// - physics
+// - collision
+//
+// It only draws graphics around the existing barrier.
 // ============================================================
 
-function addBarrierVisual(scene, barrier, index, style) {
-  if (!barrier?.active || !scene?.add) {
+function addBarrierVisual(
+  scene,
+  barrier,
+  index,
+  style
+) {
+  if (
+    !barrier?.active ||
+    !scene?.add
+  ) {
     return null;
   }
 
-  const w = Math.max(
-    40,
-    barrier.displayWidth || 48
-  );
+  const w =
+    Math.max(
+      40,
+      barrier.displayWidth ||
+        barrier.width ||
+        48
+    );
 
-  const h = Math.max(
-    52,
-    barrier.displayHeight || 64
-  );
+  const h =
+    Math.max(
+      52,
+      barrier.displayHeight ||
+        barrier.height ||
+        64
+    );
 
-  const x = barrier.x;
-  const y = barrier.y;
+  const x =
+    barrier.x;
 
-  const g = scene.add
-    .graphics()
-    .setDepth(7);
+  const y =
+    barrier.y;
 
-  // PRESERVED.
-  g.fillStyle(
+  const root =
+    scene.add
+      .graphics()
+      .setDepth(7);
+
+  // Deterministic visual type.
+  const variant =
+    index % 6;
+
+  // ----------------------------------------------------------
+  // SHADOW
+  // ----------------------------------------------------------
+
+  root.fillStyle(
     0x030914,
-    .38
+    .48
   ).fillEllipse(
     x,
-    y + h * .48,
-    w * 1.15,
+    y + h * .50,
+    w * 1.30,
+    10
+  );
+
+  // ----------------------------------------------------------
+  // OUTER ENERGY GLOW
+  // ----------------------------------------------------------
+
+  root.lineStyle(
+    6,
+    style.edge,
+    .035
+  ).strokeRoundedRect(
+    x - w / 2 - 8,
+    y - h / 2 - 8,
+    w + 16,
+    h + 16,
+    10
+  );
+
+  root.lineStyle(
+    3,
+    style.edge,
+    .09
+  ).strokeRoundedRect(
+    x - w / 2 - 5,
+    y - h / 2 - 5,
+    w + 10,
+    h + 10,
     8
   );
 
-  g.fillStyle(
-    style.dark,
-    .94
+  // ----------------------------------------------------------
+  // MAIN BODY
+  // ----------------------------------------------------------
+
+  root.fillStyle(
+    0x020812,
+    .98
   ).fillRoundedRect(
     x - w / 2 - 3,
     y - h / 2 - 3,
@@ -287,19 +404,50 @@ function addBarrierVisual(scene, barrier, index, style) {
     7
   );
 
-  g.lineStyle(
-    2,
-    style.edge,
-    .95
-  ).strokeRoundedRect(
-    x - w / 2 - 3,
-    y - h / 2 - 3,
-    w + 6,
-    h + 6,
-    7
+  root.fillStyle(
+    style.dark,
+    .98
+  ).fillRoundedRect(
+    x - w / 2,
+    y - h / 2,
+    w,
+    h,
+    6
   );
 
-  g.fillStyle(
+  // ----------------------------------------------------------
+  // OUTER FRAME
+  // ----------------------------------------------------------
+
+  root.lineStyle(
+    2,
+    style.edge,
+    .92
+  ).strokeRoundedRect(
+    x - w / 2,
+    y - h / 2,
+    w,
+    h,
+    6
+  );
+
+  root.lineStyle(
+    1,
+    style.bright,
+    .24
+  ).strokeRoundedRect(
+    x - w / 2 + 4,
+    y - h / 2 + 4,
+    w - 8,
+    h - 8,
+    4
+  );
+
+  // ----------------------------------------------------------
+  // TOP NEON STRIP
+  // ----------------------------------------------------------
+
+  root.fillStyle(
     style.edge,
     .95
   ).fillRect(
@@ -309,115 +457,782 @@ function addBarrierVisual(scene, barrier, index, style) {
     5
   );
 
-  g.fillStyle(
+  root.fillStyle(
     style.bright,
-    .34
+    .38
+  ).fillRect(
+    x - w / 2 + 7,
+    y - h / 2 - 1,
+    Math.max(
+      12,
+      w - 14
+    ),
+    2
+  );
+
+  // ----------------------------------------------------------
+  // BOTTOM WARNING STRIP
+  // ----------------------------------------------------------
+
+  root.fillStyle(
+    style.accent,
+    .32
   ).fillRect(
     x - w / 2 + 5,
-    y - h / 2 + 5,
+    y + h / 2 - 8,
     w - 10,
     3
   );
 
-  g.lineStyle(
+  // ----------------------------------------------------------
+  // CORNER BOLTS
+  // ----------------------------------------------------------
+
+  const boltOffsetX =
+    Math.max(
+      10,
+      w / 2 - 10
+    );
+
+  const boltOffsetY =
+    Math.max(
+      12,
+      h / 2 - 11
+    );
+
+  const bolts = [
+    [-boltOffsetX, -boltOffsetY],
+    [ boltOffsetX, -boltOffsetY],
+    [-boltOffsetX,  boltOffsetY],
+    [ boltOffsetX,  boltOffsetY]
+  ];
+
+  bolts.forEach(
+    ([bx, by]) => {
+      root.fillStyle(
+        style.bright,
+        .35
+      ).fillCircle(
+        x + bx,
+        y + by,
+        2
+      );
+
+      root.lineStyle(
+        1,
+        style.edge,
+        .22
+      ).strokeCircle(
+        x + bx,
+        y + by,
+        3
+      );
+    }
+  );
+
+  // ----------------------------------------------------------
+  // CENTRAL PANEL
+  // ----------------------------------------------------------
+
+  const panelW =
+    Math.max(
+      22,
+      w - 20
+    );
+
+  const panelH =
+    Math.max(
+      24,
+      h - 30
+    );
+
+  root.fillStyle(
+    0x050d19,
+    .92
+  ).fillRoundedRect(
+    x - panelW / 2,
+    y - panelH / 2,
+    panelW,
+    panelH,
+    4
+  );
+
+  root.lineStyle(
+    1,
+    style.edge,
+    .22
+  ).strokeRoundedRect(
+    x - panelW / 2,
+    y - panelH / 2,
+    panelW,
+    panelH,
+    4
+  );
+
+  // ----------------------------------------------------------
+  // VARIANT 0 — ENERGY CORE
+  // ----------------------------------------------------------
+
+  if (
+    variant === 0
+  ) {
+    root.fillStyle(
+      style.edge,
+      .10
+    ).fillCircle(
+      x,
+      y,
+      Math.min(
+        15,
+        w * .20
+      )
+    );
+
+    root.lineStyle(
+      2,
+      style.bright,
+      .45
+    ).strokeCircle(
+      x,
+      y,
+      Math.min(
+        11,
+        w * .15
+      )
+    );
+
+    root.lineStyle(
+      1,
+      style.edge,
+      .35
+    ).strokeCircle(
+      x,
+      y,
+      Math.min(
+        17,
+        w * .22
+      )
+    );
+
+    root.fillStyle(
+      style.bright,
+      .72
+    ).fillCircle(
+      x,
+      y,
+      3
+    );
+
+    // Energy rays.
+    root.lineStyle(
+      1,
+      style.edge,
+      .28
+    );
+
+    root.lineBetween(
+      x - 22,
+      y,
+      x - 8,
+      y
+    );
+
+    root.lineBetween(
+      x + 8,
+      y,
+      x + 22,
+      y
+    );
+
+    root.lineBetween(
+      x,
+      y - 22,
+      x,
+      y - 8
+    );
+
+    root.lineBetween(
+      x,
+      y + 8,
+      x,
+      y + 22
+    );
+
+  // ----------------------------------------------------------
+  // VARIANT 1 — INDUSTRIAL VENTS
+  // ----------------------------------------------------------
+
+  } else if (
+    variant === 1
+  ) {
+    const ventW =
+      Math.max(
+        24,
+        panelW - 16
+      );
+
+    const ventY =
+      y - 16;
+
+    for (
+      let i = 0;
+      i < 4;
+      i += 1
+    ) {
+      root.fillStyle(
+        style.bright,
+        .12
+      ).fillRect(
+        x - ventW / 2,
+        ventY + i * 9,
+        ventW,
+        3
+      );
+
+      root.lineStyle(
+        1,
+        style.edge,
+        .18
+      ).lineBetween(
+        x - ventW / 2,
+        ventY + i * 9,
+        x + ventW / 2,
+        ventY + i * 9
+      );
+    }
+
+  // ----------------------------------------------------------
+  // VARIANT 2 — WARNING HAZARD
+  // ----------------------------------------------------------
+
+  } else if (
+    variant === 2
+  ) {
+    const stripeW =
+      Math.max(
+        10,
+        panelW
+      );
+
+    root.fillStyle(
+      style.edge,
+      .13
+    ).fillRect(
+      x - stripeW / 2,
+      y - 15,
+      stripeW,
+      30
+    );
+
+    root.lineStyle(
+      3,
+      style.accent,
+      .34
+    );
+
+    for (
+      let sx =
+        x - stripeW / 2 - 18;
+      sx <
+        x + stripeW / 2 + 18;
+      sx += 15
+    ) {
+      root.lineBetween(
+        sx,
+        y + 15,
+        sx + 16,
+        y - 15
+      );
+    }
+
+  // ----------------------------------------------------------
+  // VARIANT 3 — REACTOR BOX
+  // ----------------------------------------------------------
+
+  } else if (
+    variant === 3
+  ) {
+    root.fillStyle(
+      style.accent,
+      .08
+    ).fillRect(
+      x - 18,
+      y - 18,
+      36,
+      36
+    );
+
+    root.lineStyle(
+      2,
+      style.edge,
+      .26
+    ).strokeRect(
+      x - 16,
+      y - 16,
+      32,
+      32
+    );
+
+    root.lineStyle(
+      1,
+      style.bright,
+      .22
+    );
+
+    root.lineBetween(
+      x - 12,
+      y - 12,
+      x + 12,
+      y + 12
+    );
+
+    root.lineBetween(
+      x + 12,
+      y - 12,
+      x - 12,
+      y + 12
+    );
+
+    root.fillStyle(
+      style.edge,
+      .62
+    ).fillCircle(
+      x,
+      y,
+      4
+    );
+
+  // ----------------------------------------------------------
+  // VARIANT 4 — NEON CONTROL PANEL
+  // ----------------------------------------------------------
+
+  } else if (
+    variant === 4
+  ) {
+    root.fillStyle(
+      style.bright,
+      .12
+    ).fillRect(
+      x - 22,
+      y - 17,
+      44,
+      5
+    );
+
+    root.fillStyle(
+      style.accent,
+      .20
+    ).fillRect(
+      x - 22,
+      y - 7,
+      29,
+      4
+    );
+
+    root.fillStyle(
+      style.edge,
+      .17
+    ).fillRect(
+      x - 22,
+      y + 2,
+      38,
+      4
+    );
+
+    root.fillStyle(
+      style.bright,
+      .42
+    ).fillCircle(
+      x + 18,
+      y + 13,
+      3
+    );
+
+  // ----------------------------------------------------------
+  // VARIANT 5 — HEAVY ARMORED BARRIER
+  // ----------------------------------------------------------
+
+  } else {
+    root.fillStyle(
+      style.dark,
+      .99
+    ).fillRect(
+      x - 5,
+      y - h / 2 + 9,
+      10,
+      h - 18
+    );
+
+    root.fillStyle(
+      style.edge,
+      .18
+    ).fillRect(
+      x - 2,
+      y - h / 2 + 12,
+      4,
+      h - 24
+    );
+
+    root.lineStyle(
+      2,
+      style.bright,
+      .18
+    );
+
+    root.lineBetween(
+      x - w / 2 + 10,
+      y - h / 2 + 13,
+      x + w / 2 - 10,
+      y - h / 2 + 13
+    );
+
+    root.lineBetween(
+      x - w / 2 + 10,
+      y + h / 2 - 13,
+      x + w / 2 - 10,
+      y + h / 2 - 13
+    );
+  }
+
+  // ----------------------------------------------------------
+  // SIDE LIGHTS
+  // ----------------------------------------------------------
+
+  root.fillStyle(
+    style.edge,
+    .55
+  ).fillRect(
+    x - w / 2 - 2,
+    y - h / 2 + 14,
+    3,
+    12
+  );
+
+  root.fillStyle(
+    style.edge,
+    .55
+  ).fillRect(
+    x + w / 2 - 1,
+    y - h / 2 + 14,
+    3,
+    12
+  );
+
+  root.fillStyle(
+    style.accent,
+    .40
+  ).fillRect(
+    x - w / 2 - 2,
+    y + h / 2 - 26,
+    3,
+    12
+  );
+
+  root.fillStyle(
+    style.accent,
+    .40
+  ).fillRect(
+    x + w / 2 - 1,
+    y + h / 2 - 26,
+    3,
+    12
+  );
+
+  // ----------------------------------------------------------
+  // TOP SIGNAL LIGHTS
+  // ----------------------------------------------------------
+
+  const signalY =
+    y -
+    h / 2 -
+    13;
+
+  const signalSpacing =
+    Math.max(
+      13,
+      w / 4
+    );
+
+  for (
+    let i = -1;
+    i <= 1;
+    i += 1
+  ) {
+    root.fillStyle(
+      i === 0
+        ? style.bright
+        : style.edge,
+      i === 0
+        ? .72
+        : .38
+    ).fillCircle(
+      x +
+        i *
+          signalSpacing,
+      signalY,
+      2
+    );
+  }
+
+  // ----------------------------------------------------------
+  // BOTTOM CIRCUIT LINE
+  // ----------------------------------------------------------
+
+  root.lineStyle(
+    1,
+    style.edge,
+    .20
+  );
+
+  root.lineBetween(
+    x - w / 2 + 12,
+    y + h / 2 - 17,
+    x - 8,
+    y + h / 2 - 17
+  );
+
+  root.lineBetween(
+    x + 8,
+    y + h / 2 - 17,
+    x + w / 2 - 12,
+    y + h / 2 - 17
+  );
+
+  // ----------------------------------------------------------
+  // WARNING TRIANGLE
+  // ----------------------------------------------------------
+
+  root.lineStyle(
+    1,
+    style.bright,
+    .30
+  );
+
+  root.lineBetween(
+    x,
+    y + 8,
+    x - 7,
+    y + 20
+  );
+
+  root.lineBetween(
+    x - 7,
+    y + 20,
+    x + 7,
+    y + 20
+  );
+
+  root.lineBetween(
+    x + 7,
+    y + 20,
+    x,
+    y + 8
+  );
+
+  root.fillStyle(
+    style.bright,
+    .38
+  ).fillRect(
+    x - 1,
+    y + 12,
+    2,
+    5
+  );
+
+  root.fillCircle(
+    x,
+    y + 19,
+    1
+  );
+
+  // ----------------------------------------------------------
+  // CABLES
+  // ----------------------------------------------------------
+
+  root.lineStyle(
+    2,
+    style.dark,
+    .98
+  ).lineBetween(
+    x - w / 2 - 3,
+    y - 6,
+    x - w / 2 - 17,
+    y + 9
+  );
+
+  root.lineStyle(
+    1,
+    style.edge,
+    .25
+  ).lineBetween(
+    x - w / 2 - 17,
+    y + 9,
+    x - w / 2 - 30,
+    y + 9
+  );
+
+  root.lineStyle(
+    2,
+    style.dark,
+    .98
+  ).lineBetween(
+    x + w / 2 + 3,
+    y - 6,
+    x + w / 2 + 17,
+    y + 9
+  );
+
+  root.lineStyle(
+    1,
+    style.edge,
+    .25
+  ).lineBetween(
+    x + w / 2 + 17,
+    y + 9,
+    x + w / 2 + 30,
+    y + 9
+  );
+
+  // ----------------------------------------------------------
+  // ANIMATED NEON PULSE
+  // ----------------------------------------------------------
+
+  const pulse =
+    scene.add
+      .graphics()
+      .setDepth(8);
+
+  pulse.lineStyle(
     2,
     style.bright,
-    .8
+    .55
+  ).strokeRoundedRect(
+    x - w / 2 - 2,
+    y - h / 2 - 2,
+    w + 4,
+    h + 4,
+    7
   );
 
-  g.lineBetween(
-    x - 11,
-    y + 8,
-    x,
-    y - 5
-  );
+  scene.tweens?.add?.({
+    targets: pulse,
+    alpha: {
+      from: .15,
+      to: .85
+    },
+    duration:
+      700 +
+      (index % 4) * 100,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.InOut'
+  });
 
-  g.lineBetween(
-    x,
-    y - 5,
-    x + 11,
-    y + 8
-  );
-
-  g.lineBetween(
-    x - 11,
-    y + 8,
-    x + 11,
-    y + 8
-  );
+  // ----------------------------------------------------------
+  // STORE VISUAL INDEX ONLY
+  // ----------------------------------------------------------
 
   barrier.setData?.(
     'relayVisualIndex',
     index
   );
 
-  return g;
+  return {
+    root,
+    pulse
+  };
 }
 
 
 // ============================================================
-// UPDATE 11 — DETERMINISTIC HASH
+// DETERMINISTIC RANDOMIZER
 // ============================================================
 
-function createWorldRandomizer(scene, id, worldWidth) {
+function createWorldRandomizer(
+  scene,
+  id,
+  worldWidth
+) {
   const seedBase =
     id
       .split('')
       .reduce(
-        (sum, char) =>
-          sum + char.charCodeAt(0),
+        (
+          sum,
+          char
+        ) =>
+          sum +
+          char.charCodeAt(0),
         0
       ) +
-    Math.floor(worldWidth);
-
-  const hash = value => {
-    let n =
-      (value ^ seedBase) | 0;
-
-    n = Math.imul(
-      n ^ (n >>> 16),
-      0x45d9f3b
+    Math.floor(
+      worldWidth
     );
 
-    n = Math.imul(
-      n ^ (n >>> 16),
-      0x45d9f3b
-    );
+  const hash =
+    value => {
+      let n =
+        (value ^
+          seedBase) |
+        0;
 
-    return (
-      n ^
-      (n >>> 16)
-    ) >>> 0;
-  };
+      n = Math.imul(
+        n ^
+          (n >>> 16),
+        0x45d9f3b
+      );
 
-  const pick = (
-    value,
-    max
-  ) => {
-    if (max <= 1) {
-      return 0;
-    }
+      n = Math.imul(
+        n ^
+          (n >>> 16),
+        0x45d9f3b
+      );
 
-    return hash(value) % max;
-  };
+      return (
+        n ^
+        (n >>> 16)
+      ) >>> 0;
+    };
 
-  const range = (
-    value,
-    min,
-    max
-  ) => {
-    if (max <= min) {
-      return min;
-    }
+  const pick =
+    (
+      value,
+      max
+    ) => {
+      if (
+        max <= 1
+      ) {
+        return 0;
+      }
 
-    return (
-      min +
-      pick(
-        value,
-        max - min + 1
-      )
-    );
-  };
+      return (
+        hash(value) %
+        max
+      );
+    };
+
+  const range =
+    (
+      value,
+      min,
+      max
+    ) => {
+      if (
+        max <= min
+      ) {
+        return min;
+      }
+
+      return (
+        min +
+        pick(
+          value,
+          max -
+            min +
+            1
+        )
+      );
+    };
 
   return {
     hash,
@@ -428,7 +1243,7 @@ function createWorldRandomizer(scene, id, worldWidth) {
 
 
 // ============================================================
-// UPDATE 11 — FAR SKYLINE
+// FAR BUILDING
 // ============================================================
 
 function drawFarBuilding(
@@ -443,9 +1258,9 @@ function drawFarBuilding(
   index
 ) {
   const roof =
-    base - height;
+    base -
+    height;
 
-  // Main distant silhouette.
   g.fillStyle(
     style.dark,
     .30
@@ -456,32 +1271,39 @@ function drawFarBuilding(
     height
   );
 
-  // Slight crown variation.
-  if (variant === 0) {
+  if (
+    variant === 0
+  ) {
     g.fillStyle(
       style.dark,
       .34
     ).fillRect(
-      x + width * .22,
+      x +
+        width * .22,
       roof - 18,
       width * .56,
       18
     );
   }
 
-  if (variant === 1) {
+  if (
+    variant === 1
+  ) {
     g.fillStyle(
       style.dark,
       .36
     ).fillRect(
-      x + width * .34,
+      x +
+        width * .34,
       roof - 30,
       width * .32,
       30
     );
   }
 
-  if (variant === 2) {
+  if (
+    variant === 2
+  ) {
     g.fillStyle(
       style.dark,
       .32
@@ -503,7 +1325,6 @@ function drawFarBuilding(
     );
   }
 
-  // Extremely sparse far windows.
   const windows =
     1 +
     random.pick(
@@ -518,7 +1339,8 @@ function drawFarBuilding(
   ) {
     if (
       random.pick(
-        index * 97 + w * 13,
+        index * 97 +
+          w * 13,
         5
       ) > 1
     ) {
@@ -542,7 +1364,6 @@ function drawFarBuilding(
     );
   }
 
-  // Occasional antenna.
   if (
     random.pick(
       index * 41 + 8,
@@ -568,7 +1389,7 @@ function drawFarBuilding(
 
 
 // ============================================================
-// UPDATE 11 — MID BUILDING WINDOWS
+// BUILDING WINDOWS
 // ============================================================
 
 function drawBuildingWindows(
@@ -583,19 +1404,23 @@ function drawBuildingWindows(
   buildingIndex,
   missionId
 ) {
-  const rows = Math.max(
-    3,
-    Math.floor(
-      (height - 70) / 46
-    )
-  );
+  const rows =
+    Math.max(
+      3,
+      Math.floor(
+        (height - 70) /
+          46
+      )
+    );
 
-  const cols = Math.max(
-    2,
-    Math.floor(
-      (width - 42) / 38
-    )
-  );
+  const cols =
+    Math.max(
+      2,
+      Math.floor(
+        (width - 42) /
+          38
+      )
+    );
 
   for (
     let row = 0;
@@ -609,15 +1434,16 @@ function drawBuildingWindows(
     ) {
       const chance =
         random.pick(
-          buildingIndex * 10000 +
+          buildingIndex *
+            10000 +
             row * 173 +
             col * 47,
           12
         );
 
-      // Blackout = dramatically fewer lights.
       const threshold =
-        missionId === 'blackout'
+        missionId ===
+        'blackout'
           ? 1
           : 4;
 
@@ -664,9 +1490,11 @@ function drawBuildingWindows(
           : 5;
 
       const alpha =
-        missionId === 'signal-storm'
+        missionId ===
+        'signal-storm'
           ? .18
-          : missionId === 'blackout'
+          : missionId ===
+              'blackout'
             ? .075
             : .14;
 
@@ -687,10 +1515,10 @@ function drawBuildingWindows(
         wh
       );
 
-      // Occasional vertical window pair.
       if (
         random.pick(
-          buildingIndex * 71 +
+          buildingIndex *
+            71 +
             row * 19 +
             col * 7,
           9
@@ -712,7 +1540,7 @@ function drawBuildingWindows(
 
 
 // ============================================================
-// UPDATE 11 — ROOFTOP MACHINERY
+// ROOFTOP MACHINE
 // ============================================================
 
 function drawRooftopMachine(
@@ -742,8 +1570,9 @@ function drawRooftopMachine(
           100
       );
 
-  if (type === 0) {
-    // Cooling unit.
+  if (
+    type === 0
+  ) {
     const mw = 34;
     const mh = 18;
 
@@ -789,8 +1618,9 @@ function drawRooftopMachine(
       );
     }
 
-  } else if (type === 1) {
-    // Antenna mast.
+  } else if (
+    type === 1
+  ) {
     g.lineStyle(
       2,
       style.edge,
@@ -822,8 +1652,9 @@ function drawRooftopMachine(
       2
     );
 
-  } else if (type === 2) {
-    // Satellite dish.
+  } else if (
+    type === 2
+  ) {
     g.fillStyle(
       style.dark,
       .98
@@ -865,8 +1696,9 @@ function drawRooftopMachine(
       2
     );
 
-  } else if (type === 3) {
-    // Neon service box.
+  } else if (
+    type === 3
+  ) {
     g.fillStyle(
       style.dark,
       .98
@@ -898,7 +1730,6 @@ function drawRooftopMachine(
     );
 
   } else {
-    // Water / fuel cylinder.
     g.fillStyle(
       style.dark,
       .98
@@ -936,7 +1767,7 @@ function drawRooftopMachine(
 
 
 // ============================================================
-// UPDATE 11 — NEON FACADE
+// FACADE ACCENT
 // ============================================================
 
 function drawFacadeAccent(
@@ -956,7 +1787,9 @@ function drawFacadeAccent(
       5
     );
 
-  if (mode === 0) {
+  if (
+    mode === 0
+  ) {
     g.fillStyle(
       style.edge,
       .13
@@ -970,7 +1803,9 @@ function drawFacadeAccent(
       )
     );
 
-  } else if (mode === 1) {
+  } else if (
+    mode === 1
+  ) {
     g.fillStyle(
       style.accent,
       .14
@@ -984,7 +1819,9 @@ function drawFacadeAccent(
       )
     );
 
-  } else if (mode === 2) {
+  } else if (
+    mode === 2
+  ) {
     const bandY =
       roof +
       55 +
@@ -1016,7 +1853,9 @@ function drawFacadeAccent(
       3
     );
 
-  } else if (mode === 3) {
+  } else if (
+    mode === 3
+  ) {
     g.lineStyle(
       1,
       style.bright,
@@ -1040,7 +1879,6 @@ function drawFacadeAccent(
     );
 
   } else {
-    // Small architectural corner light.
     g.fillStyle(
       style.bright,
       .16
@@ -1058,7 +1896,7 @@ function drawFacadeAccent(
 
 
 // ============================================================
-// UPDATE 11 — BILLBOARD
+// BILLBOARD
 // ============================================================
 
 function drawBillboard(
@@ -1083,7 +1921,6 @@ function drawBillboard(
       height
     );
 
-  // Support structure.
   g.lineStyle(
     2,
     style.dark,
@@ -1106,7 +1943,6 @@ function drawBillboard(
     y + boardH + 32
   );
 
-  // Outer frame.
   g.fillStyle(
     style.dark,
     .98
@@ -1130,7 +1966,6 @@ function drawBillboard(
     4
   );
 
-  // Screen.
   g.fillStyle(
     style.edge,
     .08
@@ -1141,7 +1976,6 @@ function drawBillboard(
     boardH - 12
   );
 
-  // Neon bars.
   const flip =
     random.pick(
       index * 97 + 11,
@@ -1176,7 +2010,6 @@ function drawBillboard(
     3
   );
 
-  // Small corner indicator.
   g.fillStyle(
     style.edge,
     .28
@@ -1189,7 +2022,7 @@ function drawBillboard(
 
 
 // ============================================================
-// UPDATE 11 — CABLE / PIPE NETWORK
+// INFRASTRUCTURE
 // ============================================================
 
 function drawInfrastructure(
@@ -1232,8 +2065,9 @@ function drawInfrastructure(
         4
       );
 
-    if (variant === 0) {
-      // Main suspended cable.
+    if (
+      variant === 0
+    ) {
       g.lineStyle(
         2,
         style.edge,
@@ -1256,8 +2090,9 @@ function drawInfrastructure(
         y + 5
       );
 
-    } else if (variant === 1) {
-      // Parallel service pipe.
+    } else if (
+      variant === 1
+    ) {
       g.lineStyle(
         4,
         style.dark,
@@ -1297,8 +2132,9 @@ function drawInfrastructure(
         );
       }
 
-    } else if (variant === 2) {
-      // Vertical service lines.
+    } else if (
+      variant === 2
+    ) {
       const vx =
         x +
         random.pick(
@@ -1332,7 +2168,6 @@ function drawInfrastructure(
       );
 
     } else {
-      // Broken cable segment.
       g.lineStyle(
         1,
         style.edge,
@@ -1360,7 +2195,7 @@ function drawInfrastructure(
 
 
 // ============================================================
-// UPDATE 11 — MAIN CITY
+// MAIN CITY
 // ============================================================
 
 function addDistrictVariation(
@@ -1375,7 +2210,8 @@ function addDistrictVariation(
   }
 
   const id =
-    scene.mission?.id || '';
+    scene.mission?.id ||
+    '';
 
   const worldWidth =
     Math.max(
@@ -1390,36 +2226,38 @@ function addDistrictVariation(
       worldWidth
     );
 
-  const base = 610;
+  const base =
+    610;
 
-  // ----------------------------------------------------------
-  // PARALLAX LAYERS
-  // ----------------------------------------------------------
+  const far =
+    scene.add
+      .graphics()
+      .setScrollFactor(.13)
+      .setDepth(-2);
 
-  const far = scene.add
-    .graphics()
-    .setScrollFactor(.13)
-    .setDepth(-2);
+  const farGlow =
+    scene.add
+      .graphics()
+      .setScrollFactor(.18)
+      .setDepth(-1.5);
 
-  const farGlow = scene.add
-    .graphics()
-    .setScrollFactor(.18)
-    .setDepth(-1.5);
+  const mid =
+    scene.add
+      .graphics()
+      .setScrollFactor(.30)
+      .setDepth(.55);
 
-  const mid = scene.add
-    .graphics()
-    .setScrollFactor(.30)
-    .setDepth(.55);
+  const near =
+    scene.add
+      .graphics()
+      .setScrollFactor(.44)
+      .setDepth(1);
 
-  const near = scene.add
-    .graphics()
-    .setScrollFactor(.44)
-    .setDepth(1);
-
-  const haze = scene.add
-    .graphics()
-    .setScrollFactor(.36)
-    .setDepth(2);
+  const haze =
+    scene.add
+      .graphics()
+      .setScrollFactor(.36)
+      .setDepth(2);
 
   // ----------------------------------------------------------
   // FAR HORIZON
@@ -1470,7 +2308,6 @@ function addDistrictVariation(
     );
   }
 
-  // Far horizon lights.
   for (
     let x = -200, i = 0;
     x < worldWidth + 400;
@@ -1499,10 +2336,11 @@ function addDistrictVariation(
   }
 
   // ----------------------------------------------------------
-  // MID CITY — MANY ARCHETYPES
+  // MID CITY
   // ----------------------------------------------------------
 
-  const buildingSpacing = 188;
+  const buildingSpacing =
+    188;
 
   for (
     let x = -220, i = 0;
@@ -1529,20 +2367,19 @@ function addDistrictVariation(
         190
       );
 
-    const left = x;
+    const left =
+      x;
+
     const right =
       x + width;
 
     const roof =
-      base - height;
+      base -
+      height;
 
     const cx =
       left +
       width * .5;
-
-    // --------------------------------------------------------
-    // BASE MASS
-    // --------------------------------------------------------
 
     mid.fillStyle(
       style.dark,
@@ -1554,11 +2391,9 @@ function addDistrictVariation(
       height
     );
 
-    // --------------------------------------------------------
-    // ARCHETYPE 0 — TOWER CROWN
-    // --------------------------------------------------------
-
-    if (archetype === 0) {
+    if (
+      archetype === 0
+    ) {
       mid.fillStyle(
         style.dark,
         .99
@@ -1590,11 +2425,9 @@ function addDistrictVariation(
         roof - 92
       );
 
-    // --------------------------------------------------------
-    // ARCHETYPE 1 — OFFSET TOWER
-    // --------------------------------------------------------
-
-    } else if (archetype === 1) {
+    } else if (
+      archetype === 1
+    ) {
       mid.fillStyle(
         style.dark,
         .99
@@ -1625,11 +2458,9 @@ function addDistrictVariation(
         height - 18
       );
 
-    // --------------------------------------------------------
-    // ARCHETYPE 2 — SHOULDERS
-    // --------------------------------------------------------
-
-    } else if (archetype === 2) {
+    } else if (
+      archetype === 2
+    ) {
       mid.fillStyle(
         style.dark,
         .99
@@ -1660,11 +2491,9 @@ function addDistrictVariation(
         5
       );
 
-    // --------------------------------------------------------
-    // ARCHETYPE 3 — STACKED CROWN
-    // --------------------------------------------------------
-
-    } else if (archetype === 3) {
+    } else if (
+      archetype === 3
+    ) {
       mid.fillStyle(
         style.dark,
         .99
@@ -1696,11 +2525,9 @@ function addDistrictVariation(
         roof - 48
       );
 
-    // --------------------------------------------------------
-    // ARCHETYPE 4 — SPLIT BLOCK
-    // --------------------------------------------------------
-
-    } else if (archetype === 4) {
+    } else if (
+      archetype === 4
+    ) {
       mid.fillStyle(
         style.dark,
         .99
@@ -1731,11 +2558,9 @@ function addDistrictVariation(
         14
       );
 
-    // --------------------------------------------------------
-    // ARCHETYPE 5 — CENTRAL SPIRE
-    // --------------------------------------------------------
-
-    } else if (archetype === 5) {
+    } else if (
+      archetype === 5
+    ) {
       mid.fillStyle(
         style.dark,
         .99
@@ -1767,11 +2592,9 @@ function addDistrictVariation(
         roof - 86
       );
 
-    // --------------------------------------------------------
-    // ARCHETYPE 6 — INDUSTRIAL BLOCK
-    // --------------------------------------------------------
-
-    } else if (archetype === 6) {
+    } else if (
+      archetype === 6
+    ) {
       mid.fillStyle(
         style.dark,
         .99
@@ -1802,11 +2625,9 @@ function addDistrictVariation(
         6
       );
 
-    // --------------------------------------------------------
-    // ARCHETYPE 7 — TERRACED BUILDING
-    // --------------------------------------------------------
-
-    } else if (archetype === 7) {
+    } else if (
+      archetype === 7
+    ) {
       mid.fillStyle(
         style.dark,
         .99
@@ -1837,11 +2658,9 @@ function addDistrictVariation(
         3
       );
 
-    // --------------------------------------------------------
-    // ARCHETYPE 8 — NARROW NEON TOWER
-    // --------------------------------------------------------
-
-    } else if (archetype === 8) {
+    } else if (
+      archetype === 8
+    ) {
       mid.fillStyle(
         style.dark,
         .99
@@ -1884,10 +2703,6 @@ function addDistrictVariation(
           height - 120
         )
       );
-
-    // --------------------------------------------------------
-    // ARCHETYPE 9 — MEGA BLOCK
-    // --------------------------------------------------------
 
     } else {
       mid.fillStyle(
@@ -1967,10 +2782,6 @@ function addDistrictVariation(
       base
     );
 
-    // --------------------------------------------------------
-    // WINDOWS
-    // --------------------------------------------------------
-
     drawBuildingWindows(
       mid,
       left,
@@ -1984,10 +2795,6 @@ function addDistrictVariation(
       id
     );
 
-    // --------------------------------------------------------
-    // NEON FACADE
-    // --------------------------------------------------------
-
     drawFacadeAccent(
       mid,
       left,
@@ -2000,10 +2807,6 @@ function addDistrictVariation(
       i
     );
 
-    // --------------------------------------------------------
-    // ROOFTOP EDGE
-    // --------------------------------------------------------
-
     mid.fillStyle(
       style.edge,
       .20
@@ -2013,10 +2816,6 @@ function addDistrictVariation(
       width - 24,
       5
     );
-
-    // --------------------------------------------------------
-    // ROOFTOP MACHINERY
-    // --------------------------------------------------------
 
     if (
       random.pick(
@@ -2036,14 +2835,15 @@ function addDistrictVariation(
     }
 
     // --------------------------------------------------------
-    // MISSION-SPECIFIC ARCHITECTURE
+    // MISSION ARCHITECTURE
     // --------------------------------------------------------
 
     if (
-      id === 'corporate-lockdown' ||
-      id === 'final-relay'
+      id ===
+        'corporate-lockdown' ||
+      id ===
+        'final-relay'
     ) {
-      // Corporate glass panel.
       mid.fillStyle(
         style.edge,
         .075
@@ -2079,9 +2879,9 @@ function addDistrictVariation(
       );
 
     } else if (
-      id === 'dead-drop'
+      id ===
+      'dead-drop'
     ) {
-      // Hidden rooftop relay.
       mid.fillStyle(
         style.accent,
         .12
@@ -2104,9 +2904,9 @@ function addDistrictVariation(
       );
 
     } else if (
-      id === 'signal-storm'
+      id ===
+      'signal-storm'
     ) {
-      // Signal dish / energy receiver.
       mid.lineStyle(
         2,
         style.edge,
@@ -2131,9 +2931,9 @@ function addDistrictVariation(
       );
 
     } else if (
-      id === 'blackout'
+      id ===
+      'blackout'
     ) {
-      // Emergency blackout strips.
       mid.fillStyle(
         style.edge,
         .055
@@ -2155,9 +2955,9 @@ function addDistrictVariation(
       );
 
     } else if (
-      id === 'pursuit'
+      id ===
+      'pursuit'
     ) {
-      // Warning stripe.
       mid.fillStyle(
         style.edge,
         .10
@@ -2169,7 +2969,6 @@ function addDistrictVariation(
       );
 
     } else {
-      // Generic urban signage.
       if (
         random.pick(
           i * 71 + 41,
@@ -2191,10 +2990,6 @@ function addDistrictVariation(
       }
     }
 
-    // --------------------------------------------------------
-    // OCCASIONAL BILLBOARD
-    // --------------------------------------------------------
-
     if (
       random.pick(
         i * 107 + 31,
@@ -2204,8 +2999,7 @@ function addDistrictVariation(
       drawBillboard(
         mid,
         left +
-          width *
-            .55,
+          width * .55,
         roof +
           70 +
           random.pick(
@@ -2287,10 +3081,6 @@ function addDistrictVariation(
         base -
         height;
 
-      // ------------------------------------------------------
-      // MAIN HERO BODY
-      // ------------------------------------------------------
-
       mid.fillStyle(
         style.dark,
         .99
@@ -2300,10 +3090,6 @@ function addDistrictVariation(
         width,
         height - 34
       );
-
-      // ------------------------------------------------------
-      // HERO 0 — RELAY TOWER
-      // ------------------------------------------------------
 
       if (
         heroType === 0
@@ -2359,10 +3145,6 @@ function addDistrictVariation(
           3
         );
 
-      // ------------------------------------------------------
-      // HERO 1 — CORPORATE MONOLITH
-      // ------------------------------------------------------
-
       } else if (
         heroType === 1
       ) {
@@ -2406,30 +3188,6 @@ function addDistrictVariation(
           width * .40,
           8
         );
-
-        mid.fillStyle(
-          style.bright,
-          .10
-        ).fillRect(
-          left + width * .30,
-          roof + 108,
-          width * .26,
-          5
-        );
-
-        mid.fillStyle(
-          style.edge,
-          .08
-        ).fillRect(
-          left + width * .30,
-          roof + 132,
-          width * .40,
-          3
-        );
-
-      // ------------------------------------------------------
-      // HERO 2 — INDUSTRIAL MEGA TOWER
-      // ------------------------------------------------------
 
       } else if (
         heroType === 2
@@ -2496,7 +3254,6 @@ function addDistrictVariation(
           base
         );
 
-        // Industrial rooftop mast.
         mid.lineStyle(
           2,
           style.bright,
@@ -2507,10 +3264,6 @@ function addDistrictVariation(
           center,
           roof - 65
         );
-
-      // ------------------------------------------------------
-      // HERO 3 — NEON SPIRE
-      // ------------------------------------------------------
 
       } else if (
         heroType === 3
@@ -2558,19 +3311,6 @@ function addDistrictVariation(
           )
         );
 
-        mid.fillStyle(
-          style.edge,
-          .14
-        ).fillRect(
-          right - width * .24 - 6,
-          roof + 118,
-          6,
-          Math.min(
-            130,
-            height - 150
-          )
-        );
-
         mid.lineStyle(
           2,
           style.bright,
@@ -2581,10 +3321,6 @@ function addDistrictVariation(
           center,
           roof - 76
         );
-
-      // ------------------------------------------------------
-      // HERO 4 — BRIDGE TOWER
-      // ------------------------------------------------------
 
       } else if (
         heroType === 4
@@ -2646,10 +3382,6 @@ function addDistrictVariation(
           roof + 22
         );
 
-      // ------------------------------------------------------
-      // HERO 5 — SIGNAL CITADEL
-      // ------------------------------------------------------
-
       } else {
         mid.fillStyle(
           style.dark,
@@ -2692,16 +3424,6 @@ function addDistrictVariation(
           100
         );
 
-        mid.fillStyle(
-          style.bright,
-          .12
-        ).fillRect(
-          center - width * .20,
-          roof + 98,
-          width * .40,
-          5
-        );
-
         mid.lineStyle(
           2,
           style.edge,
@@ -2723,19 +3445,19 @@ function addDistrictVariation(
         );
       }
 
-      // ------------------------------------------------------
-      // HERO WINDOW BANDS
-      // ------------------------------------------------------
-
       for (
-        let band = roof + 70;
-        band < base - 40;
+        let band =
+          roof + 70;
+        band <
+        base - 40;
         band += 54
       ) {
         if (
           random.pick(
             heroIndex * 200 +
-              Math.floor(band),
+              Math.floor(
+                band
+              ),
             5
           ) > 2
         ) {
@@ -2760,13 +3482,13 @@ function addDistrictVariation(
           band + 10,
           Math.max(
             30,
-            (width - 48) * .42
+            (width - 48) *
+              .42
           ),
           4
         );
       }
 
-      // Hero rooftop line.
       mid.fillStyle(
         style.edge,
         .24
@@ -2777,7 +3499,6 @@ function addDistrictVariation(
         4
       );
 
-      // Small rooftop machines.
       drawRooftopMachine(
         mid,
         left,
@@ -2864,7 +3585,6 @@ function addDistrictVariation(
     if (
       accentType === 0
     ) {
-      // Suspended rail.
       near.lineStyle(
         5,
         style.dark,
@@ -2908,7 +3628,6 @@ function addDistrictVariation(
     } else if (
       accentType === 1
     ) {
-      // Service sign.
       near.fillStyle(
         style.dark,
         .95
@@ -2942,23 +3661,9 @@ function addDistrictVariation(
         5
       );
 
-      near.fillStyle(
-        style.bright,
-        .08
-      ).fillRect(
-        x + 12,
-        y + 22,
-        Math.max(
-          20,
-          width * .38
-        ),
-        3
-      );
-
     } else if (
       accentType === 2
     ) {
-      // Ventilation unit.
       near.fillStyle(
         style.dark,
         .96
@@ -3002,7 +3707,6 @@ function addDistrictVariation(
     } else if (
       accentType === 3
     ) {
-      // Large diagonal pipe.
       near.lineStyle(
         6,
         style.dark,
@@ -3028,7 +3732,6 @@ function addDistrictVariation(
     } else if (
       accentType === 4
     ) {
-      // Rooftop antenna cluster.
       near.lineStyle(
         2,
         style.edge,
@@ -3051,17 +3754,6 @@ function addDistrictVariation(
         y + 5
       );
 
-      near.lineStyle(
-        1,
-        style.bright,
-        .10
-      ).lineBetween(
-        x + 12,
-        y - 8,
-        x + 36,
-        y - 8
-      );
-
       near.fillStyle(
         style.edge,
         .24
@@ -3072,7 +3764,6 @@ function addDistrictVariation(
       );
 
     } else {
-      // Cable frame.
       near.lineStyle(
         2,
         style.edge,
@@ -3120,7 +3811,7 @@ function addDistrictVariation(
   );
 
   // ==========================================================
-  // FOREGROUND SILHOUETTE BITS
+  // FOREGROUND SILHOUETTE
   // ==========================================================
 
   for (
@@ -3149,8 +3840,7 @@ function addDistrictVariation(
       );
 
     const y =
-      base -
-      h;
+      base - h;
 
     if (
       type === 0
@@ -3258,7 +3948,6 @@ function addDistrictVariation(
     55
   );
 
-  // Thin horizon line.
   haze.fillStyle(
     style.edge,
     .025
@@ -3351,7 +4040,9 @@ function relayComboPulse(
     duration,
     ease: 'Cubic.Out',
     onComplete: () => {
-      safeDestroy(ring);
+      safeDestroy(
+        ring
+      );
     }
   });
 }
@@ -3397,10 +4088,14 @@ function comboFeedback(
 // SETUP
 // ============================================================
 
-function setup(scene) {
+function setup(
+  scene
+) {
   if (
     !scene ||
-    stateByScene.has(scene)
+    stateByScene.has(
+      scene
+    )
   ) {
     return;
   }
@@ -3450,7 +4145,9 @@ function setup(scene) {
             style
           );
 
-        if (visual) {
+        if (
+          visual
+        ) {
           state.platforms.push(
             visual
           );
@@ -3459,7 +4156,7 @@ function setup(scene) {
     );
 
   // ----------------------------------------------------------
-  // BARRIER VISUALS
+  // ADVANCED BARRIER VISUALS
   // ----------------------------------------------------------
 
   scene.barriers
@@ -3477,7 +4174,9 @@ function setup(scene) {
             style
           );
 
-        if (visual) {
+        if (
+          visual
+        ) {
           state.barriers.push(
             visual
           );
@@ -3492,7 +4191,9 @@ function setup(scene) {
   const events =
     scene.game?.events;
 
-  if (events) {
+  if (
+    events
+  ) {
     const onFeedback =
       kind => {
         if (
@@ -3504,7 +4205,8 @@ function setup(scene) {
 
         // Gadget feedback.
         if (
-          kind === 'gadget'
+          kind ===
+          'gadget'
         ) {
           scene.gadgetPulse?.(
             style.edge,
@@ -3515,7 +4217,8 @@ function setup(scene) {
 
         // Hit feedback.
         if (
-          kind === 'hit'
+          kind ===
+          'hit'
         ) {
           const pulse =
             scene.add
@@ -3609,16 +4312,17 @@ function setup(scene) {
     };
 
   // ----------------------------------------------------------
-  // SAFE SCENE SHUTDOWN
+  // SAFE SHUTDOWN
   // ----------------------------------------------------------
 
   scene.events?.once?.(
     'shutdown',
     () => {
-      // Stop event listeners first.
+
+      // Event listeners.
       state.cleanup?.();
 
-      // Remove platform visual layers.
+      // Platform graphics.
       state.platforms.forEach(
         item => {
           safeDestroy(
@@ -3627,20 +4331,37 @@ function setup(scene) {
         }
       );
 
-      // Remove barrier visual layers.
+      // Barrier graphics.
       state.barriers.forEach(
         item => {
-          safeDestroy(
-            item
-          );
+
+          // New barrier visuals
+          // can be either:
+          // { root, pulse }
+          // or a legacy Graphics object.
+          if (
+            item?.root
+          ) {
+            safeDestroy(
+              item.root
+            );
+          }
+
+          if (
+            item?.pulse
+          ) {
+            safeDestroy(
+              item.pulse
+            );
+          } else {
+            safeDestroy(
+              item
+            );
+          }
         }
       );
 
-      // ------------------------------------------------------
-      // IMPORTANT:
-      // COMPLETE UPDATE 11 BACKGROUND CLEANUP
-      // ------------------------------------------------------
-
+      // Background.
       safeDestroy(
         state.background?.far
       );
@@ -3673,7 +4394,7 @@ function setup(scene) {
         }
       }
 
-      // Finally release state.
+      // Release state.
       stateByScene.delete(
         scene
       );
@@ -3688,12 +4409,12 @@ function setup(scene) {
 
 function install() {
   if (
-    window.__relayUpdate11WorldVariation
+    window.__relayUpdate12WorldVariation
   ) {
     return;
   }
 
-  window.__relayUpdate11WorldVariation =
+  window.__relayUpdate12WorldVariation =
     true;
 
   const ready =
@@ -3702,8 +4423,12 @@ function install() {
         event?.detail?.scene ||
         window.__relayRunnerScene;
 
-      if (scene) {
-        setup(scene);
+      if (
+        scene
+      ) {
+        setup(
+          scene
+        );
       }
     };
 
@@ -3740,4 +4465,4 @@ if (
   );
 } else {
   install();
-        }
+      }
