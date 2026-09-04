@@ -7,7 +7,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   if (window.__relayDynamicTimeCycleV6) return;
   window.__relayDynamicTimeCycleV6 = true;
 
-  const CYCLE_MS = 90_000;
+  const CYCLE_MS = 300_000;
   const START_HOUR = 6;
   const MINUTES_PER_DAY = 24 * 60;
   const LEGACY_DOM_IDS = ['relayTimeShade', 'relayTimeIndicator', 'relaySkyAtmosphere', 'relaySkyCelestial', 'relaySkyStars', 'relaySkyClouds'];
