@@ -1,44 +1,61 @@
 import Phaser from 'phaser';
 
 // ============================================================
-// RELAY GAMEPLAY EXPANSION V2 — SAFE / POLISHED
+// RELAY GAMEPLAY EXPANSION V2 — FINAL SAFE
 // ============================================================
-// New gameplay only.
-// Existing RunnerScene movement/combat/state remains authoritative.
+// Adds optional gameplay mechanics to RunnerScene.
 //
-// FIXES:
-// - state(...) typo fixed everywhere -> getState(...)
-// - safer Phaser physics handling
-// - safer keyboard handling
-// - proper cleanup on shutdown
-// - no duplicate installation
-// - rewind cannot lock player permanently
-// - safer entity destruction
-// - stronger visual feedback / tweens
-// - mobile pointer interaction supported
-// - HUD labels remain readable
-// - no modification of existing player combat/state logic
+// IMPORTANT:
+// - Existing RunnerScene movement remains authoritative.
+// - Existing combat remains authoritative.
+// - Existing mission/state remains authoritative.
+// - This module owns ONLY objects created by this module.
+// - Safe to install once.
+// - Safe to shut down/restart.
+// - Desktop keyboard + mobile pointer interaction supported.
 // ============================================================
 
 const NS = '__relayGameplayExpansionV2Safe';
 
 const LAYOUT = {
-  'first-delivery': ['magnetic', 'conveyor', 'rewind'],
-  'dead-drop': ['conveyor', 'pressure', 'weight'],
-  blackout: ['phase', 'signalIntercept', 'magnetic'],
-  pursuit: ['rotation', 'weight', 'signalIntercept'],
+  'first-delivery': [
+    'magnetic',
+    'conveyor',
+    'rewind'
+  ],
+
+  'dead-drop': [
+    'conveyor',
+    'pressure',
+    'weight'
+  ],
+
+  blackout: [
+    'phase',
+    'signalIntercept',
+    'magnetic'
+  ],
+
+  pursuit: [
+    'rotation',
+    'weight',
+    'signalIntercept'
+  ],
+
   'signal-storm': [
     'magnetic',
     'phase',
     'rewind',
     'signalIntercept'
   ],
+
   'corporate-lockdown': [
     'pressure',
     'conveyor',
     'weight',
     'phase'
   ],
+
   'final-relay': [
     'rotation',
     'magnetic',
@@ -64,55 +81,76 @@ const clamp = (value, min, max) =>
 const lerp = (a, b, t) =>
   a + (b - a) * t;
 
-
 // ============================================================
 // STATE
 // ============================================================
 
 function getState(scene) {
-  if (scene[NS]) return scene[NS];
+  if (scene[NS]) {
+    return scene[NS];
+  }
 
   const enabled = Object.fromEntries(
-    FEATURES.map(key => [key, false])
+    FEATURES.map(key => [
+      key,
+      false
+    ])
   );
 
-  for (const key of LAYOUT[scene.mission?.id] || []) {
+  const missionId =
+    scene.mission?.id;
+
+  for (
+    const key of LAYOUT[missionId] || []
+  ) {
     enabled[key] = true;
   }
 
   scene[NS] = {
     enabled,
+
     entities: {},
+
     timers: new Set(),
+
     tweens: new Set(),
+
     objects: new Set(),
+
     destroyed: false,
+
     initialized: false,
+
     polarity: 1
   };
 
   return scene[NS];
 }
 
-
 // ============================================================
 // SAFE HELPERS
 // ============================================================
 
 function rememberObject(scene, object) {
-  if (!object) return object;
+  if (!object) {
+    return object;
+  }
 
-  const st = getState(scene);
-  st.objects.add(object);
+  getState(scene)
+    .objects
+    .add(object);
 
   return object;
 }
 
 function rememberTween(scene, tween) {
-  if (!tween) return tween;
+  if (!tween) {
+    return tween;
+  }
 
-  const st = getState(scene);
-  st.tweens.add(tween);
+  getState(scene)
+    .tweens
+    .add(tween);
 
   return tween;
 }
@@ -126,7 +164,10 @@ function safeDestroy(object) {
 function safeDisableBody(object) {
   try {
     if (object?.disableBody) {
-      object.disableBody(true, true);
+      object.disableBody(
+        true,
+        true
+      );
       return;
     }
 
@@ -136,87 +177,172 @@ function safeDisableBody(object) {
   } catch {}
 }
 
-function timer(scene, fn, delay) {
-  const st = getState(scene);
+function cue(
+  scene,
+  value,
+  color = '#8df4ff'
+) {
+  try {
+    scene.playerCue?.(
+      value,
+      color
+    );
+  } catch {}
+}
 
-  if (st.destroyed) return null;
+function onKey(
+  scene,
+  key,
+  handler,
+  name
+) {
+  const keyboard =
+    scene.input?.keyboard;
+
+  if (
+    !keyboard ||
+    typeof handler !== 'function'
+  ) {
+    return;
+  }
+
+  const event =
+    `keydown-${key}`;
+
+  try {
+    keyboard.off(
+      event,
+      handler
+    );
+
+    keyboard.on(
+      event,
+      handler
+    );
+
+    getState(scene)
+      .entities[name] =
+      handler;
+  } catch {}
+}
+
+function timer(
+  scene,
+  fn,
+  delay
+) {
+  const st =
+    getState(scene);
+
+  if (
+    st.destroyed ||
+    !scene.time
+  ) {
+    return null;
+  }
 
   let handle = null;
 
-  handle = scene.time.delayedCall(delay, () => {
-    st.timers.delete(handle);
+  handle =
+    scene.time.delayedCall(
+      delay,
+      () => {
+        st.timers.delete(
+          handle
+        );
 
-    if (!st.destroyed) {
-      try {
-        fn();
-      } catch (error) {
-        console.warn('[Relay] timer error:', error);
+        if (
+          st.destroyed
+        ) {
+          return;
+        }
+
+        try {
+          fn();
+        } catch (error) {
+          console.warn(
+            '[Relay] Gameplay timer error:',
+            error
+          );
+        }
       }
-    }
-  });
+    );
 
-  st.timers.add(handle);
+  st.timers.add(
+    handle
+  );
 
   return handle;
 }
 
-function onKey(scene, key, handler, name) {
-  const keyboard = scene.input?.keyboard;
-
-  if (!keyboard || typeof handler !== 'function') {
-    return;
-  }
-
-  const event = `keydown-${key}`;
-
-  keyboard.off(event, handler);
-  keyboard.on(event, handler);
-
-  getState(scene).entities[name] = handler;
+function isAlive(object) {
+  return !!(
+    object &&
+    object.active &&
+    !object.destroyed
+  );
 }
-
-function cue(scene, value, color = '#8df4ff') {
-  try {
-    scene.playerCue?.(value, color);
-  } catch {}
-}
-
 
 // ============================================================
 // WORLD HELPERS
 // ============================================================
 
-function routeX(scene, fraction) {
-  const start = Number(
-    scene.mission?.spawn?.x ?? 160
-  );
+function routeX(
+  scene,
+  fraction
+) {
+  const start =
+    Number(
+      scene.mission?.spawn?.x ??
+      160
+    );
 
-  const goal = Number(
-    scene.mission?.goal?.x ?? start + 3600
-  );
+  const goal =
+    Number(
+      scene.mission?.goal?.x ??
+      start + 3600
+    );
+
+  const safeFraction =
+    clamp(
+      Number(fraction) || 0,
+      0,
+      1
+    );
 
   return clamp(
     lerp(
       start + 220,
       goal - 280,
-      fraction
+      safeFraction
     ),
     start + 120,
     goal - 100
   );
 }
 
-function platformY(scene, x, fallback = 540) {
-  const platforms = Array.isArray(
-    scene.mission?.platforms
-  )
-    ? scene.mission.platforms
-    : [];
+function platformY(
+  scene,
+  x,
+  fallback = 540
+) {
+  const platforms =
+    Array.isArray(
+      scene.mission?.platforms
+    )
+      ? scene.mission.platforms
+      : [];
 
   let best = null;
 
-  for (const platform of platforms) {
-    if (!Array.isArray(platform)) continue;
+  for (
+    const platform of platforms
+  ) {
+    if (
+      !Array.isArray(platform)
+    ) {
+      continue;
+    }
 
     const [
       px,
@@ -232,11 +358,17 @@ function platformY(scene, x, fallback = 540) {
       continue;
     }
 
-    const score = Math.abs(
-      px + width / 2 - x
-    );
+    const score =
+      Math.abs(
+        px +
+        width / 2 -
+        x
+      );
 
-    if (!best || score < best.score) {
+    if (
+      !best ||
+      score < best.score
+    ) {
       best = {
         y: py,
         score
@@ -244,12 +376,14 @@ function platformY(scene, x, fallback = 540) {
     }
   }
 
-  return best?.y ?? fallback;
+  return (
+    best?.y ??
+    fallback
+  );
 }
 
-
 // ============================================================
-// VISUAL SYSTEM
+// VISUAL HELPERS
 // ============================================================
 
 function label(
@@ -260,111 +394,206 @@ function label(
   color = '#dffcff',
   size = '8px'
 ) {
-  const node = scene.add.text(
-    x,
-    y,
-    value,
-    {
-      fontFamily: 'DM Mono, monospace',
-      fontSize: size,
-      color,
-      stroke: '#08101c',
-      strokeThickness: 4,
-      letterSpacing: 1,
-      shadow: {
-        offsetX: 0,
-        offsetY: 0,
-        color,
-        blur: 8,
-        fill: true
-      }
-    }
-  )
-    .setOrigin(0.5)
-    .setDepth(22)
-    .setAlpha(0.92);
+  if (!scene.add) {
+    return null;
+  }
 
-  return rememberObject(scene, node);
+  const node =
+    rememberObject(
+      scene,
+      scene.add
+        .text(
+          x,
+          y,
+          value,
+          {
+            fontFamily:
+              'DM Mono, monospace',
+
+            fontSize:
+              size,
+
+            color,
+
+            stroke:
+              '#08101c',
+
+            strokeThickness:
+              4,
+
+            letterSpacing:
+              1,
+
+            shadow: {
+              offsetX: 0,
+              offsetY: 0,
+              color,
+              blur: 8,
+              fill: true
+            }
+          }
+        )
+        .setOrigin(
+          0.5
+        )
+        .setDepth(
+          22
+        )
+        .setAlpha(
+          0.92
+        )
+    );
+
+  return node;
 }
 
-function pulse(scene, object, scale = 1.12) {
-  if (!object || !scene?.tweens) return;
+function pulse(
+  scene,
+  object,
+  scale = 1.12
+) {
+  if (
+    !object ||
+    !scene.tweens
+  ) {
+    return;
+  }
 
-  const tween = scene.tweens.add({
-    targets: object,
-    scaleX: scale,
-    scaleY: scale,
-    duration: 160,
-    yoyo: true,
-    ease: 'Sine.easeOut'
-  });
+  try {
+    const tween =
+      scene.tweens.add({
+        targets: object,
 
-  rememberTween(scene, tween);
+        scaleX: scale,
+
+        scaleY: scale,
+
+        duration: 160,
+
+        yoyo: true,
+
+        ease:
+          'Sine.easeOut',
+
+        onComplete: () => {
+          getState(scene)
+            .tweens
+            .delete(tween);
+        }
+      });
+
+    rememberTween(
+      scene,
+      tween
+    );
+  } catch {}
 }
 
-function glow(scene, x, y, radius, color) {
-  const outer = rememberObject(
-    scene,
-    scene.add.circle(
-      x,
-      y,
-      radius,
-      color,
-      0.045
-    )
-      .setStrokeStyle(
-        2,
-        color,
-        0.42
-      )
-      .setDepth(11)
-  );
+function glow(
+  scene,
+  x,
+  y,
+  radius,
+  color
+) {
+  if (!scene.add) {
+    return {
+      outer: null,
+      inner: null
+    };
+  }
 
-  const inner = rememberObject(
-    scene,
-    scene.add.circle(
-      x,
-      y,
-      Math.max(8, radius * 0.32),
-      color,
-      0.08
-    )
-      .setStrokeStyle(
-        1,
-        color,
-        0.65
-      )
-      .setDepth(12)
-  );
+  const outer =
+    rememberObject(
+      scene,
+      scene.add
+        .circle(
+          x,
+          y,
+          radius,
+          color,
+          0.045
+        )
+        .setStrokeStyle(
+          2,
+          color,
+          0.42
+        )
+        .setDepth(
+          11
+        )
+    );
 
-  const tween = scene.tweens.add({
-    targets: [outer, inner],
-    alpha: {
-      from: 0.18,
-      to: 0.045
-    },
-    scaleX: {
-      from: 0.85,
-      to: 1.15
-    },
-    scaleY: {
-      from: 0.85,
-      to: 1.15
-    },
-    duration: 1100,
-    repeat: -1,
-    yoyo: true,
-    ease: 'Sine.easeInOut'
-  });
+  const inner =
+    rememberObject(
+      scene,
+      scene.add
+        .circle(
+          x,
+          y,
+          Math.max(
+            8,
+            radius * 0.32
+          ),
+          color,
+          0.08
+        )
+        .setStrokeStyle(
+          1,
+          color,
+          0.65
+        )
+        .setDepth(
+          12
+        )
+    );
 
-  rememberTween(scene, tween);
+  if (scene.tweens) {
+    try {
+      const tween =
+        scene.tweens.add({
+          targets: [
+            outer,
+            inner
+          ],
+
+          alpha: {
+            from: 0.18,
+            to: 0.045
+          },
+
+          scaleX: {
+            from: 0.85,
+            to: 1.15
+          },
+
+          scaleY: {
+            from: 0.85,
+            to: 1.15
+          },
+
+          duration: 1100,
+
+          repeat: -1,
+
+          yoyo: true,
+
+          ease:
+            'Sine.easeInOut'
+        });
+
+      rememberTween(
+        scene,
+        tween
+      );
+    } catch {}
+  }
 
   return {
     outer,
     inner
   };
 }
-
 
 // ============================================================
 // TEXTURES
@@ -373,50 +602,75 @@ function glow(scene, x, y, radius, color) {
 function makeTexture(
   scene,
   key,
-  w,
-  h,
+  width,
+  height,
   fill,
   line = 0xdffcff
 ) {
-  if (scene.textures.exists(key)) {
+  if (
+    !scene.textures ||
+    scene.textures.exists(key)
+  ) {
     return;
   }
 
-  const graphics = scene.make.graphics({
-    add: false
-  });
+  let graphics = null;
 
-  graphics
-    .fillStyle(fill, 1)
-    .fillRoundedRect(
-      0,
-      0,
-      w,
-      h,
-      Math.min(12, w * 0.14)
+  try {
+    graphics =
+      scene.make.graphics({
+        add: false
+      });
+
+    graphics
+      .fillStyle(
+        fill,
+        1
+      )
+      .fillRoundedRect(
+        0,
+        0,
+        width,
+        height,
+        Math.min(
+          12,
+          width * 0.14
+        )
+      );
+
+    graphics
+      .lineStyle(
+        2,
+        line,
+        0.8
+      )
+      .strokeRoundedRect(
+        1,
+        1,
+        width - 2,
+        height - 2,
+        Math.min(
+          11,
+          width * 0.12
+        )
+      );
+
+    graphics.generateTexture(
+      key,
+      width,
+      height
     );
-
-  graphics
-    .lineStyle(
-      2,
-      line,
-      0.8
-    )
-    .strokeRoundedRect(
-      1,
-      1,
-      w - 2,
-      h - 2,
-      Math.min(11, w * 0.12)
+  } catch (error) {
+    console.warn(
+      '[Relay] Texture creation failed:',
+      key,
+      error
     );
-
-  graphics.generateTexture(
-    key,
-    w,
-    h
-  );
-
-  graphics.destroy();
+  } finally {
+    try {
+      graphics?.destroy();
+    } catch {}
+  }
 }
 
 function makeTextures(scene) {
@@ -502,13 +756,13 @@ function makeTextures(scene) {
   );
 }
 
-
 // ============================================================
 // MAGNETIC
 // ============================================================
 
 function installMagnetic(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
   if (
     !st.enabled.magnetic ||
@@ -517,17 +771,32 @@ function installMagnetic(scene) {
     return;
   }
 
+  if (
+    !scene.physics?.add
+  ) {
+    return;
+  }
+
   const sources = [];
   const cargo = [];
 
-  for (let i = 0; i < 3; i++) {
-    const x = routeX(
-      scene,
-      0.18 + i * 0.24
-    );
+  for (
+    let i = 0;
+    i < 3;
+    i++
+  ) {
+    const x =
+      routeX(
+        scene,
+        0.18 +
+        i * 0.24
+      );
 
     const y =
-      platformY(scene, x) - 118;
+      platformY(
+        scene,
+        x
+      ) - 118;
 
     const source =
       rememberObject(
@@ -538,12 +807,20 @@ function installMagnetic(scene) {
             y,
             'gxv2-magnet'
           )
-          .setDepth(13)
-          .setImmovable(true)
+          .setDepth(
+            13
+          )
+          .setImmovable(
+            true
+          )
       );
 
     if (source.body) {
-      source.body.allowGravity = false;
+      source.body.allowGravity =
+        false;
+
+      source.body.immovable =
+        true;
     }
 
     const polarity =
@@ -561,25 +838,27 @@ function installMagnetic(scene) {
         ? 0x8df4ff
         : 0xff826e;
 
-    const ring = glow(
-      scene,
-      x,
-      y,
-      58,
-      color
-    );
+    const ring =
+      glow(
+        scene,
+        x,
+        y,
+        58,
+        color
+      );
 
-    const textNode = label(
-      scene,
-      polarity > 0
-        ? 'MAGNET +'
-        : 'MAGNET −',
-      x,
-      y - 30,
-      polarity > 0
-        ? '#b9f5ff'
-        : '#ff9c91'
-    );
+    const textNode =
+      label(
+        scene,
+        polarity > 0
+          ? 'MAGNET +'
+          : 'MAGNET −',
+        x,
+        y - 30,
+        polarity > 0
+          ? '#b9f5ff'
+          : '#ff9c91'
+      );
 
     source.setInteractive({
       useHandCursor: true
@@ -587,7 +866,11 @@ function installMagnetic(scene) {
 
     source.on(
       'pointerdown',
-      () => flipPolarity(scene)
+      () => {
+        flipPolarity(
+          scene
+        );
+      }
     );
 
     sources.push({
@@ -597,28 +880,46 @@ function installMagnetic(scene) {
     });
   }
 
-  for (let i = 0; i < 2; i++) {
-    const x = routeX(
-      scene,
-      0.34 + i * 0.28
-    );
+  for (
+    let i = 0;
+    i < 2;
+    i++
+  ) {
+    const x =
+      routeX(
+        scene,
+        0.34 +
+        i * 0.28
+      );
 
     const y =
-      platformY(scene, x) - 26;
+      platformY(
+        scene,
+        x
+      ) - 26;
 
     const item =
       rememberObject(
         scene,
-        scene.physics.add.sprite(
-          x,
-          y,
-          'gxv2-metal-cargo'
-        )
+        scene.physics.add
+          .sprite(
+            x,
+            y,
+            'gxv2-metal-cargo'
+          )
+          .setDepth(
+            10
+          )
       );
 
     if (item.body) {
-      item.body.setAllowGravity(true);
-      item.body.setMass(2 + i);
+      item.body.setAllowGravity(
+        true
+      );
+
+      item.body.setMass(
+        2 + i
+      );
     }
 
     item.setData(
@@ -626,27 +927,36 @@ function installMagnetic(scene) {
       i ? -1 : 1
     );
 
-    cargo.push(item);
+    cargo.push(
+      item
+    );
   }
 
-  const status = label(
-    scene,
-    'POLARITY + · TAP / M',
-    92,
-    74,
-    '#8df4ff',
-    '9px'
+  const status =
+    label(
+      scene,
+      'POLARITY + · TAP / M',
+      110,
+      74,
+      '#8df4ff',
+      '9px'
+    );
+
+  status?.setScrollFactor(
+    0
   );
 
-  status.setScrollFactor(0);
-
-  status.setInteractive({
+  status?.setInteractive({
     useHandCursor: true
   });
 
-  status.on(
+  status?.on(
     'pointerdown',
-    () => flipPolarity(scene)
+    () => {
+      flipPolarity(
+        scene
+      );
+    }
   );
 
   st.entities.magnetic = {
@@ -658,15 +968,22 @@ function installMagnetic(scene) {
   onKey(
     scene,
     'M',
-    () => flipPolarity(scene),
+    () => {
+      flipPolarity(
+        scene
+      );
+    },
     'magneticKey'
   );
 }
 
 function flipPolarity(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
-  if (!st.enabled.magnetic) {
+  if (
+    !st.enabled.magnetic
+  ) {
     return;
   }
 
@@ -675,15 +992,20 @@ function flipPolarity(scene) {
   const positive =
     st.polarity > 0;
 
-  st.entities.magnetic?.status?.setText(
-    positive
-      ? 'POLARITY + · TAP / M'
-      : 'POLARITY − · TAP / M'
-  );
+  st.entities
+    .magnetic
+    ?.status
+    ?.setText(
+      positive
+        ? 'POLARITY + · TAP / M'
+        : 'POLARITY − · TAP / M'
+    );
 
   pulse(
     scene,
-    st.entities.magnetic?.status
+    st.entities
+      .magnetic
+      ?.status
   );
 
   cue(
@@ -704,18 +1026,26 @@ function applyMagnet(
   y,
   targetPolarity
 ) {
-  if (!body?.velocity) {
+  if (
+    !body?.velocity ||
+    !body.position
+  ) {
     return;
   }
 
   const dx =
-    x - body.position.x;
+    x -
+    body.position.x;
 
   const dy =
-    y - body.position.y;
+    y -
+    body.position.y;
 
   const distance =
-    Math.hypot(dx, dy);
+    Math.hypot(
+      dx,
+      dy
+    );
 
   if (
     distance < 18 ||
@@ -726,7 +1056,8 @@ function applyMagnet(
 
   const same =
     targetPolarity ===
-    getState(scene).polarity;
+    getState(scene)
+      .polarity;
 
   const sign =
     same
@@ -734,7 +1065,8 @@ function applyMagnet(
       : -1;
 
   const force =
-    ((250 - distance) / 250) *
+    ((250 - distance) /
+      250) *
     110 *
     sign;
 
@@ -750,7 +1082,9 @@ function applyMagnet(
 
 function updateMagnetic(scene) {
   const entry =
-    scene[NS]?.entities?.magnetic;
+    scene[NS]
+      ?.entities
+      ?.magnetic;
 
   if (
     !entry ||
@@ -760,9 +1094,17 @@ function updateMagnetic(scene) {
     return;
   }
 
-  for (const item of entry.sources) {
+  for (
+    const item of entry.sources
+  ) {
     const source =
       item.source;
+
+    if (
+      !isAlive(source)
+    ) {
+      continue;
+    }
 
     applyMagnet(
       scene,
@@ -777,11 +1119,10 @@ function updateMagnetic(scene) {
     );
 
     for (
-      const cargo
-      of entry.cargo
+      const cargo of entry.cargo
     ) {
       if (
-        cargo?.active &&
+        isAlive(cargo) &&
         cargo.body
       ) {
         applyMagnet(
@@ -798,30 +1139,35 @@ function updateMagnetic(scene) {
       }
     }
 
-    item.ring?.outer?.setPosition(
-      source.x,
-      source.y
-    );
+    item.ring
+      ?.outer
+      ?.setPosition(
+        source.x,
+        source.y
+      );
 
-    item.ring?.inner?.setPosition(
-      source.x,
-      source.y
-    );
+    item.ring
+      ?.inner
+      ?.setPosition(
+        source.x,
+        source.y
+      );
 
-    item.text?.setPosition(
-      source.x,
-      source.y - 30
-    );
+    item.text
+      ?.setPosition(
+        source.x,
+        source.y - 30
+      );
   }
 }
-
 
 // ============================================================
 // CONVEYOR
 // ============================================================
 
 function installConveyor(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
   if (
     !st.enabled.conveyor ||
@@ -830,16 +1176,31 @@ function installConveyor(scene) {
     return;
   }
 
+  if (
+    !scene.physics?.add
+  ) {
+    return;
+  }
+
   const belts = [];
 
-  for (let i = 0; i < 2; i++) {
-    const x = routeX(
-      scene,
-      0.28 + i * 0.31
-    );
+  for (
+    let i = 0;
+    i < 2;
+    i++
+  ) {
+    const x =
+      routeX(
+        scene,
+        0.28 +
+        i * 0.31
+      );
 
     const y =
-      platformY(scene, x) - 18;
+      platformY(
+        scene,
+        x
+      ) - 18;
 
     const belt =
       rememberObject(
@@ -850,12 +1211,20 @@ function installConveyor(scene) {
             y,
             'gxv2-belt'
           )
-          .setDepth(9)
-          .setImmovable(true)
+          .setDepth(
+            9
+          )
+          .setImmovable(
+            true
+          )
       );
 
     if (belt.body) {
-      belt.body.allowGravity = false;
+      belt.body.allowGravity =
+        false;
+
+      belt.body.immovable =
+        true;
     }
 
     const speed =
@@ -878,22 +1247,23 @@ function installConveyor(scene) {
       x + 420
     );
 
-    const textNode = label(
-      scene,
-      speed > 0
-        ? 'CONVEYOR →'
-        : 'CONVEYOR ←',
-      x,
-      y - 24,
-      '#aee37f'
-    );
+    const textNode =
+      label(
+        scene,
+        speed > 0
+          ? 'CONVEYOR →'
+          : 'CONVEYOR ←',
+        x,
+        y - 24,
+        '#aee37f'
+      );
 
     const glowNode =
       glow(
         scene,
         x,
         y,
-        100,
+        90,
         0xaee37f
       );
 
@@ -911,23 +1281,31 @@ function installConveyor(scene) {
 
 function updateConveyor(scene) {
   const belts =
-    scene[NS]?.entities
+    scene[NS]
+      ?.entities
       ?.conveyor
       ?.belts || [];
 
   const delta =
-    scene.game?.loop?.delta || 16;
+    scene.game
+      ?.loop
+      ?.delta || 16;
 
-  for (const entry of belts) {
+  for (
+    const entry of belts
+  ) {
     const belt =
       entry.belt;
 
-    if (!belt?.active) {
+    if (
+      !isAlive(belt)
+    ) {
       continue;
     }
 
     const data =
-      belt.data?.values || {};
+      belt.data?.values ||
+      {};
 
     let speed =
       Number(
@@ -936,24 +1314,32 @@ function updateConveyor(scene) {
 
     const min =
       Number(
-        data.min ?? belt.x - 260
+        data.min ??
+        belt.x - 260
       );
 
     const max =
       Number(
-        data.max ?? belt.x + 420
+        data.max ??
+        belt.x + 420
       );
 
-    if (belt.x >= max) {
+    if (
+      belt.x >= max
+    ) {
       speed = -105;
+
       belt.setData(
         'speed',
         speed
       );
     }
 
-    if (belt.x <= min) {
+    if (
+      belt.x <= min
+    ) {
       speed = 105;
+
       belt.setData(
         'speed',
         speed
@@ -968,63 +1354,83 @@ function updateConveyor(scene) {
     if (
       scene.player?.active &&
       scene.player.getBounds &&
-      Phaser.Geom.Intersects.RectangleToRectangle(
-        scene.player.getBounds(),
-        belt.getBounds()
-      )
+      Phaser.Geom.Intersects
+        .RectangleToRectangle(
+          scene.player.getBounds(),
+          belt.getBounds()
+        )
     ) {
+      const worldWidth =
+        Number(
+          scene.worldWidth ||
+          5000
+        );
+
       scene.player.x =
         clamp(
-          scene.player.x + movement,
+          scene.player.x +
+            movement,
           30,
-          Number(
-            scene.worldWidth ||
-            5000
-          ) - 30
+          worldWidth - 30
         );
     }
 
-    for (
-      const cargo
-      of scene[NS]?.entities
+    const cargo =
+      scene[NS]
+        ?.entities
         ?.magnetic
-        ?.cargo || []
+        ?.cargo || [];
+
+    for (
+      const item of cargo
     ) {
       if (
-        cargo?.active &&
-        Phaser.Geom.Intersects.RectangleToRectangle(
-          cargo.getBounds(),
-          belt.getBounds()
-        )
+        !isAlive(item)
       ) {
-        cargo.x += movement;
+        continue;
+      }
+
+      if (
+        Phaser.Geom.Intersects
+          .RectangleToRectangle(
+            item.getBounds(),
+            belt.getBounds()
+          )
+      ) {
+        item.x +=
+          movement;
       }
     }
 
-    entry.text?.setPosition(
-      belt.x,
-      belt.y - 24
-    );
+    entry.text
+      ?.setPosition(
+        belt.x,
+        belt.y - 24
+      );
 
-    entry.glow?.outer?.setPosition(
-      belt.x,
-      belt.y
-    );
+    entry.glow
+      ?.outer
+      ?.setPosition(
+        belt.x,
+        belt.y
+      );
 
-    entry.glow?.inner?.setPosition(
-      belt.x,
-      belt.y
-    );
+    entry.glow
+      ?.inner
+      ?.setPosition(
+        belt.x,
+        belt.y
+      );
   }
 }
-
 
 // ============================================================
 // ROTATION
 // ============================================================
 
 function installRotation(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
   if (
     !st.enabled.rotation ||
@@ -1033,8 +1439,17 @@ function installRotation(scene) {
     return;
   }
 
+  if (
+    !scene.physics?.add
+  ) {
+    return;
+  }
+
   const cx =
-    routeX(scene, 0.5);
+    routeX(
+      scene,
+      0.5
+    );
 
   const cy =
     platformY(
@@ -1047,26 +1462,21 @@ function installRotation(scene) {
   const pivot =
     rememberObject(
       scene,
-      scene.add.circle(
-        cx,
-        cy,
-        10,
-        0xffd06e,
-        0.95
-      )
-        .setDepth(18)
+      scene.add
+        .circle(
+          cx,
+          cy,
+          10,
+          0xffd06e,
+          0.95
+        )
+        .setDepth(
+          18
+        )
         .setInteractive({
           useHandCursor: true
         })
     );
-
-  glow(
-    scene,
-    cx,
-    cy,
-    55,
-    0xffd06e
-  );
 
   const arms =
     [0, Math.PI].map(
@@ -1074,19 +1484,24 @@ function installRotation(scene) {
         const platform =
           rememberObject(
             scene,
-            scene.add.rectangle(
-              cx +
-                Math.cos(angle) *
-                radius,
-              cy +
-                Math.sin(angle) *
-                radius,
-              138,
-              20,
-              0x263852
-            )
-              .setDepth(9)
-              .setImmovable(true)
+            scene.add
+              .rectangle(
+                cx +
+                  Math.cos(angle) *
+                    radius,
+                cy +
+                  Math.sin(angle) *
+                    radius,
+                138,
+                20,
+                0x263852
+              )
+              .setDepth(
+                9
+              )
+              .setImmovable(
+                true
+              )
           );
 
         scene.physics.add.existing(
@@ -1153,11 +1568,11 @@ function installRotation(scene) {
     toggle
   );
 
-  textNode.setInteractive({
+  textNode?.setInteractive({
     useHandCursor: true
   });
 
-  textNode.on(
+  textNode?.on(
     'pointerdown',
     toggle
   );
@@ -1172,16 +1587,24 @@ function installRotation(scene) {
 
 function updateRotation(scene) {
   const e =
-    scene[NS]?.entities
+    scene[NS]
+      ?.entities
       ?.rotation;
 
   if (!e) {
     return;
   }
 
-  if (!e.locked) {
+  if (
+    !e.locked
+  ) {
     e.angle +=
-      (scene.game?.loop?.delta || 16) *
+      (
+        scene.game
+          ?.loop
+          ?.delta ||
+        16
+      ) *
       0.00095;
   }
 
@@ -1190,45 +1613,54 @@ function updateRotation(scene) {
     i < e.arms.length;
     i++
   ) {
-    const a =
+    const angle =
       e.angle +
       i * Math.PI;
 
     const arm =
       e.arms[i];
 
+    if (
+      !arm ||
+      !arm.active
+    ) {
+      continue;
+    }
+
     arm.x =
       e.cx +
-      Math.cos(a) *
-      e.radius;
+      Math.cos(angle) *
+        e.radius;
 
     arm.y =
       e.cy +
-      Math.sin(a) *
-      e.radius;
+      Math.sin(angle) *
+        e.radius;
 
     arm.rotation =
-      a;
+      angle;
   }
 
-  e.pivot?.setPosition(
-    e.cx,
-    e.cy
-  );
+  e.pivot
+    ?.setPosition(
+      e.cx,
+      e.cy
+    );
 
-  e.text?.setPosition(
-    e.cx,
-    e.cy - 154
-  );
+  e.text
+    ?.setPosition(
+      e.cx,
+      e.cy - 154
+    );
 }
-
 
 // ============================================================
 // REWIND
 // ============================================================
 
 function installRewind(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
   if (
     !st.enabled.rewind ||
@@ -1239,37 +1671,52 @@ function installRewind(scene) {
 
   const entry = {
     buffer: [],
+
     accumulator: 0,
+
     active: false,
+
     index: 0,
+
     label: label(
       scene,
       'TEMPORAL REWIND · R',
-      110,
+      100,
       106,
       '#e0a7ff',
       '9px'
     )
   };
 
-  entry.label.setScrollFactor(0);
+  entry.label
+    ?.setScrollFactor(0);
 
   st.entities.rewind =
     entry;
 
-  entry.label.setInteractive({
-    useHandCursor: true
-  });
+  entry.label
+    ?.setInteractive({
+      useHandCursor: true
+    });
 
-  entry.label.on(
-    'pointerdown',
-    () => triggerRewind(scene)
-  );
+  entry.label
+    ?.on(
+      'pointerdown',
+      () => {
+        triggerRewind(
+          scene
+        );
+      }
+    );
 
   onKey(
     scene,
     'R',
-    () => triggerRewind(scene),
+    () => {
+      triggerRewind(
+        scene
+      );
+    },
     'rewindKey'
   );
 }
@@ -1284,9 +1731,10 @@ function triggerRewind(scene) {
     !e ||
     e.active ||
     e.buffer.length < 10 ||
-    !scene.player?.active ||
     scene.respawning ||
-    scene.finished
+    scene.finished ||
+    !scene.player?.active ||
+    !scene.player.body
   ) {
     return;
   }
@@ -1296,18 +1744,16 @@ function triggerRewind(scene) {
   e.index =
     Math.max(
       0,
-      e.buffer.length - 30
+      e.buffer.length - 1
     );
 
-  if (scene.player.body) {
-    scene.player.body.moves =
-      false;
+  scene.player.body.moves =
+    false;
 
-    scene.player.body.velocity.set(
-      0,
-      0
-    );
-  }
+  scene.player.body.velocity.set(
+    0,
+    0
+  );
 
   cue(
     scene,
@@ -1317,7 +1763,8 @@ function triggerRewind(scene) {
 
   pulse(
     scene,
-    e.label
+    e.label,
+    1.16
   );
 }
 
@@ -1326,7 +1773,8 @@ function updateRewind(
   delta
 ) {
   const e =
-    scene[NS]?.entities
+    scene[NS]
+      ?.entities
       ?.rewind;
 
   if (
@@ -1337,20 +1785,41 @@ function updateRewind(
     return;
   }
 
-  if (!e.active) {
-    e.accumulator += delta;
+  // ----------------------------------------------------------
+  // Recording
+  // ----------------------------------------------------------
 
-    if (e.accumulator >= 80) {
+  if (!e.active) {
+    e.accumulator +=
+      Math.max(
+        0,
+        Number(delta) || 0
+      );
+
+    if (
+      e.accumulator >= 80
+    ) {
       e.accumulator = 0;
 
       e.buffer.push({
-        x: scene.player.x,
-        y: scene.player.y,
-        vx: scene.player.body.velocity.x,
-        vy: scene.player.body.velocity.y
+        x:
+          scene.player.x,
+
+        y:
+          scene.player.y,
+
+        vx:
+          scene.player.body
+            .velocity.x,
+
+        vy:
+          scene.player.body
+            .velocity.y
       });
 
-      if (e.buffer.length > 34) {
+      if (
+        e.buffer.length > 60
+      ) {
         e.buffer.shift();
       }
     }
@@ -1358,11 +1827,23 @@ function updateRewind(
     return;
   }
 
-  e.index =
-    Math.max(
-      0,
-      e.index - 1
-    );
+  // ----------------------------------------------------------
+  // Rewind playback
+  // ----------------------------------------------------------
+
+  if (
+    scene.respawning ||
+    scene.finished
+  ) {
+    e.active = false;
+
+    e.buffer.length = 0;
+
+    scene.player.body.moves =
+      true;
+
+    return;
+  }
 
   const sample =
     e.buffer[e.index];
@@ -1379,11 +1860,20 @@ function updateRewind(
     );
   }
 
-  if (e.index <= 0) {
+  e.index--;
+
+  if (
+    e.index < 0
+  ) {
     e.active = false;
 
     scene.player.body.moves =
       true;
+
+    scene.player.body.velocity.set(
+      0,
+      0
+    );
 
     e.buffer.length = 0;
 
@@ -1395,13 +1885,13 @@ function updateRewind(
   }
 }
 
-
 // ============================================================
 // PHASE
 // ============================================================
 
 function installPhase(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
   if (
     !st.enabled.phase ||
@@ -1410,13 +1900,24 @@ function installPhase(scene) {
     return;
   }
 
+  if (
+    !scene.physics?.add
+  ) {
+    return;
+  }
+
   const walls = [];
 
-  for (let i = 0; i < 2; i++) {
+  for (
+    let i = 0;
+    i < 2;
+    i++
+  ) {
     const x =
       routeX(
         scene,
-        0.36 + i * 0.24
+        0.36 +
+        i * 0.24
       );
 
     const y =
@@ -1434,13 +1935,20 @@ function installPhase(scene) {
             y,
             'gxv2-phase-wall'
           )
-          .setDepth(12)
-          .setImmovable(true)
+          .setDepth(
+            12
+          )
+          .setImmovable(
+            true
+          )
       );
 
     if (wall.body) {
       wall.body.allowGravity =
         false;
+
+      wall.body.immovable =
+        true;
     }
 
     const glowNode =
@@ -1478,7 +1986,9 @@ function installPhase(scene) {
       '9px'
     );
 
-  status.setScrollFactor(0);
+  status?.setScrollFactor(
+    0
+  );
 
   st.entities.phase = {
     walls,
@@ -1487,13 +1997,17 @@ function installPhase(scene) {
   };
 
   const toggle =
-    () => togglePhase(scene);
+    () => {
+      togglePhase(
+        scene
+      );
+    };
 
-  status.setInteractive({
+  status?.setInteractive({
     useHandCursor: true
   });
 
-  status.on(
+  status?.on(
     'pointerdown',
     toggle
   );
@@ -1522,25 +2036,27 @@ function togglePhase(scene) {
   for (
     const item of e.walls
   ) {
-    if (item.wall.body) {
+    if (
+      item.wall?.body
+    ) {
       item.wall.body.enable =
         !e.active;
     }
 
-    item.wall.setAlpha(
+    item.wall?.setAlpha(
       e.active
         ? 0.22
         : 1
     );
 
-    item.text.setAlpha(
+    item.text?.setAlpha(
       e.active
         ? 0.45
         : 0.92
     );
   }
 
-  e.status.setText(
+  e.status?.setText(
     e.active
       ? 'PHASE SHIFT ACTIVE · P'
       : 'PHASE SHIFT · P'
@@ -1562,41 +2078,58 @@ function togglePhase(scene) {
 
 function updatePhase(scene) {
   const walls =
-    scene[NS]?.entities
+    scene[NS]
+      ?.entities
       ?.phase
       ?.walls || [];
 
   for (
     const item of walls
   ) {
+    if (
+      !item.wall
+    ) {
+      continue;
+    }
+
     item.text?.setPosition(
       item.wall.x,
       item.wall.y - 40
     );
 
-    item.glow?.outer?.setPosition(
-      item.wall.x,
-      item.wall.y
-    );
+    item.glow
+      ?.outer
+      ?.setPosition(
+        item.wall.x,
+        item.wall.y
+      );
 
-    item.glow?.inner?.setPosition(
-      item.wall.x,
-      item.wall.y
-    );
+    item.glow
+      ?.inner
+      ?.setPosition(
+        item.wall.x,
+        item.wall.y
+      );
   }
 }
-
 
 // ============================================================
 // PRESSURE
 // ============================================================
 
 function installPressure(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
   if (
     !st.enabled.pressure ||
     st.entities.pressure
+  ) {
+    return;
+  }
+
+  if (
+    !scene.physics?.add
   ) {
     return;
   }
@@ -1622,8 +2155,12 @@ function installPressure(scene) {
           y,
           'gxv2-valve'
         )
-        .setDepth(13)
-        .setImmovable(true)
+        .setDepth(
+          13
+        )
+        .setImmovable(
+          true
+        )
     );
 
   const right =
@@ -1635,18 +2172,28 @@ function installPressure(scene) {
           y,
           'gxv2-valve'
         )
-        .setDepth(13)
-        .setImmovable(true)
+        .setDepth(
+          13
+        )
+        .setImmovable(
+          true
+        )
     );
 
   if (left.body) {
     left.body.allowGravity =
       false;
+
+    left.body.immovable =
+      true;
   }
 
   if (right.body) {
     right.body.allowGravity =
       false;
+
+    right.body.immovable =
+      true;
   }
 
   const door =
@@ -1658,30 +2205,21 @@ function installPressure(scene) {
           y + 52,
           'gxv2-door'
         )
-        .setDepth(11)
-        .setImmovable(true)
+        .setDepth(
+          11
+        )
+        .setImmovable(
+          true
+        )
     );
 
   if (door.body) {
     door.body.allowGravity =
       false;
+
+    door.body.immovable =
+      true;
   }
-
-  glow(
-    scene,
-    left.x,
-    left.y,
-    34,
-    0xaee37f
-  );
-
-  glow(
-    scene,
-    right.x,
-    right.y,
-    34,
-    0xaee37f
-  );
 
   const status =
     label(
@@ -1705,10 +2243,16 @@ function installPressure(scene) {
     left,
     right,
     door,
+
     leftP: 0,
+
     rightP: 0,
+
     status,
-    heading
+
+    heading,
+
+    balanced: false
   };
 
   st.entities.pressure =
@@ -1716,6 +2260,12 @@ function installPressure(scene) {
 
   const add =
     side => {
+      if (
+        st.destroyed
+      ) {
+        return;
+      }
+
       entry[side] =
         clamp(
           entry[side] + 12,
@@ -1725,14 +2275,14 @@ function installPressure(scene) {
 
       pulse(
         scene,
-        side === 'left'
+        side === 'leftP'
           ? left
           : right
       );
 
       cue(
         scene,
-        side === 'left'
+        side === 'leftP'
           ? 'LEFT PRESSURE +'
           : 'RIGHT PRESSURE +',
         '#aee37f'
@@ -1740,10 +2290,14 @@ function installPressure(scene) {
     };
 
   const leftTap =
-    () => add('leftP');
+    () => {
+      add('leftP');
+    };
 
   const rightTap =
-    () => add('rightP');
+    () => {
+      add('rightP');
+    };
 
   left.setInteractive({
     useHandCursor: true
@@ -1783,25 +2337,34 @@ function updatePressure(
   delta
 ) {
   const e =
-    scene[NS]?.entities
+    scene[NS]
+      ?.entities
       ?.pressure;
 
   if (!e) {
     return;
   }
 
+  const safeDelta =
+    Math.max(
+      0,
+      Number(delta) || 0
+    );
+
   e.leftP =
     Math.max(
       0,
       e.leftP -
-        delta * 0.0045
+        safeDelta *
+        0.0045
     );
 
   e.rightP =
     Math.max(
       0,
       e.rightP -
-        delta * 0.0045
+        safeDelta *
+        0.0045
     );
 
   const balanced =
@@ -1812,18 +2375,38 @@ function updatePressure(
     e.leftP >= 60 &&
     e.rightP >= 60;
 
-  if (e.door.body) {
+  if (
+    balanced &&
+    !e.balanced
+  ) {
+    cue(
+      scene,
+      'PRESSURE BALANCED',
+      '#aee37f'
+    );
+
+    pulse(
+      scene,
+      e.door,
+      1.08
+    );
+  }
+
+  e.balanced =
+    balanced;
+
+  if (e.door?.body) {
     e.door.body.enable =
       !balanced;
   }
 
-  e.door.setAlpha(
+  e.door?.setAlpha(
     balanced
       ? 0.18
       : 1
   );
 
-  e.status.setText(
+  e.status?.setText(
     `PRESSURE ${String(
       Math.round(e.leftP)
     ).padStart(2, '0')} / ${String(
@@ -1835,23 +2418,29 @@ function updatePressure(
     }`
   );
 
-  e.heading.setPosition(
-    e.door.x,
-    e.door.y - 96
+  e.heading?.setPosition(
+    e.door?.x ?? 0,
+    (e.door?.y ?? 0) - 96
   );
 }
-
 
 // ============================================================
 // SIGNAL INTERCEPT
 // ============================================================
 
 function installSignalIntercept(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
   if (
     !st.enabled.signalIntercept ||
     st.entities.signalIntercept
+  ) {
+    return;
+  }
+
+  if (
+    !scene.physics?.add
   ) {
     return;
   }
@@ -1877,13 +2466,20 @@ function installSignalIntercept(scene) {
           y,
           'gxv2-intercept'
         )
-        .setDepth(14)
-        .setImmovable(true)
+        .setDepth(
+          14
+        )
+        .setImmovable(
+          true
+        )
     );
 
   if (drone.body) {
     drone.body.allowGravity =
       false;
+
+    drone.body.immovable =
+      true;
   }
 
   const glowNode =
@@ -1906,19 +2502,25 @@ function installSignalIntercept(scene) {
 
   const entry = {
     drone,
+
     text: textNode,
+
     glow: glowNode,
+
     phase:
       Math.random() *
       Math.PI *
       2,
+
     secured: false
   };
 
   st.entities.signalIntercept =
     entry;
 
-  if (scene.player) {
+  if (
+    scene.player
+  ) {
     scene.physics.add.overlap(
       scene.player,
       drone,
@@ -1931,7 +2533,7 @@ function installSignalIntercept(scene) {
         if (
           !e ||
           e.secured ||
-          !e.drone.active
+          !isAlive(e.drone)
         ) {
           return;
         }
@@ -1943,13 +2545,21 @@ function installSignalIntercept(scene) {
           e.drone
         );
 
-        e.text.setText(
+        e.text?.setText(
           'SIGNAL INTERCEPTED'
         );
 
-        e.text.setColor(
+        e.text?.setColor(
           '#aee37f'
         );
+
+        e.glow
+          ?.outer
+          ?.setAlpha(0.12);
+
+        e.glow
+          ?.inner
+          ?.setAlpha(0.18);
 
         cue(
           scene,
@@ -1958,13 +2568,15 @@ function installSignalIntercept(scene) {
         );
 
         try {
-          scene.game?.events?.emit(
-            'signal-intercepted',
-            {
-              missionId:
-                scene.mission?.id
-            }
-          );
+          scene.game
+            ?.events
+            ?.emit(
+              'signal-intercepted',
+              {
+                missionId:
+                  scene.mission?.id
+              }
+            );
         } catch {}
       }
     );
@@ -1976,11 +2588,14 @@ function updateSignalIntercept(
   time
 ) {
   const e =
-    scene[NS]?.entities
+    scene[NS]
+      ?.entities
       ?.signalIntercept;
 
   if (
-    !e?.drone?.active
+    !e ||
+    e.secured ||
+    !isAlive(e.drone)
   ) {
     return;
   }
@@ -2006,7 +2621,11 @@ function updateSignalIntercept(
     ) / 2;
 
   e.drone.x =
-    lerp(a, b, t);
+    lerp(
+      a,
+      b,
+      t
+    );
 
   e.drone.y =
     platformY(
@@ -2023,28 +2642,38 @@ function updateSignalIntercept(
     e.drone.y - 28
   );
 
-  e.glow?.outer?.setPosition(
-    e.drone.x,
-    e.drone.y
-  );
+  e.glow
+    ?.outer
+    ?.setPosition(
+      e.drone.x,
+      e.drone.y
+    );
 
-  e.glow?.inner?.setPosition(
-    e.drone.x,
-    e.drone.y
-  );
+  e.glow
+    ?.inner
+    ?.setPosition(
+      e.drone.x,
+      e.drone.y
+    );
 }
-
 
 // ============================================================
 // WEIGHT
 // ============================================================
 
 function installWeight(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
   if (
     !st.enabled.weight ||
     st.entities.weight
+  ) {
+    return;
+  }
+
+  if (
+    !scene.physics?.add
   ) {
     return;
   }
@@ -2062,77 +2691,100 @@ function installWeight(scene) {
     ) - 70;
 
   const plates =
-    [x - 82, x + 82]
-      .map(
-        (px, i) => {
-          const plate =
-            rememberObject(
-              scene,
-              scene.physics.add
-                .sprite(
-                  px,
-                  y + 30,
-                  'gxv2-belt'
-                )
-                .setDisplaySize(
-                  72,
-                  12
-                )
-                .setDepth(8)
-                .setImmovable(true)
-            );
-
-          if (plate.body) {
-            plate.body.allowGravity =
-              false;
-          }
-
-          plate.setData(
-            'required',
-            i
-              ? 6
-              : 10
+    [
+      x - 82,
+      x + 82
+    ].map(
+      (px, i) => {
+        const plate =
+          rememberObject(
+            scene,
+            scene.physics.add
+              .sprite(
+                px,
+                y + 30,
+                'gxv2-belt'
+              )
+              .setDisplaySize(
+                72,
+                12
+              )
+              .setDepth(
+                8
+              )
+              .setImmovable(
+                true
+              )
           );
 
-          return plate;
+        if (plate.body) {
+          plate.body.allowGravity =
+            false;
+
+          plate.body.immovable =
+            true;
         }
-      );
+
+        plate.setData(
+          'required',
+          i
+            ? 6
+            : 10
+        );
+
+        return plate;
+      }
+    );
 
   const crates =
-    [10, 6, 4]
-      .map(
-        (weight, i) => {
-          const crate =
-            rememberObject(
-              scene,
-              scene.physics.add
-                .sprite(
-                  x - 95 +
-                    i * 90,
-                  y - 4,
-                  'gxv2-weight'
-                )
-                .setDepth(10)
-            );
+    [
+      10,
+      6,
+      4
+    ].map(
+      (weight, i) => {
+        const crate =
+          rememberObject(
+            scene,
+            scene.physics.add
+              .sprite(
+                x - 95 +
+                  i * 90,
+                y - 4,
+                'gxv2-weight'
+              )
+              .setDepth(
+                10
+              )
+          );
 
-          if (crate.body) {
-            crate.body.setAllowGravity(
-              true
-            );
+        if (crate.body) {
+          crate.body.setAllowGravity(
+            true
+          );
 
-            crate.body.setMass(
-              weight
-            );
-          }
-
-          crate.setData(
-            'weightValue',
+          crate.body.setMass(
             weight
           );
 
-          return crate;
+          crate.body.setBounce(
+            0.05
+          );
+
+          crate.body.setDrag(
+            20,
+            20
+          );
         }
-      );
+
+        crate.setData(
+          'weightValue',
+          weight
+        );
+
+        return crate;
+      }
+    );
 
   const bridge =
     rememberObject(
@@ -2143,13 +2795,20 @@ function installWeight(scene) {
           y - 60,
           'gxv2-bridge'
         )
-        .setDepth(7)
-        .setImmovable(true)
+        .setDepth(
+          7
+        )
+        .setImmovable(
+          true
+        )
     );
 
   if (bridge.body) {
     bridge.body.allowGravity =
       false;
+
+    bridge.body.immovable =
+      true;
   }
 
   const textNode =
@@ -2163,16 +2822,21 @@ function installWeight(scene) {
 
   st.entities.weight = {
     plates,
+
     crates,
+
     bridge,
+
     text: textNode,
+
     open: false
   };
 }
 
 function updateWeight(scene) {
   const e =
-    scene[NS]?.entities
+    scene[NS]
+      ?.entities
       ?.weight;
 
   if (!e) {
@@ -2188,16 +2852,18 @@ function updateWeight(scene) {
             crate
           ) => {
             if (
-              !crate?.active
+              !isAlive(crate)
             ) {
               return sum;
             }
 
             const touching =
-              Phaser.Geom.Intersects.RectangleToRectangle(
-                plate.getBounds(),
-                crate.getBounds()
-              );
+              Phaser.Geom
+                .Intersects
+                .RectangleToRectangle(
+                  plate.getBounds(),
+                  crate.getBounds()
+                );
 
             return (
               sum +
@@ -2216,9 +2882,27 @@ function updateWeight(scene) {
         )
     );
 
+  const requiredLeft =
+    Number(
+      e.plates[0]
+        ?.getData(
+          'required'
+        ) || 10
+    );
+
+  const requiredRight =
+    Number(
+      e.plates[1]
+        ?.getData(
+          'required'
+        ) || 6
+    );
+
   const open =
-    totals[0] >= 10 &&
-    totals[1] >= 6;
+    totals[0] >=
+      requiredLeft &&
+    totals[1] >=
+      requiredRight;
 
   if (
     open &&
@@ -2237,10 +2921,14 @@ function updateWeight(scene) {
     );
   }
 
-  e.bridge.body.enable =
-    !open;
+  if (
+    e.bridge?.body
+  ) {
+    e.bridge.body.enable =
+      !open;
+  }
 
-  e.bridge.setAlpha(
+  e.bridge?.setAlpha(
     open
       ? 0.18
       : 1
@@ -2249,19 +2937,25 @@ function updateWeight(scene) {
   e.open =
     open;
 
-  e.text.setPosition(
-    e.bridge.x,
-    e.bridge.y - 50
+  e.text?.setText(
+    open
+      ? 'WEIGHT BALANCED · PATH OPEN'
+      : `WEIGHT ${totals[0]} / ${requiredLeft} · ${totals[1]} / ${requiredRight}`
+  );
+
+  e.text?.setPosition(
+    e.bridge?.x ?? 0,
+    (e.bridge?.y ?? 0) - 50
   );
 }
 
-
 // ============================================================
-// INSTALL
+// INSTALL ALL
 // ============================================================
 
 function install(scene) {
-  const st = getState(scene);
+  const st =
+    getState(scene);
 
   if (
     st.initialized ||
@@ -2273,21 +2967,34 @@ function install(scene) {
   st.initialized =
     true;
 
-  makeTextures(scene);
+  try {
+    makeTextures(scene);
 
-  installMagnetic(scene);
-  installConveyor(scene);
-  installRotation(scene);
-  installRewind(scene);
-  installPhase(scene);
-  installPressure(scene);
-  installSignalIntercept(scene);
-  installWeight(scene);
+    installMagnetic(scene);
+
+    installConveyor(scene);
+
+    installRotation(scene);
+
+    installRewind(scene);
+
+    installPhase(scene);
+
+    installPressure(scene);
+
+    installSignalIntercept(scene);
+
+    installWeight(scene);
+  } catch (error) {
+    console.warn(
+      '[Relay] Gameplay expansion install error:',
+      error
+    );
+  }
 }
 
-
 // ============================================================
-// UPDATE
+// UPDATE ALL
 // ============================================================
 
 function update(
@@ -2306,28 +3013,90 @@ function update(
     return;
   }
 
-  updateMagnetic(scene);
-  updateConveyor(scene);
-  updateRotation(scene);
-  updateRewind(
-    scene,
-    delta
-  );
-  updatePhase(scene);
-  updatePressure(
-    scene,
-    delta
-  );
-  updateSignalIntercept(
-    scene,
-    time
-  );
-  updateWeight(scene);
+  try {
+    updateMagnetic(scene);
+  } catch (error) {
+    console.warn(
+      '[Relay] Magnetic update:',
+      error
+    );
+  }
+
+  try {
+    updateConveyor(scene);
+  } catch (error) {
+    console.warn(
+      '[Relay] Conveyor update:',
+      error
+    );
+  }
+
+  try {
+    updateRotation(scene);
+  } catch (error) {
+    console.warn(
+      '[Relay] Rotation update:',
+      error
+    );
+  }
+
+  try {
+    updateRewind(
+      scene,
+      delta
+    );
+  } catch (error) {
+    console.warn(
+      '[Relay] Rewind update:',
+      error
+    );
+  }
+
+  try {
+    updatePhase(scene);
+  } catch (error) {
+    console.warn(
+      '[Relay] Phase update:',
+      error
+    );
+  }
+
+  try {
+    updatePressure(
+      scene,
+      delta
+    );
+  } catch (error) {
+    console.warn(
+      '[Relay] Pressure update:',
+      error
+    );
+  }
+
+  try {
+    updateSignalIntercept(
+      scene,
+      time
+    );
+  } catch (error) {
+    console.warn(
+      '[Relay] Signal update:',
+      error
+    );
+  }
+
+  try {
+    updateWeight(scene);
+  } catch (error) {
+    console.warn(
+      '[Relay] Weight update:',
+      error
+    );
+  }
 }
 
-
 // ============================================================
-// DESTROY / CLEANUP
+// CLEANUP
 // ============================================================
 
 function destroy(scene) {
@@ -2344,10 +3113,12 @@ function destroy(scene) {
   st.destroyed =
     true;
 
-  // Stop timers
+  // ----------------------------------------------------------
+  // Timers
+  // ----------------------------------------------------------
+
   for (
-    const handle
-    of st.timers
+    const handle of st.timers
   ) {
     try {
       handle?.remove?.();
@@ -2356,10 +3127,12 @@ function destroy(scene) {
 
   st.timers.clear();
 
-  // Stop tweens
+  // ----------------------------------------------------------
+  // Tweens
+  // ----------------------------------------------------------
+
   for (
-    const tween
-    of st.tweens
+    const tween of st.tweens
   ) {
     try {
       tween?.stop?.();
@@ -2369,7 +3142,10 @@ function destroy(scene) {
 
   st.tweens.clear();
 
-  // Keyboard cleanup
+  // ----------------------------------------------------------
+  // Keyboard handlers
+  // ----------------------------------------------------------
+
   const keyMap = [
     ['M', 'magneticKey'],
     ['T', 'rotationKey'],
@@ -2380,23 +3156,32 @@ function destroy(scene) {
   ];
 
   for (
-    const [key, name]
-    of keyMap
+    const [
+      key,
+      name
+    ] of keyMap
   ) {
     const fn =
       st.entities[name];
 
-    if (fn) {
-      try {
-        scene.input?.keyboard?.off(
+    if (!fn) {
+      continue;
+    }
+
+    try {
+      scene.input
+        ?.keyboard
+        ?.off(
           `keydown-${key}`,
           fn
         );
-      } catch {}
-    }
+    } catch {}
   }
 
-  // Restore player movement
+  // ----------------------------------------------------------
+  // Restore player physics
+  // ----------------------------------------------------------
+
   try {
     if (
       scene.player?.body
@@ -2411,11 +3196,12 @@ function destroy(scene) {
     }
   } catch {}
 
-  // Destroy ONLY our own objects.
-  // Player / existing RunnerScene objects are never touched.
+  // ----------------------------------------------------------
+  // Destroy ONLY objects created by expansion
+  // ----------------------------------------------------------
+
   for (
-    const object
-    of st.objects
+    const object of st.objects
   ) {
     safeDestroy(object);
   }
@@ -2423,8 +3209,13 @@ function destroy(scene) {
   st.objects.clear();
 
   st.entities = {};
-}
 
+  st.initialized =
+    false;
+
+  // Keep namespace available so
+  // shutdown remains idempotent.
+}
 
 // ============================================================
 // PUBLIC INSTALLER
@@ -2439,6 +3230,7 @@ export function installGameplayExpansionV2Safe(
     return;
   }
 
+  // Never patch RunnerScene twice.
   if (
     RunnerScene.prototype
       .__relayGameplayExpansionV2SafeInstalled
@@ -2450,11 +3242,11 @@ export function installGameplayExpansionV2Safe(
     .__relayGameplayExpansionV2SafeInstalled =
     true;
 
-  // ----------------------------------------------------------
+  // ==========================================================
   // CREATE
-  // ----------------------------------------------------------
+  // ==========================================================
 
-  const create =
+  const originalCreate =
     RunnerScene.prototype.create;
 
   RunnerScene.prototype.create =
@@ -2462,10 +3254,13 @@ export function installGameplayExpansionV2Safe(
       ...args
     ) {
       const result =
-        create.apply(
-          this,
-          args
-        );
+        typeof originalCreate ===
+        'function'
+          ? originalCreate.apply(
+              this,
+              args
+            )
+          : undefined;
 
       try {
         if (
@@ -2475,7 +3270,7 @@ export function installGameplayExpansionV2Safe(
         }
       } catch (error) {
         console.warn(
-          '[Relay] V2 gameplay isolated:',
+          '[Relay] V2 create isolated:',
           error
         );
       }
@@ -2483,11 +3278,11 @@ export function installGameplayExpansionV2Safe(
       return result;
     };
 
-  // ----------------------------------------------------------
+  // ==========================================================
   // UPDATE
-  // ----------------------------------------------------------
+  // ==========================================================
 
-  const updateOriginal =
+  const originalUpdate =
     RunnerScene.prototype.update;
 
   RunnerScene.prototype.update =
@@ -2496,15 +3291,22 @@ export function installGameplayExpansionV2Safe(
       delta,
       ...args
     ) {
-      const result =
-        updateOriginal.apply(
-          this,
-          [
-            time,
-            delta,
-            ...args
-          ]
-        );
+      let result;
+
+      if (
+        typeof originalUpdate ===
+        'function'
+      ) {
+        result =
+          originalUpdate.apply(
+            this,
+            [
+              time,
+              delta,
+              ...args
+            ]
+          );
+      }
 
       try {
         update(
@@ -2514,7 +3316,7 @@ export function installGameplayExpansionV2Safe(
         );
       } catch (error) {
         console.warn(
-          '[Relay] V2 gameplay update isolated:',
+          '[Relay] V2 update isolated:',
           error
         );
       }
@@ -2522,11 +3324,11 @@ export function installGameplayExpansionV2Safe(
       return result;
     };
 
-  // ----------------------------------------------------------
+  // ==========================================================
   // SHUTDOWN
-  // ----------------------------------------------------------
+  // ==========================================================
 
-  const shutdown =
+  const originalShutdown =
     RunnerScene.prototype.shutdown;
 
   RunnerScene.prototype.shutdown =
@@ -2537,14 +3339,21 @@ export function installGameplayExpansionV2Safe(
         destroy(this);
       } catch (error) {
         console.warn(
-          '[Relay] V2 gameplay cleanup isolated:',
+          '[Relay] V2 cleanup isolated:',
           error
         );
       }
 
-      return shutdown?.apply(
-        this,
-        args
-      );
+      if (
+        typeof originalShutdown ===
+        'function'
+      ) {
+        return originalShutdown.apply(
+          this,
+          args
+        );
+      }
+
+      return undefined;
     };
-    }
+      }
