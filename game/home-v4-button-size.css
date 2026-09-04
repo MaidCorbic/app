@@ -1,0 +1,22 @@
+/* Home V4 — compact desktop CTA refinement.
+ * Desktop only: reduce the primary action without changing mobile ergonomics.
+ */
+#intro.home-v3 .home-v4-actions{max-width:520px}
+#intro.home-v3 .home-v4-primary{min-height:52px}
+#intro.home-v3 .home-v4-primary-content{padding:0 14px 0 16px;font-size:10px;letter-spacing:.17em}
+#intro.home-v3 .home-v4-primary-arrow{width:30px;height:30px;font-size:15px}
+@media(max-width:1050px){
+  #intro.home-v3 .home-v4-actions{max-width:490px}
+  #intro.home-v3 .home-v4-primary{min-height:50px}
+}
+@media(max-width:780px){
+  #intro.home-v3 .home-v4-actions{max-width:520px}
+  #intro.home-v3 .home-v4-primary{min-height:56px}
+  #intro.home-v3 .home-v4-primary-content{padding-left:15px;font-size:9px}
+}
+@media(max-width:430px){
+  #intro.home-v3 .home-v4-actions{max-width:none}
+  #intro.home-v3 .home-v4-primary{min-height:52px}
+  #intro.home-v3 .home-v4-primary-content{font-size:8px;letter-spacing:.13em;padding-left:12px}
+  #intro.home-v3 .home-v4-primary-arrow{width:28px;height:28px;font-size:15px}
+}
