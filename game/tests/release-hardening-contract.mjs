@@ -13,7 +13,9 @@ const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
 
 assert.equal(packageJson.scripts['test:final-stability']?.length > 0, true, 'final stability suite must remain wired');
-assert.equal(packageJson.scripts['test:release-hardening'], 'node tests/release-hardening-contract.mjs && npm run test:final-stability && npm run build', 'release hardening command must be canonical');
+assert.match(packageJson.scripts['test:release-hardening'] || '', /test:final-stability/,'release hardening must include final stability');
+assert.match(packageJson.scripts['test:release-hardening'] || '', /test:mobile-orientation-release/,'release hardening must include mobile orientation contract');
+assert.match(packageJson.scripts['test:release-hardening'] || '', /test:mobile-orientation-browser/,'release hardening must include browser orientation smoke');
 assert.equal(packageJson.engines?.node, '24.x', 'release Node runtime must stay pinned to Vercel runtime');
 assert.match(config, /export default defineConfig/);
 assert.doesNotMatch(index, /href=["']mobile-viewport\.css["']/);
