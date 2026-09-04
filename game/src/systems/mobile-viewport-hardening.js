@@ -8,9 +8,11 @@ import { installCharacterStateReactions } from './character-state-reactions-v1.j
 installCharacterStateReactions(RunnerScene);
 
 // Mobile rotation hardening for Phaser + DOM layout.
-// The game itself stays on Phaser RESIZE so the canvas always fills its parent.
-// We only stabilize the browser measurements after rotation; we never switch
-// Phaser scale modes during runtime.
+//
+// Phaser remains the only canvas-size authority via Phaser.Scale.RESIZE.
+// CSS remains the DOM layout authority.
+// This controller publishes settled viewport dimensions and triggers one
+// synthetic resize after rotation. It never resizes #play or the canvas.
 
 const mobile = () => {
   const coarse = window.matchMedia?.('(pointer: coarse)').matches;
@@ -18,94 +20,65 @@ const mobile = () => {
   return coarse || touch || /Android|iPhone|iPad|iPod|Mobile|Windows Phone|Silk|Kindle/i.test(navigator.userAgent || '');
 };
 
-if (!mobile()) {
-  // Desktop keeps Phaser's normal resize lifecycle untouched.
-} else {
+if (mobile()) {
   const root = document.documentElement;
-  const play = () => document.getElementById('play');
-  const phaserHost = () => document.getElementById('phaser-game');
   let timer = 0;
+  let raf1 = 0;
+  let raf2 = 0;
   let syncing = false;
-  let last = '';
+  let lastKey = '';
 
   const measure = () => {
     const vv = window.visualViewport;
-
-    const windowWidth = Math.max(
-      1,
-      Math.round(window.innerWidth || root.clientWidth)
-    );
-
-    const windowHeight = Math.max(
-      1,
-      Math.round(window.innerHeight || root.clientHeight)
-    );
-
-    const viewportWidth = Math.max(
-      1,
-      Math.round(vv?.width || windowWidth)
-    );
-
-    const viewportHeight = Math.max(
-      1,
-      Math.round(vv?.height || windowHeight)
-    );
-
-    /*
-     * Use the browser window as the gameplay layout authority.
-     * visualViewport is allowed to report a smaller temporary area
-     * (browser chrome / keyboard / transition), but it must not
-     * unexpectedly shrink the entire game surface.
-     */
-    const width = Math.max(windowWidth, viewportWidth);
-    const height = Math.max(windowHeight, viewportHeight);
-
+    const width = Math.max(1, Math.round(window.innerWidth || root.clientWidth || vv?.width || 1));
+    const height = Math.max(1, Math.round(window.innerHeight || root.clientHeight || vv?.height || 1));
     return { width, height };
   };
-  const apply = () => {
+
+  const apply = (reason = 'resize') => {
     const { width, height } = measure();
-    const key = `${width}x${height}`;
-    if (key === last) return;
-    last = key;
+    const orientation = width >= height ? 'landscape' : 'portrait';
+    const key = width + 'x' + height + '|' + orientation;
+    if (key === lastKey && reason !== 'orientationchange') return;
+    lastKey = key;
 
-    root.style.setProperty('--relay-vw', `${width}px`);
-    root.style.setProperty('--relay-vh', `${height}px`);
-    root.dataset.relayOrientation = width >= height ? 'landscape' : 'portrait';
+    root.style.setProperty('--relay-viewport-width', width + 'px');
+    root.style.setProperty('--relay-viewport-height', height + 'px');
+    root.style.setProperty('--relay-vw', width + 'px');
+    root.style.setProperty('--relay-vh', height + 'px');
+    root.dataset.relayOrientation = orientation;
 
-    const p = play();
-    const host = phaserHost();
-    if (p) {
-      p.style.width = `${width}px`;
-      p.style.height = `${height}px`;
-    }
-    if (host) {
-      host.style.width = '100%';
-      host.style.height = '100%';
-    }
-
-    // Phaser RESIZE consumes this final browser size. Do not dispatch while
-    // syncing, otherwise visualViewport can create a resize feedback loop.
     syncing = true;
     window.dispatchEvent(new Event('resize'));
     requestAnimationFrame(() => { syncing = false; });
+
+    document.dispatchEvent(new CustomEvent('relay:viewport-settled', {
+      detail: { reason, width, height, orientation }
+    }));
   };
 
-  const schedule = () => {
+  const schedule = (reason = 'resize') => {
     if (syncing) return;
     window.clearTimeout(timer);
+    cancelAnimationFrame(raf1);
+    cancelAnimationFrame(raf2);
     timer = window.setTimeout(() => {
-      requestAnimationFrame(() => requestAnimationFrame(apply));
-    }, 80);
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => apply(reason));
+      });
+    }, 120);
   };
 
-  window.addEventListener('orientationchange', schedule, { passive: true });
-  window.addEventListener('resize', schedule, { passive: true });
-  window.visualViewport?.addEventListener('resize', schedule, { passive: true });
-  window.addEventListener('pageshow', schedule, { passive: true });
+  window.addEventListener('orientationchange', () => schedule('orientationchange'), { passive: true });
+  window.addEventListener('resize', () => {
+    if (!syncing) schedule('resize');
+  }, { passive: true });
+  window.visualViewport?.addEventListener('resize', () => schedule('visualViewport.resize'), { passive: true });
+  window.addEventListener('pageshow', () => schedule('pageshow'), { passive: true });
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', schedule, { once: true });
+    document.addEventListener('DOMContentLoaded', () => schedule('initial'), { once: true });
   } else {
-    schedule();
+    schedule('initial');
   }
 }
