@@ -872,6 +872,7 @@ this.worldWidth,
 this.createEnvironment();
 this.createPlatforms();
 this.createWorldLandmarks();
+this.createBrutalMapDetails();
 this.createRouteLighting();
 this.createPlayer();
 
@@ -1647,6 +1648,101 @@ if (visual.props === 'array') {
 
 // NIGHT RELAY WORLD LABEL DISABLED
 }
+  createBrutalMapDetails() {
+  const mapFx = this.add.graphics();
+
+  // Ground glow
+  mapFx.fillStyle(0x0b1424, 1);
+  mapFx.fillRect(
+    0,
+    610,
+    this.worldWidth,
+    110
+  );
+
+  // Neon route line
+  mapFx.lineStyle(
+    3,
+    0x8df4ff,
+    0.22
+  );
+
+  mapFx.lineBetween(
+    0,
+    606,
+    this.worldWidth,
+    606
+  );
+
+  // Repeating street panels
+  for (
+    let x = 0;
+    x < this.worldWidth;
+    x += 160
+  ) {
+    mapFx
+      .fillStyle(0x17263b, 0.7)
+      .fillRect(
+        x,
+        615,
+        132,
+        6
+      );
+
+    mapFx
+      .lineStyle(
+        1,
+        0x8df4ff,
+        0.12
+      )
+      .lineBetween(
+        x + 18,
+        620,
+        x + 18,
+        704
+      );
+  }
+
+  // Neon city pillars
+  for (
+    let x = 90;
+    x < this.worldWidth;
+    x += 300
+  ) {
+    const height =
+      70 +
+      (x % 4) * 28;
+
+    mapFx
+      .fillStyle(0x101c30, 0.9)
+      .fillRect(
+        x,
+        610 - height,
+        42,
+        height
+      );
+
+    mapFx
+      .fillStyle(0x8df4ff, 0.18)
+      .fillRect(
+        x + 8,
+        625 - height,
+        6,
+        height - 20
+      );
+
+    mapFx
+      .fillStyle(0xffd06e, 0.28)
+      .fillRect(
+        x + 24,
+        625 - height,
+        5,
+        height - 30
+      );
+  }
+
+  mapFx.setDepth(1);
+}
 createRouteLighting() {
 if (!this.mission.safeZones?.length) return;
 
@@ -2129,29 +2225,7 @@ this.mission.obstacles.forEach(
         'barrier'
       );
     
-
-// BARRIER FLOATING LABEL DISABLED
-const warning = this.add.zone(
-x - 115,
-y - 42,
-1,
-1
-)
-.setAlpha(0)
-.setDepth(3);
-
     if (!this.motionReduced) {
-      this.tweens.add({
-        targets: barrier,
-        alpha: {
-          from: 1,
-          to: .62
-        },
-        duration: 360,
-        yoyo: true,
-        repeat: -1
-      });
-
       this.tweens.add({
         targets: warning,
         alpha: {
