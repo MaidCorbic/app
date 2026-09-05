@@ -6295,12 +6295,12 @@ enemy.setData(
 500
 );
 this.playerCue(
-${
-                type === 'security'
-                  ? 'SECURITY'
-                  : 'HOSTILE'
-              } HAS EYES ON YOU,
-'#ffcf82'
+  `${
+    type === 'security'
+      ? 'SECURITY'
+      : 'HOSTILE'
+  } HAS EYES ON YOU`,
+  '#ffcf82'
 );
 }
 
