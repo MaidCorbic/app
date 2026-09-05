@@ -337,26 +337,147 @@ make('spring-pad', 56, 18, g =>
     .lineBetween(36, 7, 44, 13)
 );
 
-make('guide-drone', 42, 30, g =>
-  g.fillStyle(0x8df4ff, .18)
-    .fillCircle(21, 15, 19)
-    .fillStyle(0x203d5a)
-    .fillRoundedRect(6, 8, 30, 14, 7)
-    .lineStyle(2, 0x8df4ff)
-    .strokeRoundedRect(6, 8, 30, 14, 7)
-    .fillStyle(0xe2fbff)
-    .fillCircle(21, 15, 5)
-);
+make('guide-drone', 56, 42, g => {
+  // OUTER ENERGY GLOW
+  g.fillStyle(0x8df4ff, 0.10)
+    .fillCircle(28, 21, 21);
 
-make('alien-guide', 38, 46, g =>
-  g.fillStyle(0x5b3d82)
-    .fillEllipse(19, 18, 28, 29)
-    .fillStyle(0xe0a7ff)
-    .fillCircle(13, 16, 4)
-    .fillCircle(25, 16, 4)
-    .fillStyle(0x8df4ff)
-    .fillRoundedRect(11, 29, 16, 12, 5)
-);
+  g.fillStyle(0x8df4ff, 0.16)
+    .fillCircle(28, 21, 16);
+
+  // SIDE WINGS
+  g.fillStyle(0x10283d, 1)
+    .fillTriangle(8, 14, 2, 21, 10, 26)
+    .fillTriangle(48, 14, 54, 21, 46, 26);
+
+  g.lineStyle(2, 0x55dfff, 0.9)
+    .strokeTriangle(8, 14, 2, 21, 10, 26)
+    .strokeTriangle(48, 14, 54, 21, 46, 26);
+
+  // MAIN BODY
+  g.fillStyle(0x0b1726, 1)
+    .fillRoundedRect(9, 10, 38, 22, 9);
+
+  // BODY INNER PANEL
+  g.fillStyle(0x18324a, 1)
+    .fillRoundedRect(13, 13, 30, 16, 7);
+
+  // NEON OUTLINE
+  g.lineStyle(2, 0x8df4ff, 1)
+    .strokeRoundedRect(9, 10, 38, 22, 9);
+
+  // CENTRAL CORE GLOW
+  g.fillStyle(0x8df4ff, 0.18)
+    .fillCircle(28, 21, 11);
+
+  // CENTRAL CORE
+  g.fillStyle(0xe8fdff, 1)
+    .fillCircle(28, 21, 5);
+
+  g.fillStyle(0x8df4ff, 1)
+    .fillCircle(28, 21, 3);
+
+  // CORE HIGHLIGHT
+  g.fillStyle(0xffffff, 1)
+    .fillCircle(27, 20, 1.5);
+
+  // TOP SIGNAL LIGHTS
+  g.fillStyle(0x55dfff, 1)
+    .fillCircle(20, 8, 1.5)
+    .fillCircle(28, 7, 1.8)
+    .fillCircle(36, 8, 1.5);
+
+  // BOTTOM ENERGY VENTS
+  g.fillStyle(0x55dfff, 0.8)
+    .fillRect(18, 32, 4, 3)
+    .fillRect(26, 32, 4, 4)
+    .fillRect(34, 32, 4, 3);
+});
+
+make('alien-guide', 56, 64, g => {
+  // OUTER ALIEN AURA
+  g.fillStyle(0xb993ff, 0.08)
+    .fillCircle(28, 30, 29);
+
+  g.fillStyle(0xe0a7ff, 0.10)
+    .fillCircle(28, 30, 23);
+
+  // HEAD
+  g.fillStyle(0x3b2858)
+    .fillEllipse(28, 26, 42, 40);
+
+  // HEAD OUTLINE
+  g.lineStyle(2, 0xe0a7ff, 0.95)
+    .strokeEllipse(28, 26, 42, 40);
+
+  // INNER FACE PANEL
+  g.fillStyle(0x53366f)
+    .fillEllipse(28, 28, 34, 31);
+
+  // EYES GLOW
+  g.fillStyle(0xe0a7ff, 0.20)
+    .fillEllipse(19, 24, 14, 10)
+    .fillEllipse(37, 24, 14, 10);
+
+  // EYES
+  g.fillStyle(0xf3d9ff)
+    .fillEllipse(19, 24, 10, 8)
+    .fillEllipse(37, 24, 10, 8);
+
+  // PUPILS
+  g.fillStyle(0x24152f)
+    .fillCircle(19, 24, 3)
+    .fillCircle(37, 24, 3);
+
+  // EYE HIGHLIGHTS
+  g.fillStyle(0xffffff)
+    .fillCircle(18, 23, 1)
+    .fillCircle(36, 23, 1);
+
+  // SIGNAL MARK
+  g.fillStyle(0x8df4ff, 0.18)
+    .fillCircle(28, 35, 9);
+
+  g.fillStyle(0x8df4ff)
+    .fillRoundedRect(20, 31, 16, 8, 4);
+
+  // SIGNAL CORE
+  g.fillStyle(0xe8fdff)
+    .fillCircle(28, 35, 3);
+
+  // SIDE ENERGY FINS
+  g.fillStyle(0x2a1c40)
+    .fillTriangle(7, 30, 1, 38, 10, 41)
+    .fillTriangle(49, 30, 55, 38, 46, 41);
+
+  g.lineStyle(1.5, 0xb993ff, 0.9)
+    .strokeTriangle(7, 30, 1, 38, 10, 41)
+    .strokeTriangle(49, 30, 55, 38, 46, 41);
+
+  // ANTENNA
+  g.lineStyle(2, 0xe0a7ff, 0.9)
+    .lineBetween(28, 5, 28, 12);
+
+  // ANTENNA CORE
+  g.fillStyle(0x8df4ff)
+    .fillCircle(28, 4, 3);
+
+  g.fillStyle(0xffffff, 0.8)
+    .fillCircle(27, 3, 1);
+
+  // LOWER ENERGY BAND
+  g.fillStyle(0x8df4ff, 0.15)
+    .fillRoundedRect(16, 43, 24, 12, 5);
+
+  g.fillStyle(0x8df4ff)
+    .fillRoundedRect(18, 45, 20, 7, 3);
+
+  // ENERGY VENTS
+  g.fillStyle(0xdffcff, 0.9)
+    .fillRect(21, 48, 3, 3)
+    .fillRect(27, 47, 3, 4)
+    .fillRect(33, 48, 3, 3);
+});
 
 }
 
@@ -1034,16 +1155,42 @@ this.add.text(
 
 const backdrop = {
   'first-delivery': () => {
-    for (let x = 110; x < 1500; x += 190) {
-      sky
-        .fillStyle(0xffd06e, .12)
-        .fillCircle(
-          x,
-          212 + (x % 3) * 34,
-          28
-        );
-    }
-  },
+  for (let x = 70; x < 1500; x += 230) {
+    const y =
+      165 +
+      (x % 4) * 24;
+
+    sky
+      .fillStyle(0xffd06e, .035)
+      .fillCircle(
+        x,
+        y,
+        52
+      )
+
+      .fillStyle(0xffd06e, .045)
+      .fillCircle(
+        x + 42,
+        y + 8,
+        38
+      )
+
+      .fillStyle(0xffd06e, .035)
+      .fillCircle(
+        x - 34,
+        y + 12,
+        32
+      )
+
+      .fillStyle(0xffe0a8, .025)
+      .fillEllipse(
+        x + 10,
+        y + 28,
+        130,
+        34
+      );
+  }
+},
 
   'dead-drop': () => {
     for (let y = 118; y < 420; y += 64) {
@@ -1051,6 +1198,35 @@ const backdrop = {
         .fillStyle(0xb5d9df, .045)
         .fillRect(0, y, 1500, 28);
     }
+    const fogClouds =
+  this.add
+    .graphics()
+    .setScrollFactor(.05)
+    .setDepth(0);
+
+for (let x = -120; x < 2800; x += 300) {
+  const y =
+    145 +
+    (x % 4) * 22;
+
+  fogClouds
+    .fillStyle(0xd8edf0, .018)
+    .fillCircle(x, y, 58)
+    .fillStyle(0xb5d9df, .022)
+    .fillCircle(x + 48, y + 8, 42)
+    .fillStyle(0xd8edf0, .016)
+    .fillCircle(x - 38, y + 10, 36)
+    .fillStyle(0xd8edf0, .012)
+    .fillEllipse(x + 12, y + 28, 160, 38);
+}
+
+this.tweens.add({
+  targets: fogClouds,
+  x: -900,
+  duration: 95000,
+  ease: 'Linear',
+  repeat: -1
+});
   },
 
   blackout: () => {
@@ -1064,6 +1240,67 @@ const backdrop = {
           520
         );
     }
+    const stormClouds =
+  this.add
+    .graphics()
+    .setScrollFactor(.045)
+    .setDepth(0);
+
+for (let x = -160; x < 2800; x += 320) {
+  const y =
+    120 +
+    (x % 5) * 20;
+
+  stormClouds
+    .fillStyle(0x0b1728, .22)
+    .fillCircle(
+      x,
+      y,
+      62
+    )
+
+    .fillStyle(0x10243a, .20)
+    .fillCircle(
+      x + 48,
+      y + 8,
+      48
+    )
+
+    .fillStyle(0x091524, .18)
+    .fillCircle(
+      x - 42,
+      y + 12,
+      40
+    )
+
+    .fillStyle(0x8df4ff, .035)
+    .fillEllipse(
+      x + 10,
+      y + 30,
+      175,
+      42
+    );
+}
+
+this.tweens.add({
+  targets: stormClouds,
+  x: -1000,
+  duration: 115000,
+  ease: 'Linear',
+  repeat: -1
+});
+
+this.tweens.add({
+  targets: stormClouds,
+  alpha: {
+    from: .72,
+    to: 1
+  },
+  duration: 5200,
+  ease: 'Sine.inOut',
+  yoyo: true,
+  repeat: -1
+});
   },
 
   pursuit: () => {
@@ -1077,6 +1314,67 @@ const backdrop = {
           470
         );
     }
+    const chaseClouds =
+  this.add
+    .graphics()
+    .setScrollFactor(.07)
+    .setDepth(0);
+
+for (let x = -180; x < 3000; x += 270) {
+  const y =
+    185 +
+    (x % 3) * 20;
+
+  chaseClouds
+    .fillStyle(0x172238, .10)
+    .fillCircle(
+      x,
+      y,
+      48
+    )
+
+    .fillStyle(0x26344d, .12)
+    .fillCircle(
+      x + 40,
+      y + 5,
+      38
+    )
+
+    .fillStyle(0x101a2b, .11)
+    .fillCircle(
+      x - 34,
+      y + 8,
+      32
+    )
+
+    .fillStyle(0xff826e, .018)
+    .fillEllipse(
+      x + 8,
+      y + 27,
+      145,
+      30
+    );
+}
+
+this.tweens.add({
+  targets: chaseClouds,
+  x: -1150,
+  duration: 65000,
+  ease: 'Linear',
+  repeat: -1
+});
+
+this.tweens.add({
+  targets: chaseClouds,
+  alpha: {
+    from: .76,
+    to: 1
+  },
+  duration: 3000,
+  ease: 'Sine.inOut',
+  yoyo: true,
+  repeat: -1
+});
   },
 
   'signal-storm': () => {
@@ -1092,6 +1390,67 @@ const backdrop = {
           100
         );
     }
+    const stormClouds =
+  this.add
+    .graphics()
+    .setScrollFactor(.045)
+    .setDepth(0);
+
+for (let x = -160; x < 3000; x += 310) {
+  const y =
+    135 +
+    (x % 4) * 24;
+
+  stormClouds
+    .fillStyle(0x241a3d, .14)
+    .fillCircle(
+      x,
+      y,
+      60
+    )
+
+    .fillStyle(0x3b2860, .16)
+    .fillCircle(
+      x + 46,
+      y + 8,
+      46
+    )
+
+    .fillStyle(0x1c1630, .13)
+    .fillCircle(
+      x - 42,
+      y + 12,
+      38
+    )
+
+    .fillStyle(0xb993ff, .025)
+    .fillEllipse(
+      x + 10,
+      y + 30,
+      170,
+      40
+    );
+}
+
+this.tweens.add({
+  targets: stormClouds,
+  x: -1000,
+  duration: 98000,
+  ease: 'Linear',
+  repeat: -1
+});
+
+this.tweens.add({
+  targets: stormClouds,
+  alpha: {
+    from: .74,
+    to: 1
+  },
+  duration: 4600,
+  ease: 'Sine.inOut',
+  yoyo: true,
+  repeat: -1
+});
   },
 
   'corporate-lockdown': () => {
@@ -1100,6 +1459,67 @@ const backdrop = {
         .fillStyle(0xff826e, .07)
         .fillRect(x, 110, 68, 320);
     }
+    const corporateClouds =
+  this.add
+    .graphics()
+    .setScrollFactor(.035)
+    .setDepth(0);
+
+for (let x = -180; x < 3000; x += 340) {
+  const y =
+    125 +
+    (x % 4) * 18;
+
+  corporateClouds
+    .fillStyle(0xdffcff, .018)
+    .fillCircle(
+      x,
+      y,
+      54
+    )
+
+    .fillStyle(0xb9d9e8, .022)
+    .fillCircle(
+      x + 44,
+      y + 6,
+      40
+    )
+
+    .fillStyle(0xcfe9f2, .016)
+    .fillCircle(
+      x - 38,
+      y + 10,
+      32
+    )
+
+    .fillStyle(0xff826e, .012)
+    .fillEllipse(
+      x + 10,
+      y + 28,
+      155,
+      32
+    );
+}
+
+this.tweens.add({
+  targets: corporateClouds,
+  x: -820,
+  duration: 125000,
+  ease: 'Linear',
+  repeat: -1
+});
+
+this.tweens.add({
+  targets: corporateClouds,
+  alpha: {
+    from: .76,
+    to: 1
+  },
+  duration: 7000,
+  ease: 'Sine.inOut',
+  yoyo: true,
+  repeat: -1
+});
   },
 
   'final-relay': () => {
@@ -1108,10 +1528,124 @@ const backdrop = {
         .lineStyle(1, 0xffe0a8, .2)
         .strokeCircle(x, 230, 72);
     }
+    const relayClouds =
+  this.add
+    .graphics()
+    .setScrollFactor(.025)
+    .setDepth(0);
+
+for (let x = -220; x < 3200; x += 390) {
+  const y =
+    105 +
+    (x % 3) * 28;
+
+  relayClouds
+    .fillStyle(0x211d3a, .13)
+    .fillCircle(
+      x,
+      y,
+      72
+    )
+
+    .fillStyle(0x334261, .15)
+    .fillCircle(
+      x + 55,
+      y + 8,
+      54
+    )
+
+    .fillStyle(0x171528, .12)
+    .fillCircle(
+      x - 52,
+      y + 14,
+      46
+    )
+
+    .fillStyle(0xffe0a8, .028)
+    .fillEllipse(
+      x + 12,
+      y + 34,
+      205,
+      46
+    );
+}
+
+this.tweens.add({
+  targets: relayClouds,
+  x: -900,
+  duration: 145000,
+  ease: 'Linear',
+  repeat: -1
+});
+
+this.tweens.add({
+  targets: relayClouds,
+  alpha: {
+    from: .72,
+    to: 1
+  },
+  duration: 8000,
+  ease: 'Sine.inOut',
+  yoyo: true,
+  repeat: -1
+});
   }
 }[this.mission.id];
 
 backdrop?.();
+ 
+const farClouds =
+  this.add
+    .graphics()
+    .setScrollFactor(.03)
+    .setDepth(0);
+
+for (let x = -200; x < 2800; x += 360) {
+  const y =
+    105 +
+    (x % 4) * 20;
+
+  farClouds
+    .fillStyle(0xdffcff, .018)
+    .fillCircle(
+      x,
+      y,
+      60
+    )
+    .fillStyle(0x8df4ff, .014)
+    .fillCircle(
+      x + 48,
+      y + 8,
+      44
+    )
+    .fillStyle(0xdffcff, .012)
+    .fillEllipse(
+      x + 18,
+      y + 30,
+      170,
+      40
+    );
+}
+
+this.tweens.add({
+  targets: farClouds,
+  x: -850,
+  duration: 105000,
+  ease: 'Linear',
+  repeat: -1
+});
+
+this.tweens.add({
+  targets: farClouds,
+  alpha: {
+    from: .72,
+    to: 1
+  },
+  duration: 6200,
+  ease: 'Sine.inOut',
+  yoyo: true,
+  repeat: -1
+});
 
 const distant = this.add.graphics().setScrollFactor(.12);
 
@@ -1768,6 +2302,44 @@ this.mission.safeZones.forEach(
   }
 );
 
+  /*
+ * SAFE ZONE NEON PULSE
+ */
+if (!this.motionReduced) {
+  this.mission.safeZones.forEach(
+    ([x, y, width]) => {
+      const pulse =
+        this.add
+          .rectangle(
+            x + width / 2,
+            y + 22,
+            width,
+            45,
+            0x8df4ff,
+            0.04
+          )
+          .setOrigin(0.5)
+          .setDepth(3);
+
+      pulse.setScale(0.98, 0.92);
+
+      this.tweens.add({
+        targets: pulse,
+        scaleX: 1.02,
+        scaleY: 1.08,
+        alpha: {
+          from: 0.025,
+          to: 0.10
+        },
+        duration: 1100,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.inOut'
+      });
+    }
+  );
+}
+
 }
 
 createPlayer() {
@@ -1793,6 +2365,94 @@ this.player.body
 this.player
   .setCollideWorldBounds(true)
   .play('runner-idle');
+
+  /*
+ * PLAYER ENERGY FX
+ */
+const playerEnergyGlow =
+  this.add
+    .circle(
+      this.player.x,
+      this.player.y,
+      18,
+      0x8df4ff,
+      0.08
+    )
+    .setDepth(8);
+
+this.playerEnergyGlow =
+  playerEnergyGlow;
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: playerEnergyGlow,
+    scale: {
+      from: 0.82,
+      to: 1.18
+    },
+    alpha: {
+      from: 0.05,
+      to: 0.14
+    },
+    duration: 620,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
+
+const playerEnergyFollow =
+  this.time.addEvent({
+    delay: 16,
+    loop: true,
+    callback: () => {
+      if (
+        !this.player?.active ||
+        !playerEnergyGlow?.active
+      ) {
+        playerEnergyFollow.remove();
+        playerEnergyGlow?.destroy();
+        return;
+      }
+
+      playerEnergyGlow.x =
+        this.player.x;
+
+      playerEnergyGlow.y =
+        this.player.y + 4;
+
+      const velocityX =
+        Math.abs(
+          this.player.body?.velocity?.x || 0
+        );
+
+      const speedFactor =
+        Phaser.Math.Clamp(
+          velocityX /
+            RUNNER_TUNING.maxRunSpeed,
+          0,
+          1
+        );
+
+      playerEnergyGlow.alpha =
+        this.motionReduced
+          ? 0
+          : 0.05 +
+            speedFactor * 0.10;
+
+      playerEnergyGlow.scaleX =
+        0.9 +
+        speedFactor * 0.18;
+
+      playerEnergyGlow.scaleY =
+        0.9 +
+        speedFactor * 0.10;
+    }
+  });
+
+this.playerEnergyFollow =
+  playerEnergyFollow;
+
 
 this.physics.add.collider(
   this.player,
@@ -3747,6 +4407,7 @@ return;
     'LANDING COMPLETE · E TO FIRE · STOMP FROM ABOVE',
     '#8df4ff'
   );
+  this.createMissionTransmission();
 };
 
 const story =
@@ -4385,90 +5046,142 @@ this.input.keyboard.once(
 }
 
 createMissionTransmission() {
-const story =
-this.mission.story;
+  const story =
+    this.mission.story;
 
-const chapter =
-  story?.chapter ||
-  'RUNNER TRANSMISSION';
+  const chapter =
+    story?.chapter ||
+    'RUNNER TRANSMISSION';
 
-const objective =
-  story?.arrival ||
-  'Keep moving, read the route and protect the relay.';
+  const objective =
+    story?.arrival ||
+    'Keep moving, read the route and protect the relay.';
 
-const panel =
-  this.add
-    .container(36, 520)
-    .setScrollFactor(0)
-    .setDepth(30);
+  const panel =
+    this.add
+      .container(36, 520)
+      .setScrollFactor(0)
+      .setDepth(30);
 
-const plate =
-  this.add.rectangle(
-    280,
-    68,
-    520,
-    112,
-    0x07101f,
-    .88
-  ).setStrokeStyle(
-    1,
-    0x8df4ff,
-    .45
-  );
+  const plate =
+    this.add.rectangle(
+      280,
+      68,
+      520,
+      112,
+      0x07101f,
+      .88
+    ).setStrokeStyle(
+      1,
+      0x8df4ff,
+      .45
+    );
 
-const label =
-  this.add.text(
-    40,
-    28,
-    chapter,
-    {
-      fontFamily: 'DM Mono',
-      fontSize: '12px',
-      color: '#8df4ff'
+  const label =
+    this.add.text(
+      40,
+      28,
+      '',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '12px',
+        color: '#8df4ff'
+      }
+    );
+
+  const copy =
+    this.add.text(
+      40,
+      54,
+      '',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '12px',
+        color: '#dffcff',
+        wordWrap: {
+          width: 440
+        },
+        lineSpacing: 5
+      }
+    );
+
+  panel.add([
+    plate,
+    label,
+    copy
+  ]);
+
+  panel.setAlpha(0);
+
+  this.tweens.add({
+    targets: panel,
+    alpha: 1,
+    x: 58,
+    duration: 340,
+    ease: 'Cubic.out'
+  });
+
+  // TYPEWRITER — MISSION CHAPTER
+this.tweens.addCounter({
+  from: 0,
+  to: chapter.length,
+  duration: Math.max(
+    500,
+    chapter.length * 38
+  ),
+  onUpdate: tween => {
+    if (!panel.active) return;
+
+    const count =
+      Math.floor(tween.getValue());
+
+    label.setText(
+      chapter.slice(0, count)
+    );
+  }
+});
+    this.time.delayedCall(
+    Math.max(
+      550,
+      chapter.length * 38
+    ),
+    () => {
+      if (!panel.active) return;
+
+      this.tweens.addCounter({
+        from: 0,
+        to: objective.length,
+        duration: Math.max(
+          900,
+          objective.length * 28
+        ),
+        onUpdate: tween => {
+          if (!panel.active) return;
+
+          const count =
+            Math.floor(tween.getValue());
+
+          copy.setText(
+            objective.slice(0, count)
+          );
+        }
+      });
     }
   );
 
-const copy =
-  this.add.text(
-    40,
-    54,
-    objective,
-    {
-      fontFamily: 'DM Mono',
-      fontSize: '12px',
-      color: '#dffcff',
-      wordWrap: {
-        width: 440
-      },
-      lineSpacing: 5
-    }
-  );
-
-panel.add([
-  plate,
-  label,
-  copy
-]);
-
-panel.setAlpha(0);
-
-this.tweens.add({
-  targets: panel,
-  alpha: 1,
-  x: 58,
-  duration: 340,
-  ease: 'Cubic.out'
-});
-
-this.tweens.add({
-  targets: panel,
-  alpha: 0,
-  delay: 3900,
-  duration: 500,
-  onComplete: () =>
-    panel.destroy()
-});
-
+  this.tweens.add({
+    targets: panel,
+    alpha: 0,
+   delay: Math.max(
+  3900,
+  Math.max(550, chapter.length * 38) +
+  Math.max(900, objective.length * 28) +
+  300
+),
+    duration: 500,
+    onComplete: () =>
+      panel.destroy()
+  });
 }
 
 createBoostPads() {
@@ -4796,6 +5509,102 @@ this.mission.goal.y,
 
 this.goal.refreshBody();
 
+  /*
+ * DELIVERY BEACON FX
+ */
+const beaconGlow =
+  this.add
+    .circle(
+      this.goal.x + 28,
+      this.goal.y + 34,
+      28,
+      0xffd06e,
+      0.08
+    )
+    .setDepth(7);
+
+const beaconRing =
+  this.add
+    .circle(
+      this.goal.x + 28,
+      this.goal.y + 34,
+      22,
+      0xffd06e,
+      0
+    )
+    .setStrokeStyle(
+      2,
+      0xffe0a8,
+      0.55
+    )
+    .setDepth(8);
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: beaconGlow,
+    scale: {
+      from: 0.75,
+      to: 1.45
+    },
+    alpha: {
+      from: 0.04,
+      to: 0.18
+    },
+    duration: 900,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+
+  this.tweens.add({
+    targets: beaconRing,
+    scale: {
+      from: 0.75,
+      to: 1.9
+    },
+    alpha: {
+      from: 0.6,
+      to: 0
+    },
+    duration: 1100,
+    repeat: -1,
+    ease: 'Quad.out'
+  });
+}
+
+const beaconFollow =
+  this.time.addEvent({
+    delay: 16,
+    loop: true,
+    callback: () => {
+      if (
+        !this.goal?.active ||
+        !beaconGlow?.active ||
+        !beaconRing?.active
+      ) {
+        beaconFollow.remove();
+        beaconGlow?.destroy();
+        beaconRing?.destroy();
+        return;
+      }
+
+      beaconGlow.x =
+        this.goal.x + 28;
+
+      beaconGlow.y =
+        this.goal.y + 34;
+
+      beaconRing.x =
+        this.goal.x + 28;
+
+      beaconRing.y =
+        this.goal.y + 34;
+    }
+  });
+
+this.goalBeaconFollow =
+  beaconFollow;
+  
 if (!this.motionReduced) {
   this.tweens.add({
     targets: this.goal,
@@ -5078,92 +5887,973 @@ y,
 }
 
 createGuideCompanions() {
-const placements =
-this.mission.id ===
-'first-delivery'
-? [
-[
-360,
-470,
-'alien-guide',
-'ALIEN SCOUT · FOLLOW THE GOLD SIGNALS'
-],
-[
-1720,
-470,
-'guide-drone',
-'GUIDE DRONE · CHECKPOINTS SAVE YOUR RUN'
-]
-]
-: [
-[
-this.mission.spawn.x +
-540,
-470,
-'guide-drone',
-'ROUTE GUIDE · ENERGY AND HEALTH RESTORED'
-],
-[
-this.mission.goal.x -
-620,
-430,
-'alien-guide',
-'ALIEN SCOUT · THE RELAY IS CLOSE'
-]
-];
+  const placements =
+    this.mission.id ===
+    'first-delivery'
+      ? [
+          [
+            360,
+            470,
+            'alien-guide',
+            'ALIEN SCOUT · FOLLOW THE GOLD SIGNALS'
+          ],
+          [
+            1720,
+            470,
+            'guide-drone',
+            'GUIDE DRONE · CHECKPOINTS SAVE YOUR RUN'
+          ]
+        ]
+      : [
+          [
+            this.mission.spawn.x + 540,
+            470,
+            'guide-drone',
+            'ROUTE GUIDE · ENERGY AND HEALTH RESTORED'
+          ],
+          [
+            this.mission.goal.x - 620,
+            430,
+            'alien-guide',
+            'ALIEN SCOUT · THE RELAY IS CLOSE'
+          ]
+        ];
 
-this.guideCompanions =
-  this.physics.add.group();
+  this.guideCompanions =
+    this.physics.add.group();
 
-placements.forEach(
-  ([x, y, texture, lesson]) => {
-    const guide =
-      this.guideCompanions
-        .create(
-          x,
-          y,
-          texture
-        )
-        .setDepth(9)
-        .setData(
-          'lesson',
-          lesson
+  placements.forEach(
+    ([x, y, texture, lesson]) => {
+      const guide =
+        this.guideCompanions
+          .create(
+            x,
+            y,
+            texture
+          )
+          .setDepth(9)
+          .setData(
+            'lesson',
+            lesson
+          );
+
+      guide.body
+        .setAllowGravity(false)
+        .setCircle(
+          14,
+          6,
+          5
         );
 
-    guide.body
-      .setAllowGravity(false)
-      .setCircle(
-        14,
-        6,
-        5
+      guide.setData(
+        'baseY',
+        y
       );
 
-    if (!this.motionReduced) {
-      this.tweens.add({
-        targets: guide,
-        y: y - 12,
-        duration: 760,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.inOut'
-      });
+      guide.setData(
+        'proximityCooldown',
+        0
+      );
+
+      guide.setData(
+        'blinkCooldown',
+        Phaser.Math.Between(
+          1600,
+          3200
+        )
+      );
+
+      /*
+       * BASIC FLOATING
+       */
+      if (!this.motionReduced) {
+        this.tweens.add({
+          targets: guide,
+          y: y - 12,
+          duration: 760,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+      }
+
+      /*
+ * FLOATING SHADOW
+ */
+const shadow =
+  this.add
+    .ellipse(
+      guide.x,
+      y + 25,
+      34,
+      9,
+      texture === 'alien-guide'
+        ? 0x120c1d
+        : 0x06131f,
+      0.38
+    )
+    .setDepth(4);
+
+guide.setData(
+  'shadow',
+  shadow
+);
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: shadow,
+    scaleX: {
+      from: 0.72,
+      to: 1.08
+    },
+    scaleY: {
+      from: 0.72,
+      to: 1
+    },
+    alpha: {
+      from: 0.2,
+      to: 0.42
+    },
+    duration: 760,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
+
+const shadowFollow =
+  this.time.addEvent({
+    delay: 16,
+    loop: true,
+    callback: () => {
+      if (
+        !guide.active ||
+        !shadow.active
+      ) {
+        shadowFollow.remove();
+        shadow.destroy();
+        return;
+      }
+
+      shadow.x = guide.x;
+      shadow.y = guide.y + 25;
     }
+  });
+
+guide.setData(
+  'shadowTimer',
+  shadowFollow
+);
+
+      /*
+ * MISSION-SPECIFIC SIGNAL
+ */
+const missionSignal =
+  this.add
+    .circle(
+      guide.x,
+      guide.y,
+      7,
+      this.mission.id === 'signal-storm'
+        ? 0xb993ff
+        : this.mission.id === 'pursuit'
+          ? 0xff826e
+          : this.mission.id === 'final-relay'
+            ? 0xffd06e
+            : 0x8df4ff,
+      0.16
+    )
+    .setDepth(7);
+
+guide.setData(
+  'missionSignal',
+  missionSignal
+);
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: missionSignal,
+    scale: {
+      from: 0.7,
+      to:
+        this.mission.id === 'final-relay'
+          ? 1.8
+          : 1.45
+    },
+    alpha: {
+      from: 0.08,
+      to:
+        this.mission.id === 'signal-storm'
+          ? 0.34
+          : 0.22
+    },
+    duration:
+      this.mission.id === 'signal-storm'
+        ? 560
+        : this.mission.id === 'pursuit'
+          ? 420
+          : 760,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
+
+const missionSignalFollow =
+  this.time.addEvent({
+    delay: 16,
+    loop: true,
+    callback: () => {
+      if (
+        !guide.active ||
+        !missionSignal.active
+      ) {
+        missionSignalFollow.remove();
+        missionSignal.destroy();
+        return;
+      }
+
+      missionSignal.x = guide.x;
+      missionSignal.y = guide.y;
+    }
+  });
+
+guide.setData(
+  'missionSignalTimer',
+  missionSignalFollow
+);
+
+      /*
+       * FX CONTAINER
+       * Keeps all companion effects together
+       * and makes cleanup automatic.
+       */
+      const fx =
+        this.add
+          .container(
+            guide.x,
+            guide.y
+          )
+          .setDepth(8);
+
+      guide.setData(
+        'fxContainer',
+        fx
+      );
+
+      /*
+       * ==========================
+       * ALIEN GUIDE FX
+       * ==========================
+       */
+      if (
+        !this.motionReduced &&
+        texture === 'alien-guide'
+      ) {
+        const alienAura =
+          this.add
+            .circle(
+              0,
+              0,
+              30,
+              0xb993ff,
+              0.07
+            );
+
+        const alienGlow =
+          this.add
+            .circle(
+              0,
+              0,
+              23,
+              0xe0a7ff,
+              0.08
+            );
+
+        const alienRing =
+          this.add
+            .circle(
+              0,
+              0,
+              18,
+              0x8df4ff,
+              0
+            )
+            .setStrokeStyle(
+              1.5,
+              0xb993ff,
+              0.72
+            );
+
+        const alienCore =
+          this.add
+            .circle(
+              0,
+              5,
+              4,
+              0xe8fdff,
+              0.9
+            );
+
+        const alienSignal =
+          this.add
+            .circle(
+              0,
+              5,
+              9,
+              0x8df4ff,
+              0
+            )
+            .setStrokeStyle(
+              1.5,
+              0x8df4ff,
+              0.55
+            );
+
+        const blinkBar =
+          this.add
+            .rectangle(
+              0,
+              -7,
+              30,
+              3,
+              0x24152f,
+              0
+            );
+
+        fx.add([
+          alienAura,
+          alienGlow,
+          alienRing,
+          alienSignal,
+          alienCore,
+          blinkBar
+        ]);
+
+        guide.setData(
+          'alienFx',
+          {
+            alienAura,
+            alienGlow,
+            alienRing,
+            alienSignal,
+            alienCore,
+            blinkBar
+          }
+        );
+
+        this.tweens.add({
+          targets: alienAura,
+          scale: {
+            from: 0.92,
+            to: 1.12
+          },
+          alpha: {
+            from: 0.05,
+            to: 0.16
+          },
+          duration: 1050,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+
+        this.tweens.add({
+          targets: alienGlow,
+          scale: {
+            from: 0.92,
+            to: 1.08
+          },
+          alpha: {
+            from: 0.06,
+            to: 0.18
+          },
+          duration: 820,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+
+        this.tweens.add({
+          targets: alienRing,
+          scale: {
+            from: 0.82,
+            to: 1.45
+          },
+          alpha: {
+            from: 0.68,
+            to: 0
+          },
+          duration: 1100,
+          repeat: -1,
+          ease: 'Sine.out'
+        });
+
+        this.tweens.add({
+          targets: alienSignal,
+          scale: {
+            from: 0.75,
+            to: 1.35
+          },
+          alpha: {
+            from: 0.65,
+            to: 0
+          },
+          duration: 760,
+          repeat: -1,
+          ease: 'Sine.out'
+        });
+
+        this.tweens.add({
+          targets: alienCore,
+          scale: {
+            from: 0.85,
+            to: 1.3
+          },
+          alpha: {
+            from: 0.55,
+            to: 1
+          },
+          duration: 620,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+
+        /*
+         * Follow guide
+         */
+        const followTimer =
+          this.time.addEvent({
+            delay: 16,
+            loop: true,
+            callback: () => {
+              if (
+                !guide.active ||
+                !fx.active
+              ) {
+                followTimer.remove();
+                fx.destroy();
+                return;
+              }
+
+              fx.setPosition(
+                guide.x,
+                guide.y
+              );
+
+              const distance =
+                Phaser.Math.Distance.Between(
+                  this.player.x,
+                  this.player.y,
+                  guide.x,
+                  guide.y
+                );
+
+              /*
+               * PROXIMITY REACTION
+               */
+              if (
+                distance < 130 &&
+                guide.getData(
+                  'proximityCooldown'
+                ) <= 0
+              ) {
+                guide.setData(
+                  'proximityCooldown',
+                  900
+                );
+
+                const nearbyColor =
+  texture === 'alien-guide'
+    ? '#e0a7ff'
+    : '#8df4ff';
+
+const nearbyLabel =
+  this.add
+    .text(
+      guide.x,
+      guide.y - 46,
+      texture === 'alien-guide'
+        ? '◈ ALLY DETECTED'
+        : '◈ DRONE LINK',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '9px',
+        color: nearbyColor,
+        stroke: '#08101c',
+        strokeThickness: 4
+      }
+    )
+    .setOrigin(.5)
+    .setDepth(15)
+    .setAlpha(0);
+
+this.tweens.add({
+  targets: nearbyLabel,
+  alpha: {
+    from: 0,
+    to: 1
+  },
+  y: nearbyLabel.y - 7,
+  duration: 140,
+  ease: 'Quad.out'
+});
+
+this.time.delayedCall(
+  520,
+  () => {
+    if (!nearbyLabel.active)
+      return;
+
+    this.tweens.add({
+      targets: nearbyLabel,
+      alpha: 0,
+      y: nearbyLabel.y - 5,
+      duration: 220,
+      onComplete: () =>
+        nearbyLabel.destroy()
+    });
   }
 );
 
-this.physics.add.overlap(
-  this.player,
-  this.guideCompanions,
-  (_, guide) =>
-    this.collectGuideCompanion(
-      guide
-    ),
-  undefined,
-  this
-);
+                this.tweens.add({
+                  targets: guide,
+                  scaleX: 1.12,
+                  scaleY: 1.12,
+                  duration: 110,
+                  yoyo: true,
+                  ease: 'Sine.inOut'
+                });
 
+                this.tweens.add({
+                  targets: alienSignal,
+                  scale: {
+                    from: 1,
+                    to: 2.1
+                  },
+                  alpha: {
+                    from: 0.85,
+                    to: 0
+                  },
+                  duration: 380,
+                  ease: 'Quad.out'
+                });
+
+                this.tweens.add({
+                  targets: alienCore,
+                  scale: {
+                    from: 1,
+                    to: 1.9
+                  },
+                  alpha: {
+                    from: 1,
+                    to: 0.2
+                  },
+                  duration: 260,
+                  yoyo: true,
+                  ease: 'Sine.inOut'
+                });
+              }
+
+              const nextCooldown =
+                Math.max(
+                  0,
+                  (guide.getData(
+                    'proximityCooldown'
+                  ) || 0) - 16
+                );
+
+              guide.setData(
+                'proximityCooldown',
+                nextCooldown
+              );
+
+              /*
+               * EYE BLINK
+               */
+              const blinkCooldown =
+                guide.getData(
+                  'blinkCooldown'
+                ) || 0;
+
+              if (
+                blinkCooldown <= 0
+              ) {
+                guide.setData(
+                  'blinkCooldown',
+                  Phaser.Math.Between(
+                    2200,
+                    4300
+                  )
+                );
+
+                this.tweens.add({
+                  targets: blinkBar,
+                  alpha: {
+                    from: 0,
+                    to: 0.92
+                  },
+                  scaleY: {
+                    from: 0.2,
+                    to: 1
+                  },
+                  duration: 70,
+                  yoyo: true,
+                  hold: 45,
+                  ease: 'Quad.inOut'
+                });
+              } else {
+                guide.setData(
+                  'blinkCooldown',
+                  Math.max(
+                    0,
+                    blinkCooldown - 16
+                  )
+                );
+              }
+            }
+          });
+
+        guide.setData(
+          'fxTimer',
+          followTimer
+        );
+      }
+
+      /*
+       * ==========================
+       * DRONE GUIDE FX
+       * ==========================
+       */
+      if (
+        !this.motionReduced &&
+        texture === 'guide-drone'
+      ) {
+        const droneGlow =
+          this.add
+            .circle(
+              0,
+              0,
+              23,
+              0x8df4ff,
+              0.08
+            );
+
+        const dronePulse =
+          this.add
+            .circle(
+              0,
+              0,
+              11,
+              0x8df4ff,
+              0.14
+            );
+
+        const corePulse =
+          this.add
+            .circle(
+              0,
+              0,
+              5,
+              0xe8fdff,
+              0.34
+            );
+
+        const scanRing =
+          this.add
+            .circle(
+              0,
+              0,
+              17,
+              0x8df4ff,
+              0
+            )
+            .setStrokeStyle(
+              1.5,
+              0x8df4ff,
+              0.7
+            );
+
+        const scanArc =
+          this.add
+            .arc(
+              0,
+              0,
+              23,
+              0,
+              105,
+              false,
+              0x8df4ff,
+              0.75
+            );
+
+        const scanBeam =
+          this.add
+            .rectangle(
+              0,
+              28,
+              3,
+              20,
+              0x8df4ff,
+              0.26
+            )
+            .setOrigin(
+              0.5,
+              0
+            );
+
+        const statusLight =
+          this.add
+            .circle(
+              0,
+              -15,
+              2.2,
+              0x55dfff,
+              0.9
+            );
+
+        fx.add([
+          droneGlow,
+          dronePulse,
+          corePulse,
+          scanRing,
+          scanArc,
+          scanBeam,
+          statusLight
+        ]);
+
+        guide.setData(
+          'droneFx',
+          {
+            droneGlow,
+            dronePulse,
+            corePulse,
+            scanRing,
+            scanArc,
+            scanBeam,
+            statusLight
+          }
+        );
+
+        this.tweens.add({
+          targets: droneGlow,
+          scale: {
+            from: 0.88,
+            to: 1.16
+          },
+          alpha: {
+            from: 0.06,
+            to: 0.2
+          },
+          duration: 900,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+
+        this.tweens.add({
+          targets: dronePulse,
+          scale: {
+            from: 0.8,
+            to: 1.65
+          },
+          alpha: {
+            from: 0.32,
+            to: 0
+          },
+          duration: 780,
+          repeat: -1,
+          ease: 'Sine.out'
+        });
+
+        this.tweens.add({
+          targets: corePulse,
+          scale: {
+            from: 0.8,
+            to: 1.75
+          },
+          alpha: {
+            from: 0.45,
+            to: 0
+          },
+          duration: 700,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+
+        this.tweens.add({
+          targets: scanRing,
+          scale: {
+            from: 0.82,
+            to: 1.5
+          },
+          alpha: {
+            from: 0.7,
+            to: 0
+          },
+          duration: 950,
+          repeat: -1,
+          ease: 'Sine.out'
+        });
+
+        this.tweens.add({
+          targets: scanArc,
+          angle: 360,
+          duration: 2400,
+          repeat: -1,
+          ease: 'Linear'
+        });
+
+        this.tweens.add({
+          targets: scanBeam,
+          alpha: {
+            from: 0.12,
+            to: 0.42
+          },
+          scaleY: {
+            from: 0.65,
+            to: 1.2
+          },
+          duration: 720,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+
+        this.tweens.add({
+          targets: statusLight,
+          alpha: {
+            from: 0.25,
+            to: 1
+          },
+          scale: {
+            from: 0.7,
+            to: 1.35
+          },
+          duration: 430,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+
+        const followTimer =
+          this.time.addEvent({
+            delay: 16,
+            loop: true,
+            callback: () => {
+              if (
+                !guide.active ||
+                !fx.active
+              ) {
+                followTimer.remove();
+                fx.destroy();
+                return;
+              }
+
+              fx.setPosition(
+                guide.x,
+                guide.y
+              );
+            }
+          });
+
+        guide.setData(
+          'fxTimer',
+          followTimer
+        );
+      }
+    }
+  );
+
+  /*
+   * PLAYER → COMPANION
+   */
+  this.physics.add.overlap(
+    this.player,
+    this.guideCompanions,
+    (_, guide) => {
+      if (!guide?.active)
+        return;
+
+      /*
+       * COLLECT BURST
+       */
+      const burstColors =
+        guide.texture.key ===
+        'alien-guide'
+          ? [
+              0xb993ff,
+              0xe0a7ff,
+              0x8df4ff
+            ]
+          : [
+              0x8df4ff,
+              0x55dfff,
+              0xe8fdff
+            ];
+
+      burstColors.forEach(
+        (color, index) => {
+          const burst =
+            this.add
+              .circle(
+                guide.x,
+                guide.y,
+                7 + index * 3,
+                color,
+                0.32
+              )
+              .setDepth(12);
+
+          this.tweens.add({
+            targets: burst,
+            scale:
+              2.4 +
+              index * 0.55,
+            alpha: 0,
+            duration:
+              260 +
+              index * 90,
+            ease: 'Quad.out',
+            onComplete: () =>
+              burst.destroy()
+          });
+        }
+      );
+
+      const collectFlash =
+        this.add
+          .circle(
+            guide.x,
+            guide.y,
+            12,
+            guide.texture.key ===
+            'alien-guide'
+              ? 0xe0a7ff
+              : 0x8df4ff,
+            0.28
+          )
+          .setDepth(13);
+
+      this.tweens.add({
+        targets: collectFlash,
+        scale: 3.8,
+        alpha: 0,
+        duration: 320,
+        onComplete: () =>
+          collectFlash.destroy()
+      });
+
+      this.collectGuideCompanion(
+        guide
+      );
+    },
+    undefined,
+    this
+  );
 }
-
 collectGuideCompanion(guide) {
 if (!guide?.active) return;
 
@@ -5278,18 +6968,31 @@ this.game.events.emit(
 );
 
 const glow =
-  this.add
-    .circle(
-      signal.x,
-      signal.y,
-      12,
-      0xffd06e,
-      .75
-    )
-    .setBlendMode(
-      Phaser.BlendModes.ADD
-    )
-    .setDepth(11);
+  this.add?.circle?.(
+    signal.x,
+    signal.y,
+    12,
+    0xffd06e,
+    .75
+  );
+
+if (glow) {
+  glow.setBlendMode(
+    Phaser.BlendModes.ADD
+  );
+
+  glow.setDepth(11);
+
+  this.tweens.add({
+    targets: glow,
+    scale: 4.8,
+    alpha: 0,
+    duration: 360,
+    ease: 'Quad.out',
+    onComplete: () =>
+      glow.destroy()
+  });
+}
 
 this.tweens.add({
   targets: glow,
@@ -5302,15 +7005,6 @@ this.tweens.add({
 });
 
 // XP FLOATING TEXT DISABLED
-
-const label = this.add.zone(
-signal.x,
-signal.y - 30,
-1,
-1
-)
-.setAlpha(0)
-.setDepth(12);
 
 this.tweens.add({
   targets: this.player,
@@ -5343,24 +7037,6 @@ this.game.events.emit(
   'feedback',
   'signal'
 );
-
-const label = this.add.zone(
-secret.x,
-secret.y - 26,
-1,
-1
-)
-.setAlpha(0)
-.setDepth(12);
-
-this.tweens.add({
-  targets: label,
-  y: label.y - 28,
-  alpha: 0,
-  duration: 650,
-  onComplete: () =>
-    label.destroy()
-});
 
 }
 
@@ -7320,11 +8996,13 @@ const relayGlow =
       20,
       0xffd06e,
       .75
-    )
-    .setBlendMode(
-      Phaser.BlendModes.ADD
-    )
-    .setDepth(12);
+    );
+
+relayGlow.setBlendMode(
+  Phaser.BlendModes.ADD
+);
+
+relayGlow.setDepth(12);
 
 const completeLabel =
   this.add.text(
@@ -7429,7 +9107,8 @@ if (
 this.briefingProtected ||
 this.finished ||
 this.respawning ||
-this.respawnGrace > 0
+this.respawnGrace > 0 ||
+this.healthInvulnerable > 0
 ) {
 return;
 }
@@ -8683,18 +10362,20 @@ if (
     );
 
     const burst =
-      this.add
-        .circle(
-          wallX,
-          this.player.y,
-          7,
-          0x8df4ff,
-          .5
-        )
-        .setBlendMode(
-          Phaser.BlendModes.ADD
-        )
-        .setDepth(11);
+  this.add
+    .circle(
+      wallX,
+      this.player.y,
+      7,
+      0x8df4ff,
+      .5
+    );
+
+burst.setBlendMode(
+  Phaser.BlendModes.ADD
+);
+
+burst.setDepth(11);
 
     this.tweens.add({
       targets: burst,
@@ -8735,12 +10416,64 @@ if (
         'DOUBLE JUMP',
         '#ffd06e'
       );
+
+  const doubleJumpRing =
+    this.add.circle(
+      this.player.x,
+      this.player.y,
+      9,
+      0xffd06e,
+      0
+    );
+
+  doubleJumpRing.setStrokeStyle(
+    2,
+    0xffd06e,
+    0.65
+  );
+
+  doubleJumpRing.setDepth(11);
+
+  this.tweens.add({
+    targets: doubleJumpRing,
+    scale: 2.8,
+    alpha: 0,
+    duration: 240,
+    ease: 'Quad.out',
+    onComplete: () =>
+      doubleJumpRing.destroy()
+  });
+}
+      
     }
-  }
 
   body.setVelocityY(
     RUNNER_TUNING.jumpVelocity
   );
+
+  if (!this.motionReduced) {
+  const jumpBurst =
+    this.add.circle(
+      this.player.x,
+      this.player.y + 27,
+      7,
+      0x8df4ff,
+      0.28
+    );
+
+  jumpBurst.setDepth(11);
+
+  this.tweens.add({
+    targets: jumpBurst,
+    scaleX: 2.8,
+    scaleY: 0.55,
+    alpha: 0,
+    duration: 180,
+    ease: 'Quad.out',
+    onComplete: () =>
+      jumpBurst.destroy()
+  });
+}
 
   this.jumps++;
 
@@ -8949,6 +10682,64 @@ if (
 
   this.dashTimer =
     RUNNER_TUNING.dashDurationMs;
+
+  /*
+ * DASH ENERGY TRAIL
+ */
+if (!this.motionReduced) {
+  this.leaveAfterimage(
+    direction > 0
+      ? 0x8df4ff
+      : 0xb9f5ff
+  );
+
+  const dashTrail =
+    this.add
+      .circle(
+        this.player.x -
+          direction * 22,
+        this.player.y,
+        10,
+        0x8df4ff,
+        0.24
+      )
+      .setDepth(9);
+
+  this.tweens.add({
+    targets: dashTrail,
+    scaleX: 2.8,
+    scaleY: 0.7,
+    alpha: 0,
+    x:
+      dashTrail.x -
+      direction * 42,
+    duration: 180,
+    ease: 'Quad.out',
+    onComplete: () =>
+      dashTrail.destroy()
+  });
+
+  const dashCore =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        6,
+        0xe8fdff,
+        0.7
+      )
+      .setDepth(12);
+
+  this.tweens.add({
+    targets: dashCore,
+    scale: 2.4,
+    alpha: 0,
+    duration: 160,
+    ease: 'Quad.out',
+    onComplete: () =>
+      dashCore.destroy()
+  });
+}
 
 this.perfectDodgeWindow = 120;
   const dashBurst =
@@ -9199,6 +10990,31 @@ if (
     this.player.y - 2,
     1
   );
+  const runStreak =
+  this.add.rectangle(
+    this.player.x -
+      Math.sign(body.velocity.x) * 22,
+    this.player.y - 2,
+    22,
+    3,
+    0x8df4ff,
+    0.22
+  );
+
+runStreak.setDepth(9);
+
+this.tweens.add({
+  targets: runStreak,
+  scaleX: 2.4,
+  alpha: 0,
+  x:
+    runStreak.x -
+    Math.sign(body.velocity.x) * 26,
+  duration: 140,
+  ease: 'Quad.out',
+  onComplete: () =>
+    runStreak.destroy()
+});
 
   this.speedTimer = 45;
 }
