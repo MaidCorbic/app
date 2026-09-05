@@ -429,7 +429,10 @@ screenShake = true,
 reducedMotion = false,
 firstTimeTutorial = false
 }) {
-this.mission = mission;
+this.mission = mission || {};
+this.mission.spawn ??= { x: 0, y: 0 };
+this.mission.goal ??= { x: this.mission.spawn.x + 1200, y: this.mission.spawn.y };
+for (const key of ['platforms','obstacles','movingGates','enemies','signals','secrets','checkpoints','boostPads','guides','safeZones','events']) if (!Array.isArray(this.mission[key])) this.mission[key] = [];
 this.runId = runId;
 this.abilities = new Set(abilities);
 this.rainEnabled = rain;
@@ -478,7 +481,13 @@ this.finished = false;
 this.respawning = false;
 this.respawnGrace = 0;
 
-this.cinematicActive = mission.id === 'first-delivery' && firstTimeTutorial;
+this.cinematicActive = this.mission.id === 'first-delivery' && firstTimeTutorial;
+this.eventState = new Map();
+this.mobileDirection = null;
+this.mobileActions = { jump:false, dash:false, fire:false, sword:false, build1:false, build2:false, gadget1:false, gadget2:false };
+this.empTimer = 0; this.decoyTimer = 0; this.boosterTimer = 0;
+this.boosterAura = null; this.decoyBeacon = null; this.infoCard = null; this.landingTimer = 0;
+this.bossDefeated = false; this.goalTouched = false;
 
 this.coyote = 0;
 this.jumpBuffer = 0;
@@ -509,12 +518,25 @@ this.routeHintTimer = 0;
 this.eventCheckTimer = 0;
 
 this.checkpoint = {
-  x: mission.spawn.x,
-  y: mission.spawn.y,
+  x: this.mission.spawn.x,
+  y: this.mission.spawn.y,
   signals: new Set(),
   secrets: new Set()
 };
 
+}
+
+validateMission() {
+  const mission = this.mission || {};
+  mission.spawn ??= { x: 0, y: 0 };
+  mission.goal ??= { x: mission.spawn.x + 1200, y: mission.spawn.y };
+  for (const key of ['platforms','obstacles','movingGates','enemies','signals','secrets','checkpoints','boostPads','guides','safeZones','events']) if (!Array.isArray(mission[key])) mission[key] = [];
+  mission.enemies = mission.enemies.map(enemy => ({
+    ...enemy,
+    min: Number.isFinite(enemy?.min) ? enemy.min : (Number(enemy?.x) || mission.spawn.x) - 90,
+    max: Number.isFinite(enemy?.max) ? enemy.max : (Number(enemy?.x) || mission.spawn.x) + 90
+  }));
+  this.mission = mission;
 }
 
 shake(duration, intensity) {
@@ -812,13 +834,14 @@ this.loadout.upgrades?.includes('escape') ? .85 : 1
 }
 
 create() {
+this.validateMission();
 if (!this.textures.exists('runner-idle')) {
 this.createTextures();
 }
 
 this.createAnimations();
 
-this.package = packages[this.mission.id];
+this.package = packages[this.mission.id] || { speedMultiplier: 1, upgrades: [], equipment: [] };
 this.packageCondition = 100;
 
 this.energy = 100;
@@ -838,7 +861,7 @@ this.airDashUsed = false;
 this.alarmTimer = 0;
 this.alarms = 0;
 this.chaseEscapes = 0;
-this.worldWidth = this.mission.goal.x + 180;
+this.worldWidth = Math.max(this.mission.goal?.x ?? 1200, this.mission.spawn?.x ?? 0) + 180;
 this.physics.world.setBounds(
 0,
 0,
@@ -4727,6 +4750,7 @@ this.physics.add.overlap(
   this.player,
   this.goal,
   () => {
+    this.goalTouched = true;
     const goalBurst =
       this.add
         .circle(
@@ -5173,9 +5197,7 @@ signal.disableBody(
 this.collected++;
 
 if (
-  this.collected ===
-  this.mission.signals.length -
-    1
+  this.mission.signals.length - this.collected === 1
 ) {
   this.playerCue(
     'ONE SIGNAL LEFT',
@@ -5252,8 +5274,8 @@ this.secretsCollected++;
 
 this.game.events.emit(
   'secret',
-  this.collected,
-  this.secretsCollected
+  this.secretsCollected,
+  this.mission.secrets.length
 );
 
 this.game.events.emit(
@@ -5784,6 +5806,10 @@ return true;
 }
 
 updateEnemies(delta) {
+const detectionRange =
+  this.mission.blackout && this.loadout.upgrades?.includes('ghost') ? 190 :
+  this.mission.blackout ? 260 : 320;
+
 if (!this.enemies)
 return;
 
@@ -7036,7 +7062,8 @@ beats.forEach(
 }
 
 updateEvents() {
-this.mission.events.forEach(
+const events = Array.isArray(this.mission?.events) ? this.mission.events : [];
+events.forEach(
 (event, index) => {
 const state =
 this.eventState.get(
@@ -7909,12 +7936,14 @@ const upgrades =
   this.loadout.upgrades ||
   [];
 
+const modifier = this.loadout.modifier;
+
 this.energyMax =
-  upgrades.includes(
-    'energyCore'
-  )
-    ? 115
-    : 100;
+  modifier?.id === 'lowEnergy'
+    ? 65
+    : upgrades.includes('energyCore')
+      ? 115
+      : 100;
 
 this.energy =
   Math.min(
@@ -8264,21 +8293,7 @@ if (swordPressed) {
   this.useSword();
 }
 
-const modifier =
-  this.loadout.modifier;
-
-if (
-  modifier?.id ===
-  'lowEnergy'
-) {
-  this.energyMax = 65;
-
-  this.energy =
-    Math.min(
-      this.energy,
-      this.energyMax
-    );
-}
+// energyMax is resolved before regeneration above.
 
 const body =
   this.player.body;
@@ -8399,6 +8414,8 @@ body.setGravityY(
       : 0
   )
 );
+
+body.setMaxVelocityY(RUNNER_TUNING.maxFallSpeed);
 
 if (onGround) {
   this.coyote =
@@ -9353,7 +9370,7 @@ const progress =
     100,
     Math.round(
       this.player.x /
-        this.mission.goal.x *
+        Math.max(1, this.mission.goal.x) *
         100
     )
   );
