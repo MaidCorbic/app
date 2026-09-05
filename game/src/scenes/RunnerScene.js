@@ -6364,6 +6364,8 @@ detectionValue
 );
 }
 
+}
+
 updateSciFiThreats(delta) {
 const now =
 this.elapsedMs;
