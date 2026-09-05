@@ -46,7 +46,7 @@ let runSettled = false;
 // instead register it manually with `autoStart: false` via `game.scene.add()` right below. Without
 // this, RunnerScene used to auto-start with no mission data and crash inside init()/create(),
 // leaving the canvas blank behind the still-visible menu.
-const game = new Phaser.Game({ type: Phaser.AUTO, parent: 'phaser-game', width: 1280, height: 720, backgroundColor: '#091225', physics: { default: 'arcade', arcade: { gravity: { y: 1600 }, debug: false } }, scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }, scene: [] });
+const game = new Phaser.Game({ type: detectTouchDevice() ? Phaser.CANVAS : Phaser.AUTO, parent: 'phaser-game', width: 1280, height: 720, backgroundColor: '#091225', physics: { default: 'arcade', arcade: { gravity: { y: 1600 }, debug: false } }, scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }, scene: [] });
 game.scene.add('runner', RunnerScene, false);
 document.addEventListener('keydown', event => { if (event.key !== 'Escape') return; const runner = game.scene.getScene('runner'); if (runner?.infoCard) { event.preventDefault(); event.stopImmediatePropagation(); runner.dismissIntelCard(); } }, true);
 // Mobile input ownership lives exclusively in src/systems/mobile-input-single-owner-v1.js.
