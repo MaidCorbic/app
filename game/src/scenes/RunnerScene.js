@@ -5932,9 +5932,6 @@ enemy.setFlipX(
 }
 }
 
-}
-}
-
       if (
 
 aiState === 'RETURN'
