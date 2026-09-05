@@ -2224,22 +2224,9 @@ this.mission.obstacles.forEach(
         y + 32,
         'barrier'
       );
-    
-    if (!this.motionReduced) {
-      this.tweens.add({
-        targets: warning,
-        alpha: {
-          from: .9,
-          to: .38
-        },
-        duration: 720,
-        yoyo: true,
-        repeat: -1
-      });
-    }
-  }
+     }
 );
-
+ 
 this.physics.add.overlap(
 this.player,
 this.barriers,
