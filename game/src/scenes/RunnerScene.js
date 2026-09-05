@@ -5965,7 +5965,6 @@ enemy.setFlipX(
 }
 
 }
-}
 
       if (
 
