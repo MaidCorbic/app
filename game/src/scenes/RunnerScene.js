@@ -1765,7 +1765,10 @@ this.mobileActionHandler = action => {
 
 this.mobileMoveHandler =
   direction => {
-    this.mobileDirection = direction;
+    this.mobileDirection =
+      direction === 'left' || direction === 'right'
+        ? direction
+        : null;
   };
 
 this.game.events.on(
@@ -2313,7 +2316,11 @@ data.y - 30,
 .setDepth(7);
 
     enemy.body.setAllowGravity(false);
-    enemy.setData('route', data);
+    enemy.setData('route', {
+  ...data,
+  min: Number.isFinite(data?.min) ? data.min : enemy.x - 90,
+  max: Number.isFinite(data?.max) ? data.max : enemy.x + 90
+});
     enemy.setData(
       'direction',
       1
@@ -3195,6 +3202,9 @@ enemy,
 method,
 power = 1
 ) {
+if (!enemy?.active || enemy.getData('resolvingHit')) return;
+enemy.setData('resolvingHit', true);
+
 if (!enemy?.active) return;
 enemy.setTint(0xffffff);
 
@@ -4716,9 +4726,7 @@ this.chaser.x =
   Math.min(
     targetX,
     this.chaser.x +
-      section.speed *
-        delta /
-        1000
+      (Number(section.speed) || 260) * delta / 1000
   );
 
 this.chaser.y =
@@ -5816,9 +5824,8 @@ return true;
 }
 
 updateEnemies(delta) {
-const detectionRange =
-  this.mission.blackout && this.loadout.upgrades?.includes('ghost') ? 190 :
-  this.mission.blackout ? 260 : 320;
+// Detection radius is type- and altitude-aware; keep this before every use.
+
 
 if (!this.enemies)
 return;
@@ -5854,6 +5861,14 @@ this.enemies
 
       const type =
         route.type;
+
+      const detectionRange =
+        this.mission.blackout &&
+        this.player.y < 470
+          ? 105
+          : type === 'security'
+            ? 180
+            : 145;
 
       let direction =
         enemy.getData(
@@ -6113,11 +6128,8 @@ enemy.x
 : 1;
 }
 
-      enemy.x +=
-        direction *
-        speed *
-        delta /
-        1000;
+      enemy.body.setVelocityX(direction * speed);
+      enemy.body.setMaxVelocityX(Math.max(160, speed));
 
       if (
         enemy.x >=
@@ -6300,11 +6312,11 @@ enemy.setData(
 500
 );
 this.playerCue(
-${
+`${
                 type === 'security'
                   ? 'SECURITY'
                   : 'HOSTILE'
-              } HAS EYES ON YOU,
+              } HAS EYES ON YOU`,
 '#ffcf82'
 );
 }
