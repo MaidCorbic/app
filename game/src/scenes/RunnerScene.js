@@ -6354,6 +6354,8 @@ this.playerCue(
     }
   );
 
+}
+
 if (this.alarmTimer > 0) {
 this.alarmTimer =
 Math.max(
