@@ -495,6 +495,7 @@ this.decoyBeacon = null;
 this.infoCard = null;
 this.landingTimer = 0;
 this.bossDefeated = false;
+this.goalTouched = false;
 
 this.coyote = 0;
 this.jumpBuffer = 0;
@@ -3239,7 +3240,7 @@ enemy.x +=
   this.player.x < enemy.x
     ? 10
     : -10;
-  this.cameras.main.shake(
+  this.shake(
   55,
   0.0025
 );
@@ -3261,7 +3262,7 @@ this.tweens.add({
 const health =
   enemy.getData('health');
 
-if (health) {
+if (Number.isFinite(health)) {
   const isBoss =
   enemy.getData('boss') === true;
 
@@ -3303,7 +3304,7 @@ this.combatCombo >= 5
 const finalPower =
 power * comboMultiplier;
 const remaining =
-  health - finalPower;
+  Math.max(0, health - finalPower);
 
   enemy.setData(
     'health',
@@ -3325,7 +3326,8 @@ const remaining =
   );
 
   if (remaining > 0) {
-    
+    enemy.setData('resolvingHit', false);
+
     if (
   enemy.getData('boss') === true &&
   remaining === 1
@@ -3427,6 +3429,12 @@ enemy.disableBody(
   true,
   true
 );
+if (enemy === this.boss) {
+  this.bossDefeated = true;
+  if (this.goalTouched) {
+    this.time.delayedCall(0, () => this.complete());
+  }
+}
 
 this.enemyDefeats =
   (this.enemyDefeats || 0) +
@@ -3434,7 +3442,7 @@ this.enemyDefeats =
 
 this.combatCombo =
   this.comboTimer > 0
-    ? this.combatCombo + 1
+    ? Math.min(10, this.combatCombo + 1)
     : 1;
 
 this.comboTimer = 3000;
@@ -4767,6 +4775,7 @@ this.physics.add.overlap(
   this.player,
   this.goal,
   () => {
+    this.goalTouched = true;
     const goalBurst =
       this.add
         .circle(
@@ -5213,9 +5222,7 @@ signal.disableBody(
 this.collected++;
 
 if (
-  this.collected ===
-  this.mission.signals.length -
-    1
+  this.mission.signals.length - this.collected === 1
 ) {
   this.playerCue(
     'ONE SIGNAL LEFT',
@@ -5887,8 +5894,7 @@ this.enemies
           this.player.y
         );
 
-     const aiState =
-
+     let aiState =
 enemy.getData('aiState') ||
 'IDLE';
 
