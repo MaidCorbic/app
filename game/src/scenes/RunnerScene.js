@@ -5139,14 +5139,14 @@ this.time.delayedCall(
       enemy.clearTint();
     }
   }
+);
 
-  if (!enemy.getData('boss')) {
+if (!enemy.getData('boss')) {
   this.game.events.emit(
     'feedback',
     'enemy_hit'
   );
 }
-);
   const hitPulse =
   this.add
     .circle(
