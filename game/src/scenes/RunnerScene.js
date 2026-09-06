@@ -199,143 +199,834 @@ make('dino', 68, 48, g =>
     .fillCircle(51, 16, 2)
 );
 
-make('dino-boss', 112, 82, g =>
-  g.fillStyle(0x4f855f)
-    .fillRoundedRect(12, 25, 80, 38, 13)
-    .fillTriangle(0, 43, 20, 12, 20, 70)
-    .lineStyle(3, 0xdff0b0)
-    .strokeRoundedRect(12, 25, 80, 38, 13)
-    .fillStyle(0xffd06e)
-    .fillCircle(82, 28, 8)
-    .fillStyle(0x172238)
-    .fillCircle(83, 28, 3)
-);
+make('dino-boss', 112, 82, g => {
+  // OUTER BOSS AURA
+  g.fillStyle(0xff826e, 0.08)
+    .fillCircle(56, 42, 39);
 
-make('sentinel-boss', 90, 92, g =>
-  g.fillStyle(0x203d5a)
-    .fillRoundedRect(18, 18, 54, 62, 12)
-    .lineStyle(3, 0x8df4ff)
-    .strokeRoundedRect(18, 18, 54, 62, 12)
-    .fillStyle(0x8df4ff, .28)
-    .fillCircle(45, 42, 23)
-    .fillStyle(0xe2fbff)
-    .fillCircle(45, 42, 8)
-    .fillStyle(0xff826e)
-    .fillRect(30, 65, 30, 7)
-);
+  g.fillStyle(0xffd06e, 0.08)
+    .fillCircle(56, 42, 31);
 
-make('storm-boss', 104, 86, g =>
-  g.fillStyle(0x3f356e)
-    .fillTriangle(4, 46, 40, 8, 78, 46)
-    .fillTriangle(26, 48, 64, 12, 100, 48)
-    .fillStyle(0xb993ff, .32)
-    .fillCircle(52, 44, 35)
-    .lineStyle(3, 0xe0a7ff)
-    .strokeCircle(52, 44, 22)
-    .fillStyle(0xffd06e)
-    .fillCircle(52, 44, 8)
-);
+  // REAR SPIKES
+  g.fillStyle(0x233d32)
+    .fillTriangle(16, 25, 2, 12, 22, 38)
+    .fillTriangle(24, 21, 12, 4, 31, 31)
+    .fillTriangle(88, 22, 104, 6, 91, 38);
 
-make('apex-boss', 108, 96, g =>
-  g.fillStyle(0x382844)
-    .fillRoundedRect(14, 18, 80, 68, 16)
-    .lineStyle(3, 0xffd06e)
-    .strokeRoundedRect(14, 18, 80, 68, 16)
-    .fillStyle(0xff826e, .22)
-    .fillCircle(54, 43, 28)
-    .fillStyle(0xffe0a8)
-    .fillCircle(54, 43, 9)
-    .fillStyle(0x8df4ff)
-    .fillRect(30, 69, 48, 7)
-);
+  // MAIN ARMOR
+  g.fillStyle(0x274936)
+    .fillRoundedRect(13, 22, 82, 40, 14);
 
-make('alien-ground', 54, 54, g =>
-  g.fillStyle(0x402d64)
-    .fillRoundedRect(7, 12, 40, 36, 12)
-    .lineStyle(2, 0xe0a7ff)
-    .strokeRoundedRect(7, 12, 40, 36, 12)
-    .fillStyle(0xe0a7ff)
-    .fillCircle(19, 26, 5)
-    .fillCircle(35, 26, 5)
-    .fillStyle(0x8df4ff)
-    .fillRect(17, 43, 20, 5)
-);
+  // ARMOR INNER PANEL
+  g.fillStyle(0x345f45)
+    .fillRoundedRect(20, 28, 68, 27, 10);
 
-make('egg', 18, 24, g =>
-  g.fillStyle(0xfff3cf)
-    .fillEllipse(9, 12, 14, 21)
-    .lineStyle(1, 0xffd06e)
-    .strokeEllipse(9, 12, 14, 21)
-);
+  // NEON OUTLINE
+  g.lineStyle(3, 0xaee37f, 0.95)
+    .strokeRoundedRect(13, 22, 82, 40, 14);
 
-make('comet', 32, 32, g =>
-  g.fillStyle(0xff826e, .25)
-    .fillCircle(16, 16, 15)
-    .fillStyle(0xffd06e)
-    .fillCircle(16, 16, 8)
-    .fillStyle(0xfff3cf)
-    .fillCircle(13, 13, 3)
-);
+  // HEAD / SNOUT
+  g.fillStyle(0x6fa66e)
+    .fillTriangle(
+      0, 42,
+      21, 16,
+      25, 65
+    );
 
-make('kinetic-ball', 26, 26, g =>
-  g.fillStyle(0x8df4ff, .25)
-    .fillCircle(13, 13, 13)
-    .lineStyle(2, 0xdffcff)
-    .strokeCircle(13, 13, 10)
-    .fillStyle(0x8df4ff)
-    .fillCircle(13, 13, 5)
-);
+  // EYE SOCKET
+  g.fillStyle(0x172238)
+    .fillEllipse(78, 30, 19, 15);
 
-make('shield', 46, 64, g =>
-  g.fillStyle(0x8df4ff, .18)
-    .fillRoundedRect(4, 2, 38, 60, 9)
-    .lineStyle(2, 0xb9f5ff)
-    .strokeRoundedRect(4, 2, 38, 60, 9)
-);
+  // EYE GLOW
+  g.fillStyle(0xffd06e, 0.25)
+    .fillCircle(82, 29, 10);
 
-make('blaster', 34, 14, g =>
-  g.fillStyle(0x263853)
-    .fillRoundedRect(1, 3, 28, 8, 3)
-    .fillStyle(0x8df4ff)
-    .fillRect(21, 5, 12, 4)
-    .fillStyle(0xffd06e)
-    .fillRect(7, 11, 7, 3)
-);
+  g.fillStyle(0xffd06e)
+    .fillCircle(82, 29, 6);
 
-make('sword', 52, 12, g =>
+  g.fillStyle(0xffffff, 0.9)
+    .fillCircle(83, 28, 2);
+
+  // CORE
+  g.fillStyle(0xff826e, 0.18)
+    .fillCircle(53, 43, 17);
+
+  g.lineStyle(2, 0xffd06e, 0.8)
+    .strokeCircle(53, 43, 12);
+
+  g.fillStyle(0xffe0a8)
+    .fillCircle(53, 43, 6);
+
+  // ARMOR VENTS
+  g.fillStyle(0x8df4ff, 0.8)
+    .fillRect(33, 55, 7, 3)
+    .fillRect(45, 57, 7, 3)
+    .fillRect(57, 55, 7, 3);
+
+  // JAW ACCENT
+  g.lineStyle(2, 0xff826e, 0.9)
+    .lineBetween(17, 56, 37, 66);
+
+  // TOP ENERGY MARK
+  g.fillStyle(0xdffcff, 0.9)
+    .fillRect(42, 18, 22, 3);
+});
+
+make('sentinel-boss', 90, 92, g => {
+  // OUTER ENERGY FIELD
+  g.fillStyle(0x8df4ff, 0.08)
+    .fillCircle(45, 46, 42);
+
+  g.fillStyle(0xb9f5ff, 0.07)
+    .fillCircle(45, 46, 34);
+
+  // BACK PLATES
+  g.fillStyle(0x10243a)
+    .fillTriangle(18, 22, 5, 12, 20, 36)
+    .fillTriangle(72, 22, 85, 12, 70, 36);
+
+  // MAIN BODY
+  g.fillStyle(0x172d48)
+    .fillRoundedRect(15, 15, 60, 64, 15);
+
+  // INNER ARMOR
+  g.fillStyle(0x254866)
+    .fillRoundedRect(21, 21, 48, 51, 11);
+
+  // NEON OUTLINE
+  g.lineStyle(3, 0x8df4ff, 0.95)
+    .strokeRoundedRect(15, 15, 60, 64, 15);
+
+  // CENTRAL CORE FIELD
+  g.fillStyle(0x8df4ff, 0.16)
+    .fillCircle(45, 42, 25);
+
+  g.lineStyle(2, 0x55dfff, 0.9)
+    .strokeCircle(45, 42, 20);
+
+  g.lineStyle(1, 0xdffcff, 0.75)
+    .strokeCircle(45, 42, 14);
+
+  // CORE
+  g.fillStyle(0xe8fdff)
+    .fillCircle(45, 42, 8);
+
+  g.fillStyle(0x8df4ff)
+    .fillCircle(45, 42, 5);
+
+  g.fillStyle(0xffffff)
+    .fillCircle(43, 40, 2);
+
+  // TOP SENSOR
+  g.fillStyle(0x55dfff, 0.18)
+    .fillCircle(45, 9, 9);
+
+  g.fillStyle(0x8df4ff)
+    .fillCircle(45, 9, 4);
+
+  // LOWER WEAPON BAR
+  g.fillStyle(0x0b1726)
+    .fillRoundedRect(27, 67, 36, 9, 4);
+
+  g.lineStyle(2, 0xff826e, 0.9)
+    .strokeRoundedRect(27, 67, 36, 9, 4);
+
+  // ENERGY VENTS
+  g.fillStyle(0xdffcff, 0.9)
+    .fillRect(29, 71, 6, 2)
+    .fillRect(42, 71, 6, 2)
+    .fillRect(55, 71, 6, 2);
+});
+
+make('storm-boss', 104, 86, g => {
+  // OUTER STORM AURA
+  g.fillStyle(0xb993ff, 0.08)
+    .fillCircle(52, 43, 41);
+
+  g.fillStyle(0xe0a7ff, 0.06)
+    .fillCircle(52, 43, 34);
+
+  // WING / STORM SHARDS
+  g.fillStyle(0x241b45)
+    .fillTriangle(6, 47, 34, 9, 46, 47);
+
+  g.fillStyle(0x32235e)
+    .fillTriangle(58, 47, 89, 8, 99, 49);
+
+  // MAIN STORM BODY
+  g.fillStyle(0x3d3169)
+    .fillRoundedRect(25, 17, 54, 53, 16);
+
+  // INNER ENERGY
+  g.fillStyle(0x574587)
+    .fillRoundedRect(31, 23, 42, 41, 12);
+
+  // OUTLINE
+  g.lineStyle(3, 0xe0a7ff, 0.95)
+    .strokeRoundedRect(25, 17, 54, 53, 16);
+
+  // ORBIT RING
+  g.lineStyle(2, 0xb993ff, 0.85)
+    .strokeCircle(52, 43, 24);
+
+  g.lineStyle(1, 0xdabfff, 0.55)
+    .strokeCircle(52, 43, 18);
+
+  // CORE GLOW
+  g.fillStyle(0xb993ff, 0.25)
+    .fillCircle(52, 43, 17);
+
+  // CORE
+  g.fillStyle(0xffd06e)
+    .fillCircle(52, 43, 8);
+
+  g.fillStyle(0xfff0c7)
+    .fillCircle(52, 43, 4);
+
+  // LIGHTNING NODES
+  g.fillStyle(0x8df4ff)
+    .fillCircle(35, 29, 3)
+    .fillCircle(69, 29, 3)
+    .fillCircle(37, 57, 3)
+    .fillCircle(67, 57, 3);
+
+  // LIGHTNING STRIKES
+  g.lineStyle(2, 0x8df4ff, 0.8)
+    .lineBetween(35, 29, 44, 38)
+    .lineBetween(69, 29, 60, 38)
+    .lineBetween(37, 57, 45, 49)
+    .lineBetween(67, 57, 59, 49);
+
+  // TOP CROWN
+  g.fillStyle(0xe0a7ff)
+    .fillTriangle(39, 15, 45, 2, 51, 16)
+    .fillTriangle(53, 15, 60, 2, 65, 16);
+});
+make('apex-boss', 108, 96, g => {
+  // MASSIVE OUTER AURA
+  g.fillStyle(0xff826e, 0.07)
+    .fillCircle(54, 47, 45);
+
+  g.fillStyle(0xffd06e, 0.06)
+    .fillCircle(54, 47, 37);
+
+  // SHOULDER PLATES
+  g.fillStyle(0x251b30)
+    .fillTriangle(17, 28, 2, 13, 25, 32);
+
+  g.fillStyle(0x251b30)
+    .fillTriangle(91, 28, 106, 13, 83, 32);
+
+  // MAIN ARMOR
+  g.fillStyle(0x2a2038)
+    .fillRoundedRect(12, 17, 84, 62, 17);
+
+  // INNER ARMOR
+  g.fillStyle(0x463154)
+    .fillRoundedRect(20, 24, 68, 47, 12);
+
+  // HEAVY OUTLINE
+  g.lineStyle(3, 0xffd06e, 0.95)
+    .strokeRoundedRect(12, 17, 84, 62, 17);
+
+  // TOP CROWN
+  g.fillStyle(0xffd06e, 0.2)
+    .fillTriangle(37, 18, 46, 2, 52, 20)
+    .fillTriangle(55, 20, 64, 2, 71, 18);
+
+  // CORE AURA
+  g.fillStyle(0xff826e, 0.22)
+    .fillCircle(54, 44, 29);
+
+  // CORE RINGS
+  g.lineStyle(2, 0xffd06e, 0.9)
+    .strokeCircle(54, 44, 22);
+
+  g.lineStyle(1, 0xff826e, 0.8)
+    .strokeCircle(54, 44, 29);
+
+  // CORE
+  g.fillStyle(0xffe0a8)
+    .fillCircle(54, 44, 10);
+
+  g.fillStyle(0xff826e)
+    .fillCircle(54, 44, 6);
+
+  g.fillStyle(0xffffff, 0.95)
+    .fillCircle(51, 41, 2.5);
+
+  // EYE / VISOR
+  g.fillStyle(0x0b1020)
+    .fillRoundedRect(28, 29, 52, 9, 4);
+
+  g.fillStyle(0xff826e)
+    .fillRect(33, 32, 42, 3);
+
+  // CHEST ENERGY BARS
+  g.fillStyle(0x8df4ff, 0.8)
+    .fillRect(31, 61, 11, 3)
+    .fillRect(48, 61, 11, 3)
+    .fillRect(65, 61, 11, 3);
+
+  // LOWER CORE VENT
   g.fillStyle(0xdffcff)
-    .fillTriangle(10, 6, 48, 1, 48, 11)
-    .fillStyle(0xffd06e)
-    .fillRect(3, 2, 10, 8)
-);
+    .fillRoundedRect(39, 69, 30, 6, 3);
 
-make('plasma', 18, 10, g =>
-  g.fillStyle(0x8df4ff, .25)
-    .fillEllipse(9, 5, 18, 10)
-    .fillStyle(0xe2fbff)
-    .fillEllipse(9, 5, 10, 5)
-);
+  // SIDE ENERGY STRIPS
+  g.fillStyle(0xffd06e, 0.8)
+    .fillRect(18, 41, 4, 18)
+    .fillRect(86, 41, 4, 18);
+});
 
-make('turret', 42, 42, g =>
-  g.fillStyle(0x202d48)
-    .fillRoundedRect(5, 20, 32, 17, 5)
-    .fillStyle(0x8df4ff)
-    .fillRect(17, 5, 8, 20)
-    .fillStyle(0xdffcff)
-    .fillCircle(21, 13, 5)
-);
+make('alien-ground', 54, 54, g => {
+  // OUTER ALIEN AURA
+  g.fillStyle(0xb993ff, 0.08)
+    .fillCircle(27, 28, 25);
 
-make('spring-pad', 56, 18, g =>
+  g.fillStyle(0xe0a7ff, 0.10)
+    .fillCircle(27, 28, 20);
+
+  // MAIN ALIEN BODY
+  g.fillStyle(0x241836)
+    .fillRoundedRect(6, 10, 42, 38, 13);
+
+  // INNER BODY PANEL
+  g.fillStyle(0x402d64)
+    .fillRoundedRect(10, 14, 34, 29, 10);
+
+  // NEON OUTLINE
+  g.lineStyle(2, 0xe0a7ff, 0.95)
+    .strokeRoundedRect(6, 10, 42, 38, 13);
+
+  // EYE GLOW
+  g.fillStyle(0xe0a7ff, 0.18)
+    .fillCircle(18, 25, 8)
+    .fillCircle(36, 25, 8);
+
+  // EYES
+  g.fillStyle(0xf3d9ff)
+    .fillEllipse(18, 25, 11, 9)
+    .fillEllipse(36, 25, 11, 9);
+
+  // PUPILS
+  g.fillStyle(0x24152f)
+    .fillCircle(18, 25, 3)
+    .fillCircle(36, 25, 3);
+
+  // EYE HIGHLIGHTS
+  g.fillStyle(0xffffff)
+    .fillCircle(17, 24, 1)
+    .fillCircle(35, 24, 1);
+
+  // CENTRAL SIGNAL CORE
+  g.fillStyle(0x8df4ff, 0.18)
+    .fillCircle(27, 36, 9);
+
+  g.lineStyle(1.5, 0x8df4ff, 0.8)
+    .strokeCircle(27, 36, 7);
+
+  g.fillStyle(0xe8fdff)
+    .fillCircle(27, 36, 3);
+
+  // LOWER ENERGY BAND
+  g.fillStyle(0x8df4ff, 0.14)
+    .fillRoundedRect(15, 43, 24, 7, 3);
+
+  g.fillStyle(0x8df4ff)
+    .fillRect(18, 45, 18, 3);
+});
+
+make('egg', 24, 30, g => {
+  // OUTER WARNING GLOW
+  g.fillStyle(0xff826e, 0.10)
+    .fillCircle(12, 15, 13);
+
+  // SHADOW / OUTER SHELL
+  g.fillStyle(0xc9a85d)
+    .fillEllipse(12, 16, 17, 25);
+
+  // MAIN SHELL
+  g.fillStyle(0xfff3cf)
+    .fillEllipse(12, 14, 15, 23);
+
+  // SHELL HIGHLIGHT
+  g.fillStyle(0xffffff, 0.75)
+    .fillEllipse(9, 10, 5, 9);
+
+  // ENERGY CRACKS
+  g.lineStyle(1.2, 0xff826e, 0.9)
+    .lineBetween(7, 12, 10, 15)
+    .lineBetween(10, 15, 8, 18)
+    .lineBetween(10, 15, 13, 13);
+
+  // GOLDEN OUTLINE
+  g.lineStyle(1.5, 0xffd06e, 0.95)
+    .strokeEllipse(12, 14, 15, 23);
+
+  // TOP ENERGY SPARK
+  g.fillStyle(0xffd06e)
+    .fillCircle(16, 4, 2);
+
+  g.fillStyle(0xfff3cf, 0.7)
+    .fillCircle(16, 4, 4);
+});
+
+make('comet', 40, 40, g => {
+  // OUTER WARNING AURA
+  g.fillStyle(0xff826e, 0.08)
+    .fillCircle(20, 20, 19);
+
+  // ENERGY TRAIL
+  g.fillStyle(0xff826e, 0.16)
+    .fillTriangle(
+      4, 20,
+      18, 14,
+      18, 26
+    );
+
+  g.fillStyle(0xffd06e, 0.20)
+    .fillTriangle(
+      7, 20,
+      18, 16,
+      18, 24
+    );
+
+  // MAIN PLASMA CORE
+  g.fillStyle(0xff826e, 0.28)
+    .fillCircle(21, 20, 14);
+
+  g.lineStyle(2, 0xff826e, 0.95)
+    .strokeCircle(21, 20, 11);
+
+  // HOT CORE
+  g.fillStyle(0xffd06e)
+    .fillCircle(21, 20, 8);
+
+  // INNER CORE
+  g.fillStyle(0xfff3cf)
+    .fillCircle(19, 18, 4);
+
+  // CORE HIGHLIGHT
+  g.fillStyle(0xffffff, 0.95)
+    .fillCircle(18, 17, 2);
+
+  // ENERGY RINGS
+  g.lineStyle(1, 0xffe0a8, 0.65)
+    .strokeCircle(21, 20, 15);
+
+  g.lineStyle(1, 0x8df4ff, 0.45)
+    .strokeCircle(21, 20, 18);
+
+  // PLASMA SPARKS
+  g.fillStyle(0xffd06e, 0.9)
+    .fillCircle(11, 10, 2)
+    .fillCircle(31, 12, 1.5)
+    .fillCircle(30, 29, 2)
+    .fillCircle(12, 31, 1.5);
+});
+
+make('kinetic-ball', 34, 34, g => {
+  // OUTER ENERGY FIELD
+  g.fillStyle(0x8df4ff, 0.08)
+    .fillCircle(17, 17, 16);
+
+  g.fillStyle(0x55dfff, 0.12)
+    .fillCircle(17, 17, 13);
+
+  // OUTER RING
+  g.lineStyle(2, 0x8df4ff, 0.9)
+    .strokeCircle(17, 17, 12);
+
+  g.lineStyle(1, 0xdffcff, 0.65)
+    .strokeCircle(17, 17, 8);
+
+  // CENTRAL CORE GLOW
+  g.fillStyle(0x8df4ff, 0.28)
+    .fillCircle(17, 17, 9);
+
+  // CORE
+  g.fillStyle(0xe8fdff)
+    .fillCircle(17, 17, 6);
+
+  g.fillStyle(0x8df4ff)
+    .fillCircle(17, 17, 4);
+
+  // CORE HIGHLIGHT
+  g.fillStyle(0xffffff, 0.95)
+    .fillCircle(15, 15, 2);
+
+  // ENERGY CROSS
+  g.lineStyle(1.5, 0xb9f5ff, 0.8)
+    .lineBetween(17, 3, 17, 8)
+    .lineBetween(17, 26, 17, 31)
+    .lineBetween(3, 17, 8, 17)
+    .lineBetween(26, 17, 31, 17);
+
+  // SMALL ENERGY NODES
+  g.fillStyle(0x55dfff)
+    .fillCircle(6, 8, 1.5)
+    .fillCircle(28, 8, 1.5)
+    .fillCircle(8, 28, 1.5)
+    .fillCircle(28, 28, 1.5);
+});
+
+make('shield', 54, 72, g => {
+  // OUTER ENERGY AURA
+  g.fillStyle(0x8df4ff, 0.07)
+    .fillRoundedRect(4, 2, 46, 68, 13);
+
+  g.fillStyle(0x55dfff, 0.10)
+    .fillRoundedRect(7, 5, 40, 62, 11);
+
+  // MAIN SHIELD BODY
+  g.fillStyle(0x10283d, 0.86)
+    .fillRoundedRect(8, 4, 38, 64, 10);
+
+  // INNER ENERGY PANEL
+  g.fillStyle(0x183b55, 0.72)
+    .fillRoundedRect(12, 9, 30, 52, 8);
+
+  // NEON OUTLINE
+  g.lineStyle(2, 0x8df4ff, 0.95)
+    .strokeRoundedRect(8, 4, 38, 64, 10);
+
+  // INNER FRAME
+  g.lineStyle(1, 0xb9f5ff, 0.55)
+    .strokeRoundedRect(12, 9, 30, 52, 8);
+
+  // TOP SENSOR
+  g.fillStyle(0x8df4ff, 0.22)
+    .fillCircle(27, 16, 8);
+
+  g.fillStyle(0xe8fdff)
+    .fillCircle(27, 16, 4);
+
+  g.fillStyle(0xffffff, 0.9)
+    .fillCircle(26, 15, 1.5);
+
+  // CENTRAL ENERGY CORE
+  g.fillStyle(0x8df4ff, 0.18)
+    .fillCircle(27, 37, 14);
+
+  g.lineStyle(1.5, 0x55dfff, 0.85)
+    .strokeCircle(27, 37, 11);
+
+  g.fillStyle(0x8df4ff)
+    .fillCircle(27, 37, 6);
+
+  g.fillStyle(0xe8fdff)
+    .fillCircle(27, 37, 3);
+
+  // ENERGY CIRCUIT LINES
+  g.lineStyle(1, 0x55dfff, 0.7)
+    .lineBetween(15, 24, 15, 48)
+    .lineBetween(39, 24, 39, 48)
+    .lineBetween(17, 50, 24, 57)
+    .lineBetween(37, 50, 30, 57);
+
+  // LOWER ENERGY BAR
+  g.fillStyle(0x8df4ff, 0.16)
+    .fillRoundedRect(16, 56, 22, 6, 3);
+
+  g.fillStyle(0x8df4ff)
+    .fillRect(19, 58, 16, 2);
+
+  // SIDE ENERGY NODES
+  g.fillStyle(0x55dfff)
+    .fillCircle(10, 35, 2)
+    .fillCircle(44, 35, 2);
+});
+
+make('blaster', 46, 22, g => {
+  // OUTER WEAPON GLOW
+  g.fillStyle(0x8df4ff, 0.08)
+    .fillRoundedRect(1, 3, 44, 16, 5);
+
+  // MAIN BODY
+  g.fillStyle(0x18263b)
+    .fillRoundedRect(4, 5, 34, 11, 4);
+
+  // UPPER ARMOR
+  g.fillStyle(0x2d4664)
+    .fillRoundedRect(8, 3, 23, 5, 2);
+
+  // NEON BODY OUTLINE
+  g.lineStyle(1.5, 0x8df4ff, 0.9)
+    .strokeRoundedRect(4, 5, 34, 11, 4);
+
+  // BARREL
+  g.fillStyle(0x0b1726)
+    .fillRoundedRect(28, 7, 15, 7, 2);
+
+  // PLASMA BARREL
+  g.fillStyle(0x8df4ff, 0.22)
+    .fillRoundedRect(29, 8, 14, 5, 2);
+
+  g.fillStyle(0xe8fdff)
+    .fillRect(34, 9, 9, 3);
+
+  // ENERGY CORE
+  g.fillStyle(0x8df4ff, 0.18)
+    .fillCircle(17, 10, 7);
+
+  g.fillStyle(0x8df4ff)
+    .fillCircle(17, 10, 4);
+
+  g.fillStyle(0xffffff, 0.9)
+    .fillCircle(16, 9, 1.5);
+
+  // GRIP
+  g.fillStyle(0x101a2b)
+    .fillRoundedRect(10, 15, 11, 6, 2);
+
+  g.lineStyle(1, 0xffd06e, 0.8)
+    .lineBetween(12, 17, 19, 20);
+
+  // AMMO / ENERGY INDICATOR
+  g.fillStyle(0xffd06e, 0.22)
+    .fillRoundedRect(23, 16, 10, 3, 1);
+
+  g.fillStyle(0xffd06e)
+    .fillRect(24, 17, 7, 1);
+
+  // MUZZLE SPARK
+  g.fillStyle(0xffffff, 0.9)
+    .fillCircle(44, 10, 2);
+
+  g.fillStyle(0x8df4ff, 0.7)
+    .fillCircle(44, 10, 4);
+});
+
+make('sword', 64, 20, g => {
+  // OUTER ENERGY GLOW
+  g.fillStyle(0x8df4ff, 0.08)
+    .fillTriangle(8, 10, 58, 3, 58, 17);
+
+  // BLADE CORE
+  g.fillStyle(0xdffcff)
+    .fillTriangle(12, 10, 56, 3, 56, 17);
+
+  // HOT BLADE EDGE
+  g.fillStyle(0xffffff, 0.95)
+    .fillTriangle(18, 10, 56, 5, 56, 8);
+
+  // CYAN ENERGY EDGE
+  g.lineStyle(2, 0x8df4ff, 0.95)
+    .lineBetween(12, 10, 56, 3)
+    .lineBetween(12, 10, 56, 17);
+
+  // INNER ENERGY LINE
+  g.lineStyle(1, 0xb9f5ff, 0.8)
+    .lineBetween(20, 10, 54, 8);
+
+  // GUARD
+  g.fillStyle(0x17263a)
+    .fillRoundedRect(7, 5, 11, 11, 3);
+
+  g.lineStyle(1.5, 0xffd06e, 0.95)
+    .strokeRoundedRect(7, 5, 11, 11, 3);
+
+  // ENERGY CELL
+  g.fillStyle(0xffd06e)
+    .fillRect(10, 8, 5, 5);
+
+  g.fillStyle(0xffffff, 0.8)
+    .fillRect(11, 9, 2, 2);
+
+  // HANDLE
+  g.fillStyle(0x0b1726)
+    .fillRoundedRect(2, 6, 8, 8, 2);
+
+  g.lineStyle(1, 0x8df4ff, 0.8)
+    .strokeRoundedRect(2, 6, 8, 8, 2);
+
+  // HANDLE GRIP
+  g.fillStyle(0xff826e, 0.75)
+    .fillRect(4, 8, 4, 2)
+    .fillRect(4, 11, 4, 2);
+
+  // BLADE TIP
+  g.fillStyle(0xffffff)
+    .fillCircle(56, 10, 2);
+
+  g.fillStyle(0x8df4ff, 0.6)
+    .fillCircle(56, 10, 4);
+});
+
+make('plasma', 30, 16, g => {
+  // OUTER PLASMA AURA
+  g.fillStyle(0x8df4ff, 0.08)
+    .fillEllipse(15, 8, 29, 15);
+
+  g.fillStyle(0x55dfff, 0.18)
+    .fillEllipse(15, 8, 24, 12);
+
+  // MAIN ENERGY SHELL
+  g.fillStyle(0x8df4ff, 0.55)
+    .fillEllipse(15, 8, 19, 10);
+
+  // HOT CENTER
+  g.fillStyle(0xe8fdff)
+    .fillEllipse(15, 8, 12, 7);
+
+  // CORE
+  g.fillStyle(0xffffff)
+    .fillEllipse(15, 8, 7, 4);
+
+  // ENERGY CONTOUR
+  g.lineStyle(1.5, 0xb9f5ff, 0.95)
+    .strokeEllipse(15, 8, 21, 11);
+
+  // TRAILING ENERGY
+  g.fillStyle(0x8df4ff, 0.20)
+    .fillTriangle(2, 4, 11, 8, 2, 12);
+
+  g.fillStyle(0x55dfff, 0.18)
+    .fillTriangle(0, 6, 8, 8, 0, 10);
+
+  // HOT SPARK
+  g.fillStyle(0xffffff, 0.9)
+    .fillCircle(18, 6, 1.5);
+
+  // SMALL ENERGY NODES
+  g.fillStyle(0x55dfff, 0.85)
+    .fillCircle(7, 3, 1)
+    .fillCircle(8, 13, 1);
+});
+
+make('turret', 52, 52, g => {
+  // OUTER DEFENSE AURA
+  g.fillStyle(0x8df4ff, 0.07)
+    .fillCircle(26, 28, 24);
+
+  // BASE GLOW
+  g.fillStyle(0x55dfff, 0.10)
+    .fillRoundedRect(4, 25, 44, 20, 7);
+
+  // MAIN BASE
+  g.fillStyle(0x16263b)
+    .fillRoundedRect(5, 27, 42, 17, 6);
+
+  // BASE INNER PANEL
+  g.fillStyle(0x263f5d)
+    .fillRoundedRect(9, 30, 34, 11, 4);
+
+  // BASE OUTLINE
+  g.lineStyle(2, 0x8df4ff, 0.9)
+    .strokeRoundedRect(5, 27, 42, 17, 6);
+
+  // TURRET HOUSING
+  g.fillStyle(0x20344e)
+    .fillRoundedRect(13, 17, 26, 17, 7);
+
+  g.lineStyle(2, 0xb9f5ff, 0.85)
+    .strokeRoundedRect(13, 17, 26, 17, 7);
+
+  // ROTATING CORE
+  g.fillStyle(0x8df4ff, 0.16)
+    .fillCircle(26, 25, 11);
+
+  g.lineStyle(1.5, 0x55dfff, 0.85)
+    .strokeCircle(26, 25, 8);
+
+  // BARREL
+  g.fillStyle(0x0b1726)
+    .fillRoundedRect(22, 4, 8, 20, 3);
+
+  g.lineStyle(1.5, 0x8df4ff, 0.9)
+    .strokeRoundedRect(22, 4, 8, 20, 3);
+
+  // BARREL ENERGY
+  g.fillStyle(0x8df4ff)
+    .fillRect(24, 7, 4, 12);
+
+  g.fillStyle(0xe8fdff)
+    .fillRect(24, 8, 4, 5);
+
+  // MUZZLE CORE
+  g.fillStyle(0xffffff)
+    .fillCircle(26, 5, 3);
+
+  g.fillStyle(0x8df4ff, 0.6)
+    .fillCircle(26, 5, 5);
+
+  // STATUS LIGHTS
+  g.fillStyle(0xffd06e)
+    .fillCircle(16, 37, 2);
+
+  g.fillStyle(0xff826e)
+    .fillCircle(36, 37, 2);
+
+  // LOWER ENERGY VENTS
+  g.fillStyle(0x55dfff, 0.8)
+    .fillRect(16, 42, 7, 2)
+    .fillRect(29, 42, 7, 2);
+
+  // SIDE ARMOR
+  g.fillStyle(0x172238)
+    .fillTriangle(5, 28, 1, 34, 7, 40)
+    .fillTriangle(47, 28, 51, 34, 45, 40);
+});
+  
+make('spring-pad', 64, 24, g => {
+  // OUTER ENERGY GLOW
+  g.fillStyle(0xaee37f, 0.08)
+    .fillRoundedRect(1, 3, 62, 18, 5);
+
+  g.fillStyle(0x8df4ff, 0.06)
+    .fillRoundedRect(4, 5, 56, 14, 4);
+
+  // MAIN BODY
+  g.fillStyle(0x17263b)
+    .fillRoundedRect(2, 5, 60, 16, 5);
+
+  // INNER PANEL
   g.fillStyle(0x263853)
-    .fillRoundedRect(1, 3, 54, 14, 4)
-    .lineStyle(2, 0xaee37f)
-    .strokeRoundedRect(1, 3, 54, 14, 4)
-    .lineStyle(2, 0xaee37f)
-    .lineBetween(12, 13, 20, 7)
-    .lineBetween(20, 7, 28, 13)
-    .lineBetween(28, 13, 36, 7)
-    .lineBetween(36, 7, 44, 13)
-);
+    .fillRoundedRect(6, 8, 52, 10, 3);
+
+  // NEON OUTLINE
+  g.lineStyle(2, 0xaee37f, 0.95)
+    .strokeRoundedRect(2, 5, 60, 16, 5);
+
+  // INNER ENERGY FRAME
+  g.lineStyle(1, 0x8df4ff, 0.65)
+    .strokeRoundedRect(6, 8, 52, 10, 3);
+
+  // LAUNCH ARROWS
+  g.fillStyle(0xaee37f, 0.95)
+    .fillTriangle(10, 16, 18, 10, 18, 16)
+    .fillTriangle(22, 16, 30, 10, 30, 16)
+    .fillTriangle(34, 16, 42, 10, 42, 16)
+    .fillTriangle(46, 16, 54, 10, 54, 16);
+
+  // ARROW HOT CENTERS
+  g.fillStyle(0xe8ffd0, 0.85)
+    .fillTriangle(12, 15, 18, 11, 18, 15)
+    .fillTriangle(24, 15, 30, 11, 30, 15)
+    .fillTriangle(36, 15, 42, 11, 42, 15)
+    .fillTriangle(48, 15, 54, 11, 54, 15);
+
+  // CENTRAL ENERGY CORE
+  g.fillStyle(0x8df4ff, 0.18)
+    .fillCircle(32, 12, 8);
+
+  g.lineStyle(1, 0x8df4ff, 0.8)
+    .strokeCircle(32, 12, 6);
+
+  g.fillStyle(0xe8fdff)
+    .fillCircle(32, 12, 3);
+
+  // SIDE ENERGY NODES
+  g.fillStyle(0xaee37f)
+    .fillCircle(6, 13, 1.5)
+    .fillCircle(58, 13, 1.5);
+
+  // LOWER POWER VENTS
+  g.fillStyle(0x55dfff, 0.75)
+    .fillRect(18, 19, 7, 2)
+    .fillRect(29, 19, 7, 2)
+    .fillRect(40, 19, 7, 2);
+});
 
 make('guide-drone', 56, 42, g => {
   // OUTER ENERGY GLOW
@@ -565,7 +1256,18 @@ this.collected = 0;
 this.secretsCollected = 0;
 this.elapsedMs = 0;
 this.timeEmitTimer = 0;
+// ============================================================
+// MISSION MEDALS / RUN RATING
+// ============================================================
+this.runRating = {
+  speed: 0,
+  combat: 0,
+  collection: 0,
+  survival: 0,
+  overall: 'C'
+};
 
+this.medalResult = null;
 this.boostCooldown = 0;
 this.dashCooldown = 0;
 this.dashTimer = 0;
@@ -589,6 +1291,7 @@ this.buildCooldowns = [0, 0];
 
 this.combatCombo = 0;
 this.comboTimer = 0;
+this.overdriveTimer = 0;
 this.jumps = 0;
 this.collisions = 0;
 this.falls = 0;
@@ -599,6 +1302,10 @@ this.perfectDodgeCooldown = 0;
 this.deathLimit = mission.id === 'first-delivery' ? Infinity : 3;
 this.jumpsUsed = 0;
 this.finished = false;
+this.gameOverUI = null;
+this.gameOverRestarting = false;
+this.missionMedalsUI = null;
+this.missionMedalsClosing = false;
 this.respawning = false;
 this.respawnGrace = 0;
 
@@ -608,13 +1315,17 @@ this.mobileDirection = null;
 this.mobileActions = { jump:false, dash:false, fire:false, sword:false, build1:false, build2:false, gadget1:false, gadget2:false };
 this.empTimer = 0; this.decoyTimer = 0; this.boosterTimer = 0;
 this.boosterAura = null; this.decoyBeacon = null; this.infoCard = null; this.landingTimer = 0;
-this.bossDefeated = false; this.goalTouched = false;
+this.bossDefeated = false;
+this.bossPhaseTwo = false;
+this.bossVictorySequence = false;
+this.bossVictoryLock = false;
+this.goalTouched = false;
 
 this.coyote = 0;
 this.jumpBuffer = 0;
 this.dustTimer = 0;
 this.speedTimer = 0;
-
+this.fastFallFxTimer = 0;
 this.lastProgress = -1;
 this.wasGrounded = false;
 this.fallSpeed = 0;
@@ -677,6 +1388,11 @@ if (
 this.perfectDodgeWindow = 120;
 this.perfectDodgeCooldown = 320;
 
+  this.game.events.emit(
+  'feedback',
+  'perfect_dodge'
+);
+  
 this.combatCombo = Math.min(
   10,
   this.combatCombo + 1
@@ -684,6 +1400,58 @@ this.combatCombo = Math.min(
 
 this.comboTimer = 3000;
 
+  /*
+ * ============================================================
+ * PERFECT DODGE · COMBAT FEEDBACK
+ * ============================================================
+ */
+if (!this.motionReduced) {
+  const dodgeRing =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        12,
+        0x8df4ff,
+        .16
+      )
+      .setDepth(13);
+
+  dodgeRing.setStrokeStyle(
+    2,
+    0xb9f5ff,
+    .9
+  );
+
+  this.tweens.add({
+    targets: dodgeRing,
+    scale: 4.6,
+    alpha: 0,
+    duration: 360,
+    ease: 'Quad.out',
+    onComplete: () =>
+      dodgeRing.destroy()
+  });
+
+  this.cameras.main.flash(
+    90,
+    120,
+    220,
+    255
+  );
+
+  this.playerCue(
+    'PERFECT DODGE',
+    '#8df4ff'
+  );
+
+  this.gadgetPulse(
+    0x8df4ff,
+    14,
+    360
+  );
+}
+  
 this.energy = Math.min(
   this.energyMax,
   this.energy + 8
@@ -702,10 +1470,6 @@ this.game.events.emit(
   1
 );
 
-this.playerCue(
-  'PERFECT DODGE',
-  '#8df4ff'
-);
   const dodgeBurst =
   this.add
     .circle(
@@ -755,27 +1519,59 @@ this.shake(90, .004);
 }
 
 playerCue(text, color = '#b9f5ff') {
-const label = this.add.text(
-this.player.x,
-this.player.y - 46,
-text,
-{
-fontFamily: 'DM Mono',
-fontSize: '10px',
-color,
-stroke: '#08101c',
-strokeThickness: 4
-}
-).setOrigin(.5).setDepth(14);
+  if (!this.player?.active) {
+    return;
+  }
 
-this.tweens.add({
-  targets: label,
-  y: label.y - 20,
-  alpha: 0,
-  duration: 520,
-  onComplete: () => label.destroy()
-});
+  const activeCues =
+    this.children.list.filter(
+      child =>
+        child?.getData?.('playerCue') === true &&
+        child.active
+    );
 
+  const stackOffset =
+    Math.min(
+      activeCues.length,
+      3
+    ) * 16;
+
+  const label =
+    this.add
+      .text(
+        this.player.x,
+        this.player.y - 46 - stackOffset,
+        text,
+        {
+          fontFamily: 'DM Mono',
+          fontSize: '10px',
+          color,
+          stroke: '#08101c',
+          strokeThickness: 4,
+          padding: {
+            left: 3,
+            right: 3,
+            top: 2,
+            bottom: 2
+          }
+        }
+      )
+      .setOrigin(.5)
+      .setDepth(14)
+      .setData(
+        'playerCue',
+        true
+      );
+
+  this.tweens.add({
+    targets: label,
+    y: label.y - 20,
+    alpha: 0,
+    duration: 520,
+    ease: 'Quad.out',
+    onComplete: () =>
+      label.destroy()
+  });
 }
 
 showIntelCard(title, lines, color = '#8df4ff') {
@@ -934,6 +1730,10 @@ this.tweens.add({
 }
 
 gadgetPulse(color, radius = 16, duration = 360) {
+if (this.motionReduced) {
+  return;
+}
+
 const pulse = this.add
 .circle(this.player.x, this.player.y, radius, color, .3)
 .setDepth(11);
@@ -1092,7 +1892,12 @@ sky.fillGradientStyle(
   skyBottom,
   skyBottom,
   1
-).fillRect(0, 0, 1500, 720);
+).fillRect(
+  0,
+  0,
+  1500,
+  720
+);
 
 if (this.mission.gravityMode === 'low') {
   for (let index = 0; index < 86; index++) {
@@ -1118,13 +1923,158 @@ if (this.mission.gravityMode === 'low') {
     .fillCircle(1245, 150, 120);
 }
 
-sky
-  .fillStyle(0xffe0a8, .14)
-  .fillCircle(975, 104, 104)
-  .fillStyle(0xffe0a8)
-  .fillCircle(975, 104, 58)
-  .fillStyle(0x10182a)
-  .fillCircle(1002, 87, 58);
+// ============================================================
+// CELESTIAL SKY · SUN + MOON
+// ============================================================
+
+const celestialTime =
+  (this.time.now % 180000) / 180000;
+
+const sunAngle =
+  celestialTime * Math.PI * 2;
+
+const moonAngle =
+  sunAngle + Math.PI;
+
+const sunX =
+  930 +
+  Math.cos(sunAngle) * 260;
+
+const sunY =
+  150 +
+  Math.sin(sunAngle) * 75;
+
+const moonX =
+  930 +
+  Math.cos(moonAngle) * 260;
+
+const moonY =
+  150 +
+  Math.sin(moonAngle) * 75;
+
+  const sunAltitude =
+  Phaser.Math.Clamp(
+    (150 - sunY) / 75,
+    -1,
+    1
+  );
+
+const moonAltitude =
+  Phaser.Math.Clamp(
+    (150 - moonY) / 75,
+    -1,
+    1
+  );
+
+  // ============================================================
+// CELESTIAL · DAY / NIGHT INTENSITY
+// ============================================================
+
+const daylight =
+  Phaser.Math.Clamp(
+    (Math.sin(sunAngle) + 1) * 0.5,
+    0,
+    1
+  );
+
+  const daylightSmooth =
+  Phaser.Math.SmoothStep(
+    daylight,
+    0,
+    1
+  );
+
+const nightAmount =
+  1 - daylightSmooth;
+
+const sunGlowAlpha =
+  Phaser.Math.Linear(
+    0.06,
+    0.16,
+    daylightSmooth
+  );
+
+const moonGlowAlpha =
+  Phaser.Math.Linear(
+    0.18,
+    0.035,
+    daylightSmooth
+  );
+
+  const moonShadowAlpha =
+  Phaser.Math.Linear(
+   0.62,
+   0.88,
+    nightAmount
+  );
+
+  // ============================================================
+// CELESTIAL · MOVING OBJECTS
+// ============================================================
+
+this.celestialSun =
+  this.add
+    .circle(
+      sunX,
+      sunY,
+      52,
+      0xffe6ad,
+      1
+    )
+    .setScrollFactor(0)
+    .setDepth(2);
+
+this.celestialSunGlow =
+  this.add
+    .circle(
+      sunX,
+      sunY,
+      105,
+      0xffd06e,
+      sunGlowAlpha
+    )
+    .setScrollFactor(0)
+    .setDepth(1);
+
+this.celestialMoon =
+  this.add
+    .circle(
+      moonX,
+      moonY,
+      42,
+      0xdffcff,
+      0.95
+    )
+    .setScrollFactor(0)
+    .setDepth(2);
+
+this.celestialMoonGlow =
+  this.add
+    .circle(
+      moonX,
+      moonY,
+      74,
+      0x8df4ff,
+      moonGlowAlpha
+    )
+    .setScrollFactor(0)
+    .setDepth(1);
+
+  // ============================================================
+// CELESTIAL · MOON CRESCENT
+// ============================================================
+
+this.celestialMoonShadow =
+  this.add
+    .circle(
+     moonX + 24,
+     moonY - 15,
+      42,
+     skyBottom,
+      0.98
+    )
+    .setScrollFactor(0)
+    .setDepth(3);
 
 const environment = {
   'first-delivery': ['LANTERN ROOFS', 0xffd06e],
@@ -2366,6 +3316,28 @@ this.player
   .setCollideWorldBounds(true)
   .play('runner-idle');
 
+  // ============================================================
+// PLAYER · PREMIUM MOVEMENT ANIMATION
+// ============================================================
+
+this.playerVisualBaseScaleX =
+  this.player.scaleX;
+
+this.playerVisualBaseScaleY =
+  this.player.scaleY;
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: this.player,
+    scaleX: 1.025,
+    scaleY: 0.985,
+    duration: 620,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
+
   /*
  * PLAYER ENERGY FX
  */
@@ -2821,6 +3793,62 @@ marker.getData('index');
         )
         .setDepth(6);
 
+      /*
+ * ============================================================
+ * CHECKPOINT BEACON FX
+ * ============================================================
+ */
+if (!this.motionReduced) {
+  const beaconRing =
+    this.add
+      .circle(
+        marker.x,
+        marker.y - 20,
+        18,
+        0x8df4ff,
+        .08
+      )
+      .setDepth(5);
+
+  beaconRing.setStrokeStyle(
+    2,
+    0xb9f5ff,
+    .78
+  );
+
+  this.tweens.add({
+    targets: beaconRing,
+    scale: 3.8,
+    alpha: 0,
+    duration: 620,
+    ease: 'Quad.out',
+    onComplete: () =>
+      beaconRing.destroy()
+  });
+
+  const beaconBeam =
+    this.add
+      .rectangle(
+        marker.x,
+        marker.y - 54,
+        4,
+        62,
+        0x8df4ff,
+        .16
+      )
+      .setDepth(5);
+
+  this.tweens.add({
+    targets: beaconBeam,
+    scaleX: 2.4,
+    alpha: 0,
+    duration: 480,
+    ease: 'Sine.out',
+    onComplete: () =>
+      beaconBeam.destroy()
+  });
+}
+
       this.tweens.add({
         targets: pulse,
         scale: 3,
@@ -2830,10 +3858,15 @@ marker.getData('index');
           pulse.destroy()
       });
 
-      this.playerCue(
-        'CHECKPOINT NEAR',
-        '#b9f5ff'
-      );
+    this.playerCue(
+  'CHECKPOINT // NEAR',
+  '#b9f5ff'
+);
+
+this.game.events.emit(
+  'feedback',
+  'checkpoint_near'
+);
     }
   }
 );
@@ -2868,6 +3901,11 @@ if (
     'DELIVERY BEACON NEAR',
     '#ffd06e'
   );
+  this.gadgetPulse(
+  0xffd06e,
+  10,
+  320
+);
 }
 
 }
@@ -3236,6 +4274,24 @@ if (this.mission.boss) {
     profile.color
   );
 
+  // ============================================================
+// BOSS · PREMIUM CORE PULSE
+// ============================================================
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: this.boss,
+    alpha: {
+      from: 0.92,
+      to: 1
+    },
+    duration: 720,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
+
   this.boss.setData(
     'attackCooldown',
     profile.attackCooldown
@@ -3390,6 +4446,12 @@ this.tweens.add({
       '#8df4ff'
     );
 
+    this.gadgetPulse(
+  0x8df4ff,
+  10,
+  280
+);
+
     destroyBall(
       null,
       ball
@@ -3430,6 +4492,12 @@ this.tweens.add({
       'GATE DESTROYED',
       '#8df4ff'
     );
+
+    this.gadgetPulse(
+  0x8df4ff,
+  11,
+  300
+);
 
     destroyBall(
       null,
@@ -3529,6 +4597,11 @@ this.tweens.add({
       'SHOT DEFLECTED',
       '#8df4ff'
     );
+    
+    this.playerCue(
+  '+1 DEFLECT',
+  '#b9f5ff'
+);
   }
 );
 
@@ -3563,6 +4636,11 @@ this.tweens.add({
       'BOLT DEFLECTED',
       '#8df4ff'
     );
+    
+    this.playerCue(
+  '+1 DEFLECT',
+  '#b9f5ff'
+);
   }
 );
 
@@ -3591,6 +4669,28 @@ this.physics.add.overlap(
       onComplete: () =>
         shieldPulse.destroy()
     });
+
+    this.playerCue(
+  'SHIELD BLOCK',
+  '#8df4ff'
+);
+
+this.gadgetPulse(
+  0x8df4ff,
+  9,
+  260
+);
+
+    this.playerCue(
+  'SHIELD BLOCK',
+  '#8df4ff'
+);
+
+this.gadgetPulse(
+  0x8df4ff,
+  9,
+  260
+);
   }
 );
 
@@ -3635,6 +4735,17 @@ this.physics.add.overlap(
       -880
     );
 
+    this.playerCue(
+  'SPRING LAUNCH',
+  '#aee37f'
+);
+
+this.gadgetPulse(
+  0xaee37f,
+  12,
+  320
+);
+
     const springPulse =
   this.add
     .circle(
@@ -3675,12 +4786,119 @@ return;
 }
 
 this.health--;
+  // ============================================================
+// LOW HP · CRITICAL STATE
+// ============================================================
+if (
+  this.health === 1 &&
+  !this.motionReduced
+) {
+  this.playerCue(
+    'CRITICAL',
+    '#ff826e'
+  );
+
+  this.cameras.main.flash(
+    120,
+    255,
+    70,
+    70
+  );
+
+  this.shake(
+    120,
+    0.004
+  );
+
+  const criticalPulse =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        20,
+        0xff826e,
+        .20
+      )
+      .setDepth(13);
+
+  criticalPulse.setStrokeStyle(
+    3,
+    0xffa08f,
+    .9
+  );
+
+  this.tweens.add({
+    targets: criticalPulse,
+    scale: 4.4,
+    alpha: 0,
+    duration: 520,
+    ease: 'Quad.out',
+    onComplete: () =>
+      criticalPulse.destroy()
+  });
+}
 this.healthInvulnerable = 1100;
 
 this.game.events.emit(
   'health',
   this.health
 );
+
+  /*
+ * ============================================================
+ * DAMAGE IMPACT FX
+ * ============================================================
+ */
+if (!this.motionReduced) {
+  const impact =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        11,
+        0xff826e,
+        .28
+      )
+      .setDepth(13);
+
+  impact.setStrokeStyle(
+    2,
+    0xffc2b8,
+    .85
+  );
+
+  this.tweens.add({
+    targets: impact,
+    scale: 3.8,
+    alpha: 0,
+    duration: 260,
+    ease: 'Quad.out',
+    onComplete: () =>
+      impact.destroy()
+  });
+
+  this.player.setTint(
+    0xff6f68
+  );
+
+  this.time.delayedCall(
+    90,
+    () => {
+      if (
+        this.player?.active &&
+        this.health > 0
+      ) {
+        this.player.clearTint();
+      }
+    }
+  );
+
+  this.shake(
+    85,
+    .0035
+  );
+}
+  
   if (
   this.health === 1 &&
   !this.motionReduced
@@ -3896,6 +5114,12 @@ if (id === 'spring-pad') {
     '#aee37f'
   );
 
+  this.gadgetPulse(
+  0xaee37f,
+  10,
+  300
+);
+
   this.buildCooldowns[slot] =
     8000;
 }
@@ -3918,6 +5142,13 @@ this.time.delayedCall(
     }
   }
 );
+
+if (!enemy.getData('boss')) {
+  this.game.events.emit(
+    'feedback',
+    'enemy_hit'
+  );
+}
   const hitPulse =
   this.add
     .circle(
@@ -3941,7 +5172,7 @@ enemy.x +=
   this.player.x < enemy.x
     ? 10
     : -10;
-  this.cameras.main.shake(
+ this.shake(
   55,
   0.0025
 );
@@ -3968,6 +5199,10 @@ if (health) {
   enemy.getData('boss') === true;
 
 if (isBoss) {
+  this.game.events.emit(
+  'feedback',
+  'boss_hit'
+);
   const bossPulse =
     this.add
       .circle(
@@ -4007,6 +5242,257 @@ power * comboMultiplier;
 const remaining =
   health - finalPower;
 
+  // ============================================================
+// BOSS FINAL ENRAGE · 25% HP
+// ============================================================
+if (
+  enemy.getData('boss') === true &&
+  remaining > 0 &&
+  remaining <= health * 0.25 &&
+  enemy.getData('finalEnrage') !== true
+) {
+  enemy.setData(
+    'finalEnrage',
+    true
+  );
+
+  enemy.setData(
+    'phase',
+    3
+  );
+
+  const currentCooldown =
+    Number(
+      enemy.getData(
+        'attackCooldown'
+      )
+    ) || 1800;
+
+  enemy.setData(
+    'attackCooldown',
+    currentCooldown * .48
+  );
+
+  this.playerCue(
+    'FINAL ENRAGE',
+    '#ff4f5f'
+  );
+
+  this.gadgetPulse(
+    0xff4f5f,
+    30,
+    900
+  );
+
+  if (!this.motionReduced) {
+    this.cameras.main.flash(
+      220,
+      255,
+      60,
+      60
+    );
+
+    this.shake(
+      260,
+      0.012
+    );
+
+    const enrageBurst =
+      this.add
+        .circle(
+          enemy.x,
+          enemy.y,
+          28,
+          0xff4f5f,
+          .26
+        )
+        .setDepth(13);
+
+    enrageBurst.setStrokeStyle(
+      3,
+      0xffb0b0,
+      .95
+    );
+
+    this.tweens.add({
+      targets: enrageBurst,
+      scale: 6.2,
+      alpha: 0,
+      duration: 760,
+      ease: 'Quad.out',
+      onComplete: () =>
+        enrageBurst.destroy()
+    });
+  }
+
+  this.game.events.emit(
+    'feedback',
+    'boss_final_enrage'
+  );
+}
+
+  // ============================================================
+// BOSS PHASE 2 · 50% HP TRANSITION
+// ============================================================
+if (
+  isBoss &&
+  !this.bossPhaseTwo &&
+  remaining > 0 &&
+  remaining <= health * 0.5
+) {
+  this.bossPhaseTwo = true;
+
+  // ============================================================
+// BOSS PHASE 2 · ENRAGE AURA
+// ============================================================
+this.bossPhaseAura?.destroy();
+this.bossPhaseAuraFollow?.remove();
+
+const bossAuraColor =
+  enemy.getData('bossColor') ||
+  0xff826e;
+
+this.bossPhaseAura =
+  this.add
+    .circle(
+      enemy.x,
+      enemy.y,
+      34,
+      bossAuraColor,
+      .12
+    )
+    .setDepth(10);
+
+this.bossPhaseAura.setStrokeStyle(
+  2,
+  0xffcf82,
+  .72
+);
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: this.bossPhaseAura,
+    scale: {
+      from: .86,
+      to: 1.18
+    },
+    alpha: {
+      from: .10,
+      to: .24
+    },
+    duration: 520,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
+
+this.bossPhaseAuraFollow =
+  this.time.addEvent({
+    delay: 16,
+    loop: true,
+    callback: () => {
+      if (
+        !enemy.active ||
+        !this.bossPhaseAura
+      ) {
+        this.bossPhaseAuraFollow?.remove();
+        this.bossPhaseAuraFollow = null;
+        this.bossPhaseAura?.destroy();
+        this.bossPhaseAura = null;
+        return;
+      }
+
+      this.bossPhaseAura.x = enemy.x;
+      if (
+  enemy.active &&
+  !this.motionReduced
+) {
+  const baseY =
+    enemy.getData('premiumBaseY');
+
+  if (
+    typeof baseY !== 'number'
+  ) {
+    enemy.setData(
+      'premiumBaseY',
+      enemy.y
+    );
+  } else {
+    enemy.y =
+      baseY +
+      Math.sin(
+        this.time.now * 0.0028
+      ) * 4;
+  }
+}
+      this.bossPhaseAura.y = enemy.y;
+    }
+  });
+  
+  enemy.setData(
+    'phase',
+    2
+  );
+
+  this.playerCue(
+    'PHASE 2 // INCOMING',
+    '#ff826e'
+  );
+
+  this.gadgetPulse(
+    0xff826e,
+    26,
+    760
+  );
+
+  if (!this.motionReduced) {
+    this.cameras.main.flash(
+      180,
+      255,
+      130,
+      110
+    );
+
+    this.shake(
+      220,
+      0.009
+    );
+
+    const phaseRing =
+      this.add
+        .circle(
+          enemy.x,
+          enemy.y,
+          24,
+          0xff826e,
+          .24
+        )
+        .setDepth(13);
+
+    phaseRing.setStrokeStyle(
+      3,
+      0xffcf82,
+      .95
+    );
+
+    this.tweens.add({
+      targets: phaseRing,
+      scale: 5.8,
+      alpha: 0,
+      duration: 680,
+      ease: 'Quad.out',
+      onComplete: () =>
+        phaseRing.destroy()
+    });
+  }
+
+  this.game.events.emit(
+    'feedback',
+    'boss_phase_two'
+  );
+}
+  
   enemy.setData(
     'health',
     remaining
@@ -4058,13 +5544,74 @@ const remaining =
       '#ffcf82'
     );
 
+    this.gadgetPulse(
+  0xffcf82,
+  15,
+  360
+);
+
     return;
   }
+
+  if (!enemy.getData('boss')) {
+  this.game.events.emit(
+    'feedback',
+    'enemy_defeated'
+  );
+}
 
   enemy
     .getData('label')
     ?.destroy();
   if (enemy.getData('boss') === true) {
+
+    // ============================================================
+// BOSS VICTORY ONCE-ONLY GUARD
+// ============================================================
+    
+if (this.bossVictorySequence === true) {
+  return;
+}
+
+this.bossVictorySequence = true;
+    
+    // ============================================================
+// BOSS VICTORY INPUT LOCK
+// ============================================================
+    
+this.bossVictoryLock = true;
+
+if (this.player?.body) {
+  this.player.body.setVelocity(0, 0);
+}
+
+this.input?.keyboard?.resetKeys?.();
+    // ============================================================
+// BOSS UI / PHASE CLEANUP
+// ============================================================
+if (this.bossHealthUI) {
+  this.bossHealthUI.marker50?.destroy();
+  this.bossHealthUI.marker25?.destroy();
+
+  this.bossHealthUI.container?.destroy();
+
+  this.bossHealthUI = null;
+}
+
+if (this.boss?.active) {
+  this.boss.setData(
+    'finalEnrage',
+    false
+  );
+
+  this.boss.setData(
+    'phase',
+    0
+  );
+}
+
+this.bossPhaseAura?.destroy?.();
+this.bossPhaseAura = null;
   const deathBurst =
     this.add
       .circle(
@@ -4090,6 +5637,239 @@ const remaining =
     180,
     0.008
   );
+    
+    // ============================================================
+// BOSS PROJECTILE PURGE
+// ============================================================
+if (this.comets) {
+  this.comets
+    .getChildren()
+    .forEach(projectile => {
+      if (
+        projectile.active &&
+        projectile.getData('bossProjectile') === true
+      ) {
+        projectile.body?.setVelocity(0, 0);
+        projectile.body?.setEnable(false);
+        projectile.setActive(false);
+        projectile.setVisible(false);
+        projectile.destroy();
+      }
+    });
+}
+    
+    // ============================================================
+// BOSS FINAL KILL IMPACT
+// ============================================================
+    
+this.playerCue(
+  'BOSS DEFEATED',
+  '#8df4ff'
+);
+    
+    // ============================================================
+// BOSS VICTORY BANNER
+// ============================================================
+    
+if (!this.motionReduced) {
+  const centerX =
+    this.scale.width / 2;
+
+  const centerY =
+    this.scale.height / 2;
+
+  const banner =
+    this.add
+      .container(
+        centerX,
+        centerY
+      )
+      .setScrollFactor(0)
+      .setDepth(150)
+      .setAlpha(0)
+      .setScale(.82);
+
+  const glow =
+    this.add
+      .rectangle(
+        0,
+        0,
+        Math.min(
+          this.scale.width - 40,
+          420
+        ),
+        112,
+        0x06111d,
+        .96
+      )
+      .setStrokeStyle(
+        2,
+        0x8df4ff,
+        .9
+      );
+
+  const accent =
+    this.add
+      .rectangle(
+        0,
+        -53,
+        Math.min(
+          this.scale.width - 40,
+          420
+        ),
+        4,
+        0x8df4ff,
+        .95
+      );
+
+  const title =
+    this.add
+      .text(
+        0,
+        -18,
+        'BOSS DEFEATED',
+        {
+          fontFamily:
+            'Arial Black, Arial, sans-serif',
+          fontSize: '28px',
+          fontStyle: 'bold',
+          color: '#8df4ff',
+          stroke: '#02070d',
+          strokeThickness: 6,
+          align: 'center',
+          resolution: 2
+        }
+      )
+      .setOrigin(.5);
+
+  const subtitle =
+    this.add
+      .text(
+        0,
+        18,
+        'THREAT ELIMINATED',
+        {
+          fontFamily:
+            'Arial, sans-serif',
+          fontSize: '13px',
+          fontStyle: 'bold',
+          color: '#dcecff',
+          letterSpacing: 2,
+          align: 'center',
+          resolution: 2
+        }
+      )
+      .setOrigin(.5);
+
+  const line =
+    this.add
+      .rectangle(
+        0,
+        40,
+        170,
+        2,
+        0x8df4ff,
+        .65
+      );
+
+  banner.add([
+    glow,
+    accent,
+    title,
+    subtitle,
+    line
+  ]);
+
+  this.tweens.add({
+    targets: banner,
+    alpha: 1,
+    scale: 1,
+    duration: 420,
+    ease: 'Back.out'
+  });
+
+  this.tweens.add({
+    targets: accent,
+    scaleX: .35,
+    duration: 260,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+
+  this.tweens.add({
+    targets: banner,
+    delay: 1500,
+    alpha: 0,
+    scale: 1.04,
+    duration: 420,
+    ease: 'Quad.in',
+    onComplete: () => {
+      banner.destroy();
+    }
+  });
+}
+
+this.gadgetPulse(
+  0x8df4ff,
+  36,
+  1000
+);
+
+this.game.events.emit(
+  'feedback',
+  'boss_defeated'
+);
+
+if (!this.motionReduced) {
+  const killFlash =
+    this.add
+      .rectangle(
+        this.scale.width / 2,
+        this.scale.height / 2,
+        this.scale.width,
+        this.scale.height,
+        0x8df4ff,
+        .18
+      )
+      .setScrollFactor(0)
+      .setDepth(140);
+
+  this.tweens.add({
+    targets: killFlash,
+    alpha: 0,
+    duration: 520,
+    ease: 'Quad.out',
+    onComplete: () =>
+      killFlash.destroy()
+  });
+
+  const killRing =
+    this.add
+      .circle(
+        enemy.x,
+        enemy.y,
+        34,
+        0x8df4ff,
+        0
+      )
+      .setStrokeStyle(
+        4,
+        0x8df4ff,
+        .95
+      )
+      .setDepth(18);
+
+  this.tweens.add({
+    targets: killRing,
+    scale: 7,
+    alpha: 0,
+    duration: 900,
+    ease: 'Cubic.out',
+    onComplete: () =>
+      killRing.destroy()
+  });
+}
     if (!this.motionReduced) {
   this.cameras.main.flash(
     220,
@@ -4141,6 +5921,145 @@ this.combatCombo =
 
 this.comboTimer = 3000;
 
+  /*
+ * ============================================================
+ * OVERDRIVE · COMBO x10
+ * ============================================================
+ */
+if (
+  this.combatCombo >= 10 &&
+  this.overdriveTimer <= 0
+) {
+  this.overdriveTimer = 4200;
+
+  this.playerCue(
+    'OVERDRIVE',
+    '#ffd06e'
+  );
+
+  this.gadgetPulse(
+    0xffd06e,
+    22,
+    700
+  );
+
+  if (!this.motionReduced) {
+    this.cameras.main.flash(
+      150,
+      255,
+      208,
+      110
+    );
+
+    this.shake(
+      110,
+      .005
+    );
+
+    const overdriveRing =
+      this.add
+        .circle(
+          this.player.x,
+          this.player.y,
+          18,
+          0xffd06e,
+          .20
+        )
+        .setDepth(13);
+
+    overdriveRing.setStrokeStyle(
+      3,
+      0xfff0a8,
+      .9
+    );
+
+    this.tweens.add({
+      targets: overdriveRing,
+      scale: 5.2,
+      alpha: 0,
+      duration: 520,
+      ease: 'Quad.out',
+      onComplete: () =>
+        overdriveRing.destroy()
+    });
+  }
+
+  this.game.events.emit(
+    'feedback',
+    'overdrive'
+  );
+}
+
+  /*
+ * ============================================================
+ * COMBO VISUAL PROGRESSION
+ * ============================================================
+ */
+if (!this.motionReduced) {
+  const comboLevel =
+    this.combatCombo;
+
+  const comboColor =
+    comboLevel >= 10
+      ? 0xffd06e
+      : comboLevel >= 5
+        ? 0xb993ff
+        : 0x8df4ff;
+
+  const comboPulse =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        13 + comboLevel,
+        comboColor,
+        .18
+      )
+      .setDepth(13);
+
+  comboPulse.setStrokeStyle(
+    comboLevel >= 5 ? 2 : 1,
+    comboColor,
+    .78
+  );
+
+  this.tweens.add({
+    targets: comboPulse,
+    scale: comboLevel >= 10
+      ? 4.8
+      : comboLevel >= 5
+        ? 4.2
+        : 3.4,
+    alpha: 0,
+    duration: comboLevel >= 10
+      ? 420
+      : 300,
+    ease: 'Quad.out',
+    onComplete: () =>
+      comboPulse.destroy()
+  });
+
+  this.playerCue(
+    `COMBO x${comboLevel}`,
+    comboLevel >= 10
+      ? '#ffd06e'
+      : comboLevel >= 5
+        ? '#b993ff'
+        : '#8df4ff'
+  );
+
+  if (comboLevel >= 5) {
+    this.shake(
+      comboLevel >= 10
+        ? 95
+        : 55,
+      comboLevel >= 10
+        ? .004
+        : .002
+    );
+  }
+}
+  
 if (this.combatCombo >= 3) {
   this.energy =
     Math.min(
@@ -4224,6 +6143,12 @@ if (!this.ammo) {
     'PLASMA RECHARGING',
     '#ffcf82'
   );
+
+  this.gadgetPulse(
+  0xffcf82,
+  9,
+  300
+);
 
   this.game.events.emit(
     'feedback',
@@ -4311,9 +6236,33 @@ this.playerCue(
   '#8df4ff'
 );
 
+  if (!this.motionReduced) {
+  const muzzleFlash =
+    this.add
+      .circle(
+        this.player.x +
+          (this.player.flipX ? -30 : 30),
+        this.player.y - 4,
+        7,
+        0x8df4ff,
+        .34
+      )
+      .setDepth(13);
+
+  this.tweens.add({
+    targets: muzzleFlash,
+    scale: 2.6,
+    alpha: 0,
+    duration: 110,
+    ease: 'Quad.out',
+    onComplete: () =>
+      muzzleFlash.destroy()
+  });
+}
+  
 this.game.events.emit(
   'feedback',
-  'gadget'
+  'blaster_fire'
 );
 
 }
@@ -4385,6 +6334,36 @@ this.playerCue(
   'SWORD ARC',
   '#ffd06e'
 );
+
+  this.game.events.emit(
+  'feedback',
+  'sword_swing'
+);
+
+  if (!this.motionReduced) {
+  const swordFlash =
+    this.add
+      .circle(
+        this.player.x +
+          (this.player.flipX ? -22 : 22),
+        this.player.y - 2,
+        9,
+        0xffd06e,
+        .30
+      )
+      .setDepth(13);
+
+  this.tweens.add({
+    targets: swordFlash,
+    scaleX: 2.8,
+    scaleY: 1.4,
+    alpha: 0,
+    duration: 130,
+    ease: 'Quad.out',
+    onComplete: () =>
+      swordFlash.destroy()
+  });
+}
 
 }
 
@@ -5219,6 +7198,17 @@ this.physics.add.overlap(
       -825
     );
 
+    this.playerCue(
+  'BOOST LAUNCH',
+  '#8df4ff'
+);
+
+this.gadgetPulse(
+  0x8df4ff,
+  12,
+  320
+);
+
     const boostPulse =
   this.add
     .circle(
@@ -5620,7 +7610,37 @@ this.physics.add.overlap(
   this.player,
   this.goal,
   () => {
-    this.goalTouched = true;
+  if (this.goalTouched) {
+  return;
+}
+
+this.goalTouched = true;
+    const arrivalLabel =
+  this.add
+    .text(
+      this.goal.x + 28,
+      this.goal.y - 18,
+      'DELIVERY LOCK',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '10px',
+        color: '#ffd06e',
+        stroke: '#08101c',
+        strokeThickness: 3
+      }
+    )
+    .setOrigin(.5)
+    .setDepth(14);
+
+this.tweens.add({
+  targets: arrivalLabel,
+  y: arrivalLabel.y - 18,
+  alpha: 0,
+  duration: 650,
+  ease: 'Quad.out',
+  onComplete: () =>
+    arrivalLabel.destroy()
+});
     const goalBurst =
       this.add
         .circle(
@@ -5852,6 +7872,12 @@ if (
     'CROSSWIND · HOLD YOUR LINE',
     '#b9f5ff'
   );
+
+  this.gadgetPulse(
+  0x8ba2c4,
+  9,
+  300
+);
 }
 
 }
@@ -6926,6 +8952,17 @@ if (
   this.boosterTimer > 0
 ) {
   this.boostedSignals++;
+
+  this.playerCue(
+  'BOOSTED SIGNAL',
+  '#8df4ff'
+);
+
+this.gadgetPulse(
+  0x8df4ff,
+  10,
+  300
+);
 }
 
 this.dust.emitParticleAt(
@@ -6947,6 +8984,17 @@ signal.disableBody(
 
 this.collected++;
 
+  this.playerCue(
+  'SIGNAL ACQUIRED',
+  '#ffd06e'
+);
+
+this.gadgetPulse(
+  0xffd06e,
+  10,
+  300
+);
+
 if (
   this.mission.signals.length - this.collected === 1
 ) {
@@ -6954,6 +9002,11 @@ if (
     'ONE SIGNAL LEFT',
     '#ffd06e'
   );
+  this.gadgetPulse(
+  0xffd06e,
+  12,
+  340
+);
 }
 
 this.game.events.emit(
@@ -7025,8 +9078,81 @@ secret.disableBody(
   true
 );
 
-this.secretsCollected++;
+  // ============================================================
+// SECRET DISCOVERY · RARE PICKUP FX
+// ============================================================
+if (!this.motionReduced) {
+  const secretBurst =
+    this.add
+      .circle(
+        secret.x,
+        secret.y,
+        12,
+        0xb993ff,
+        .30
+      )
+      .setDepth(13);
 
+  secretBurst.setStrokeStyle(
+    2,
+    0xe0a7ff,
+    .95
+  );
+
+  this.tweens.add({
+    targets: secretBurst,
+    scale: 5.4,
+    alpha: 0,
+    duration: 520,
+    ease: 'Quad.out',
+    onComplete: () =>
+      secretBurst.destroy()
+  });
+
+  const secretCore =
+    this.add
+      .circle(
+        secret.x,
+        secret.y,
+        5,
+        0xffffff,
+        .85
+      )
+      .setDepth(14);
+
+  this.tweens.add({
+    targets: secretCore,
+    scale: 2.8,
+    alpha: 0,
+    duration: 300,
+    ease: 'Quad.out',
+    onComplete: () =>
+      secretCore.destroy()
+  });
+
+  this.cameras.main.flash(
+    110,
+    170,
+    110,
+    220
+  );
+
+  this.shake(
+    70,
+    0.0025
+  );
+}
+this.secretsCollected++;
+this.playerCue(
+  'SECRET ACQUIRED',
+  '#b993ff'
+);
+
+this.gadgetPulse(
+  0xb993ff,
+  12,
+  340
+);
 this.game.events.emit(
   'secret',
   this.secretsCollected,
@@ -7035,7 +9161,7 @@ this.game.events.emit(
 
 this.game.events.emit(
   'feedback',
-  'signal'
+   'secret_collect'
 );
 
 }
@@ -7124,9 +9250,9 @@ this.game.events.emit(
   index
 );
 
-this.game.events.emit(
+  this.game.events.emit(
   'feedback',
-  'signal'
+  'checkpoint_activate'
 );
 
 }
@@ -7172,6 +9298,13 @@ if (
       'LOW ENERGY',
       '#ff9c91'
     );
+
+    this.gadgetPulse(
+  0xff826e,
+  11,
+  320
+);
+
   }
 
   return false;
@@ -8107,6 +10240,217 @@ updateSciFiThreats(delta) {
 const now =
 this.elapsedMs;
 
+  // ============================================================
+// BOSS DEATH FREEZE
+// ============================================================
+  
+if (this.bossVictoryLock === true) {
+  if (this.boss?.active) {
+    this.boss.setData(
+      'nextShot',
+      Number.MAX_SAFE_INTEGER
+    );
+
+    this.boss.setData(
+      'attackCooldown',
+      Number.MAX_SAFE_INTEGER
+    );
+
+    if (this.boss.body) {
+      this.boss.body.setVelocity(0, 0);
+    }
+  }
+
+  return;
+}
+
+  // ============================================================
+// BOSS HEALTH BAR · COMBAT HUD
+// ============================================================
+if (
+  this.boss?.active &&
+  !this.bossHealthUI
+) {
+  const width =
+    Math.min(
+      this.scale.width - 40,
+      430
+    );
+
+  const x =
+    this.scale.width / 2;
+
+  const y = 38;
+
+  const maxHealth =
+    Math.max(
+      1,
+      Number(
+        this.boss.getData('health')
+      ) || 1
+    );
+
+  this.boss.setData(
+    'maxHealth',
+    maxHealth
+  );
+
+  const container =
+    this.add
+      .container(
+        0,
+        0
+      )
+      .setScrollFactor(0)
+      .setDepth(120);
+
+  const plate =
+    this.add
+      .rectangle(
+        x,
+        y,
+        width,
+        58,
+        0x050914,
+        .94
+      )
+      .setStrokeStyle(
+        1,
+        0xff826e,
+        .72
+      );
+
+  const title =
+    this.add
+      .text(
+        x,
+        y - 17,
+        `BOSS // ${
+          this.boss.getData(
+            'bossName'
+          ) || 'THREAT'
+        }`,
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            this.scale.width < 600
+              ? '9px'
+              : '10px',
+          color: '#ffcf82',
+          stroke: '#08101c',
+          strokeThickness: 4,
+          align: 'center'
+        }
+      )
+      .setOrigin(.5);
+
+  const barBack =
+    this.add
+      .rectangle(
+        x,
+        y + 5,
+        width - 28,
+        10,
+        0x182338,
+        1
+      )
+      .setStrokeStyle(
+        1,
+        0x33445f,
+        .85
+      );
+
+  const barFill =
+    this.add
+      .rectangle(
+        x -
+          (width - 28) / 2 +
+          2,
+        y + 5,
+        width - 32,
+        6,
+        0xff826e,
+        1
+      )
+      .setOrigin(0, .5);
+
+  const hpText =
+    this.add
+      .text(
+        x,
+        y + 23,
+        `HP ${maxHealth} / ${maxHealth}`,
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            this.scale.width < 600
+              ? '8px'
+              : '9px',
+          color: '#8ba0b8',
+          align: 'center'
+        }
+      )
+      .setOrigin(.5);
+
+  container.add([
+    plate,
+    title,
+    barBack,
+    barFill,
+    hpText
+  ]);
+
+  this.bossHealthUI = {
+    container,
+    plate,
+    title,
+    barBack,
+    barFill,
+    hpText,
+    width,
+    maxHealth
+  };
+
+  // ============================================================
+// BOSS HP · PHASE MARKERS
+// ============================================================
+const marker50 =
+  this.add
+    .rectangle(
+      x -
+        (width - 28) / 2 +
+        (width - 28) * .5,
+      y + 5,
+      2,
+      14,
+      0xffcf82,
+      .85
+    )
+    .setScrollFactor(0)
+    .setDepth(122);
+
+const marker25 =
+  this.add
+    .rectangle(
+      x -
+        (width - 28) / 2 +
+        (width - 28) * .25,
+      y + 5,
+      2,
+      14,
+      0xff826e,
+      .85
+    )
+    .setScrollFactor(0)
+    .setDepth(122);
+
+this.bossHealthUI.marker50 =
+  marker50;
+
+this.bossHealthUI.marker25 =
+  marker25;
+}
+
 if (
   this.boss?.active &&
   Math.abs(
@@ -8133,22 +10477,39 @@ if (
           0xff826e
       );
 
+  bolt.setData(
+  'bossProjectile',
+  true
+);
+
   bolt.body
     .setAllowGravity(false)
     .setVelocity(
-      (
-        this.player.x -
-        this.boss.x
-      ) * .8,
-      this.boss
-          .getData(
-            'route'
-          )
-          ?.type ===
-        'storm-boss'
-        ? 250
-        : 100
-    );
+  (
+    this.player.x -
+    this.boss.x
+  ) * (
+    this.boss.getData('phase') === 2
+      ? 1.05
+      : .8
+  ),
+  this.boss
+      .getData(
+        'route'
+      )
+      ?.type ===
+    'storm-boss'
+    ? (
+        this.boss.getData('phase') === 2
+          ? 340
+          : 250
+      )
+    : (
+        this.boss.getData('phase') === 2
+          ? 145
+          : 100
+      )
+);
 
   this.boss.setData(
     'nextShot',
@@ -8157,6 +10518,84 @@ if (
         'attackCooldown'
       )
   );
+
+  // ============================================================
+// BOSS PHASE 2 · DOUBLE ATTACK
+// ============================================================
+if (
+  this.boss.getData('phase') === 2 &&
+  !this.motionReduced
+) {
+  const secondShotDelay = 180;
+
+  this.time.delayedCall(
+    secondShotDelay,
+    () => {
+  if (
+  !this.boss?.active ||
+  this.finished ||
+  this.respawning ||
+  this.bossVictoryLock === true
+) {
+  return;
+}
+      if (
+        Math.abs(
+          this.boss.x -
+          this.player.x
+        ) > 620
+      ) {
+        return;
+      }
+
+      const secondBolt =
+        this.comets
+          .create(
+            this.boss.x,
+            this.boss.y + 6,
+            'comet'
+          )
+          .setDepth(11)
+          .setTint(
+            this.boss.getData(
+              'bossColor'
+            ) ||
+              0xff826e
+          );
+
+      secondBolt.setData(
+  'bossProjectile',
+  true
+);
+
+      secondBolt.body
+        .setAllowGravity(false)
+        .setVelocity(
+          (
+            this.player.x -
+            this.boss.x
+          ) * 1.05,
+          this.boss
+            .getData('route')
+            ?.type ===
+          'storm-boss'
+            ? 340
+            : 145
+        );
+
+      this.playerCue(
+        'SECONDARY VOLLEY',
+        '#ff826e'
+      );
+
+      this.gadgetPulse(
+        0xff826e,
+        13,
+        280
+      );
+    }
+  );
+}
 
   this.playerCue(
     `${
@@ -9041,6 +11480,48 @@ this.tweens.add({
   ease: 'Back.out'
 });
 
+  // ============================================================
+// FINAL MISSION CUE
+// ============================================================
+this.playerCue(
+  'MISSION COMPLETE',
+  '#ffd06e'
+);
+
+this.gadgetPulse(
+  0xffd06e,
+  22,
+  520
+);
+
+if (!this.motionReduced) {
+  this.cameras.main.flash(
+    140,
+    255,
+    214,
+    120
+  );
+
+  this.shake(
+    120,
+    0.006
+  );
+}
+
+const medalResult =
+  this.calculateMissionMedals();
+
+this.time.delayedCall(
+  650,
+  () => {
+    if (!this.scene.isActive()) return;
+
+    this.showMissionMedals();
+  },
+  undefined,
+  this
+);
+  
 this.time.delayedCall(
   120,
   () =>
@@ -9066,6 +11547,7 @@ this.time.delayedCall(
             this.boss &&
             !this.boss.active
           ),
+        medals: medalResult,
         package:
           this.package,
         packageCondition:
@@ -9102,7 +11584,1084 @@ this.time.delayedCall(
 
 }
 
+// ============================================================
+// MISSION MEDALS
+// Calculates a final run rating from existing run statistics.
+// ============================================================
+calculateMissionMedals() {
+  const totalSignals =
+    Math.max(
+      1,
+      this.mission.signals?.length || 1
+    );
+
+  const signalRatio =
+    Phaser.Math.Clamp(
+      this.collected / totalSignals,
+      0,
+      1
+    );
+
+  const totalSecrets =
+    this.mission.secrets?.length || 0;
+
+  const secretRatio =
+    totalSecrets > 0
+      ? Phaser.Math.Clamp(
+          this.secretsCollected / totalSecrets,
+          0,
+          1
+        )
+      : 0;
+
+  // ----------------------------------------------------------
+  // SPEED
+  // ----------------------------------------------------------
+  const elapsedSeconds =
+    Math.max(
+      1,
+      this.elapsedMs / 1000
+    );
+
+  const expectedSeconds =
+    Math.max(
+      18,
+      (
+        (
+          this.mission.goal?.x || 4000
+        ) -
+        (
+          this.mission.spawn?.x || 0
+        )
+      ) / 240
+    );
+
+  const speedRatio =
+    Phaser.Math.Clamp(
+      expectedSeconds / elapsedSeconds,
+      0,
+      1.35
+    );
+
+  this.runRating.speed =
+    speedRatio >= 1.10
+      ? 3
+      : speedRatio >= .86
+        ? 2
+        : 1;
+
+  // ----------------------------------------------------------
+  // COMBAT
+  // ----------------------------------------------------------
+  const defeats =
+    this.enemyDefeats || 0;
+
+  const enemyCount =
+    Math.max(
+      1,
+      this.enemies?.getChildren?.().length || 1
+    );
+
+  const combatRatio =
+    Phaser.Math.Clamp(
+      defeats / enemyCount,
+      0,
+      1
+    );
+
+  this.runRating.combat =
+    combatRatio >= .75
+      ? 3
+      : combatRatio >= .35
+        ? 2
+        : 1;
+
+  // ----------------------------------------------------------
+  // COLLECTION
+  // ----------------------------------------------------------
+  const collectionScore =
+    signalRatio * .70 +
+    secretRatio * .30;
+
+  this.runRating.collection =
+    collectionScore >= .90
+      ? 3
+      : collectionScore >= .60
+        ? 2
+        : 1;
+
+  // ----------------------------------------------------------
+  // SURVIVAL
+  // ----------------------------------------------------------
+  const deaths =
+    this.deaths || 0;
+
+  const collisions =
+    this.collisions || 0;
+
+  const falls =
+    this.falls || 0;
+
+  let survivalScore = 3;
+
+  if (deaths >= 2) {
+    survivalScore = 1;
+  } else if (
+    deaths === 1 ||
+    collisions >= 3 ||
+    falls >= 3
+  ) {
+    survivalScore = 2;
+  }
+
+  this.runRating.survival =
+    survivalScore;
+
+  // ----------------------------------------------------------
+  // OVERALL
+  // ----------------------------------------------------------
+  const total =
+    this.runRating.speed +
+    this.runRating.combat +
+    this.runRating.collection +
+    this.runRating.survival;
+
+  this.runRating.overall =
+    total >= 11
+      ? 'S'
+      : total >= 9
+        ? 'A'
+        : total >= 7
+          ? 'B'
+          : 'C';
+
+  this.medalResult = {
+    speed: this.runRating.speed,
+    combat: this.runRating.combat,
+    collection: this.runRating.collection,
+    survival: this.runRating.survival,
+    overall: this.runRating.overall,
+
+    total,
+    timeMs: this.elapsedMs,
+    signals: this.collected,
+    secrets: this.secretsCollected,
+    deaths,
+    collisions,
+    falls,
+    enemyDefeats: defeats,
+
+    bossDefeated: Boolean(
+      this.boss &&
+      !this.boss.active
+    )
+  };
+
+  return this.medalResult;
+}
+
+// ============================================================
+// RUN EVALUATION UI
+// Displays the final mission rating without changing gameplay.
+// ============================================================
+showMissionMedals() {
+
+  if (
+    !this.medalResult ||
+    this.gameOverUI
+  ) {
+    return;
+  }
+
+  if (this.missionMedalsUI) {
+    return;
+  }
+
+  const result =
+    this.medalResult;
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const stars = value =>
+    '★'.repeat(value) +
+    '☆'.repeat(3 - value);
+
+  const overallColor =
+    result.overall === 'S'
+      ? '#fff0a8'
+      : result.overall === 'A'
+        ? '#8df4ff'
+        : result.overall === 'B'
+          ? '#aee37f'
+          : '#ff826e';
+
+  const panelWidth =
+    Math.min(
+      width - 36,
+      430
+    );
+
+const panelHeight = Math.min(
+  height - 28,
+  330
+);
+
+  const panel =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        panelWidth,
+        panelHeight,
+        0x050914,
+        .96
+      )
+      .setStrokeStyle(
+        2,
+        0x8df4ff,
+        .75
+      )
+      .setScrollFactor(0)
+      .setDepth(120);
+
+  const header =
+    this.add
+      .text(
+        width / 2,
+        height / 2 - 132,
+        'MISSION COMPLETE',
+        {
+          fontFamily: 'DM Mono',
+          fontSize: width < 600
+            ? '14px'
+            : '16px',
+          color: '#8df4ff',
+          stroke: '#08101c',
+          strokeThickness: 5,
+          align: 'center'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+
+  const subtitle =
+    this.add
+      .text(
+        width / 2,
+        height / 2 - 105,
+        'DELIVERY REPORT · RUN PERFORMANCE',
+        {
+          fontFamily: 'DM Mono',
+          fontSize: width < 600
+            ? '8px'
+            : '9px',
+          color: '#6f849d',
+          align: 'center'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+
+  const resultText =
+    this.add
+      .text(
+        width / 2,
+        height / 2 - 38,
+        [
+          `SPEED       ${stars(result.speed)}`,
+          `COMBAT      ${stars(result.combat)}`,
+          `COLLECTION  ${stars(result.collection)}`,
+          `SURVIVAL    ${stars(result.survival)}`
+        ].join('\n'),
+        {
+          fontFamily: 'DM Mono',
+          fontSize: width < 600
+            ? '10px'
+            : '12px',
+          color: '#dffcff',
+          stroke: '#08101c',
+          strokeThickness: 4,
+          lineSpacing: 11,
+          align: 'left'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+
+  // ============================================================
+// FINAL RANK · HERO REVEAL
+// ============================================================
+const rankGlow =
+  this.add
+    .circle(
+      width / 2,
+      height / 2 + 78,
+      width < 600 ? 44 : 52,
+      Phaser.Display.Color.HexStringToColor(
+        overallColor
+      ).color,
+      .16
+    )
+    .setScrollFactor(0)
+    .setDepth(120);
+
+rankGlow.setStrokeStyle(
+  2,
+  Phaser.Display.Color.HexStringToColor(
+    overallColor
+  ).color,
+  .82
+);
+
+this.tweens.add({
+  targets: rankGlow,
+  scale: 2.4,
+  alpha: 0,
+  duration: 720,
+  ease: 'Quad.out',
+  onComplete: () =>
+    rankGlow.destroy()
+});
+
+this.time.delayedCall(
+  220,
+  () => {
+    this.tweens.add({
+      targets: overall,
+      alpha: 1,
+      scale: 1,
+      duration: 520,
+      ease: 'Back.out'
+    });
+
+    if (!this.motionReduced) {
+      this.cameras.main.flash(
+        120,
+        result.overall === 'S'
+          ? 255
+          : result.overall === 'A'
+            ? 120
+            : result.overall === 'B'
+              ? 140
+              : 255,
+        result.overall === 'B'
+          ? 220
+          : 120,
+        170
+      );
+    }
+  }
+);
+  
+
+  const overall =
+    this.add
+      .text(
+        width / 2,
+        height / 2 + 78,
+        result.overall,
+        {
+          fontFamily: 'DM Mono',
+          fontSize: width < 600
+            ? '54px'
+            : '64px',
+          fontStyle: 'bold',
+          color: overallColor,
+          stroke: '#08101c',
+          strokeThickness: 8,
+          align: 'center'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+
+  const summary =
+    this.add
+      .text(
+        width / 2,
+        height / 2 + 125,
+        `RATING ${result.total} / 12  ·  ${result.signals} SIGNALS  ·  ${result.secrets} SECRETS`,
+        {
+          fontFamily: 'DM Mono',
+          fontSize: width < 600
+            ? '7px'
+            : '8px',
+          color: '#8ba0b8',
+          align: 'center'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+
+
+
+  const objects = [
+  panel,
+  header,
+  subtitle,
+  resultText,
+  overall,
+  summary
+];
+
+objects.forEach(
+  object => {
+    object.setAlpha(0);
+    object.setScale(.94);
+  }
+);
+
+// ============================================================
+// FINAL RANK · HERO INITIAL STATE
+// ============================================================
+overall.setScale(.35);
+overall.setAlpha(0);
+
+this.missionMedalsUI = objects;
+
+ this.tweens.add({
+  targets: objects.filter(
+    object => object !== overall
+  ),
+  alpha: 1,
+  scaleX: 1,
+  scaleY: 1,
+  duration: 360,
+  ease: 'Back.out'
+});
+
+this.tweens.add({
+  targets: overall,
+  alpha: 1,
+  scaleX: 1,
+  scaleY: 1,
+  duration: 560,
+  delay: 360,
+  ease: 'Back.out',
+  onComplete: () => {
+    if (
+      this.missionMedalsUI === objects
+    ) {
+      this.missionMedalsUI = null;
+    }
+  }
+});
+}
+
+showGameOverScreen(message = 'RUN ENDED') {
+
+  if (this.gameOverUI) {
+    return;
+  }
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const panelWidth =
+    Math.min(
+      width - 36,
+      430
+    );
+
+  const panelHeight =
+    Math.min(
+      height - 70,
+      390
+    );
+
+  const remainingLives =
+    Math.max(
+      0,
+      this.deathLimit - this.deaths
+    );
+
+  const objects = [];
+
+  /*
+   * ============================================================
+   * GAME OVER · BACKDROP
+   * ============================================================
+   */
+
+  const backdrop =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        width,
+        height,
+        0x03050b,
+        0.78
+      )
+      .setScrollFactor(0)
+      .setDepth(119);
+
+  objects.push(backdrop);
+
+  /*
+   * ============================================================
+   * GAME OVER · PANEL
+   * ============================================================
+   */
+
+  const panel =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        panelWidth,
+        panelHeight,
+        0x070d18,
+        0.98
+      )
+      .setStrokeStyle(
+        2,
+        0xff826e,
+        0.82
+      )
+      .setScrollFactor(0)
+      .setDepth(120);
+
+  objects.push(panel);
+
+  /*
+   * ============================================================
+   * GAME OVER · TITLE
+   * ============================================================
+   */
+
+  const title =
+    this.add
+      .text(
+        width / 2,
+        height / 2 - 135,
+        'RUN FAILED',
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '24px'
+              : '30px',
+          fontStyle: 'bold',
+          color: '#ff826e',
+          stroke: '#08101c',
+          strokeThickness: 6,
+          align: 'center'
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+
+  objects.push(title);
+
+  /*
+   * ============================================================
+   * GAME OVER · SUBTITLE
+   * ============================================================
+   */
+
+  const subtitle =
+    this.add
+      .text(
+        width / 2,
+        height / 2 - 98,
+        'RECOVERY LIMIT REACHED',
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '9px'
+              : '11px',
+          color: '#7f93ab',
+          align: 'center'
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+
+  objects.push(subtitle);
+
+  /*
+   * ============================================================
+   * GAME OVER · REASON
+   * ============================================================
+   */
+
+  const reason =
+    this.add
+      .text(
+        width / 2,
+        height / 2 - 52,
+        message,
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '9px'
+              : '11px',
+          color: '#dffcff',
+          stroke: '#08101c',
+          strokeThickness: 4,
+          wordWrap: {
+            width:
+              panelWidth - 54
+          },
+          align: 'center'
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+
+  objects.push(reason);
+
+  /*
+   * ============================================================
+   * GAME OVER · RUN STATS
+   * ============================================================
+   */
+
+  const stats =
+    this.add
+      .text(
+        width / 2,
+        height / 2 + 5,
+        [
+          `DEATHS       ${this.deaths}`,
+          `COLLISIONS   ${this.collisions}`,
+          `FALLS        ${this.falls}`,
+          `SIGNALS      ${this.collected}`,
+          `SECRETS      ${this.secretsCollected}`,
+          `RECOVERIES   ${remainingLives}`
+        ].join('\n'),
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '10px'
+              : '12px',
+          color: '#b9f5ff',
+          stroke: '#08101c',
+          strokeThickness: 4,
+          lineSpacing: 7,
+          align: 'left'
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+
+  objects.push(stats);
+
+  /*
+   * ============================================================
+   * GAME OVER · RESTART BUTTON
+   * ============================================================
+   */
+
+  const restartButton =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2 + 118,
+        Math.min(
+          panelWidth - 70,
+          250
+        ),
+        46,
+        0x10263a,
+        0.98
+      )
+      .setStrokeStyle(
+        2,
+        0x8df4ff,
+        0.9
+      )
+      .setScrollFactor(0)
+      .setDepth(121)
+      .setInteractive({
+        useHandCursor: true
+      });
+
+  objects.push(restartButton);
+
+  const restartText =
+    this.add
+      .text(
+        width / 2,
+        height / 2 + 118,
+        'RESTART RUN',
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '11px'
+              : '13px',
+          fontStyle: 'bold',
+          color: '#dffcff',
+          align: 'center'
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(122);
+
+  objects.push(restartText);
+
+    /*
+ * ============================================================
+ * GAME OVER · BRIEFING BUTTON
+ * ============================================================
+ */
+
+const briefingButton =
+  this.add
+    .rectangle(
+      width / 2,
+      height / 2 + 174,
+      Math.min(
+        panelWidth - 70,
+        250
+      ),
+      40,
+      0x0b1524,
+      0.96
+    )
+    .setStrokeStyle(
+      1,
+      0x52677d,
+      0.9
+    )
+    .setScrollFactor(0)
+    .setDepth(121)
+    .setInteractive({
+      useHandCursor: true
+    });
+
+objects.push(
+  briefingButton
+);
+
+const briefingText =
+  this.add
+    .text(
+      width / 2,
+      height / 2 + 174,
+      'RETURN TO BRIEFING',
+      {
+        fontFamily: 'DM Mono',
+        fontSize:
+          width < 600
+            ? '9px'
+            : '10px',
+        fontStyle: 'bold',
+        color: '#8fa5bc',
+        align: 'center'
+      }
+    )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(122);
+
+objects.push(
+  briefingText
+);
+
+  /*
+   * ============================================================
+   * BUTTON INTERACTION
+   * ============================================================
+   */
+
+  restartButton.on(
+    'pointerover',
+    () => {
+
+      restartButton
+        .setFillStyle(
+          0x163b52,
+          1
+        )
+        .setStrokeStyle(
+          2,
+          0xb9f5ff,
+          1
+        );
+
+      restartText.setColor(
+        '#ffffff'
+      );
+    }
+  );
+
+    briefingButton.on(
+  'pointerover',
+  () => {
+
+    briefingButton
+      .setFillStyle(
+        0x142336,
+        1
+      )
+      .setStrokeStyle(
+        1,
+        0x8df4ff,
+        0.85
+      );
+
+    briefingText.setColor(
+      '#dffcff'
+    );
+  }
+);
+
+briefingButton.on(
+  'pointerout',
+  () => {
+
+    briefingButton
+      .setFillStyle(
+        0x0b1524,
+        0.96
+      )
+      .setStrokeStyle(
+        1,
+        0x52677d,
+        0.9
+      );
+
+    briefingText.setColor(
+      '#8fa5bc'
+    );
+  }
+);
+
+    briefingButton.on(
+  'pointerdown',
+  () => {
+
+    if (
+      this.gameOverRestarting
+    ) {
+      return;
+    }
+
+    this.gameOverRestarting = true;
+
+    this.gameOverUI?.forEach(
+      object => object.destroy()
+    );
+
+    this.gameOverUI = null;
+
+    this.scene.stop();
+
+    const intro =
+      document.getElementById(
+        'intro'
+      );
+
+    const worldMap =
+      document.getElementById(
+        'worldMap'
+      );
+
+    const preflight =
+      document.getElementById(
+        'preflight'
+      );
+
+    worldMap?.classList.add(
+      'hidden'
+    );
+
+    preflight?.classList.add(
+      'hidden'
+    );
+
+    intro?.classList.remove(
+      'hidden'
+    );
+  }
+);
+
+  restartButton.on(
+    'pointerout',
+    () => {
+
+      restartButton
+        .setFillStyle(
+          0x10263a,
+          0.98
+        )
+        .setStrokeStyle(
+          2,
+          0x8df4ff,
+          0.9
+        );
+
+      restartText.setColor(
+        '#dffcff'
+      );
+    }
+  );
+
+  restartButton.on(
+    'pointerdown',
+    () => {
+
+      if (this.gameOverRestarting) {
+        return;
+      }
+
+      this.gameOverRestarting = true;
+
+      if (
+  this.missionMedalsUI
+) {
+  this.missionMedalsUI.forEach(
+    object => {
+      if (
+        object &&
+        object.active
+      ) {
+        object.destroy();
+      }
+    }
+  );
+
+  this.missionMedalsUI = null;
+}
+
+this.missionMedalsClosing = true;
+
+this.tweens.killAll();
+      this.scene.restart();
+    }
+  );
+
+  /*
+   * ============================================================
+   * GAME OVER · ANIMATION
+   * ============================================================
+   */
+
+  objects.forEach(
+    object => {
+
+      object.setAlpha(0);
+
+      if (
+        object !== backdrop
+      ) {
+        object.setScale(
+          0.94
+        );
+      }
+    }
+  );
+
+  this.tweens.add({
+    targets: objects,
+    alpha: 1,
+    duration: 280,
+    ease: 'Quad.out'
+  });
+
+  this.tweens.add({
+    targets: objects.filter(
+      object =>
+        object !== backdrop
+    ),
+    scaleX: 1,
+    scaleY: 1,
+    duration: 360,
+    ease: 'Back.out'
+  });
+
+  this.gameOverUI =
+    objects;
+
+    /*
+ * ============================================================
+ * GAME OVER · VISUAL IMPACT
+ * ============================================================
+ */
+
+this.time.delayedCall(
+  520,
+  () => {
+
+    if (
+      !this.gameOverUI ||
+      this.gameOverRestarting
+    ) {
+      return;
+    }
+
+    /*
+     * TITLE IMPACT
+     */
+
+    this.tweens.add({
+      targets: title,
+      scaleX: 1.07,
+      scaleY: 1.07,
+      duration: 120,
+      ease: 'Quad.out',
+      yoyo: true
+    });
+
+    /*
+     * RED ALERT PULSE
+     */
+
+    this.tweens.add({
+      targets: backdrop,
+      alpha: 0.9,
+      duration: 160,
+      ease: 'Quad.out',
+      yoyo: true
+    });
+
+    /*
+     * RESTART BUTTON BREATHING
+     */
+
+    this.tweens.add({
+      targets: [
+        restartButton,
+        restartText
+      ],
+      scaleX: 1.035,
+      scaleY: 1.035,
+      duration: 500,
+      ease: 'Sine.inOut',
+      yoyo: true,
+      repeat: -1
+    });
+
+  }
+);
+    
+}
+
 fail(message) {
+
 if (
 this.briefingProtected ||
 this.finished ||
@@ -9163,12 +12722,16 @@ if (
     0xff826e
   );
 
-  this.shake(
-    170,
-    .014
-  );
+this.shake(
+  170,
+  .014
+);
 
-  this.game.events.emit(
+this.showGameOverScreen(
+  `RUN ENDED · ${this.deathLimit} / ${this.deathLimit} RECOVERIES USED`
+);
+
+this.game.events.emit(
     'game-over',
     `RUN ENDED · ${this.deathLimit} / ${this.deathLimit} RECOVERIES USED`,
     this.deaths,
@@ -9212,7 +12775,7 @@ if (!this.motionReduced) {
 
 this.game.events.emit(
   'feedback',
-  'hit'
+    'death'
 );
 
 this.dust.emitParticleAt(
@@ -9236,6 +12799,10 @@ this.time.delayedCall(
 }
 
 respawnCheckpoint() {
+  this.game.events.emit(
+  'feedback',
+  'respawn'
+);
 if (
 this.loadout.modifier
 ?.id ===
@@ -9458,7 +13025,7 @@ this.tweens.add({
 });
 
 this.playerCue(
-  'SAFE RESET · 2 SEC SHIELD',
+ 'SAFE RESET · SHIELD ACTIVE',
   '#b9f5ff'
 );
 
@@ -9517,6 +13084,209 @@ this.respawning ||
 this.cinematicActive
 ) {
 return;
+}
+
+  // ============================================================
+// CELESTIAL · ORBIT UPDATE
+// ============================================================
+
+const celestialTime =
+  (this.time.now % 180000) / 180000;
+
+const sunAngle =
+  celestialTime * Math.PI * 2;
+
+const moonAngle =
+  sunAngle + Math.PI;
+
+const sunX =
+  930 +
+  Math.cos(sunAngle) * 260;
+
+const sunY =
+  150 +
+  Math.sin(sunAngle) * 75;
+
+const moonX =
+  930 +
+  Math.cos(moonAngle) * 260;
+
+const moonY =
+  150 +
+  Math.sin(moonAngle) * 75;
+
+  const sunAltitude =
+  Phaser.Math.Clamp(
+    (150 - sunY) / 75,
+    -1,
+    1
+  );
+
+const moonAltitude =
+  Phaser.Math.Clamp(
+    (150 - moonY) / 75,
+    -1,
+    1
+  );
+
+const daylight =
+  Phaser.Math.Clamp(
+    (Math.sin(sunAngle) + 1) * 0.5,
+    0,
+    1
+  );
+
+  const daylightSmooth =
+  Phaser.Math.SmoothStep(
+    daylight,
+    0,
+    1
+  );
+
+const nightAmount =
+   1 - daylightSmooth;
+
+  const moonShadowAlpha =
+  Phaser.Math.Linear(
+    0.62,
+    0.88,
+    nightAmount
+  );
+
+const sunGlowAlpha =
+  Phaser.Math.Linear(
+    0.06,
+    0.16,
+    daylightSmooth
+  );
+
+const moonGlowAlpha =
+  Phaser.Math.Linear(
+   0.18,
+   0.035,
+  daylightSmooth
+  );
+
+if (
+  this.celestialSun &&
+  this.celestialSunGlow &&
+  this.celestialMoon &&
+  this.celestialMoonGlow
+) {
+  this.celestialSun.setPosition(
+    sunX,
+    sunY
+  );
+
+  this.celestialMoon.setPosition(
+  moonX,
+  moonY
+);
+
+const moonScale =
+  0.94 +
+  Math.max(
+    0,
+    moonAltitude
+  ) * 0.08;
+
+const moonVisibility =
+  Phaser.Math.Clamp(
+    0.55 +
+    moonAltitude * 0.45,
+    0.35,
+    1
+  );
+
+this.celestialMoon.setScale(
+  moonScale
+);
+
+this.celestialMoon.setAlpha(
+  moonVisibility
+);
+  
+
+  const sunScale =
+  0.92 +
+  Math.max(
+    0,
+    sunAltitude
+  ) * 0.10;
+
+  const sunVisibility =
+  Phaser.Math.Clamp(
+    0.55 +
+    sunAltitude * 0.45,
+    0.35,
+    1
+  );
+
+this.celestialSun.setScale(
+  sunScale
+);
+
+  this.celestialSun.setAlpha(
+  sunVisibility
+);
+
+ this.celestialSunGlow.setPosition(
+  sunX,
+  sunY - 2
+);
+
+  const sunGlowScale =
+  0.96 +
+  Math.max(
+    0,
+    sunAltitude
+  ) * 0.06;
+
+this.celestialSunGlow.setScale(
+  sunGlowScale
+);
+
+  if (this.celestialMoonShadow) {
+  this.celestialMoonShadow.setPosition(
+    moonX + 24,
+    moonY - 15
+  );
+}
+
+ this.celestialMoonGlow.setPosition(
+  moonX,
+  moonY - 2
+);
+
+  const celestialPulse =
+  1 +
+  Math.sin(this.time.now * 0.0018) * 0.035;
+
+this.celestialSunGlow.setAlpha(
+  Phaser.Math.Clamp(
+    sunGlowAlpha * celestialPulse,
+    0,
+    1
+  )
+);
+
+this.celestialMoonGlow.setAlpha(
+  Phaser.Math.Clamp(
+    moonGlowAlpha * celestialPulse,
+    0,
+    1
+  )
+);
+  if (this.celestialMoonShadow) {
+ this.celestialMoonShadow.setAlpha(
+  Phaser.Math.Clamp(
+    moonShadowAlpha +
+      Math.sin(this.time.now * 0.0014) * 0.015,
+    0,
+    1
+  )
+);
+}
 }
 
 this.elapsedMs += delta;
@@ -9951,6 +13721,33 @@ this.comboTimer =
       delta
   );
 
+ const previousOverdriveTimer =
+  this.overdriveTimer;
+
+this.overdriveTimer =
+  Math.max(
+    0,
+    this.overdriveTimer -
+      delta
+  );
+
+if (
+  previousOverdriveTimer > 0 &&
+  this.overdriveTimer === 0 &&
+  this.player?.active
+) {
+  this.playerCue(
+    'OVERDRIVE OFF',
+    '#8ba0b8'
+  );
+
+  this.gadgetPulse(
+    0x8ba0b8,
+    10,
+    240
+  );
+}
+
 this.perfectDodgeWindow =
 
 Math.max(
@@ -9970,6 +13767,59 @@ if (
   !this.comboTimer &&
   this.combatCombo
 ) {
+
+  if (
+    this.combatCombo >= 3 &&
+    this.player?.active
+  ) {
+    this.playerCue(
+      'COMBO LOST',
+      '#ff826e'
+    );
+
+    this.gadgetPulse(
+      0xff826e,
+      11,
+      260
+    );
+  }
+
+  // ============================================================
+// COMBO BREAK · IMPACT FX
+// ============================================================
+if (!this.motionReduced) {
+  const comboBreak =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        12,
+        0xff826e,
+        .22
+      )
+      .setDepth(13);
+
+  comboBreak.setStrokeStyle(
+    2,
+    0xffb3a8,
+    .9
+  );
+
+  this.tweens.add({
+    targets: comboBreak,
+    scale: 4.2,
+    alpha: 0,
+    duration: 300,
+    ease: 'Quad.out',
+    onComplete: () =>
+      comboBreak.destroy()
+  });
+
+  this.shake(
+    90,
+    0.0035
+  );
+}
   this.combatCombo = 0;
 
   this.game.events.emit(
@@ -9989,6 +13839,11 @@ if (
     1050
 ) {
   this.ammo++;
+  this.gadgetPulse(
+  0x8df4ff,
+  8,
+  260
+);
   this.ammoRecharge = 0;
 
   this.game.events.emit(
@@ -10361,6 +14216,39 @@ if (
       4
     );
 
+    // ============================================================
+// WALL JUMP · ENERGY RING
+// ============================================================
+
+if (!this.motionReduced) {
+  const wallJumpRing =
+    this.add
+      .circle(
+        wallX,
+        this.player.y,
+        7,
+        0x8df4ff,
+        0.22
+      )
+      .setDepth(11);
+
+  wallJumpRing.setStrokeStyle(
+    1.5,
+    0xb9f5ff,
+    0.85
+  );
+
+  this.tweens.add({
+    targets: wallJumpRing,
+    scale: 3.2,
+    alpha: 0,
+    duration: 190,
+    ease: 'Quad.out',
+    onComplete: () =>
+      wallJumpRing.destroy()
+  });
+}
+
     const burst =
   this.add
     .circle(
@@ -10416,6 +14304,34 @@ burst.setDepth(11);
         'DOUBLE JUMP',
         '#ffd06e'
       );
+
+      // ============================================================
+// DOUBLE JUMP · PREMIUM BOOST
+// ============================================================
+
+if (
+  !this.motionReduced &&
+  this.cameras?.main
+) {
+  this.cameras.main.shake(
+    70,
+    0.0014
+  );
+
+  this.tweens.add({
+    targets: this.player,
+    scaleX:
+      this.playerVisualBaseScaleX *
+      1.06,
+    scaleY:
+      this.playerVisualBaseScaleY *
+      0.94,
+    duration: 70,
+    yoyo: true,
+    ease: 'Quad.out'
+  });
+}
+      
 
   const doubleJumpRing =
     this.add.circle(
@@ -10476,6 +14392,42 @@ burst.setDepth(11);
 }
 
   this.jumps++;
+
+  // ============================================================
+// PLAYER · JUMP TAKEOFF ENERGY
+// ============================================================
+
+if (
+  !this.motionReduced &&
+  this.jumps === 1
+) {
+  const takeoffRing =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y + 27,
+        6,
+        0x8df4ff,
+        0.18
+      )
+      .setDepth(11);
+
+  takeoffRing.setStrokeStyle(
+    1.5,
+    0xb9f5ff,
+    0.75
+  );
+
+  this.tweens.add({
+    targets: takeoffRing,
+    scale: 2.6,
+    alpha: 0,
+    duration: 170,
+    ease: 'Quad.out',
+    onComplete: () =>
+      takeoffRing.destroy()
+  });
+}
 
   this.coyote = 0;
   this.jumpBuffer = 0;
@@ -10683,6 +14635,34 @@ if (
   this.dashTimer =
     RUNNER_TUNING.dashDurationMs;
 
+  // ============================================================
+// PLAYER · DASH TILT
+// ============================================================
+
+if (
+  this.player &&
+  !this.motionReduced
+) {
+  this.player.angle =
+    direction > 0
+      ? 7
+      : -7;
+}
+
+  // ============================================================
+// DASH · CAMERA IMPACT
+// ============================================================
+
+if (
+  !this.motionReduced &&
+  this.cameras?.main
+) {
+  this.cameras.main.shake(
+    90,
+    0.0018
+  );
+}
+
   /*
  * DASH ENERGY TRAIL
  */
@@ -10888,11 +14868,47 @@ this.tweens.add({
   this.landingTimer =
     110;
 
-  this.game.events.emit(
-    'feedback',
-    'land'
+  // ============================================================
+// PLAYER · LANDING SHOCKWAVE
+// ============================================================
+
+if (!this.motionReduced) {
+  const landingShock =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y + 28,
+        hardLanding ? 9 : 6,
+        0x8df4ff,
+        0.22
+      )
+      .setDepth(10);
+
+  landingShock.setStrokeStyle(
+    hardLanding ? 2 : 1,
+    0xffcf82,
+    0.75
   );
+
+  this.tweens.add({
+    targets: landingShock,
+    scale: hardLanding ? 3.8 : 2.8,
+    alpha: 0,
+    duration: hardLanding ? 240 : 180,
+    ease: 'Quad.out',
+    onComplete: () =>
+      landingShock.destroy()
+  });
 }
+  
+ 
+}
+  this.game.events.emit(
+  'feedback',
+  hardLanding
+    ? 'hard_land'
+    : 'land'
+);
 
 if (onGround) {
   this.fallSpeed = 0;
@@ -10929,6 +14945,92 @@ if (
       : 'runner-fall',
     true
   );
+  
+// ============================================================
+// PLAYER · FAST FALL TRAIL
+// ============================================================
+
+if (
+  body.velocity.y > 420 &&
+  !this.motionReduced
+) {
+  this.fastFallFxTimer -= delta;
+
+  if (this.fastFallFxTimer <= 0) {
+    const fallTrail =
+      this.add
+        .circle(
+          this.player.x,
+          this.player.y - 24,
+          5,
+          0x8df4ff,
+          0.16
+        )
+        .setDepth(8);
+
+    this.tweens.add({
+      targets: fallTrail,
+      y: fallTrail.y + 28,
+      scaleY: 2.4,
+      scaleX: 0.7,
+      alpha: 0,
+      duration: 150,
+      ease: 'Quad.out',
+      onComplete: () =>
+        fallTrail.destroy()
+    });
+
+    this.fastFallFxTimer = 55;
+  }
+} else {
+  this.fastFallFxTimer = 0;
+}
+
+  // ============================================================
+// PLAYER · AIRBORNE POSE
+// ============================================================
+
+if (
+  !this.motionReduced &&
+  Math.abs(body.velocity.y) > 100
+) {
+  const airRatio =
+    Phaser.Math.Clamp(
+      Math.abs(body.velocity.y) /
+        RUNNER_TUNING.maxFallSpeed,
+      0,
+      1
+    );
+
+  const targetAirScaleX =
+    this.playerVisualBaseScaleX *
+    (1 + airRatio * 0.035);
+
+  const targetAirScaleY =
+    this.playerVisualBaseScaleY *
+    (1 - airRatio * 0.05);
+
+  this.player.scaleX =
+    Phaser.Math.Linear(
+      this.player.scaleX,
+      targetAirScaleX,
+      Math.min(
+        1,
+        delta * 0.018
+      )
+    );
+
+  this.player.scaleY =
+    Phaser.Math.Linear(
+      this.player.scaleY,
+      targetAirScaleY,
+      Math.min(
+        1,
+        delta * 0.018
+      )
+    );
+}
+  
 } else if (
   this.landingTimer > 0
 ) {
@@ -10945,6 +15047,33 @@ if (
     'runner-run',
     true
   );
+  // ============================================================
+// PLAYER · RUN ANIMATION BOOST
+// ============================================================
+
+if (
+  !this.motionReduced &&
+  Math.abs(body.velocity.x) > 120
+) {
+  const runPulse =
+    Phaser.Math.Clamp(
+      Math.abs(body.velocity.x) /
+        RUNNER_TUNING.maxRunSpeed,
+      0,
+      1
+    );
+
+  this.player.scaleX =
+    Phaser.Math.Linear(
+      this.player.scaleX,
+      this.playerVisualBaseScaleX *
+        (1 + runPulse * 0.025),
+      Math.min(
+        1,
+        delta * 0.02
+      )
+    );
+}
 } else {
   this.player.play(
     'runner-idle',
@@ -10952,6 +15081,92 @@ if (
   );
 }
 
+  // ============================================================
+// PLAYER · SPEED LEAN / AIR TILT
+// ============================================================
+
+if (
+  this.player?.active &&
+  !this.motionReduced
+) {
+  const vx =
+    this.player.body?.velocity?.x || 0;
+
+  const vy =
+    this.player.body?.velocity?.y || 0;
+
+  const speedRatio =
+    Phaser.Math.Clamp(
+      Math.abs(vx) /
+        RUNNER_TUNING.maxRunSpeed,
+      0,
+      1
+    );
+
+  const targetAngle =
+    Phaser.Math.Clamp(
+      vx * 0.018,
+      -8,
+      8
+    );
+
+  const targetScaleX =
+    this.playerVisualBaseScaleX *
+    (
+      1 +
+      speedRatio * 0.035
+    );
+
+  const targetScaleY =
+    this.playerVisualBaseScaleY *
+    (
+      1 -
+      speedRatio * 0.025
+    );
+
+  this.player.angle =
+    Phaser.Math.Linear(
+      this.player.angle,
+      targetAngle,
+      Math.min(
+        1,
+        delta * 0.012
+      )
+    );
+
+  this.player.scaleX =
+    Phaser.Math.Linear(
+      this.player.scaleX,
+      targetScaleX,
+      Math.min(
+        1,
+        delta * 0.018
+      )
+    );
+
+  this.player.scaleY =
+    Phaser.Math.Linear(
+      this.player.scaleY,
+      targetScaleY,
+      Math.min(
+        1,
+        delta * 0.018
+      )
+    );
+
+  if (Math.abs(vy) > 80) {
+    this.player.angle =
+      Phaser.Math.Linear(
+        this.player.angle,
+        vx * 0.012,
+        Math.min(
+          1,
+          delta * 0.015
+        )
+      );
+  }
+}
+  
 this.dustTimer -=
   delta;
 
@@ -11027,6 +15242,37 @@ const speed =
   Math.abs(
     body.velocity.x
   );
+
+  // ============================================================
+// CAMERA · SPEED ZOOM
+// ============================================================
+
+if (
+  !this.motionReduced &&
+  this.cameras?.main
+) {
+  const speedRatio =
+    Phaser.Math.Clamp(
+      speed /
+        RUNNER_TUNING.maxRunSpeed,
+      0,
+      1
+    );
+
+  const targetZoom =
+    1 +
+    speedRatio * 0.045;
+
+  this.cameras.main.zoom =
+    Phaser.Math.Linear(
+      this.cameras.main.zoom,
+      targetZoom,
+      Math.min(
+        1,
+        delta * 0.006
+      )
+    );
+}
 
 const parallaxBoost =
   !this.motionReduced
@@ -11126,6 +15372,7 @@ if (hardLanding) {
 }
 
 /* Speed-based cinematic zoom. */
+  
 let targetZoom = 1;
 
 if (!this.motionReduced) {
@@ -11172,6 +15419,23 @@ const cameraLerpY =
           : .008
       )
   );
+
+  // ============================================================
+// CAMERA · SPEED ZOOM TARGET
+// ============================================================
+
+const speedZoom =
+  !this.motionReduced
+    ? Phaser.Math.Clamp(
+        speed /
+          RUNNER_TUNING.maxRunSpeed,
+        0,
+        1
+      ) * 0.045
+    : 0;
+
+const targetZoom =
+  1 + speedZoom;
 
 const cameraLerpZoom =
   Math.min(
