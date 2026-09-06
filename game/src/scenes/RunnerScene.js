@@ -1315,8 +1315,10 @@ this.mobileDirection = null;
 this.mobileActions = { jump:false, dash:false, fire:false, sword:false, build1:false, build2:false, gadget1:false, gadget2:false };
 this.empTimer = 0; this.decoyTimer = 0; this.boosterTimer = 0;
 this.boosterAura = null; this.decoyBeacon = null; this.infoCard = null; this.landingTimer = 0;
-this.bossDefeated = false; 
+this.bossDefeated = false;
 this.bossPhaseTwo = false;
+this.bossVictorySequence = false;
+this.bossVictoryLock = false;
 this.goalTouched = false;
 
 this.coyote = 0;
@@ -5567,25 +5569,17 @@ this.bossPhaseAuraFollow =
 // BOSS VICTORY ONCE-ONLY GUARD
 // ============================================================
     
-if (
-  this.getData('bossVictorySequence') === true
-) {
+if (this.bossVictorySequence === true) {
   return;
 }
 
-this.setData(
-  'bossVictorySequence',
-  true
-);
+this.bossVictorySequence = true;
     
     // ============================================================
 // BOSS VICTORY INPUT LOCK
 // ============================================================
     
-this.setData(
-  'bossVictoryLock',
-  true
-);
+this.bossVictoryLock = true;
 
 if (this.player?.body) {
   this.player.body.setVelocity(0, 0);
@@ -9167,7 +9161,7 @@ this.game.events.emit(
 
 this.game.events.emit(
   'feedback',
-  'signal'
+   'secret_collect'
 );
 
 }
@@ -10250,9 +10244,7 @@ this.elapsedMs;
 // BOSS DEATH FREEZE
 // ============================================================
   
-if (
-  this.getData('bossVictoryLock') === true
-) {
+if (this.bossVictoryLock === true) {
   if (this.boss?.active) {
     this.boss.setData(
       'nextShot',
@@ -10543,7 +10535,7 @@ if (
   !this.boss?.active ||
   this.finished ||
   this.respawning ||
-  this.getData('bossVictoryLock') === true
+  this.bossVictoryLock === true
 ) {
   return;
 }
@@ -12054,18 +12046,18 @@ this.tweens.add({
   scaleY: 1,
   duration: 560,
   delay: 360,
-  ease: 'Back.out'
-});
-
+  ease: 'Back.out',
+  onComplete: () => {
     if (
       this.missionMedalsUI === objects
     ) {
       this.missionMedalsUI = null;
     }
   }
+});
 }
 
-  showGameOverScreen(message = 'RUN ENDED') {
+showGameOverScreen(message = 'RUN ENDED') {
 
   if (this.gameOverUI) {
     return;
