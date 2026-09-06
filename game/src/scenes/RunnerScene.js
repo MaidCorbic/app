@@ -12063,7 +12063,6 @@ this.tweens.add({
       this.missionMedalsUI = null;
     }
   }
-);
 }
 
   showGameOverScreen(message = 'RUN ENDED') {
