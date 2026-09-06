@@ -15373,8 +15373,8 @@ if (hardLanding) {
 
 /* Speed-based cinematic zoom. */
   
-let targetZoom = 1;
-
+let cinematicTargetZoom = 1;
+  
 if (!this.motionReduced) {
   if (speed > 520) {
     targetZoom = 1.035;
@@ -15434,7 +15434,7 @@ const speedZoom =
       ) * 0.045
     : 0;
 
-const targetZoom =
+const speedZoomTarget =
   1 + speedZoom;
 
 const cameraLerpZoom =
