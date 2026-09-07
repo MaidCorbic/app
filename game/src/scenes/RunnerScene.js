@@ -5,30 +5,85 @@ import { enemyIntel, signatureThreats } from '../enemy-intel.js';
 
 // Kept together so movement can be tuned without touching level or state logic.
 const RUNNER_TUNING = {
-maxRunSpeed: 460,
-groundAcceleration: 4200,
-airAcceleration: 2350,
-turnAcceleration: 5600,
-groundDeceleration: 3300,
-jumpVelocity: -705,
-jumpCutMultiplier: .48,
-coyoteMs: 115,
-jumpBufferMs: 120,
-fallGravity: 720,
+maxRunSpeed: 475,
+groundAcceleration: 4500,
+airAcceleration: 2500,
+turnAcceleration: 5900,
+groundDeceleration: 3500,
+jumpVelocity: -735,
+jumpCutMultiplier: .44,
+coyoteMs: 135,
+jumpBufferMs: 145,
+fallGravity: 735,
 maxFallSpeed: 1120,
-dashSpeed: 670,
-dashDurationMs: 145,
-dashCooldownMs: 620,
+dashSpeed: 720,
+dashDurationMs: 155,
+dashCooldownMs: 580,
 };
 
 const DISTRICT_VISUALS = {
-'first-delivery': { skyline: 0x1b2943, building: 0x263653, window: 0xffcd7a, accent: 0xffd06e, label: 'OLD QUARTER', props: 'lanterns' },
-'dead-drop': { skyline: 0x283142, building: 0x394052, window: 0xffbd5b, accent: 0xffa85d, label: 'SALT DOCKS', props: 'docks' },
-blackout: { skyline: 0x10192a, building: 0x15233a, window: 0x8df4ff, accent: 0x8df4ff, label: 'GRID NINE', props: 'emergency' },
-pursuit: { skyline: 0x202945, building: 0x2c3858, window: 0xb9d9ff, accent: 0xff826e, label: 'RAIL SPINE', props: 'rail' },
-'signal-storm': { skyline: 0x15213a, building: 0x26385a, window: 0xaecbff, accent: 0xb993ff, label: 'CROWN ARRAY', props: 'array' },
-'corporate-lockdown': { skyline: 0x263044, building: 0x3a465f, window: 0xffd06e, accent: 0xff826e, label: 'HELIX TOWER', props: 'rail' },
-'final-relay': { skyline: 0x211d3a, building: 0x334261, window: 0xffe0a8, accent: 0xffd06e, label: 'APEX SPINE', props: 'array' },
+  'first-delivery': {
+    skyline: 0x08111f,
+    building: 0x10243a,
+    window: 0x5ee7ff,
+    accent: 0x00d9ff,
+    label: 'OLD QUARTER',
+    props: 'lanterns'
+  },
+
+  'dead-drop': {
+    skyline: 0x0a1422,
+    building: 0x172a40,
+    window: 0xffb454,
+    accent: 0xff7a45,
+    label: 'SALT DOCKS',
+    props: 'docks'
+  },
+
+  blackout: {
+    skyline: 0x050b15,
+    building: 0x0b1829,
+    window: 0x66f4ff,
+    accent: 0x00eaff,
+    label: 'GRID NINE',
+    props: 'emergency'
+  },
+
+  pursuit: {
+    skyline: 0x0b1020,
+    building: 0x182542,
+    window: 0x79c9ff,
+    accent: 0xff5364,
+    label: 'RAIL SPINE',
+    props: 'rail'
+  },
+
+  'signal-storm': {
+    skyline: 0x0d1022,
+    building: 0x1b2040,
+    window: 0xb8a0ff,
+    accent: 0x9b5cff,
+    label: 'CROWN ARRAY',
+    props: 'array'
+  },
+
+  'corporate-lockdown': {
+    skyline: 0x111522,
+    building: 0x202b3d,
+    window: 0xffd76a,
+    accent: 0xff5a4f,
+    label: 'HELIX TOWER',
+    props: 'rail'
+  },
+
+  'final-relay': {
+    skyline: 0x0d0b18,
+    building: 0x1b2034,
+    window: 0xffe6a1,
+    accent: 0xffc247,
+    label: 'APEX SPINE',
+    props: 'array'
+  }
 };
 
 export class RunnerScene extends Phaser.Scene {
@@ -40,12 +95,157 @@ const graphics = this.make.graphics({ add: false });
 draw(graphics); graphics.generateTexture(key, width, height); graphics.destroy();
 };
 
-const runner = (key, leftLeg, rightLeg, arm) => make(key, 48, 64, g => {
-  g.fillStyle(0xf3eee4).fillCircle(24, 12, 10).fillStyle(0x202a3d).fillRect(14, 21, 20, 5);
-  g.fillStyle(0xff756d).fillRoundedRect(14, 23, 20, 24, 5).fillStyle(0xffd06e).fillRect(14, 29, 20, 5);
-  g.lineStyle(5, 0xf3eee4).lineBetween(15, 30, 8, arm).lineBetween(33, 30, 40, 42 - arm / 5);
-  g.lineStyle(7, 0xaee37f).lineBetween(19, 45, 16, leftLeg).lineBetween(29, 45, 33, rightLeg);
-});
+const runner = (key, leftLeg, rightLeg, arm) =>
+  make(key, 48, 64, g => {
+    // ============================================================
+    // OUTER RUNNER ENERGY
+    // ============================================================
+    g.fillStyle(0x8df4ff, 0.07)
+      .fillCircle(24, 30, 27);
+
+    // ============================================================
+    // HEAD AURA
+    // ============================================================
+    g.fillStyle(0xdffcff, 0.10)
+      .fillCircle(24, 12, 13);
+
+    // HEAD
+    g.fillStyle(0xf3eee4)
+      .fillCircle(24, 12, 10);
+
+    // HEAD HIGHLIGHT
+    g.fillStyle(0xffffff, 0.45)
+      .fillCircle(21, 9, 3);
+
+    // ============================================================
+    // VISOR
+    // ============================================================
+    g.fillStyle(0x0b1220)
+      .fillRoundedRect(14, 19, 20, 7, 3);
+
+    g.lineStyle(1, 0x8df4ff, 0.75)
+      .strokeRoundedRect(14, 19, 20, 7, 3);
+
+    g.fillStyle(0x8df4ff)
+      .fillRect(17, 21, 14, 2);
+
+    // VISOR HOT CORE
+    g.fillStyle(0xe8fdff, 0.9)
+      .fillRect(20, 21, 8, 1);
+
+    // ============================================================
+    // BODY AURA
+    // ============================================================
+    g.fillStyle(0xff756d, 0.08)
+      .fillRoundedRect(10, 21, 28, 29, 7);
+
+    // MAIN SUIT
+    g.fillStyle(0x202a3d)
+      .fillRoundedRect(13, 22, 22, 25, 6);
+
+    // INNER SUIT PANEL
+    g.fillStyle(0x2c3c55)
+      .fillRoundedRect(16, 25, 16, 19, 4);
+
+    // ============================================================
+    // CHEST ARMOR
+    // ============================================================
+    g.fillStyle(0xff756d, 0.16)
+      .fillRoundedRect(15, 28, 18, 8, 3);
+
+    g.fillStyle(0xff756d, 0.85)
+      .fillRect(17, 30, 14, 3);
+
+    // ============================================================
+    // CHEST ENERGY CORE
+    // ============================================================
+    g.fillStyle(0x8df4ff, 0.18)
+      .fillCircle(24, 39, 7);
+
+    g.lineStyle(1, 0x8df4ff, 0.8)
+      .strokeCircle(24, 39, 5);
+
+    g.fillStyle(0xe8fdff)
+      .fillCircle(24, 39, 2.5);
+
+    // ============================================================
+    // ARMOR BELT
+    // ============================================================
+    g.fillStyle(0xffd06e, 0.90)
+      .fillRect(15, 44, 18, 3);
+
+    // ============================================================
+    // ARMS
+    // ============================================================
+    g.lineStyle(5, 0xf3eee4, 0.95)
+      .lineBetween(
+        15, 30,
+        8, arm
+      )
+      .lineBetween(
+        33, 30,
+        40, 42 - arm / 5
+      );
+
+    // ARM ENERGY MARKERS
+    g.lineStyle(1.5, 0x8df4ff, 0.65)
+      .lineBetween(
+        9, arm - 2,
+        7, arm
+      )
+      .lineBetween(
+        39, 42 - arm / 5 - 1,
+        41, 42 - arm / 5
+      );
+
+    // ============================================================
+    // LEGS
+    // ============================================================
+    g.lineStyle(7, 0xaee37f, 0.95)
+      .lineBetween(
+        19, 45,
+        16, leftLeg
+      )
+      .lineBetween(
+        29, 45,
+        33, rightLeg
+      );
+
+    // LEG ARMOR
+    g.lineStyle(2, 0x8df4ff, 0.65)
+      .lineBetween(
+        19, 49,
+        17, leftLeg - 3
+      )
+      .lineBetween(
+        29, 49,
+        32, rightLeg - 3
+      );
+
+    // ============================================================
+    // RUNNER BOOTS
+    // ============================================================
+    g.fillStyle(0x172238)
+      .fillRoundedRect(
+        11,
+        leftLeg - 2,
+        9,
+        4,
+        2
+      )
+      .fillRoundedRect(
+        28,
+        rightLeg - 2,
+        9,
+        4,
+        2
+      );
+
+    // BOOT ENERGY EDGES
+    g.fillStyle(0x8df4ff)
+      .fillRect(13, leftLeg - 1, 5, 1)
+      .fillRect(30, rightLeg - 1, 5, 1);
+  });
 
 // Generated textures are isolated here so authored sprite sheets can replace them later.
 runner('runner-idle', 60, 60, 40);
@@ -70,134 +270,561 @@ make('signal', 56, 56, g => {
   g.fillStyle(0xff826e).fillCircle(28, 28, 3);
 });
 
-make('barrier', 48, 64, g =>
-  g.fillStyle(0x202b39)
-    .fillRect(3, 3, 42, 58)
-    .lineStyle(3, 0xff826e)
-    .strokeRect(4, 4, 40, 56)
+make('barrier', 48, 64, g => {
+  // OUTER WARNING FIELD
+  g.fillStyle(0xff5364, 0.08)
+    .fillRoundedRect(0, 0, 48, 64, 6);
+
+  // DARK CORE
+  g.fillStyle(0x0d1828)
+    .fillRoundedRect(3, 3, 42, 58, 6);
+
+  // INNER PANEL
+  g.fillStyle(0x16263b)
+    .fillRoundedRect(7, 7, 34, 50, 4);
+
+  // WARNING FRAME
+  g.lineStyle(2.5, 0xff5364, 0.95)
+    .strokeRoundedRect(4, 4, 40, 56, 5);
+
+  // INNER ENERGY FRAME
+  g.lineStyle(1, 0xff826e, 0.55)
+    .strokeRoundedRect(8, 8, 32, 48, 3);
+
+  // CROSS-BEAM
+  g.lineStyle(2, 0xff826e, 0.8)
     .lineBetween(7, 8, 41, 56)
-    .lineBetween(41, 8, 7, 56)
-);
+    .lineBetween(41, 8, 7, 56);
 
-make('goal', 56, 68, g =>
-  g.lineStyle(4, 0xe5ecf1)
-    .lineBetween(10, 66, 10, 4)
-    .fillStyle(0xffd06e)
-    .fillTriangle(12, 9, 48, 21, 12, 36)
-);
+  // CORE WARNING STRIP
+  g.fillStyle(0xff5364, 0.14)
+    .fillRoundedRect(14, 28, 20, 8, 3);
 
-make('rain', 8, 14, g =>
-  g.lineStyle(2, 0xd9e9ff, .45)
-    .lineBetween(6, 0, 1, 13)
-);
+  g.fillStyle(0xff5364, 0.95)
+    .fillRect(17, 31, 14, 2);
 
-make('dust', 10, 10, g =>
-  g.fillStyle(0xd6dbe2, .65).fillCircle(5, 5, 4)
-);
+  // ENERGY NODES
+  g.fillStyle(0xffd06e)
+    .fillCircle(9, 10, 2)
+    .fillCircle(39, 10, 2)
+    .fillCircle(9, 54, 2)
+    .fillCircle(39, 54, 2);
+});
+
+make('goal', 56, 68, g => {
+  // RELAY AURA
+  g.fillStyle(0xffd06e, 0.10)
+    .fillCircle(28, 30, 27);
+
+  g.fillStyle(0x8df4ff, 0.07)
+    .fillCircle(28, 30, 22);
+
+  // POLE
+  g.lineStyle(4, 0xe8edf2, 0.95)
+    .lineBetween(10, 66, 10, 4);
+
+  g.lineStyle(1.5, 0xb9c7d5, 0.7)
+    .lineBetween(14, 64, 14, 8);
+
+  // FLAG SHADOW
+  g.fillStyle(0x8b6a25, 0.45)
+    .fillTriangle(13, 10, 49, 22, 13, 37);
+
+  // MAIN FLAG
+  g.fillStyle(0xffd06e)
+    .fillTriangle(12, 8, 48, 20, 12, 35);
+
+  // FLAG CORE
+  g.fillStyle(0xfff0b5, 0.9)
+    .fillTriangle(14, 11, 42, 20, 14, 29);
+
+  // RELAY SYMBOL
+  g.lineStyle(2, 0x8df4ff, 0.9)
+    .lineBetween(19, 19, 31, 19)
+    .lineBetween(25, 15, 25, 28);
+
+  // TOP ENERGY NODE
+  g.fillStyle(0xffffff, 0.95)
+    .fillCircle(10, 4, 2);
+
+  g.fillStyle(0x8df4ff, 0.6)
+    .fillCircle(10, 4, 4);
+});
+
+make('rain', 8, 14, g => {
+  // MAIN STREAK
+  g.lineStyle(2, 0xd9e9ff, 0.42)
+    .lineBetween(6, 0, 1, 13);
+
+  // INNER HIGHLIGHT
+  g.lineStyle(1, 0xffffff, 0.18)
+    .lineBetween(7, 1, 3, 11);
+});
+
+make('dust', 10, 10, g => {
+  // SOFT OUTER PARTICLE
+  g.fillStyle(0xd6dbe2, 0.18)
+    .fillCircle(5, 5, 5);
+
+  // CORE
+  g.fillStyle(0xe8edf2, 0.72)
+    .fillCircle(5, 5, 2.5);
+});
 
 make('speed-line', 32, 3, g =>
   g.fillGradientStyle(
-    0xb9e9ff,
-    0xb9e9ff,
-    0xb9e9ff,
-    0xb9e9ff,
-    0,
-    .65,
-    .65,
-    0
-  ).fillRect(0, 0, 32, 3)
+    0xe8fdff,
+    0x8df4ff,
+    0x8df4ff,
+    0xe8fdff,
+    0.15,
+    0.9,
+    0.9,
+    0.15
+  )
+  .fillRoundedRect(0, 0, 32, 3, 1.5)
 );
 
-make('boost-pad', 58, 18, g =>
-  g.fillStyle(0x17263b)
-    .fillRoundedRect(0, 2, 58, 14, 4)
-    .fillStyle(0x8df4ff)
-    .fillTriangle(10, 13, 20, 5, 30, 13)
-    .fillTriangle(27, 13, 37, 5, 47, 13)
-);
+make('boost-pad', 58, 18, g => {
+  // OUTER ENERGY FIELD
+  g.fillStyle(0x8df4ff, 0.08)
+    .fillRoundedRect(0, 1, 58, 17, 5);
 
-make('chaser', 52, 60, g =>
-  g.fillStyle(0xff826e, .14)
-    .fillCircle(26, 28, 25)
-    .fillStyle(0x172238)
-    .fillRoundedRect(10, 8, 32, 42, 7)
-    .lineStyle(2, 0xff826e)
-    .strokeRoundedRect(10, 8, 32, 42, 7)
-    .fillStyle(0xff826e)
-    .fillRect(16, 20, 20, 5)
-);
+  // DARK BODY
+  g.fillStyle(0x0e1b2c)
+    .fillRoundedRect(1, 2, 56, 15, 4);
 
-make('checkpoint', 30, 54, g =>
-  g.lineStyle(3, 0x8df4ff)
-    .lineBetween(6, 52, 6, 4)
-    .fillStyle(0x8df4ff, .2)
-    .fillTriangle(8, 6, 27, 14, 8, 23)
-    .lineStyle(1, 0xdffcff)
-    .strokeTriangle(8, 6, 27, 14, 8, 23)
-);
+  // INNER PANEL
+  g.fillStyle(0x172b40)
+    .fillRoundedRect(5, 5, 48, 9, 3);
 
-make('security', 42, 34, g =>
-  g.fillStyle(0xff826e, .14)
-    .fillCircle(21, 17, 20)
-    .fillStyle(0x172238)
-    .fillRoundedRect(5, 8, 32, 20, 8)
-    .lineStyle(2, 0xff826e)
-    .strokeRoundedRect(5, 8, 32, 20, 8)
-    .fillStyle(0xff826e)
-    .fillCircle(28, 17, 4)
-);
+  // NEON FRAME
+  g.lineStyle(2, 0x8df4ff, 0.95)
+    .strokeRoundedRect(2, 3, 54, 13, 4);
 
-make('guard', 32, 58, g =>
-  g.fillStyle(0x172238)
-    .fillRoundedRect(6, 7, 20, 44, 5)
-    .lineStyle(2, 0xff826e)
-    .strokeRoundedRect(6, 7, 20, 44, 5)
-    .fillStyle(0xffd06e)
-    .fillRect(10, 16, 12, 4)
-);
+  // BOOST ARROWS
+  g.fillStyle(0x8df4ff, 0.95)
+    .fillTriangle(8, 13, 18, 5, 28, 13)
+    .fillTriangle(25, 13, 35, 5, 45, 13);
 
-make('enemy-runner', 48, 64, g => {
-  g.fillStyle(0xd5f0ff).fillCircle(24, 12, 10);
-  g.fillStyle(0x241b35).fillRect(14, 21, 20, 5);
-  g.fillStyle(0x6b3f83).fillRoundedRect(14, 23, 20, 24, 5);
-  g.fillStyle(0xff826e).fillRect(14, 29, 20, 5);
-  g.lineStyle(5, 0xd5f0ff)
-    .lineBetween(15, 30, 8, 42)
-    .lineBetween(33, 30, 40, 35);
-  g.lineStyle(7, 0xff826e)
-    .lineBetween(19, 45, 16, 60)
-    .lineBetween(29, 45, 33, 60);
+  // HOT CENTERS
+  g.fillStyle(0xe8fdff, 0.9)
+    .fillTriangle(11, 11, 18, 6, 25, 11)
+    .fillTriangle(28, 11, 35, 6, 42, 11);
+
+  // CENTRAL CORE
+  g.fillStyle(0x8df4ff, 0.18)
+    .fillCircle(29, 9, 7);
+
+  g.fillStyle(0xe8fdff)
+    .fillCircle(29, 9, 2.5);
 });
 
-make('invader', 48, 38, g =>
-  g.fillStyle(0x5b3d82)
-    .fillRoundedRect(4, 9, 40, 23, 10)
-    .lineStyle(2, 0xe0a7ff)
-    .strokeRoundedRect(4, 9, 40, 23, 10)
-    .fillStyle(0xe0a7ff)
-    .fillCircle(17, 20, 4)
-    .fillCircle(31, 20, 4)
-);
+make('chaser', 52, 60, g => {
+  // CHASER AURA
+  g.fillStyle(0xff5364, 0.07)
+    .fillCircle(26, 29, 26);
 
-make('chicken', 42, 38, g =>
+  g.fillStyle(0xff826e, 0.14)
+    .fillCircle(26, 28, 22);
+
+  // CORE BODY
+  g.fillStyle(0x0b1726)
+    .fillRoundedRect(8, 7, 36, 45, 9);
+
+  // INNER ARMOR
+  g.fillStyle(0x17283d)
+    .fillRoundedRect(12, 11, 28, 36, 7);
+
+  // NEON OUTLINE
+  g.lineStyle(2.5, 0xff5364, 0.95)
+    .strokeRoundedRect(9, 8, 34, 43, 8);
+
+  // VISOR FIELD
+  g.fillStyle(0xff5364, 0.14)
+    .fillRoundedRect(14, 17, 24, 10, 4);
+
+  // VISOR
+  g.fillStyle(0xff826e)
+    .fillRect(16, 20, 20, 4);
+
+  // VISOR CORE
+  g.fillStyle(0xffe0a8)
+    .fillRect(19, 21, 14, 2);
+
+  // LOWER ENERGY BAR
+  g.fillStyle(0x8df4ff, 0.22)
+    .fillRoundedRect(16, 34, 20, 5, 2);
+
+  g.fillStyle(0x8df4ff, 0.9)
+    .fillRect(19, 35, 14, 2);
+
+  // SIDE SIGNAL NODES
+  g.fillStyle(0xffd06e)
+    .fillCircle(13, 44, 1.5)
+    .fillCircle(39, 44, 1.5);
+});
+
+make('checkpoint', 30, 54, g => {
+  // CHECKPOINT AURA
+  g.fillStyle(0x8df4ff, 0.08)
+    .fillCircle(14, 25, 16);
+
+  // POST
+  g.lineStyle(3, 0x8df4ff, 0.95)
+    .lineBetween(6, 52, 6, 4);
+
+  g.lineStyle(1, 0xdffcff, 0.55)
+    .lineBetween(9, 50, 9, 8);
+
+  // FLAG FIELD
+  g.fillStyle(0x8df4ff, 0.18)
+    .fillTriangle(8, 6, 27, 14, 8, 23);
+
+  // FLAG CORE
+  g.fillStyle(0x8df4ff, 0.75)
+    .fillTriangle(9, 8, 24, 14, 9, 20);
+
+  // FLAG OUTLINE
+  g.lineStyle(1, 0xdffcff, 0.9)
+    .strokeTriangle(8, 6, 27, 14, 8, 23);
+
+  // ACTIVE NODE
+  g.fillStyle(0xe8fdff)
+    .fillCircle(6, 4, 2);
+
+  g.fillStyle(0x8df4ff, 0.65)
+    .fillCircle(6, 4, 4);
+});
+
+make('security', 42, 34, g => {
+  // SECURITY WARNING AURA
+  g.fillStyle(0xff5364, 0.07)
+    .fillCircle(21, 17, 21);
+
+  // MAIN HOUSING
+  g.fillStyle(0x0c1727)
+    .fillRoundedRect(4, 7, 34, 22, 9);
+
+  // INNER PANEL
+  g.fillStyle(0x18283c)
+    .fillRoundedRect(8, 11, 26, 14, 6);
+
+  // OUTLINE
+  g.lineStyle(2, 0xff5364, 0.95)
+    .strokeRoundedRect(5, 8, 32, 20, 8);
+
+  // SENSOR CORE
+  g.fillStyle(0xff5364, 0.20)
+    .fillCircle(28, 17, 8);
+
+  g.fillStyle(0xff826e)
+    .fillCircle(28, 17, 4);
+
+  g.fillStyle(0xfff0c7)
+    .fillCircle(28, 16, 1.5);
+
+  // SIDE LIGHT
+  g.fillStyle(0xffd06e)
+    .fillCircle(11, 17, 2);
+});
+
+make('guard', 32, 58, g => {
+  // GUARD AURA
+  g.fillStyle(0xff5364, 0.06)
+    .fillCircle(16, 29, 17);
+
+  // OUTER BODY
+  g.fillStyle(0x0c1727)
+    .fillRoundedRect(5, 6, 22, 46, 6);
+
+  // ARMOR PANEL
+  g.fillStyle(0x18283c)
+    .fillRoundedRect(9, 10, 14, 36, 4);
+
+  // NEON FRAME
+  g.lineStyle(2, 0xff5364, 0.9)
+    .strokeRoundedRect(6, 7, 20, 44, 5);
+
+  // HEAD VISOR
+  g.fillStyle(0xff5364, 0.16)
+    .fillRoundedRect(9, 15, 14, 8, 3);
+
+  g.fillStyle(0xffd06e)
+    .fillRect(11, 17, 10, 3);
+
+  // CHEST ENERGY
+  g.fillStyle(0x8df4ff, 0.16)
+    .fillRoundedRect(10, 29, 12, 7, 2);
+
+  g.fillStyle(0x8df4ff)
+    .fillRect(12, 31, 8, 2);
+
+  // LOWER STATUS
+  g.fillStyle(0xff5364)
+    .fillRect(10, 41, 4, 2);
+
+  g.fillStyle(0xffd06e)
+    .fillRect(16, 41, 4, 2);
+
+  // TOP SIGNAL
+  g.fillStyle(0xfff0c7, 0.9)
+    .fillCircle(16, 9, 1.5);
+
+  g.fillStyle(0xff5364, 0.55)
+    .fillCircle(16, 9, 3);
+});
+
+make('enemy-runner', 48, 64, g => {
+  // OUTER THREAT AURA
+  g.fillStyle(0xff5364, 0.08)
+    .fillCircle(24, 31, 29);
+
+  // HEAD GLOW
+  g.fillStyle(0xd5f0ff, 0.12)
+    .fillCircle(24, 12, 13);
+
+  // HEAD
+  g.fillStyle(0xd5f0ff)
+    .fillCircle(24, 12, 10);
+
+  // VISOR
+  g.fillStyle(0x0b1220)
+    .fillRoundedRect(14, 19, 20, 7, 3);
+
+  g.fillStyle(0xff5364)
+    .fillRect(17, 21, 14, 2);
+
+  // BODY AURA
+  g.fillStyle(0xff5364, 0.10)
+    .fillRoundedRect(11, 21, 26, 29, 7);
+
+  // BODY
+  g.fillStyle(0x301c42)
+    .fillRoundedRect(13, 23, 22, 25, 6);
+
+  // ARMOR PANEL
+  g.fillStyle(0x55306c)
+    .fillRoundedRect(16, 26, 16, 17, 4);
+
+  // CHEST ENERGY STRIP
+  g.fillStyle(0xff826e, 0.18)
+    .fillRoundedRect(15, 30, 18, 7, 3);
+
+  g.fillStyle(0xff826e)
+    .fillRect(17, 32, 14, 3);
+
+  // ARMS
+  g.lineStyle(5, 0xd5f0ff, 0.95)
+    .lineBetween(15, 30, 7, 43)
+    .lineBetween(33, 30, 41, 35);
+
+  // ARM ENERGY
+  g.lineStyle(2, 0xff5364, 0.75)
+    .lineBetween(9, 40, 7, 43)
+    .lineBetween(39, 34, 41, 35);
+
+  // LEGS
+  g.lineStyle(7, 0xff5364, 0.95)
+    .lineBetween(19, 45, 16, 60)
+    .lineBetween(29, 45, 33, 60);
+
+  // LEG CORE
+  g.lineStyle(2, 0xffd06e, 0.65)
+    .lineBetween(19, 48, 17, 58)
+    .lineBetween(29, 48, 32, 58);
+
+  // FOOT ENERGY
+  g.fillStyle(0x8df4ff)
+    .fillRect(13, 58, 7, 2)
+    .fillRect(31, 58, 7, 2);
+});
+
+make('invader', 48, 38, g => {
+  // OUTER INVADER FIELD
+  g.fillStyle(0xe0a7ff, 0.08)
+    .fillEllipse(24, 19, 46, 34);
+
+  // REAR ENERGY PLATES
+  g.fillStyle(0x24153b)
+    .fillTriangle(4, 19, 0, 12, 9, 15)
+    .fillTriangle(44, 19, 48, 12, 39, 15);
+
+  // MAIN BODY
+  g.fillStyle(0x20172f)
+    .fillRoundedRect(4, 8, 40, 24, 10);
+
+  // INNER ARMOR
+  g.fillStyle(0x4c2e68)
+    .fillRoundedRect(8, 12, 32, 16, 7);
+
+  // NEON OUTLINE
+  g.lineStyle(2, 0xe0a7ff, 0.95)
+    .strokeRoundedRect(4, 8, 40, 24, 10);
+
+  // CENTRAL VISOR
+  g.fillStyle(0x8df4ff, 0.14)
+    .fillRoundedRect(11, 16, 26, 7, 3);
+
+  g.fillStyle(0xdffcff)
+    .fillRect(14, 18, 20, 3);
+
+  // EYES
+  g.fillStyle(0xe0a7ff, 0.20)
+    .fillCircle(17, 20, 6)
+    .fillCircle(31, 20, 6);
+
+  g.fillStyle(0xe0a7ff)
+    .fillCircle(17, 20, 3.5)
+    .fillCircle(31, 20, 3.5);
+
+  // CORE
+  g.fillStyle(0x8df4ff, 0.18)
+    .fillCircle(24, 28, 6);
+
+  g.fillStyle(0x8df4ff)
+    .fillCircle(24, 28, 2);
+
+  // BOTTOM ENERGY VENTS
+  g.fillStyle(0x55dfff, 0.85)
+    .fillRect(13, 30, 7, 2)
+    .fillRect(21, 30, 6, 2)
+    .fillRect(29, 30, 7, 2);
+});
+
+make('chicken', 42, 38, g => {
+  // SOFT SHADOW / AURA
+  g.fillStyle(0xffd06e, 0.08)
+    .fillCircle(21, 22, 17);
+
+  // BODY SHADOW
+  g.fillStyle(0xbcae91)
+    .fillCircle(20, 23, 15);
+
+  // BODY
   g.fillStyle(0xf4f0e7)
-    .fillCircle(20, 22, 15)
-    .fillCircle(28, 10, 9)
-    .fillStyle(0xffd06e)
-    .fillTriangle(35, 11, 43, 15, 35, 19)
-    .fillStyle(0xff826e)
-    .fillCircle(26, 2, 4)
-);
+    .fillCircle(20, 21, 15);
 
-make('dino', 68, 48, g =>
-  g.fillStyle(0x72a66a)
-    .fillRoundedRect(7, 16, 48, 24, 9)
-    .fillTriangle(0, 25, 14, 10, 14, 40)
-    .fillStyle(0xdff0b0)
-    .fillCircle(50, 17, 5)
-    .fillStyle(0x172238)
-    .fillCircle(51, 16, 2)
-);
+  // WING
+  g.fillStyle(0xe2ddd2)
+    .fillEllipse(14, 23, 10, 14);
+
+  // HEAD
+  g.fillStyle(0xf4f0e7)
+    .fillCircle(28, 10, 9);
+
+  // HEAD HIGHLIGHT
+  g.fillStyle(0xffffff, 0.75)
+    .fillCircle(25, 7, 3);
+
+  // BEAK SHADOW
+  g.fillStyle(0xc28b33)
+    .fillTriangle(34, 11, 42, 15, 34, 19);
+
+  // BEAK
+  g.fillStyle(0xffd06e)
+    .fillTriangle(34, 10, 41, 14, 34, 17);
+
+  // EYE
+  g.fillStyle(0x172238)
+    .fillCircle(31, 9, 2);
+
+  g.fillStyle(0xffffff)
+    .fillCircle(30.5, 8.5, 0.6);
+
+  // COMB
+  g.fillStyle(0xff5364)
+    .fillCircle(25, 2, 3)
+    .fillCircle(29, 1, 3)
+    .fillCircle(33, 3, 2.5);
+
+  // WATTLE
+  g.fillStyle(0xff5364)
+    .fillCircle(33, 16, 2.5);
+
+  // LEGS
+  g.lineStyle(2, 0xd9a949, 0.95)
+    .lineBetween(16, 33, 14, 37)
+    .lineBetween(25, 33, 27, 37);
+
+  // FOOT TOES
+  g.lineStyle(1.5, 0xd9a949, 0.9)
+    .lineBetween(14, 37, 11, 37)
+    .lineBetween(14, 37, 16, 36)
+    .lineBetween(27, 37, 24, 37)
+    .lineBetween(27, 37, 29, 36);
+});
+
+make('dino', 68, 48, g => {
+  // OUTER DINOSAUR AURA
+  g.fillStyle(0xaee37f, 0.08)
+    .fillEllipse(34, 27, 62, 40);
+
+  // TAIL
+  g.fillStyle(0x466d48)
+    .fillTriangle(0, 28, 18, 16, 20, 39);
+
+  // MAIN BODY
+  g.fillStyle(0x4d8652)
+    .fillRoundedRect(8, 15, 48, 25, 10);
+
+  // BODY ARMOR
+  g.fillStyle(0x6fa66e)
+    .fillRoundedRect(12, 19, 39, 17, 7);
+
+  // BACK RIDGE
+  g.fillStyle(0xaee37f, 0.8)
+    .fillTriangle(15, 16, 20, 9, 23, 17)
+    .fillTriangle(25, 16, 30, 8, 33, 17)
+    .fillTriangle(35, 16, 40, 10, 43, 17);
+
+  // HEAD
+  g.fillStyle(0x6fa66e)
+    .fillRoundedRect(44, 9, 20, 23, 8);
+
+  // SNOUT
+  g.fillStyle(0x5a8f5d)
+    .fillRoundedRect(53, 18, 12, 11, 5);
+
+  // EYE SOCKET
+  g.fillStyle(0x172238)
+    .fillCircle(51, 16, 6);
+
+  // EYE
+  g.fillStyle(0xffd06e)
+    .fillCircle(52, 16, 3);
+
+  g.fillStyle(0xffffff)
+    .fillCircle(53, 15, 1);
+
+  // NOSTRIL
+  g.fillStyle(0x172238)
+    .fillCircle(62, 23, 1.5);
+
+  // MOUTH
+  g.lineStyle(1.5, 0x2b4730, 0.9)
+    .lineBetween(53, 28, 63, 28);
+
+  // CHEST CORE
+  g.fillStyle(0x8df4ff, 0.12)
+    .fillCircle(31, 28, 9);
+
+  g.fillStyle(0x8df4ff)
+    .fillCircle(31, 28, 3);
+
+  // FRONT LEG
+  g.lineStyle(6, 0x4d8652, 0.95)
+    .lineBetween(46, 35, 47, 46);
+
+  // REAR LEG
+  g.lineStyle(6, 0x466d48, 0.95)
+    .lineBetween(21, 35, 20, 46);
+
+  // FOOT ENERGY
+  g.lineStyle(2, 0xaee37f, 0.85)
+    .lineBetween(44, 46, 51, 46)
+    .lineBetween(18, 46, 25, 46);
+});
 
 make('dino-boss', 112, 82, g => {
   // OUTER BOSS AURA
@@ -1290,6 +1917,7 @@ this.swordCooldown = 0;
 this.buildCooldowns = [0, 0];
 
 this.combatCombo = 0;
+this.bestCombatCombo = 0;
 this.comboTimer = 0;
 this.overdriveTimer = 0;
 this.jumps = 0;
@@ -1299,6 +1927,7 @@ this.deaths = 0;
 
 this.perfectDodgeWindow = 0;
 this.perfectDodgeCooldown = 0;
+this.perfectDodges = 0;
 this.deathLimit = mission.id === 'first-delivery' ? Infinity : 3;
 this.jumpsUsed = 0;
 this.finished = false;
@@ -1334,8 +1963,9 @@ this.cameraOffsetX = -85;
 this.cameraOffsetY = 65;
 this.cameraZoom = 1;
 this.lastParallaxBoost = -1;
-
+this.cameraVelocityX = 0;
 this.jumpHeld = false;
+this.wallJumpFxShown = false;
 this.sectorTwoAnnounced = false;
 this.chaseWarnings = new Set();
 this.checkpointHints = new Set();
@@ -1387,6 +2017,8 @@ if (
 
 this.perfectDodgeWindow = 120;
 this.perfectDodgeCooldown = 320;
+  this.perfectDodges =
+  (this.perfectDodges || 0) + 1;
 
   this.game.events.emit(
   'feedback',
@@ -1399,6 +2031,11 @@ this.combatCombo = Math.min(
 );
 
 this.comboTimer = 3000;
+
+  this.bestCombatCombo = Math.max(
+  this.bestCombatCombo || 0,
+  this.combatCombo
+);
 
   /*
  * ============================================================
@@ -5921,6 +6558,11 @@ this.combatCombo =
 
 this.comboTimer = 3000;
 
+  this.bestCombatCombo = Math.max(
+  this.bestCombatCombo || 0,
+  this.combatCombo
+);
+
   /*
  * ============================================================
  * OVERDRIVE · COMBO x10
@@ -7192,11 +7834,49 @@ this.physics.add.overlap(
       return;
     }
 
-    this.boostCooldown = 260;
+this.boostCooldown = 260;
 
-    this.player.body.setVelocityY(
-      -825
-    );
+this.player.body.setVelocityY(
+  -825
+);
+
+if (
+  !this.motionReduced &&
+  this.player?.active
+) {
+  const boostPulse =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y + 24,
+        8,
+        0x8df4ff,
+        0.28
+      )
+      .setDepth(11);
+
+  this.tweens.add({
+    targets: boostPulse,
+    scaleX: 3.2,
+    scaleY: 0.55,
+    alpha: 0,
+    duration: 190,
+    ease: 'Quad.out',
+    onComplete: () =>
+      boostPulse.destroy()
+  });
+
+  this.tweens.add({
+    targets: this.player,
+    scaleX:
+      this.playerVisualBaseScaleX * 0.94,
+    scaleY:
+      this.playerVisualBaseScaleY * 1.08,
+    duration: 60,
+    yoyo: true,
+    ease: 'Quad.out'
+  });
+}
 
     this.playerCue(
   'BOOST LAUNCH',
@@ -7209,22 +7889,23 @@ this.gadgetPulse(
   320
 );
 
-    const boostPulse =
+const boostPulse =
   this.add
     .circle(
       this.player.x,
       this.player.y + 20,
       10,
       0x8df4ff,
-      .32
+      .38
     )
     .setDepth(11);
 
 this.tweens.add({
   targets: boostPulse,
-  scale: 3.6,
+  scale: 4.4,
   alpha: 0,
-  duration: 240,
+  duration: 270,
+  ease: 'Quad.out',
   onComplete: () =>
     boostPulse.destroy()
 });
@@ -9640,22 +10321,45 @@ this.vaultCooldown = 450;
 
 body.setVelocityY(-510);
 
-  const vaultBurst =
+  if (
+  !this.motionReduced &&
+  this.player?.active
+) {
+  this.player.angle =
+    this.player.flipX
+      ? -5
+      : 5;
+
+  this.tweens.add({
+    targets: this.player,
+    scaleX:
+      this.playerVisualBaseScaleX * 1.08,
+    scaleY:
+      this.playerVisualBaseScaleY * 0.90,
+    duration: 70,
+    yoyo: true,
+    ease: 'Quad.out'
+  });
+}
+
+const vaultBurst =
   this.add
     .circle(
       this.player.x,
       this.player.y + 22,
-      10,
+      11,
       0xb9f5ff,
-      .30
+      .34
     )
     .setDepth(12);
 
 this.tweens.add({
   targets: vaultBurst,
-  scale: 3.8,
+  scaleX: 4.5,
+  scaleY: 0.65,
   alpha: 0,
-  duration: 240,
+  duration: 210,
+  ease: 'Quad.out',
   onComplete: () =>
     vaultBurst.destroy()
 });
@@ -11542,6 +12246,10 @@ this.time.delayedCall(
         enemyDefeats:
           this.enemyDefeats ||
           0,
+        perfectDodges:
+  this.perfectDodges || 0,
+        bestCombatCombo:
+  this.bestCombatCombo || 0,
         bossDefeated:
           Boolean(
             this.boss &&
@@ -13378,6 +14086,9 @@ this.dashCooldown =
       delta
   );
 
+  const previousDashTimer =
+  this.dashTimer;
+
 this.dashTimer =
   Math.max(
     0,
@@ -13385,12 +14096,55 @@ this.dashTimer =
       delta
   );
 
-this.wallJumpTimer =
-  Math.max(
-    0,
-    this.wallJumpTimer -
-      delta
-  );
+// DASH → MOVEMENT TRANSITION
+if (
+  previousDashTimer > 0 &&
+  this.dashTimer <= 0 &&
+  !this.motionReduced &&
+  this.player?.active
+) {
+  this.player.angle = 0;
+
+  this.tweens.add({
+    targets: this.player,
+    scaleX:
+      this.playerVisualBaseScaleX * 1.045,
+    scaleY:
+      this.playerVisualBaseScaleY * 0.965,
+    duration: 55,
+    yoyo: true,
+    ease: 'Quad.out'
+  });
+
+  const exitBurst =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        6,
+        0x8df4ff,
+        0.24
+      )
+      .setDepth(10);
+
+  this.tweens.add({
+    targets: exitBurst,
+    scaleX: 2.6,
+    scaleY: 0.65,
+    alpha: 0,
+    duration: 130,
+    ease: 'Quad.out',
+    onComplete: () =>
+      exitBurst.destroy()
+  });
+}
+
+
+if (
+  this.wallJumpTimer <= 0
+) {
+  this.wallJumpFxShown = false;
+}
 
 const packageSpeed =
   this.package
@@ -13409,25 +14163,33 @@ if (
     0 &&
   !this.dashCooldown
 ) {
-  const readyPulse =
-    this.add
-      .circle(
-        this.player.x,
-        this.player.y,
-        8,
-        0x8df4ff,
-        .45
-      )
-      .setDepth(11);
 
-  this.tweens.add({
-    targets: readyPulse,
-    scale: 2.4,
-    alpha: 0,
-    duration: 180,
-    onComplete: () =>
-      readyPulse.destroy()
-  });
+  const readyPulse =
+  this.add
+    .circle(
+      this.player.x,
+      this.player.y,
+      9,
+      0x8df4ff,
+      .52
+    )
+    .setDepth(11);
+
+readyPulse.setStrokeStyle(
+  2,
+  0xb9f5ff,
+  0.9
+);
+
+this.tweens.add({
+  targets: readyPulse,
+  scale: 3.2,
+  alpha: 0,
+  duration: 240,
+  ease: 'Quad.out',
+  onComplete: () =>
+    readyPulse.destroy()
+});
 
   this.playerCue(
     'DASH READY'
@@ -13963,7 +14725,7 @@ if (left) {
     .setDragX(
       onGround
         ? RUNNER_TUNING.groundDeceleration
-        : 420
+        : 520
     );
 }
 
@@ -13989,24 +14751,18 @@ if (
   );
 }
 
+const gravityMultiplier =
+  this.mission.gravityMode === 'low'
+    ? 0.55
+    : 1;
+
 body.setGravityY(
   (
     body.velocity.y > 0
       ? RUNNER_TUNING.fallGravity
       : 0
   ) *
-  (
-    this.mission.gravityMode ===
-    'low'
-      ? .55
-      : 1
-  ) -
-  (
-    this.mission.gravityMode ===
-    'low'
-      ? 700
-      : 0
-  )
+  gravityMultiplier
 );
 
 body.setMaxVelocityY(RUNNER_TUNING.maxFallSpeed);
@@ -14320,9 +15076,9 @@ if (
 
   this.tweens.add({
     targets: this.player,
-    scaleX:
-      this.playerVisualBaseScaleX *
-      1.06,
+   scaleX:
+  this.playerVisualBaseScaleX *
+  1.08,
     scaleY:
       this.playerVisualBaseScaleY *
       0.94,
@@ -14368,27 +15124,27 @@ if (
   );
 
   if (!this.motionReduced) {
-  const jumpBurst =
-    this.add.circle(
-      this.player.x,
-      this.player.y + 27,
-      7,
-      0x8df4ff,
-      0.28
-    );
+const jumpBurst =
+  this.add.circle(
+    this.player.x,
+    this.player.y + 27,
+    8,
+    0x8df4ff,
+    0.32
+  );
 
-  jumpBurst.setDepth(11);
+jumpBurst.setDepth(11);
 
-  this.tweens.add({
-    targets: jumpBurst,
-    scaleX: 2.8,
-    scaleY: 0.55,
-    alpha: 0,
-    duration: 180,
-    ease: 'Quad.out',
-    onComplete: () =>
-      jumpBurst.destroy()
-  });
+this.tweens.add({
+  targets: jumpBurst,
+  scaleX: 3.4,
+  scaleY: 0.48,
+  alpha: 0,
+  duration: 165,
+  ease: 'Quad.out',
+  onComplete: () =>
+    jumpBurst.destroy()
+});
 }
 
   this.jumps++;
@@ -14481,12 +15237,12 @@ if (
     560
   );
 
-  this.player.setScale(
-    1.12,
-    .82
-  );
+this.player.setScale(
+  this.playerVisualBaseScaleX * 1.12,
+  this.playerVisualBaseScaleY * 0.82
+);
 
-  const slideBurst =
+const slideBurst =
   this.add
     .circle(
       this.player.x,
@@ -14506,13 +15262,16 @@ this.tweens.add({
     slideBurst.destroy()
 });
 
-  this.tweens.add({
-    targets:
-      this.player,
-    scaleX: 1,
-    scaleY: 1,
-    duration: 220
-  });
+this.tweens.add({
+  targets:
+    this.player,
+  scaleX:
+    this.playerVisualBaseScaleX,
+  scaleY:
+    this.playerVisualBaseScaleY,
+  duration: 220,
+  ease: 'Quad.out'
+});
 
   this.playerCue(
     'SLIDE',
@@ -14673,31 +15432,31 @@ if (!this.motionReduced) {
       : 0xb9f5ff
   );
 
-  const dashTrail =
-    this.add
-      .circle(
-        this.player.x -
-          direction * 22,
-        this.player.y,
-        10,
-        0x8df4ff,
-        0.24
-      )
-      .setDepth(9);
+const dashTrail =
+  this.add
+    .circle(
+      this.player.x -
+        direction * 24,
+      this.player.y,
+      11,
+      0x8df4ff,
+      0.28
+    )
+    .setDepth(9);
 
-  this.tweens.add({
-    targets: dashTrail,
-    scaleX: 2.8,
-    scaleY: 0.7,
-    alpha: 0,
-    x:
-      dashTrail.x -
-      direction * 42,
-    duration: 180,
-    ease: 'Quad.out',
-    onComplete: () =>
-      dashTrail.destroy()
-  });
+this.tweens.add({
+  targets: dashTrail,
+  scaleX: 3.4,
+  scaleY: 0.65,
+  alpha: 0,
+  x:
+    dashTrail.x -
+    direction * 52,
+  duration: 155,
+  ease: 'Quad.out',
+  onComplete: () =>
+    dashTrail.destroy()
+});
 
   const dashCore =
     this.add
@@ -14813,17 +15572,17 @@ if (
       : 1
   );
 
-  if (hardLanding) {
-    this.shake(
-      70,
-      .002
-    );
+ if (hardLanding) {
+  this.shake(
+    105,
+    .0028
+  );
 
-    this.playerCue(
-      'HARD LANDING',
-      '#ffcf82'
-    );
-  }
+  this.playerCue(
+    'HARD LANDING',
+    '#ffcf82'
+  );
+}
 
   const landingPulse =
   this.add
@@ -14838,9 +15597,9 @@ if (
 
 this.tweens.add({
   targets: landingPulse,
-  scale: 4,
-  alpha: 0,
-  duration: 260,
+ scale: 4.4,
+alpha: 0,
+duration: 290,
   onComplete: () =>
     landingPulse.destroy()
 });
@@ -14849,14 +15608,20 @@ this.tweens.add({
     this.tweens.add({
       targets:
         this.player,
-      scaleX:
-        hardLanding
-          ? 1.12
-          : 1.04,
-      scaleY:
-        hardLanding
-          ? .82
-          : .94,
+scaleX:
+  this.playerVisualBaseScaleX *
+  (
+    hardLanding
+      ? 1.15
+      : 1.04
+  ),
+scaleY:
+  this.playerVisualBaseScaleY *
+  (
+    hardLanding
+      ? 0.80
+      : 0.94
+  ),
       yoyo: true,
       duration:
         hardLanding
@@ -14865,10 +15630,10 @@ this.tweens.add({
     });
   }
 
-  this.landingTimer =
-    110;
+ this.landingTimer =
+  hardLanding ? 135 : 105;
 
-  // ============================================================
+// ============================================================
 // PLAYER · LANDING SHOCKWAVE
 // ============================================================
 
@@ -14878,23 +15643,29 @@ if (!this.motionReduced) {
       .circle(
         this.player.x,
         this.player.y + 28,
-        hardLanding ? 9 : 6,
+        hardLanding ? 10 : 6,
         0x8df4ff,
-        0.22
+        hardLanding ? 0.30 : 0.22
       )
       .setDepth(10);
 
   landingShock.setStrokeStyle(
     hardLanding ? 2 : 1,
-    0xffcf82,
-    0.75
+    hardLanding
+      ? 0xffcf82
+      : 0x8df4ff,
+    hardLanding ? 0.9 : 0.75
   );
 
   this.tweens.add({
     targets: landingShock,
-    scale: hardLanding ? 3.8 : 2.8,
+    scale: hardLanding
+      ? 4.8
+      : 3.0,
     alpha: 0,
-    duration: hardLanding ? 240 : 180,
+    duration: hardLanding
+      ? 260
+      : 175,
     ease: 'Quad.out',
     onComplete: () =>
       landingShock.destroy()
@@ -14938,6 +15709,44 @@ if (
     'runner-wall',
     true
   );
+
+  // ============================================================
+  // PLAYER · WALL JUMP VISUAL KICK
+  // ============================================================
+  if (
+    !this.motionReduced &&
+    this.wallJumpTimer > 0 &&
+    this.wallJumpTimer > 95
+  ) {
+    const wallKick =
+      this.add
+        .circle(
+          this.player.x,
+          this.player.y,
+          7,
+          0x8df4ff,
+          0.26
+        )
+        .setDepth(10);
+
+    this.tweens.add({
+      targets: wallKick,
+      x:
+        wallKick.x +
+        (
+          this.player.flipX
+            ? 1
+            : -1
+        ) * 26,
+      scaleX: 2.8,
+      scaleY: 0.55,
+      alpha: 0,
+      duration: 150,
+      ease: 'Quad.out',
+      onComplete: () =>
+        wallKick.destroy()
+    });
+  }
 } else if (!onGround) {
   this.player.play(
     body.velocity.y < 0
@@ -14994,31 +15803,62 @@ if (
   !this.motionReduced &&
   Math.abs(body.velocity.y) > 100
 ) {
-  const airRatio =
-    Phaser.Math.Clamp(
-      Math.abs(body.velocity.y) /
-        RUNNER_TUNING.maxFallSpeed,
-      0,
-      1
-    );
+const verticalSpeed =
+  Math.abs(body.velocity.y);
 
-  const targetAirScaleX =
-    this.playerVisualBaseScaleX *
-    (1 + airRatio * 0.035);
+const airRatio =
+  Phaser.Math.Clamp(
+    verticalSpeed /
+      RUNNER_TUNING.maxFallSpeed,
+    0,
+    1
+  );
 
-  const targetAirScaleY =
-    this.playerVisualBaseScaleY *
-    (1 - airRatio * 0.05);
+// PLAYER · AIRBORNE APEX
+const apexRatio =
+  1 -
+  Phaser.Math.Clamp(
+    verticalSpeed / 180,
+    0,
+    1
+  );
+
+const rising =
+  body.velocity.y < 0;
+
+const targetAirScaleX =
+  this.playerVisualBaseScaleX *
+  (
+    1 +
+    (
+      rising
+        ? 0.022
+        : 0.042
+    ) * airRatio +
+    apexRatio * 0.018
+  );
+
+const targetAirScaleY =
+  this.playerVisualBaseScaleY *
+  (
+    1 -
+    (
+      rising
+        ? 0.028
+        : 0.058
+    ) * airRatio +
+    apexRatio * 0.012
+  );
 
   this.player.scaleX =
-    Phaser.Math.Linear(
-      this.player.scaleX,
-      targetAirScaleX,
-      Math.min(
-        1,
-        delta * 0.018
-      )
-    );
+  Phaser.Math.Linear(
+    this.player.scaleX,
+    targetAirScaleX,
+    Math.min(
+      1,
+      delta * 0.018
+    )
+  );
 
   this.player.scaleY =
     Phaser.Math.Linear(
@@ -15055,9 +15895,12 @@ if (
   !this.motionReduced &&
   Math.abs(body.velocity.x) > 120
 ) {
+  const runSpeed =
+    Math.abs(body.velocity.x);
+
   const runPulse =
     Phaser.Math.Clamp(
-      Math.abs(body.velocity.x) /
+      runSpeed /
         RUNNER_TUNING.maxRunSpeed,
       0,
       1
@@ -15073,14 +15916,81 @@ if (
         delta * 0.02
       )
     );
+
+  const runRate =
+    Phaser.Math.Linear(
+      11,
+      17,
+      runPulse
+    );
+
+  if (
+    this.player.anims?.currentAnim?.key ===
+    'runner-run'
+  ) {
+    this.player.anims.msPerFrame =
+      1000 / runRate;
+  }
 }
-} else {
+}
+
+ } else {
   this.player.play(
     'runner-idle',
     true
   );
+
+  // ============================================================
+  // PLAYER · RUN → IDLE TRANSITION
+  // ============================================================
+
+  if (
+    !this.motionReduced &&
+    this.player?.active
+  ) {
+    const idleVelocity =
+      Math.abs(
+        body.velocity.x
+      );
+
+    const idleSnap =
+      Phaser.Math.Clamp(
+        idleVelocity / 35,
+        0,
+        1
+      );
+
+    this.player.scaleX =
+      Phaser.Math.Linear(
+        this.player.scaleX,
+        this.playerVisualBaseScaleX *
+          (
+            1 +
+            idleSnap * 0.018
+          ),
+        Math.min(
+          1,
+          delta * 0.025
+        )
+      );
+
+    this.player.scaleY =
+      Phaser.Math.Linear(
+        this.player.scaleY,
+        this.playerVisualBaseScaleY *
+          (
+            1 -
+            idleSnap * 0.012
+          ),
+        Math.min(
+          1,
+          delta * 0.025
+        )
+      );
+  }
 }
 
+ 
   // ============================================================
 // PLAYER · SPEED LEAN / AIR TILT
 // ============================================================
@@ -15196,42 +16106,81 @@ if (
   ) > 280 &&
   this.speedTimer <= 0
 ) {
+  const direction =
+    Math.sign(body.velocity.x) || 1;
+
+  const speedRatio =
+    Phaser.Math.Clamp(
+      Math.abs(body.velocity.x) /
+        RUNNER_TUNING.maxRunSpeed,
+      0,
+      1
+    );
+
   this.speedLines.emitParticleAt(
     this.player.x -
-      Math.sign(
-        body.velocity.x
-      ) *
-        12,
+      direction * 12,
     this.player.y - 2,
     1
   );
+
+  const runStreakLength =
+    Phaser.Math.Linear(
+      22,
+      38,
+      speedRatio
+    );
+
   const runStreak =
-  this.add.rectangle(
-    this.player.x -
-      Math.sign(body.velocity.x) * 22,
-    this.player.y - 2,
-    22,
-    3,
-    0x8df4ff,
-    0.22
-  );
+    this.add.rectangle(
+      this.player.x -
+        direction *
+          (18 + runStreakLength * .35),
+      this.player.y - 2,
+      runStreakLength,
+      3,
+      0x8df4ff,
+      Phaser.Math.Linear(
+        .18,
+        .36,
+        speedRatio
+      )
+    );
 
-runStreak.setDepth(9);
+  runStreak.setDepth(9);
 
-this.tweens.add({
-  targets: runStreak,
-  scaleX: 2.4,
-  alpha: 0,
-  x:
-    runStreak.x -
-    Math.sign(body.velocity.x) * 26,
-  duration: 140,
-  ease: 'Quad.out',
-  onComplete: () =>
-    runStreak.destroy()
-});
+  this.tweens.add({
+    targets: runStreak,
+    scaleX: Phaser.Math.Linear(
+      2.2,
+      3.2,
+      speedRatio
+    ),
+    alpha: 0,
+    x:
+      runStreak.x -
+      direction *
+        Phaser.Math.Linear(
+          22,
+          38,
+          speedRatio
+        ),
+    duration: Phaser.Math.Linear(
+      150,
+      95,
+      speedRatio
+    ),
+    ease: 'Quad.out',
+    onComplete: () =>
+      runStreak.destroy()
+  });
 
-  this.speedTimer = 45;
+  this.speedTimer =
+    Phaser.Math.Linear(
+      52,
+      32,
+      speedRatio
+    );
 }
 
 /* -------------------------------------------------
@@ -15365,6 +16314,11 @@ if (
 }
 
 /* Smooth camera motion. */
+const directionChange =
+  Math.abs(
+    velocityX - this.cameraVelocityX
+  );
+
 const cameraLerpX =
   Math.min(
     1,
@@ -15372,9 +16326,14 @@ const cameraLerpX =
       (
         dashActive
           ? .009
-          : .0055
+          : directionChange > 180
+            ? .008
+            : .0055
       )
   );
+
+this.cameraVelocityX =
+  velocityX;
 
 const cameraLerpY =
   Math.min(
@@ -15415,8 +16374,8 @@ const cameraLerpZoom =
     delta *
       (
         dashActive
-          ? .009
-          : .0045
+          ? .012
+          : .0055
       )
   );
 
