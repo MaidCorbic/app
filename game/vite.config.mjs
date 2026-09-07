@@ -88,6 +88,57 @@ function relaySpecialEventCreditRewardFix() {
   return relayTransform('relay-special-event-credit-reward-fix', id => id.endsWith('/src/state.js'), patchSpecialEventCreditReward);
 }
 
+function relayRunnerZoomStabilityFix() {
+  return {
+    name: 'relay-runner-zoom-stability-fix',
+    enforce: 'post',
+    transform(code, id) {
+      const hasBrokenZoomSignature =
+        code.includes('CAMERA · SPEED ZOOM') ||
+        code.includes('targetZoom = 1.035') ||
+        code.includes('targetZoom = 1.026') ||
+        code.includes('targetZoom = 1.014') ||
+        code.includes('targetZoom = 1.045') ||
+        code.includes('this.cameras.main.zoom =');
+
+      if (!hasBrokenZoomSignature) return null;
+
+      let transformed = code;
+
+      transformed = transformed.replace(
+        /\/\/ CAMERA · SPEED ZOOM[\s\S]*?\n\}\s*\n\s*const parallaxBoost\s*=/,
+        'const parallaxBoost ='
+      );
+
+      transformed = transformed.replace(
+        /(\/\* Speed-based cinematic zoom\. \*\/)([\s\S]*?)(\/\* Smooth camera motion\. \*\/)/,
+        (_match, start, block, end) => `${start}${block.replace(/\btargetZoom\s*=\s*1\.(035|026|014|045)/g, 'cinematicTargetZoom = 1.$1')}${end}`
+      );
+
+      if (!/const targetZoom = Math\.max\(\s*cinematicTargetZoom,\s*speedZoomTarget\s*\);/.test(transformed)) {
+        transformed = transformed.replace(
+          /(const speedZoomTarget\s*=\s*1 \+ speedZoom;)/,
+          '$1\n\nconst targetZoom = Math.max(\n  cinematicTargetZoom,\n  speedZoomTarget\n);'
+        );
+      }
+
+      if (/targetZoom\s*=\s*1\.(035|026|014|045)/.test(transformed)) {
+        throw new Error(`relay-runner-zoom-stability-fix: unresolved targetZoom assignment in ${id}`);
+      }
+
+      if (!/const targetZoom = Math\.max\(\s*cinematicTargetZoom,\s*speedZoomTarget\s*\);/.test(transformed)) {
+        throw new Error(`relay-runner-zoom-stability-fix: missing final targetZoom declaration in ${id}`);
+      }
+
+      if (/this\.cameras\.main\.zoom\s*=/.test(transformed)) {
+        throw new Error(`relay-runner-zoom-stability-fix: duplicate direct camera zoom remains in ${id}`);
+      }
+
+      return { code: transformed, map: null };
+    },
+  };
+}
+
 export default defineConfig({
   server: {
     host: '0.0.0.0',
@@ -102,6 +153,7 @@ export default defineConfig({
     relayCheckpointCollectiblesFix(),
     relayRespawnTransientStateFix(),
     relaySpecialEventCreditRewardFix(),
+    relayRunnerZoomStabilityFix(),
     relayLegacyAssetAliases(),
   ],
   build: {
