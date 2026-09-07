@@ -14,7 +14,7 @@ const LEGACY_BINARY_ASSETS = [
   'assets/loading-landscape.jpg',
   'assets/homescreen.jpg'
 ];
-const FAVICON_ICO_BASE64 = 'AAABAAIAEBAAAAAAIACfAgAAJgAAACAgAAAAACAAMwIAAMUCAACJUE5HDQoaCgAAAA1JSERSAAAAEAAAABAIBgAAAB/z/2EAAAJmSURBVHicpZNNiE5hFMd/57nPfe97532HGVM+SrIQZYHksylZiaZkgyw0NqxkY+Nb+chGKcWCGqZGU0hJybAQJYkw1CiUIWY0MmPmfe+8H/fe51h4J5oZpZz9+Z3zP//zF7w6N6U+I3u2LByaNT38EccYESYtVfB9XP9AqeHs1Z7GkUJVZVpjg25bP+9Hvs7vrqYuEYdF9C8EQQ1JxjO2OBov7rzzvkEO7Fo9pMrLUxefLwfNwWTjxwMl2r9z6VMRltjZ03NDbz8NC2guV59NksSZ1Dm01uN5BusZnFMUsEZcVCznSpVE5s+ZOmQrsfPGRCeJGjHGTMmFGCMYIxQKJUaLZfxsBoC0toMRoRI7zxoZE2yolCusWLaAuzeOEscJcZwSJQlHjnXQee0hQQ3Cb4iaydROnT2T9s77LGrezbR8yJnjOwiyAc4pYuBPl+xEqxR1Kc45nHNEo2Xeve8nTRIQoVRyoO73FuMB1npoIWJX6zo+vG5j5owmDp28QlKtoKny4PJG1q6cy/eRCtbIREAcp6RhlvNtXazZsI9Y4eDezYRhwOOOTeTrfF709NOQC0hVxwFU8X0PP9NEPhfQ/eod7e1dtLSs4uXNVtI4ZfnW6wwXKvhWUAXjVGXsfNa3fOn7zvET57h97zmeH3D63C34+oSBvm8077iJ9T1EPJwqTlVs4JvUqQJKNptx/V8HOXL4ApAhzGfp7e1j/fZLPHsziDGGwPdctVQ1TiHwTWo/D0SNYWA/gkTFQqn2ynWAo1QsA4auR721exsKcWJAojDw9PNA1PhPYTKeoOmvNE4I0//G+SfQTTV7agRoCQAAAABJRU5ErkJggolQTkcNChoKAAAADUlIRFIAAAAgAAAAIAgGAAAAc3p69AAAAfpJREFUeJxjZOXg+c8wgIAFXeDXiaTntLSQzWKeJE4H/DqR9JzNYp7krxNJlTSyvB1mB1yQlYPnPysHz///F/KeQekKmBi1McxsmF2sHDz/GehlOS5HMCEFfyWbxbx2WgQ9lmiARzETPsX0AKMOGHAHYBRE2EBYgBXDkhn5GOI/f/1meP7iPcOJM7cY+qZvZrhw+QHJDqAoBNjZWBkU5MQYIoJsGA5vbWEwN1aljwP45GMYuGSiGGy9axjeffgCd0xBhg99HMDAwMDw589fhpNnbzNs3HYKLqYoL0Y/B8AAIyMjnP3y9UeS9ROVCLFqZGFmMNZXYvDzNIWLLVi+nz4O+PRwCQr/2fN3DA1dqxjWbzmJVf2vE0kMbBbzsMpRpRxgYWVm+PzlO07LkWmqOIBPPoZBQiOZYcaCXQwMDAwMYiL8DIun5zGYGChjtZyBgYH6IfDuwxeGwur5DFeuP2JgYICkib6WBJIsp8gBDAwMDH///mNo7l0D51uYqDG42OsRbTnFDmBgYGDYsPUUw/VbT+D8bZ0mRFtOFQf8//+foX3CegjnwU6SLCfaAas2HGNgkwiH4x8/f6PIr1h3hCzLiXYAMQBmKSmWU9UB5FhOdQeQA+AOQG+t0gpgtL4HumPCiNw5HYiuGYoDYI6gheVIjkDpnGI4gN4AABdNJqORWz8sAAAAAElFTkSuQmCC';
+const FAVICON_ICO_BASE64 = 'AAABAAIAEBAAAAAAIACfAgAAJgAAACAgAAAAACAAMwIAAMUCAACJUE5HDQoaCgAAAA1JSERSAAAAEAAAABAIBgAAAB/z/2EAAAJmSURBVHicpZNNiE5hFMd/57nPfe97532HGVM+SrIQZYHksylZiaZkgyw0NqxkY+Nb+chGKcWCGqZGU0hJybAQJYkw1CiUIWY0MmPmfe+8H/fe51h4J5oZpZz9+Z3zP//zF7w6N6U+I3u2LByaNT38EccYESYtVfB9XP9AqeHs1Z7GkUJVZVpjg25bP+9Hvs7vrqYuEYdF9C8EQQ1JxjO2OBov7rzzvkEO7Fo9pMrLUxefLwfNwWTjxwMl2r9z6VMRltjZ03NDbz8NC2guV59NksSZ1Dm01uN5BusZnFMUsEZcVCznSpVE5s+ZOmQrsfPGRCeJGjHGTMmFGCMYIxQKJUaLZfxsBoC0toMRoRI7zxoZE2yolCusWLaAuzeOEscJcZwSJQlHjnXQee0hQQ3Cb4iaydROnT2T9s77LGrezbR8yJnjOwiyAc4pYuBPl+xEqxR1Kc45nHNEo2Xeve8nTRIQoVRyoO73FuMB1npoIWJX6zo+vG5j5owmDp28QlKtoKny4PJG1q6cy/eRCtbIREAcp6RhlvNtXazZsI9Y4eDezYRhwOOOTeTrfF709NOQC0hVxwFU8X0PP9NEPhfQ/eod7e1dtLSs4uXNVtI4ZfnW6wwXKvhWUAXjVGXsfNa3fOn7zvET57h97zmeH3D63C34+oSBvm8077iJ9T1EPJwqTlVs4JvUqQJKNptx/V8HOXL4ApAhzGfp7e1j/fZLPHsziDGGwPdctVQ1TiHwTWo/D0SNYWA/gkTFQqn2ynWAo1QsA4auR721exsKcWJAojDw9PNA1PhPYTKeoOmvNEoI0//G+SfQTTV7agRoCQAAAABJRU5ErkJggolQTkcNChoKAAAADUlIRFIAAAAgAAAAIAgGAAAAc3p69AAAAfpJREFUeJxjZOXg+c8wgIAFXeDXiaTntLSQzWKeJE4H/DqR9JzNYp7krxNJlTSyvB1mB1yQlYPnPysHz///F/KeQekKmBi1McxsmF2sHDz/GehlOS5HMCEFfyWbxbx2WgQ9lmiARzETPsX0AKMOGHAHYBRE2EBYgBXDkhn5GOI/f/1meP7iPcOJM7cY+qZvZrhw+QHJDqAoBNjZWBkU5MQYIoJsGA5vbWEwN1aljwP45GMYuGSiGGy9axjeffgCd0xBhg99HMDAwMDw589fhpNnbzNs3HYKLqYoL0Y/B8AAIyMjnP3y9UeS9ROVCLFqZGFmMNZXYvDzNIWLLVi+nz4O+PRwCQr/2fN3DA1dqxjWbzmJVf2vE0kMbBbzsMpRpRxgYWVm+PzlO07LkWmqOIBPPoZBQiOZYcaCXQwMDAwMYiL8DIun5zGYGChjtZyBgYH6IfDuwxeGwur5DFeuP2JgYICkib6WBJIsp8gBDAwMDH///mNo7l0D51uYqDG42OsRbTnFDmBgYGDYsPUUw/VbT+D8bZ0mRFtOFQf8//+foX3CegjnwU6SLCfaAas2HGNgkwiH4x8/f6PIr1h3hCzLiXYAMQBmKSmWU9UB5FhOdQeQA+AOQG+t0gpgtL4HumPCiNw5HYiuGYoDYI6gheVIjkDpnGI4gN4AABdNJqORWz8sAAAAAElFTkSuQmCC';
 
 function relayLegacyAssetAliases() {
   let resolvedConfig;
@@ -93,6 +93,8 @@ function relayRunnerZoomStabilityFix() {
     name: 'relay-runner-zoom-stability-fix',
     enforce: 'post',
     transform(code, id) {
+      if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
+
       const hasBrokenZoomSignature =
         code.includes('CAMERA · SPEED ZOOM') ||
         code.includes('targetZoom = 1.035') ||
@@ -101,7 +103,11 @@ function relayRunnerZoomStabilityFix() {
         code.includes('targetZoom = 1.045') ||
         code.includes('this.cameras.main.zoom =');
 
-      if (!hasBrokenZoomSignature) return null;
+      const hasHardLandingTdzSignature =
+        code.includes('const hardLanding =\n  this.landingTimer > 0 &&') &&
+        code.includes("this.game.events.emit(\n  'feedback',\n  hardLanding");
+
+      if (!hasBrokenZoomSignature && !hasHardLandingTdzSignature) return null;
 
       let transformed = code;
 
@@ -120,6 +126,20 @@ function relayRunnerZoomStabilityFix() {
           /(const speedZoomTarget\s*=\s*1 \+ speedZoom;)/,
           '$1\n\nconst targetZoom = Math.max(\n  cinematicTargetZoom,\n  speedZoomTarget\n);'
         );
+      }
+
+      if (hasHardLandingTdzSignature || /const hardLanding =\s*this\.landingTimer\s*>\s*0\s*&&\s*this\.fallSpeed\s*>\s*260;/.test(transformed)) {
+        const hardLandingDecl = /const hardLanding =\s*this\.landingTimer\s*>\s*0\s*&&\s*this\.fallSpeed\s*>\s*260;/;
+        transformed = transformed.replace(hardLandingDecl, '');
+
+        transformed = transformed.replace(
+          /(this\.landingTimer\s*=\s*Math\.max\([\s\S]*?\);)(\s*if\s*\(\s*this\.dashTimer\s*>\s*0\s*\))/,
+          '$1\n\nconst hardLanding =\n  this.landingTimer > 0 &&\n  this.fallSpeed > 260;\n$2'
+        );
+
+        if (!transformed.includes("const hardLanding =\n  this.landingTimer > 0 &&\n  this.fallSpeed > 260;")) {
+          throw new Error(`relay-runner-zoom-stability-fix: failed to move hardLanding declaration in ${id}`);
+        }
       }
 
       if (/targetZoom\s*=\s*1\.(035|026|014|045)/.test(transformed)) {
