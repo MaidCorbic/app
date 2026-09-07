@@ -1,81 +1,1563 @@
 (() => {
   'use strict';
+
   if (window.__relayMobileCsgoFullMapV1) return;
   window.__relayMobileCsgoFullMapV1 = true;
 
   const isMobile = () => matchMedia('(max-width: 760px)').matches;
-  const scene = () => window.__relayRunnerScene || window.game?.scene?.getScene?.('runner') || null;
-  const intro = () => document.getElementById('relayGameplayIntroFinalV3');
-  const svg = () => intro()?.querySelector('.map-briefing-map');
-  const n = (v, d = 0) => Number.isFinite(Number(v)) ? Number(v) : d;
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  const scene = () =>
+    window.__relayRunnerScene ||
+    window.game?.scene?.getScene?.('runner') ||
+    null;
+
+  const intro = () =>
+    document.getElementById('relayGameplayIntroFinalV3');
+
+  const svg = () =>
+    intro()?.querySelector('.map-briefing-map');
+
+  const n = (v, d = 0) =>
+    Number.isFinite(Number(v)) ? Number(v) : d;
+
+  const clamp = (v, a, b) =>
+    Math.max(a, Math.min(b, v));
+
+
+  /* =========================================================
+     POINT
+     ========================================================= */
 
   function point(v, sx, sy) {
-    if (Array.isArray(v)) return { x: n(v[0]) * sx, y: n(v[1]) * sy };
-    return { x: n(v?.x) * sx, y: n(v?.y) * sy };
+    if (Array.isArray(v)) {
+      return {
+        x: n(v[0]) * sx,
+        y: n(v[1]) * sy
+      };
+    }
+
+    return {
+      x: n(v?.x) * sx,
+      y: n(v?.y) * sy
+    };
   }
 
+
+  /* =========================================================
+     DRAW MAP
+     ========================================================= */
+
   function draw() {
+
     if (!isMobile()) return;
-    const root = intro(), el = svg(), s = scene();
+
+    const root = intro();
+    const el = svg();
+    const s = scene();
+
     if (!root || !el || !s) return;
+
     const m = s.mission || {};
-    const worldW = n(s.physics?.world?.bounds?.width, n(m.goal?.x, 6100) + 300);
-    const worldH = n(s.physics?.world?.bounds?.height, 720);
-    const W = 1000, H = 560, sx = 900 / Math.max(worldW, 1), sy = 430 / Math.max(worldH, 1);
-    const X = x => 50 + clamp(n(x) * sx, 0, 900), Y = y => 55 + clamp(n(y) * sy, 0, 430);
-    const arr = k => Array.isArray(m[k]) ? m[k] : [];
+
+    const worldW =
+      n(
+        s.physics?.world?.bounds?.width,
+        n(m.goal?.x, 6100) + 300
+      );
+
+    const worldH =
+      n(
+        s.physics?.world?.bounds?.height,
+        720
+      );
+
+    const W = 1000;
+    const H = 560;
+
+    const sx =
+      900 / Math.max(worldW, 1);
+
+    const sy =
+      430 / Math.max(worldH, 1);
+
+    const X = x =>
+      50 + clamp(
+        n(x) * sx,
+        0,
+        900
+      );
+
+    const Y = y =>
+      55 + clamp(
+        n(y) * sy,
+        0,
+        430
+      );
+
+    const arr = k =>
+      Array.isArray(m[k])
+        ? m[k]
+        : [];
+
     const p = s.player || {};
-    const start = { x: X(m.spawn?.x ?? 120), y: Y(m.spawn?.y ?? 520) };
-    const goal = { x: X(m.goal?.x ?? worldW - 100), y: Y(m.goal?.y ?? 500) };
-    const you = { x: X(p.x ?? m.spawn?.x ?? 120), y: Y(p.y ?? m.spawn?.y ?? 520) };
-    const cps = arr('checkpoints').map(v => point(v, sx, sy));
-    const route = [start, ...cps, goal];
-    const path = route.map((v,i) => `${i?'L':'M'}${X(v.x/sx-50)/1} ${Y(v.y/sy-55)/1}`).join(' ');
-    const rects = k => arr(k).map(v => {
-      const a = Array.isArray(v) ? v : [v?.x, v?.y, v?.width ?? v?.w ?? 50, v?.height ?? v?.h ?? 20];
-      const x = X(a[0]), y = Y(a[1]), w = Math.max(5, n(a[2],50)*sx), h = Math.max(4,n(a[3],20)*sy);
-      return `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="world-block"/>`;
-    }).join('');
-    const dots = (k, cls, label='') => arr(k).map((v,i) => { const q=point(v,sx,sy); return `<g class="${cls}"><circle cx="${X(q.x/sx-50)}" cy="${Y(q.y/sy-55)}" r="${cls==='hostile'?7:5}"/><text x="${X(q.x/sx-50)+10}" y="${Y(q.y/sy-55)+3}">${label || (cls==='checkpoint' ? 'CP '+(i+1) : '')}</text></g>`; }).join('');
-    const cpMarkup = cps.map((q,i)=>`<g class="checkpoint"><circle cx="${X(q.x/sx-50)}" cy="${Y(q.y/sy-55)}" r="12"/><circle cx="${X(q.x/sx-50)}" cy="${Y(q.y/sy-55)}" r="3"/><text x="${X(q.x/sx-50)+15}" y="${Y(q.y/sy-55)+3}">CP ${i+1}</text></g>`).join('');
-    const grid = Array.from({length:10},(_,i)=>`<path d="M${i*100} 0V560"/><path d="M0 ${i*56}H1000"/>`).join('');
-    el.innerHTML = `<style>
-      .bg{fill:#050505}.grid{stroke:#242424;stroke-width:1;opacity:.7}.world-block{fill:#161616;stroke:#4d4d4d;stroke-width:2}.route{fill:none;stroke:#f2c94c;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}.routeGlow{fill:none;stroke:#f2c94c;stroke-width:12;opacity:.08}.checkpoint circle:first-child{fill:#101010;stroke:#f2c94c;stroke-width:2}.checkpoint circle:nth-child(2){fill:#f2c94c}.checkpoint text{fill:#f2c94c;font:700 10px ui-monospace,monospace}.start circle{fill:#68d391;stroke:#d8ffe7;stroke-width:2}.start text{fill:#8ff0ae;font:700 10px ui-monospace,monospace}.goal circle{fill:#f2c94c;stroke:#fff0b0;stroke-width:2}.goal text{fill:#f2c94c;font:700 10px ui-monospace,monospace}.you circle{fill:#63d9ff;stroke:#fff;stroke-width:2}.you text{fill:#63d9ff;font:700 10px ui-monospace,monospace}.hostile circle{fill:#d64c4c;stroke:#ffb0b0;stroke-width:2}.hostile text{fill:#ff8f8f;font:700 8px ui-monospace,monospace}.signal circle{fill:#9ee6ff;stroke:#fff;stroke-width:1}.signal text{fill:#9ee6ff;font:700 8px ui-monospace,monospace}.legend{fill:#a9a9a9;font:700 9px ui-monospace,monospace;letter-spacing:.08em}.district{fill:#6d6d6d;font:700 12px ui-monospace,monospace;letter-spacing:.16em}.road{stroke:#303030;stroke-width:18;opacity:.8}.road2{stroke:#171717;stroke-width:10}.border{fill:none;stroke:#555;stroke-width:2}.scan{fill:url(#scan);opacity:.14}</style>
-      <defs><pattern id="scan" width="1" height="8" patternUnits="userSpaceOnUse"><rect width="1" height="1" fill="#fff"/></pattern></defs>
-      <rect width="1000" height="560" class="bg"/><g class="grid">${grid}</g>
-      <path d="M40 470 Q280 400 470 300 T960 80" class="road"/><path d="M40 470 Q280 400 470 300 T960 80" class="road2"/>
-      ${rects('platforms')}${rects('obstacles')}${rects('movingGates')}
-      <path d="${path}" class="routeGlow"/><path d="${path}" class="route"/>
-      ${cpMarkup}${dots('enemies','hostile','HOSTILE')}${dots('signals','signal','SIGNAL')}${dots('boostPads','signal','BOOST')}
-      <g class="start"><circle cx="${start.x}" cy="${start.y}" r="8"/><text x="${start.x+14}" y="${start.y+4}">START</text></g>
-      <g class="goal"><circle cx="${goal.x}" cy="${goal.y}" r="9"/><text x="${goal.x+14}" y="${goal.y+4}">TARGET</text></g>
-      <g class="you"><circle cx="${you.x}" cy="${you.y}" r="7"/><text x="${you.x+12}" y="${you.y-10}">YOU</text></g>
-      <text x="30" y="30" class="district">${String(m.district || 'CURRENT DISTRICT').toUpperCase()}</text>
-      <text x="970" y="530" text-anchor="end" class="legend">ROUTE  CHECKPOINT  TARGET  HOSTILE  SIGNAL  YOU</text>
-      <rect x="10" y="10" width="980" height="540" class="border"/><rect width="1000" height="560" class="scan"/>
+
+
+    /* =======================================================
+       POSITIONS
+       ======================================================= */
+
+    const start = {
+      x: X(m.spawn?.x ?? 120),
+      y: Y(m.spawn?.y ?? 520)
+    };
+
+    const goal = {
+      x: X(m.goal?.x ?? worldW - 100),
+      y: Y(m.goal?.y ?? 500)
+    };
+
+    const you = {
+      x: X(p.x ?? m.spawn?.x ?? 120),
+      y: Y(p.y ?? m.spawn?.y ?? 520)
+    };
+
+
+    /* =======================================================
+       CHECKPOINTS
+       ======================================================= */
+
+    const cps =
+      arr('checkpoints')
+        .map(v => point(v, sx, sy));
+
+
+    /* =======================================================
+       ROUTE
+       ======================================================= */
+
+    const route = [
+      start,
+      ...cps,
+      goal
+    ];
+
+    const path =
+      route
+        .map((v, i) =>
+          `${i ? 'L' : 'M'}${X(v.x / sx - 50)} ${Y(v.y / sy - 55)}`
+        )
+        .join(' ');
+
+
+    /* =======================================================
+       MAP BLOCKS
+       ======================================================= */
+
+    const rects = k =>
+      arr(k)
+        .map(v => {
+
+          const a =
+            Array.isArray(v)
+              ? v
+              : [
+                  v?.x,
+                  v?.y,
+                  v?.width ?? v?.w ?? 50,
+                  v?.height ?? v?.h ?? 20
+                ];
+
+          const x = X(a[0]);
+
+          const y = Y(a[1]);
+
+          const w =
+            Math.max(
+              5,
+              n(a[2], 50) * sx
+            );
+
+          const h =
+            Math.max(
+              4,
+              n(a[3], 20) * sy
+            );
+
+          return `
+            <rect
+              x="${x}"
+              y="${y}"
+              width="${w}"
+              height="${h}"
+              class="world-block"
+            />
+          `;
+        })
+        .join('');
+
+
+    /* =======================================================
+       DOTS
+       ======================================================= */
+
+    const dots = (
+      k,
+      cls,
+      label = ''
+    ) =>
+      arr(k)
+        .map((v, i) => {
+
+          const q =
+            point(v, sx, sy);
+
+          const cx =
+            X(q.x / sx - 50);
+
+          const cy =
+            Y(q.y / sy - 55);
+
+          const radius =
+            cls === 'hostile'
+              ? 7
+              : 5;
+
+          return `
+            <g class="${cls}">
+              <circle
+                cx="${cx}"
+                cy="${cy}"
+                r="${radius}"
+              />
+
+              <text
+                x="${cx + 10}"
+                y="${cy + 3}"
+              >
+                ${
+                  label ||
+                  (
+                    cls === 'checkpoint'
+                      ? 'CP ' + (i + 1)
+                      : ''
+                  )
+                }
+              </text>
+            </g>
+          `;
+        })
+        .join('');
+
+
+    /* =======================================================
+       CHECKPOINT MARKERS
+       ======================================================= */
+
+    const cpMarkup =
+      cps
+        .map((q, i) => {
+
+          const cx =
+            X(q.x / sx - 50);
+
+          const cy =
+            Y(q.y / sy - 55);
+
+          return `
+            <g class="checkpoint">
+
+              <circle
+                cx="${cx}"
+                cy="${cy}"
+                r="13"
+              />
+
+              <circle
+                cx="${cx}"
+                cy="${cy}"
+                r="3"
+              />
+
+              <text
+                x="${cx + 17}"
+                y="${cy + 3}"
+              >
+                CP ${i + 1}
+              </text>
+
+            </g>
+          `;
+        })
+        .join('');
+
+
+    /* =======================================================
+       GRID
+       ======================================================= */
+
+    const grid =
+      Array.from(
+        { length: 10 },
+        (_, i) => `
+          <path d="M${i * 100} 0V560"/>
+          <path d="M0 ${i * 56}H1000"/>
+        `
+      )
+      .join('');
+
+
+    /* =======================================================
+       SVG
+       ======================================================= */
+
+    el.innerHTML = `
+
+      <style>
+
+        /* =====================================================
+           BASE
+           ===================================================== */
+
+        .bg {
+          fill: #030405;
+        }
+
+        .grid {
+          stroke: #24282a;
+          stroke-width: 1;
+          opacity: .72;
+        }
+
+
+        /* =====================================================
+           MAP STRUCTURES
+           ===================================================== */
+
+        .world-block {
+          fill: #111416;
+          stroke: #4a4f52;
+          stroke-width: 2;
+        }
+
+
+        /* =====================================================
+           ROADS
+           ===================================================== */
+
+        .road {
+          stroke: #252a2d;
+          stroke-width: 19;
+          opacity: .85;
+        }
+
+        .road2 {
+          stroke: #0b0d0e;
+          stroke-width: 11;
+        }
+
+
+        /* =====================================================
+           ROUTE
+           ===================================================== */
+
+        .routeGlow {
+          fill: none;
+          stroke: #f2c94c;
+          stroke-width: 14;
+          opacity: .08;
+        }
+
+        .route {
+          fill: none;
+          stroke: #f2c94c;
+          stroke-width: 5;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+
+          filter:
+            drop-shadow(
+              0 0 5px
+              rgba(242,201,76,.5)
+            );
+
+          animation:
+            tacticalRoute 2.8s
+            ease-in-out
+            infinite;
+        }
+
+
+        /* =====================================================
+           CHECKPOINT
+           ===================================================== */
+
+        .checkpoint circle:first-child {
+          fill: #07090a;
+          stroke: #f2c94c;
+          stroke-width: 2;
+
+          filter:
+            drop-shadow(
+              0 0 5px
+              rgba(242,201,76,.35)
+            );
+        }
+
+        .checkpoint circle:nth-child(2) {
+          fill: #f2c94c;
+
+          filter:
+            drop-shadow(
+              0 0 5px
+              rgba(242,201,76,.7)
+            );
+        }
+
+        .checkpoint text {
+          fill: #f2c94c;
+
+          font:
+            900 10px
+            ui-monospace,
+            SFMono-Regular,
+            Menlo,
+            Monaco,
+            Consolas,
+            monospace;
+
+          letter-spacing: .1em;
+        }
+
+
+        /* =====================================================
+           START
+           ===================================================== */
+
+        .start circle {
+          fill: #4fd889;
+          stroke: #e1ffeb;
+          stroke-width: 2;
+
+          filter:
+            drop-shadow(
+              0 0 7px
+              rgba(79,216,137,.55)
+            );
+        }
+
+        .start text {
+          fill: #75eba1;
+
+          font:
+            900 10px
+            ui-monospace,
+            monospace;
+
+          letter-spacing: .12em;
+        }
+
+
+        /* =====================================================
+           PLAYER
+           ===================================================== */
+
+        .you circle {
+          fill: #4dd8ff;
+          stroke: #ffffff;
+          stroke-width: 2;
+
+          filter:
+            drop-shadow(
+              0 0 9px
+              rgba(77,216,255,.85)
+            );
+
+          animation:
+            playerPulse 1.5s
+            ease-in-out
+            infinite;
+        }
+
+        .you text {
+          fill: #55dcff;
+
+          font:
+            900 10px
+            ui-monospace,
+            monospace;
+
+          letter-spacing: .12em;
+
+          filter:
+            drop-shadow(
+              0 0 4px
+              rgba(77,216,255,.5)
+            );
+        }
+
+
+        /* =====================================================
+           TARGET
+           ===================================================== */
+
+        .goal circle {
+          fill: #f2c94c;
+          stroke: #fff3b5;
+          stroke-width: 2;
+
+          filter:
+            drop-shadow(
+              0 0 10px
+              rgba(242,201,76,.7)
+            );
+
+          transform-box: fill-box;
+          transform-origin: center;
+
+          animation:
+            targetPulse 1.8s
+            ease-in-out
+            infinite;
+        }
+
+        .goal text {
+          fill: #f2c94c;
+
+          font:
+            900 10px
+            ui-monospace,
+            monospace;
+
+          letter-spacing: .12em;
+        }
+
+
+        /* =====================================================
+           HOSTILES
+           ===================================================== */
+
+        .hostile circle {
+          fill: #b82f38;
+          stroke: #ff9a9a;
+          stroke-width: 2;
+
+          filter:
+            drop-shadow(
+              0 0 7px
+              rgba(210,45,55,.6)
+            );
+
+          animation:
+            hostilePulse 2s
+            ease-in-out
+            infinite;
+        }
+
+        .hostile text {
+          fill: #ff8585;
+
+          font:
+            900 8px
+            ui-monospace,
+            monospace;
+
+          letter-spacing: .08em;
+        }
+
+
+        /* =====================================================
+           SIGNAL / BOOST
+           ===================================================== */
+
+        .signal circle {
+          fill: #79ddff;
+          stroke: #ecfbff;
+          stroke-width: 1.5;
+
+          filter:
+            drop-shadow(
+              0 0 6px
+              rgba(121,221,255,.55)
+            );
+        }
+
+        .signal text {
+          fill: #79ddff;
+
+          font:
+            900 8px
+            ui-monospace,
+            monospace;
+
+          letter-spacing: .08em;
+        }
+
+
+        /* =====================================================
+           DISTRICT
+           ===================================================== */
+
+        .district {
+          fill: #f2c94c;
+
+          font:
+            900 12px
+            ui-monospace,
+            monospace;
+
+          letter-spacing: .18em;
+
+          paint-order: stroke;
+
+          stroke: #030405;
+          stroke-width: 4px;
+        }
+
+
+        /* =====================================================
+           LEGEND
+           ===================================================== */
+
+        .legend {
+          fill: rgba(235,235,235,.62);
+
+          font:
+            800 8px
+            ui-monospace,
+            monospace;
+
+          letter-spacing: .1em;
+        }
+
+
+        /* =====================================================
+           BORDER
+           ===================================================== */
+
+        .border {
+          fill: none;
+
+          stroke:
+            rgba(242,201,76,.5);
+
+          stroke-width: 2;
+        }
+
+
+        /* =====================================================
+           SCAN
+           ===================================================== */
+
+        .scan {
+          fill: url(#scan);
+          opacity: .055;
+
+          pointer-events: none;
+        }
+
+
+        /* =====================================================
+           ANIMATIONS
+           ===================================================== */
+
+        @keyframes tacticalRoute {
+
+          0%,
+          100% {
+            opacity: .75;
+          }
+
+          50% {
+            opacity: 1;
+          }
+        }
+
+
+        @keyframes playerPulse {
+
+          0%,
+          100% {
+            opacity: 1;
+
+            filter:
+              drop-shadow(
+                0 0 5px
+                rgba(77,216,255,.5)
+              );
+          }
+
+          50% {
+            opacity: .72;
+
+            filter:
+              drop-shadow(
+                0 0 13px
+                rgba(77,216,255,1)
+              );
+          }
+        }
+
+
+        @keyframes targetPulse {
+
+          0%,
+          100% {
+            opacity: .82;
+            transform: scale(1);
+          }
+
+          50% {
+            opacity: 1;
+            transform: scale(1.13);
+          }
+        }
+
+
+        @keyframes hostilePulse {
+
+          0%,
+          100% {
+            opacity: .75;
+          }
+
+          50% {
+            opacity: 1;
+          }
+        }
+
+      </style>
+
+
+      <defs>
+
+        <pattern
+          id="scan"
+          width="1"
+          height="8"
+          patternUnits="userSpaceOnUse"
+        >
+          <rect
+            width="1"
+            height="1"
+            fill="#ffffff"
+          />
+        </pattern>
+
+      </defs>
+
+
+      <!-- BACKGROUND -->
+
+      <rect
+        width="1000"
+        height="560"
+        class="bg"
+      />
+
+
+      <!-- GRID -->
+
+      <g class="grid">
+        ${grid}
+      </g>
+
+
+      <!-- ROAD -->
+
+      <path
+        d="M40 470 Q280 400 470 300 T960 80"
+        class="road"
+      />
+
+      <path
+        d="M40 470 Q280 400 470 300 T960 80"
+        class="road2"
+      />
+
+
+      <!-- WORLD -->
+
+      ${rects('platforms')}
+
+      ${rects('obstacles')}
+
+      ${rects('movingGates')}
+
+
+      <!-- ROUTE -->
+
+      <path
+        d="${path}"
+        class="routeGlow"
+      />
+
+      <path
+        d="${path}"
+        class="route"
+      />
+
+
+      <!-- CHECKPOINTS -->
+
+      ${cpMarkup}
+
+
+      <!-- HOSTILES -->
+
+      ${dots(
+        'enemies',
+        'hostile',
+        'HOSTILE'
+      )}
+
+
+      <!-- SIGNALS -->
+
+      ${dots(
+        'signals',
+        'signal',
+        'SIGNAL'
+      )}
+
+
+      <!-- BOOST -->
+
+      ${dots(
+        'boostPads',
+        'signal',
+        'BOOST'
+      )}
+
+
+      <!-- START -->
+
+      <g class="start">
+
+        <circle
+          cx="${start.x}"
+          cy="${start.y}"
+          r="8"
+        />
+
+        <text
+          x="${start.x + 14}"
+          y="${start.y + 4}"
+        >
+          START
+        </text>
+
+      </g>
+
+
+      <!-- TARGET -->
+
+      <g class="goal">
+
+        <circle
+          cx="${goal.x}"
+          cy="${goal.y}"
+          r="9"
+        />
+
+        <text
+          x="${goal.x + 14}"
+          y="${goal.y + 4}"
+        >
+          TARGET
+        </text>
+
+      </g>
+
+
+      <!-- PLAYER -->
+
+      <g class="you">
+
+        <circle
+          cx="${you.x}"
+          cy="${you.y}"
+          r="7"
+        />
+
+        <text
+          x="${you.x + 12}"
+          y="${you.y - 10}"
+        >
+          YOU
+        </text>
+
+      </g>
+
+
+      <!-- DISTRICT -->
+
+      <text
+        x="30"
+        y="30"
+        class="district"
+      >
+        ${String(
+          m.district ||
+          'CURRENT DISTRICT'
+        ).toUpperCase()}
+      </text>
+
+
+      <!-- LEGEND -->
+
+      <text
+        x="970"
+        y="530"
+        text-anchor="end"
+        class="legend"
+      >
+        ROUTE  CHECKPOINT  TARGET  HOSTILE  SIGNAL  YOU
+      </text>
+
+
+      <!-- BORDER -->
+
+      <rect
+        x="10"
+        y="10"
+        width="980"
+        height="540"
+        class="border"
+      />
+
+
+      <!-- SCAN -->
+
+      <rect
+        width="1000"
+        height="560"
+        class="scan"
+      />
+
     </svg>`;
   }
 
-  const css = document.createElement('style');
+
+  /* =========================================================
+     NEW MOBILE HUD CSS
+     ========================================================= */
+
+  const css =
+    document.createElement('style');
+
   css.textContent = `
-    @media(max-width:760px){
-      #relayGameplayIntroFinalV3 .map-briefing-shell{width:100vw!important;height:100dvh!important;padding:8px!important;gap:8px!important;border:0!important;border-radius:0!important;background:#050505!important;box-shadow:none!important}
-      #relayGameplayIntroFinalV3 .map-briefing-head{padding:5px 6px!important}
-      #relayGameplayIntroFinalV3 .map-briefing-kicker{color:#f2c94c!important}
-      #relayGameplayIntroFinalV3 .map-briefing-title{color:#f5f5f5!important;font-size:22px!important}
-      #relayGameplayIntroFinalV3 .map-briefing-timer{border-color:rgba(242,201,76,.5)!important;background:#0b0b0b!important}
-      #relayGameplayIntroFinalV3 .map-briefing-timer b{color:#f2c94c!important}
-      #relayGameplayIntroFinalV3 .map-briefing-map-wrap{border:1px solid #3c3c3c!important;border-radius:4px!important;background:#050505!important}
-      #relayGameplayIntroFinalV3 .map-briefing-map{background:#050505!important}
-      #relayGameplayIntroFinalV3 .map-briefing-scan,#relayGameplayIntroFinalV3 .map-briefing-vignette,#relayGameplayIntroFinalV3 .map-briefing-tag{display:none!important}
-      #relayGameplayIntroFinalV3 .map-briefing-foot{padding:4px 6px!important;color:#777!important}
+
+    /* =======================================================
+       FULLSCREEN ROOT
+       ======================================================= */
+
+    @media (max-width: 760px) {
+
+      #relayGameplayIntroFinalV3 {
+
+        position: fixed !important;
+
+        inset: 0 !important;
+
+        width: 100vw !important;
+
+        height: 100dvh !important;
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+        overflow: hidden !important;
+
+        background:
+          #020304 !important;
+
+        color: #f4f4f4 !important;
+
+        isolation: isolate !important;
+
+        z-index: 500 !important;
+      }
+
+
+      /* =====================================================
+         SHELL
+         ===================================================== */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-shell {
+
+        position: absolute !important;
+
+        inset: 0 !important;
+
+        width: 100% !important;
+
+        height: 100% !important;
+
+        min-width: 0 !important;
+
+        min-height: 0 !important;
+
+        display: grid !important;
+
+        grid-template-rows:
+          auto
+          minmax(0, 1fr)
+          auto !important;
+
+        gap: 0 !important;
+
+        padding:
+          max(7px, env(safe-area-inset-top))
+          7px
+          max(7px, env(safe-area-inset-bottom))
+          7px !important;
+
+        border: 0 !important;
+
+        border-radius: 0 !important;
+
+        background:
+          linear-gradient(
+            180deg,
+            #07090a 0%,
+            #020304 100%
+          ) !important;
+
+        box-shadow: none !important;
+
+        overflow: hidden !important;
+      }
+
+
+      /* =====================================================
+         HEADER
+         ===================================================== */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-head {
+
+        position: relative !important;
+
+        display: grid !important;
+
+        grid-template-columns:
+          minmax(0, 1fr)
+          auto !important;
+
+        align-items: center !important;
+
+        min-height: 61px !important;
+
+        margin:
+          0 0 7px !important;
+
+        padding:
+          8px 10px 9px 13px !important;
+
+        border:
+          1px solid
+          rgba(242,201,76,.32) !important;
+
+        background:
+          linear-gradient(
+            135deg,
+            rgba(19,22,24,.98),
+            rgba(5,7,8,.99)
+          ) !important;
+
+        box-shadow:
+          inset 0 1px
+          rgba(255,255,255,.035),
+          0 8px 28px
+          rgba(0,0,0,.5) !important;
+
+        overflow: hidden !important;
+      }
+
+
+      /* LEFT TACTICAL STRIPE */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-head::before {
+
+        content: "" !important;
+
+        position: absolute !important;
+
+        top: 0 !important;
+
+        left: 0 !important;
+
+        width: 4px !important;
+
+        height: 100% !important;
+
+        background:
+          #f2c94c !important;
+
+        box-shadow:
+          0 0 13px
+          rgba(242,201,76,.6) !important;
+      }
+
+
+      /* TOP RIGHT STATUS */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-head::after {
+
+        content:
+          "TACTICAL // LIVE" !important;
+
+        position: absolute !important;
+
+        right: 9px !important;
+
+        bottom: 4px !important;
+
+        color:
+          rgba(242,201,76,.45) !important;
+
+        font:
+          800 7px
+          ui-monospace,
+          monospace !important;
+
+        letter-spacing:
+          .18em !important;
+
+        pointer-events: none !important;
+      }
+
+
+      /* =====================================================
+         KICKER
+         ===================================================== */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-kicker {
+
+        margin: 0 0 3px !important;
+
+        color:
+          #f2c94c !important;
+
+        font:
+          900 8px
+          ui-monospace,
+          monospace !important;
+
+        letter-spacing:
+          .22em !important;
+
+        text-transform:
+          uppercase !important;
+      }
+
+
+      /* =====================================================
+         TITLE
+         ===================================================== */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-title {
+
+        margin: 0 !important;
+
+        max-width:
+          calc(100vw - 105px) !important;
+
+        color:
+          #f5f5f5 !important;
+
+        font:
+          900 clamp(17px, 5vw, 23px)
+          ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Monaco,
+          Consolas,
+          monospace !important;
+
+        line-height: 1.05 !important;
+
+        letter-spacing:
+          .055em !important;
+
+        text-transform:
+          uppercase !important;
+
+        white-space:
+          nowrap !important;
+
+        overflow:
+          hidden !important;
+
+        text-overflow:
+          ellipsis !important;
+      }
+
+
+      /* =====================================================
+         TIMER
+         ===================================================== */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-timer {
+
+        min-width: 69px !important;
+
+        padding:
+          7px 8px !important;
+
+        border:
+          1px solid
+          rgba(242,201,76,.48) !important;
+
+        background:
+          #090b0b !important;
+
+        box-shadow:
+          inset 0 0 15px
+          rgba(242,201,76,.05),
+          0 0 16px
+          rgba(242,201,76,.08) !important;
+
+        text-align:
+          center !important;
+      }
+
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-timer b {
+
+        display: block !important;
+
+        color:
+          #f2c94c !important;
+
+        font:
+          900 18px
+          ui-monospace,
+          monospace !important;
+
+        line-height:
+          1 !important;
+
+        letter-spacing:
+          .08em !important;
+
+        text-shadow:
+          0 0 9px
+          rgba(242,201,76,.35) !important;
+      }
+
+
+      /* =====================================================
+         MAP CONTAINER
+         ===================================================== */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-map-wrap {
+
+        position: relative !important;
+
+        width: 100% !important;
+
+        height: 100% !important;
+
+        min-width: 0 !important;
+
+        min-height: 0 !important;
+
+        margin: 0 !important;
+
+        border:
+          1px solid
+          rgba(242,201,76,.35) !important;
+
+        border-radius:
+          3px !important;
+
+        background:
+          #020304 !important;
+
+        box-shadow:
+          inset 0 0 0 1px
+          rgba(255,255,255,.018),
+          inset 0 0 70px
+          rgba(0,0,0,.8),
+          0 10px 35px
+          rgba(0,0,0,.55) !important;
+
+        overflow:
+          hidden !important;
+      }
+
+
+      /* =====================================================
+         SVG
+         ===================================================== */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-map {
+
+        display:
+          block !important;
+
+        width:
+          100% !important;
+
+        height:
+          100% !important;
+
+        min-width:
+          0 !important;
+
+        min-height:
+          0 !important;
+
+        background:
+          #020304 !important;
+
+        overflow:
+          hidden !important;
+
+        touch-action:
+          none !important;
+      }
+
+
+      /* =====================================================
+         FOOTER
+         ===================================================== */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-foot {
+
+        display:
+          flex !important;
+
+        align-items:
+          center !important;
+
+        justify-content:
+          space-between !important;
+
+        min-height:
+          27px !important;
+
+        margin:
+          7px 0 0 !important;
+
+        padding:
+          5px 7px !important;
+
+        border-top:
+          1px solid
+          rgba(255,255,255,.07) !important;
+
+        color:
+          rgba(210,210,210,.5) !important;
+
+        font:
+          800 7px
+          ui-monospace,
+          monospace !important;
+
+        letter-spacing:
+          .1em !important;
+
+        text-transform:
+          uppercase !important;
+
+        white-space:
+          nowrap !important;
+
+        overflow:
+          hidden !important;
+      }
+
+
+      /* =====================================================
+         OLD DECORATIVE OVERLAYS
+         ===================================================== */
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-scan,
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-vignette,
+
+      #relayGameplayIntroFinalV3
+      .map-briefing-tag {
+
+        pointer-events:
+          none !important;
+      }
+
+
+      /* =====================================================
+         SMALL PHONES
+         ===================================================== */
+
+      @media (max-width: 390px) {
+
+        #relayGameplayIntroFinalV3
+        .map-briefing-shell {
+
+          padding-left:
+            5px !important;
+
+          padding-right:
+            5px !important;
+        }
+
+
+        #relayGameplayIntroFinalV3
+        .map-briefing-head {
+
+          min-height:
+            55px !important;
+
+          padding:
+            7px 8px 8px 11px !important;
+        }
+
+
+        #relayGameplayIntroFinalV3
+        .map-briefing-title {
+
+          font-size:
+            15px !important;
+
+          max-width:
+            calc(100vw - 94px) !important;
+        }
+
+
+        #relayGameplayIntroFinalV3
+        .map-briefing-timer {
+
+          min-width:
+            61px !important;
+
+          padding:
+            6px !important;
+        }
+
+
+        #relayGameplayIntroFinalV3
+        .map-briefing-timer b {
+
+          font-size:
+            16px !important;
+        }
+      }
+
+
+      /* =====================================================
+         SHORT SCREEN
+         ===================================================== */
+
+      @media (max-height: 620px) {
+
+        #relayGameplayIntroFinalV3
+        .map-briefing-head {
+
+          min-height:
+            49px !important;
+
+          margin-bottom:
+            5px !important;
+        }
+
+
+        #relayGameplayIntroFinalV3
+        .map-briefing-foot {
+
+          min-height:
+            21px !important;
+
+          margin-top:
+            5px !important;
+        }
+      }
+
+
+      /* =====================================================
+         REDUCE MOTION
+         ===================================================== */
+
+      @media (prefers-reduced-motion: reduce) {
+
+        #relayGameplayIntroFinalV3
+        .route,
+
+        #relayGameplayIntroFinalV3
+        .you circle,
+
+        #relayGameplayIntroFinalV3
+        .goal circle,
+
+        #relayGameplayIntroFinalV3
+        .hostile circle {
+
+          animation:
+            none !important;
+        }
+      }
+
     }
+
   `;
+
   document.head.appendChild(css);
 
-  const tick = () => { if (intro()?.hidden === false) draw(); };
-  new MutationObserver(tick).observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden','class']});
-  window.addEventListener('resize',draw,{passive:true});
-  setInterval(tick,500);
+
+  /* =========================================================
+     REFRESH
+     ========================================================= */
+
+  const tick = () => {
+
+    if (
+      intro()?.hidden === false
+    ) {
+      draw();
+    }
+  };
+
+
+  new MutationObserver(
+    tick
+  ).observe(
+    document.body,
+    {
+      subtree: true,
+      attributes: true,
+      attributeFilter: [
+        'hidden',
+        'class'
+      ]
+    }
+  );
+
+
+  window.addEventListener(
+    'resize',
+    draw,
+    {
+      passive: true
+    }
+  );
+
+
+  setInterval(
+    tick,
+    500
+  );
+
 })();
