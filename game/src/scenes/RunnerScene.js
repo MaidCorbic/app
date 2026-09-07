@@ -15243,36 +15243,7 @@ const speed =
     body.velocity.x
   );
 
-  // ============================================================
-// CAMERA · SPEED ZOOM
-// ============================================================
 
-if (
-  !this.motionReduced &&
-  this.cameras?.main
-) {
-  const speedRatio =
-    Phaser.Math.Clamp(
-      speed /
-        RUNNER_TUNING.maxRunSpeed,
-      0,
-      1
-    );
-
-  const targetZoom =
-    1 +
-    speedRatio * 0.045;
-
-  this.cameras.main.zoom =
-    Phaser.Math.Linear(
-      this.cameras.main.zoom,
-      targetZoom,
-      Math.min(
-        1,
-        delta * 0.006
-      )
-    );
-}
 
 const parallaxBoost =
   !this.motionReduced
@@ -15372,20 +15343,16 @@ if (hardLanding) {
 }
 
 /* Speed-based cinematic zoom. */
-  
+
 let cinematicTargetZoom = 1;
-  
+
 if (!this.motionReduced) {
   if (speed > 520) {
-    targetZoom = 1.035;
-  } else if (
-    speed > 420
-  ) {
-    targetZoom = 1.026;
-  } else if (
-    speed > 330
-  ) {
-    targetZoom = 1.014;
+    cinematicTargetZoom = 1.035;
+  } else if (speed > 420) {
+    cinematicTargetZoom = 1.026;
+  } else if (speed > 330) {
+    cinematicTargetZoom = 1.014;
   }
 }
 
@@ -15394,7 +15361,7 @@ if (
   dashActive &&
   !this.motionReduced
 ) {
-  targetZoom = 1.045;
+  cinematicTargetZoom = 1.045;
 }
 
 /* Smooth camera motion. */
@@ -15436,6 +15403,11 @@ const speedZoom =
 
 const speedZoomTarget =
   1 + speedZoom;
+
+  const targetZoom = Math.max(
+  cinematicTargetZoom,
+  speedZoomTarget
+);
 
 const cameraLerpZoom =
   Math.min(
