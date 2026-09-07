@@ -715,18 +715,25 @@
       }
     }
 
-    #${ROOT_ID} .rv5-vignette {
-      position:absolute;
-      inset:0;
-      pointer-events:none;
+#${ROOT_ID} .rv5-vignette {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
 
-      background:
-        radial-gradient(
-          ellipse at center,
-          transparent 40%,
-          rgba(0,0,0,.68)
-        );
-    }
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(0,0,0,.38) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,.12),
+      transparent 18%,
+      transparent 82%,
+      rgba(0,0,0,.12)
+    );
+}
 
     #${ROOT_ID} .rv5-corner {
       position:absolute;
@@ -887,14 +894,28 @@
 
       background:rgba(1,6,10,.98);
     }
+    
+#${ROOT_ID} .rv5-objective{
+  display:flex;
+  align-items:center;
+  gap:14px;
 
-    #${ROOT_ID} .rv5-objective {
-      display:flex;
-      align-items:center;
-      gap:12px;
+  min-width:0;
 
-      min-width:0;
-    }
+  padding:9px 13px;
+
+  border:1px solid rgba(101,232,255,.12);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(101,232,255,.055),
+      rgba(101,232,255,.012)
+    );
+
+  box-shadow:
+    inset 0 0 20px rgba(101,232,255,.025);
+}
 
     #${ROOT_ID} .rv5-objective-icon {
       width:32px;
@@ -1262,6 +1283,937 @@
       }
     }
 
+        /* ============================================================
+       FINAL AAA READABILITY / MAP REDESIGN OVERRIDE
+       ============================================================ */
+
+    #${ROOT_ID} .rv5-shell{
+      width:min(1440px,98vw);
+      height:min(920px,96dvh);
+
+      background:
+        radial-gradient(
+          circle at 50% 45%,
+          rgba(55,190,225,.08),
+          transparent 42%
+        ),
+        linear-gradient(
+          145deg,
+          #06131b 0%,
+          #02080d 58%,
+          #010407 100%
+        );
+
+      border:1px solid rgba(101,232,255,.28);
+
+      box-shadow:
+        0 35px 120px rgba(0,0,0,.88),
+        0 0 80px rgba(65,205,235,.11),
+        inset 0 0 60px rgba(101,232,255,.025);
+    }
+
+    #${ROOT_ID} .rv5-header{
+      padding:22px 26px;
+      gap:24px;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(10,28,38,.72),
+          rgba(2,9,14,.35)
+        );
+
+      border-bottom:1px solid rgba(101,232,255,.14);
+    }
+
+    #${ROOT_ID} .rv5-live{
+      font-size:10px;
+      line-height:1.2;
+      letter-spacing:.13em;
+      color:#9cc1cc;
+      text-shadow:0 1px 8px rgba(0,0,0,.9);
+    }
+
+    #${ROOT_ID} .rv5-kicker{
+      font-size:10px;
+      line-height:1.25;
+      letter-spacing:.13em;
+      font-weight:950;
+      color:var(--yellow);
+      text-shadow:0 1px 8px rgba(0,0,0,.9);
+    }
+
+    #${ROOT_ID} h1{
+      font-size:clamp(32px,4.8vw,56px);
+      line-height:.95;
+      letter-spacing:.055em;
+      font-weight:950;
+
+      text-shadow:
+        0 0 20px rgba(255,255,255,.06),
+        0 0 32px rgba(101,232,255,.10);
+    }
+
+    #${ROOT_ID} .rv5-meta{
+      margin-top:10px;
+
+      color:#b1d0d8;
+
+      font-size:10px;
+      line-height:1.25;
+      font-weight:900;
+      letter-spacing:.09em;
+
+      text-shadow:0 1px 8px rgba(0,0,0,.95);
+    }
+
+   #${ROOT_ID} .rv5-timer{
+  position:relative;
+
+  width:92px;
+  height:92px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,215,106,.09) 0%,
+      rgba(255,215,106,.025) 42%,
+      transparent 72%
+    );
+
+  box-shadow:
+    0 0 24px rgba(255,215,106,.08),
+    inset 0 0 20px rgba(255,215,106,.035);
+}
+
+    #${ROOT_ID} .rv5-timer circle{
+      stroke-width:3;
+    }
+
+  #${ROOT_ID} .rv5-timer strong{
+  position:relative;
+  z-index:3;
+
+  font-size:31px;
+  line-height:1;
+
+  font-weight:950;
+
+  color:#ffe28b;
+
+  text-shadow:
+    0 0 8px rgba(255,215,106,.75),
+    0 0 22px rgba(255,215,106,.30);
+}
+
+    #${ROOT_ID} .rv5-timer small{
+      font-size:7px;
+      font-weight:900;
+      letter-spacing:.15em;
+    }
+
+    /* MAP BAR */
+
+    #${ROOT_ID} .rv5-mapbar{
+      min-height:42px;
+      padding:0 16px;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(5,20,29,.98),
+          rgba(2,9,14,.98)
+        );
+    }
+
+    #${ROOT_ID} .rv5-mapbar > div{
+      gap:7px;
+    }
+
+    #${ROOT_ID} .rv5-mapbar span{
+      padding:7px 10px;
+
+      color:#91b0bb;
+      font-size:9px;
+      line-height:1.1;
+      font-weight:950;
+      letter-spacing:.09em;
+
+      border:1px solid rgba(101,232,255,.13);
+      background:rgba(101,232,255,.025);
+    }
+
+    #${ROOT_ID} .rv5-mapbar span.active{
+      color:#72f1ff;
+
+      border-color:rgba(101,232,255,.38);
+
+      background:
+        linear-gradient(
+          90deg,
+          rgba(101,232,255,.10),
+          rgba(101,232,255,.025)
+        );
+
+      box-shadow:
+        inset 0 0 12px rgba(101,232,255,.04),
+        0 0 12px rgba(101,232,255,.05);
+    }
+
+    #${ROOT_ID} .rv5-mapbar b{
+      color:#a1bdc6;
+      font-size:9px;
+      line-height:1.1;
+      font-weight:950;
+      letter-spacing:.09em;
+    }
+
+    /* MAP */
+
+ #${ROOT_ID} .rv5-map{
+  position:relative;
+  overflow:hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(85,220,255,.13) 0%,
+      rgba(25,100,125,.055) 26%,
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      #041722 0%,
+      #020a10 52%,
+      #010509 100%
+    );
+
+  border-top:1px solid rgba(101,232,255,.16);
+  border-bottom:1px solid rgba(101,232,255,.16);
+
+  box-shadow:
+    inset 0 0 45px rgba(101,232,255,.035),
+    inset 0 0 100px rgba(0,0,0,.22);
+}
+
+#${ROOT_ID} .rv5-map::before{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  pointer-events:none;
+  z-index:4;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 49.8%,
+      rgba(101,232,255,.08) 50%,
+      transparent 50.2%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 49.8%,
+      rgba(101,232,255,.08) 50%,
+      transparent 50.2%
+    );
+
+  opacity:.65;
+}
+
+    #${ROOT_ID} .rv5-svg{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    /* stronger tactical grid */
+
+    #${ROOT_ID} .grid{
+      stroke:#163c50;
+      stroke-width:1;
+      opacity:.58;
+    }
+
+    #${ROOT_ID} .grid-major{
+      stroke:#286078;
+      stroke-width:1.6;
+      opacity:.48;
+    }
+
+    #${ROOT_ID} .platform{
+      fill:#0c2432;
+      stroke:#49778a;
+      stroke-width:1.5;
+    }
+
+    #${ROOT_ID} .edge{
+      stroke:#70e9ff;
+      opacity:.42;
+    }
+
+    /* ROUTE */
+
+ #${ROOT_ID} .route-halo{
+  fill:none;
+  stroke:#61e8ff;
+  stroke-width:26;
+  opacity:.14;
+
+  filter:
+    drop-shadow(0 0 10px rgba(101,232,255,.30));
+}
+
+ #${ROOT_ID} .route{
+  fill:none;
+
+  stroke:#6cf1ff;
+  stroke-width:5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+
+  stroke-dasharray:16 10;
+
+  animation:
+    rv5route 1.05s linear infinite;
+
+  filter:
+    drop-shadow(0 0 5px rgba(101,232,255,.95))
+    drop-shadow(0 0 14px rgba(101,232,255,.40));
+}
+
+    #${ROOT_ID} .route-core{
+      stroke:#f4fdff;
+      stroke-width:1.3;
+      opacity:.86;
+    }
+
+    /* MAP MARKERS */
+
+#${ROOT_ID} .start{
+  fill:#8df59b;
+
+  stroke:#f4ffe7;
+  stroke-width:3;
+
+  filter:
+    drop-shadow(0 0 6px rgba(141,245,155,.95))
+    drop-shadow(0 0 16px rgba(141,245,155,.38));
+
+  transform-box:fill-box;
+  transform-origin:center;
+}
+
+#${ROOT_ID} .goal{
+  fill:#ffd76a;
+
+  stroke:#fff8ce;
+  stroke-width:3;
+
+  filter:
+    drop-shadow(0 0 8px rgba(255,215,106,.95))
+    drop-shadow(0 0 20px rgba(255,215,106,.42));
+
+  transform-box:fill-box;
+  transform-origin:center;
+}
+
+  #${ROOT_ID} .player{
+  fill:#ffffff;
+  stroke:#64ebff;
+  stroke-width:3;
+
+  filter:
+    drop-shadow(0 0 5px rgba(100,235,255,.8))
+    drop-shadow(0 0 13px rgba(100,235,255,.28));
+}
+
+#${ROOT_ID} .player-ring{
+  fill:none;
+
+  stroke:#6ff3ff;
+  stroke-width:2.8;
+
+  stroke-dasharray:7 5;
+
+  opacity:1;
+
+  filter:
+    drop-shadow(0 0 5px rgba(100,235,255,.9))
+    drop-shadow(0 0 15px rgba(100,235,255,.32));
+
+  animation:
+    rv5ring 1.35s linear infinite;
+}
+
+    #${ROOT_ID} .checkpoint{
+  fill:rgba(100,235,255,.035);
+
+  stroke:#64ebff;
+  stroke-width:2;
+
+  filter:
+    drop-shadow(0 0 5px rgba(100,235,255,.35));
+}
+
+#${ROOT_ID} .checkpoint-dot{
+  fill:#ffffff;
+
+  filter:
+    drop-shadow(0 0 5px rgba(100,235,255,.80));
+}
+
+   #${ROOT_ID} .danger-object{
+  fill:#3a1725;
+
+  stroke:#ff6577;
+  stroke-width:2;
+
+  filter:
+    drop-shadow(0 0 5px rgba(255,104,119,.32));
+}
+
+    #${ROOT_ID} .signal{
+      fill:#ffd76a;
+
+      filter:
+        drop-shadow(0 0 6px rgba(255,215,106,.55));
+    }
+
+    /* MAP TEXT */
+
+    #${ROOT_ID} .label{
+      fill:#f2fbff;
+
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+     font-size:13px;
+font-weight:950;
+letter-spacing:.025em;
+
+      paint-order:stroke;
+
+      stroke:#02070b;
+      stroke-width:3.5px;
+      stroke-linejoin:round;
+
+      text-shadow:
+        0 2px 8px rgba(0,0,0,.95);
+    }
+
+    #${ROOT_ID} #rv5-player text{
+  fill:#ffffff;
+
+  font-size:14px;
+  font-weight:950;
+  letter-spacing:.04em;
+
+  paint-order:stroke;
+  stroke:#021018;
+  stroke-width:4px;
+  stroke-linejoin:round;
+
+  filter:
+    drop-shadow(0 0 6px rgba(101,232,255,.95))
+    drop-shadow(0 0 14px rgba(101,232,255,.38));
+}
+
+
+    #${ROOT_ID} .guide{
+      fill:#72efff;
+
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+  font-size:12px;
+font-weight:950;
+letter-spacing:.02em;
+      paint-order:stroke;
+
+      stroke:#02070b;
+      stroke-width:3px;
+      stroke-linejoin:round;
+    }
+
+    /* MAP OVERLAY LABELS */
+
+    #${ROOT_ID} .rv5-map-label small{
+      color:#9bb7c1;
+      font-size:10px;
+      line-height:1.2;
+      font-weight:950;
+      letter-spacing:.10em;
+
+      text-shadow:0 2px 8px rgba(0,0,0,.95);
+    }
+
+    #${ROOT_ID} .rv5-map-label strong{
+      color:#f2fbff;
+      font-size:14px;
+      line-height:1.15;
+      font-weight:950;
+      letter-spacing:.07em;
+
+      text-shadow:0 2px 12px rgba(0,0,0,.95);
+    }
+
+    #${ROOT_ID} .rv5-live-tag{
+      padding:9px 12px;
+
+      color:#70efff;
+      font-size:9px;
+      line-height:1.1;
+      font-weight:950;
+      letter-spacing:.09em;
+
+      border:1px solid rgba(101,232,255,.28);
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(3,19,28,.94),
+          rgba(1,8,13,.90)
+        );
+
+      box-shadow:
+        0 0 18px rgba(101,232,255,.06),
+        inset 0 0 14px rgba(101,232,255,.03);
+    }
+
+    /* STATS */
+
+    #${ROOT_ID} .rv5-stats{
+      min-height:48px;
+    }
+
+    #${ROOT_ID} .rv5-stats small{
+      color:#7899a5;
+      font-size:8px;
+      line-height:1.2;
+      font-weight:900;
+      letter-spacing:.10em;
+    }
+
+    #${ROOT_ID} .rv5-stats strong{
+      color:#ecf9fc;
+      font-size:10px;
+      line-height:1.2;
+      font-weight:950;
+      letter-spacing:.07em;
+    }
+
+    #${ROOT_ID} .rv5-stats .danger{
+      color:#ff7886;
+      text-shadow:0 0 10px rgba(255,104,119,.20);
+    }
+
+    /* FOOTER */
+
+  #${ROOT_ID} .rv5-footer{
+  min-height:86px;
+  padding:12px 20px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3,14,20,.99),
+      rgba(1,6,10,1)
+    );
+
+  border-top:1px solid rgba(101,232,255,.16);
+
+  box-shadow:
+    inset 0 10px 30px rgba(101,232,255,.025);
+}
+
+    #${ROOT_ID} .rv5-objective small{
+      font-size:8px;
+      line-height:1.2;
+      font-weight:950;
+      letter-spacing:.11em;
+    }
+
+    #${ROOT_ID} .objective-text{
+      max-width:65vw;
+
+      color:#f1fbfd;
+
+      font-size:13px;
+      line-height:1.2;
+      font-weight:950;
+      letter-spacing:.025em;
+
+      text-shadow:
+        0 0 10px rgba(101,232,255,.08);
+    }
+
+    /* ============================================================
+       MOBILE
+       ============================================================ */
+
+    @media(max-width:820px){
+
+      #${ROOT_ID}{
+        padding:4px !important;
+      }
+
+      #${ROOT_ID} .rv5-shell{
+        width:99vw;
+        height:98dvh;
+        border-radius:8px;
+      }
+
+      #${ROOT_ID} .rv5-header{
+        padding:12px 12px;
+        gap:8px;
+      }
+
+      #${ROOT_ID} .rv5-live{
+        font-size:8px;
+      }
+
+      #${ROOT_ID} .rv5-kicker{
+        font-size:8px;
+        letter-spacing:.09em;
+      }
+
+      #${ROOT_ID} h1{
+        font-size:clamp(25px,7vw,38px);
+      }
+
+      #${ROOT_ID} .rv5-meta{
+        max-width:67vw;
+        font-size:8px;
+      }
+
+   #${ROOT_ID} .rv5-timer{
+  width:66px;
+  height:66px;
+}
+
+#${ROOT_ID} .rv5-timer strong{
+  font-size:22px;
+}
+
+      #${ROOT_ID} .rv5-timer small{
+        font-size:6px;
+      }
+
+      #${ROOT_ID} .rv5-main{
+        grid-template-rows:40px minmax(0,1fr) 48px;
+      }
+
+      #${ROOT_ID} .rv5-mapbar{
+        padding:0 8px;
+      }
+
+      #${ROOT_ID} .rv5-mapbar span{
+        padding:6px 7px;
+        font-size:8px;
+      }
+
+      #${ROOT_ID} .rv5-mapbar b{
+        font-size:8px;
+      }
+
+      #${ROOT_ID} .rv5-map-label.top{
+        top:10px;
+        left:10px;
+      }
+
+      #${ROOT_ID} .rv5-map-label.bottom{
+        right:10px;
+        bottom:10px;
+      }
+
+      #${ROOT_ID} .rv5-map-label small{
+        font-size:8px;
+      }
+
+      #${ROOT_ID} .rv5-map-label strong{
+        font-size:11px;
+      }
+
+      #${ROOT_ID} .rv5-live-tag{
+        left:8px;
+        bottom:8px;
+        padding:7px 9px;
+        font-size:8px;
+      }
+
+      #${ROOT_ID} .rv5-stats small{
+        font-size:7px;
+      }
+
+      #${ROOT_ID} .rv5-stats strong{
+        font-size:9px;
+      }
+
+      #${ROOT_ID} .rv5-footer{
+        min-height:62px;
+        padding:9px 10px;
+      }
+
+      #${ROOT_ID} .rv5-objective small{
+        font-size:7px;
+      }
+
+     #${ROOT_ID} .objective-text{
+  max-width:72vw;
+
+  font-size:10px;
+  line-height:1.3;
+
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+
+  word-break:normal;
+  overflow-wrap:anywhere;
+}
+
+      #${ROOT_ID} .label{
+        font-size:11px;
+        stroke-width:3px;
+      }
+
+      #${ROOT_ID} .guide{
+        font-size:10px;
+        stroke-width:2.5px;
+      }
+    }
+
+    @media(max-width:520px){
+
+      #${ROOT_ID} .rv5-header{
+        min-height:80px;
+        padding:9px 10px;
+      }
+
+      #${ROOT_ID} .rv5-live{
+        font-size:7px;
+      }
+
+      #${ROOT_ID} .rv5-kicker{
+        font-size:7px;
+      }
+
+      #${ROOT_ID} h1{
+        font-size:clamp(23px,7.4vw,32px);
+      }
+
+      #${ROOT_ID} .rv5-meta{
+        max-width:63vw;
+        font-size:7px;
+      }
+
+      #${ROOT_ID} .rv5-timer{
+  width:60px;
+  height:60px;
+}
+
+#${ROOT_ID} .rv5-timer strong{
+  font-size:20px;
+}
+
+      #${ROOT_ID} .rv5-main{
+        grid-template-rows:39px minmax(0,1fr) 48px;
+      }
+
+      #${ROOT_ID} .rv5-mapbar span{
+        padding:6px;
+        font-size:7px;
+      }
+
+      #${ROOT_ID} .rv5-mapbar b{
+        font-size:7px;
+      }
+
+      #${ROOT_ID} .rv5-map-label small{
+        font-size:7px;
+      }
+
+      #${ROOT_ID} .rv5-map-label strong{
+        font-size:9px;
+      }
+
+      #${ROOT_ID} .rv5-live-tag{
+        font-size:7px;
+      }
+
+      #${ROOT_ID} .rv5-stats small{
+        font-size:6px;
+      }
+
+      #${ROOT_ID} .rv5-stats strong{
+        font-size:8px;
+      }
+
+      #${ROOT_ID} .rv5-footer{
+        min-height:58px;
+      }
+
+      #${ROOT_ID} .rv5-objective small{
+        font-size:6.5px;
+      }
+
+    #${ROOT_ID} .objective-text{
+  max-width:68vw;
+
+  font-size:9px;
+  line-height:1.25;
+
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+
+  word-break:normal;
+  overflow-wrap:anywhere;
+}
+
+      #${ROOT_ID} .label{
+        font-size:10px;
+      }
+
+      #${ROOT_ID} .guide{
+        font-size:9px;
+      }
+    }
+
+    /* ============================================================
+       FINAL MOBILE VISIBILITY LOCK
+       ============================================================ */
+
+    @media(max-width:520px){
+
+      #${ROOT_ID} .rv5-map{
+        min-height:0 !important;
+      }
+
+      #${ROOT_ID} .rv5-svg{
+        width:100% !important;
+        height:100% !important;
+        display:block !important;
+      }
+
+      /* MAP BAR */
+
+      #${ROOT_ID} .rv5-mapbar span{
+        font-size:8px !important;
+        line-height:1.1 !important;
+        font-weight:950 !important;
+        letter-spacing:.06em !important;
+      }
+
+      /* MAP CORNER LABELS */
+
+      #${ROOT_ID} .rv5-map-label small{
+        font-size:8px !important;
+        line-height:1.2 !important;
+        font-weight:950 !important;
+        letter-spacing:.06em !important;
+      }
+
+      #${ROOT_ID} .rv5-map-label strong{
+        font-size:10px !important;
+        line-height:1.15 !important;
+        font-weight:950 !important;
+        letter-spacing:.04em !important;
+      }
+
+      /* LIVE TAG */
+
+      #${ROOT_ID} .rv5-live-tag{
+        font-size:8px !important;
+        line-height:1.1 !important;
+        font-weight:950 !important;
+        letter-spacing:.06em !important;
+        padding:7px 9px !important;
+      }
+
+      /* STATS */
+
+      #${ROOT_ID} .rv5-stats small{
+        font-size:7px !important;
+        line-height:1.15 !important;
+        font-weight:900 !important;
+        letter-spacing:.06em !important;
+      }
+
+      #${ROOT_ID} .rv5-stats strong{
+        font-size:9px !important;
+        line-height:1.15 !important;
+        font-weight:950 !important;
+        letter-spacing:.04em !important;
+      }
+
+      /* OBJECTIVE */
+
+      #${ROOT_ID} .rv5-objective small{
+        font-size:7px !important;
+        line-height:1.15 !important;
+        font-weight:950 !important;
+      }
+
+      #${ROOT_ID} .objective-text{
+        font-size:10px !important;
+        line-height:1.2 !important;
+        font-weight:950 !important;
+        letter-spacing:.02em !important;
+      }
+
+      /* REAL MAP LABELS */
+
+      #${ROOT_ID} .label{
+        font-size:11px !important;
+        line-height:1 !important;
+        font-weight:950 !important;
+        letter-spacing:.015em !important;
+
+        paint-order:stroke !important;
+        stroke:#02070b !important;
+        stroke-width:3.2px !important;
+        stroke-linejoin:round !important;
+      }
+
+      #${ROOT_ID} .guide{
+        font-size:10px !important;
+        line-height:1 !important;
+        font-weight:950 !important;
+        letter-spacing:.01em !important;
+
+        paint-order:stroke !important;
+        stroke:#02070b !important;
+        stroke-width:2.8px !important;
+        stroke-linejoin:round !important;
+      }
+    }
+
+
     @media(prefers-reduced-motion:reduce) {
 
       #${ROOT_ID} *,
@@ -1521,8 +2473,8 @@ function mapModel(scene) {
    * od ukupnih 560px SVG prostora.
    */
 
-  const targetTop = 110;
-  const targetBottom = 450;
+ const targetTop = 70;
+const targetBottom = 490;
 
   const targetHeight =
     targetBottom - targetTop;
