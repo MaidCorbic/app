@@ -1,483 +1,116 @@
 (() => {
   'use strict';
 
-  if (window.__relayGameplayIntroFinalV3) return;
-  window.__relayGameplayIntroFinalV3 = true;
-
   /* ============================================================
    * RELAY RUNNER
-   * MISSION ROUTE BRIEFING — AAA TACTICAL V4
+   * MISSION ROUTE — ELITE HUD DESIGN OVERRIDE v2
    *
-   * IMPORTANT:
-   * - Uses the REAL Phaser runner scene.
-   * - Uses the REAL mission data.
-   * - Does NOT create another gameplay map.
-   * - Presentation layer only.
-   * - Responsive desktop / tablet / mobile.
+   * DESIGN ONLY
+   * - Does NOT replace Phaser
+   * - Does NOT create another map
+   * - Does NOT modify mission logic
+   * - Does NOT modify renderMap()
+   * - Mobile + Desktop
+   * - Anti-overlap protection
+   * - Premium tactical HUD
    * ============================================================ */
 
-  const BUTTONS = '#start,#nextMission,#again,#retry,#launchJob';
-  const ROOT_ID = 'relayGameplayIntroFinalV3';
+  const STYLE_ID = 'relay-elite-route-design-v2';
 
-  const wait = ms =>
-    new Promise(resolve => window.setTimeout(resolve, ms));
+  /* Remove previous version if it exists */
+  document.getElementById('relay-elite-route-design-v1')?.remove();
 
-  const runner = () =>
-    window.__relayRunnerScene ||
-    window.game?.scene?.getScene?.('runner') ||
-    null;
-
-  const num = (value, fallback = 0) =>
-    Number.isFinite(Number(value))
-      ? Number(value)
-      : fallback;
-
-  const clamp = (value, min, max) =>
-    Math.max(min, Math.min(max, value));
-
-  const esc = value =>
-    String(value ?? '').replace(
-      /[&<>"]/g,
-      char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;'
-      }[char])
-    );
-
-
-  /* ============================================================
-   * MISSION
-   * ============================================================ */
-
-  const mission = () => {
-
-    const scene = runner();
-
-    const m = scene?.mission || {};
-
-    const id =
-      m.id ||
-      scene?.sys?.settings?.data?.missionId ||
-      document.getElementById('missionId')?.value ||
-      null;
-
-    const title =
-      m.title ||
-      document.getElementById('objective')?.textContent ||
-      'CURRENT MISSION';
-
-    const district =
-      m.district ||
-      document.getElementById('district')?.textContent ||
-      'CURRENT DISTRICT';
-
-    const objective =
-      m.objective ||
-      document.getElementById('worldGoal')?.textContent ||
-      'FOLLOW THE RELAY';
-
-    return {
-      scene,
-      id,
-      title: String(title).trim(),
-      district: String(district).trim(),
-      objective: String(objective).trim()
-    };
-  };
-
-
-  /* ============================================================
-   * ROOT
-   * ============================================================ */
-
-  const root = document.createElement('section');
-
-  root.id = ROOT_ID;
-  root.hidden = true;
-
-  root.innerHTML = `
-    <div
-      class="relay-v4-backdrop"
-      aria-hidden="true">
-    </div>
-
-    <div
-      class="relay-v4-shell"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Mission route map briefing">
-
-      <div class="relay-v4-topline">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-
-
-      <!-- ======================================================
-           HEADER
-           ====================================================== -->
-
-      <header class="relay-v4-header">
-
-        <div class="relay-v4-header-left">
-
-          <div class="relay-v4-status-line">
-
-            <span class="relay-v4-live-dot"></span>
-
-            <span>RELAY NETWORK</span>
-
-            <i></i>
-
-            <span>TACTICAL NAVIGATION</span>
-
-          </div>
-
-          <div class="relay-v4-title-row">
-
-            <div>
-
-              <p class="relay-v4-kicker">
-                LIVE MISSION // ROUTE INTELLIGENCE
-              </p>
-
-              <h1 class="relay-v4-title">
-                MISSION ROUTE
-              </h1>
-
-              <p class="relay-v4-meta"></p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div class="relay-v4-header-right">
-
-          <div class="relay-v4-readout">
-
-            <span class="relay-v4-readout-label">
-              ROUTE STATUS
-            </span>
-
-            <b>LOCKED</b>
-
-          </div>
-
-          <div class="relay-v4-timer">
-
-            <div class="relay-v4-timer-ring">
-
-              <svg viewBox="0 0 48 48" aria-hidden="true">
-
-                <circle
-                  class="relay-v4-timer-track"
-                  cx="24"
-                  cy="24"
-                  r="20">
-                </circle>
-
-                <circle
-                  class="relay-v4-timer-progress"
-                  cx="24"
-                  cy="24"
-                  r="20">
-                </circle>
-
-              </svg>
-
-              <strong>10</strong>
-
-            </div>
-
-            <span>SEC</span>
-
-          </div>
-
-        </div>
-
-      </header>
-
-
-      <!-- ======================================================
-           MAP
-           ====================================================== -->
-
-      <main class="relay-v4-map-frame">
-
-        <div class="relay-v4-map-toolbar">
-
-          <div class="relay-v4-toolbar-left">
-
-            <span class="relay-v4-chip active">
-              LIVE
-            </span>
-
-            <span class="relay-v4-chip">
-              GRID 04
-            </span>
-
-            <span class="relay-v4-chip">
-              NIGHT OPS
-            </span>
-
-          </div>
-
-          <div class="relay-v4-coordinates">
-            ROUTE // ACTIVE
-          </div>
-
-        </div>
-
-
-        <div class="relay-v4-map-wrap">
-
-          <svg
-            class="map-briefing-map"
-            viewBox="0 0 1000 560"
-            preserveAspectRatio="xMidYMid meet"
-            role="img"
-            aria-label="Actual level route map">
-          </svg>
-
-
-          <div class="relay-v4-map-noise"></div>
-
-          <div class="relay-v4-map-scan"></div>
-
-          <div class="relay-v4-map-vignette"></div>
-
-          <div class="relay-v4-map-corners">
-
-            <div class="corner tl"></div>
-            <div class="corner tr"></div>
-            <div class="corner bl"></div>
-            <div class="corner br"></div>
-
-          </div>
-
-
-          <div class="relay-v4-map-label relay-v4-map-label-top">
-            <span>TACTICAL GRID</span>
-            <b>RLY // 04 // SPINE</b>
-          </div>
-
-
-          <div class="relay-v4-map-label relay-v4-map-label-bottom">
-            <span>LIVE ROUTE</span>
-            <b>MISSION PATH</b>
-          </div>
-
-
-          <div class="relay-v4-map-crosshair"></div>
-
-
-          <div class="relay-v4-map-tag">
-
-            <span class="relay-v4-tag-dot"></span>
-
-            REAL LEVEL ROUTE
-
-          </div>
-
-        </div>
-
-
-        <div class="relay-v4-map-footer">
-
-          <div>
-            <span>MAP SOURCE</span>
-            <b>LIVE PHASER WORLD</b>
-          </div>
-
-          <div>
-            <span>ROUTE</span>
-            <b>CALCULATED</b>
-          </div>
-
-          <div>
-            <span>THREAT</span>
-            <b class="danger">ACTIVE</b>
-          </div>
-
-        </div>
-
-      </main>
-
-
-      <!-- ======================================================
-           FOOTER
-           ====================================================== -->
-
-      <footer class="relay-v4-footer">
-
-        <div class="relay-v4-objective">
-
-          <span class="relay-v4-objective-label">
-            PRIMARY OBJECTIVE
-          </span>
-
-          <strong class="relay-v4-objective-text">
-          </strong>
-
-        </div>
-
-
-        <div class="relay-v4-footer-status">
-
-          <span class="relay-v4-status-icon"></span>
-
-          <span>
-            DEPLOYMENT READY
-          </span>
-
-        </div>
-
-      </footer>
-
-    </div>
-  `;
-
-  document.body.appendChild(root);
-
-
-  /* ============================================================
-   * STYLE
-   * ============================================================ */
+  /* Prevent duplicate injection */
+  if (document.getElementById(STYLE_ID)) return;
 
   const style = document.createElement('style');
-
-  style.id = 'relay-gameplay-intro-final-v4-style';
+  style.id = STYLE_ID;
 
   style.textContent = `
 
   /* ============================================================
-   * ROOT
-   * ============================================================ */
+     ROOT / GLOBAL
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 {
 
-    --v4-bg:
-      #02060a;
+    --elite-bg: #010307;
+    --elite-panel: rgba(3,9,15,.985);
+    --elite-panel-2: rgba(5,14,22,.97);
+    --elite-panel-soft: rgba(7,17,27,.92);
 
-    --v4-panel:
-      rgba(5,12,19,.97);
+    --elite-cyan: #65f3ff;
+    --elite-cyan-2: #19b9d1;
+    --elite-blue: #438cff;
 
-    --v4-panel-2:
-      rgba(7,17,26,.94);
+    --elite-yellow: #ffd166;
+    --elite-green: #8cff9a;
+    --elite-red: #ff5366;
 
-    --v4-cyan:
-      #8df4ff;
+    --elite-white: #f2fdff;
+    --elite-text: #e8f8fb;
+    --elite-muted: #66818f;
+    --elite-dark-muted: #3d5661;
 
-    --v4-cyan-soft:
-      rgba(141,244,255,.12);
+    --elite-line: rgba(101,243,255,.14);
+    --elite-line-strong: rgba(101,243,255,.28);
 
-    --v4-yellow:
-      #ffd06e;
+    position: relative;
 
-    --v4-yellow-soft:
-      rgba(255,208,110,.12);
-
-    --v4-red:
-      #ff6e79;
-
-    --v4-green:
-      #a9ed83;
-
-    --v4-white:
-      #edf8fb;
-
-    --v4-muted:
-      #6c8495;
-
-    --v4-line:
-      rgba(141,244,255,.12);
-
-    position: fixed !important;
-
-    inset: 0 !important;
-
-    z-index: 2147483647 !important;
-
-    display: grid !important;
-
-    place-items: center !important;
+    width: 100%;
+    min-width: 0;
 
     padding:
-      clamp(8px,2vw,28px) !important;
+      clamp(6px, 1.5vw, 24px) !important;
 
-    box-sizing: border-box;
-
-    overflow: hidden;
+    overflow: hidden !important;
 
     background:
       radial-gradient(
-        circle at 50% 50%,
-        rgba(20,80,100,.12),
-        transparent 48%
+        circle at 50% 35%,
+        rgba(25,185,209,.11),
+        transparent 38%
       ),
-      #02060a;
+      radial-gradient(
+        circle at 15% 90%,
+        rgba(67,140,255,.055),
+        transparent 32%
+      ),
+      #010307 !important;
 
-    color:
-      var(--v4-white);
+    color: var(--elite-text);
 
-    font-family:
-      ui-monospace,
-      SFMono-Regular,
-      Menlo,
-      Monaco,
-      Consolas,
-      monospace;
+    box-sizing: border-box;
 
     isolation: isolate;
-
   }
 
 
-  #relayGameplayIntroFinalV3[hidden] {
+  #relayGameplayIntroFinalV3,
+  #relayGameplayIntroFinalV3 *,
+  #relayGameplayIntroFinalV3 *::before,
+  #relayGameplayIntroFinalV3 *::after {
 
-    display: none !important;
+    box-sizing: border-box;
 
+    -webkit-tap-highlight-color: transparent;
+  }
+
+
+  #relayGameplayIntroFinalV3 * {
+
+    min-width: 0;
+
+    text-rendering:
+      geometricPrecision;
   }
 
 
   /* ============================================================
-   * BACKDROP
-   * ============================================================ */
+     GLOBAL SCAN EFFECT
+     ============================================================ */
 
-  #relayGameplayIntroFinalV3 .relay-v4-backdrop {
-
-    position: absolute;
-
-    inset: 0;
-
-    pointer-events: none;
-
-    background:
-
-      radial-gradient(
-        circle at 50% 45%,
-        rgba(141,244,255,.045),
-        transparent 35%
-      ),
-
-      linear-gradient(
-        180deg,
-        rgba(0,0,0,.25),
-        rgba(0,0,0,.72)
-      );
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-backdrop::before {
+  #relayGameplayIntroFinalV3::before {
 
     content: "";
 
@@ -485,121 +118,270 @@
 
     inset: 0;
 
-    opacity: .2;
+    pointer-events: none;
 
-    background-image:
+    z-index: 20;
 
-      linear-gradient(
-        rgba(141,244,255,.025) 1px,
-        transparent 1px
-      ),
+    opacity: .16;
 
-      linear-gradient(
-        90deg,
-        rgba(141,244,255,.025) 1px,
-        transparent 1px
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0,
+        transparent 3px,
+        rgba(101,243,255,.018) 4px,
+        transparent 5px
       );
 
-    background-size:
-      44px 44px;
+    mix-blend-mode: screen;
+  }
+
+
+  #relayGameplayIntroFinalV3::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 21;
+
+    background:
+      radial-gradient(
+        ellipse at center,
+        transparent 48%,
+        rgba(0,0,0,.42) 100%
+      );
 
   }
 
 
   /* ============================================================
-   * SHELL
-   * ============================================================ */
+     BACKDROP
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-backdrop {
+
+    background:
+
+      radial-gradient(
+        ellipse at center,
+        rgba(0,180,220,.095),
+        transparent 45%
+      ),
+
+      radial-gradient(
+        ellipse at 18% 82%,
+        rgba(20,70,120,.09),
+        transparent 36%
+      ),
+
+      radial-gradient(
+        ellipse at 90% 15%,
+        rgba(255,209,102,.025),
+        transparent 30%
+      ),
+
+      linear-gradient(
+        180deg,
+        rgba(0,0,0,.22),
+        rgba(0,0,0,.9)
+      ) !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-backdrop::before {
+
+    opacity: .38 !important;
+
+    background-size:
+      32px 32px !important;
+
+    background-image:
+
+      linear-gradient(
+        rgba(101,243,255,.038) 1px,
+        transparent 1px
+      ),
+
+      linear-gradient(
+        90deg,
+        rgba(101,243,255,.038) 1px,
+        transparent 1px
+      ) !important;
+
+  }
+
+
+  /* ============================================================
+     MAIN SHELL
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .relay-v4-shell {
 
     position: relative;
 
     width:
-      min(1240px,96vw);
+      min(1380px, 96vw) !important;
 
     height:
-      min(850px,94dvh);
+      min(900px, 94dvh) !important;
 
     min-height:
-      min(560px,94dvh);
+      560px !important;
 
-    display: grid;
-
-    grid-template-rows:
-      auto
-      1fr
-      auto;
-
-    gap: 0;
-
-    overflow: hidden;
+    overflow: hidden !important;
 
     border:
       1px solid
-      rgba(141,244,255,.18);
+      rgba(101,243,255,.24) !important;
+
+    border-radius:
+      5px !important;
 
     background:
+
       linear-gradient(
-        145deg,
-        rgba(6,17,26,.98),
-        rgba(2,7,12,.99)
-      );
+        135deg,
+        rgba(8,20,30,.995),
+        rgba(2,7,12,.995)
+      ) !important;
 
     box-shadow:
 
-      0 45px 140px rgba(0,0,0,.78),
+      0 40px 120px
+      rgba(0,0,0,.92),
 
       0 0 90px
-      rgba(141,244,255,.045),
+      rgba(50,200,230,.075),
+
+      0 0 2px
+      rgba(101,243,255,.45),
 
       inset 0 1px
-      rgba(255,255,255,.045);
+      rgba(255,255,255,.065),
+
+      inset 0 0 80px
+      rgba(30,150,180,.028) !important;
 
     clip-path:
       polygon(
         0 0,
-        calc(100% - 16px) 0,
-        100% 16px,
-        100% 100%,
-        16px 100%,
-        0 calc(100% - 16px)
+        calc(100% - 18px) 0,
+        100% 18px,
+        100% calc(100% - 18px),
+        calc(100% - 18px) 100%,
+        18px 100%,
+        0 calc(100% - 18px)
+      ) !important;
+
+    contain:
+      layout paint;
+  }
+
+
+  /* ============================================================
+     SHELL EDGE LIGHT
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-shell::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 30;
+
+    border:
+      1px solid rgba(101,243,255,.07);
+
+    background:
+
+      linear-gradient(
+        90deg,
+        rgba(101,243,255,.06),
+        transparent 18%,
+        transparent 82%,
+        rgba(255,209,102,.035)
       );
 
   }
 
 
   /* ============================================================
-   * TOP LINE
-   * ============================================================ */
+     TOP SCANNER
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .relay-v4-topline {
 
+    position: relative;
+
+    height:
+      3px !important;
+
+    overflow: hidden;
+
+    background:
+      rgba(101,243,255,.025);
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-topline::after {
+
+    content: "";
+
     position: absolute;
 
-    left: 0;
-
-    right: 0;
-
     top: 0;
+    left: -30%;
 
-    height: 2px;
+    width: 30%;
+    height: 100%;
 
-    display: flex;
+    background:
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(101,243,255,.8),
+        transparent
+      );
 
-    z-index: 20;
+    animation:
+      relayEliteScanner
+      3.8s
+      linear
+      infinite;
+  }
 
-    pointer-events: none;
+
+  @keyframes relayEliteScanner {
+
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(440%);
+    }
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-topline span {
 
-    flex: 1;
-
     border-right:
-      1px solid
-      rgba(141,244,255,.16);
+      1px solid rgba(101,243,255,.18) !important;
+
+    box-shadow:
+      0 0 10px rgba(101,243,255,.12);
 
   }
 
@@ -608,7 +390,11 @@
   #relayGameplayIntroFinalV3 .relay-v4-topline span:nth-child(5) {
 
     background:
-      var(--v4-yellow);
+      var(--elite-yellow) !important;
+
+    box-shadow:
+      0 0 14px
+      rgba(255,209,102,.55);
 
   }
 
@@ -617,229 +403,295 @@
   #relayGameplayIntroFinalV3 .relay-v4-topline span:nth-child(4) {
 
     background:
-      rgba(141,244,255,.5);
+      var(--elite-cyan) !important;
+
+    box-shadow:
+      0 0 14px
+      rgba(101,243,255,.5);
 
   }
 
 
   /* ============================================================
-   * HEADER
-   * ============================================================ */
+     HEADER
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .relay-v4-header {
 
     position: relative;
 
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 24px;
+    min-height:
+      92px;
 
     padding:
-      20px 24px;
+      20px 28px !important;
+
+    gap:
+      18px;
 
     border-bottom:
       1px solid
-      var(--v4-line);
+      rgba(101,243,255,.14) !important;
 
     background:
+
       linear-gradient(
-        180deg,
-        rgba(255,255,255,.025),
-        transparent
-      );
+        90deg,
+        rgba(101,243,255,.04),
+        transparent 45%,
+        rgba(255,209,102,.027)
+      ) !important;
 
   }
 
 
-  #relayGameplayIntroFinalV3 .relay-v4-status-line {
+  #relayGameplayIntroFinalV3 .relay-v4-header::after {
 
-    display: flex;
+    content: "";
 
-    align-items: center;
+    position: absolute;
 
-    gap: 8px;
-
-    margin-bottom: 8px;
-
-    color:
-      var(--v4-muted);
-
-    font-size: 7px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .18em;
-
-    text-transform:
-      uppercase;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-status-line i {
-
-    width: 24px;
+    left: 28px;
+    right: 28px;
+    bottom: -1px;
 
     height: 1px;
 
     background:
-      rgba(141,244,255,.22);
+      linear-gradient(
+        90deg,
+        var(--elite-cyan),
+        transparent 22%,
+        transparent 78%,
+        var(--elite-yellow)
+      );
+
+    opacity: .42;
+
+  }
+
+
+  /* ============================================================
+     HEADER LEFT — OVERLAP PROTECTION
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-header > :first-child {
+
+    min-width: 0;
+
+    flex:
+      1 1 auto;
+
+    overflow: hidden;
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-kicker,
+  #relayGameplayIntroFinalV3 .relay-v4-title,
+  #relayGameplayIntroFinalV3 .relay-v4-meta,
+  #relayGameplayIntroFinalV3 .relay-v4-status-line {
+
+    max-width: 100%;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+
+
+  /* ============================================================
+     STATUS
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-status-line {
+
+    color:
+      #668594 !important;
+
+    font-size:
+      7px !important;
+
+    letter-spacing:
+      .22em !important;
+
+    line-height:
+      1.4 !important;
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-live-dot {
 
-    width: 6px;
+    flex:
+      0 0 auto;
 
-    height: 6px;
+    width:
+      7px !important;
 
-    border-radius: 50%;
+    height:
+      7px !important;
 
     background:
-      var(--v4-cyan);
+      var(--elite-cyan) !important;
 
     box-shadow:
-      0 0 12px
-      var(--v4-cyan);
+      0 0 7px var(--elite-cyan),
+      0 0 18px rgba(101,243,255,.7) !important;
 
     animation:
-      relayV4LivePulse
-      1.4s
+      relayLivePulse
+      1.7s
       ease-in-out
       infinite;
-
   }
 
 
-  @keyframes relayV4LivePulse {
+  @keyframes relayLivePulse {
 
-    0%,100% {
-      opacity: .45;
-      transform: scale(.8);
+    0%,
+    100% {
+      opacity: .7;
+      transform: scale(.92);
     }
 
     50% {
       opacity: 1;
-      transform: scale(1.15);
+      transform: scale(1.08);
     }
 
   }
 
 
+  /* ============================================================
+     TITLE
+     ============================================================ */
+
   #relayGameplayIntroFinalV3 .relay-v4-kicker {
 
-    margin:
-      0 0 5px;
-
     color:
-      var(--v4-yellow);
+      var(--elite-yellow) !important;
 
-    font-size: 7px;
+    font-size:
+      7px !important;
 
-    font-weight: 900;
+    line-height:
+      1.2 !important;
 
     letter-spacing:
-      .2em;
+      .24em !important;
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-title {
 
-    margin: 0;
-
     color:
-      #f5fbfd;
+      #f2fdff !important;
 
     font-size:
-      clamp(25px,3.3vw,43px);
-
-    line-height:
-      .92;
+      clamp(28px,3.4vw,48px) !important;
 
     font-weight:
-      950;
+      950 !important;
+
+    line-height:
+      .98 !important;
 
     letter-spacing:
-      .06em;
+      .075em !important;
+
+    text-shadow:
+      0 0 24px rgba(101,243,255,.13);
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-meta {
 
-    margin:
-      8px 0 0;
-
     color:
-      #6d8697;
+      #6f8997 !important;
 
-    font-size: 8px;
+    font-size:
+      8px !important;
 
-    font-weight: 800;
+    line-height:
+      1.35 !important;
 
     letter-spacing:
-      .12em;
-
-    text-transform:
-      uppercase;
+      .16em !important;
 
   }
 
 
   /* ============================================================
-   * HEADER RIGHT
-   * ============================================================ */
+     RIGHT HUD
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .relay-v4-header-right {
 
-    display: flex;
+    flex:
+      0 0 auto;
 
-    align-items: center;
+    gap:
+      18px !important;
 
-    gap: 14px;
+    min-width:
+      0;
+
+    display:
+      flex;
+
+    align-items:
+      center;
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-readout {
 
-    min-width: 100px;
+    min-width:
+      122px !important;
+
+    max-width:
+      180px;
 
     padding:
-      10px 12px;
+      11px 14px !important;
 
     border:
       1px solid
-      rgba(141,244,255,.09);
+      rgba(101,243,255,.16) !important;
 
     background:
-      rgba(141,244,255,.025);
+      rgba(101,243,255,.025) !important;
+
+    box-shadow:
+      inset 0 0 20px rgba(101,243,255,.025);
+
+    overflow:
+      hidden;
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-readout-label {
 
-    display: block;
-
-    margin-bottom: 5px;
-
     color:
-      #617888;
+      #55707d !important;
 
-    font-size: 6px;
+    font-size:
+      6px !important;
 
-    font-weight: 900;
+    line-height:
+      1.2;
 
     letter-spacing:
-      .16em;
+      .2em !important;
+
+    white-space:
+      nowrap;
 
   }
 
@@ -847,214 +699,211 @@
   #relayGameplayIntroFinalV3 .relay-v4-readout b {
 
     color:
-      var(--v4-green);
+      var(--elite-green) !important;
 
-    font-size: 9px;
+    font-size:
+      9px !important;
 
-    letter-spacing:
-      .14em;
+    line-height:
+      1.3;
+
+    text-shadow:
+      0 0 10px rgba(140,255,154,.25);
+
+    white-space:
+      nowrap;
 
   }
 
 
   /* ============================================================
-   * TIMER
-   * ============================================================ */
+     TIMER
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .relay-v4-timer {
 
     position: relative;
 
-    width: 72px;
+    flex:
+      0 0 auto;
 
-    height: 72px;
+    width:
+      78px !important;
 
-    display: grid;
+    height:
+      78px !important;
 
-    place-items: center;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-timer-ring {
-
-    position: absolute;
-
-    inset: 0;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-timer-ring svg {
-
-    width: 100%;
-
-    height: 100%;
-
-    transform:
-      rotate(-90deg);
+    filter:
+      drop-shadow(
+        0 0 12px rgba(255,209,102,.14)
+      );
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-timer-track {
 
-    fill: none;
-
     stroke:
-      rgba(255,208,110,.08);
+      rgba(255,209,102,.08) !important;
 
     stroke-width:
-      2;
+      2 !important;
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-timer-progress {
 
-    fill: none;
-
     stroke:
-      var(--v4-yellow);
+      var(--elite-yellow) !important;
 
     stroke-width:
-      2.5;
-
-    stroke-linecap:
-      round;
-
-    stroke-dasharray:
-      125.66;
-
-    stroke-dashoffset:
-      0;
+      2.8 !important;
 
     filter:
       drop-shadow(
-        0 0 4px
-        rgba(255,208,110,.55)
-      );
+        0 0 5px rgba(255,209,102,.8)
+      ) !important;
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-timer strong {
 
-    position: relative;
-
-    z-index: 2;
-
     color:
-      var(--v4-yellow);
+      #fff2bd !important;
 
     font-size:
-      25px;
+      27px !important;
 
-    line-height: 1;
+    line-height:
+      1 !important;
+
+    text-shadow:
+      0 0 15px rgba(255,209,102,.45);
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-timer > span {
 
-    position: absolute;
-
-    bottom: 5px;
-
     color:
-      #687d8b;
+      #718894 !important;
 
-    font-size: 5px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .16em;
+    line-height:
+      1 !important;
 
   }
 
 
   /* ============================================================
-   * MAP FRAME
-   * ============================================================ */
+     MAP FRAME
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .relay-v4-map-frame {
 
+    position: relative;
+
     min-height: 0;
 
-    display: grid;
+    overflow: hidden !important;
 
-    grid-template-rows:
-      38px
-      1fr
-      38px;
-
-    overflow: hidden;
+    background:
+      #01070b !important;
 
   }
 
 
   /* ============================================================
-   * TOOLBAR
-   * ============================================================ */
+     MAP TOOLBAR
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .relay-v4-map-toolbar {
 
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 12px;
+    min-height:
+      40px;
 
     padding:
-      0 16px;
+      0 18px !important;
+
+    gap:
+      10px;
+
+    background:
+
+      linear-gradient(
+        90deg,
+        rgba(4,15,23,.99),
+        rgba(2,8,13,.97)
+      ) !important;
 
     border-bottom:
       1px solid
-      rgba(141,244,255,.08);
+      rgba(101,243,255,.11) !important;
 
-    background:
-      rgba(2,8,13,.7);
+    overflow:
+      hidden;
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-toolbar-left {
 
-    display: flex;
+    display:
+      flex;
 
-    align-items: center;
+    align-items:
+      center;
 
-    gap: 6px;
+    gap:
+      7px !important;
 
-    min-width: 0;
+    min-width:
+      0;
 
+    overflow:
+      hidden;
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-chip {
 
+    flex:
+      0 0 auto;
+
+    min-height:
+      20px;
+
+    display:
+      inline-flex;
+
+    align-items:
+      center;
+
+    justify-content:
+      center;
+
     padding:
-      5px 8px;
+      4px 9px !important;
 
     border:
       1px solid
-      rgba(141,244,255,.08);
+      rgba(101,243,255,.12) !important;
 
     color:
-      #607988;
+      #55717e !important;
 
     background:
-      rgba(255,255,255,.015);
+      rgba(255,255,255,.018) !important;
 
-    font-size: 5px;
+    font-size:
+      5px !important;
 
-    font-weight: 900;
+    line-height:
+      1 !important;
 
     letter-spacing:
-      .14em;
+      .17em !important;
 
     white-space:
       nowrap;
@@ -1065,35 +914,56 @@
   #relayGameplayIntroFinalV3 .relay-v4-chip.active {
 
     color:
-      var(--v4-cyan);
+      var(--elite-cyan) !important;
 
     border-color:
-      rgba(141,244,255,.25);
+      rgba(101,243,255,.35) !important;
 
     background:
-      rgba(141,244,255,.045);
+      rgba(101,243,255,.055) !important;
+
+    box-shadow:
+      0 0 12px rgba(101,243,255,.07),
+      inset 0 0 10px rgba(101,243,255,.035);
 
   }
 
 
   #relayGameplayIntroFinalV3 .relay-v4-coordinates {
 
+    margin-left:
+      auto;
+
+    flex:
+      0 1 auto;
+
+    max-width:
+      42%;
+
+    overflow:
+      hidden;
+
+    text-overflow:
+      ellipsis;
+
+    white-space:
+      nowrap;
+
     color:
-      #516977;
+      #55727f !important;
 
-    font-size: 6px;
-
-    font-weight: 900;
+    font-size:
+      6px !important;
 
     letter-spacing:
-      .14em;
+      .2em !important;
 
   }
 
 
   /* ============================================================
-   * MAP
-   * ============================================================ */
+     MAP WRAP
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .relay-v4-map-wrap {
 
@@ -1101,638 +971,45 @@
 
     min-height: 0;
 
-    overflow: hidden;
+    overflow: hidden !important;
 
     background:
-      #02070c;
+      #01070b !important;
 
-    border-bottom:
-      1px solid
-      rgba(141,244,255,.08);
+    box-shadow:
+      inset 0 0 80px rgba(0,0,0,.45);
+
+    transform:
+      translateZ(0);
+
+    backface-visibility:
+      hidden;
 
   }
 
 
   #relayGameplayIntroFinalV3 .map-briefing-map {
 
-    position: absolute;
-
-    inset: 0;
-
-    width: 100%;
-
-    height: 100%;
-
-    display: block;
-
-  }
-
-
-  /* ============================================================
-   * MAP FX
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-noise {
-
-    position: absolute;
-
-    inset: 0;
-
-    pointer-events: none;
-
-    opacity: .15;
-
-    background-image:
-      radial-gradient(
-        rgba(255,255,255,.8) .5px,
-        transparent .5px
-      );
-
-    background-size:
-      5px 5px;
-
-    mix-blend-mode:
-      screen;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-scan {
-
-    position: absolute;
-
-    left: 0;
-
-    right: 0;
-
-    height: 70px;
-
-    pointer-events: none;
-
-    background:
-      linear-gradient(
-        180deg,
-        transparent,
-        rgba(141,244,255,.045),
-        transparent
-      );
-
-    animation:
-      relayV4Scan
-      4.5s
-      linear
-      infinite;
-
-  }
-
-
-  @keyframes relayV4Scan {
-
-    0% {
-      transform:
-        translateY(-90px);
-      opacity: 0;
-    }
-
-    10% {
-      opacity: .8;
-    }
-
-    90% {
-      opacity: .55;
-    }
-
-    100% {
-      transform:
-        translateY(600px);
-      opacity: 0;
-    }
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-vignette {
-
-    position: absolute;
-
-    inset: 0;
-
-    pointer-events: none;
-
-    background:
-      radial-gradient(
-        ellipse at center,
-        transparent 45%,
-        rgba(0,0,0,.55) 100%
-      );
-
-  }
-
-
-  /* ============================================================
-   * CORNERS
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-corners {
-
-    position: absolute;
-
-    inset: 10px;
-
-    pointer-events: none;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner {
-
-    position: absolute;
-
-    width: 30px;
-
-    height: 30px;
-
-    border-color:
-      rgba(141,244,255,.22);
-
-    border-style:
-      solid;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner.tl {
-
-    left: 0;
-    top: 0;
-
-    border-width:
-      1px 0 0 1px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner.tr {
-
-    right: 0;
-    top: 0;
-
-    border-width:
-      1px 1px 0 0;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner.bl {
-
-    left: 0;
-    bottom: 0;
-
-    border-width:
-      0 0 1px 1px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner.br {
-
-    right: 0;
-    bottom: 0;
-
-    border-width:
-      0 1px 1px 0;
-
-  }
-
-
-  /* ============================================================
-   * MAP LABELS
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label {
-
-    position: absolute;
-
-    z-index: 5;
-
-    pointer-events: none;
-
-    display: grid;
-
-    gap: 4px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label span {
-
-    color:
-      #526d7b;
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .17em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label b {
-
-    color:
-      #a8c1cb;
-
-    font-size: 8px;
-
-    letter-spacing:
-      .1em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label-top {
-
-    left: 24px;
-
-    top: 20px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label-bottom {
-
-    right: 24px;
-
-    bottom: 20px;
-
-    text-align:
-      right;
-
-  }
-
-
-  /* ============================================================
-   * CROSSHAIR
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair {
-
-    position: absolute;
-
-    left: 50%;
-
-    top: 50%;
-
-    width: 46px;
-
-    height: 46px;
+    filter:
+      saturate(1.12)
+      contrast(1.06);
 
     transform:
-      translate(-50%,-50%);
-
-    border:
-      1px solid
-      rgba(141,244,255,.05);
-
-    border-radius:
-      50%;
-
-    pointer-events: none;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::before,
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::after {
-
-    content: "";
-
-    position: absolute;
-
-    background:
-      rgba(141,244,255,.12);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::before {
-
-    width: 70px;
-
-    height: 1px;
-
-    left: -12px;
-
-    top: 22px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::after {
-
-    width: 1px;
-
-    height: 70px;
-
-    left: 22px;
-
-    top: -12px;
-
+      translateZ(0);
   }
 
 
   /* ============================================================
-   * TAG
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-tag {
-
-    position: absolute;
-
-    left: 18px;
-
-    bottom: 18px;
-
-    z-index: 8;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    padding:
-      7px 9px;
-
-    border:
-      1px solid
-      rgba(141,244,255,.16);
-
-    background:
-      rgba(2,8,13,.76);
-
-    color:
-      var(--v4-cyan);
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .15em;
-
-    backdrop-filter:
-      blur(8px);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-tag-dot {
-
-    width: 5px;
-
-    height: 5px;
-
-    border-radius: 50%;
-
-    background:
-      var(--v4-cyan);
-
-    box-shadow:
-      0 0 8px
-      var(--v4-cyan);
-
-  }
-
-
-  /* ============================================================
-   * MAP FOOTER
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer {
-
-    display: grid;
-
-    grid-template-columns:
-      repeat(3,1fr);
-
-    min-width: 0;
-
-    background:
-      rgba(2,7,11,.9);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer > div {
-
-    min-width: 0;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    flex-direction: column;
-
-    gap: 3px;
-
-    border-right:
-      1px solid
-      rgba(141,244,255,.07);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer > div:last-child {
-
-    border-right: 0;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer span {
-
-    color:
-      #4e6675;
-
-    font-size: 5px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .16em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer b {
-
-    color:
-      #a5bac4;
-
-    font-size: 6px;
-
-    letter-spacing:
-      .1em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer b.danger {
-
-    color:
-      var(--v4-red);
-
-  }
-
-
-  /* ============================================================
-   * FOOTER
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-footer {
-
-    min-height:
-      70px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 20px;
-
-    padding:
-      12px 20px;
-
-    border-top:
-      1px solid
-      rgba(141,244,255,.1);
-
-    background:
-      rgba(2,7,11,.96);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-objective {
-
-    min-width: 0;
-
-    display: grid;
-
-    gap: 5px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-objective-label {
-
-    color:
-      var(--v4-yellow);
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .16em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-objective-text {
-
-    max-width:
-      min(700px,70vw);
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    white-space: nowrap;
-
-    color:
-      #dcebef;
-
-    font-size:
-      clamp(8px,1vw,10px);
-
-    letter-spacing:
-      .04em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-footer-status {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    color:
-      #77909d;
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .14em;
-
-    white-space:
-      nowrap;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-status-icon {
-
-    width: 7px;
-
-    height: 7px;
-
-    border-radius: 50%;
-
-    background:
-      var(--v4-green);
-
-    box-shadow:
-      0 0 10px
-      rgba(169,237,131,.65);
-
-  }
-
-
-  /* ============================================================
-   * SVG MAP
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .bg {
-
-    fill:
-      #02080d;
-
-  }
-
+     MAP GRID
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .map-briefing-map .grid {
 
     stroke:
-      #123044;
-
-    stroke-width:
-      1;
+      #113445 !important;
 
     opacity:
-      .52;
+      .42 !important;
 
   }
 
@@ -1740,27 +1017,28 @@
   #relayGameplayIntroFinalV3 .map-briefing-map .grid-major {
 
     stroke:
-      #1c465b;
-
-    stroke-width:
-      1.4;
+      #1d5267 !important;
 
     opacity:
-      .42;
+      .48 !important;
 
   }
 
 
+  /* ============================================================
+     PLATFORMS
+     ============================================================ */
+
   #relayGameplayIntroFinalV3 .map-briefing-map .platform {
 
     fill:
-      #102333;
+      #0b1d2a !important;
 
     stroke:
-      #42677b;
+      #31566a !important;
 
     stroke-width:
-      1.3;
+      1.3 !important;
 
   }
 
@@ -1768,298 +1046,80 @@
   #relayGameplayIntroFinalV3 .map-briefing-map .platform-edge {
 
     stroke:
-      #8df4ff;
-
-    stroke-width:
-      1;
+      var(--elite-cyan) !important;
 
     opacity:
-      .2;
+      .27 !important;
 
   }
 
 
-  #relayGameplayIntroFinalV3 .map-briefing-map .danger {
-
-    fill:
-      #ff6e79;
-
-    opacity:
-      .9;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .boost {
-
-    fill:
-      #082d3b;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      1.4;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .boostmark {
-
-    fill:
-      #8df4ff;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-ring {
-
-    fill:
-      none;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      1.5;
-
-    opacity:
-      .65;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-ring-outer {
-
-    fill:
-      none;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      1;
-
-    stroke-dasharray:
-      3 5;
-
-    opacity:
-      .3;
-
-    animation:
-      relayV4Checkpoint
-      2.5s
-      linear
-      infinite;
-
-  }
-
-
-  @keyframes relayV4Checkpoint {
-
-    to {
-      transform:
-        rotate(360deg);
-      transform-origin:
-        center;
-    }
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-dot {
-
-    fill:
-      #8df4ff;
-
-    filter:
-      url(#relay-v4-glow);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .signal {
-
-    fill:
-      #ffd06e;
-
-    filter:
-      url(#relay-v4-glow);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .secret {
-
-    fill:
-      rgba(224,167,255,.08);
-
-    stroke:
-      #e0a7ff;
-
-    stroke-width:
-      1.5;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .gate {
-
-    fill:
-      #351e2a;
-
-    stroke:
-      #ff6e79;
-
-    stroke-width:
-      1.3;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .enemy {
-
-    fill:
-      #301a27;
-
-    stroke:
-      #ff6e79;
-
-    stroke-width:
-      2;
-
-    filter:
-      url(#relay-v4-glow-soft);
-
-  }
-
+  /* ============================================================
+     ROUTE
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .map-briefing-map .route-halo {
 
-    fill:
-      none;
-
     stroke:
-      #8df4ff;
+      var(--elite-cyan) !important;
 
     stroke-width:
-      13;
+      18 !important;
 
     opacity:
-      .07;
+      .045 !important;
+
+    filter:
+      blur(3px);
 
   }
 
 
   #relayGameplayIntroFinalV3 .map-briefing-map .route {
 
-    fill:
-      none;
-
     stroke:
-      #8df4ff;
+      var(--elite-cyan) !important;
 
     stroke-width:
-      3.5;
-
-    stroke-linecap:
-      round;
-
-    stroke-linejoin:
-      round;
-
-    stroke-dasharray:
-      11 8;
+      3.8 !important;
 
     opacity:
-      .9;
+      .95 !important;
 
     filter:
       url(#relay-v4-glow);
-
-    animation:
-      relayV4Route
-      1.4s
-      linear
-      infinite;
-
-  }
-
-
-  @keyframes relayV4Route {
-
-    to {
-      stroke-dashoffset:
-        -38;
-    }
 
   }
 
 
   #relayGameplayIntroFinalV3 .map-briefing-map .route-core {
 
-    fill:
-      none;
-
     stroke:
-      rgba(237,250,253,.9);
+      #e9fdff !important;
 
     stroke-width:
-      1;
-
-    stroke-linecap:
-      round;
+      1 !important;
 
     opacity:
-      .8;
+      .72 !important;
 
   }
 
 
-  #relayGameplayIntroFinalV3 .map-briefing-map .marker-start {
-
-    fill:
-      #a9ed83;
-
-    stroke:
-      #edffd9;
-
-    stroke-width:
-      2;
-
-    filter:
-      url(#relay-v4-glow-soft);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .marker-goal {
-
-    fill:
-      #ffd06e;
-
-    stroke:
-      #fff0c7;
-
-    stroke-width:
-      2;
-
-    filter:
-      url(#relay-v4-glow);
-
-  }
-
+  /* ============================================================
+     PLAYER
+     ============================================================ */
 
   #relayGameplayIntroFinalV3 .map-briefing-map .marker-player {
 
     fill:
-      #effcff;
+      #ffffff !important;
 
     stroke:
-      #8df4ff;
+      var(--elite-cyan) !important;
 
     stroke-width:
-      2;
+      2 !important;
 
     filter:
       url(#relay-v4-glow);
@@ -2069,64 +1129,177 @@
 
   #relayGameplayIntroFinalV3 .map-briefing-map .player-ring {
 
-    fill:
-      none;
-
     stroke:
-      #8df4ff;
-
-    stroke-width:
-      1.5;
-
-    stroke-dasharray:
-      4 5;
+      var(--elite-cyan) !important;
 
     opacity:
-      .65;
+      .85 !important;
+
+    filter:
+      drop-shadow(
+        0 0 5px rgba(101,243,255,.5)
+      );
 
     animation:
-      relayV4PlayerRing
+      relayPlayerRing
       2s
-      linear
+      ease-out
       infinite;
-
   }
 
 
-  @keyframes relayV4PlayerRing {
+  @keyframes relayPlayerRing {
 
-    to {
-      transform:
-        rotate(360deg);
+    0% {
+      opacity: .85;
+      stroke-width: 1;
+    }
 
-      transform-origin:
-        center;
+    70% {
+      opacity: .18;
+      stroke-width: 2.5;
+    }
+
+    100% {
+      opacity: .85;
+      stroke-width: 1;
     }
 
   }
 
 
-  #relayGameplayIntroFinalV3 .map-briefing-map .label,
-  #relayGameplayIntroFinalV3 .map-briefing-map .guide,
-  #relayGameplayIntroFinalV3 .map-briefing-map .legend {
+  /* ============================================================
+     CHECKPOINT
+     ============================================================ */
 
-    font-family:
-      ui-monospace,
-      SFMono-Regular,
-      Menlo,
-      monospace;
+  #relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-ring {
+
+    stroke:
+      var(--elite-cyan) !important;
+
+    opacity:
+      .75 !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-dot {
 
     fill:
-      #7895a4;
+      var(--elite-cyan) !important;
+
+    filter:
+      drop-shadow(
+        0 0 5px rgba(101,243,255,.7)
+      );
+
+  }
+
+
+  /* ============================================================
+     DANGER
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .danger {
+
+    fill:
+      var(--elite-red) !important;
+
+    filter:
+      drop-shadow(
+        0 0 4px rgba(255,83,102,.45)
+      );
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .enemy {
+
+    fill:
+      #29121a !important;
+
+    stroke:
+      var(--elite-red) !important;
+
+    filter:
+      url(#relay-v4-glow-soft);
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .gate {
+
+    fill:
+      #26131b !important;
+
+    stroke:
+      var(--elite-red) !important;
+
+  }
+
+
+  /* ============================================================
+     BOOST
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .boost {
+
+    fill:
+      #062b38 !important;
+
+    stroke:
+      var(--elite-cyan) !important;
+
+    filter:
+      drop-shadow(
+        0 0 4px rgba(101,243,255,.22)
+      );
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .boostmark {
+
+    fill:
+      #9cfcff !important;
+
+  }
+
+
+  /* ============================================================
+     MAP TEXT — ANTI OVERLAP
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .map-briefing-map text {
+
+    paint-order:
+      stroke fill;
+
+    stroke:
+      rgba(1,7,11,.75);
+
+    stroke-width:
+      2px;
+
+    stroke-linejoin:
+      round;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .label,
+  #relayGameplayIntroFinalV3 .map-briefing-map .legend {
+
+    fill:
+      #91aeba !important;
 
     font-size:
-      9px;
+      8px !important;
 
     font-weight:
-      800;
+      850 !important;
 
     letter-spacing:
-      .1em;
+      .12em !important;
 
   }
 
@@ -2134,62 +1307,713 @@
   #relayGameplayIntroFinalV3 .map-briefing-map .guide {
 
     fill:
-      #8df4ff;
+      var(--elite-cyan) !important;
 
     font-size:
-      8px;
+      8px !important;
 
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .legend {
-
-    fill:
-      #b2c6ce;
+    letter-spacing:
+      .12em !important;
 
   }
 
 
   /* ============================================================
-   * OPEN ANIMATION
-   * ============================================================ */
+     MAP FX
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-noise {
+
+    opacity:
+      .08 !important;
+
+    pointer-events:
+      none !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-vignette {
+
+    background:
+      radial-gradient(
+        ellipse at center,
+        transparent 42%,
+        rgba(0,0,0,.68) 100%
+      ) !important;
+
+    pointer-events:
+      none !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-scan {
+
+    height:
+      90px !important;
+
+    background:
+      linear-gradient(
+        180deg,
+        transparent,
+        rgba(101,243,255,.055),
+        transparent
+      ) !important;
+
+    pointer-events:
+      none !important;
+
+    animation:
+      relayMapScan
+      5s
+      linear
+      infinite;
+  }
+
+
+  @keyframes relayMapScan {
+
+    0% {
+      transform: translateY(-120%);
+      opacity: 0;
+    }
+
+    15% {
+      opacity: .8;
+    }
+
+    70% {
+      opacity: .45;
+    }
+
+    100% {
+      transform: translateY(500%);
+      opacity: 0;
+    }
+
+  }
+
+
+  /* ============================================================
+     MAP CORNERS
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-corners {
+
+    inset:
+      12px !important;
+
+    pointer-events:
+      none !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .corner {
+
+    width:
+      36px !important;
+
+    height:
+      36px !important;
+
+    border-color:
+      rgba(101,243,255,.28) !important;
+
+    filter:
+      drop-shadow(
+        0 0 4px rgba(101,243,255,.12)
+      );
+
+  }
+
+
+  /* ============================================================
+     MAP LABELS
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-label {
+
+    max-width:
+      min(220px, 38vw);
+
+    padding:
+      8px 10px;
+
+    overflow:
+      hidden;
+
+    border-left:
+      2px solid
+      rgba(101,243,255,.35);
+
+    background:
+      linear-gradient(
+        90deg,
+        rgba(3,12,19,.78),
+        transparent
+      );
+
+    pointer-events:
+      none;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-label span,
+  #relayGameplayIntroFinalV3 .relay-v4-map-label b {
+
+    display:
+      block;
+
+    overflow:
+      hidden;
+
+    text-overflow:
+      ellipsis;
+
+    white-space:
+      nowrap;
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-label span {
+
+    color:
+      #55727f !important;
+
+    font-size:
+      5px !important;
+
+    letter-spacing:
+      .2em !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-label b {
+
+    color:
+      #b3cbd3 !important;
+
+    font-size:
+      7px !important;
+
+    line-height:
+      1.35 !important;
+
+    letter-spacing:
+      .14em !important;
+
+  }
+
+
+  /* ============================================================
+     CROSSHAIR
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair {
+
+    width:
+      54px !important;
+
+    height:
+      54px !important;
+
+    border-color:
+      rgba(101,243,255,.09) !important;
+
+    pointer-events:
+      none !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::before {
+
+    background:
+      rgba(101,243,255,.17) !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::after {
+
+    background:
+      rgba(101,243,255,.17) !important;
+
+  }
+
+
+  /* ============================================================
+     LEVEL ROUTE TAG
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-tag {
+
+    left:
+      18px !important;
+
+    bottom:
+      18px !important;
+
+    min-height:
+      28px;
+
+    max-width:
+      min(280px, 50vw);
+
+    padding:
+      7px 11px !important;
+
+    border:
+      1px solid
+      rgba(101,243,255,.25) !important;
+
+    background:
+      rgba(2,10,16,.9) !important;
+
+    color:
+      var(--elite-cyan) !important;
+
+    font-size:
+      6px !important;
+
+    line-height:
+      1.25 !important;
+
+    letter-spacing:
+      .18em !important;
+
+    white-space:
+      nowrap;
+
+    overflow:
+      hidden;
+
+    text-overflow:
+      ellipsis;
+
+    box-shadow:
+      0 8px 25px rgba(0,0,0,.4),
+      inset 0 0 15px rgba(101,243,255,.025);
+
+    backdrop-filter:
+      blur(5px);
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-tag-dot {
+
+    flex:
+      0 0 auto;
+
+    background:
+      var(--elite-cyan) !important;
+
+    box-shadow:
+      0 0 7px var(--elite-cyan),
+      0 0 14px rgba(101,243,255,.6) !important;
+
+    animation:
+      relayTagPulse
+      1.4s
+      ease-in-out
+      infinite;
+  }
+
+
+  @keyframes relayTagPulse {
+
+    0%,
+    100% {
+      opacity: .55;
+    }
+
+    50% {
+      opacity: 1;
+    }
+
+  }
+
+
+  /* ============================================================
+     MAP FOOTER
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-footer {
+
+    background:
+      #02090f !important;
+
+    border-top:
+      1px solid
+      rgba(101,243,255,.04);
+
+    overflow:
+      hidden;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-footer > div {
+
+    min-width:
+      0;
+
+    overflow:
+      hidden;
+
+    border-right:
+      1px solid
+      rgba(101,243,255,.08) !important;
+
+    position:
+      relative;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-footer > div::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 20%;
+    right: 20%;
+
+    height: 1px;
+
+    background:
+      var(--elite-cyan);
+
+    opacity:
+      .12;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-footer span,
+  #relayGameplayIntroFinalV3 .relay-v4-map-footer b {
+
+    display:
+      block;
+
+    overflow:
+      hidden;
+
+    text-overflow:
+      ellipsis;
+
+    white-space:
+      nowrap;
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-footer span {
+
+    color:
+      #4c6775 !important;
+
+    font-size:
+      5px !important;
+
+    letter-spacing:
+      .19em !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-footer b {
+
+    color:
+      #a8c0c8 !important;
+
+    font-size:
+      6px !important;
+
+    line-height:
+      1.35 !important;
+
+    letter-spacing:
+      .12em !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-footer b.danger {
+
+    color:
+      var(--elite-red) !important;
+
+    text-shadow:
+      0 0 8px rgba(255,83,102,.25);
+
+  }
+
+
+  /* ============================================================
+     BOTTOM OBJECTIVE PANEL
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-footer {
+
+    min-height:
+      82px !important;
+
+    padding:
+      14px 24px !important;
+
+    gap:
+      15px;
+
+    background:
+
+      linear-gradient(
+        90deg,
+        rgba(5,15,23,.99),
+        rgba(2,8,13,.99)
+      ) !important;
+
+    border-top:
+      1px solid
+      rgba(101,243,255,.15) !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-objective {
+
+    position:
+      relative;
+
+    min-width:
+      0;
+
+    padding-left:
+      12px;
+
+    overflow:
+      hidden;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-objective::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 2px;
+    bottom: 2px;
+
+    width:
+      2px;
+
+    background:
+      var(--elite-yellow);
+
+    box-shadow:
+      0 0 9px rgba(255,209,102,.45);
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-objective-label {
+
+    color:
+      var(--elite-yellow) !important;
+
+    font-size:
+      6px !important;
+
+    line-height:
+      1.3;
+
+    letter-spacing:
+      .2em !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-objective-text {
+
+    color:
+      #e7f5f8 !important;
+
+    font-size:
+      clamp(8px,1vw,11px) !important;
+
+    font-weight:
+      800 !important;
+
+    line-height:
+      1.35 !important;
+
+    letter-spacing:
+      .055em !important;
+
+    overflow:
+      hidden;
+
+    text-overflow:
+      ellipsis;
+
+    white-space:
+      nowrap;
+
+  }
+
+
+  /* ============================================================
+     DEPLOYMENT READY
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-footer-status {
+
+    flex:
+      0 0 auto;
+
+    min-height:
+      28px;
+
+    max-width:
+      230px;
+
+    padding:
+      0 12px;
+
+    border:
+      1px solid
+      rgba(140,255,154,.12);
+
+    background:
+      rgba(140,255,154,.025);
+
+    color:
+      #71917b !important;
+
+    font-size:
+      6px !important;
+
+    line-height:
+      1 !important;
+
+    letter-spacing:
+      .18em !important;
+
+    white-space:
+      nowrap;
+
+    overflow:
+      hidden;
+
+    text-overflow:
+      ellipsis;
+
+    box-shadow:
+      inset 0 0 14px rgba(140,255,154,.018);
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-status-icon {
+
+    flex:
+      0 0 auto;
+
+    width:
+      7px !important;
+
+    height:
+      7px !important;
+
+    background:
+      var(--elite-green) !important;
+
+    box-shadow:
+      0 0 8px var(--elite-green),
+      0 0 15px rgba(140,255,154,.45) !important;
+
+    animation:
+      relayStatusPulse
+      1.8s
+      ease-in-out
+      infinite;
+  }
+
+
+  @keyframes relayStatusPulse {
+
+    0%,
+    100% {
+      opacity: .55;
+    }
+
+    50% {
+      opacity: 1;
+    }
+
+  }
+
+
+  /* ============================================================
+     OPEN ANIMATION
+     ============================================================ */
 
   #relayGameplayIntroFinalV3.relay-v4-opening
   .relay-v4-shell {
 
     animation:
-      relayV4Open
-      .42s
-      cubic-bezier(.18,.82,.2,1)
-      both;
+      relayEliteOpen
+      .48s
+      cubic-bezier(.16,.82,.22,1)
+      both !important;
 
   }
 
 
-  @keyframes relayV4Open {
+  @keyframes relayEliteOpen {
 
-    from {
+    0% {
 
-      opacity: 0;
+      opacity:
+        0;
 
       transform:
-        translateY(18px)
-        scale(.985);
+        translateY(20px)
+        scale(.975);
 
       filter:
-        blur(5px);
+        brightness(.4)
+        blur(7px);
 
     }
 
-    to {
+    55% {
 
-      opacity: 1;
+      filter:
+        brightness(1.18)
+        blur(1px);
+
+    }
+
+    100% {
+
+      opacity:
+        1;
 
       transform:
         translateY(0)
         scale(1);
 
       filter:
+        brightness(1)
         blur(0);
 
     }
@@ -2198,15 +2022,15 @@
 
 
   /* ============================================================
-   * MOBILE
-   * ============================================================ */
+     TABLET / MOBILE
+     ============================================================ */
 
   @media (max-width: 820px) {
 
     #relayGameplayIntroFinalV3 {
 
       padding:
-        6px !important;
+        5px !important;
 
     }
 
@@ -2214,35 +2038,79 @@
     #relayGameplayIntroFinalV3 .relay-v4-shell {
 
       width:
-        98vw;
+        99vw !important;
 
       height:
-        96dvh;
+        97dvh !important;
 
       min-height:
-        0;
-
-      clip-path:
-        none;
+        0 !important;
 
       border-radius:
-        12px;
+        8px !important;
+
+      clip-path:
+        none !important;
 
     }
 
 
     #relayGameplayIntroFinalV3 .relay-v4-header {
 
+      min-height:
+        82px !important;
+
       padding:
+        12px 14px !important;
+
+      gap:
+        10px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-header::after {
+
+      left:
         14px;
+
+      right:
+        14px;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-header-right {
+
+      gap:
+        9px !important;
 
     }
 
 
     #relayGameplayIntroFinalV3 .relay-v4-readout {
 
-      display:
-        none;
+      min-width:
+        78px !important;
+
+      padding:
+        8px 9px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-readout-label {
+
+      font-size:
+        5px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-readout b {
+
+      font-size:
+        7px !important;
 
     }
 
@@ -2250,123 +2118,7 @@
     #relayGameplayIntroFinalV3 .relay-v4-title {
 
       font-size:
-        clamp(22px,7vw,30px);
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-frame {
-
-      grid-template-rows:
-        34px
-        1fr
-        34px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-chip:nth-child(3) {
-
-      display:
-        none;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-label-top {
-
-      left:
-        14px;
-
-      top:
-        14px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-label-bottom {
-
-      right:
-        14px;
-
-      bottom:
-        14px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-tag {
-
-      left:
-        12px;
-
-      bottom:
-        12px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-footer {
-
-      min-height:
-        58px;
-
-      padding:
-        10px 14px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-footer-status {
-
-      display:
-        none;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-objective-text {
-
-      max-width:
-        90vw;
-
-    }
-
-  }
-
-
-  /* ============================================================
-   * SMALL MOBILE
-   * ============================================================ */
-
-  @media (max-width: 520px) {
-
-    #relayGameplayIntroFinalV3 .relay-v4-header {
-
-      min-height:
-        72px;
-
-      padding:
-        11px 12px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-status-line {
-
-      font-size:
-        5px;
-
-      margin-bottom:
-        6px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-status-line i {
-
-      width:
-        12px;
+        clamp(21px,7vw,30px) !important;
 
     }
 
@@ -2374,41 +2126,32 @@
     #relayGameplayIntroFinalV3 .relay-v4-kicker {
 
       font-size:
-        5px;
+        5px !important;
+
+      letter-spacing:
+        .19em !important;
 
     }
 
 
-    #relayGameplayIntroFinalV3 .relay-v4-title {
+    #relayGameplayIntroFinalV3 .relay-v4-status-line {
 
       font-size:
-        21px;
+        5px !important;
 
-      letter-spacing:
-        .045em;
+      gap:
+        6px !important;
 
     }
 
 
     #relayGameplayIntroFinalV3 .relay-v4-meta {
 
-      margin-top:
-        5px;
+      max-width:
+        55vw !important;
 
       font-size:
-        6px;
-
-      max-width:
-        60vw;
-
-      overflow:
-        hidden;
-
-      white-space:
-        nowrap;
-
-      text-overflow:
-        ellipsis;
+        6px !important;
 
     }
 
@@ -2416,10 +2159,10 @@
     #relayGameplayIntroFinalV3 .relay-v4-timer {
 
       width:
-        54px;
+        58px !important;
 
       height:
-        54px;
+        58px !important;
 
     }
 
@@ -2427,110 +2170,7 @@
     #relayGameplayIntroFinalV3 .relay-v4-timer strong {
 
       font-size:
-        19px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-toolbar {
-
-      padding:
-        0 9px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-chip {
-
-      padding:
-        4px 6px;
-
-      font-size:
-        4px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-coordinates {
-
-      display:
-        none;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-footer {
-
-      grid-template-columns:
-        repeat(3,1fr);
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-footer span {
-
-      font-size:
-        4px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-footer b {
-
-      font-size:
-        5px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-objective-label {
-
-      font-size:
-        5px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-objective-text {
-
-      font-size:
-        7px;
-
-    }
-
-  }
-
-
-  /* ============================================================
-   * LANDSCAPE PHONE
-   * ============================================================ */
-
-  @media (
-    max-height: 600px
-  ) and (
-    orientation: landscape
-  ) {
-
-    #relayGameplayIntroFinalV3 {
-
-      padding:
-        4px !important;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-shell {
-
-      height:
-        98dvh;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-header {
-
-      padding:
-        8px 14px;
+        20px !important;
 
     }
 
@@ -2538,9 +2178,92 @@
     #relayGameplayIntroFinalV3 .relay-v4-map-frame {
 
       grid-template-rows:
-        30px
+        35px
         1fr
-        28px;
+        35px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-toolbar {
+
+      padding:
+        0 9px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-chip {
+
+      min-height:
+        19px;
+
+      padding:
+        3px 7px !important;
+
+      font-size:
+        4px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-coordinates {
+
+      max-width:
+        38%;
+
+      font-size:
+        5px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-label-top {
+
+      left:
+        10px !important;
+
+      top:
+        10px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-label-bottom {
+
+      right:
+        10px !important;
+
+      bottom:
+        10px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-label {
+
+      max-width:
+        42vw;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-tag {
+
+      left:
+        9px !important;
+
+      bottom:
+        9px !important;
+
+      max-width:
+        48vw;
+
+      padding:
+        6px 8px !important;
+
+      font-size:
+        5px !important;
 
     }
 
@@ -2548,10 +2271,37 @@
     #relayGameplayIntroFinalV3 .relay-v4-footer {
 
       min-height:
-        42px;
+        62px !important;
 
       padding:
-        6px 12px;
+        9px 12px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-objective {
+
+      padding-left:
+        9px;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-objective-text {
+
+      max-width:
+        76vw !important;
+
+      font-size:
+        7px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-footer-status {
+
+      display:
+        none !important;
 
     }
 
@@ -2559,25 +2309,498 @@
 
 
   /* ============================================================
-   * REDUCED MOTION
-   * ============================================================ */
+     SMALL PHONE
+     ============================================================ */
+
+  @media (max-width: 520px) {
+
+    #relayGameplayIntroFinalV3 {
+
+      padding:
+        0 !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-shell {
+
+      width:
+        100vw !important;
+
+      height:
+        100dvh !important;
+
+      border-radius:
+        0 !important;
+
+      border-left:
+        0 !important;
+
+      border-right:
+        0 !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-header {
+
+      min-height:
+        70px !important;
+
+      padding:
+        9px 10px !important;
+
+      gap:
+        6px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-header-right {
+
+      gap:
+        5px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-readout {
+
+      display:
+        none !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-title {
+
+      font-size:
+        19px !important;
+
+      letter-spacing:
+        .055em !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-kicker {
+
+      margin-bottom:
+        4px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-meta {
+
+      margin-top:
+        4px !important;
+
+      max-width:
+        57vw !important;
+
+      font-size:
+        5px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-timer {
+
+      width:
+        50px !important;
+
+      height:
+        50px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-timer strong {
+
+      font-size:
+        18px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-timer > span {
+
+      bottom:
+        2px !important;
+
+      font-size:
+        4px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-frame {
+
+      grid-template-rows:
+        31px
+        1fr
+        31px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-chip:nth-child(2) {
+
+      display:
+        none !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-coordinates {
+
+      max-width:
+        46%;
+
+      font-size:
+        4px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-label {
+
+      padding:
+        5px 7px;
+
+      max-width:
+        44vw;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-label span {
+
+      font-size:
+        4px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-label b {
+
+      font-size:
+        5px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-corners {
+
+      inset:
+        7px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .corner {
+
+      width:
+        24px !important;
+
+      height:
+        24px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-crosshair {
+
+      width:
+        40px !important;
+
+      height:
+        40px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-tag {
+
+      bottom:
+        7px !important;
+
+      left:
+        7px !important;
+
+      max-width:
+        52vw;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-footer span {
+
+      font-size:
+        3.5px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-footer b {
+
+      font-size:
+        4.5px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-footer {
+
+      min-height:
+        54px !important;
+
+      padding:
+        7px 10px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-objective-label {
+
+      font-size:
+        4.5px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-objective-text {
+
+      max-width:
+        90vw !important;
+
+      font-size:
+        6px !important;
+
+    }
+
+  }
+
+
+  /* ============================================================
+     VERY SMALL PHONES
+     ============================================================ */
+
+  @media (max-width: 380px) {
+
+    #relayGameplayIntroFinalV3 .relay-v4-header {
+
+      min-height:
+        64px !important;
+
+      padding:
+        7px 8px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-title {
+
+      font-size:
+        17px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-timer {
+
+      width:
+        44px !important;
+
+      height:
+        44px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-timer strong {
+
+      font-size:
+        15px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-frame {
+
+      grid-template-rows:
+        29px
+        1fr
+        29px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-footer {
+
+      min-height:
+        50px !important;
+
+      padding:
+        6px 8px !important;
+
+    }
+
+  }
+
+
+  /* ============================================================
+     LANDSCAPE MOBILE
+     ============================================================ */
 
   @media (
-    prefers-reduced-motion: reduce
+    max-height: 600px
+  ) and (
+    orientation: landscape
   ) {
+
+    #relayGameplayIntroFinalV3 .relay-v4-header {
+
+      min-height:
+        58px !important;
+
+      padding:
+        7px 13px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-title {
+
+      font-size:
+        20px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-frame {
+
+      grid-template-rows:
+        27px
+        1fr
+        27px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-footer {
+
+      min-height:
+        42px !important;
+
+      padding:
+        5px 12px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-objective-text {
+
+      font-size:
+        6px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-footer-status {
+
+      display:
+        none !important;
+
+    }
+
+  }
+
+
+  /* ============================================================
+     TOUCH / PERFORMANCE
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-wrap,
+  #relayGameplayIntroFinalV3 .relay-v4-shell {
+
+    transform:
+      translateZ(0);
+
+    backface-visibility:
+      hidden;
+
+    -webkit-backface-visibility:
+      hidden;
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-noise,
+  #relayGameplayIntroFinalV3 .relay-v4-map-vignette,
+  #relayGameplayIntroFinalV3 .relay-v4-map-scan,
+  #relayGameplayIntroFinalV3 .relay-v4-map-corners {
+
+    user-select:
+      none;
+
+    -webkit-user-select:
+      none;
+  }
+
+
+  /* ============================================================
+     NO TEXT SELECTION DURING HUD
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-shell {
+
+    user-select:
+      none;
+
+    -webkit-user-select:
+      none;
+  }
+
+
+  /* ============================================================
+     REDUCED MOTION
+     ============================================================ */
+
+  @media (prefers-reduced-motion: reduce) {
 
     #relayGameplayIntroFinalV3 *,
     #relayGameplayIntroFinalV3 *::before,
     #relayGameplayIntroFinalV3 *::after {
 
-      animation-duration:
-        .001ms !important;
+      animation:
+        none !important;
 
-      animation-iteration-count:
-        1 !important;
+      transition:
+        none !important;
 
-      scroll-behavior:
-        auto !important;
+    }
+
+  }
+
+
+  /* ============================================================
+     SAFE AREA — MOBILE
+     ============================================================ */
+
+  @supports (padding: env(safe-area-inset-bottom)) {
+
+    @media (max-width: 820px) {
+
+      #relayGameplayIntroFinalV3 {
+
+        padding-bottom:
+          max(
+            5px,
+            env(safe-area-inset-bottom)
+          ) !important;
+
+      }
 
     }
 
@@ -2587,1528 +2810,1308 @@
 
   document.head.appendChild(style);
 
+})();
+
+(() => {
+  'use strict';
 
   /* ============================================================
-   * MAP MODEL
+   * RELAY RUNNER
+   * ELITE HUD DESIGN OVERRIDE — V2
+   *
+   * COPY-PASTE BELOW V1
+   * DESIGN ONLY
+   * - Does NOT replace Phaser
+   * - Does NOT create another map
+   * - Does NOT modify mission logic
+   * - Does NOT modify renderMap()
    * ============================================================ */
 
-  function mapModel(scene) {
+  const STYLE_ID = 'relay-elite-route-design-v2';
 
-    const m =
-      scene?.mission || {};
+  if (document.getElementById(STYLE_ID)) return;
 
-    const width =
-      num(
-        scene?.physics?.world?.bounds?.width,
-        num(
-          m?.goal?.x,
-          6100
-        ) + 300
-      );
+  const style = document.createElement('style');
+  style.id = STYLE_ID;
 
-    const height =
-      num(
-        scene?.physics?.world?.bounds?.height,
-        720
-      );
+  style.textContent = `
 
+  /* ============================================================
+     ELITE V2 VARIABLES
+     ============================================================ */
 
-    const sx =
-      920 /
-      Math.max(width, 1);
+  #relayGameplayIntroFinalV3 {
 
-    const sy =
-      430 /
-      Math.max(height, 1);
+    --v2-cyan: #65f3ff;
+    --v2-cyan-soft: rgba(101,243,255,.16);
 
+    --v2-blue: #438cff;
+    --v2-yellow: #ffd166;
+    --v2-green: #8cff9a;
+    --v2-red: #ff5366;
 
-    const X = x =>
-      40 +
-      clamp(
-        num(x) * sx,
-        0,
-        920
-      );
-
-
-    const Y = y =>
-      50 +
-      clamp(
-        num(y) * sy,
-        0,
-        430
-      );
-
-
-    const p =
-      scene?.player;
-
-
-    const points = {
-
-      start: {
-        x:
-          X(
-            m?.spawn?.x ??
-            120
-          ),
-
-        y:
-          Y(
-            m?.spawn?.y ??
-            520
-          )
-      },
-
-      goal: {
-        x:
-          X(
-            m?.goal?.x ??
-            6100
-          ),
-
-        y:
-          Y(
-            m?.goal?.y ??
-            500
-          )
-      },
-
-      player: {
-        x:
-          X(
-            p?.x ??
-            m?.spawn?.x ??
-            120
-          ),
-
-        y:
-          Y(
-            p?.y ??
-            m?.spawn?.y ??
-            520
-          )
-      }
-
-    };
-
-
-    const arr = key =>
-      Array.isArray(m?.[key])
-        ? m[key]
-        : [];
-
-
-    const point = item => {
-
-      if (
-        Array.isArray(item)
-      ) {
-
-        return {
-          x:
-            X(item[0]),
-
-          y:
-            Y(item[1])
-
-        };
-
-      }
-
-
-      return {
-
-        x:
-          X(item?.x),
-
-        y:
-          Y(item?.y)
-
-      };
-
-    };
-
-
-    const rect = item => {
-
-      const x =
-        num(item?.[0]);
-
-      const y =
-        num(item?.[1]);
-
-      const w =
-        num(
-          item?.[2],
-          40
-        );
-
-      const h =
-        num(
-          item?.[3],
-          20
-        );
-
-
-      return {
-
-        x:
-          X(x),
-
-        y:
-          Y(y),
-
-        w:
-          Math.max(
-            4,
-            w * sx
-          ),
-
-        h:
-          Math.max(
-            3,
-            h * sy
-          )
-
-      };
-
-    };
-
-
-    return {
-
-      width,
-      height,
-
-      X,
-      Y,
-
-      points,
-
-      platforms:
-        arr('platforms'),
-
-      obstacles:
-        arr('obstacles'),
-
-      boostPads:
-        arr('boostPads'),
-
-      checkpoints:
-        arr('checkpoints'),
-
-      signals:
-        arr('signals'),
-
-      secrets:
-        arr('secrets'),
-
-      movingGates:
-        arr('movingGates'),
-
-      enemies:
-        arr('enemies'),
-
-      guides:
-        arr('guides'),
-
-      point,
-      rect
-
-    };
+    --v2-white: #effcff;
+    --v2-muted: #6b8996;
 
   }
 
 
   /* ============================================================
-   * SVG HELPERS
-   * ============================================================ */
+     GLOBAL HUD ENERGY
+     ============================================================ */
 
-  const createGrid = () => {
+  #relayGameplayIntroFinalV3 {
 
-    let output = '';
+    isolation: isolate;
 
-    for (
-      let x = 40;
-      x <= 960;
-      x += 40
-    ) {
-
-      output += `
-        <line
-          x1="${x}"
-          y1="0"
-          x2="${x}"
-          y2="560"
-          class="${
-            x % 120 === 0
-              ? 'grid-major'
-              : 'grid'
-          }">
-        </line>
-      `;
-
-    }
+  }
 
 
-    for (
-      let y = 40;
-      y <= 520;
-      y += 40
-    ) {
+  #relayGameplayIntroFinalV3::before {
 
-      output += `
-        <line
-          x1="0"
-          y1="${y}"
-          x2="1000"
-          y2="${y}"
-          class="${
-            y % 120 === 0
-              ? 'grid-major'
-              : 'grid'
-          }">
-        </line>
-      `;
+    content: "";
 
-    }
+    position: absolute;
 
-    return output;
+    inset: 0;
 
-  };
+    pointer-events: none;
 
+    z-index: 0;
 
-  /* ============================================================
-   * RENDER MAP
-   * ============================================================ */
+    background:
 
-  function renderMap(scene) {
-
-    const svg =
-      root.querySelector(
-        '.map-briefing-map'
-      );
-
-    if (
-      !svg ||
-      !scene
-    ) return;
-
-
-    const d =
-      mapModel(scene);
-
-
-    const pathPoints = [
-
-      d.points.start,
-
-      ...d.checkpoints.map(
-        d.point
+      radial-gradient(
+        circle at 50% 0%,
+        rgba(101,243,255,.08),
+        transparent 30%
       ),
 
-      d.points.goal
+      radial-gradient(
+        circle at 100% 100%,
+        rgba(67,140,255,.045),
+        transparent 35%
+      );
 
-    ];
+    animation:
+      relayV2Atmosphere
+      8s ease-in-out infinite alternate;
 
+  }
 
-    const routePath =
-      pathPoints
-        .map(
-          (point, index) =>
-            `${
-              index
-                ? 'L'
-                : 'M'
-            } ${
-              point.x.toFixed(1)
-            } ${
-              point.y.toFixed(1)
-            }`
-        )
-        .join(' ');
 
+  @keyframes relayV2Atmosphere {
 
-    const platforms =
-      d.platforms
-        .map(
-          item => {
+    from {
+      opacity: .55;
+    }
 
-            const r =
-              d.rect(item);
-
-            return `
-              <g>
-                <rect
-                  x="${r.x}"
-                  y="${r.y}"
-                  width="${r.w}"
-                  height="${r.h}"
-                  rx="3"
-                  class="platform">
-                </rect>
-
-                <line
-                  x1="${r.x}"
-                  y1="${r.y}"
-                  x2="${r.x + r.w}"
-                  y2="${r.y}"
-                  class="platform-edge">
-                </line>
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const obstacles =
-      d.obstacles
-        .map(
-          item => {
-
-            const p =
-              d.point(item);
-
-            return `
-              <g>
-
-                <path
-                  d="
-                    M ${p.x - 9} ${p.y + 8}
-                    L ${p.x} ${p.y - 9}
-                    L ${p.x + 9} ${p.y + 8}
-                    Z
-                  "
-                  class="danger">
-                </path>
-
-                <line
-                  x1="${p.x - 5}"
-                  y1="${p.y + 4}"
-                  x2="${p.x + 5}"
-                  y2="${p.y + 4}"
-                  stroke="#ffb0b6"
-                  opacity=".4">
-                </line>
-
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const pads =
-      d.boostPads
-        .map(
-          item => {
-
-            const r =
-              d.rect([
-                item[0] - 28,
-                item[1] - 8,
-                56,
-                16
-              ]);
-
-
-            return `
-              <g>
-
-                <rect
-                  x="${r.x}"
-                  y="${r.y}"
-                  width="${r.w}"
-                  height="${r.h}"
-                  rx="4"
-                  class="boost">
-                </rect>
-
-                <path
-                  d="
-                    M ${r.x + 7}
-                      ${r.y + r.h / 2}
-
-                    l 9 -6
-                    v 12
-                    z
-
-                    M ${r.x + 20}
-                      ${r.y + r.h / 2}
-
-                    l 9 -6
-                    v 12
-                    z
-                  "
-                  class="boostmark">
-                </path>
-
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const cps =
-      d.checkpoints
-        .map(
-          (item, index) => {
-
-            const p =
-              d.point(item);
-
-            return `
-              <g>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="18"
-                  class="checkpoint-ring-outer">
-                </circle>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="13"
-                  class="checkpoint-ring">
-                </circle>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="4"
-                  class="checkpoint-dot">
-                </circle>
-
-                <text
-                  x="${p.x}"
-                  y="${p.y - 20}"
-                  text-anchor="middle"
-                  class="label">
-                  CP ${index + 1}
-                </text>
-
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const signals =
-      d.signals
-        .map(
-          item => {
-
-            const p =
-              d.point(item);
-
-            return `
-              <g>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="9"
-                  fill="none"
-                  stroke="#ffd06e"
-                  opacity=".12">
-                </circle>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="4.5"
-                  class="signal">
-                </circle>
-
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const secrets =
-      d.secrets
-        .map(
-          item => {
-
-            const p =
-              d.point(item);
-
-            return `
-              <path
-                d="
-                  M ${p.x} ${p.y - 7}
-                  l 7 7
-                  -7 7
-                  -7 -7
-                  Z
-                "
-                class="secret">
-              </path>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const gates =
-      d.movingGates
-        .map(
-          item => {
-
-            const r =
-              d.rect(item);
-
-            return `
-              <g>
-
-                <rect
-                  x="${r.x}"
-                  y="${r.y}"
-                  width="${r.w}"
-                  height="${r.h}"
-                  rx="3"
-                  class="gate">
-                </rect>
-
-                <line
-                  x1="${r.x}"
-                  y1="${r.y}"
-                  x2="${r.x + r.w}"
-                  y2="${r.y + r.h}"
-                  stroke="#ff6e79"
-                  opacity=".25">
-                </line>
-
-                <line
-                  x1="${r.x + r.w}"
-                  y1="${r.y}"
-                  x2="${r.x}"
-                  y2="${r.y + r.h}"
-                  stroke="#ff6e79"
-                  opacity=".25">
-                </line>
-
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const enemies =
-      d.enemies
-        .map(
-          item => {
-
-            const p =
-              d.point(item);
-
-            return `
-              <g>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="12"
-                  fill="none"
-                  stroke="#ff6e79"
-                  stroke-width="1"
-                  opacity=".16">
-                </circle>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="8"
-                  class="enemy">
-                </circle>
-
-                <path
-                  d="
-                    M ${p.x - 3} ${p.y}
-                    H ${p.x + 3}
-                    M ${p.x} ${p.y - 3}
-                    V ${p.y + 3}
-                  "
-                  stroke="#ffadb3"
-                  opacity=".55">
-                </path>
-
-                <text
-                  x="${p.x + 14}"
-                  y="${p.y + 3}"
-                  class="label">
-                  HOSTILE
-                </text>
-
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const guides =
-      d.guides
-        .map(
-          item => {
-
-            const p =
-              d.point(item);
-
-            return `
-              <text
-                x="${p.x}"
-                y="${p.y - 13}"
-                class="guide">
-                ${esc(item?.text || '')}
-              </text>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    /* ==========================================================
-     * SVG
-     * ========================================================== */
-
-    svg.innerHTML = `
-
-      <defs>
-
-        <filter
-          id="relay-v4-glow"
-          x="-100%"
-          y="-100%"
-          width="300%"
-          height="300%">
-
-          <feGaussianBlur
-            stdDeviation="2.8"
-            result="blur">
-          </feGaussianBlur>
-
-          <feMerge>
-
-            <feMergeNode
-              in="blur">
-            </feMergeNode>
-
-            <feMergeNode
-              in="SourceGraphic">
-            </feMergeNode>
-
-          </feMerge>
-
-        </filter>
-
-
-        <filter
-          id="relay-v4-glow-soft"
-          x="-100%"
-          y="-100%"
-          width="300%"
-          height="300%">
-
-          <feGaussianBlur
-            stdDeviation="1.5"
-            result="blur">
-          </feGaussianBlur>
-
-          <feMerge>
-
-            <feMergeNode
-              in="blur">
-            </feMergeNode>
-
-            <feMergeNode
-              in="SourceGraphic">
-            </feMergeNode>
-
-          </feMerge>
-
-        </filter>
-
-
-        <linearGradient
-          id="relay-v4-map-gradient"
-          x1="0"
-          y1="0"
-          x2="1"
-          y2="1">
-
-          <stop
-            offset="0%"
-            stop-color="#06131e">
-          </stop>
-
-          <stop
-            offset="50%"
-            stop-color="#020a11">
-          </stop>
-
-          <stop
-            offset="100%"
-            stop-color="#010508">
-          </stop>
-
-        </linearGradient>
-
-
-        <radialGradient
-          id="relay-v4-center-glow">
-
-          <stop
-            offset="0%"
-            stop-color="#8df4ff"
-            stop-opacity=".055">
-          </stop>
-
-          <stop
-            offset="100%"
-            stop-color="#8df4ff"
-            stop-opacity="0">
-          </stop>
-
-        </radialGradient>
-
-      </defs>
-
-
-      <rect
-        width="1000"
-        height="560"
-        fill="url(#relay-v4-map-gradient)">
-      </rect>
-
-
-      <rect
-        width="1000"
-        height="560"
-        fill="url(#relay-v4-center-glow)">
-      </rect>
-
-
-      <!-- GRID -->
-
-      ${createGrid()}
-
-
-      <!-- ROUTE -->
-
-      <path
-        d="${routePath}"
-        class="route-halo">
-      </path>
-
-      <path
-        d="${routePath}"
-        class="route">
-      </path>
-
-      <path
-        d="${routePath}"
-        class="route-core">
-      </path>
-
-
-      <!-- LEVEL OBJECTS -->
-
-      ${platforms}
-
-      ${gates}
-
-      ${obstacles}
-
-      ${pads}
-
-      ${signals}
-
-      ${secrets}
-
-      ${cps}
-
-      ${enemies}
-
-      ${guides}
-
-
-      <!-- START -->
-
-      <g>
-
-        <circle
-          cx="${d.points.start.x}"
-          cy="${d.points.start.y}"
-          r="15"
-          fill="none"
-          stroke="#a9ed83"
-          opacity=".16">
-        </circle>
-
-        <circle
-          cx="${d.points.start.x}"
-          cy="${d.points.start.y}"
-          r="8"
-          class="marker-start">
-        </circle>
-
-        <text
-          x="${d.points.start.x + 15}"
-          y="${d.points.start.y + 4}"
-          class="legend">
-          START
-        </text>
-
-      </g>
-
-
-      <!-- OBJECTIVE -->
-
-      <g>
-
-        <circle
-          cx="${d.points.goal.x}"
-          cy="${d.points.goal.y}"
-          r="20"
-          fill="none"
-          stroke="#ffd06e"
-          opacity=".12">
-        </circle>
-
-        <circle
-          cx="${d.points.goal.x}"
-          cy="${d.points.goal.y}"
-          r="10"
-          class="marker-goal">
-        </circle>
-
-        <path
-          d="
-            M ${d.points.goal.x - 4}
-              ${d.points.goal.y + 8}
-
-            V ${d.points.goal.y - 9}
-
-            l 15 5
-
-            -15 6
-          "
-          fill="#ffd06e">
-        </path>
-
-        <text
-          x="${d.points.goal.x + 18}"
-          y="${d.points.goal.y + 4}"
-          class="legend">
-          OBJECTIVE
-        </text>
-
-      </g>
-
-
-      <!-- PLAYER -->
-
-      <g id="live-player">
-
-        <circle
-          cx="${d.points.player.x}"
-          cy="${d.points.player.y}"
-          r="15"
-          class="player-ring">
-        </circle>
-
-        <circle
-          cx="${d.points.player.x}"
-          cy="${d.points.player.y}"
-          r="7"
-          class="marker-player">
-        </circle>
-
-        <text
-          x="${d.points.player.x + 13}"
-          y="${d.points.player.y - 12}"
-          class="legend">
-          YOU
-        </text>
-
-      </g>
-
-
-      <!-- THREAT CORRIDOR -->
-
-      <g opacity=".9">
-
-        <path
-          d="
-            M 690 350
-            L 900 300
-            L 930 390
-            L 720 445
-            Z
-          "
-          fill="#ff6e79"
-          fill-opacity=".025"
-          stroke="#ff6e79"
-          stroke-opacity=".16"
-          stroke-dasharray="5 8">
-        </path>
-
-        <text
-          x="730"
-          y="375"
-          fill="#ff6e79"
-          opacity=".55"
-          font-family="ui-monospace,monospace"
-          font-size="8"
-          font-weight="900"
-          letter-spacing=".14em">
-          THREAT CORRIDOR
-        </text>
-
-      </g>
-
-
-      <!-- LEGEND -->
-
-      <g
-        transform="translate(28 528)">
-
-        <circle
-          cx="0"
-          cy="0"
-          r="4"
-          class="signal">
-        </circle>
-
-        <text
-          x="12"
-          y="3"
-          class="legend">
-          SIGNAL
-        </text>
-
-
-        <circle
-          cx="88"
-          cy="0"
-          r="4"
-          class="enemy">
-        </circle>
-
-        <text
-          x="100"
-          y="3"
-          class="legend">
-          THREAT
-        </text>
-
-
-        <circle
-          cx="178"
-          cy="0"
-          r="4"
-          class="marker-goal">
-        </circle>
-
-        <text
-          x="190"
-          y="3"
-          class="legend">
-          TARGET
-        </text>
-
-      </g>
-
-    `;
+    to {
+      opacity: 1;
+    }
 
   }
 
 
   /* ============================================================
-   * STATE
-   * ============================================================ */
+     SHELL — EXTRA DEPTH
+     ============================================================ */
 
-  let active = false;
+  #relayGameplayIntroFinalV3 .relay-v4-shell {
 
-  let timerId = 0;
-  let endId = 0;
-  let followId = 0;
+    position: relative;
 
-  const lock = state => {
+    overflow: hidden;
 
-    window.__relayCinematicLock =
-      state;
+    box-shadow:
 
-    document
-      .getElementById('play')
-      ?.classList
-      .toggle(
-        'relay-map-briefing-lock',
-        state
-      );
+      0 35px 100px rgba(0,0,0,.95),
 
-    window.dispatchEvent(
-      new Event(
-        state
-          ? 'relay:cinematic-lock'
-          : 'relay:cinematic-unlock'
-      )
-    );
+      0 0 0 1px rgba(101,243,255,.035),
 
-  };
+      0 0 90px rgba(101,243,255,.045),
+
+      inset 0 1px rgba(255,255,255,.06),
+
+      inset 0 -30px 80px rgba(0,0,0,.28) !important;
+
+  }
 
 
   /* ============================================================
-   * TIMER
-   * ============================================================ */
+     SHELL SCANLINES
+     ============================================================ */
 
-  const updateTimer = ms => {
+  #relayGameplayIntroFinalV3 .relay-v4-shell::before {
 
-    const seconds =
-      Math.max(
-        0,
-        Math.ceil(ms / 1000)
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 50;
+
+    opacity: .045;
+
+    background:
+
+      repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 3px,
+        rgba(101,243,255,.12) 4px
       );
 
+    mix-blend-mode: screen;
 
-    const number =
-      root.querySelector(
-        '.relay-v4-timer strong'
+  }
+
+
+  /* ============================================================
+     MOVING TOP ENERGY LINE
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-topline {
+
+    position: relative;
+
+    overflow: hidden;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-topline::after {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    bottom: 0;
+
+    width: 180px;
+
+    left: -200px;
+
+    background:
+
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.85),
+        transparent
       );
 
+    filter:
+      blur(2px);
 
-    const progress =
-      root.querySelector(
-        '.relay-v4-timer-progress'
+    animation:
+      relayV2Scanner
+      3.8s
+      linear
+      infinite;
+
+  }
+
+
+  @keyframes relayV2Scanner {
+
+    0% {
+      left: -220px;
+    }
+
+    100% {
+      left: 110%;
+    }
+
+  }
+
+
+  /* ============================================================
+     HEADER — PREMIUM SEPARATION
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-header {
+
+    position: relative;
+
+    overflow: hidden;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-header::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    width: 170px;
+
+    height: 100%;
+
+    pointer-events: none;
+
+    background:
+
+      linear-gradient(
+        90deg,
+        rgba(101,243,255,.045),
+        transparent
       );
 
+  }
 
-    if (number) {
 
-      number.textContent =
-        String(seconds);
+  /* ============================================================
+     TITLE GLOW
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-title {
+
+    position: relative;
+
+    text-shadow:
+
+      0 0 8px rgba(101,243,255,.08),
+
+      0 0 22px rgba(101,243,255,.12),
+
+      0 2px 0 rgba(0,0,0,.9) !important;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-title::after {
+
+    content: "";
+
+    display: block;
+
+    width: 42px;
+
+    height: 2px;
+
+    margin-top: 7px;
+
+    background:
+
+      linear-gradient(
+        90deg,
+        var(--v2-cyan),
+        transparent
+      );
+
+    box-shadow:
+      0 0 10px rgba(101,243,255,.45);
+
+  }
+
+
+  /* ============================================================
+     LIVE STATUS
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-live-dot {
+
+    position: relative;
+
+    animation:
+      relayV2LivePulse
+      1.5s
+      ease-in-out
+      infinite;
+
+  }
+
+
+  @keyframes relayV2LivePulse {
+
+    0%,
+    100% {
+      opacity: .65;
+      transform: scale(.85);
+    }
+
+    50% {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+
+  }
+
+
+  /* ============================================================
+     READOUT CARDS
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-readout {
+
+    position: relative;
+
+    overflow: hidden;
+
+    transition:
+      border-color .2s ease,
+      background .2s ease,
+      transform .2s ease;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-readout::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: -100%;
+
+    width: 60%;
+
+    height: 100%;
+
+    background:
+
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(101,243,255,.08),
+        transparent
+      );
+
+    animation:
+      relayV2ReadoutScan
+      5s
+      linear
+      infinite;
+
+  }
+
+
+  @keyframes relayV2ReadoutScan {
+
+    0% {
+      left: -100%;
+    }
+
+    30%,
+    100% {
+      left: 160%;
+    }
+
+  }
+
+
+  /* ============================================================
+     TIMER — COMBAT CORE
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-timer {
+
+    position: relative;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-timer::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: -5px;
+
+    border-radius: 50%;
+
+    border:
+      1px solid rgba(255,209,102,.08);
+
+    box-shadow:
+      0 0 20px rgba(255,209,102,.04);
+
+    animation:
+      relayV2TimerPulse
+      2s
+      ease-in-out
+      infinite;
+
+  }
+
+
+  @keyframes relayV2TimerPulse {
+
+    0%,
+    100% {
+      opacity: .35;
+      transform: scale(.96);
+    }
+
+    50% {
+      opacity: .9;
+      transform: scale(1.04);
+    }
+
+  }
+
+
+  /* ============================================================
+     MAP FRAME — COMMAND CENTER
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-frame {
+
+    position: relative;
+
+    overflow: hidden;
+
+    box-shadow:
+
+      inset 0 0 0 1px rgba(101,243,255,.025),
+
+      inset 0 0 100px rgba(0,0,0,.55);
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-frame::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 20;
+
+    border:
+
+      1px solid rgba(101,243,255,.055);
+
+  }
+
+
+  /* ============================================================
+     MAP TOOLBAR — ACTIVE CONSOLE
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-toolbar {
+
+    position: relative;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-toolbar::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    bottom: 0;
+
+    width: 22%;
+
+    height: 1px;
+
+    background:
+      var(--v2-cyan);
+
+    box-shadow:
+      0 0 8px rgba(101,243,255,.5);
+
+    opacity: .55;
+
+  }
+
+
+  /* ============================================================
+     CHIPS — GAME BUTTON FEEL
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-chip {
+
+    position: relative;
+
+    overflow: hidden;
+
+    cursor: default;
+
+    transition:
+
+      color .18s ease,
+      border-color .18s ease,
+      background .18s ease,
+      box-shadow .18s ease,
+      transform .18s ease;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-chip::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+      linear-gradient(
+        120deg,
+        transparent 35%,
+        rgba(101,243,255,.12),
+        transparent 65%
+      );
+
+    transform:
+      translateX(-120%);
+
+    transition:
+      transform .35s ease;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-chip:hover::before {
+
+    transform:
+      translateX(120%);
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-chip.active {
+
+    box-shadow:
+
+      0 0 14px rgba(101,243,255,.08),
+
+      inset 0 0 14px rgba(101,243,255,.045);
+
+  }
+
+
+  /* ============================================================
+     MAP ROUTE — ENERGY FLOW
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .route {
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+
+    animation:
+      relayV2RouteGlow
+      2.2s
+      ease-in-out
+      infinite alternate;
+
+  }
+
+
+  @keyframes relayV2RouteGlow {
+
+    from {
+      opacity: .72;
+    }
+
+    to {
+      opacity: 1;
+    }
+
+  }
+
+
+  /* ============================================================
+     PLAYER MARKER — TARGET LOCK
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .marker-player {
+
+    animation:
+      relayV2PlayerPulse
+      1.7s
+      ease-in-out
+      infinite;
+
+  }
+
+
+  @keyframes relayV2PlayerPulse {
+
+    0%,
+    100% {
+      opacity: .82;
+    }
+
+    50% {
+      opacity: 1;
+    }
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .player-ring {
+
+    transform-box:
+      fill-box;
+
+    transform-origin:
+      center;
+
+    animation:
+      relayV2PlayerRing
+      2s
+      ease-out
+      infinite;
+
+  }
+
+
+  @keyframes relayV2PlayerRing {
+
+    0% {
+      transform: scale(.75);
+      opacity: .8;
+    }
+
+    100% {
+      transform: scale(1.45);
+      opacity: 0;
+    }
+
+  }
+
+
+  /* ============================================================
+     CHECKPOINT PULSE
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-ring {
+
+    transform-box:
+      fill-box;
+
+    transform-origin:
+      center;
+
+    animation:
+      relayV2Checkpoint
+      2.4s
+      ease-in-out
+      infinite;
+
+  }
+
+
+  @keyframes relayV2Checkpoint {
+
+    0%,
+    100% {
+      opacity: .4;
+    }
+
+    50% {
+      opacity: 1;
+    }
+
+  }
+
+
+  /* ============================================================
+     DANGER — RED WARNING
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .danger,
+  #relayGameplayIntroFinalV3 .map-briefing-map .enemy {
+
+    animation:
+      relayV2Danger
+      1.35s
+      ease-in-out
+      infinite;
+
+  }
+
+
+  @keyframes relayV2Danger {
+
+    0%,
+    100% {
+      opacity: .65;
+    }
+
+    50% {
+      opacity: 1;
+    }
+
+  }
+
+
+  /* ============================================================
+     BOOST — ENERGY PULSE
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .map-briefing-map .boost {
+
+    animation:
+      relayV2Boost
+      1.8s
+      ease-in-out
+      infinite;
+
+  }
+
+
+  @keyframes relayV2Boost {
+
+    0%,
+    100% {
+      opacity: .72;
+    }
+
+    50% {
+      opacity: 1;
+    }
+
+  }
+
+
+  /* ============================================================
+     MAP SCAN
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-scan {
+
+    pointer-events: none;
+
+    animation:
+      relayV2MapScan
+      5s
+      linear
+      infinite;
+
+  }
+
+
+  @keyframes relayV2MapScan {
+
+    0% {
+      transform:
+        translateY(-120px);
+      opacity: 0;
+    }
+
+    15% {
+      opacity: .55;
+    }
+
+    70% {
+      opacity: .3;
+    }
+
+    100% {
+      transform:
+        translateY(520px);
+      opacity: 0;
+    }
+
+  }
+
+
+  /* ============================================================
+     CORNERS — TACTICAL BRACKETS
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-corners {
+
+    pointer-events: none;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .corner {
+
+    transition:
+      width .25s ease,
+      height .25s ease,
+      opacity .25s ease;
+
+  }
+
+
+  /* ============================================================
+     MAP TAG
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-tag {
+
+    position: relative;
+
+    overflow: hidden;
+
+    backdrop-filter:
+      blur(8px);
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-map-tag::after {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: -100%;
+
+    width: 70%;
+
+    height: 100%;
+
+    background:
+
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(101,243,255,.14),
+        transparent
+      );
+
+    animation:
+      relayV2TagScan
+      4s
+      linear
+      infinite;
+
+  }
+
+
+  @keyframes relayV2TagScan {
+
+    0%,
+    35% {
+      left: -100%;
+    }
+
+    70%,
+    100% {
+      left: 150%;
+    }
+
+  }
+
+
+  /* ============================================================
+     FOOTER — MISSION COMMAND
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-footer {
+
+    position: relative;
+
+    overflow: hidden;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-footer::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    top: 0;
+
+    width: 28%;
+
+    height: 1px;
+
+    background:
+      linear-gradient(
+        90deg,
+        var(--v2-yellow),
+        transparent
+      );
+
+    box-shadow:
+      0 0 9px rgba(255,209,102,.3);
+
+  }
+
+
+  /* ============================================================
+     OBJECTIVE TEXT
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-objective-text {
+
+    text-shadow:
+      0 1px 0 rgba(0,0,0,.9);
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-objective-label {
+
+    display:
+      inline-flex;
+
+    align-items:
+      center;
+
+    gap:
+      7px;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-objective-label::before {
+
+    content: "";
+
+    width: 5px;
+
+    height: 5px;
+
+    background:
+      var(--v2-yellow);
+
+    box-shadow:
+      0 0 7px rgba(255,209,102,.65);
+
+    animation:
+      relayV2Objective
+      1.3s
+      ease-in-out
+      infinite;
+
+  }
+
+
+  @keyframes relayV2Objective {
+
+    0%,
+    100% {
+      opacity: .5;
+    }
+
+    50% {
+      opacity: 1;
+    }
+
+  }
+
+
+  /* ============================================================
+     READY STATUS
+     ============================================================ */
+
+  #relayGameplayIntroFinalV3 .relay-v4-footer-status {
+
+    position: relative;
+
+    overflow: hidden;
+
+    transition:
+      border-color .2s ease,
+      box-shadow .2s ease;
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-footer-status::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(140,255,154,.08),
+        transparent
+      );
+
+    transform:
+      translateX(-100%);
+
+    animation:
+      relayV2ReadyScan
+      3.5s
+      linear
+      infinite;
+
+  }
+
+
+  @keyframes relayV2ReadyScan {
+
+    0% {
+      transform:
+        translateX(-100%);
+    }
+
+    55%,
+    100% {
+      transform:
+        translateX(100%);
+    }
+
+  }
+
+
+  #relayGameplayIntroFinalV3 .relay-v4-status-icon {
+
+    animation:
+      relayV2ReadyPulse
+      1.6s
+      ease-in-out
+      infinite;
+
+  }
+
+
+  @keyframes relayV2ReadyPulse {
+
+    0%,
+    100% {
+      transform: scale(.8);
+      opacity: .65;
+    }
+
+    50% {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+
+  }
+
+
+  /* ============================================================
+     TOUCH FEEDBACK
+     ============================================================ */
+
+  @media (hover: none) {
+
+    #relayGameplayIntroFinalV3 .relay-v4-chip:active {
+
+      transform:
+        scale(.96);
+
+      border-color:
+        rgba(101,243,255,.5) !important;
+
+      box-shadow:
+        0 0 18px rgba(101,243,255,.12);
 
     }
 
-
-    if (progress) {
-
-      const circumference =
-        125.66;
-
-      const ratio =
-        clamp(
-          ms / 10000,
-          0,
-          1
-        );
-
-      progress.style.strokeDashoffset =
-        String(
-          circumference *
-          (1 - ratio)
-        );
-
-    }
-
-  };
+  }
 
 
   /* ============================================================
-   * LIVE PLAYER
-   * ============================================================ */
+     MOBILE — REMOVE VISUAL OVERLOAD
+     ============================================================ */
 
-  const updatePlayer = () => {
+  @media (max-width: 820px) {
 
-    if (!active) return;
-
-
-    const scene =
-      runner();
-
-    const svg =
-      root.querySelector(
-        '.map-briefing-map'
-      );
-
-    const group =
-      svg?.querySelector(
-        '#live-player'
-      );
-
-
-    if (
-      !scene ||
-      !group
-    ) return;
-
-
-    const d =
-      mapModel(scene);
-
-
-    const circle =
-      group.querySelector(
-        '.marker-player'
-      );
-
-    const ring =
-      group.querySelector(
-        '.player-ring'
-      );
-
-    const text =
-      group.querySelector(
-        'text'
-      );
-
-
-    circle?.setAttribute(
-      'cx',
-      d.points.player.x
-    );
-
-    circle?.setAttribute(
-      'cy',
-      d.points.player.y
-    );
-
-
-    ring?.setAttribute(
-      'cx',
-      d.points.player.x
-    );
-
-    ring?.setAttribute(
-      'cy',
-      d.points.player.y
-    );
-
-
-    text?.setAttribute(
-      'x',
-      d.points.player.x + 13
-    );
-
-    text?.setAttribute(
-      'y',
-      d.points.player.y - 12
-    );
-
-  };
-
-
-  /* ============================================================
-   * FINISH
-   * ============================================================ */
-
-  const finish = () => {
-
-    clearInterval(timerId);
-
-    clearTimeout(endId);
-
-    clearInterval(followId);
-
-
-    timerId =
-      endId =
-      followId =
-      0;
-
-
-    active =
-      false;
-
-
-    root.classList.remove(
-      'relay-v4-opening'
-    );
-
-
-    lock(false);
-
-
-    root.hidden =
-      true;
-
-  };
-
-
-  /* ============================================================
-   * SHOW
-   * ============================================================ */
-
-  const show = async () => {
-
-    if (active) return;
-
-
-    active =
-      true;
-
-
-    lock(true);
-
-
-    root.hidden =
-      false;
-
-
-    root.classList.remove(
-      'relay-v4-opening'
-    );
-
-
-    /*
-     * Force animation restart.
-     */
-
-    void root.offsetWidth;
-
-
-    root.classList.add(
-      'relay-v4-opening'
-    );
-
-
-    const startedWait =
-      performance.now();
-
-
-    let data =
-      mission();
-
-
-    while (
-      !data.scene &&
-      performance.now() -
-        startedWait <
-        4500
-    ) {
-
-      await wait(80);
-
-      data =
-        mission();
-
-    }
-
-
-    data =
-      mission();
-
-
-    root.querySelector(
-      '.relay-v4-meta'
-    ).textContent =
-      `${data.district} // ${data.title}`;
-
-
-    root.querySelector(
-      '.relay-v4-objective-text'
-    ).textContent =
-      data.objective;
-
-
-    renderMap(
-      data.scene
-    );
-
-
-    const started =
-      performance.now();
-
-
-    updateTimer(
-      10000
-    );
-
-
-    timerId =
-      setInterval(
-        () => {
-
-          updateTimer(
-            10000 -
-            (
-              performance.now() -
-              started
-            )
-          );
-
-        },
-        100
-      );
-
-
-    followId =
-      setInterval(
-        updatePlayer,
-        100
-      );
-
-
-    endId =
-      setTimeout(
-        finish,
-        10000
-      );
-
-  };
-
-
-  /* ============================================================
-   * CLOSE WITH ESC
-   * ============================================================ */
-
-  document.addEventListener(
-    'keydown',
-    event => {
-
-      if (
-        event.key === 'Escape' &&
-        active
-      ) {
-
-        finish();
-
-      }
-
-    },
-    true
-  );
-
-
-  /* ============================================================
-   * PLAY DETECTION
-   * ============================================================ */
-
-  document.addEventListener(
-    'click',
-    event => {
-
-      const button =
-        event.target.closest(
-          BUTTONS
-        );
-
-
-      if (
-        !button ||
-        active
-      ) return;
-
-
-      /*
-       * Let the original game handler
-       * initialize the Phaser scene first.
-       */
-
-      setTimeout(
-        show,
-        120
-      );
-
-    },
-    true
-  );
-
-
-  /* ============================================================
-   * CINEMATIC LOCK
-   * ============================================================ */
-
-  const lockStyle =
-    document.createElement(
-      'style'
-    );
-
-
-  lockStyle.textContent = `
-
-    #play.relay-map-briefing-lock .hud,
-    #play.relay-map-briefing-lock .world-marker,
-    #play.relay-map-briefing-lock .input-guide,
-    #play.relay-map-briefing-lock .mobile-controls,
-    #play.relay-map-briefing-lock .rotate-prompt,
-    #play.relay-map-briefing-lock #toast,
-    #play.relay-map-briefing-lock #pause {
-
-      visibility:
-        hidden !important;
+    #relayGameplayIntroFinalV3 .relay-v4-shell::before {
 
       opacity:
-        0 !important;
+        .025;
 
-      pointer-events:
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-title::after {
+
+      width:
+        28px;
+
+      margin-top:
+        5px;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-readout {
+
+      min-width:
+        92px !important;
+
+      padding:
+        7px 9px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-scan {
+
+      animation-duration:
+        6s;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-footer-status {
+
+      backdrop-filter:
+        none;
+
+    }
+
+  }
+
+
+  /* ============================================================
+     SMALL PHONE — CLEAN HUD
+     ============================================================ */
+
+  @media (max-width: 520px) {
+
+    #relayGameplayIntroFinalV3 .relay-v4-header {
+
+      overflow:
+        hidden;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-title::after {
+
+      width:
+        22px;
+
+      height:
+        1px;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-readout {
+
+      min-width:
+        76px !important;
+
+      padding:
+        5px 7px !important;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-frame::before {
+
+      border-color:
+        rgba(101,243,255,.035);
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-map-tag {
+
+      backdrop-filter:
+        blur(5px);
+
+    }
+
+  }
+
+
+  /* ============================================================
+     LANDSCAPE — KEEP MAP DOMINANT
+     ============================================================ */
+
+  @media (
+    max-height: 600px
+  ) and (
+    orientation: landscape
+  ) {
+
+    #relayGameplayIntroFinalV3 .relay-v4-header {
+
+      overflow:
+        hidden;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-title::after {
+
+      display:
+        none;
+
+    }
+
+
+    #relayGameplayIntroFinalV3 .relay-v4-shell::before {
+
+      opacity:
+        .018;
+
+    }
+
+  }
+
+
+  /* ============================================================
+     ACCESSIBILITY / PERFORMANCE
+     ============================================================ */
+
+  @media (prefers-reduced-motion: reduce) {
+
+    #relayGameplayIntroFinalV3::before,
+    #relayGameplayIntroFinalV3 *,
+    #relayGameplayIntroFinalV3 *::before,
+    #relayGameplayIntroFinalV3 *::after {
+
+      animation:
         none !important;
 
     }
 
-  `;
-
-
-  document.head.appendChild(
-    lockStyle
-  );
+  }
 
 
   /* ============================================================
-   * PUBLIC API
-   * ============================================================ */
+     GPU COMPOSITING
+     ============================================================ */
 
-  window.relayGameplayIntroV4 = {
+  #relayGameplayIntroFinalV3 .relay-v4-shell,
+  #relayGameplayIntroFinalV3 .relay-v4-map-wrap,
+  #relayGameplayIntroFinalV3 .relay-v4-timer,
+  #relayGameplayIntroFinalV3 .relay-v4-map-scan {
 
-    show,
+    will-change:
+      transform;
 
-    close:
-      finish,
+  }
 
-    refresh() {
+  `;
 
-      if (!active) return;
-
-      const data =
-        mission();
-
-      renderMap(
-        data.scene
-      );
-
-    },
-
-    getRoot() {
-
-      return root;
-
-    },
-
-    isVisible() {
-
-      return active;
-
-    }
-
-  };
+  document.head.appendChild(style);
 
 })();
