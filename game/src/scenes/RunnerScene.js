@@ -15247,33 +15247,6 @@ const speed =
 // CAMERA · SPEED ZOOM
 // ============================================================
 
-if (
-  !this.motionReduced &&
-  this.cameras?.main
-) {
-  const speedRatio =
-    Phaser.Math.Clamp(
-      speed /
-        RUNNER_TUNING.maxRunSpeed,
-      0,
-      1
-    );
-
-  const targetZoom =
-    1 +
-    speedRatio * 0.045;
-
-  this.cameras.main.zoom =
-    Phaser.Math.Linear(
-      this.cameras.main.zoom,
-      targetZoom,
-      Math.min(
-        1,
-        delta * 0.006
-      )
-    );
-}
-
 const parallaxBoost =
   !this.motionReduced
     ? Math.min(
