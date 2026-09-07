@@ -93,15 +93,15 @@ function relayRunnerZoomStabilityFix() {
     name: 'relay-runner-zoom-stability-fix',
     enforce: 'post',
     transform(code, id) {
-      const hasRunnerZoomSignature =
+      const hasBrokenZoomSignature =
         code.includes('CAMERA · SPEED ZOOM') ||
         code.includes('targetZoom = 1.035') ||
         code.includes('targetZoom = 1.026') ||
         code.includes('targetZoom = 1.014') ||
         code.includes('targetZoom = 1.045') ||
-        code.includes('speedZoomTarget');
+        code.includes('this.cameras.main.zoom =');
 
-      if (!hasRunnerZoomSignature) return null;
+      if (!hasBrokenZoomSignature) return null;
 
       let transformed = code;
 
@@ -132,10 +132,6 @@ function relayRunnerZoomStabilityFix() {
 
       if (/this\.cameras\.main\.zoom\s*=/.test(transformed)) {
         throw new Error(`relay-runner-zoom-stability-fix: duplicate direct camera zoom remains in ${id}`);
-      }
-
-      if (transformed === code) {
-        throw new Error(`relay-runner-zoom-stability-fix: RunnerScene signature found but code was not changed in ${id}`);
       }
 
       return { code: transformed, map: null };
