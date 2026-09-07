@@ -88,6 +88,35 @@ function relaySpecialEventCreditRewardFix() {
   return relayTransform('relay-special-event-credit-reward-fix', id => id.endsWith('/src/state.js'), patchSpecialEventCreditReward);
 }
 
+function relayRunnerZoomStabilityFix() {
+  return relayTransform(
+    'relay-runner-zoom-stability-fix',
+    id => id.endsWith('/src/scenes/RunnerScene.js'),
+    code => {
+      let transformed = code;
+
+      transformed = transformed.replace(
+        /\/\/ CAMERA · SPEED ZOOM[\s\S]*?\n\}\n\nconst parallaxBoost =/,
+        'const parallaxBoost ='
+      );
+
+      transformed = transformed.replace(
+        /(\/\* Speed-based cinematic zoom\. \*\/)([\s\S]*?)(\/\* Smooth camera motion\. \*\/)/,
+        (_match, start, block, end) => `${start}${block.replace(/\btargetZoom\s*=\s*1\.(035|026|014|045)/g, 'cinematicTargetZoom = 1.$1')}${end}`
+      );
+
+      if (!/const targetZoom = Math\.max\(\s*cinematicTargetZoom,\s*speedZoomTarget\s*\);/.test(transformed)) {
+        transformed = transformed.replace(
+          /(const speedZoomTarget\s*=\s*\n\s*1 \+ speedZoom;\s*\n)/,
+          '$1\nconst targetZoom = Math.max(\n  cinematicTargetZoom,\n  speedZoomTarget\n);\n'
+        );
+      }
+
+      return transformed;
+    }
+  );
+}
+
 export default defineConfig({
   server: {
     host: '0.0.0.0',
@@ -102,6 +131,7 @@ export default defineConfig({
     relayCheckpointCollectiblesFix(),
     relayRespawnTransientStateFix(),
     relaySpecialEventCreditRewardFix(),
+    relayRunnerZoomStabilityFix(),
     relayLegacyAssetAliases(),
   ],
   build: {
