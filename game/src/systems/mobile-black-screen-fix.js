@@ -23,7 +23,7 @@ if (!window.__relayMobileBlackScreenFix) {
 
       if (isTouch()) {
       const width = Math.max(1, this.scale.width);
-      const height = Math.max(720, this.scale.height);
+      const height = 860;
 
       this.__mobileWorldSurface = this.add
         .rectangle(
@@ -57,8 +57,7 @@ if (!window.__relayMobileBlackScreenFix) {
     if (!isTouch() || !scene?.scene?.isActive?.() || !scene.cameras?.main) return;
 
     const width = Math.max(1, scene.scale.width);
-    const height = Math.max(720, scene.scale.height);
-
+    const height = 860;
     if (width === lastSurfaceWidth && height === lastSurfaceHeight) {
       return;
     }
