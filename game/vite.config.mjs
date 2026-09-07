@@ -52,7 +52,7 @@ function relayLegacyAssetAliases() {
 }
 
 function relayTransform(name, predicate, transform) {
-  return { name, transform(code, id) {
+  return { name, enforce: 'post', transform(code, id) {
     if (!predicate(id)) return null;
     const transformed = transform(code);
     return transformed === code ? null : { code: transformed, map: null };
@@ -91,12 +91,12 @@ function relaySpecialEventCreditRewardFix() {
 function relayRunnerZoomStabilityFix() {
   return relayTransform(
     'relay-runner-zoom-stability-fix',
-    id => id.endsWith('/src/scenes/RunnerScene.js'),
+    id => /[\\/]src[\\/]scenes[\\/]RunnerScene\.js(?:\?.*)?$/.test(id),
     code => {
       let transformed = code;
 
       transformed = transformed.replace(
-        /\/\/ CAMERA · SPEED ZOOM[\s\S]*?\n\}\n\nconst parallaxBoost =/,
+        /\/\/ CAMERA · SPEED ZOOM[\s\S]*?\n\}\s*\n\s*const parallaxBoost\s*=/,
         'const parallaxBoost ='
       );
 
@@ -105,11 +105,21 @@ function relayRunnerZoomStabilityFix() {
         (_match, start, block, end) => `${start}${block.replace(/\btargetZoom\s*=\s*1\.(035|026|014|045)/g, 'cinematicTargetZoom = 1.$1')}${end}`
       );
 
+      transformed = transformed.replace(
+        /(const speedZoomTarget\s*=\s*1 \+ speedZoom;)(?![\s\S]*const targetZoom = Math\.max\(\s*cinematicTargetZoom,\s*speedZoomTarget\s*\);)/,
+        '$1\n\nconst targetZoom = Math.max(\n  cinematicTargetZoom,\n  speedZoomTarget\n);'
+      );
+
+      if (/targetZoom\s*=\s*1\.(035|026|014|045)/.test(transformed)) {
+        throw new Error('relay-runner-zoom-stability-fix: unresolved cinematic targetZoom assignment');
+      }
+
       if (!/const targetZoom = Math\.max\(\s*cinematicTargetZoom,\s*speedZoomTarget\s*\);/.test(transformed)) {
-        transformed = transformed.replace(
-          /(const speedZoomTarget\s*=\s*\n\s*1 \+ speedZoom;\s*\n)/,
-          '$1\nconst targetZoom = Math.max(\n  cinematicTargetZoom,\n  speedZoomTarget\n);\n'
-        );
+        throw new Error('relay-runner-zoom-stability-fix: missing final targetZoom declaration');
+      }
+
+      if (/this\.cameras\.main\.zoom\s*=/.test(transformed)) {
+        throw new Error('relay-runner-zoom-stability-fix: duplicate direct camera zoom remains');
       }
 
       return transformed;
