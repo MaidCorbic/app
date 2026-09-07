@@ -52,7 +52,7 @@ function relayLegacyAssetAliases() {
 }
 
 function relayTransform(name, predicate, transform) {
-  return { name, enforce: 'post', transform(code, id) {
+  return { name, transform(code, id) {
     if (!predicate(id)) return null;
     const transformed = transform(code);
     return transformed === code ? null : { code: transformed, map: null };
@@ -89,10 +89,12 @@ function relaySpecialEventCreditRewardFix() {
 }
 
 function relayRunnerZoomStabilityFix() {
-  return relayTransform(
-    'relay-runner-zoom-stability-fix',
-    id => /[\\/]src[\\/]scenes[\\/]RunnerScene\.js(?:\?.*)?$/.test(id),
-    code => {
+  return {
+    name: 'relay-runner-zoom-stability-fix',
+    enforce: 'post',
+    transform(code, id) {
+      if (!/[\\/]src[\\/]scenes[\\/]RunnerScene\.js(?:\?.*)?$/.test(id)) return null;
+
       let transformed = code;
 
       transformed = transformed.replace(
@@ -122,9 +124,10 @@ function relayRunnerZoomStabilityFix() {
         throw new Error('relay-runner-zoom-stability-fix: duplicate direct camera zoom remains');
       }
 
-      return transformed;
-    }
-  );
+      if (transformed === code) return null;
+      return { code: transformed, map: null };
+    },
+  };
 }
 
 export default defineConfig({
