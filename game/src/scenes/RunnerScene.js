@@ -998,6 +998,7 @@ make('spring-pad', 64, 24, g => {
     .fillTriangle(22, 16, 30, 10, 30, 16)
     .fillTriangle(34, 16, 42, 10, 42, 16)
     .fillTriangle(46, 16, 54, 10, 54, 16);
+
   // ARROW HOT CENTERS
   g.fillStyle(0xe8ffd0, 0.85)
     .fillTriangle(12, 15, 18, 11, 18, 15)
@@ -1996,7 +1997,8 @@ const sunGlowAlpha =
 const moonGlowAlpha =
   Phaser.Math.Linear(
     0.18,
-    0.035,    daylightSmooth
+    0.035,
+    daylightSmooth
   );
 
   const moonShadowAlpha =
@@ -2995,7 +2997,8 @@ if (visual.props === 'lanterns') {
         .2
       )
       .fillCircle(
-        x + 9,        510,
+        x + 9,
+        510,
         26
       )
       .fillStyle(
@@ -3994,7 +3997,8 @@ this.physics.add.overlap(
   this.movingGates,
   () =>
     this.fail(
-      'A security gate sealed the relay route.'    ),
+      'A security gate sealed the relay route.'
+    ),
   undefined,
   this
 );
@@ -4993,7 +4997,8 @@ if (
   !id ||
   this.buildCooldowns[slot] > 0
 ) {
-  return;}
+  return;
+}
 
 const direction =
   this.player.flipX
@@ -5993,6 +5998,7 @@ if (
 if (!this.motionReduced) {
   const comboLevel =
     this.combatCombo;
+
   const comboColor =
     comboLevel >= 10
       ? 0xffd06e
@@ -6991,7 +6997,8 @@ if (!this.motionReduced) {
     targets: stars,
     alpha: {
       from: .12,
-      to: .62    },
+      to: .62
+    },
     yoyo: true,
     repeat: -1,
     duration: 1100,
@@ -7990,7 +7997,8 @@ createGuideCompanions() {
           targets: guide,
           y: y - 12,
           duration: 760,
-          yoyo: true,          repeat: -1,
+          yoyo: true,
+          repeat: -1,
           ease: 'Sine.inOut'
         });
       }
@@ -8989,7 +8997,8 @@ this.gadgetPulse(
 
 if (
   this.mission.signals.length - this.collected === 1
-) {  this.playerCue(
+) {
+  this.playerCue(
     'ONE SIGNAL LEFT',
     '#ffd06e'
   );
@@ -9988,7 +9997,8 @@ enemy.x
 
       const patrol =
         type ===
-          'security' ||        type ===
+          'security' ||
+        type ===
           'guard';
 
       const detectionRange =
@@ -10987,7 +10997,8 @@ if (this.turrets?.active) {
       Number.isFinite(expires) &&
       now >= expires
     ) {
-      turret.destroy();      return;
+      turret.destroy();
+      return;
     }
 
     if (!this.enemies?.active) return;
@@ -11986,7 +11997,8 @@ this.time.delayedCall(
           color: '#8ba0b8',
           align: 'center'
         }
-      )      .setOrigin(.5)
+      )
+      .setOrigin(.5)
       .setScrollFactor(0)
       .setDepth(121);
 
@@ -12985,7 +12997,8 @@ if (
 const shield =
   this.add
     .circle(
-      this.player.x,      this.player.y,
+      this.player.x,
+      this.player.y,
       22,
       0x8df4ff,
       .22
@@ -13984,7 +13997,8 @@ body.setGravityY(
   ) *
   (
     this.mission.gravityMode ===
-    'low'      ? .55
+    'low'
+      ? .55
       : 1
   ) -
   (
@@ -14983,7 +14997,8 @@ if (
   const airRatio =
     Phaser.Math.Clamp(
       Math.abs(body.velocity.y) /
-        RUNNER_TUNING.maxFallSpeed,      0,
+        RUNNER_TUNING.maxFallSpeed,
+      0,
       1
     );
 
