@@ -1,96 +1,100 @@
 (() => {
   'use strict';
 
-  if (window.__relayGameplayIntroFinalV3) return;
-  window.__relayGameplayIntroFinalV3 = true;
+  if (window.__relayGameplayIntroFinalV5) return;
+  window.__relayGameplayIntroFinalV5 = true;
 
-  /* ============================================================
+  /*
    * RELAY RUNNER
-   * MISSION ROUTE BRIEFING — AAA TACTICAL V4
+   * REAL MISSION ROUTE BRIEFING V5
    *
-   * IMPORTANT:
-   * - Uses the REAL Phaser runner scene.
-   * - Uses the REAL mission data.
-   * - Does NOT create another gameplay map.
-   * - Presentation layer only.
-   * - Responsive desktop / tablet / mobile.
-   * ============================================================ */
+   * - koristi pravi Phaser runner
+   * - koristi pravi scene.mission
+   * - ne pravi novu gameplay mapu
+   * - samo prikazuje tactical briefing prije igre
+   * - 100% mobile responsive
+   */
 
-  const BUTTONS = '#start,#nextMission,#again,#retry,#launchJob';
-  const ROOT_ID = 'relayGameplayIntroFinalV3';
+  const ROOT_ID = 'relayGameplayIntroFinalV5';
 
-  const wait = ms =>
-    new Promise(resolve => window.setTimeout(resolve, ms));
+  const PLAY_BUTTONS =
+    '#start,#nextMission,#again,#retry,#launchJob';
+
+  const WAIT = ms =>
+    new Promise(resolve => setTimeout(resolve, ms));
 
   const runner = () =>
     window.__relayRunnerScene ||
     window.game?.scene?.getScene?.('runner') ||
     null;
 
-  const num = (value, fallback = 0) =>
-    Number.isFinite(Number(value))
-      ? Number(value)
+  const num = (v, fallback = 0) =>
+    Number.isFinite(Number(v))
+      ? Number(v)
       : fallback;
 
-  const clamp = (value, min, max) =>
-    Math.max(min, Math.min(max, value));
+  const clamp = (v, min, max) =>
+    Math.max(min, Math.min(max, v));
 
-  const esc = value =>
-    String(value ?? '').replace(
+  const esc = v =>
+    String(v ?? '').replace(
       /[&<>"]/g,
-      char => ({
+      c => ({
         '&': '&amp;',
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;'
-      }[char])
+      }[c])
     );
 
-
-  /* ============================================================
+  /*
+   * ============================================================
    * MISSION
-   * ============================================================ */
+   * ============================================================
+   */
 
-  const mission = () => {
+  function getMission() {
 
     const scene = runner();
-
     const m = scene?.mission || {};
-
-    const id =
-      m.id ||
-      scene?.sys?.settings?.data?.missionId ||
-      document.getElementById('missionId')?.value ||
-      null;
-
-    const title =
-      m.title ||
-      document.getElementById('objective')?.textContent ||
-      'CURRENT MISSION';
-
-    const district =
-      m.district ||
-      document.getElementById('district')?.textContent ||
-      'CURRENT DISTRICT';
-
-    const objective =
-      m.objective ||
-      document.getElementById('worldGoal')?.textContent ||
-      'FOLLOW THE RELAY';
 
     return {
       scene,
-      id,
-      title: String(title).trim(),
-      district: String(district).trim(),
-      objective: String(objective).trim()
+
+      id:
+        m.id ||
+        scene?.sys?.settings?.data?.missionId ||
+        document.getElementById('missionId')?.value ||
+        null,
+
+      title:
+        String(
+          m.title ||
+          document.getElementById('objective')?.textContent ||
+          'CURRENT MISSION'
+        ).trim(),
+
+      district:
+        String(
+          m.district ||
+          document.getElementById('district')?.textContent ||
+          'CURRENT DISTRICT'
+        ).trim(),
+
+      objective:
+        String(
+          m.objective ||
+          document.getElementById('worldGoal')?.textContent ||
+          'FOLLOW THE RELAY'
+        ).trim()
     };
-  };
+  }
 
-
-  /* ============================================================
+  /*
+   * ============================================================
    * ROOT
-   * ============================================================ */
+   * ============================================================
+   */
 
   const root = document.createElement('section');
 
@@ -98,106 +102,67 @@
   root.hidden = true;
 
   root.innerHTML = `
-    <div
-      class="relay-v4-backdrop"
-      aria-hidden="true">
-    </div>
+    <div class="rv5-bg"></div>
+    <div class="rv5-noise"></div>
 
-    <div
-      class="relay-v4-shell"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Mission route map briefing">
+    <div class="rv5-shell">
 
-      <div class="relay-v4-topline">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
+      <div class="rv5-topline">
+        <i></i><i></i><i></i><i></i><i></i><i></i>
       </div>
 
+      <header class="rv5-header">
 
-      <!-- ======================================================
-           HEADER
-           ====================================================== -->
+        <div class="rv5-brand">
 
-      <header class="relay-v4-header">
-
-        <div class="relay-v4-header-left">
-
-          <div class="relay-v4-status-line">
-
-            <span class="relay-v4-live-dot"></span>
-
+          <div class="rv5-live">
+            <b></b>
+            LIVE
             <span>RELAY NETWORK</span>
-
-            <i></i>
-
-            <span>TACTICAL NAVIGATION</span>
-
           </div>
 
-          <div class="relay-v4-title-row">
-
-            <div>
-
-              <p class="relay-v4-kicker">
-                LIVE MISSION // ROUTE INTELLIGENCE
-              </p>
-
-              <h1 class="relay-v4-title">
-                MISSION ROUTE
-              </h1>
-
-              <p class="relay-v4-meta"></p>
-
-            </div>
-
+          <div class="rv5-kicker">
+            MISSION CONTROL / ROUTE INTELLIGENCE
           </div>
+
+          <h1>
+            MISSION <strong>ROUTE</strong>
+          </h1>
+
+          <div class="rv5-meta"></div>
 
         </div>
 
+        <div class="rv5-right">
 
-        <div class="relay-v4-header-right">
-
-          <div class="relay-v4-readout">
-
-            <span class="relay-v4-readout-label">
-              ROUTE STATUS
-            </span>
-
-            <b>LOCKED</b>
-
+          <div class="rv5-status">
+            <small>ROUTE STATUS</small>
+            <strong>LOCKED</strong>
+            <i></i>
           </div>
 
-          <div class="relay-v4-timer">
+          <div class="rv5-timer">
 
-            <div class="relay-v4-timer-ring">
+            <svg viewBox="0 0 100 100">
 
-              <svg viewBox="0 0 48 48" aria-hidden="true">
+              <circle
+                class="timer-track"
+                cx="50"
+                cy="50"
+                r="43">
+              </circle>
 
-                <circle
-                  class="relay-v4-timer-track"
-                  cx="24"
-                  cy="24"
-                  r="20">
-                </circle>
+              <circle
+                class="timer-progress"
+                cx="50"
+                cy="50"
+                r="43">
+              </circle>
 
-                <circle
-                  class="relay-v4-timer-progress"
-                  cx="24"
-                  cy="24"
-                  r="20">
-                </circle>
+            </svg>
 
-              </svg>
-
-              <strong>10</strong>
-
-            </div>
-
-            <span>SEC</span>
+            <strong>10</strong>
+            <small>SEC</small>
 
           </div>
 
@@ -205,139 +170,94 @@
 
       </header>
 
+      <main class="rv5-main">
 
-      <!-- ======================================================
-           MAP
-           ====================================================== -->
+        <div class="rv5-mapbar">
 
-      <main class="relay-v4-map-frame">
-
-        <div class="relay-v4-map-toolbar">
-
-          <div class="relay-v4-toolbar-left">
-
-            <span class="relay-v4-chip active">
-              LIVE
-            </span>
-
-            <span class="relay-v4-chip">
-              GRID 04
-            </span>
-
-            <span class="relay-v4-chip">
-              NIGHT OPS
-            </span>
-
+          <div>
+            <span class="active">● LIVE</span>
+            <span>GRID 04</span>
+            <span>NIGHT OPS</span>
           </div>
 
-          <div class="relay-v4-coordinates">
-            ROUTE // ACTIVE
-          </div>
+          <b>RLY // ROUTE ACTIVE</b>
 
         </div>
 
-
-        <div class="relay-v4-map-wrap">
+        <div class="rv5-map">
 
           <svg
-            class="map-briefing-map"
+            class="rv5-svg"
             viewBox="0 0 1000 560"
-            preserveAspectRatio="xMidYMid meet"
-            role="img"
-            aria-label="Actual level route map">
+            preserveAspectRatio="xMidYMid meet">
           </svg>
 
+          <div class="rv5-scan"></div>
+          <div class="rv5-vignette"></div>
 
-          <div class="relay-v4-map-noise"></div>
+          <div class="rv5-corner tl"></div>
+          <div class="rv5-corner tr"></div>
+          <div class="rv5-corner bl"></div>
+          <div class="rv5-corner br"></div>
 
-          <div class="relay-v4-map-scan"></div>
-
-          <div class="relay-v4-map-vignette"></div>
-
-          <div class="relay-v4-map-corners">
-
-            <div class="corner tl"></div>
-            <div class="corner tr"></div>
-            <div class="corner bl"></div>
-            <div class="corner br"></div>
-
+          <div class="rv5-map-label top">
+            <small>TACTICAL GRID</small>
+            <strong>RLY // 04 // SPINE</strong>
           </div>
 
-
-          <div class="relay-v4-map-label relay-v4-map-label-top">
-            <span>TACTICAL GRID</span>
-            <b>RLY // 04 // SPINE</b>
+          <div class="rv5-map-label bottom">
+            <small>ROUTE ANALYSIS</small>
+            <strong>LIVE PHASER WORLD</strong>
           </div>
 
-
-          <div class="relay-v4-map-label relay-v4-map-label-bottom">
-            <span>LIVE ROUTE</span>
-            <b>MISSION PATH</b>
-          </div>
-
-
-          <div class="relay-v4-map-crosshair"></div>
-
-
-          <div class="relay-v4-map-tag">
-
-            <span class="relay-v4-tag-dot"></span>
-
+          <div class="rv5-live-tag">
+            <i></i>
             REAL LEVEL ROUTE
-
           </div>
 
         </div>
 
-
-        <div class="relay-v4-map-footer">
+        <div class="rv5-stats">
 
           <div>
-            <span>MAP SOURCE</span>
-            <b>LIVE PHASER WORLD</b>
+            <small>MAP SOURCE</small>
+            <strong>LIVE PHASER</strong>
           </div>
 
           <div>
-            <span>ROUTE</span>
-            <b>CALCULATED</b>
+            <small>ROUTE</small>
+            <strong>CALCULATED</strong>
           </div>
 
           <div>
-            <span>THREAT</span>
-            <b class="danger">ACTIVE</b>
+            <small>THREAT</small>
+            <strong class="danger">ACTIVE</strong>
           </div>
 
         </div>
 
       </main>
 
+      <footer class="rv5-footer">
 
-      <!-- ======================================================
-           FOOTER
-           ====================================================== -->
+        <div class="rv5-objective">
 
-      <footer class="relay-v4-footer">
+          <div class="rv5-objective-icon">
+            ◆
+          </div>
 
-        <div class="relay-v4-objective">
-
-          <span class="relay-v4-objective-label">
-            PRIMARY OBJECTIVE
-          </span>
-
-          <strong class="relay-v4-objective-text">
-          </strong>
+          <div>
+            <small>PRIMARY OBJECTIVE</small>
+            <strong class="objective-text">
+              FOLLOW THE RELAY
+            </strong>
+          </div>
 
         </div>
 
-
-        <div class="relay-v4-footer-status">
-
-          <span class="relay-v4-status-icon"></span>
-
-          <span>
-            DEPLOYMENT READY
-          </span>
-
+        <div class="rv5-ready">
+          <i></i>
+          DEPLOYMENT READY
         </div>
 
       </footer>
@@ -347,2280 +267,1042 @@
 
   document.body.appendChild(root);
 
-
-  /* ============================================================
-   * STYLE
-   * ============================================================ */
+  /*
+   * ============================================================
+   * CSS
+   * ============================================================
+   */
 
   const style = document.createElement('style');
 
-  style.id = 'relay-gameplay-intro-final-v4-style';
+  style.id = 'relay-gameplay-intro-v5-style';
 
   style.textContent = `
 
-  /* ============================================================
-   * ROOT
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 {
-
-    --v4-bg:
-      #02060a;
-
-    --v4-panel:
-      rgba(5,12,19,.97);
-
-    --v4-panel-2:
-      rgba(7,17,26,.94);
-
-    --v4-cyan:
-      #8df4ff;
-
-    --v4-cyan-soft:
-      rgba(141,244,255,.12);
-
-    --v4-yellow:
-      #ffd06e;
-
-    --v4-yellow-soft:
-      rgba(255,208,110,.12);
-
-    --v4-red:
-      #ff6e79;
-
-    --v4-green:
-      #a9ed83;
-
-    --v4-white:
-      #edf8fb;
-
-    --v4-muted:
-      #6c8495;
-
-    --v4-line:
-      rgba(141,244,255,.12);
-
-    position: fixed !important;
-
-    inset: 0 !important;
-
-    z-index: 2147483647 !important;
-
-    display: grid !important;
-
-    place-items: center !important;
-
-    padding:
-      clamp(8px,2vw,28px) !important;
-
-    box-sizing: border-box;
-
-    overflow: hidden;
-
-    background:
-      radial-gradient(
-        circle at 50% 50%,
-        rgba(20,80,100,.12),
-        transparent 48%
-      ),
-      #02060a;
-
-    color:
-      var(--v4-white);
-
-    font-family:
-      ui-monospace,
-      SFMono-Regular,
-      Menlo,
-      Monaco,
-      Consolas,
-      monospace;
-
-    isolation: isolate;
-
-  }
-
-
-  #relayGameplayIntroFinalV3[hidden] {
-
-    display: none !important;
-
-  }
-
-
-  /* ============================================================
-   * BACKDROP
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-backdrop {
-
-    position: absolute;
-
-    inset: 0;
-
-    pointer-events: none;
-
-    background:
-
-      radial-gradient(
-        circle at 50% 45%,
-        rgba(141,244,255,.045),
-        transparent 35%
-      ),
-
-      linear-gradient(
-        180deg,
-        rgba(0,0,0,.25),
-        rgba(0,0,0,.72)
-      );
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-backdrop::before {
-
-    content: "";
-
-    position: absolute;
-
-    inset: 0;
-
-    opacity: .2;
-
-    background-image:
-
-      linear-gradient(
-        rgba(141,244,255,.025) 1px,
-        transparent 1px
-      ),
-
-      linear-gradient(
-        90deg,
-        rgba(141,244,255,.025) 1px,
-        transparent 1px
-      );
-
-    background-size:
-      44px 44px;
-
-  }
-
-
-  /* ============================================================
-   * SHELL
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-shell {
-
-    position: relative;
-
-    width:
-      min(1240px,96vw);
-
-    height:
-      min(850px,94dvh);
-
-    min-height:
-      min(560px,94dvh);
-
-    display: grid;
-
-    grid-template-rows:
-      auto
-      1fr
-      auto;
-
-    gap: 0;
-
-    overflow: hidden;
-
-    border:
-      1px solid
-      rgba(141,244,255,.18);
-
-    background:
-      linear-gradient(
-        145deg,
-        rgba(6,17,26,.98),
-        rgba(2,7,12,.99)
-      );
-
-    box-shadow:
-
-      0 45px 140px rgba(0,0,0,.78),
-
-      0 0 90px
-      rgba(141,244,255,.045),
-
-      inset 0 1px
-      rgba(255,255,255,.045);
-
-    clip-path:
-      polygon(
-        0 0,
-        calc(100% - 16px) 0,
-        100% 16px,
-        100% 100%,
-        16px 100%,
-        0 calc(100% - 16px)
-      );
-
-  }
-
-
-  /* ============================================================
-   * TOP LINE
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-topline {
-
-    position: absolute;
-
-    left: 0;
-
-    right: 0;
-
-    top: 0;
-
-    height: 2px;
-
-    display: flex;
-
-    z-index: 20;
-
-    pointer-events: none;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-topline span {
-
-    flex: 1;
-
-    border-right:
-      1px solid
-      rgba(141,244,255,.16);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-topline span:nth-child(1),
-  #relayGameplayIntroFinalV3 .relay-v4-topline span:nth-child(5) {
-
-    background:
-      var(--v4-yellow);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-topline span:nth-child(2),
-  #relayGameplayIntroFinalV3 .relay-v4-topline span:nth-child(4) {
-
-    background:
-      rgba(141,244,255,.5);
-
-  }
-
-
-  /* ============================================================
-   * HEADER
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-header {
-
-    position: relative;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 24px;
-
-    padding:
-      20px 24px;
-
-    border-bottom:
-      1px solid
-      var(--v4-line);
-
-    background:
-      linear-gradient(
-        180deg,
-        rgba(255,255,255,.025),
-        transparent
-      );
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-status-line {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    margin-bottom: 8px;
-
-    color:
-      var(--v4-muted);
-
-    font-size: 7px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .18em;
-
-    text-transform:
-      uppercase;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-status-line i {
-
-    width: 24px;
-
-    height: 1px;
-
-    background:
-      rgba(141,244,255,.22);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-live-dot {
-
-    width: 6px;
-
-    height: 6px;
-
-    border-radius: 50%;
-
-    background:
-      var(--v4-cyan);
-
-    box-shadow:
-      0 0 12px
-      var(--v4-cyan);
-
-    animation:
-      relayV4LivePulse
-      1.4s
-      ease-in-out
-      infinite;
-
-  }
-
-
-  @keyframes relayV4LivePulse {
-
-    0%,100% {
-      opacity: .45;
-      transform: scale(.8);
+    #${ROOT_ID} {
+      --cyan:#65e8ff;
+      --yellow:#ffd76a;
+      --green:#8df59b;
+      --red:#ff6877;
+      --white:#eefcff;
+      --muted:#647e8b;
+
+      position:fixed !important;
+      inset:0 !important;
+      z-index:2147483647 !important;
+
+      display:grid !important;
+      place-items:center !important;
+
+      padding:12px !important;
+      box-sizing:border-box;
+
+      overflow:hidden;
+
+      background:
+        radial-gradient(
+          circle at 50% 45%,
+          rgba(35,150,180,.13),
+          transparent 42%
+        ),
+        #020609;
+
+      color:var(--white);
+
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+      isolation:isolate;
     }
 
-    50% {
-      opacity: 1;
-      transform: scale(1.15);
+    #${ROOT_ID}[hidden] {
+      display:none !important;
     }
 
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-kicker {
-
-    margin:
-      0 0 5px;
-
-    color:
-      var(--v4-yellow);
-
-    font-size: 7px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .2em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-title {
-
-    margin: 0;
-
-    color:
-      #f5fbfd;
-
-    font-size:
-      clamp(25px,3.3vw,43px);
-
-    line-height:
-      .92;
-
-    font-weight:
-      950;
-
-    letter-spacing:
-      .06em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-meta {
-
-    margin:
-      8px 0 0;
-
-    color:
-      #6d8697;
-
-    font-size: 8px;
-
-    font-weight: 800;
-
-    letter-spacing:
-      .12em;
-
-    text-transform:
-      uppercase;
-
-  }
-
-
-  /* ============================================================
-   * HEADER RIGHT
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-header-right {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 14px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-readout {
-
-    min-width: 100px;
-
-    padding:
-      10px 12px;
-
-    border:
-      1px solid
-      rgba(141,244,255,.09);
-
-    background:
-      rgba(141,244,255,.025);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-readout-label {
-
-    display: block;
-
-    margin-bottom: 5px;
-
-    color:
-      #617888;
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .16em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-readout b {
-
-    color:
-      var(--v4-green);
-
-    font-size: 9px;
-
-    letter-spacing:
-      .14em;
-
-  }
-
-
-  /* ============================================================
-   * TIMER
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-timer {
-
-    position: relative;
-
-    width: 72px;
-
-    height: 72px;
-
-    display: grid;
-
-    place-items: center;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-timer-ring {
-
-    position: absolute;
-
-    inset: 0;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-timer-ring svg {
-
-    width: 100%;
-
-    height: 100%;
-
-    transform:
-      rotate(-90deg);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-timer-track {
-
-    fill: none;
-
-    stroke:
-      rgba(255,208,110,.08);
-
-    stroke-width:
-      2;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-timer-progress {
-
-    fill: none;
-
-    stroke:
-      var(--v4-yellow);
-
-    stroke-width:
-      2.5;
-
-    stroke-linecap:
-      round;
-
-    stroke-dasharray:
-      125.66;
-
-    stroke-dashoffset:
-      0;
-
-    filter:
-      drop-shadow(
-        0 0 4px
-        rgba(255,208,110,.55)
-      );
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-timer strong {
-
-    position: relative;
-
-    z-index: 2;
-
-    color:
-      var(--v4-yellow);
-
-    font-size:
-      25px;
-
-    line-height: 1;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-timer > span {
-
-    position: absolute;
-
-    bottom: 5px;
-
-    color:
-      #687d8b;
-
-    font-size: 5px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .16em;
-
-  }
-
-
-  /* ============================================================
-   * MAP FRAME
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-frame {
-
-    min-height: 0;
-
-    display: grid;
-
-    grid-template-rows:
-      38px
-      1fr
-      38px;
-
-    overflow: hidden;
-
-  }
-
-
-  /* ============================================================
-   * TOOLBAR
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-toolbar {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 12px;
-
-    padding:
-      0 16px;
-
-    border-bottom:
-      1px solid
-      rgba(141,244,255,.08);
-
-    background:
-      rgba(2,8,13,.7);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-toolbar-left {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 6px;
-
-    min-width: 0;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-chip {
-
-    padding:
-      5px 8px;
-
-    border:
-      1px solid
-      rgba(141,244,255,.08);
-
-    color:
-      #607988;
-
-    background:
-      rgba(255,255,255,.015);
-
-    font-size: 5px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .14em;
-
-    white-space:
-      nowrap;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-chip.active {
-
-    color:
-      var(--v4-cyan);
-
-    border-color:
-      rgba(141,244,255,.25);
-
-    background:
-      rgba(141,244,255,.045);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-coordinates {
-
-    color:
-      #516977;
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .14em;
-
-  }
-
-
-  /* ============================================================
-   * MAP
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-wrap {
-
-    position: relative;
-
-    min-height: 0;
-
-    overflow: hidden;
-
-    background:
-      #02070c;
-
-    border-bottom:
-      1px solid
-      rgba(141,244,255,.08);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map {
-
-    position: absolute;
-
-    inset: 0;
-
-    width: 100%;
-
-    height: 100%;
-
-    display: block;
-
-  }
-
-
-  /* ============================================================
-   * MAP FX
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-noise {
-
-    position: absolute;
-
-    inset: 0;
-
-    pointer-events: none;
-
-    opacity: .15;
-
-    background-image:
-      radial-gradient(
-        rgba(255,255,255,.8) .5px,
-        transparent .5px
-      );
-
-    background-size:
-      5px 5px;
-
-    mix-blend-mode:
-      screen;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-scan {
-
-    position: absolute;
-
-    left: 0;
-
-    right: 0;
-
-    height: 70px;
-
-    pointer-events: none;
-
-    background:
-      linear-gradient(
-        180deg,
-        transparent,
-        rgba(141,244,255,.045),
-        transparent
-      );
-
-    animation:
-      relayV4Scan
-      4.5s
-      linear
-      infinite;
-
-  }
-
-
-  @keyframes relayV4Scan {
-
-    0% {
-      transform:
-        translateY(-90px);
-      opacity: 0;
+    #${ROOT_ID} .rv5-bg {
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+
+      background:
+        linear-gradient(
+          90deg,
+          rgba(0,0,0,.4),
+          transparent 30%,
+          transparent 70%,
+          rgba(0,0,0,.4)
+        );
     }
 
-    10% {
-      opacity: .8;
+    #${ROOT_ID} .rv5-bg::before {
+      content:"";
+      position:absolute;
+      inset:0;
+
+      background-image:
+        linear-gradient(
+          rgba(101,232,255,.025) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(101,232,255,.025) 1px,
+          transparent 1px
+        );
+
+      background-size:40px 40px;
     }
 
-    90% {
-      opacity: .55;
+    #${ROOT_ID} .rv5-noise {
+      position:absolute;
+      inset:0;
+      opacity:.035;
+      pointer-events:none;
+
+      background-image:
+        radial-gradient(
+          white .5px,
+          transparent .5px
+        );
+
+      background-size:4px 4px;
     }
 
-    100% {
-      transform:
-        translateY(600px);
-      opacity: 0;
+    #${ROOT_ID} .rv5-shell {
+      position:relative;
+
+      width:min(1320px,97vw);
+      height:min(900px,94dvh);
+
+      min-height:520px;
+
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr) auto;
+
+      overflow:hidden;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(7,20,29,.99),
+          rgba(2,7,11,.99)
+        );
+
+      border:1px solid rgba(101,232,255,.2);
+
+      box-shadow:
+        0 35px 120px rgba(0,0,0,.85),
+        0 0 100px rgba(40,180,215,.08),
+        inset 0 1px rgba(255,255,255,.05);
+
+      border-radius:10px;
     }
 
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-vignette {
-
-    position: absolute;
-
-    inset: 0;
-
-    pointer-events: none;
-
-    background:
-      radial-gradient(
-        ellipse at center,
-        transparent 45%,
-        rgba(0,0,0,.55) 100%
-      );
-
-  }
-
-
-  /* ============================================================
-   * CORNERS
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-corners {
-
-    position: absolute;
-
-    inset: 10px;
-
-    pointer-events: none;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner {
-
-    position: absolute;
-
-    width: 30px;
-
-    height: 30px;
-
-    border-color:
-      rgba(141,244,255,.22);
-
-    border-style:
-      solid;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner.tl {
-
-    left: 0;
-    top: 0;
-
-    border-width:
-      1px 0 0 1px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner.tr {
-
-    right: 0;
-    top: 0;
-
-    border-width:
-      1px 1px 0 0;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner.bl {
-
-    left: 0;
-    bottom: 0;
-
-    border-width:
-      0 0 1px 1px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .corner.br {
-
-    right: 0;
-    bottom: 0;
-
-    border-width:
-      0 1px 1px 0;
-
-  }
-
-
-  /* ============================================================
-   * MAP LABELS
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label {
-
-    position: absolute;
-
-    z-index: 5;
-
-    pointer-events: none;
-
-    display: grid;
-
-    gap: 4px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label span {
-
-    color:
-      #526d7b;
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .17em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label b {
-
-    color:
-      #a8c1cb;
-
-    font-size: 8px;
-
-    letter-spacing:
-      .1em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label-top {
-
-    left: 24px;
-
-    top: 20px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-label-bottom {
-
-    right: 24px;
-
-    bottom: 20px;
-
-    text-align:
-      right;
-
-  }
-
-
-  /* ============================================================
-   * CROSSHAIR
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair {
-
-    position: absolute;
-
-    left: 50%;
-
-    top: 50%;
-
-    width: 46px;
-
-    height: 46px;
-
-    transform:
-      translate(-50%,-50%);
-
-    border:
-      1px solid
-      rgba(141,244,255,.05);
-
-    border-radius:
-      50%;
-
-    pointer-events: none;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::before,
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::after {
-
-    content: "";
-
-    position: absolute;
-
-    background:
-      rgba(141,244,255,.12);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::before {
-
-    width: 70px;
-
-    height: 1px;
-
-    left: -12px;
-
-    top: 22px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-crosshair::after {
-
-    width: 1px;
-
-    height: 70px;
-
-    left: 22px;
-
-    top: -12px;
-
-  }
-
-
-  /* ============================================================
-   * TAG
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-tag {
-
-    position: absolute;
-
-    left: 18px;
-
-    bottom: 18px;
-
-    z-index: 8;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    padding:
-      7px 9px;
-
-    border:
-      1px solid
-      rgba(141,244,255,.16);
-
-    background:
-      rgba(2,8,13,.76);
-
-    color:
-      var(--v4-cyan);
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .15em;
-
-    backdrop-filter:
-      blur(8px);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-tag-dot {
-
-    width: 5px;
-
-    height: 5px;
-
-    border-radius: 50%;
-
-    background:
-      var(--v4-cyan);
-
-    box-shadow:
-      0 0 8px
-      var(--v4-cyan);
-
-  }
-
-
-  /* ============================================================
-   * MAP FOOTER
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer {
-
-    display: grid;
-
-    grid-template-columns:
-      repeat(3,1fr);
-
-    min-width: 0;
-
-    background:
-      rgba(2,7,11,.9);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer > div {
-
-    min-width: 0;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    flex-direction: column;
-
-    gap: 3px;
-
-    border-right:
-      1px solid
-      rgba(141,244,255,.07);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer > div:last-child {
-
-    border-right: 0;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer span {
-
-    color:
-      #4e6675;
-
-    font-size: 5px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .16em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer b {
-
-    color:
-      #a5bac4;
-
-    font-size: 6px;
-
-    letter-spacing:
-      .1em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-map-footer b.danger {
-
-    color:
-      var(--v4-red);
-
-  }
-
-
-  /* ============================================================
-   * FOOTER
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .relay-v4-footer {
-
-    min-height:
-      70px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 20px;
-
-    padding:
-      12px 20px;
-
-    border-top:
-      1px solid
-      rgba(141,244,255,.1);
-
-    background:
-      rgba(2,7,11,.96);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-objective {
-
-    min-width: 0;
-
-    display: grid;
-
-    gap: 5px;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-objective-label {
-
-    color:
-      var(--v4-yellow);
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .16em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-objective-text {
-
-    max-width:
-      min(700px,70vw);
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    white-space: nowrap;
-
-    color:
-      #dcebef;
-
-    font-size:
-      clamp(8px,1vw,10px);
-
-    letter-spacing:
-      .04em;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-footer-status {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    color:
-      #77909d;
-
-    font-size: 6px;
-
-    font-weight: 900;
-
-    letter-spacing:
-      .14em;
-
-    white-space:
-      nowrap;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .relay-v4-status-icon {
-
-    width: 7px;
-
-    height: 7px;
-
-    border-radius: 50%;
-
-    background:
-      var(--v4-green);
-
-    box-shadow:
-      0 0 10px
-      rgba(169,237,131,.65);
-
-  }
-
-
-  /* ============================================================
-   * SVG MAP
-   * ============================================================ */
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .bg {
-
-    fill:
-      #02080d;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .grid {
-
-    stroke:
-      #123044;
-
-    stroke-width:
-      1;
-
-    opacity:
-      .52;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .grid-major {
-
-    stroke:
-      #1c465b;
-
-    stroke-width:
-      1.4;
-
-    opacity:
-      .42;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .platform {
-
-    fill:
-      #102333;
-
-    stroke:
-      #42677b;
-
-    stroke-width:
-      1.3;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .platform-edge {
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      1;
-
-    opacity:
-      .2;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .danger {
-
-    fill:
-      #ff6e79;
-
-    opacity:
-      .9;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .boost {
-
-    fill:
-      #082d3b;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      1.4;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .boostmark {
-
-    fill:
-      #8df4ff;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-ring {
-
-    fill:
-      none;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      1.5;
-
-    opacity:
-      .65;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-ring-outer {
-
-    fill:
-      none;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      1;
-
-    stroke-dasharray:
-      3 5;
-
-    opacity:
-      .3;
-
-    animation:
-      relayV4Checkpoint
-      2.5s
-      linear
-      infinite;
-
-  }
-
-
-  @keyframes relayV4Checkpoint {
-
-    to {
-      transform:
-        rotate(360deg);
-      transform-origin:
-        center;
+    #${ROOT_ID} .rv5-topline {
+      position:absolute;
+      top:0;
+      left:0;
+      right:0;
+      height:3px;
+
+      display:flex;
+      z-index:20;
     }
 
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-dot {
-
-    fill:
-      #8df4ff;
-
-    filter:
-      url(#relay-v4-glow);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .signal {
-
-    fill:
-      #ffd06e;
-
-    filter:
-      url(#relay-v4-glow);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .secret {
-
-    fill:
-      rgba(224,167,255,.08);
-
-    stroke:
-      #e0a7ff;
-
-    stroke-width:
-      1.5;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .gate {
-
-    fill:
-      #351e2a;
-
-    stroke:
-      #ff6e79;
-
-    stroke-width:
-      1.3;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .enemy {
-
-    fill:
-      #301a27;
-
-    stroke:
-      #ff6e79;
-
-    stroke-width:
-      2;
-
-    filter:
-      url(#relay-v4-glow-soft);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .route-halo {
-
-    fill:
-      none;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      13;
-
-    opacity:
-      .07;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .route {
-
-    fill:
-      none;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      3.5;
-
-    stroke-linecap:
-      round;
-
-    stroke-linejoin:
-      round;
-
-    stroke-dasharray:
-      11 8;
-
-    opacity:
-      .9;
-
-    filter:
-      url(#relay-v4-glow);
-
-    animation:
-      relayV4Route
-      1.4s
-      linear
-      infinite;
-
-  }
-
-
-  @keyframes relayV4Route {
-
-    to {
-      stroke-dashoffset:
-        -38;
+    #${ROOT_ID} .rv5-topline i {
+      flex:1;
+      background:rgba(101,232,255,.2);
     }
 
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .route-core {
-
-    fill:
-      none;
-
-    stroke:
-      rgba(237,250,253,.9);
-
-    stroke-width:
-      1;
-
-    stroke-linecap:
-      round;
-
-    opacity:
-      .8;
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .marker-start {
-
-    fill:
-      #a9ed83;
-
-    stroke:
-      #edffd9;
-
-    stroke-width:
-      2;
-
-    filter:
-      url(#relay-v4-glow-soft);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .marker-goal {
-
-    fill:
-      #ffd06e;
-
-    stroke:
-      #fff0c7;
-
-    stroke-width:
-      2;
-
-    filter:
-      url(#relay-v4-glow);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .marker-player {
-
-    fill:
-      #effcff;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      2;
-
-    filter:
-      url(#relay-v4-glow);
-
-  }
-
-
-  #relayGameplayIntroFinalV3 .map-briefing-map .player-ring {
-
-    fill:
-      none;
-
-    stroke:
-      #8df4ff;
-
-    stroke-width:
-      1.5;
-
-    stroke-dasharray:
-      4 5;
-
-    opacity:
-      .65;
-
-    animation:
-      relayV4PlayerRing
-      2s
-      linear
-      infinite;
-
-  }
-
-
-  @keyframes relayV4PlayerRing {
-
-    to {
-      transform:
-        rotate(360deg);
-
-      transform-origin:
-        center;
+    #${ROOT_ID} .rv5-topline i:first-child,
+    #${ROOT_ID} .rv5-topline i:last-child {
+      background:var(--yellow);
     }
 
-  }
+    #${ROOT_ID} .rv5-topline i:nth-child(3) {
+      background:var(--cyan);
+    }
 
+    #${ROOT_ID} .rv5-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
 
-  #relayGameplayIntroFinalV3 .map-briefing-map .label,
-  #relayGameplayIntroFinalV3 .map-briefing-map .guide,
-  #relayGameplayIntroFinalV3 .map-briefing-map .legend {
+      padding:20px 24px;
 
-    font-family:
-      ui-monospace,
-      SFMono-Regular,
-      Menlo,
-      monospace;
+      border-bottom:1px solid rgba(101,232,255,.1);
+    }
 
-    fill:
-      #7895a4;
+    #${ROOT_ID} .rv5-live {
+      display:flex;
+      align-items:center;
+      gap:7px;
 
-    font-size:
-      9px;
+      margin-bottom:8px;
 
-    font-weight:
-      800;
+      color:#607984;
+      font-size:7px;
+      font-weight:900;
+      letter-spacing:.18em;
+    }
 
-    letter-spacing:
-      .1em;
+    #${ROOT_ID} .rv5-live b {
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:var(--cyan);
 
-  }
+      box-shadow:0 0 12px var(--cyan);
 
+      animation:rv5pulse 1.3s infinite;
+    }
 
-  #relayGameplayIntroFinalV3 .map-briefing-map .guide {
+    #${ROOT_ID} .rv5-live span {
+      color:#78919d;
+    }
 
-    fill:
-      #8df4ff;
+    @keyframes rv5pulse {
+      50% {
+        transform:scale(1.35);
+        opacity:.55;
+      }
+    }
 
-    font-size:
-      8px;
+    #${ROOT_ID} .rv5-kicker {
+      color:var(--yellow);
+      font-size:7px;
+      font-weight:900;
+      letter-spacing:.2em;
+      margin-bottom:5px;
+    }
 
-  }
+    #${ROOT_ID} h1 {
+      margin:0;
 
+      font-size:clamp(28px,4vw,50px);
+      line-height:.9;
+      letter-spacing:.05em;
+      font-weight:950;
+    }
 
-  #relayGameplayIntroFinalV3 .map-briefing-map .legend {
+    #${ROOT_ID} h1 strong {
+      color:var(--cyan);
+      text-shadow:0 0 20px rgba(101,232,255,.25);
+    }
 
-    fill:
-      #b2c6ce;
+    #${ROOT_ID} .rv5-meta {
+      margin-top:8px;
 
-  }
+      color:#637d89;
+      font-size:7px;
+      font-weight:800;
+      letter-spacing:.13em;
 
+      max-width:65vw;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
 
-  /* ============================================================
-   * OPEN ANIMATION
-   * ============================================================ */
+    #${ROOT_ID} .rv5-right {
+      display:flex;
+      align-items:center;
+      gap:15px;
+    }
 
-  #relayGameplayIntroFinalV3.relay-v4-opening
-  .relay-v4-shell {
+    #${ROOT_ID} .rv5-status {
+      position:relative;
 
-    animation:
-      relayV4Open
-      .42s
-      cubic-bezier(.18,.82,.2,1)
-      both;
+      min-width:110px;
+      padding:10px 12px;
 
-  }
+      border:1px solid rgba(101,232,255,.1);
+      background:rgba(101,232,255,.025);
+    }
 
+    #${ROOT_ID} .rv5-status small {
+      display:block;
+      margin-bottom:5px;
 
-  @keyframes relayV4Open {
+      color:#536c78;
+      font-size:6px;
+      letter-spacing:.15em;
+    }
 
-    from {
+    #${ROOT_ID} .rv5-status strong {
+      color:var(--green);
+      font-size:9px;
+      letter-spacing:.14em;
+    }
 
-      opacity: 0;
+    #${ROOT_ID} .rv5-status i {
+      position:absolute;
+      right:9px;
+      bottom:9px;
 
-      transform:
-        translateY(18px)
-        scale(.985);
+      width:5px;
+      height:5px;
+      border-radius:50%;
+
+      background:var(--green);
+      box-shadow:0 0 8px var(--green);
+    }
+
+    #${ROOT_ID} .rv5-timer {
+      position:relative;
+
+      width:72px;
+      height:72px;
+
+      display:grid;
+      place-items:center;
+    }
+
+    #${ROOT_ID} .rv5-timer svg {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      transform:rotate(-90deg);
+    }
+
+    #${ROOT_ID} .rv5-timer circle {
+      fill:none;
+      stroke-width:2.5;
+    }
+
+    #${ROOT_ID} .timer-track {
+      stroke:rgba(255,215,106,.08);
+    }
+
+    #${ROOT_ID} .timer-progress {
+      stroke:var(--yellow);
+      stroke-linecap:round;
+
+      stroke-dasharray:270.18;
+      stroke-dashoffset:0;
 
       filter:
-        blur(5px);
-
+        drop-shadow(
+          0 0 6px
+          rgba(255,215,106,.7)
+        );
     }
 
-    to {
+    #${ROOT_ID} .rv5-timer strong {
+      position:relative;
+      z-index:2;
 
-      opacity: 1;
+      color:var(--yellow);
+      font-size:24px;
+    }
 
-      transform:
-        translateY(0)
-        scale(1);
+    #${ROOT_ID} .rv5-timer small {
+      position:absolute;
+      bottom:5px;
+
+      color:#637983;
+      font-size:5px;
+      letter-spacing:.15em;
+    }
+
+    #${ROOT_ID} .rv5-main {
+      min-height:0;
+
+      display:grid;
+      grid-template-rows:38px minmax(0,1fr) 40px;
+
+      overflow:hidden;
+    }
+
+    #${ROOT_ID} .rv5-mapbar {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      padding:0 15px;
+
+      border-bottom:1px solid rgba(101,232,255,.08);
+
+      background:rgba(1,7,11,.9);
+    }
+
+    #${ROOT_ID} .rv5-mapbar > div {
+      display:flex;
+      gap:6px;
+    }
+
+    #${ROOT_ID} .rv5-mapbar span {
+      padding:5px 8px;
+
+      color:#506b78;
+      font-size:5px;
+      font-weight:900;
+      letter-spacing:.14em;
+
+      border:1px solid rgba(101,232,255,.07);
+    }
+
+    #${ROOT_ID} .rv5-mapbar span.active {
+      color:var(--cyan);
+      border-color:rgba(101,232,255,.25);
+      background:rgba(101,232,255,.04);
+    }
+
+    #${ROOT_ID} .rv5-mapbar b {
+      color:#4d6672;
+      font-size:6px;
+      letter-spacing:.14em;
+    }
+
+    #${ROOT_ID} .rv5-map {
+      position:relative;
+      min-height:0;
+      overflow:hidden;
+      background:#02080d;
+    }
+
+    #${ROOT_ID} .rv5-svg {
+      position:absolute;
+      inset:0;
+
+      width:100%;
+      height:100%;
+
+      display:block;
+    }
+
+    #${ROOT_ID} .rv5-scan {
+      position:absolute;
+      left:0;
+      right:0;
+
+      height:100px;
+
+      pointer-events:none;
+
+      background:
+        linear-gradient(
+          180deg,
+          transparent,
+          rgba(101,232,255,.05),
+          transparent
+        );
+
+      animation:
+        rv5scan 4s linear infinite;
+    }
+
+    @keyframes rv5scan {
+      from {
+        transform:translateY(-120px);
+        opacity:0;
+      }
+
+      15% {
+        opacity:1;
+      }
+
+      to {
+        transform:translateY(650px);
+        opacity:0;
+      }
+    }
+
+    #${ROOT_ID} .rv5-vignette {
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+
+      background:
+        radial-gradient(
+          ellipse at center,
+          transparent 40%,
+          rgba(0,0,0,.68)
+        );
+    }
+
+    #${ROOT_ID} .rv5-corner {
+      position:absolute;
+
+      width:30px;
+      height:30px;
+
+      border-color:rgba(101,232,255,.3);
+      border-style:solid;
+
+      z-index:10;
+    }
+
+    #${ROOT_ID} .rv5-corner.tl {
+      top:10px;
+      left:10px;
+      border-width:1px 0 0 1px;
+    }
+
+    #${ROOT_ID} .rv5-corner.tr {
+      top:10px;
+      right:10px;
+      border-width:1px 1px 0 0;
+    }
+
+    #${ROOT_ID} .rv5-corner.bl {
+      bottom:10px;
+      left:10px;
+      border-width:0 0 1px 1px;
+    }
+
+    #${ROOT_ID} .rv5-corner.br {
+      bottom:10px;
+      right:10px;
+      border-width:0 1px 1px 0;
+    }
+
+    #${ROOT_ID} .rv5-map-label {
+      position:absolute;
+      z-index:12;
+
+      display:grid;
+      gap:4px;
+
+      pointer-events:none;
+    }
+
+    #${ROOT_ID} .rv5-map-label.top {
+      top:20px;
+      left:24px;
+    }
+
+    #${ROOT_ID} .rv5-map-label.bottom {
+      right:24px;
+      bottom:20px;
+      text-align:right;
+    }
+
+    #${ROOT_ID} .rv5-map-label small {
+      color:#526b78;
+      font-size:6px;
+      letter-spacing:.16em;
+    }
+
+    #${ROOT_ID} .rv5-map-label strong {
+      color:#a9c0c9;
+      font-size:8px;
+      letter-spacing:.1em;
+    }
+
+    #${ROOT_ID} .rv5-live-tag {
+      position:absolute;
+
+      left:16px;
+      bottom:16px;
+
+      z-index:15;
+
+      display:flex;
+      align-items:center;
+      gap:7px;
+
+      padding:8px 10px;
+
+      color:var(--cyan);
+
+      font-size:6px;
+      font-weight:900;
+      letter-spacing:.14em;
+
+      border:1px solid rgba(101,232,255,.18);
+      background:rgba(2,9,14,.82);
+      backdrop-filter:blur(8px);
+    }
+
+    #${ROOT_ID} .rv5-live-tag i {
+      width:5px;
+      height:5px;
+      border-radius:50%;
+
+      background:var(--cyan);
+      box-shadow:0 0 8px var(--cyan);
+    }
+
+    #${ROOT_ID} .rv5-stats {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+
+      background:rgba(1,6,10,.96);
+
+      border-top:1px solid rgba(101,232,255,.07);
+    }
+
+    #${ROOT_ID} .rv5-stats div {
+      min-width:0;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:3px;
+
+      border-right:1px solid rgba(101,232,255,.06);
+    }
+
+    #${ROOT_ID} .rv5-stats div:last-child {
+      border-right:0;
+    }
+
+    #${ROOT_ID} .rv5-stats small {
+      color:#465e69;
+      font-size:5px;
+      letter-spacing:.15em;
+    }
+
+    #${ROOT_ID} .rv5-stats strong {
+      color:#a5bbc3;
+      font-size:6px;
+      letter-spacing:.1em;
+    }
+
+    #${ROOT_ID} .rv5-stats .danger {
+      color:var(--red);
+    }
+
+    #${ROOT_ID} .rv5-footer {
+      min-height:72px;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      gap:15px;
+
+      padding:10px 20px;
+
+      border-top:1px solid rgba(101,232,255,.1);
+
+      background:rgba(1,6,10,.98);
+    }
+
+    #${ROOT_ID} .rv5-objective {
+      display:flex;
+      align-items:center;
+      gap:12px;
+
+      min-width:0;
+    }
+
+    #${ROOT_ID} .rv5-objective-icon {
+      width:32px;
+      height:32px;
+
+      flex:0 0 auto;
+
+      display:grid;
+      place-items:center;
+
+      color:var(--yellow);
+
+      border:1px solid rgba(255,215,106,.25);
+      background:rgba(255,215,106,.04);
+
+      transform:rotate(45deg);
+    }
+
+    #${ROOT_ID} .rv5-objective-icon::first-letter {
+      transform:rotate(-45deg);
+    }
+
+    #${ROOT_ID} .rv5-objective small {
+      display:block;
+
+      margin-bottom:4px;
+
+      color:var(--yellow);
+
+      font-size:6px;
+      font-weight:900;
+      letter-spacing:.16em;
+    }
+
+    #${ROOT_ID} .objective-text {
+      display:block;
+
+      max-width:65vw;
+
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+
+      color:#dcecef;
+
+      font-size:9px;
+      letter-spacing:.04em;
+    }
+
+    #${ROOT_ID} .rv5-ready {
+      display:flex;
+      align-items:center;
+      gap:8px;
+
+      color:#6d858f;
+
+      font-size:6px;
+      font-weight:900;
+      letter-spacing:.14em;
+      white-space:nowrap;
+    }
+
+    #${ROOT_ID} .rv5-ready i {
+      width:7px;
+      height:7px;
+      border-radius:50%;
+
+      background:var(--green);
+      box-shadow:0 0 10px var(--green);
+    }
+
+    /* SVG */
+
+    #${ROOT_ID} .grid {
+      stroke:#123044;
+      stroke-width:1;
+      opacity:.5;
+    }
+
+    #${ROOT_ID} .grid-major {
+      stroke:#1c465b;
+      stroke-width:1.4;
+      opacity:.4;
+    }
+
+    #${ROOT_ID} .platform {
+      fill:#102333;
+      stroke:#42677b;
+      stroke-width:1.3;
+    }
+
+    #${ROOT_ID} .edge {
+      stroke:var(--cyan);
+      opacity:.3;
+    }
+
+    #${ROOT_ID} .route-halo {
+      fill:none;
+      stroke:var(--cyan);
+      stroke-width:15;
+      opacity:.07;
+    }
+
+    #${ROOT_ID} .route {
+      fill:none;
+      stroke:var(--cyan);
+      stroke-width:3.5;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      stroke-dasharray:11 8;
+
+      animation:rv5route 1.3s linear infinite;
 
       filter:
-        blur(0);
-
+        drop-shadow(
+          0 0 5px
+          rgba(101,232,255,.8)
+        );
     }
 
-  }
-
-
-  /* ============================================================
-   * MOBILE
-   * ============================================================ */
-
-  @media (max-width: 820px) {
-
-    #relayGameplayIntroFinalV3 {
-
-      padding:
-        6px !important;
-
+    @keyframes rv5route {
+      to {
+        stroke-dashoffset:-38;
+      }
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-shell {
-
-      width:
-        98vw;
-
-      height:
-        96dvh;
-
-      min-height:
-        0;
-
-      clip-path:
-        none;
-
-      border-radius:
-        12px;
-
+    #${ROOT_ID} .route-core {
+      fill:none;
+      stroke:#effcff;
+      stroke-width:1;
+      opacity:.75;
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-header {
-
-      padding:
-        14px;
-
+    #${ROOT_ID} .start {
+      fill:var(--green);
+      stroke:#efffd9;
+      stroke-width:2;
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-readout {
-
-      display:
-        none;
-
+    #${ROOT_ID} .goal {
+      fill:var(--yellow);
+      stroke:#fff0c7;
+      stroke-width:2;
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-title {
-
-      font-size:
-        clamp(22px,7vw,30px);
-
+    #${ROOT_ID} .player {
+      fill:#effcff;
+      stroke:var(--cyan);
+      stroke-width:2;
     }
 
+    #${ROOT_ID} .player-ring {
+      fill:none;
+      stroke:var(--cyan);
+      stroke-width:1.5;
+      stroke-dasharray:4 5;
 
-    #relayGameplayIntroFinalV3 .relay-v4-map-frame {
-
-      grid-template-rows:
-        34px
-        1fr
-        34px;
-
+      animation:rv5ring 2s linear infinite;
+      transform-origin:center;
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-chip:nth-child(3) {
-
-      display:
-        none;
-
+    @keyframes rv5ring {
+      to {
+        transform:rotate(360deg);
+      }
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-label-top {
-
-      left:
-        14px;
-
-      top:
-        14px;
-
+    #${ROOT_ID} .checkpoint {
+      fill:none;
+      stroke:var(--cyan);
+      stroke-width:1.5;
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-label-bottom {
-
-      right:
-        14px;
-
-      bottom:
-        14px;
-
+    #${ROOT_ID} .checkpoint-dot {
+      fill:var(--cyan);
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-tag {
-
-      left:
-        12px;
-
-      bottom:
-        12px;
-
+    #${ROOT_ID} .danger-object {
+      fill:#301a27;
+      stroke:var(--red);
+      stroke-width:1.5;
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-footer {
-
-      min-height:
-        58px;
-
-      padding:
-        10px 14px;
-
+    #${ROOT_ID} .signal {
+      fill:var(--yellow);
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-footer-status {
-
-      display:
-        none;
-
+    #${ROOT_ID} .label {
+      fill:#7895a4;
+      font-family:ui-monospace,monospace;
+      font-size:9px;
+      font-weight:800;
+      letter-spacing:.1em;
     }
 
-
-    #relayGameplayIntroFinalV3 .relay-v4-objective-text {
-
-      max-width:
-        90vw;
-
+    #${ROOT_ID} .guide {
+      fill:var(--cyan);
+      font-family:ui-monospace,monospace;
+      font-size:8px;
+      font-weight:900;
     }
 
-  }
-
-
-  /* ============================================================
-   * SMALL MOBILE
-   * ============================================================ */
-
-  @media (max-width: 520px) {
-
-    #relayGameplayIntroFinalV3 .relay-v4-header {
-
-      min-height:
-        72px;
-
-      padding:
-        11px 12px;
-
+    #${ROOT_ID}.opening .rv5-shell {
+      animation:
+        rv5open
+        .45s
+        cubic-bezier(.16,.84,.22,1)
+        both;
     }
 
+    @keyframes rv5open {
+      from {
+        opacity:0;
+        transform:translateY(15px) scale(.985);
+        filter:blur(5px);
+      }
 
-    #relayGameplayIntroFinalV3 .relay-v4-status-line {
-
-      font-size:
-        5px;
-
-      margin-bottom:
-        6px;
-
+      to {
+        opacity:1;
+        transform:none;
+        filter:none;
+      }
     }
 
+    @media(max-width:820px) {
 
-    #relayGameplayIntroFinalV3 .relay-v4-status-line i {
+      #${ROOT_ID} {
+        padding:5px !important;
+      }
 
-      width:
-        12px;
+      #${ROOT_ID} .rv5-shell {
+        width:98vw;
+        height:97dvh;
+        min-height:0;
+        border-radius:10px;
+      }
 
+      #${ROOT_ID} .rv5-header {
+        padding:12px;
+      }
+
+      #${ROOT_ID} .rv5-status {
+        display:none;
+      }
+
+      #${ROOT_ID} .rv5-main {
+        grid-template-rows:34px minmax(0,1fr) 34px;
+      }
+
+      #${ROOT_ID} .rv5-footer {
+        min-height:58px;
+        padding:8px 11px;
+      }
+
+      #${ROOT_ID} .rv5-ready {
+        display:none;
+      }
     }
 
+    @media(max-width:520px) {
 
-    #relayGameplayIntroFinalV3 .relay-v4-kicker {
+      #${ROOT_ID} .rv5-header {
+        min-height:70px;
+        padding:9px 10px;
+      }
 
-      font-size:
-        5px;
+      #${ROOT_ID} .rv5-live {
+        font-size:5px;
+        margin-bottom:5px;
+      }
 
+      #${ROOT_ID} .rv5-kicker {
+        font-size:5px;
+      }
+
+      #${ROOT_ID} h1 {
+        font-size:20px;
+      }
+
+      #${ROOT_ID} .rv5-meta {
+        max-width:62vw;
+        font-size:5px;
+      }
+
+      #${ROOT_ID} .rv5-timer {
+        width:53px;
+        height:53px;
+      }
+
+      #${ROOT_ID} .rv5-timer strong {
+        font-size:17px;
+      }
+
+      #${ROOT_ID} .rv5-mapbar {
+        padding:0 7px;
+      }
+
+      #${ROOT_ID} .rv5-mapbar span {
+        padding:4px 5px;
+        font-size:4px;
+      }
+
+      #${ROOT_ID} .rv5-mapbar span:nth-child(3) {
+        display:none;
+      }
+
+      #${ROOT_ID} .rv5-mapbar b {
+        display:none;
+      }
+
+      #${ROOT_ID} .rv5-map-label.top {
+        top:12px;
+        left:12px;
+      }
+
+      #${ROOT_ID} .rv5-map-label.bottom {
+        right:12px;
+        bottom:12px;
+      }
+
+      #${ROOT_ID} .rv5-map-label small {
+        font-size:4px;
+      }
+
+      #${ROOT_ID} .rv5-map-label strong {
+        font-size:5px;
+      }
+
+      #${ROOT_ID} .rv5-live-tag {
+        left:8px;
+        bottom:8px;
+        padding:6px 7px;
+        font-size:4px;
+      }
+
+      #${ROOT_ID} .rv5-stats small {
+        font-size:4px;
+      }
+
+      #${ROOT_ID} .rv5-stats strong {
+        font-size:5px;
+      }
+
+      #${ROOT_ID} .rv5-footer {
+        min-height:55px;
+      }
+
+      #${ROOT_ID} .rv5-objective {
+        gap:8px;
+      }
+
+      #${ROOT_ID} .rv5-objective-icon {
+        width:24px;
+        height:24px;
+        font-size:8px;
+      }
+
+      #${ROOT_ID} .rv5-objective small {
+        font-size:4px;
+      }
+
+      #${ROOT_ID} .objective-text {
+        max-width:78vw;
+        font-size:6px;
+      }
     }
 
+    @media(prefers-reduced-motion:reduce) {
 
-    #relayGameplayIntroFinalV3 .relay-v4-title {
-
-      font-size:
-        21px;
-
-      letter-spacing:
-        .045em;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-meta {
-
-      margin-top:
-        5px;
-
-      font-size:
-        6px;
-
-      max-width:
-        60vw;
-
-      overflow:
-        hidden;
-
-      white-space:
-        nowrap;
-
-      text-overflow:
-        ellipsis;
+      #${ROOT_ID} *,
+      #${ROOT_ID} *::before,
+      #${ROOT_ID} *::after {
+        animation:none !important;
+      }
 
     }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-timer {
-
-      width:
-        54px;
-
-      height:
-        54px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-timer strong {
-
-      font-size:
-        19px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-toolbar {
-
-      padding:
-        0 9px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-chip {
-
-      padding:
-        4px 6px;
-
-      font-size:
-        4px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-coordinates {
-
-      display:
-        none;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-footer {
-
-      grid-template-columns:
-        repeat(3,1fr);
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-footer span {
-
-      font-size:
-        4px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-footer b {
-
-      font-size:
-        5px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-objective-label {
-
-      font-size:
-        5px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-objective-text {
-
-      font-size:
-        7px;
-
-    }
-
-  }
-
-
-  /* ============================================================
-   * LANDSCAPE PHONE
-   * ============================================================ */
-
-  @media (
-    max-height: 600px
-  ) and (
-    orientation: landscape
-  ) {
-
-    #relayGameplayIntroFinalV3 {
-
-      padding:
-        4px !important;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-shell {
-
-      height:
-        98dvh;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-header {
-
-      padding:
-        8px 14px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-map-frame {
-
-      grid-template-rows:
-        30px
-        1fr
-        28px;
-
-    }
-
-
-    #relayGameplayIntroFinalV3 .relay-v4-footer {
-
-      min-height:
-        42px;
-
-      padding:
-        6px 12px;
-
-    }
-
-  }
-
-
-  /* ============================================================
-   * REDUCED MOTION
-   * ============================================================ */
-
-  @media (
-    prefers-reduced-motion: reduce
-  ) {
-
-    #relayGameplayIntroFinalV3 *,
-    #relayGameplayIntroFinalV3 *::before,
-    #relayGameplayIntroFinalV3 *::after {
-
-      animation-duration:
-        .001ms !important;
-
-      animation-iteration-count:
-        1 !important;
-
-      scroll-behavior:
-        auto !important;
-
-    }
-
-  }
 
   `;
 
   document.head.appendChild(style);
 
-
-  /* ============================================================
+  /*
+   * ============================================================
    * MAP MODEL
-   * ============================================================ */
+   * ============================================================
+   */
 
   function mapModel(scene) {
 
-    const m =
-      scene?.mission || {};
+    const m = scene?.mission || {};
+
+    const bounds =
+      scene?.physics?.world?.bounds;
 
     const width =
       num(
-        scene?.physics?.world?.bounds?.width,
-        num(
-          m?.goal?.x,
-          6100
-        ) + 300
+        bounds?.width,
+        num(m?.goal?.x, 6100) + 500
       );
 
     const height =
       num(
-        scene?.physics?.world?.bounds?.height,
+        bounds?.height,
         720
       );
 
-
-    const sx =
-      920 /
-      Math.max(width, 1);
-
-    const sy =
-      430 /
-      Math.max(height, 1);
-
+    const sx = 920 / Math.max(width, 1);
+    const sy = 430 / Math.max(height, 1);
 
     const X = x =>
       40 +
@@ -2630,7 +1312,6 @@
         920
       );
 
-
     const Y = y =>
       50 +
       clamp(
@@ -2639,717 +1320,344 @@
         430
       );
 
+    const point = item => {
 
-    const p =
-      scene?.player;
-
-
-    const points = {
-
-      start: {
-        x:
-          X(
-            m?.spawn?.x ??
-            120
-          ),
-
-        y:
-          Y(
-            m?.spawn?.y ??
-            520
-          )
-      },
-
-      goal: {
-        x:
-          X(
-            m?.goal?.x ??
-            6100
-          ),
-
-        y:
-          Y(
-            m?.goal?.y ??
-            500
-          )
-      },
-
-      player: {
-        x:
-          X(
-            p?.x ??
-            m?.spawn?.x ??
-            120
-          ),
-
-        y:
-          Y(
-            p?.y ??
-            m?.spawn?.y ??
-            520
-          )
+      if (Array.isArray(item)) {
+        return {
+          x:X(item[0]),
+          y:Y(item[1])
+        };
       }
 
+      return {
+        x:X(item?.x),
+        y:Y(item?.y)
+      };
     };
 
+    const rect = item => {
+
+      if (Array.isArray(item)) {
+
+        return {
+          x:X(item[0]),
+          y:Y(item[1]),
+          w:Math.max(4, num(item[2],40) * sx),
+          h:Math.max(3, num(item[3],20) * sy)
+        };
+      }
+
+      return {
+        x:X(item?.x),
+        y:Y(item?.y),
+        w:Math.max(4,num(item?.width ?? item?.w,40) * sx),
+        h:Math.max(3,num(item?.height ?? item?.h,20) * sy)
+      };
+    };
 
     const arr = key =>
       Array.isArray(m?.[key])
         ? m[key]
         : [];
 
-
-    const point = item => {
-
-      if (
-        Array.isArray(item)
-      ) {
-
-        return {
-          x:
-            X(item[0]),
-
-          y:
-            Y(item[1])
-
-        };
-
-      }
-
-
-      return {
-
-        x:
-          X(item?.x),
-
-        y:
-          Y(item?.y)
-
-      };
-
-    };
-
-
-    const rect = item => {
-
-      const x =
-        num(item?.[0]);
-
-      const y =
-        num(item?.[1]);
-
-      const w =
-        num(
-          item?.[2],
-          40
-        );
-
-      const h =
-        num(
-          item?.[3],
-          20
-        );
-
-
-      return {
-
-        x:
-          X(x),
-
-        y:
-          Y(y),
-
-        w:
-          Math.max(
-            4,
-            w * sx
-          ),
-
-        h:
-          Math.max(
-            3,
-            h * sy
-          )
-
-      };
-
-    };
-
-
     return {
-
-      width,
-      height,
 
       X,
       Y,
-
-      points,
-
-      platforms:
-        arr('platforms'),
-
-      obstacles:
-        arr('obstacles'),
-
-      boostPads:
-        arr('boostPads'),
-
-      checkpoints:
-        arr('checkpoints'),
-
-      signals:
-        arr('signals'),
-
-      secrets:
-        arr('secrets'),
-
-      movingGates:
-        arr('movingGates'),
-
-      enemies:
-        arr('enemies'),
-
-      guides:
-        arr('guides'),
-
       point,
-      rect
+      rect,
 
+      points:{
+        start:point(
+          m?.spawn || {x:120,y:520}
+        ),
+
+        goal:point(
+          m?.goal || {x:6100,y:500}
+        ),
+
+        player:point(
+          scene?.player || m?.spawn || {x:120,y:520}
+        )
+      },
+
+      platforms:arr('platforms'),
+      obstacles:arr('obstacles'),
+      movingGates:arr('movingGates'),
+      enemies:arr('enemies'),
+      signals:arr('signals'),
+      secrets:arr('secrets'),
+      checkpoints:arr('checkpoints'),
+      boostPads:arr('boostPads'),
+      guides:arr('guides')
     };
-
   }
 
+  /*
+   * ============================================================
+   * GRID
+   * ============================================================
+   */
 
-  /* ============================================================
-   * SVG HELPERS
-   * ============================================================ */
+  function grid() {
 
-  const createGrid = () => {
+    let out = '';
 
-    let output = '';
+    for (let x=40;x<=960;x+=40) {
 
-    for (
-      let x = 40;
-      x <= 960;
-      x += 40
-    ) {
-
-      output += `
+      out += `
         <line
           x1="${x}"
           y1="0"
           x2="${x}"
           y2="560"
-          class="${
-            x % 120 === 0
-              ? 'grid-major'
-              : 'grid'
-          }">
+          class="${x % 120 === 0 ? 'grid-major' : 'grid'}">
         </line>
       `;
-
     }
 
+    for (let y=40;y<=520;y+=40) {
 
-    for (
-      let y = 40;
-      y <= 520;
-      y += 40
-    ) {
-
-      output += `
+      out += `
         <line
           x1="0"
           y1="${y}"
           x2="1000"
           y2="${y}"
-          class="${
-            y % 120 === 0
-              ? 'grid-major'
-              : 'grid'
-          }">
+          class="${y % 120 === 0 ? 'grid-major' : 'grid'}">
         </line>
       `;
-
     }
 
-    return output;
+    return out;
+  }
 
-  };
-
-
-  /* ============================================================
-   * RENDER MAP
-   * ============================================================ */
+  /*
+   * ============================================================
+   * RENDER REAL MAP
+   * ============================================================
+   */
 
   function renderMap(scene) {
 
     const svg =
-      root.querySelector(
-        '.map-briefing-map'
-      );
+      root.querySelector('.rv5-svg');
 
-    if (
-      !svg ||
-      !scene
-    ) return;
+    if (!svg || !scene) return;
 
+    const d = mapModel(scene);
 
-    const d =
-      mapModel(scene);
-
-
-    const pathPoints = [
-
+    const routePoints = [
       d.points.start,
-
-      ...d.checkpoints.map(
-        d.point
-      ),
-
+      ...d.checkpoints.map(d.point),
       d.points.goal
-
     ];
 
-
-    const routePath =
-      pathPoints
+    const route =
+      routePoints
         .map(
-          (point, index) =>
-            `${
-              index
-                ? 'L'
-                : 'M'
-            } ${
-              point.x.toFixed(1)
-            } ${
-              point.y.toFixed(1)
-            }`
+          (p,i) =>
+            `${i ? 'L' : 'M'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`
         )
         .join(' ');
 
-
     const platforms =
       d.platforms
-        .map(
-          item => {
+        .map(item => {
 
-            const r =
-              d.rect(item);
+          const r = d.rect(item);
 
-            return `
-              <g>
-                <rect
-                  x="${r.x}"
-                  y="${r.y}"
-                  width="${r.w}"
-                  height="${r.h}"
-                  rx="3"
-                  class="platform">
-                </rect>
+          return `
+            <rect
+              x="${r.x}"
+              y="${r.y}"
+              width="${r.w}"
+              height="${r.h}"
+              rx="3"
+              class="platform">
+            </rect>
 
-                <line
-                  x1="${r.x}"
-                  y1="${r.y}"
-                  x2="${r.x + r.w}"
-                  y2="${r.y}"
-                  class="platform-edge">
-                </line>
-              </g>
-            `;
-
-          }
-        )
+            <line
+              x1="${r.x}"
+              y1="${r.y}"
+              x2="${r.x+r.w}"
+              y2="${r.y}"
+              class="edge">
+            </line>
+          `;
+        })
         .join('');
-
 
     const obstacles =
       d.obstacles
-        .map(
-          item => {
+        .map(item => {
 
-            const p =
-              d.point(item);
+          const p = d.point(item);
 
-            return `
-              <g>
-
-                <path
-                  d="
-                    M ${p.x - 9} ${p.y + 8}
-                    L ${p.x} ${p.y - 9}
-                    L ${p.x + 9} ${p.y + 8}
-                    Z
-                  "
-                  class="danger">
-                </path>
-
-                <line
-                  x1="${p.x - 5}"
-                  y1="${p.y + 4}"
-                  x2="${p.x + 5}"
-                  y2="${p.y + 4}"
-                  stroke="#ffb0b6"
-                  opacity=".4">
-                </line>
-
-              </g>
-            `;
-
-          }
-        )
+          return `
+            <path
+              d="
+                M ${p.x-9} ${p.y+8}
+                L ${p.x} ${p.y-9}
+                L ${p.x+9} ${p.y+8}
+                Z
+              "
+              class="danger-object">
+            </path>
+          `;
+        })
         .join('');
-
-
-    const pads =
-      d.boostPads
-        .map(
-          item => {
-
-            const r =
-              d.rect([
-                item[0] - 28,
-                item[1] - 8,
-                56,
-                16
-              ]);
-
-
-            return `
-              <g>
-
-                <rect
-                  x="${r.x}"
-                  y="${r.y}"
-                  width="${r.w}"
-                  height="${r.h}"
-                  rx="4"
-                  class="boost">
-                </rect>
-
-                <path
-                  d="
-                    M ${r.x + 7}
-                      ${r.y + r.h / 2}
-
-                    l 9 -6
-                    v 12
-                    z
-
-                    M ${r.x + 20}
-                      ${r.y + r.h / 2}
-
-                    l 9 -6
-                    v 12
-                    z
-                  "
-                  class="boostmark">
-                </path>
-
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const cps =
-      d.checkpoints
-        .map(
-          (item, index) => {
-
-            const p =
-              d.point(item);
-
-            return `
-              <g>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="18"
-                  class="checkpoint-ring-outer">
-                </circle>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="13"
-                  class="checkpoint-ring">
-                </circle>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="4"
-                  class="checkpoint-dot">
-                </circle>
-
-                <text
-                  x="${p.x}"
-                  y="${p.y - 20}"
-                  text-anchor="middle"
-                  class="label">
-                  CP ${index + 1}
-                </text>
-
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const signals =
-      d.signals
-        .map(
-          item => {
-
-            const p =
-              d.point(item);
-
-            return `
-              <g>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="9"
-                  fill="none"
-                  stroke="#ffd06e"
-                  opacity=".12">
-                </circle>
-
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="4.5"
-                  class="signal">
-                </circle>
-
-              </g>
-            `;
-
-          }
-        )
-        .join('');
-
-
-    const secrets =
-      d.secrets
-        .map(
-          item => {
-
-            const p =
-              d.point(item);
-
-            return `
-              <path
-                d="
-                  M ${p.x} ${p.y - 7}
-                  l 7 7
-                  -7 7
-                  -7 -7
-                  Z
-                "
-                class="secret">
-              </path>
-            `;
-
-          }
-        )
-        .join('');
-
 
     const gates =
       d.movingGates
-        .map(
-          item => {
+        .map(item => {
 
-            const r =
-              d.rect(item);
+          const r = d.rect(item);
 
-            return `
-              <g>
+          return `
+            <rect
+              x="${r.x}"
+              y="${r.y}"
+              width="${r.w}"
+              height="${r.h}"
+              rx="3"
+              class="danger-object">
+            </rect>
 
-                <rect
-                  x="${r.x}"
-                  y="${r.y}"
-                  width="${r.w}"
-                  height="${r.h}"
-                  rx="3"
-                  class="gate">
-                </rect>
+            <line
+              x1="${r.x}"
+              y1="${r.y}"
+              x2="${r.x+r.w}"
+              y2="${r.y+r.h}"
+              stroke="#ff6877"
+              opacity=".3">
+            </line>
 
-                <line
-                  x1="${r.x}"
-                  y1="${r.y}"
-                  x2="${r.x + r.w}"
-                  y2="${r.y + r.h}"
-                  stroke="#ff6e79"
-                  opacity=".25">
-                </line>
-
-                <line
-                  x1="${r.x + r.w}"
-                  y1="${r.y}"
-                  x2="${r.x}"
-                  y2="${r.y + r.h}"
-                  stroke="#ff6e79"
-                  opacity=".25">
-                </line>
-
-              </g>
-            `;
-
-          }
-        )
+            <line
+              x1="${r.x+r.w}"
+              y1="${r.y}"
+              x2="${r.x}"
+              y2="${r.y+r.h}"
+              stroke="#ff6877"
+              opacity=".3">
+            </line>
+          `;
+        })
         .join('');
 
+    const checkpoints =
+      d.checkpoints
+        .map((item,i) => {
+
+          const p = d.point(item);
+
+          return `
+            <g>
+
+              <circle
+                cx="${p.x}"
+                cy="${p.y}"
+                r="17"
+                class="checkpoint">
+              </circle>
+
+              <circle
+                cx="${p.x}"
+                cy="${p.y}"
+                r="4"
+                class="checkpoint-dot">
+              </circle>
+
+              <text
+                x="${p.x}"
+                y="${p.y-21}"
+                text-anchor="middle"
+                class="label">
+                CP ${i+1}
+              </text>
+
+            </g>
+          `;
+        })
+        .join('');
+
+    const signals =
+      d.signals
+        .map(item => {
+
+          const p = d.point(item);
+
+          return `
+            <circle
+              cx="${p.x}"
+              cy="${p.y}"
+              r="5"
+              class="signal">
+            </circle>
+          `;
+        })
+        .join('');
 
     const enemies =
       d.enemies
-        .map(
-          item => {
+        .map(item => {
 
-            const p =
-              d.point(item);
+          const p = d.point(item);
 
-            return `
-              <g>
+          return `
+            <g>
 
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="12"
-                  fill="none"
-                  stroke="#ff6e79"
-                  stroke-width="1"
-                  opacity=".16">
-                </circle>
+              <circle
+                cx="${p.x}"
+                cy="${p.y}"
+                r="11"
+                fill="none"
+                stroke="#ff6877"
+                opacity=".25">
+              </circle>
 
-                <circle
-                  cx="${p.x}"
-                  cy="${p.y}"
-                  r="8"
-                  class="enemy">
-                </circle>
+              <circle
+                cx="${p.x}"
+                cy="${p.y}"
+                r="7"
+                class="danger-object">
+              </circle>
 
-                <path
-                  d="
-                    M ${p.x - 3} ${p.y}
-                    H ${p.x + 3}
-                    M ${p.x} ${p.y - 3}
-                    V ${p.y + 3}
-                  "
-                  stroke="#ffadb3"
-                  opacity=".55">
-                </path>
+              <text
+                x="${p.x+12}"
+                y="${p.y+3}"
+                class="label">
+                HOSTILE
+              </text>
 
-                <text
-                  x="${p.x + 14}"
-                  y="${p.y + 3}"
-                  class="label">
-                  HOSTILE
-                </text>
-
-              </g>
-            `;
-
-          }
-        )
+            </g>
+          `;
+        })
         .join('');
-
 
     const guides =
       d.guides
-        .map(
-          item => {
+        .map(item => {
 
-            const p =
-              d.point(item);
+          const p = d.point(item);
 
-            return `
-              <text
-                x="${p.x}"
-                y="${p.y - 13}"
-                class="guide">
-                ${esc(item?.text || '')}
-              </text>
-            `;
-
-          }
-        )
+          return `
+            <text
+              x="${p.x}"
+              y="${p.y-12}"
+              class="guide">
+              ${esc(item?.text || '')}
+            </text>
+          `;
+        })
         .join('');
-
-
-    /* ==========================================================
-     * SVG
-     * ========================================================== */
 
     svg.innerHTML = `
 
       <defs>
 
-        <filter
-          id="relay-v4-glow"
-          x="-100%"
-          y="-100%"
-          width="300%"
-          height="300%">
-
-          <feGaussianBlur
-            stdDeviation="2.8"
-            result="blur">
-          </feGaussianBlur>
-
-          <feMerge>
-
-            <feMergeNode
-              in="blur">
-            </feMergeNode>
-
-            <feMergeNode
-              in="SourceGraphic">
-            </feMergeNode>
-
-          </feMerge>
-
-        </filter>
-
-
-        <filter
-          id="relay-v4-glow-soft"
-          x="-100%"
-          y="-100%"
-          width="300%"
-          height="300%">
-
-          <feGaussianBlur
-            stdDeviation="1.5"
-            result="blur">
-          </feGaussianBlur>
-
-          <feMerge>
-
-            <feMergeNode
-              in="blur">
-            </feMergeNode>
-
-            <feMergeNode
-              in="SourceGraphic">
-            </feMergeNode>
-
-          </feMerge>
-
-        </filter>
-
-
         <linearGradient
-          id="relay-v4-map-gradient"
+          id="rv5mapGradient"
           x1="0"
           y1="0"
           x2="1"
@@ -3361,7 +1669,7 @@
           </stop>
 
           <stop
-            offset="50%"
+            offset="55%"
             stop-color="#020a11">
           </stop>
 
@@ -3372,84 +1680,38 @@
 
         </linearGradient>
 
-
-        <radialGradient
-          id="relay-v4-center-glow">
-
-          <stop
-            offset="0%"
-            stop-color="#8df4ff"
-            stop-opacity=".055">
-          </stop>
-
-          <stop
-            offset="100%"
-            stop-color="#8df4ff"
-            stop-opacity="0">
-          </stop>
-
-        </radialGradient>
-
       </defs>
 
-
       <rect
         width="1000"
         height="560"
-        fill="url(#relay-v4-map-gradient)">
+        fill="url(#rv5mapGradient)">
       </rect>
 
-
-      <rect
-        width="1000"
-        height="560"
-        fill="url(#relay-v4-center-glow)">
-      </rect>
-
-
-      <!-- GRID -->
-
-      ${createGrid()}
-
-
-      <!-- ROUTE -->
+      ${grid()}
 
       <path
-        d="${routePath}"
+        d="${route}"
         class="route-halo">
       </path>
 
       <path
-        d="${routePath}"
+        d="${route}"
         class="route">
       </path>
 
       <path
-        d="${routePath}"
+        d="${route}"
         class="route-core">
       </path>
 
-
-      <!-- LEVEL OBJECTS -->
-
       ${platforms}
-
       ${gates}
-
       ${obstacles}
-
-      ${pads}
-
       ${signals}
-
-      ${secrets}
-
-      ${cps}
-
+      ${checkpoints}
       ${enemies}
-
       ${guides}
-
 
       <!-- START -->
 
@@ -3460,28 +1722,27 @@
           cy="${d.points.start.y}"
           r="15"
           fill="none"
-          stroke="#a9ed83"
-          opacity=".16">
+          stroke="#8df59b"
+          opacity=".2">
         </circle>
 
         <circle
           cx="${d.points.start.x}"
           cy="${d.points.start.y}"
           r="8"
-          class="marker-start">
+          class="start">
         </circle>
 
         <text
-          x="${d.points.start.x + 15}"
-          y="${d.points.start.y + 4}"
-          class="legend">
+          x="${d.points.start.x+14}"
+          y="${d.points.start.y+4}"
+          class="label">
           START
         </text>
 
       </g>
 
-
-      <!-- OBJECTIVE -->
+      <!-- GOAL -->
 
       <g>
 
@@ -3490,49 +1751,34 @@
           cy="${d.points.goal.y}"
           r="20"
           fill="none"
-          stroke="#ffd06e"
-          opacity=".12">
+          stroke="#ffd76a"
+          opacity=".2">
         </circle>
 
         <circle
           cx="${d.points.goal.x}"
           cy="${d.points.goal.y}"
           r="10"
-          class="marker-goal">
+          class="goal">
         </circle>
 
-        <path
-          d="
-            M ${d.points.goal.x - 4}
-              ${d.points.goal.y + 8}
-
-            V ${d.points.goal.y - 9}
-
-            l 15 5
-
-            -15 6
-          "
-          fill="#ffd06e">
-        </path>
-
         <text
-          x="${d.points.goal.x + 18}"
-          y="${d.points.goal.y + 4}"
-          class="legend">
+          x="${d.points.goal.x+18}"
+          y="${d.points.goal.y+4}"
+          class="label">
           OBJECTIVE
         </text>
 
       </g>
 
-
       <!-- PLAYER -->
 
-      <g id="live-player">
+      <g id="rv5-player">
 
         <circle
           cx="${d.points.player.x}"
           cy="${d.points.player.y}"
-          r="15"
+          r="16"
           class="player-ring">
         </circle>
 
@@ -3540,123 +1786,97 @@
           cx="${d.points.player.x}"
           cy="${d.points.player.y}"
           r="7"
-          class="marker-player">
+          class="player">
         </circle>
 
         <text
-          x="${d.points.player.x + 13}"
-          y="${d.points.player.y - 12}"
-          class="legend">
+          x="${d.points.player.x+13}"
+          y="${d.points.player.y-12}"
+          class="label">
           YOU
         </text>
 
       </g>
 
-
-      <!-- THREAT CORRIDOR -->
-
-      <g opacity=".9">
-
-        <path
-          d="
-            M 690 350
-            L 900 300
-            L 930 390
-            L 720 445
-            Z
-          "
-          fill="#ff6e79"
-          fill-opacity=".025"
-          stroke="#ff6e79"
-          stroke-opacity=".16"
-          stroke-dasharray="5 8">
-        </path>
-
-        <text
-          x="730"
-          y="375"
-          fill="#ff6e79"
-          opacity=".55"
-          font-family="ui-monospace,monospace"
-          font-size="8"
-          font-weight="900"
-          letter-spacing=".14em">
-          THREAT CORRIDOR
-        </text>
-
-      </g>
-
-
-      <!-- LEGEND -->
-
-      <g
-        transform="translate(28 528)">
-
-        <circle
-          cx="0"
-          cy="0"
-          r="4"
-          class="signal">
-        </circle>
-
-        <text
-          x="12"
-          y="3"
-          class="legend">
-          SIGNAL
-        </text>
-
-
-        <circle
-          cx="88"
-          cy="0"
-          r="4"
-          class="enemy">
-        </circle>
-
-        <text
-          x="100"
-          y="3"
-          class="legend">
-          THREAT
-        </text>
-
-
-        <circle
-          cx="178"
-          cy="0"
-          r="4"
-          class="marker-goal">
-        </circle>
-
-        <text
-          x="190"
-          y="3"
-          class="legend">
-          TARGET
-        </text>
-
-      </g>
-
     `;
-
   }
 
+  /*
+   * ============================================================
+   * PLAYER UPDATE
+   * ============================================================
+   */
 
-  /* ============================================================
+  function updatePlayer() {
+
+    if (!active) return;
+
+    const scene = runner();
+
+    const svg =
+      root.querySelector('.rv5-svg');
+
+    const player =
+      svg?.querySelector('#rv5-player');
+
+    if (!scene || !player) return;
+
+    const d = mapModel(scene);
+
+    const circle =
+      player.querySelector('.player');
+
+    const ring =
+      player.querySelector('.player-ring');
+
+    const label =
+      player.querySelector('text');
+
+    circle?.setAttribute(
+      'cx',
+      d.points.player.x
+    );
+
+    circle?.setAttribute(
+      'cy',
+      d.points.player.y
+    );
+
+    ring?.setAttribute(
+      'cx',
+      d.points.player.x
+    );
+
+    ring?.setAttribute(
+      'cy',
+      d.points.player.y
+    );
+
+    label?.setAttribute(
+      'x',
+      d.points.player.x + 13
+    );
+
+    label?.setAttribute(
+      'y',
+      d.points.player.y - 12
+    );
+  }
+
+  /*
+   * ============================================================
    * STATE
-   * ============================================================ */
+   * ============================================================
+   */
 
   let active = false;
-
   let timerId = 0;
-  let endId = 0;
-  let followId = 0;
+  let finishId = 0;
+  let playerId = 0;
 
-  const lock = state => {
+  function lockGame(state) {
 
-    window.__relayCinematicLock =
-      state;
+    window.__relayCinematicLock = state;
 
     document
       .getElementById('play')
@@ -3673,15 +1893,15 @@
           : 'relay:cinematic-unlock'
       )
     );
+  }
 
-  };
-
-
-  /* ============================================================
+  /*
+   * ============================================================
    * TIMER
-   * ============================================================ */
+   * ============================================================
+   */
 
-  const updateTimer = ms => {
+  function updateTimer(ms) {
 
     const seconds =
       Math.max(
@@ -3689,31 +1909,24 @@
         Math.ceil(ms / 1000)
       );
 
-
     const number =
       root.querySelector(
-        '.relay-v4-timer strong'
+        '.rv5-timer strong'
       );
-
 
     const progress =
       root.querySelector(
-        '.relay-v4-timer-progress'
+        '.timer-progress'
       );
 
-
     if (number) {
-
       number.textContent =
         String(seconds);
-
     }
-
 
     if (progress) {
 
-      const circumference =
-        125.66;
+      const circumference = 270.18;
 
       const ratio =
         clamp(
@@ -3725,224 +1938,89 @@
       progress.style.strokeDashoffset =
         String(
           circumference *
-          (1 - ratio)
+          (1-ratio)
         );
-
     }
+  }
 
-  };
-
-
-  /* ============================================================
-   * LIVE PLAYER
-   * ============================================================ */
-
-  const updatePlayer = () => {
-
-    if (!active) return;
-
-
-    const scene =
-      runner();
-
-    const svg =
-      root.querySelector(
-        '.map-briefing-map'
-      );
-
-    const group =
-      svg?.querySelector(
-        '#live-player'
-      );
-
-
-    if (
-      !scene ||
-      !group
-    ) return;
-
-
-    const d =
-      mapModel(scene);
-
-
-    const circle =
-      group.querySelector(
-        '.marker-player'
-      );
-
-    const ring =
-      group.querySelector(
-        '.player-ring'
-      );
-
-    const text =
-      group.querySelector(
-        'text'
-      );
-
-
-    circle?.setAttribute(
-      'cx',
-      d.points.player.x
-    );
-
-    circle?.setAttribute(
-      'cy',
-      d.points.player.y
-    );
-
-
-    ring?.setAttribute(
-      'cx',
-      d.points.player.x
-    );
-
-    ring?.setAttribute(
-      'cy',
-      d.points.player.y
-    );
-
-
-    text?.setAttribute(
-      'x',
-      d.points.player.x + 13
-    );
-
-    text?.setAttribute(
-      'y',
-      d.points.player.y - 12
-    );
-
-  };
-
-
-  /* ============================================================
+  /*
+   * ============================================================
    * FINISH
-   * ============================================================ */
+   * ============================================================
+   */
 
-  const finish = () => {
+  function finish() {
 
     clearInterval(timerId);
+    clearTimeout(finishId);
+    clearInterval(playerId);
 
-    clearTimeout(endId);
+    timerId = 0;
+    finishId = 0;
+    playerId = 0;
 
-    clearInterval(followId);
+    active = false;
 
+    root.classList.remove('opening');
 
-    timerId =
-      endId =
-      followId =
-      0;
+    lockGame(false);
 
+    root.hidden = true;
+  }
 
-    active =
-      false;
-
-
-    root.classList.remove(
-      'relay-v4-opening'
-    );
-
-
-    lock(false);
-
-
-    root.hidden =
-      true;
-
-  };
-
-
-  /* ============================================================
+  /*
+   * ============================================================
    * SHOW
-   * ============================================================ */
+   * ============================================================
+   */
 
-  const show = async () => {
+  async function show() {
 
     if (active) return;
 
+    active = true;
 
-    active =
-      true;
+    lockGame(true);
 
+    root.hidden = false;
 
-    lock(true);
-
-
-    root.hidden =
-      false;
-
-
-    root.classList.remove(
-      'relay-v4-opening'
-    );
-
-
-    /*
-     * Force animation restart.
-     */
+    root.classList.remove('opening');
 
     void root.offsetWidth;
 
-
-    root.classList.add(
-      'relay-v4-opening'
-    );
-
+    root.classList.add('opening');
 
     const startedWait =
       performance.now();
 
-
-    let data =
-      mission();
-
+    let data = getMission();
 
     while (
       !data.scene &&
-      performance.now() -
-        startedWait <
-        4500
+      performance.now() - startedWait < 4500
     ) {
 
-      await wait(80);
+      await WAIT(80);
 
-      data =
-        mission();
-
+      data = getMission();
     }
 
+    data = getMission();
 
-    data =
-      mission();
-
-
-    root.querySelector(
-      '.relay-v4-meta'
-    ).textContent =
+    root.querySelector('.rv5-meta')
+      .textContent =
       `${data.district} // ${data.title}`;
 
-
-    root.querySelector(
-      '.relay-v4-objective-text'
-    ).textContent =
+    root.querySelector('.objective-text')
+      .textContent =
       data.objective;
 
-
-    renderMap(
-      data.scene
-    );
-
+    renderMap(data.scene);
 
     const started =
       performance.now();
 
-
-    updateTimer(
-      10000
-    );
-
+    updateTimer(10000);
 
     timerId =
       setInterval(
@@ -3960,26 +2038,24 @@
         100
       );
 
-
-    followId =
+    playerId =
       setInterval(
         updatePlayer,
         100
       );
 
-
-    endId =
+    finishId =
       setTimeout(
         finish,
         10000
       );
+  }
 
-  };
-
-
-  /* ============================================================
-   * CLOSE WITH ESC
-   * ============================================================ */
+  /*
+   * ============================================================
+   * ESC
+   * ============================================================
+   */
 
   document.addEventListener(
     'keydown',
@@ -3989,19 +2065,18 @@
         event.key === 'Escape' &&
         active
       ) {
-
         finish();
-
       }
 
     },
     true
   );
 
-
-  /* ============================================================
-   * PLAY DETECTION
-   * ============================================================ */
+  /*
+   * ============================================================
+   * PLAY
+   * ============================================================
+   */
 
   document.addEventListener(
     'click',
@@ -4009,40 +2084,34 @@
 
       const button =
         event.target.closest(
-          BUTTONS
+          PLAY_BUTTONS
         );
 
-
-      if (
-        !button ||
-        active
-      ) return;
-
+      if (!button || active) return;
 
       /*
-       * Let the original game handler
-       * initialize the Phaser scene first.
+       * VAŽNO:
+       * originalni Play handler ide prvi.
+       * Tek nakon toga čekamo Phaser runner.
        */
 
       setTimeout(
         show,
-        120
+        180
       );
 
     },
     true
   );
 
-
-  /* ============================================================
-   * CINEMATIC LOCK
-   * ============================================================ */
+  /*
+   * ============================================================
+   * HUD LOCK
+   * ============================================================
+   */
 
   const lockStyle =
-    document.createElement(
-      'style'
-    );
-
+    document.createElement('style');
 
   lockStyle.textContent = `
 
@@ -4054,59 +2123,45 @@
     #play.relay-map-briefing-lock #toast,
     #play.relay-map-briefing-lock #pause {
 
-      visibility:
-        hidden !important;
-
-      opacity:
-        0 !important;
-
-      pointer-events:
-        none !important;
+      visibility:hidden !important;
+      opacity:0 !important;
+      pointer-events:none !important;
 
     }
 
   `;
 
+  document.head.appendChild(lockStyle);
 
-  document.head.appendChild(
-    lockStyle
-  );
-
-
-  /* ============================================================
+  /*
+   * ============================================================
    * PUBLIC API
-   * ============================================================ */
+   * ============================================================
+   */
 
-  window.relayGameplayIntroV4 = {
+  window.relayGameplayIntroV5 = {
 
     show,
 
-    close:
-      finish,
+    close:finish,
 
     refresh() {
 
       if (!active) return;
 
-      const data =
-        mission();
+      const data = getMission();
 
-      renderMap(
-        data.scene
-      );
-
+      if (data.scene) {
+        renderMap(data.scene);
+      }
     },
 
     getRoot() {
-
       return root;
-
     },
 
     isVisible() {
-
       return active;
-
     }
 
   };
