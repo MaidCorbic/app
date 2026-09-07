@@ -1282,117 +1282,416 @@
    * ============================================================
    */
 
-  function mapModel(scene) {
+  
+    
+function mapModel(scene) {
 
-    const m = scene?.mission || {};
+  const m = scene?.mission || {};
 
-    const bounds =
-      scene?.physics?.world?.bounds;
+  const bounds =
+    scene?.physics?.world?.bounds;
 
-    const width =
-      num(
-        bounds?.width,
-        num(m?.goal?.x, 6100) + 500
-      );
+  const width =
+    num(
+      bounds?.width,
+      num(m?.goal?.x, 6100) + 500
+    );
 
-    const height =
-      num(
-        bounds?.height,
-        720
-      );
+  const height =
+    num(
+      bounds?.height,
+      720
+    );
 
-    const sx = 920 / Math.max(width, 1);
-    const sy = 430 / Math.max(height, 1);
+  /*
+   * ------------------------------------------------------------
+   * HORIZONTAL SCALE
+   * ------------------------------------------------------------
+   */
 
-    const X = x =>
-      40 +
-      clamp(
-        num(x) * sx,
-        0,
-        920
-      );
+  const sx =
+    920 / Math.max(width, 1);
 
-    const Y = y =>
-      50 +
-      clamp(
-        num(y) * sy,
-        0,
-        430
-      );
+  const X = x =>
+    40 +
+    clamp(
+      num(x) * sx,
+      0,
+      920
+    );
 
-    const point = item => {
 
-      if (Array.isArray(item)) {
-        return {
-          x:X(item[0]),
-          y:Y(item[1])
-        };
+  /*
+   * ------------------------------------------------------------
+   * FIND REAL LEVEL CONTENT VERTICAL RANGE
+   *
+   * Stari kod je koristio:
+   *
+   *   Y = 50 + y * sy
+   *
+   * zbog čega je sadržaj na mobilnom završavao prenisko.
+   *
+   * Sada prvo pronađemo gdje se stvarni level nalazi,
+   * pa ga centriramo i povećamo u dostupnom prostoru.
+   * ------------------------------------------------------------
+   */
+
+  const ys = [];
+
+  const addPointY = item => {
+
+    if (Array.isArray(item)) {
+
+      if (Number.isFinite(Number(item[1]))) {
+        ys.push(Number(item[1]));
       }
 
-      return {
-        x:X(item?.x),
-        y:Y(item?.y)
-      };
-    };
+      return;
+    }
 
-    const rect = item => {
+    if (
+      item &&
+      Number.isFinite(Number(item.y))
+    ) {
+      ys.push(Number(item.y));
+    }
+  };
 
-      if (Array.isArray(item)) {
 
-        return {
-          x:X(item[0]),
-          y:Y(item[1]),
-          w:Math.max(4, num(item[2],40) * sx),
-          h:Math.max(3, num(item[3],20) * sy)
-        };
+  const addRectY = item => {
+
+    if (Array.isArray(item)) {
+
+      const y =
+        Number(item[1]);
+
+      const h =
+        Number(item[3]);
+
+      if (Number.isFinite(y)) {
+        ys.push(y);
+
+        if (Number.isFinite(h)) {
+          ys.push(y + h);
+        }
       }
 
-      return {
-        x:X(item?.x),
-        y:Y(item?.y),
-        w:Math.max(4,num(item?.width ?? item?.w,40) * sx),
-        h:Math.max(3,num(item?.height ?? item?.h,20) * sy)
-      };
-    };
+      return;
+    }
 
-    const arr = key =>
+    if (
+      item &&
+      Number.isFinite(Number(item.y))
+    ) {
+
+      const y =
+        Number(item.y);
+
+      const h =
+        Number(
+          item.height ??
+          item.h ??
+          0
+        );
+
+      ys.push(y);
+
+      if (Number.isFinite(h)) {
+        ys.push(y + h);
+      }
+    }
+  };
+
+
+  /*
+   * Main mission points
+   */
+
+  addPointY(
+    m?.spawn || {
+      x:120,
+      y:520
+    }
+  );
+
+  addPointY(
+    m?.goal || {
+      x:6100,
+      y:500
+    }
+  );
+
+
+  /*
+   * Real level objects
+   */
+
+  const pointArrays = [
+    'enemies',
+    'signals',
+    'secrets',
+    'checkpoints',
+    'boostPads',
+    'guides'
+  ];
+
+  pointArrays.forEach(key => {
+
+    const list =
       Array.isArray(m?.[key])
         ? m[key]
         : [];
 
-    return {
+    list.forEach(addPointY);
 
-      X,
-      Y,
-      point,
-      rect,
+  });
 
-      points:{
-        start:point(
-          m?.spawn || {x:120,y:520}
-        ),
 
-        goal:point(
-          m?.goal || {x:6100,y:500}
-        ),
+  const rectArrays = [
+    'platforms',
+    'obstacles',
+    'movingGates'
+  ];
 
-        player:point(
-          scene?.player || m?.spawn || {x:120,y:520}
-        )
-      },
+  rectArrays.forEach(key => {
 
-      platforms:arr('platforms'),
-      obstacles:arr('obstacles'),
-      movingGates:arr('movingGates'),
-      enemies:arr('enemies'),
-      signals:arr('signals'),
-      secrets:arr('secrets'),
-      checkpoints:arr('checkpoints'),
-      boostPads:arr('boostPads'),
-      guides:arr('guides')
-    };
+    const list =
+      Array.isArray(m?.[key])
+        ? m[key]
+        : [];
+
+    list.forEach(addRectY);
+
+  });
+
+
+  /*
+   * Fallback ako level nema dovoljno podataka.
+   */
+
+  if (ys.length < 2) {
+
+    ys.push(0);
+    ys.push(height);
+
   }
 
+
+  let minY =
+    Math.min(...ys);
+
+  let maxY =
+    Math.max(...ys);
+
+
+  /*
+   * Ako je range premalen, dodajemo malo prostora
+   * da mapa ne bude spljoštena.
+   */
+
+  if (
+    !Number.isFinite(minY) ||
+    !Number.isFinite(maxY)
+  ) {
+
+    minY = 0;
+    maxY = height;
+
+  }
+
+
+  const contentRange =
+    Math.max(
+      1,
+      maxY - minY
+    );
+
+
+  /*
+   * ------------------------------------------------------------
+   * MOBILE-FRIENDLY VERTICAL FIT
+   * ------------------------------------------------------------
+   *
+   * Level dobija više vertikalnog prostora.
+   *
+   * 110 = gornji padding
+   * 450 = donji padding
+   *
+   * Dakle stvarni level koristi približno 340px
+   * od ukupnih 560px SVG prostora.
+   */
+
+  const targetTop = 110;
+  const targetBottom = 450;
+
+  const targetHeight =
+    targetBottom - targetTop;
+
+
+  const sy =
+    targetHeight /
+    contentRange;
+
+
+  const Y = y => {
+
+    const value =
+      num(y, minY);
+
+    return targetTop +
+      clamp(
+        (value - minY) * sy,
+        0,
+        targetHeight
+      );
+
+  };
+
+
+  /*
+   * ------------------------------------------------------------
+   * HELPERS
+   * ------------------------------------------------------------
+   */
+
+  const point = item => {
+
+    if (Array.isArray(item)) {
+
+      return {
+        x: X(item[0]),
+        y: Y(item[1])
+      };
+
+    }
+
+    return {
+      x: X(item?.x),
+      y: Y(item?.y)
+    };
+
+  };
+
+
+  const rect = item => {
+
+    if (Array.isArray(item)) {
+
+      return {
+        x: X(item[0]),
+        y: Y(item[1]),
+        w: Math.max(
+          4,
+          num(item[2], 40) * sx
+        ),
+        h: Math.max(
+          3,
+          num(item[3], 20) * sy
+        )
+      };
+
+    }
+
+    return {
+      x: X(item?.x),
+      y: Y(item?.y),
+      w: Math.max(
+        4,
+        num(
+          item?.width ?? item?.w,
+          40
+        ) * sx
+      ),
+      h: Math.max(
+        3,
+        num(
+          item?.height ?? item?.h,
+          20
+        ) * sy
+      )
+    };
+
+  };
+
+
+  const arr = key =>
+    Array.isArray(m?.[key])
+      ? m[key]
+      : [];
+
+
+  /*
+   * ------------------------------------------------------------
+   * RETURN REAL LEVEL DATA
+   * ------------------------------------------------------------
+   */
+
+  return {
+
+    X,
+    Y,
+    point,
+    rect,
+
+    points: {
+
+      start:
+        point(
+          m?.spawn || {
+            x:120,
+            y:520
+          }
+        ),
+
+      goal:
+        point(
+          m?.goal || {
+            x:6100,
+            y:500
+          }
+        ),
+
+      player:
+        point(
+          scene?.player ||
+          m?.spawn || {
+            x:120,
+            y:520
+          }
+        )
+
+    },
+
+    platforms:
+      arr('platforms'),
+
+    obstacles:
+      arr('obstacles'),
+
+    movingGates:
+      arr('movingGates'),
+
+    enemies:
+      arr('enemies'),
+
+    signals:
+      arr('signals'),
+
+    secrets:
+      arr('secrets'),
+
+    checkpoints:
+      arr('checkpoints'),
+
+    boostPads:
+      arr('boostPads'),
+
+    guides:
+      arr('guides')
+
+  };
+
+}
   /*
    * ============================================================
    * GRID
