@@ -1847,7 +1847,7 @@ this.events.once(
 );
 
 this.cameras.main
-  .setBounds(0, 0, this.worldWidth, 720)
+  .setBounds(0, 0, this.worldWidth, 860)
   .startFollow(
     this.player,
     true,
