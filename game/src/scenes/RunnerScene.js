@@ -15377,15 +15377,15 @@ let cinematicTargetZoom = 1;
   
 if (!this.motionReduced) {
   if (speed > 520) {
-    targetZoom = 1.035;
+    cinematicTargetZoom = 1.035;
   } else if (
     speed > 420
   ) {
-    targetZoom = 1.026;
+    cinematicTargetZoom = 1.026;
   } else if (
     speed > 330
   ) {
-    targetZoom = 1.014;
+    cinematicTargetZoom = 1.014;
   }
 }
 
@@ -15394,7 +15394,7 @@ if (
   dashActive &&
   !this.motionReduced
 ) {
-  targetZoom = 1.045;
+  cinematicTargetZoom = 1.045;
 }
 
 /* Smooth camera motion. */
@@ -15460,6 +15460,12 @@ this.cameraOffsetY =
     this.cameraOffsetY,
     targetOffsetY,
     cameraLerpY
+  );
+
+const targetZoom =
+  Math.max(
+    cinematicTargetZoom,
+    speedZoomTarget
   );
 
 this.cameraZoom =
