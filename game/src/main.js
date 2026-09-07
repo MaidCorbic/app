@@ -323,6 +323,7 @@ $('panelContent').addEventListener('input', event => { const input = event.targe
 $('closeLevelUp').onclick = () => $('levelUp').classList.add('hidden');
 $('closeAbilityUnlock').onclick = () => $('abilityUnlock').classList.add('hidden');
 applyRuntimeSettings(); renderHomeProgress();
+window.setTimeout(() => launch(0, true), 0);
 function openWorldMapSafe() {
   game.scene.stop('runner'); $('pauseMenu').classList.add('hidden');
   const grid = $('districtGrid'); grid.replaceChildren();
