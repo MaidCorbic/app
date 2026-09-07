@@ -15930,8 +15930,6 @@ if (
   ) {
     this.player.anims.msPerFrame =
       1000 / runRate;
-  }
-}
 }
 
  } else {
