@@ -1,1 +1,876 @@
-.relay-update-meta{display:flex;align-items:center;gap:10px;margin:0 0 18px;color:#8ea4b8;font:800 10px 'DM Mono',monospace;letter-spacing:1.4px;text-transform:uppercase}.relay-update-meta::before{content:'LIVE';display:inline-flex;align-items:center;height:20px;padding:0 7px;border:1px solid rgba(255,208,110,.35);border-radius:999px;color:#ffd06e;background:rgba(255,208,110,.06);box-shadow:0 0 16px rgba(255,208,110,.06);font-size:9px;letter-spacing:1px}.relay-info-panel.relay-update-mode .relay-info-card{border-color:rgba(255,208,110,.22);background:radial-gradient(circle at 85% 12%,rgba(255,208,110,.07),transparent 30%),linear-gradient(145deg,rgba(20,30,45,.99),rgba(4,10,18,.99));box-shadow:0 45px 130px rgba(0,0,0,.78),0 0 70px rgba(255,208,110,.045),inset 0 1px 0 rgba(255,255,255,.06)}.relay-info-panel.relay-update-mode .relay-info-card::before{background:linear-gradient(90deg,transparent,rgba(255,208,110,.9),rgba(25,200,245,.45),transparent)}.relay-info-panel.relay-update-mode .relay-info-card h2{letter-spacing:-.065em}.relay-update-list{position:relative;gap:10px}.relay-update-list::before{content:'';position:absolute;left:10px;top:10px;bottom:10px;width:1px;background:linear-gradient(180deg,rgba(255,208,110,.42),rgba(25,200,245,.08),transparent)}.relay-update-item{position:relative;z-index:1;min-height:54px;padding:15px 16px 15px 18px;border-color:rgba(215,228,242,.12);background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(255,255,255,.012));border-radius:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.025);transition:transform 180ms cubic-bezier(.2,.8,.2,1),border-color 180ms ease,background 180ms ease,box-shadow 180ms ease}.relay-update-item::before{content:'+';flex:0 0 22px;width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,208,110,.4);background:linear-gradient(145deg,rgba(255,208,110,.12),rgba(255,208,110,.025));box-shadow:0 0 18px rgba(255,208,110,.06);font-size:12px}.relay-update-item:hover{transform:translateX(5px);border-color:rgba(255,208,110,.42);background:linear-gradient(135deg,rgba(255,208,110,.075),rgba(255,255,255,.015));box-shadow:0 10px 30px rgba(0,0,0,.25),inset 2px 0 0 rgba(255,208,110,.45)}.relay-update-item:active{transform:translateX(2px)}.relay-info-panel.relay-update-mode .relay-info-close:hover,.relay-info-panel.relay-update-mode .relay-info-close:focus-visible{box-shadow:0 0 24px rgba(255,208,110,.16)}@media(max-width:600px){.relay-update-meta{margin-bottom:16px;font-size:9px;letter-spacing:1.1px}.relay-update-list{gap:8px}.relay-update-list::before{left:9px}.relay-update-item{min-height:50px;padding:13px 12px 13px 14px;gap:10px;font-size:12px;line-height:1.55}.relay-update-item::before{flex-basis:20px;width:20px;height:20px}.relay-update-item:hover{transform:translateX(2px)}}@media(prefers-reduced-motion:reduce){.relay-update-item{transition:none!important}.relay-update-item:hover{transform:none}}
+/* =========================================================
+   RELAY UPDATE UI — FINAL BRUTAL GAMING
+   UPDATE / LIVE FEED
+   VISUAL ONLY — NO JS / GAMEPLAY LOGIC
+   ========================================================= */
+
+
+/* =========================================================
+   UPDATE META / LIVE STATUS
+   ========================================================= */
+
+.relay-update-meta{
+
+  position:relative;
+
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+
+  gap:10px;
+
+  margin:0 0 20px;
+
+  color:#8ea4b8;
+
+  font:
+    800 10px/1
+    "DM Mono",
+    monospace;
+
+  letter-spacing:1.5px;
+
+  text-transform:uppercase;
+}
+
+
+/* LIVE BADGE */
+
+.relay-update-meta::before{
+
+  content:"LIVE";
+
+  position:relative;
+
+  display:inline-flex;
+
+  align-items:center;
+  justify-content:center;
+
+  min-width:51px;
+  height:21px;
+
+  padding:0 9px;
+
+  border:
+    1px solid rgba(255,208,110,.48);
+
+  border-radius:999px;
+
+  color:#ffd06e;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,208,110,.13),
+      rgba(255,208,110,.035)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 12px rgba(255,208,110,.07);
+
+  font:
+    900 8px/1
+    "DM Mono",
+    monospace;
+
+  letter-spacing:1.2px;
+
+  animation:
+    relayUpdateLivePulse
+    2.2s ease-in-out infinite;
+}
+
+
+/* LIVE DOT */
+
+.relay-update-meta::after{
+
+  content:"";
+
+  width:5px;
+  height:5px;
+
+  margin-left:-6px;
+
+  border-radius:50%;
+
+  background:#ffd06e;
+
+  box-shadow:
+    0 0 7px rgba(255,208,110,.8),
+    0 0 16px rgba(255,208,110,.35);
+
+  animation:
+    relayUpdateDot
+    1.4s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   UPDATE MODE — MAIN CARD
+   ========================================================= */
+
+.relay-info-panel.relay-update-mode
+.relay-info-card{
+
+  border-color:
+    rgba(255,208,110,.25);
+
+  background:
+
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(255,208,110,.085),
+      transparent 28%
+    ),
+
+    radial-gradient(
+      circle at 5% 92%,
+      rgba(25,200,245,.035),
+      transparent 34%
+    ),
+
+    linear-gradient(
+      145deg,
+      rgba(20,31,46,.995),
+      rgba(4,10,18,.995)
+    );
+
+  box-shadow:
+
+    inset 0 1px 0 rgba(255,255,255,.065),
+
+    inset 0 -1px 0 rgba(0,0,0,.55),
+
+    0 45px 140px rgba(0,0,0,.82),
+
+    0 0 80px rgba(255,208,110,.055),
+
+    0 0 0 1px rgba(255,255,255,.012);
+}
+
+
+/* =========================================================
+   TOP ENERGY BAR
+   ========================================================= */
+
+.relay-info-panel.relay-update-mode
+.relay-info-card::before{
+
+  height:2px;
+
+  background:
+
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(25,200,245,.12) 10%,
+      rgba(255,208,110,.92) 40%,
+      #ffd06e 50%,
+      rgba(25,200,245,.55) 68%,
+      rgba(255,208,110,.12) 88%,
+      transparent 100%
+    );
+
+  box-shadow:
+    0 0 12px rgba(255,208,110,.22),
+    0 0 28px rgba(25,200,245,.06);
+}
+
+
+/* =========================================================
+   UPDATE CARD CORNER HUD
+   ========================================================= */
+
+.relay-info-panel.relay-update-mode
+.relay-info-card::after{
+
+  width:44px;
+  height:44px;
+
+  top:12px;
+  left:12px;
+
+  border-top:
+    1px solid rgba(255,208,110,.55);
+
+  border-left:
+    1px solid rgba(255,208,110,.55);
+
+  box-shadow:
+    -3px -3px 18px rgba(255,208,110,.035);
+
+  pointer-events:none;
+}
+
+
+/* =========================================================
+   UPDATE TITLE
+   ========================================================= */
+
+.relay-info-panel.relay-update-mode
+.relay-info-card h2{
+
+  position:relative;
+
+  letter-spacing:
+    -.065em;
+
+  text-shadow:
+    0 3px 24px rgba(0,0,0,.4);
+}
+
+
+/* TITLE STATUS MARK */
+
+.relay-info-panel.relay-update-mode
+.relay-info-card h2::after{
+
+  width:8px;
+  height:8px;
+
+  margin-left:10px;
+
+  background:#ffd06e;
+
+  box-shadow:
+    0 0 10px rgba(255,208,110,.7),
+    0 0 24px rgba(255,208,110,.25);
+}
+
+
+/* =========================================================
+   UPDATE LIST
+   ========================================================= */
+
+.relay-update-list{
+
+  position:relative;
+
+  display:grid;
+
+  gap:10px;
+
+  isolation:isolate;
+}
+
+
+/* TIMELINE */
+
+.relay-update-list::before{
+
+  content:"";
+
+  position:absolute;
+
+  left:10px;
+
+  top:8px;
+  bottom:8px;
+
+  width:1px;
+
+  background:
+
+    linear-gradient(
+      180deg,
+      rgba(255,208,110,.58),
+      rgba(255,208,110,.18) 35%,
+      rgba(25,200,245,.12) 70%,
+      transparent
+    );
+
+  box-shadow:
+    0 0 8px rgba(255,208,110,.08);
+
+  pointer-events:none;
+}
+
+
+/* =========================================================
+   UPDATE ITEM
+   ========================================================= */
+
+.relay-update-item{
+
+  position:relative;
+
+  z-index:1;
+
+  display:flex;
+
+  align-items:flex-start;
+
+  gap:13px;
+
+  min-height:56px;
+
+  padding:
+    15px
+    16px
+    15px
+    18px;
+
+  border:
+    1px solid rgba(215,228,242,.11);
+
+  border-radius:7px;
+
+  color:#c9d5df;
+
+  background:
+
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.045),
+      rgba(255,255,255,.008)
+    );
+
+  box-shadow:
+
+    inset 0 1px 0 rgba(255,255,255,.035),
+
+    inset 0 -1px 0 rgba(0,0,0,.25),
+
+    0 7px 22px rgba(0,0,0,.15);
+
+  font:
+    500 13px/1.6
+    "Manrope",
+    sans-serif;
+
+  overflow:hidden;
+
+  transition:
+    transform .18s cubic-bezier(.2,.8,.2,1),
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+
+/* =========================================================
+   ITEM SCAN LINE
+   ========================================================= */
+
+.relay-update-item::after{
+
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  right:0;
+
+  top:0;
+
+  height:1px;
+
+  background:
+
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,208,110,.24),
+      rgba(25,200,245,.14),
+      transparent
+    );
+
+  opacity:.55;
+
+  pointer-events:none;
+}
+
+
+/* =========================================================
+   UPDATE ICON
+   ========================================================= */
+
+.relay-update-item::before{
+
+  content:"+";
+
+  flex:
+    0 0 22px;
+
+  width:22px;
+  height:22px;
+
+  display:grid;
+
+  place-items:center;
+
+  margin-top:1px;
+
+  border:
+    1px solid rgba(255,208,110,.48);
+
+  border-radius:6px;
+
+  color:#ffd06e;
+
+  background:
+
+    linear-gradient(
+      145deg,
+      rgba(255,208,110,.14),
+      rgba(255,208,110,.025)
+    );
+
+  box-shadow:
+
+    inset 0 1px rgba(255,255,255,.06),
+
+    0 0 14px rgba(255,208,110,.07);
+
+  font:
+    900 12px/1
+    "DM Mono",
+    monospace;
+
+  transition:
+    transform .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease;
+}
+
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+
+.relay-update-item:hover{
+
+  transform:
+    translateX(5px);
+
+  border-color:
+    rgba(255,208,110,.42);
+
+  background:
+
+    linear-gradient(
+      135deg,
+      rgba(255,208,110,.075),
+      rgba(25,200,245,.018),
+      rgba(255,255,255,.012)
+    );
+
+  box-shadow:
+
+    inset 2px 0 0 rgba(255,208,110,.48),
+
+    inset 0 1px 0 rgba(255,255,255,.05),
+
+    0 12px 32px rgba(0,0,0,.28),
+
+    0 0 24px rgba(255,208,110,.035);
+}
+
+
+.relay-update-item:hover::before{
+
+  transform:
+    rotate(90deg)
+    scale(1.08);
+
+  border-color:
+    rgba(255,208,110,.72);
+
+  background:
+    rgba(255,208,110,.11);
+
+  box-shadow:
+    0 0 18px rgba(255,208,110,.15);
+}
+
+
+/* =========================================================
+   ACTIVE
+   ========================================================= */
+
+.relay-update-item:active{
+
+  transform:
+    translateX(2px)
+    scale(.992);
+
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.35),
+    0 5px 16px rgba(0,0,0,.22);
+}
+
+
+/* =========================================================
+   CLOSE BUTTON — UPDATE MODE
+   ========================================================= */
+
+.relay-info-panel.relay-update-mode
+.relay-info-close{
+
+  border-color:
+    rgba(215,228,242,.18);
+
+  background:
+
+    linear-gradient(
+      145deg,
+      rgba(17,31,49,.98),
+      rgba(5,12,22,.98)
+    );
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.05),
+    0 7px 20px rgba(0,0,0,.28);
+}
+
+
+.relay-info-panel.relay-update-mode
+.relay-info-close:hover,
+.relay-info-panel.relay-update-mode
+.relay-info-close:focus-visible{
+
+  color:#ffd06e;
+
+  border-color:
+    rgba(255,208,110,.68);
+
+  background:
+    rgba(255,208,110,.055);
+
+  box-shadow:
+
+    0 0 22px rgba(255,208,110,.14),
+
+    inset 0 1px rgba(255,255,255,.07);
+
+  transform:
+    rotate(90deg);
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.relay-info-panel.relay-update-mode
+.relay-info-close:focus-visible{
+
+  outline:
+    2px solid rgba(255,208,110,.72);
+
+  outline-offset:3px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:600px){
+
+  .relay-update-meta{
+
+    gap:8px;
+
+    margin-bottom:16px;
+
+    font-size:9px;
+
+    letter-spacing:1.1px;
+  }
+
+
+  .relay-update-meta::before{
+
+    min-width:47px;
+
+    height:20px;
+
+    padding:0 7px;
+
+    font-size:8px;
+  }
+
+
+  .relay-update-meta::after{
+
+    width:4px;
+    height:4px;
+  }
+
+
+  .relay-update-list{
+
+    gap:8px;
+  }
+
+
+  .relay-update-list::before{
+
+    left:9px;
+
+    top:7px;
+    bottom:7px;
+  }
+
+
+  .relay-update-item{
+
+    min-height:51px;
+
+    gap:10px;
+
+    padding:
+      13px
+      12px
+      13px
+      14px;
+
+    border-radius:6px;
+
+    font-size:12px;
+
+    line-height:1.55;
+  }
+
+
+  .relay-update-item::before{
+
+    flex-basis:20px;
+
+    width:20px;
+    height:20px;
+
+    font-size:11px;
+  }
+
+
+  .relay-update-item:hover{
+
+    transform:
+      translateX(2px);
+  }
+
+
+  .relay-update-item:hover::before{
+
+    transform:
+      scale(1.04);
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media(max-width:380px){
+
+  .relay-update-meta{
+
+    font-size:8px;
+
+    letter-spacing:.9px;
+  }
+
+
+  .relay-update-item{
+
+    gap:9px;
+
+    min-height:48px;
+
+    padding:
+      11px
+      10px
+      11px
+      12px;
+
+    font-size:11px;
+
+    line-height:1.5;
+  }
+
+
+  .relay-update-item::before{
+
+    flex-basis:19px;
+
+    width:19px;
+    height:19px;
+
+    border-radius:5px;
+
+    font-size:10px;
+  }
+
+
+  .relay-update-list::before{
+
+    left:8px;
+  }
+}
+
+
+/* =========================================================
+   LANDSCAPE MOBILE
+   ========================================================= */
+
+@media(
+  orientation:landscape
+)
+and
+(max-height:560px){
+
+  .relay-update-meta{
+
+    margin-bottom:12px;
+  }
+
+
+  .relay-update-list{
+
+    gap:7px;
+  }
+
+
+  .relay-update-item{
+
+    min-height:45px;
+
+    padding:
+      10px
+      12px;
+
+    font-size:11px;
+  }
+}
+
+
+/* =========================================================
+   TOUCH DEVICES
+   ========================================================= */
+
+@media(hover:none){
+
+  .relay-update-item:hover{
+
+    transform:none;
+
+    border-color:
+      rgba(215,228,242,.11);
+
+    background:
+      linear-gradient(
+        135deg,
+        rgba(255,255,255,.045),
+        rgba(255,255,255,.008)
+      );
+
+    box-shadow:
+
+      inset 0 1px 0 rgba(255,255,255,.035),
+
+      inset 0 -1px 0 rgba(0,0,0,.25),
+
+      0 7px 22px rgba(0,0,0,.15);
+  }
+
+
+  .relay-update-item:hover::before{
+
+    transform:none;
+
+    border-color:
+      rgba(255,208,110,.48);
+
+    box-shadow:
+      inset 0 1px rgba(255,255,255,.06),
+      0 0 14px rgba(255,208,110,.07);
+  }
+
+
+  .relay-update-item:active{
+
+    transform:
+      scale(.985);
+
+    border-color:
+      rgba(255,208,110,.38);
+
+    background:
+      rgba(255,208,110,.045);
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+  .relay-update-meta::before,
+  .relay-update-meta::after{
+
+    animation:none!important;
+  }
+
+
+  .relay-update-item,
+  .relay-update-item::before,
+  .relay-info-close{
+
+    transition:none!important;
+  }
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes relayUpdateLivePulse{
+
+  0%,
+  100%{
+
+    opacity:.72;
+
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.08),
+      0 0 10px rgba(255,208,110,.04);
+  }
+
+  50%{
+
+    opacity:1;
+
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.1),
+      0 0 20px rgba(255,208,110,.12);
+  }
+}
+
+
+@keyframes relayUpdateDot{
+
+  0%,
+  100%{
+
+    opacity:.45;
+
+    transform:scale(.8);
+  }
+
+  50%{
+
+    opacity:1;
+
+    transform:scale(1.2);
+  }
+}
