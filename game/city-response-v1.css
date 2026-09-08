@@ -1,108 +1,620 @@
-/* UPDATE 20 — CITY RESPONSE V4
-   Premium holographic gameplay notification.
-   Typography-first readability polish; gameplay and Finish remain untouched.
-*/
+/* ==========================================================================
+   CITY RESPONSE HUD V5 — PREMIUM TACTICAL / SCI-FI
+   Presentation only.
+   Gameplay logic untouched.
+   ========================================================================== */
+
 #cityResponseV1{
-  position:fixed;
-  left:50%;
-  top:clamp(88px,9vh,108px);
-  width:min(440px,calc(100vw - 32px));
-  transform:translate(-50%,-12px) scale(.97);
-  opacity:0;
-  visibility:hidden;
+  --cr-accent:var(--city-response-accent,#8df4ff);
+  --cr-bg-a:rgba(3,11,21,.985);
+  --cr-bg-b:rgba(5,18,31,.965);
+
+  position:fixed!important;
+  left:50%!important;
+  top:clamp(82px,8.5vh,108px)!important;
+
+  width:min(460px,calc(100vw - 28px))!important;
+  max-width:460px!important;
+
+  transform:
+    translate(-50%,-14px)
+    scale(.965)!important;
+
+  opacity:0!important;
+  visibility:hidden!important;
+
   display:block!important;
   pointer-events:none!important;
   z-index:80!important;
-  color:#eaffff;
-  font:600 11px/1.3 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  isolation:isolate;
-  transition:opacity .18s ease,transform .24s cubic-bezier(.18,.82,.22,1),visibility 0s linear .24s;
+  isolation:isolate!important;
+
+  color:#eaffff!important;
+
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif!important;
+
+  transition:
+    opacity .18s ease,
+    transform .34s cubic-bezier(.16,.82,.24,1),
+    visibility 0s linear .34s!important;
+
+  filter:
+    drop-shadow(
+      0 18px 42px rgba(0,0,0,.40)
+    )!important;
 }
+
 #cityResponseV1.is-visible{
-  opacity:1;
-  visibility:visible;
-  transform:translate(-50%,0) scale(1);
-  transition:opacity .18s ease,transform .24s cubic-bezier(.18,.82,.22,1),visibility 0s;
+  opacity:1!important;
+  visibility:visible!important;
+
+  transform:
+    translate(-50%,0)
+    scale(1)!important;
+
+  transition:
+    opacity .18s ease,
+    transform .34s cubic-bezier(.16,.82,.24,1),
+    visibility 0s!important;
 }
+
+/* --------------------------------------------------------------------------
+   MAIN CARD
+   -------------------------------------------------------------------------- */
+
 #cityResponseV1 .city-response-card{
-  --holo-a:var(--city-response-accent,#8df4ff);
-  position:relative;
-  overflow:hidden;
-  padding:15px 18px 16px;
-  border:1px solid color-mix(in srgb,var(--holo-a) 62%,rgba(255,255,255,.18));
-  border-radius:15px;
-  background:radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--holo-a) 13%,transparent),transparent 36%),linear-gradient(145deg,rgba(3,12,23,.97),rgba(2,7,15,.95));
-  box-shadow:0 20px 52px rgba(0,0,0,.48),0 0 0 1px rgba(255,255,255,.025) inset,0 0 20px color-mix(in srgb,var(--holo-a) 12%,transparent),0 0 46px color-mix(in srgb,var(--holo-a) 10%,transparent);
-  backdrop-filter:blur(14px) saturate(1.15);
-  -webkit-backdrop-filter:blur(14px) saturate(1.15);
+  position:relative!important;
+  box-sizing:border-box!important;
+
+  min-height:92px!important;
+  padding:17px 20px 18px 20px!important;
+
+  overflow:hidden!important;
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--cr-accent) 58%,
+      rgba(255,255,255,.12)
+    )!important;
+
+  border-radius:16px!important;
+
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      color-mix(
+        in srgb,
+        var(--cr-accent) 14%,
+        transparent
+      ),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 92% 100%,
+      color-mix(
+        in srgb,
+        var(--cr-accent) 7%,
+        transparent
+      ),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      var(--cr-bg-a),
+      var(--cr-bg-b)
+    )!important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.075),
+    inset 0 0 0 1px rgba(255,255,255,.018),
+    inset 0 -24px 48px rgba(0,0,0,.15),
+
+    0 18px 44px rgba(0,0,0,.42),
+
+    0 0 20px
+      color-mix(
+        in srgb,
+        var(--cr-accent) 10%,
+        transparent
+      ),
+
+    0 0 54px
+      color-mix(
+        in srgb,
+        var(--cr-accent) 8%,
+        transparent
+      )!important;
+
+  backdrop-filter:
+    blur(16px)
+    saturate(1.16)!important;
+
+  -webkit-backdrop-filter:
+    blur(16px)
+    saturate(1.16)!important;
 }
+
+/* --------------------------------------------------------------------------
+   HOLOGRAPHIC SHEEN
+   -------------------------------------------------------------------------- */
+
 #cityResponseV1 .city-response-card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(100deg,color-mix(in srgb,var(--holo-a) 14%,transparent),transparent 28%,rgba(255,255,255,.035) 49%,transparent 72%,color-mix(in srgb,var(--holo-a) 7%,transparent)),repeating-linear-gradient(180deg,transparent 0 6px,rgba(255,255,255,.022) 6px 7px,transparent 7px 12px);
-  mix-blend-mode:screen;
-  opacity:.75;
-  pointer-events:none;
+  content:""!important;
+
+  position:absolute!important;
+  inset:0!important;
+
+  pointer-events:none!important;
+  z-index:0!important;
+
+  background:
+    linear-gradient(
+      100deg,
+      transparent 0%,
+      color-mix(
+        in srgb,
+        var(--cr-accent) 7%,
+        transparent
+      ) 18%,
+      rgba(255,255,255,.035) 46%,
+      transparent 62%,
+      color-mix(
+        in srgb,
+        var(--cr-accent) 6%,
+        transparent
+      ) 100%
+    ),
+
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 6px,
+      rgba(255,255,255,.016) 6px 7px,
+      transparent 7px 13px
+    );
+
+  opacity:.82!important;
 }
+
+/* --------------------------------------------------------------------------
+   TECHNICAL FRAME
+   -------------------------------------------------------------------------- */
+
 #cityResponseV1 .city-response-card::after{
-  content:"";
-  position:absolute;
-  inset:7px;
-  border:1px solid color-mix(in srgb,var(--holo-a) 20%,transparent);
-  border-radius:10px;
-  clip-path:polygon(0 0,14% 0,14% 1px,0 1px,0 14%,1px 14%,1px 86%,0 86%,0 100%,14% 100%,14% calc(100% - 1px),0 calc(100% - 1px),100% calc(100% - 14%),calc(100% - 1px) calc(100% - 14%),calc(100% - 1px) 86%,100% 86%,100% 0,86% 0,86% 1px,100% 1px);
-  opacity:.7;
-  pointer-events:none;
+  content:""!important;
+
+  position:absolute!important;
+  inset:7px!important;
+
+  pointer-events:none!important;
+  z-index:0!important;
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--cr-accent) 22%,
+      transparent
+    )!important;
+
+  border-radius:11px!important;
+
+  opacity:.82!important;
+
+  clip-path:polygon(
+    0 0,
+    17% 0,
+    17% 1px,
+    0 1px,
+    0 17%,
+    1px 17%,
+
+    1px 83%,
+    0 83%,
+    0 100%,
+    17% 100%,
+    17% calc(100% - 1px),
+    0 calc(100% - 1px),
+
+    83% 100%,
+    83% calc(100% - 1px),
+    100% calc(100% - 1px),
+    100% 83%,
+    calc(100% - 1px) 83%,
+
+    calc(100% - 1px) 17%,
+    100% 17%,
+    100% 0,
+    83% 0,
+    83% 1px,
+    100% 1px
+  );
 }
+
+/* --------------------------------------------------------------------------
+   CONTENT LAYER
+   -------------------------------------------------------------------------- */
+
 #cityResponseV1 .city-response-kicker,
 #cityResponseV1 .city-response-title,
 #cityResponseV1 .city-response-line,
-#cityResponseV1 .city-response-detail{position:relative;z-index:1}
-#cityResponseV1 .city-response-kicker{
-  font:700 9px/1.1 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  letter-spacing:.17em;
-  text-transform:uppercase;
-  opacity:.58;
-}
-#cityResponseV1 .city-response-title{
-  margin-top:6px;
-  font:800 19px/1.05 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:var(--holo-a);
-  text-shadow:0 0 8px color-mix(in srgb,var(--holo-a) 28%,transparent),0 0 22px color-mix(in srgb,var(--holo-a) 16%,transparent);
-}
-#cityResponseV1 .city-response-line{
-  margin-top:7px;
-  font:700 12px/1.25 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  letter-spacing:.055em;
-  text-transform:uppercase;
-  color:#f2fdff;
-}
 #cityResponseV1 .city-response-detail{
-  margin-top:6px;
-  max-width:94%;
-  font:600 10px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  letter-spacing:.02em;
-  opacity:.72;
+  position:relative!important;
+  z-index:2!important;
 }
-#cityResponseV1 .city-response-title::before{content:"//";margin-right:8px;opacity:.35}
-#cityResponseV1.is-burst .city-response-card{animation:cityResponseHoloIn .56s cubic-bezier(.18,.82,.22,1)}
-@keyframes cityResponseHoloIn{0%{opacity:.2;transform:translateY(8px) scale(.97);filter:brightness(.8) saturate(.8)}38%{opacity:1;transform:translateY(0) scale(1.018);filter:brightness(1.24) saturate(1.22)}68%{transform:translateY(0) scale(.998)}100%{opacity:1;transform:translateY(0) scale(1);filter:brightness(1) saturate(1)}}
+
+/* --------------------------------------------------------------------------
+   KICKER
+   -------------------------------------------------------------------------- */
+
+#cityResponseV1 .city-response-kicker{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+
+  font:
+    800 8px/1
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace!important;
+
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+
+  color:
+    color-mix(
+      in srgb,
+      var(--cr-accent) 78%,
+      #dffcff
+    )!important;
+
+  opacity:.74!important;
+}
+
+#cityResponseV1 .city-response-kicker::before{
+  content:""!important;
+
+  width:6px!important;
+  height:6px!important;
+
+  flex:0 0 6px!important;
+
+  border-radius:50%!important;
+
+  background:var(--cr-accent)!important;
+
+  box-shadow:
+    0 0 6px var(--cr-accent),
+    0 0 14px
+      color-mix(
+        in srgb,
+        var(--cr-accent) 60%,
+        transparent
+      )!important;
+
+  animation:
+    cityResponseSignalPulse
+    1.35s
+    ease-in-out
+    infinite!important;
+}
+
+/* --------------------------------------------------------------------------
+   TITLE
+   -------------------------------------------------------------------------- */
+
+#cityResponseV1 .city-response-title{
+  margin-top:8px!important;
+
+  font:
+    900 21px/1
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif!important;
+
+  letter-spacing:.095em!important;
+  text-transform:uppercase!important;
+
+  color:var(--cr-accent)!important;
+
+  text-shadow:
+    0 0 7px
+      color-mix(
+        in srgb,
+        var(--cr-accent) 28%,
+        transparent
+      ),
+    0 0 22px
+      color-mix(
+        in srgb,
+        var(--cr-accent) 14%,
+        transparent
+      )!important;
+}
+
+#cityResponseV1 .city-response-title::before{
+  content:"//"!important;
+  margin-right:9px!important;
+  opacity:.34!important;
+}
+
+/* --------------------------------------------------------------------------
+   MAIN LINE
+   -------------------------------------------------------------------------- */
+
+#cityResponseV1 .city-response-line{
+  margin-top:8px!important;
+
+  font:
+    800 12px/1.25
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif!important;
+
+  letter-spacing:.062em!important;
+  text-transform:uppercase!important;
+
+  color:#f4fdff!important;
+
+  text-shadow:
+    0 0 7px rgba(255,255,255,.055)!important;
+}
+
+/* --------------------------------------------------------------------------
+   DETAIL
+   -------------------------------------------------------------------------- */
+
+#cityResponseV1 .city-response-detail{
+  margin-top:6px!important;
+
+  max-width:96%!important;
+
+  font:
+    600 10px/1.45
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif!important;
+
+  letter-spacing:.025em!important;
+
+  color:#d8eef2!important;
+  opacity:.68!important;
+}
+
+/* --------------------------------------------------------------------------
+   BURST ENTRY
+   -------------------------------------------------------------------------- */
+
+#cityResponseV1.is-burst .city-response-card{
+  animation:
+    cityResponseHoloInV5
+    .58s
+    cubic-bezier(.16,.82,.24,1)
+    both!important;
+}
+
+@keyframes cityResponseHoloInV5{
+
+  0%{
+    opacity:0;
+    transform:
+      translateY(10px)
+      scale(.965);
+
+    filter:
+      brightness(.72)
+      saturate(.72)
+      blur(.5px);
+  }
+
+  32%{
+    opacity:1;
+    transform:
+      translateY(-1px)
+      scale(1.018);
+
+    filter:
+      brightness(1.22)
+      saturate(1.18)
+      blur(0);
+  }
+
+  58%{
+    transform:
+      translateY(0)
+      scale(.997);
+
+    filter:
+      brightness(1.06)
+      saturate(1.06);
+  }
+
+  100%{
+    opacity:1;
+    transform:
+      translateY(0)
+      scale(1);
+
+    filter:
+      brightness(1)
+      saturate(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   SIGNAL PULSE
+   -------------------------------------------------------------------------- */
+
+@keyframes cityResponseSignalPulse{
+
+  0%,
+  100%{
+    opacity:.42;
+    transform:scale(.82);
+  }
+
+  50%{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   MOBILE
+   -------------------------------------------------------------------------- */
+
 @media(max-width:700px){
-  #cityResponseV1{top:max(78px,env(safe-area-inset-top,0px) + 64px);width:calc(100vw - 24px);font-size:10px}
-  #cityResponseV1 .city-response-card{padding:13px 14px 14px;border-radius:13px}
-  #cityResponseV1 .city-response-kicker{font-size:7px;letter-spacing:.14em}
-  #cityResponseV1 .city-response-title{font-size:16px;letter-spacing:.065em}
-  #cityResponseV1 .city-response-line{margin-top:6px;font-size:10px;letter-spacing:.035em}
-  #cityResponseV1 .city-response-detail{margin-top:5px;max-width:100%;font-size:8.5px;line-height:1.4;letter-spacing:.01em}
+
+  #cityResponseV1{
+    top:
+      max(
+        72px,
+        calc(
+          env(safe-area-inset-top,0px) + 58px
+        )
+      )!important;
+
+    width:
+      calc(100vw - 20px)!important;
+
+    max-width:none!important;
+  }
+
+  #cityResponseV1 .city-response-card{
+    min-height:82px!important;
+
+    padding:
+      14px
+      15px
+      15px!important;
+
+    border-radius:14px!important;
+  }
+
+  #cityResponseV1 .city-response-title{
+    font-size:16px!important;
+    letter-spacing:.07em!important;
+  }
+
+  #cityResponseV1 .city-response-line{
+    font-size:10px!important;
+    letter-spacing:.045em!important;
+  }
+
+  #cityResponseV1 .city-response-detail{
+    max-width:100%!important;
+    font-size:8.5px!important;
+    line-height:1.42!important;
+  }
+
+  #cityResponseV1 .city-response-kicker{
+    font-size:6.8px!important;
+    letter-spacing:.135em!important;
+  }
 }
+
+/* --------------------------------------------------------------------------
+   SMALL MOBILE
+   -------------------------------------------------------------------------- */
+
 @media(max-width:390px){
-  #cityResponseV1{top:max(72px,env(safe-area-inset-top,0px) + 58px);width:calc(100vw - 20px)}
-  #cityResponseV1 .city-response-card{padding:12px 13px 13px}
-  #cityResponseV1 .city-response-title{font-size:15px}
-  #cityResponseV1 .city-response-line{font-size:9.5px}
-  #cityResponseV1 .city-response-detail{font-size:8px}
+
+  #cityResponseV1{
+    top:
+      max(
+        68px,
+        calc(
+          env(safe-area-inset-top,0px) + 54px
+        )
+      )!important;
+
+    width:
+      calc(100vw - 14px)!important;
+  }
+
+  #cityResponseV1 .city-response-card{
+    padding:
+      12px
+      13px
+      13px!important;
+
+    border-radius:13px!important;
+  }
+
+  #cityResponseV1 .city-response-title{
+    font-size:14px!important;
+  }
+
+  #cityResponseV1 .city-response-line{
+    font-size:9px!important;
+  }
+
+  #cityResponseV1 .city-response-detail{
+    font-size:7.8px!important;
+  }
 }
-@media(prefers-reduced-motion:reduce){#cityResponseV1{transition:none!important}#cityResponseV1.is-burst .city-response-card{animation:none!important}}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION
+   -------------------------------------------------------------------------- */
+
+@media(prefers-reduced-motion:reduce){
+
+  #cityResponseV1{
+    transition:none!important;
+  }
+
+  #cityResponseV1.is-burst .city-response-card{
+    animation:none!important;
+  }
+
+  #cityResponseV1 .city-response-kicker::before{
+    animation:none!important;
+  }
+}
+
+/* ==========================================================================
+   HOME / MAIN MENU
+   City Response never visible while Home is active.
+   ========================================================================== */
+
+body:has(#intro:not(.hidden)) #cityResponseV1,
+body:has(#intro:not([hidden])) #cityResponseV1{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* Extra safety for the actual gameplay container. */
+#intro:not(.hidden) ~ #cityResponseV1,
+#intro:not([hidden]) ~ #cityResponseV1{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+}
+
+/* ==========================================================================
+   END
+   ========================================================================== */
