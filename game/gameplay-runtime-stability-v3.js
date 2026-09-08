@@ -44,7 +44,7 @@
       position:absolute!important;
       left:50%!important;
       right:auto!important;
-      top:78px!important;
+      top:125px!important;
       bottom:auto!important;
       transform:translateX(-50%)!important;
       width:min(290px,calc(100vw - 28px))!important;
@@ -201,7 +201,7 @@
       }
 
       #game .world-marker{
-        top:60px!important;
+        top:100px!important;
         width:min(
           230px,
           calc(100vw - 24px)
