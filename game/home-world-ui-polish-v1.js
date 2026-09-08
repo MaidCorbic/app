@@ -163,6 +163,32 @@
     await sleep(260);
     if (token===typingToken) typeErase(node,token);
   }
+
+  const MISSION_LABELS = {
+  'DELIVER THE SIGNAL PACKAGE': 'MISSION 01',
+  'SECURE THE DROP': 'MISSION 02',
+  'RESTORE THE GRID': 'MISSION 03',
+  'ESCAPE THE INTERCEPTOR': 'MISSION 04',
+  'STABILIZE THE ARRAY': 'MISSION 05',
+  'BREACH THE LOCKDOWN': 'MISSION 06',
+  'REACH THE FINAL RELAY': 'MISSION 07'
+};
+
+function updateMissionLabelFromObjective(objectiveText) {
+  const label = document.getElementById('worldMissionLabel');
+  if (!label) return;
+
+  const text = String(objectiveText || '')
+    .trim()
+    .toUpperCase();
+
+  const missionLabel = MISSION_LABELS[text];
+
+  if (missionLabel) {
+    label.textContent = missionLabel;
+  }
+}
+  
   function startMissionTyping() {
     const nodes = [document.getElementById('worldGoal')].filter(Boolean);
     nodes.forEach(node => {
@@ -175,19 +201,55 @@
     });
   }
 
-  function observeMissionChanges() {
-    const goal = byId('worldGoal');
-    if (!goal || goal.dataset.relayTypingObserver==='1') return;
-    goal.dataset.relayTypingObserver='1';
-    const observer = new MutationObserver(() => {
-      const next = goal.textContent.trim();
-      if (!next) return;
-      goal.dataset.relayTypeTarget=next;
-      typingToken += 1;
-      typeErase(goal,typingToken);
-    });
-    observer.observe(goal,{childList:true,characterData:true,subtree:true});
-  }
+function observeMissionChanges() {
+  const goal = byId('worldGoal');
+  if (!goal || goal.dataset.relayTypingObserver === '1') return;
+
+  goal.dataset.relayTypingObserver = '1';
+
+  let lastObjective = '';
+
+  const sync = () => {
+    const next = goal.dataset.relayTypeTarget ||
+      goal.textContent.trim();
+
+    if (!next) return;
+
+    const normalized = next.trim().toUpperCase();
+
+    if (normalized !== lastObjective) {
+      lastObjective = normalized;
+      updateMissionLabelFromObjective(normalized);
+    }
+  };
+
+  sync();
+
+  const observer = new MutationObserver(() => {
+    const next =
+      goal.dataset.relayTypeTarget ||
+      goal.textContent.trim();
+
+    if (!next) return;
+
+    const normalized = next.trim().toUpperCase();
+
+    /*
+     * Ignore mutations caused by the typewriter itself.
+     * Only react when the actual mission target changes.
+     */
+    if (normalized.length >= 6 && normalized !== lastObjective) {
+      lastObjective = normalized;
+      updateMissionLabelFromObjective(normalized);
+    }
+  });
+
+  observer.observe(goal, {
+    childList: true,
+    characterData: true,
+    subtree: true
+  });
+}
 
   function boot() {
     installStyles();
@@ -196,6 +258,7 @@
     dedupeHomeButtons();
     startMissionTyping();
     observeMissionChanges();
+   
     const intro = byId('intro');
     const sync = () => {
       const homeVisible = !!intro && !intro.classList.contains('hidden');
@@ -213,4 +276,5 @@
 
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
+ 
 })();
