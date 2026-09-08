@@ -186,12 +186,9 @@ function activate(scene, terminal) {
   const barrier = (scene.barriers?.getChildren?.() || [])
     .filter(item=>item?.active)
     .sort((a,b)=>distance(terminal,a)-distance(terminal,b))[0];
-  if (barrier && distance(terminal,barrier) < 220) {
-    try { barrier.disableBody(true,true); } catch {}
-    scene.playerCue?.('ACCESS GRANTED · ROUTE OPEN','#aee37f');
-  } else {
-    scene.playerCue?.('CHECKPOINT SECURED','#aee37f');
-  }
+if (barrier && distance(terminal,barrier) < 220) {
+  try { barrier.disableBody(true,true); } catch {}
+}
 
   const button = ensureUi();
   button.classList.remove('is-visible');
