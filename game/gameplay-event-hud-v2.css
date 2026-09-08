@@ -1394,3 +1394,657 @@
     animation:none!important;
   }
 }
+
+/* ============================================================
+   FINAL OVERRIDE — GAMEPLAY EVENT HUD V2
+   ------------------------------------------------------------
+   Must remain at the VERY END of this CSS file.
+   Overrides legacy gameplay-event-hud styling.
+   Gameplay logic untouched.
+   ============================================================ */
+
+
+/* ============================================================
+   HUD POSITION / CONTAINER
+   ============================================================ */
+
+#play #gameplayEventHud,
+#play .gameplay-event-hud{
+
+  position:fixed !important;
+
+  top:clamp(92px,11vh,118px) !important;
+  left:50% !important;
+  right:auto !important;
+  bottom:auto !important;
+
+  width:min(350px,calc(100vw - 28px)) !important;
+  max-width:350px !important;
+  min-width:0 !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  box-sizing:border-box !important;
+
+  transform:
+    translate(-50%,-10px)
+    scale(.94) !important;
+
+  opacity:0 !important;
+  visibility:hidden !important;
+
+  pointer-events:none !important;
+
+  z-index:121 !important;
+
+  filter:
+    drop-shadow(0 18px 36px rgba(0,0,0,.50))
+    drop-shadow(0 0 18px rgba(255,208,110,.08)) !important;
+
+  transition:
+    opacity .16s ease,
+    transform .28s cubic-bezier(.16,.9,.2,1),
+    visibility .16s ease !important;
+}
+
+
+/* ============================================================
+   VISIBLE STATE
+   ============================================================ */
+
+#play #gameplayEventHud.is-visible,
+#play .gameplay-event-hud.is-visible{
+
+  opacity:1 !important;
+
+  visibility:visible !important;
+
+  transform:
+    translate(-50%,0)
+    scale(1) !important;
+}
+
+
+/* ============================================================
+   CARD — FINAL GEOMETRY
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-card,
+#play .gameplay-event-hud .gameplay-event-card{
+
+  position:relative !important;
+
+  display:grid !important;
+
+  grid-template-columns:
+    32px
+    minmax(0,1fr) !important;
+
+  gap:7px !important;
+
+  width:100% !important;
+
+  min-width:0 !important;
+
+  min-height:66px !important;
+
+  margin:0 !important;
+
+  padding:
+    10px
+    11px
+    11px !important;
+
+  box-sizing:border-box !important;
+
+  overflow:hidden !important;
+
+  border:
+    1px solid
+    rgba(255,208,110,.78) !important;
+
+  border-radius:11px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(18,26,36,.985),
+      rgba(4,9,16,.985) 58%,
+      rgba(10,14,18,.99)
+    ) !important;
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.026),
+    0 0 24px rgba(255,208,110,.13),
+    0 10px 34px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.085),
+    inset 0 -18px 30px rgba(0,0,0,.18) !important;
+
+  backdrop-filter:
+    blur(16px)
+    saturate(135%) !important;
+
+  -webkit-backdrop-filter:
+    blur(16px)
+    saturate(135%) !important;
+}
+
+
+/* ============================================================
+   REMOVE LEGACY CARD TRANSFORMS
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-card{
+  transform-origin:center center !important;
+}
+
+
+/* ============================================================
+   ICON
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-icon,
+#play .gameplay-event-hud .gameplay-event-icon{
+
+  position:relative !important;
+
+  width:32px !important;
+  height:32px !important;
+
+  min-width:32px !important;
+  min-height:32px !important;
+
+  margin:0 !important;
+
+  align-self:center !important;
+
+  box-sizing:border-box !important;
+
+  border:
+    1px solid
+    rgba(255,208,110,.82) !important;
+
+  border-radius:8px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,208,110,.15),
+      rgba(255,208,110,.025)
+    ) !important;
+
+  box-shadow:
+    0 0 18px rgba(255,208,110,.16),
+    inset 0 0 12px rgba(255,208,110,.09) !important;
+}
+
+
+/* ============================================================
+   COPY
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-copy,
+#play .gameplay-event-hud .gameplay-event-copy{
+
+  min-width:0 !important;
+
+  width:auto !important;
+
+  margin:0 !important;
+
+  padding:0 !important;
+
+  position:relative !important;
+
+  z-index:2 !important;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-head,
+#play .gameplay-event-hud .gameplay-event-head{
+
+  display:flex !important;
+
+  align-items:center !important;
+
+  justify-content:space-between !important;
+
+  gap:6px !important;
+
+  width:100% !important;
+
+  min-width:0 !important;
+
+  margin:0 !important;
+}
+
+
+/* ============================================================
+   TITLE
+   ============================================================ */
+
+#play #gameplayEventHud #gameplayEventTitle,
+#play .gameplay-event-hud #gameplayEventTitle{
+
+  display:block !important;
+
+  width:100% !important;
+
+  max-width:100% !important;
+
+  margin-top:3px !important;
+
+  padding:0 !important;
+
+  font-size:12px !important;
+
+  font-weight:900 !important;
+
+  line-height:1.15 !important;
+
+  letter-spacing:.075em !important;
+
+  white-space:nowrap !important;
+
+  overflow:hidden !important;
+
+  text-overflow:ellipsis !important;
+
+  color:#fff5d2 !important;
+
+  text-shadow:
+    0 0 10px rgba(255,208,110,.15),
+    0 0 22px rgba(255,208,110,.06) !important;
+}
+
+
+/* ============================================================
+   DETAIL
+   ============================================================ */
+
+#play #gameplayEventHud #gameplayEventDetail,
+#play .gameplay-event-hud #gameplayEventDetail{
+
+  display:block !important;
+
+  width:100% !important;
+
+  max-width:100% !important;
+
+  margin-top:4px !important;
+
+  padding:0 !important;
+
+  font-size:7.1px !important;
+
+  font-weight:800 !important;
+
+  line-height:1.3 !important;
+
+  letter-spacing:.085em !important;
+
+  white-space:nowrap !important;
+
+  overflow:hidden !important;
+
+  text-overflow:ellipsis !important;
+
+  color:#71889c !important;
+}
+
+
+/* ============================================================
+   METER
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-meter,
+#play .gameplay-event-hud .gameplay-event-meter{
+
+  position:absolute !important;
+
+  right:12px !important;
+  bottom:8px !important;
+
+  width:68px !important;
+  height:2px !important;
+
+  min-width:0 !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  overflow:hidden !important;
+
+  background:
+    rgba(255,255,255,.07) !important;
+}
+
+
+#play #gameplayEventHud .gameplay-event-meter i,
+#play .gameplay-event-hud .gameplay-event-meter i{
+
+  display:block !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  transform-origin:left center !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      #ffd06e,
+      #fff1bc
+    ) !important;
+
+  box-shadow:
+    0 0 8px rgba(255,208,110,.80) !important;
+}
+
+
+/* ============================================================
+   FORCE NEW SCAN LAYER
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-scan,
+#play .gameplay-event-hud .gameplay-event-scan{
+
+  position:absolute !important;
+
+  inset:-35% -15% !important;
+
+  pointer-events:none !important;
+
+  z-index:4 !important;
+}
+
+
+/* ============================================================
+   FORCE GRID LAYER
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-grid,
+#play .gameplay-event-hud .gameplay-event-grid{
+
+  position:absolute !important;
+
+  inset:0 !important;
+
+  pointer-events:none !important;
+
+  z-index:1 !important;
+}
+
+
+/* ============================================================
+   FORCE DECORATION ABOVE BACKGROUND
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-line,
+#play .gameplay-event-hud .gameplay-event-line{
+
+  position:absolute !important;
+
+  left:12px !important;
+  right:12px !important;
+  bottom:0 !important;
+
+  height:1px !important;
+
+  z-index:5 !important;
+
+  pointer-events:none !important;
+}
+
+
+/* ============================================================
+   BRACKETS
+   ============================================================ */
+
+#play #gameplayEventHud .gameplay-event-bracket,
+#play .gameplay-event-hud .gameplay-event-bracket{
+
+  position:absolute !important;
+
+  top:8px !important;
+
+  height:calc(100% - 16px) !important;
+
+  width:7px !important;
+
+  z-index:5 !important;
+
+  pointer-events:none !important;
+}
+
+
+/* ============================================================
+   MOBILE FINAL
+   ============================================================ */
+
+@media(max-width:768px){
+
+  #play #gameplayEventHud,
+  #play .gameplay-event-hud{
+
+    top:
+      calc(
+        88px +
+        env(
+          safe-area-inset-top,
+          0px
+        )
+      ) !important;
+
+    left:50% !important;
+
+    width:
+      min(
+        320px,
+        calc(100vw - 18px)
+      ) !important;
+
+    max-width:
+      min(
+        320px,
+        calc(100vw - 18px)
+      ) !important;
+  }
+
+
+  #play #gameplayEventHud .gameplay-event-card,
+  #play .gameplay-event-hud .gameplay-event-card{
+
+    grid-template-columns:
+      29px
+      minmax(0,1fr) !important;
+
+    gap:7px !important;
+
+    min-height:58px !important;
+
+    padding:
+      8px
+      9px
+      10px !important;
+
+    border-radius:10px !important;
+  }
+
+
+  #play #gameplayEventHud .gameplay-event-icon,
+  #play .gameplay-event-hud .gameplay-event-icon{
+
+    width:27px !important;
+    height:27px !important;
+
+    min-width:27px !important;
+    min-height:27px !important;
+  }
+
+
+  #play #gameplayEventHud #gameplayEventTitle,
+  #play .gameplay-event-hud #gameplayEventTitle{
+
+    font-size:10px !important;
+  }
+
+
+  #play #gameplayEventHud #gameplayEventDetail,
+  #play .gameplay-event-hud #gameplayEventDetail{
+
+    font-size:6.2px !important;
+  }
+
+
+  #play #gameplayEventHud .gameplay-event-meter,
+  #play .gameplay-event-hud .gameplay-event-meter{
+
+    right:9px !important;
+    bottom:7px !important;
+
+    width:54px !important;
+  }
+
+
+  #play #gameplayEventHud .gameplay-event-line,
+  #play .gameplay-event-hud .gameplay-event-line{
+
+    left:9px !important;
+    right:9px !important;
+  }
+}
+
+
+/* ============================================================
+   LANDSCAPE MOBILE
+   ============================================================ */
+
+@media(
+  orientation:landscape
+) and (
+  max-height:560px
+){
+
+  #play #gameplayEventHud,
+  #play .gameplay-event-hud{
+
+    top:78px !important;
+
+    width:
+      min(
+        320px,
+        42vw
+      ) !important;
+
+    max-width:
+      min(
+        320px,
+        42vw
+      ) !important;
+  }
+
+
+  #play #gameplayEventHud .gameplay-event-card,
+  #play .gameplay-event-hud .gameplay-event-card{
+
+    min-height:53px !important;
+
+    padding:
+      7px
+      9px
+      8px !important;
+  }
+
+
+  #play #gameplayEventHud #gameplayEventTitle,
+  #play .gameplay-event-hud #gameplayEventTitle{
+
+    font-size:9.8px !important;
+  }
+
+
+  #play #gameplayEventHud #gameplayEventDetail,
+  #play .gameplay-event-hud #gameplayEventDetail{
+
+    font-size:5.8px !important;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL
+   ============================================================ */
+
+@media(max-width:380px){
+
+  #play #gameplayEventHud,
+  #play .gameplay-event-hud{
+
+    width:
+      calc(100vw - 16px) !important;
+
+    max-width:
+      calc(100vw - 16px) !important;
+  }
+
+
+  #play #gameplayEventHud .gameplay-event-card,
+  #play .gameplay-event-hud .gameplay-event-card{
+
+    grid-template-columns:
+      27px
+      minmax(0,1fr) !important;
+
+    gap:6px !important;
+
+    padding:
+      7px
+      8px
+      9px !important;
+  }
+
+
+  #play #gameplayEventHud .gameplay-event-icon,
+  #play .gameplay-event-hud .gameplay-event-icon{
+
+    width:25px !important;
+    height:25px !important;
+
+    min-width:25px !important;
+    min-height:25px !important;
+  }
+
+
+  #play #gameplayEventHud #gameplayEventTitle,
+  #play .gameplay-event-hud #gameplayEventTitle{
+
+    font-size:9.5px !important;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media(prefers-reduced-motion:reduce){
+
+  #play #gameplayEventHud,
+  #play #gameplayEventHud *,
+  #play .gameplay-event-hud,
+  #play .gameplay-event-hud *{
+
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+   }
