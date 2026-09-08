@@ -147,47 +147,127 @@
     } catch {}
   }
 
-  const sleep = ms => new Promise(resolve => window.setTimeout(resolve,ms));
-  let typingToken = 0;
-  async function typeErase(node, token) {
-    if (!node?.isConnected || token !== typingToken) return;
-    const marker = node.closest('.world-marker');
-    const getTarget = () => String(node.dataset.relayTypeTarget || node.textContent || '').trim();
-    let target = getTarget();
-    if (!target) return;
-    node.textContent = '';
-    marker?.classList.add('is-typing');
-    for (let i=1;i<=target.length && token===typingToken;i++) { node.textContent=target.slice(0,i); await sleep(34); }
-    await sleep(1100);
-    for (let i=target.length-1;i>=0 && token===typingToken;i--) { node.textContent=target.slice(0,i); await sleep(22); }
-    await sleep(260);
-    if (token===typingToken) typeErase(node,token);
-  }
-  function startMissionTyping() {
-    const nodes = [document.getElementById('worldGoal')].filter(Boolean);
-    nodes.forEach(node => {
-      const target = node.textContent.trim();
-      if (!target || node.dataset.relayTypingInstalled==='1') return;
-      node.dataset.relayTypingInstalled='1';
-      node.dataset.relayTypeTarget=target;
-      typingToken += 1;
-      typeErase(node,typingToken);
-    });
+const sleep = ms =>
+  new Promise(resolve => window.setTimeout(resolve, ms));
+
+let typingToken = 0;
+
+async function typeErase(node, token) {
+  if (!node?.isConnected || token !== typingToken) return;
+
+  const marker = node.closest('.world-marker');
+
+  const target = String(
+    node.dataset.relayTypeTarget || ''
+  ).trim();
+
+  if (!target) return;
+
+  // Kažemo observeru da je ovo naš typing.
+  node.dataset.relayTyping = '1';
+
+  marker?.classList.add('is-typing');
+
+  node.textContent = '';
+
+  // ISPIS SLOVO PO SLOVO
+  for (
+    let i = 1;
+    i <= target.length && token === typingToken;
+    i++
+  ) {
+    node.textContent = target.slice(0, i);
+    await sleep(45);
   }
 
-  function observeMissionChanges() {
-    const goal = byId('worldGoal');
-    if (!goal || goal.dataset.relayTypingObserver==='1') return;
-    goal.dataset.relayTypingObserver='1';
-    const observer = new MutationObserver(() => {
-      const next = goal.textContent.trim();
-      if (!next) return;
-      goal.dataset.relayTypeTarget=next;
-      typingToken += 1;
-      typeErase(goal,typingToken);
-    });
-    observer.observe(goal,{childList:true,characterData:true,subtree:true});
+  if (token !== typingToken) {
+    node.dataset.relayTyping = '0';
+    marker?.classList.remove('is-typing');
+    return;
   }
+
+  await sleep(1200);
+
+  // BRISANJE SLOVO PO SLOVO
+  for (
+    let i = target.length - 1;
+    i >= 0 && token === typingToken;
+    i--
+  ) {
+    node.textContent = target.slice(0, i);
+    await sleep(25);
+  }
+
+  node.dataset.relayTyping = '0';
+  marker?.classList.remove('is-typing');
+
+  await sleep(300);
+
+  if (token === typingToken) {
+    typeErase(node, token);
+  }
+}
+
+function startMissionTyping() {
+  const node = document.getElementById('worldGoal');
+
+  if (!node) return;
+
+  const target = node.textContent.trim();
+
+  if (!target) return;
+
+  node.dataset.relayTypeTarget = target;
+  node.dataset.relayTypingInstalled = '1';
+
+  typingToken += 1;
+
+  typeErase(node, typingToken);
+}
+
+function observeMissionChanges() {
+  const goal = document.getElementById('worldGoal');
+
+  if (!goal || goal.dataset.relayTypingObserver === '1') {
+    return;
+  }
+
+  goal.dataset.relayTypingObserver = '1';
+
+  let lastTarget =
+    goal.dataset.relayTypeTarget ||
+    goal.textContent.trim();
+
+  const observer = new MutationObserver(() => {
+
+    // VAŽNO:
+    // Ako je promjenu napravio naš typewriter,
+    // ništa ne pokrećemo ponovo.
+    if (goal.dataset.relayTyping === '1') {
+      return;
+    }
+
+    const next = goal.textContent.trim();
+
+    if (!next || next === lastTarget) {
+      return;
+    }
+
+    lastTarget = next;
+
+    goal.dataset.relayTypeTarget = next;
+
+    typingToken += 1;
+
+    typeErase(goal, typingToken);
+  });
+
+  observer.observe(goal, {
+    childList: true,
+    characterData: true,
+    subtree: true
+  });
+}
 
   function boot() {
     installStyles();
