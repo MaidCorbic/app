@@ -268,7 +268,7 @@ state.hideTimer = setTimeout(
       const value = next.toUpperCase();
       if (source === 'toast') {
         if (value.startsWith('SIGNAL CAPTURED')) return;
-        if (value.includes('CHECKPOINT')) show(['CHECKPOINT', 'ROUTE SAVED', next, 'checkpoint', 1250]);
+      if (value.includes('CHECKPOINT')) return;
         else if (value.includes('SECRET FOUND')) show(['DISCOVERY', 'SECRET FOUND', next, 'discovery', 1250]);
        else if (value.includes('CHASE'))
   show([
