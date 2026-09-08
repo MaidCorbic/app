@@ -1,53 +1,81 @@
 /* =========================================================
-   RELAY — FINAL CYBERPUNK DYNAMIC ATMOSPHERE
-   VISUAL ONLY
+   RELAY — WEATHER / ATMOSPHERE V2
+   PREMIUM DYNAMIC GAME ATMOSPHERE
    ---------------------------------------------------------
-   Supports:
-   dawn / day / dusk / night / deep-night
-
+   VISUAL ONLY
    Does NOT modify:
-   gameplay
-   physics
-   collisions
-   platforms
-   player
-   controls
-   missions
-   progression
+   - gameplay
+   - physics
+   - collisions
+   - platforms
+   - player
+   - controls
+   - missions
+   - progression
+   ========================================================= */
+
+/* =========================================================
+   ROOT ATMOSPHERE CONTROLLER
    ========================================================= */
 
 #intro.intro{
-  isolation:isolate;
   position:relative;
+  isolation:isolate;
   overflow:hidden;
 
+  /* ---------- SKY ---------- */
   --atm-sky-top:#07111f;
   --atm-sky-mid:#102238;
   --atm-horizon:#294c67;
   --atm-ground:#03070d;
 
+  /* ---------- LIGHT ---------- */
   --atm-glow:rgba(91,184,255,.14);
   --atm-sun-glow:rgba(255,177,105,.16);
 
+  /* ---------- CITY ---------- */
   --atm-city-back:#091727;
   --atm-city-front:#050e1a;
 
+  /* ---------- WINDOWS ---------- */
   --atm-window:rgba(255,210,125,.18);
   --atm-city-light:.48;
 
+  /* ---------- FOG ---------- */
   --atm-fog:rgba(125,174,210,.10);
+  --atm-fog-opacity:.72;
+  --atm-fog-speed:24s;
 
+  /* ---------- RAIN ---------- */
   --atm-rain:.55;
+  --atm-rain-speed:3.5s;
 
+  /* ---------- CLOUD ---------- */
+  --atm-cloud-opacity:.12;
+  --atm-cloud-speed:48s;
+  --atm-cloud-color:rgba(182,214,239,.075);
+
+  /* ---------- MOON ---------- */
   --atm-moon:#f6dfb5;
   --atm-moon-opacity:1;
   --atm-moon-glow:rgba(255,205,133,.20);
 
+  /* ---------- STARS ---------- */
   --atm-star:rgba(215,237,255,.65);
+  --atm-star-opacity:.72;
 
+  /* ---------- ATMOSPHERE ---------- */
   --atm-vignette:rgba(1,4,9,.58);
+  --atm-horizon-glow:rgba(115,188,234,.10);
+  --atm-wet-glow:rgba(89,194,255,.00);
+
+  /* ---------- EVENT ---------- */
+  --atm-storm-flash:0;
+  --atm-storm-speed:7s;
 
   background:#02050a;
+
+  color:#eef2f6;
 
   transition:
     background-color 2.4s ease,
@@ -60,6 +88,10 @@
    ========================================================= */
 
 #intro.intro .menu-backdrop{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+
   background:
     radial-gradient(
       circle at var(--relay-sun-x,68%) var(--relay-sun-y,17%),
@@ -75,7 +107,7 @@
 
     radial-gradient(
       ellipse at 50% 65%,
-      var(--atm-glow),
+      var(--atm-horizon-glow),
       transparent 46%
     ),
 
@@ -94,19 +126,23 @@
 
 
 /* =========================================================
-   STARS + ATMOSPHERIC FOG
+   STARFIELD + FOG + CLOUD ATMOSPHERE
    ========================================================= */
 
 #intro.intro .menu-backdrop::before{
   content:"";
+
   position:absolute;
-  inset:0;
+  inset:-8%;
 
   z-index:2;
 
+  pointer-events:none;
+
   background:
 
-    /* stars */
+    /* ---------- STARS ---------- */
+
     radial-gradient(
       circle at 8% 16%,
       var(--atm-star) 0 1px,
@@ -161,7 +197,8 @@
       transparent 1.8px
     ),
 
-    /* atmospheric fog */
+    /* ---------- FOG ---------- */
+
     radial-gradient(
       ellipse at 18% 69%,
       var(--atm-fog),
@@ -178,11 +215,60 @@
       ellipse at 50% 78%,
       var(--atm-fog),
       transparent 42%
+    ),
+
+    /* ---------- CLOUD BANDS ---------- */
+
+    radial-gradient(
+      ellipse at 18% 34%,
+      var(--atm-cloud-color) 0%,
+      transparent 34%
+    ),
+
+    radial-gradient(
+      ellipse at 70% 29%,
+      var(--atm-cloud-color) 0%,
+      transparent 37%
     );
 
-  opacity:.72;
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    145% 100%,
+    125% 100%,
+    140% 100%,
+    145% 100%,
+    130% 100%;
 
-  pointer-events:none;
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    -2% 0,
+    3% 2%,
+    0 0,
+    -10% 1%,
+    12% -2%;
+
+  opacity:var(--atm-star-opacity);
+
+  transform:translate3d(0,0,0);
+
+  animation:
+    relay-atmosphere-drift var(--atm-fog-speed) ease-in-out infinite alternate;
 
   transition:
     opacity 2.4s ease,
@@ -191,18 +277,35 @@
 
 
 /* =========================================================
-   CINEMATIC VIGNETTE
+   SECONDARY FOG / CLOUD LAYER
    ========================================================= */
 
 #intro.intro .menu-backdrop::after{
   content:"";
+
   position:absolute;
-  inset:0;
+  inset:-12%;
 
   z-index:7;
 
+  pointer-events:none;
+
   background:
 
+    /* atmospheric haze */
+    radial-gradient(
+      ellipse at 20% 64%,
+      rgba(128,185,222,.10),
+      transparent 30%
+    ),
+
+    radial-gradient(
+      ellipse at 82% 57%,
+      rgba(112,170,208,.08),
+      transparent 32%
+    ),
+
+    /* cinematic vignette */
     radial-gradient(
       ellipse at 50% 42%,
       transparent 18%,
@@ -210,6 +313,7 @@
       var(--atm-vignette) 100%
     ),
 
+    /* lower atmospheric falloff */
     linear-gradient(
       180deg,
       rgba(0,0,0,.025) 0%,
@@ -217,10 +321,50 @@
       var(--atm-ground) 100%
     );
 
-  pointer-events:none;
+  opacity:var(--atm-fog-opacity);
+
+  transform:translate3d(0,0,0);
+
+  animation:
+    relay-fog-drift var(--atm-cloud-speed) ease-in-out infinite alternate;
 
   transition:
-    background 2.4s ease;
+    background 2.4s ease,
+    opacity 2.4s ease;
+}
+
+
+/* =========================================================
+   ATMOSPHERIC DRIFT
+   ========================================================= */
+
+@keyframes relay-atmosphere-drift{
+  0%{
+    transform:translate3d(-1.5%,0,0) scale(1.015);
+  }
+
+  50%{
+    transform:translate3d(1.2%,-.4%,0) scale(1.025);
+  }
+
+  100%{
+    transform:translate3d(-.8%,.6%,0) scale(1.018);
+  }
+}
+
+
+@keyframes relay-fog-drift{
+  0%{
+    transform:translate3d(-2%,1%,0) scale(1.02);
+  }
+
+  50%{
+    transform:translate3d(1.5%,-.5%,0) scale(1.035);
+  }
+
+  100%{
+    transform:translate3d(2%,-1%,0) scale(1.025);
+  }
 }
 
 
@@ -229,7 +373,7 @@
    ========================================================= */
 
 #intro.intro .backdrop-moon{
-  z-index:1;
+  z-index:3;
 
   width:clamp(125px,16vw,230px);
 
@@ -281,7 +425,7 @@
    ========================================================= */
 
 #intro.intro .backdrop-orbit{
-  z-index:1;
+  z-index:3;
 
   opacity:.20;
 
@@ -310,6 +454,8 @@
    ========================================================= */
 
 #intro.intro .city-one{
+  position:absolute;
+
   z-index:4;
 
   height:38%;
@@ -321,7 +467,6 @@
 
   background-image:
 
-    /* vertical building divisions */
     repeating-linear-gradient(
       90deg,
       transparent 0 41px,
@@ -329,7 +474,6 @@
       transparent 45px 82px
     ),
 
-    /* distant roof line */
     linear-gradient(
       180deg,
       transparent 0 7%,
@@ -400,8 +544,35 @@
 
   pointer-events:none;
 
+  animation:
+    relay-city-flicker 9s ease-in-out infinite;
+
   transition:
     opacity 2.4s ease;
+}
+
+
+@keyframes relay-city-flicker{
+  0%,
+  100%{
+    filter:brightness(.96);
+  }
+
+  47%{
+    filter:brightness(.96);
+  }
+
+  49%{
+    filter:brightness(1.03);
+  }
+
+  52%{
+    filter:brightness(.98);
+  }
+
+  76%{
+    filter:brightness(1);
+  }
 }
 
 
@@ -410,6 +581,8 @@
    ========================================================= */
 
 #intro.intro .city-two{
+  position:absolute;
+
   z-index:5;
 
   height:25%;
@@ -427,10 +600,15 @@
 }
 
 
+/* =========================================================
+   FRONT CITY WINDOWS
+   ========================================================= */
+
 #intro.intro .city-two::before{
   content:"";
 
   position:absolute;
+
   inset:17% 0 0;
 
   background:
@@ -467,8 +645,30 @@
 
   pointer-events:none;
 
+  animation:
+    relay-city-front-pulse 12s ease-in-out infinite alternate;
+
   transition:
     opacity 2.4s ease;
+}
+
+
+@keyframes relay-city-front-pulse{
+  0%{
+    filter:brightness(.92);
+  }
+
+  48%{
+    filter:brightness(.92);
+  }
+
+  53%{
+    filter:brightness(1.025);
+  }
+
+  100%{
+    filter:brightness(.96);
+  }
 }
 
 
@@ -488,9 +688,54 @@
       0 0 2px rgba(125,210,255,.10)
     );
 
+  animation:
+    relay-rain-fall var(--atm-rain-speed) linear infinite;
+
   transition:
     opacity 2.4s ease,
     filter 2.4s ease;
+}
+
+
+@keyframes relay-rain-fall{
+  from{
+    transform:translate3d(0,-2%,0);
+  }
+
+  to{
+    transform:translate3d(-4%,8%,0);
+  }
+}
+
+
+/* =========================================================
+   WET NEON ATMOSPHERE
+   ========================================================= */
+
+#intro.intro::after{
+  content:"";
+
+  position:absolute;
+  inset:auto 0 0;
+
+  z-index:8;
+
+  height:28%;
+
+  pointer-events:none;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--atm-wet-glow) 100%
+    );
+
+  opacity:.7;
+
+  transition:
+    opacity 2.4s ease,
+    background 2.4s ease;
 }
 
 
@@ -528,7 +773,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="dawn"]{
-
   --atm-sky-top:#101b35;
   --atm-sky-mid:#594b63;
   --atm-horizon:#df8c67;
@@ -544,8 +788,13 @@
   --atm-city-light:.30;
 
   --atm-fog:rgba(255,192,151,.19);
+  --atm-fog-opacity:.68;
 
   --atm-rain:.08;
+  --atm-rain-speed:4.6s;
+
+  --atm-cloud-opacity:.15;
+  --atm-cloud-speed:54s;
 
   --atm-moon:#ffe3b5;
   --atm-moon-opacity:0;
@@ -553,8 +802,11 @@
   --atm-moon-glow:rgba(255,193,128,.10);
 
   --atm-star:rgba(255,231,208,.16);
+  --atm-star-opacity:.22;
 
   --atm-vignette:rgba(25,15,17,.38);
+
+  --atm-horizon-glow:rgba(255,166,112,.16);
 }
 
 
@@ -563,7 +815,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="day"]{
-
   --atm-sky-top:#2d668e;
   --atm-sky-mid:#70a0b5;
   --atm-horizon:#c6d2cf;
@@ -579,8 +830,15 @@
   --atm-city-light:.07;
 
   --atm-fog:rgba(227,241,243,.17);
+  --atm-fog-opacity:.55;
 
   --atm-rain:.012;
+  --atm-rain-speed:4.4s;
+
+  --atm-cloud-opacity:.26;
+  --atm-cloud-speed:62s;
+
+  --atm-cloud-color:rgba(255,255,255,.09);
 
   --atm-moon:#f1eee4;
   --atm-moon-opacity:0;
@@ -588,8 +846,11 @@
   --atm-moon-glow:transparent;
 
   --atm-star:transparent;
+  --atm-star-opacity:0;
 
   --atm-vignette:rgba(7,14,19,.16);
+
+  --atm-horizon-glow:rgba(255,255,255,.11);
 }
 
 
@@ -598,7 +859,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="dusk"]{
-
   --atm-sky-top:#191b31;
   --atm-sky-mid:#5e4057;
   --atm-horizon:#c56c59;
@@ -614,8 +874,15 @@
   --atm-city-light:.74;
 
   --atm-fog:rgba(228,157,148,.15);
+  --atm-fog-opacity:.70;
 
   --atm-rain:.14;
+  --atm-rain-speed:3.8s;
+
+  --atm-cloud-opacity:.20;
+  --atm-cloud-speed:52s;
+
+  --atm-cloud-color:rgba(238,177,162,.075);
 
   --atm-moon:#ffe0ae;
   --atm-moon-opacity:0;
@@ -623,8 +890,11 @@
   --atm-moon-glow:rgba(255,164,105,.12);
 
   --atm-star:rgba(255,219,198,.27);
+  --atm-star-opacity:.35;
 
   --atm-vignette:rgba(16,8,14,.50);
+
+  --atm-horizon-glow:rgba(255,105,82,.15);
 }
 
 
@@ -633,7 +903,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="night"]{
-
   --atm-sky-top:#030914;
   --atm-sky-mid:#08192d;
   --atm-horizon:#17415f;
@@ -649,8 +918,15 @@
   --atm-city-light:.78;
 
   --atm-fog:rgba(105,158,199,.11);
+  --atm-fog-opacity:.74;
 
   --atm-rain:.60;
+  --atm-rain-speed:3.1s;
+
+  --atm-cloud-opacity:.16;
+  --atm-cloud-speed:47s;
+
+  --atm-cloud-color:rgba(113,170,216,.07);
 
   --atm-moon:#f7dfb1;
   --atm-moon-opacity:1;
@@ -658,8 +934,13 @@
   --atm-moon-glow:rgba(249,201,121,.22);
 
   --atm-star:rgba(212,236,255,.72);
+  --atm-star-opacity:.82;
 
   --atm-vignette:rgba(1,4,9,.60);
+
+  --atm-horizon-glow:rgba(75,175,239,.13);
+
+  --atm-wet-glow:rgba(65,175,239,.06);
 }
 
 
@@ -668,7 +949,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="deep-night"]{
-
   --atm-sky-top:#01040b;
   --atm-sky-mid:#030b17;
   --atm-horizon:#092942;
@@ -684,8 +964,15 @@
   --atm-city-light:.46;
 
   --atm-fog:rgba(67,117,157,.10);
+  --atm-fog-opacity:.80;
 
   --atm-rain:.80;
+  --atm-rain-speed:2.7s;
+
+  --atm-cloud-opacity:.13;
+  --atm-cloud-speed:42s;
+
+  --atm-cloud-color:rgba(87,143,184,.055);
 
   --atm-moon:#dce8f0;
   --atm-moon-opacity:.84;
@@ -693,8 +980,13 @@
   --atm-moon-glow:rgba(113,167,207,.17);
 
   --atm-star:rgba(194,224,249,.58);
+  --atm-star-opacity:.66;
 
   --atm-vignette:rgba(0,2,6,.76);
+
+  --atm-horizon-glow:rgba(42,124,180,.11);
+
+  --atm-wet-glow:rgba(53,136,196,.085);
 }
 
 
@@ -724,7 +1016,7 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="day"] .menu-backdrop::before{
-  opacity:.20;
+  opacity:.18;
 }
 
 
@@ -733,7 +1025,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="dawn"] .menu-backdrop::after{
-
   background:
 
     radial-gradient(
@@ -757,7 +1048,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="day"] .menu-backdrop::after{
-
   background:
 
     radial-gradient(
@@ -781,7 +1071,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="dusk"] .menu-backdrop::after{
-
   background:
 
     radial-gradient(
@@ -805,7 +1094,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="night"] .menu-backdrop::after{
-
   background:
 
     radial-gradient(
@@ -829,7 +1117,6 @@
    ========================================================= */
 
 #intro.intro[data-atmosphere="deep-night"] .menu-backdrop::after{
-
   background:
 
     radial-gradient(
@@ -849,6 +1136,167 @@
 
 
 /* =========================================================
+   STORM MODE
+   ---------------------------------------------------------
+   Works only when:
+   #intro.intro[data-weather="storm"]
+   ========================================================= */
+
+#intro.intro[data-weather="storm"]{
+  --atm-rain:.92;
+  --atm-rain-speed:2.1s;
+  --atm-fog-opacity:.86;
+  --atm-cloud-opacity:.30;
+  --atm-wet-glow:rgba(63,181,245,.11);
+
+  animation:
+    relay-storm-atmosphere var(--atm-storm-speed) ease-in-out infinite;
+}
+
+
+#intro.intro[data-weather="storm"] .menu-backdrop::before{
+  animation:
+    relay-storm-clouds 19s ease-in-out infinite alternate;
+}
+
+
+#intro.intro[data-weather="storm"] .menu-backdrop::after{
+  animation:
+    relay-storm-flash var(--atm-storm-speed) steps(1,end) infinite;
+}
+
+
+#intro.intro[data-weather="storm"] .backdrop-rain{
+  filter:
+    brightness(1.08)
+    drop-shadow(
+      0 0 3px rgba(125,210,255,.16)
+    );
+}
+
+
+@keyframes relay-storm-atmosphere{
+  0%,
+  100%{
+    filter:brightness(.98) saturate(.98);
+  }
+
+  48%{
+    filter:brightness(.97) saturate(1);
+  }
+
+  49%{
+    filter:brightness(1.08) saturate(1.04);
+  }
+
+  50%{
+    filter:brightness(.98);
+  }
+}
+
+
+@keyframes relay-storm-clouds{
+  0%{
+    transform:
+      translate3d(-2%,0,0)
+      scale(1.02);
+  }
+
+  100%{
+    transform:
+      translate3d(2%,-1%,0)
+      scale(1.04);
+  }
+}
+
+
+@keyframes relay-storm-flash{
+
+  0%,
+  79%,
+  100%{
+    opacity:1;
+  }
+
+  80%{
+    opacity:.88;
+  }
+
+  80.7%{
+    opacity:1;
+  }
+
+  81.2%{
+    opacity:.82;
+  }
+
+  82%{
+    opacity:1;
+  }
+}
+
+
+/* =========================================================
+   MIST MODE
+   ---------------------------------------------------------
+   #intro.intro[data-weather="mist"]
+   ========================================================= */
+
+#intro.intro[data-weather="mist"]{
+  --atm-rain:.025;
+  --atm-fog-opacity:.96;
+  --atm-fog:rgba(174,206,222,.16);
+  --atm-cloud-opacity:.20;
+}
+
+
+#intro.intro[data-weather="mist"] .menu-backdrop::after{
+  filter:blur(.25px);
+}
+
+
+#intro.intro[data-weather="mist"] .city-one,
+#intro.intro[data-weather="mist"] .city-two{
+  filter:blur(.35px);
+}
+
+
+/* =========================================================
+   CLEAR WEATHER
+   ---------------------------------------------------------
+   #intro.intro[data-weather="clear"]
+   ========================================================= */
+
+#intro.intro[data-weather="clear"]{
+  --atm-rain:.0;
+  --atm-fog-opacity:.42;
+  --atm-cloud-opacity:.07;
+}
+
+
+#intro.intro[data-weather="clear"] .backdrop-rain{
+  opacity:0!important;
+}
+
+
+/* =========================================================
+   WEATHER-SPECIFIC CITY LIGHTING
+   ========================================================= */
+
+#intro.intro[data-weather="storm"] .city-one::after,
+#intro.intro[data-weather="storm"] .city-two::before{
+  filter:
+    brightness(.90);
+}
+
+
+#intro.intro[data-weather="mist"] .city-one::after,
+#intro.intro[data-weather="mist"] .city-two::before{
+  opacity:calc(var(--atm-city-light) * .62);
+}
+
+
+/* =========================================================
    MOBILE
    ========================================================= */
 
@@ -856,6 +1304,7 @@
 
   #intro.intro .backdrop-moon{
     width:clamp(105px,19vw,175px);
+
     right:8%;
     top:9%;
   }
@@ -875,6 +1324,10 @@
   #intro.intro .menu-backdrop::before{
     opacity:.48;
   }
+
+  #intro.intro .menu-backdrop::after{
+    animation-duration:calc(var(--atm-cloud-speed) * 1.15);
+  }
 }
 
 
@@ -886,6 +1339,7 @@
 
   #intro.intro .backdrop-moon{
     width:108px;
+
     right:6%;
     top:8%;
 
@@ -921,6 +1375,15 @@
     filter:blur(.2px);
     opacity:.38;
   }
+
+  #intro.intro .menu-backdrop::after{
+    opacity:calc(var(--atm-fog-opacity) * .82);
+  }
+
+  /* lighter storm on mobile */
+  #intro.intro[data-weather="storm"] .backdrop-rain{
+    opacity:.66;
+  }
 }
 
 
@@ -932,6 +1395,7 @@
 
   #intro.intro .backdrop-moon{
     width:84px;
+
     right:5%;
     top:7%;
   }
@@ -942,6 +1406,14 @@
 
   #intro.intro .city-two{
     height:18%;
+  }
+
+  #intro.intro .menu-backdrop::before{
+    opacity:.30;
+  }
+
+  #intro.intro .menu-backdrop::after{
+    opacity:.68;
   }
 }
 
@@ -964,6 +1436,43 @@
   #intro.intro .city-two{
     height:22%;
   }
+
+  #intro.intro .menu-backdrop::before{
+    opacity:.34;
+  }
+}
+
+
+/* =========================================================
+   TOUCH DEVICES
+   ========================================================= */
+
+@media(pointer:coarse){
+
+  #intro.intro .backdrop-moon{
+    animation-duration:10s;
+  }
+
+  #intro.intro .city-one::after,
+  #intro.intro .city-two::before{
+    animation-duration:14s;
+  }
+
+  #intro.intro[data-weather="storm"]{
+    animation-duration:10s;
+  }
+}
+
+
+/* =========================================================
+   PERFORMANCE SAFETY
+   ========================================================= */
+
+#intro.intro .backdrop-moon,
+#intro.intro .backdrop-rain,
+#intro.intro .menu-backdrop::before,
+#intro.intro .menu-backdrop::after{
+  will-change:transform,opacity;
 }
 
 
@@ -973,7 +1482,8 @@
 
 @media(prefers-reduced-motion:reduce){
 
-  #intro.intro *{
+  #intro.intro *,
+  #intro.intro::after{
     animation-duration:.001ms!important;
     animation-iteration-count:1!important;
     scroll-behavior:auto!important;
@@ -988,4 +1498,4 @@
   #intro.intro .backdrop-rain{
     transition:none!important;
   }
-  }
+}
