@@ -829,3 +829,87 @@
     bottom: 145px !important;
   }
 }
+
+/* =========================================================
+   CARGO HUD — DESKTOP POSITION REFINEMENT
+   ========================================================= */
+
+#cargoIntegrityV2{
+
+  left:22px !important;
+
+  right:auto !important;
+
+  top:auto !important;
+
+  bottom:24px !important;
+
+  width:min(350px,calc(100vw - 44px)) !important;
+
+  max-width:350px !important;
+}
+
+
+/* Slightly more compact card */
+
+#cargoIntegrityV2 .cargo-card{
+
+  padding:11px 13px !important;
+
+  border-radius:12px !important;
+}
+
+
+/* Cleaner cargo header */
+
+#cargoIntegrityV2 .cargo-head{
+
+  margin-bottom:8px !important;
+}
+
+
+/* Slightly stronger progress */
+
+#cargoIntegrityV2 .cargo-track{
+
+  height:7px !important;
+}
+
+
+#cargoIntegrityV2 .cargo-value{
+
+  min-width:44px !important;
+
+  font-size:12px !important;
+}
+
+
+/* Footer spacing */
+
+#cargoIntegrityV2 .cargo-foot{
+
+  margin-top:8px !important;
+}
+
+
+/* Mobile */
+
+@media(max-width:700px){
+
+  #cargoIntegrityV2{
+
+    left:10px !important;
+
+    right:10px !important;
+
+    bottom:
+      calc(
+        82px +
+        env(safe-area-inset-bottom,0px)
+      ) !important;
+
+    width:auto !important;
+
+    max-width:none !important;
+  }
+}
