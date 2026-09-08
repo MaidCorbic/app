@@ -322,89 +322,63 @@
   /*
    * Runtime mission typing effect.
    */
-  function typeMission() {
-    if (!gameplay()) return;
+ function typeMission() {
+  if (!gameplay()) return;
 
-    const badge =
-      q('#game .world-marker');
+  const badge = q('#game .world-marker');
+  const target = q('#worldGoal');
 
-    const target =
-      q('#worldGoal');
+  if (!badge || !target) return;
+  if (badge.__runtimeTypeTimer) return;
 
-    if (!badge || !target) return;
+  // Originalni tekst čuvamo izvan textContenta
+  // da ga drugi sistemi ne mogu "pojesti".
+  const source =
+    target.dataset.missionSource ||
+    target.textContent?.trim() ||
+    '';
 
-    if (badge.__runtimeTypeTimer) {
-      return;
-    }
+  const current = source.toUpperCase();
 
-    const current =
-      String(
-        target.textContent || ''
-      )
-        .trim()
-        .toUpperCase();
+  if (!current) return;
 
-    if (!current) return;
-
-    if (
-      badge.dataset.runtimeTyped ===
-      current
-    ) {
-      return;
-    }
-
-    badge.dataset.runtimeTyped =
-      current;
-
-    badge.classList.add(
-      'is-runtime-typing'
-    );
-
-    clearInterval(
-      badge.__runtimeTypeTimer
-    );
-
-    target.textContent = '';
-
-    let i = 0;
-
-    badge.__runtimeTypeTimer =
-      window.setInterval(
-        () => {
-          if (!gameplay()) {
-            clearInterval(
-              badge.__runtimeTypeTimer
-            );
-
-            badge.__runtimeTypeTimer = 0;
-            return;
-          }
-
-          i++;
-
-          target.textContent =
-            current.slice(
-              0,
-              i
-            );
-
-          if (
-            i >= current.length
-          ) {
-            clearInterval(
-              badge.__runtimeTypeTimer
-            );
-
-            badge.__runtimeTypeTimer = 0;
-
-            badge.classList.remove(
-              'is-runtime-typing'
-            );
-          }
-        },
-        60
-      );
+  // Isti tekst je već ispisan.
+  if (badge.dataset.runtimeTyped === current) {
+    target.textContent = current;
+    return;
   }
+
+  target.dataset.missionSource = current;
+
+  badge.dataset.runtimeTyped = '';
+  badge.classList.add('is-runtime-typing');
+
+  target.textContent = '';
+
+  let i = 0;
+
+  badge.__runtimeTypeTimer = window.setInterval(() => {
+    if (!gameplay()) {
+      clearInterval(badge.__runtimeTypeTimer);
+      badge.__runtimeTypeTimer = 0;
+      badge.classList.remove('is-runtime-typing');
+      return;
+    }
+
+    i += 1;
+    target.textContent = current.slice(0, i);
+
+    if (i >= current.length) {
+      clearInterval(badge.__runtimeTypeTimer);
+      badge.__runtimeTypeTimer = 0;
+
+      target.textContent = current;
+      badge.dataset.runtimeTyped = current;
+
+      badge.classList.remove('is-runtime-typing');
+    }
+  }, 90);
+}
 
   /*
    * Optimized countdown.
