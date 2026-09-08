@@ -1,103 +1,251 @@
-/* UPDATE 10 — Gameplay Event HUD V3
-   In-game presentation layer. No gameplay state ownership.
-*/
+/* ============================================================
+   UPDATE 10 — FINAL GAMEPLAY EVENT HUD
+   ------------------------------------------------------------
+   In-game presentation layer.
+   No gameplay state ownership.
+   No input ownership.
+   ============================================================ */
+
+
+/* ============================================================
+   ROOT
+   ============================================================ */
 
 #gameplayEventHud{
-  position:absolute;
-  top:calc(100% + 16px);
+  position:fixed;
+
+  top:clamp(92px,11vh,118px);
   left:50%;
+
   z-index:121;
-  width:min(370px,calc(100vw - 28px));
-  transform:translate(-50%,-12px) scale(.965);
+
+  width:min(350px,calc(100vw - 28px));
+
+  transform:
+    translate(-50%,-10px)
+    scale(.94);
+
   opacity:0;
   visibility:hidden;
   pointer-events:none;
+
   box-sizing:border-box;
-  font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  filter:drop-shadow(0 18px 38px rgba(0,0,0,.48));
+
+  font-family:
+    "DM Mono",
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+
+  filter:
+    drop-shadow(0 18px 36px rgba(0,0,0,.50))
+    drop-shadow(0 0 18px rgba(255,208,110,.08));
+
   transition:
-    opacity .18s ease,
-    transform .26s cubic-bezier(.2,.95,.25,1),
-    visibility .18s ease;
+    opacity .16s ease,
+    transform .28s cubic-bezier(.16,.9,.2,1),
+    visibility .16s ease;
 }
+
+
+/* ============================================================
+   ACTIVE
+   ============================================================ */
 
 #gameplayEventHud.is-visible{
   opacity:1;
   visibility:visible;
-  transform:translate(-50%,0) scale(1);
+
+  transform:
+    translate(-50%,0)
+    scale(1);
 }
 
+
+/* ============================================================
+   POP
+   ============================================================ */
+
 #gameplayEventHud.is-pop .gameplay-event-card{
-  animation:gameplayEventPop .34s cubic-bezier(.2,.9,.2,1) both;
+  animation:
+    gameplayEventPop
+    .34s
+    cubic-bezier(.16,.9,.2,1)
+    both;
 }
+
+
+/* ============================================================
+   CARD
+   ============================================================ */
 
 #gameplayEventHud .gameplay-event-card{
   position:relative;
+
   display:grid;
-  grid-template-columns:36px minmax(0,1fr);
-  gap:11px;
+
+  grid-template-columns:
+    32px
+    minmax(0,1fr);
+
+  gap:7px;
+
   overflow:hidden;
-  min-height:68px;
-  padding:11px 13px 13px;
-  border:1px solid rgba(255,208,110,.72);
-  border-radius:10px;
+
+  min-height:66px;
+
+  padding:
+    10px
+    11px
+    11px;
+
+  border:
+    1px solid
+    rgba(255,208,110,.78);
+
+  border-radius:11px;
+
   background:
     linear-gradient(
       135deg,
-      rgba(17,24,32,.98),
-      rgba(4,9,16,.985) 62%,
-      rgba(15,18,18,.98)
+      rgba(18,26,36,.985),
+      rgba(4,9,16,.985) 58%,
+      rgba(10,14,18,.99)
     );
+
   box-shadow:
-    0 0 0 1px rgba(255,255,255,.025),
-    0 0 28px rgba(255,208,110,.13),
-    inset 0 1px rgba(255,255,255,.1),
-    inset 0 -16px 28px rgba(0,0,0,.18);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
+    0 0 0 1px rgba(255,255,255,.026),
+    0 0 24px rgba(255,208,110,.13),
+    0 10px 34px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.085),
+    inset 0 -18px 30px rgba(0,0,0,.18);
+
+  backdrop-filter:
+    blur(16px)
+    saturate(135%);
+
+  -webkit-backdrop-filter:
+    blur(16px)
+    saturate(135%);
 }
+
+
+/* ============================================================
+   TOP ENERGY LINE
+   ============================================================ */
 
 #gameplayEventHud .gameplay-event-card::before{
   content:"";
+
   position:absolute;
+
+  left:0;
+  right:0;
+  top:0;
+
+  height:2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,208,110,.20) 10%,
+      rgba(255,208,110,.96) 50%,
+      rgba(255,208,110,.20) 90%,
+      transparent 100%
+    );
+
+  box-shadow:
+    0 0 10px rgba(255,208,110,.65),
+    0 0 22px rgba(255,208,110,.18);
+
+  pointer-events:none;
+}
+
+
+/* ============================================================
+   INTERNAL LIGHT
+   ============================================================ */
+
+#gameplayEventHud .gameplay-event-card::after{
+  content:"";
+
+  position:absolute;
+
   inset:0;
+
   background:
     radial-gradient(
       circle at 8% 50%,
       rgba(255,208,110,.12),
-      transparent 26%
+      transparent 28%
     ),
     linear-gradient(
       115deg,
-      transparent 0 42%,
-      rgba(255,255,255,.025) 50%,
+      transparent 0 38%,
+      rgba(255,255,255,.018) 48%,
       transparent 58%
     );
+
+  opacity:.95;
+
   pointer-events:none;
 }
+
+
+/* ============================================================
+   SCAN EFFECT
+   ============================================================ */
 
 #gameplayEventHud .gameplay-event-scan{
   position:absolute;
-  inset:-30% 0;
+
+  inset:-35% -15%;
+
   background:
     linear-gradient(
       90deg,
-      transparent,
-      rgba(255,208,110,.19),
-      transparent
+      transparent 0%,
+      transparent 40%,
+      rgba(255,208,110,.08) 47%,
+      rgba(255,255,255,.20) 50%,
+      rgba(255,208,110,.08) 53%,
+      transparent 60%,
+      transparent 100%
     );
-  transform:translateX(-120%) skewX(-14deg);
+
+  transform:
+    translateX(-120%)
+    skewX(-14deg);
+
+  mix-blend-mode:
+    screen;
+
   pointer-events:none;
 }
 
+
 #gameplayEventHud.is-pop .gameplay-event-scan{
-  animation:gameplayEventScan .72s ease-out both;
+  animation:
+    gameplayEventScan
+    .72s
+    cubic-bezier(.18,.8,.24,1)
+    both;
 }
+
+
+/* ============================================================
+   GRID
+   ============================================================ */
 
 #gameplayEventHud .gameplay-event-grid{
   position:absolute;
+
   inset:0;
-  opacity:.22;
+
+  opacity:.18;
+
   background-image:
     linear-gradient(
       rgba(255,255,255,.035) 1px,
@@ -108,251 +256,478 @@
       rgba(255,255,255,.035) 1px,
       transparent 1px
     );
-  background-size:18px 18px;
+
+  background-size:
+    18px
+    18px;
+
   mask-image:
     linear-gradient(
       90deg,
       transparent,
-      black 20%,
-      black 80%,
+      black 18%,
+      black 82%,
       transparent
     );
+
   pointer-events:none;
 }
 
+
+/* ============================================================
+   ICON
+   ============================================================ */
+
 #gameplayEventHud .gameplay-event-icon{
   position:relative;
+
   align-self:center;
+
   width:32px;
   height:32px;
-  border:1px solid rgba(255,208,110,.76);
-  border-radius:7px;
+
+  border:
+    1px solid
+    rgba(255,208,110,.82);
+
+  border-radius:8px;
+
   background:
     linear-gradient(
       145deg,
-      rgba(255,208,110,.12),
+      rgba(255,208,110,.15),
       rgba(255,208,110,.025)
     );
+
   box-shadow:
     0 0 18px rgba(255,208,110,.16),
-    inset 0 0 12px rgba(255,208,110,.08);
+    0 0 32px rgba(255,208,110,.06),
+    inset 0 0 12px rgba(255,208,110,.09);
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease;
 }
+
+
+/* ============================================================
+   ICON ACTIVE PULSE
+   ============================================================ */
+
+#gameplayEventHud.is-visible .gameplay-event-icon{
+  animation:
+    gameplayEventIconPulse
+    .9s
+    ease-out
+    both;
+}
+
+
+/* ============================================================
+   ICON CORE
+   ============================================================ */
 
 #gameplayEventHud .gameplay-event-icon::before,
 #gameplayEventHud .gameplay-event-icon::after,
 #gameplayEventHud .gameplay-event-icon i::before,
 #gameplayEventHud .gameplay-event-icon i::after{
   content:"";
+
   position:absolute;
+
   background:#ffd06e;
-  box-shadow:0 0 8px rgba(255,208,110,.85);
+
+  box-shadow:
+    0 0 8px rgba(255,208,110,.90);
 }
+
+
+/* HORIZONTAL */
 
 #gameplayEventHud .gameplay-event-icon::before{
   width:12px;
   height:2px;
+
   left:9px;
   top:15px;
 }
 
+
+/* VERTICAL */
+
 #gameplayEventHud .gameplay-event-icon::after{
   width:2px;
   height:12px;
+
   left:14px;
   top:10px;
 }
 
+
+/* CORNER DOT */
+
 #gameplayEventHud .gameplay-event-icon i::before{
   width:4px;
   height:4px;
+
   left:4px;
   top:4px;
+
   box-shadow:none;
 }
+
+
+/* CORNER DOT */
 
 #gameplayEventHud .gameplay-event-icon i::after{
   width:4px;
   height:4px;
+
   right:4px;
   bottom:4px;
+
   box-shadow:none;
 }
 
+
+/* ============================================================
+   COPY
+   ============================================================ */
+
 #gameplayEventHud .gameplay-event-copy{
   position:relative;
+
   z-index:2;
+
   min-width:0;
+
+  padding-right:1px;
 }
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
 
 #gameplayEventHud .gameplay-event-head{
   display:flex;
+
   align-items:center;
   justify-content:space-between;
-  gap:10px;
+
+  gap:6px;
+
   min-width:0;
+
   line-height:1;
 }
 
+
+/* ============================================================
+   TYPE
+   ============================================================ */
+
 #gameplayEventHud .gameplay-event-head small{
   min-width:0;
+
   overflow:hidden;
+
   text-overflow:ellipsis;
+
   white-space:nowrap;
+
   font-size:7px;
+
   font-weight:900;
+
   letter-spacing:.18em;
+
   color:#8da1b4;
+
   text-transform:uppercase;
 }
+
+
+/* ============================================================
+   STATUS
+   ============================================================ */
 
 #gameplayEventHud .gameplay-event-head b{
   flex:0 0 auto;
+
   font-size:7px;
-  letter-spacing:.15em;
+
+  letter-spacing:.14em;
+
   color:#ffd06e;
-  text-shadow:0 0 10px rgba(255,208,110,.35);
+
+  text-shadow:
+    0 0 8px rgba(255,208,110,.42),
+    0 0 18px rgba(255,208,110,.14);
 }
+
+
+/* ============================================================
+   TITLE
+   ============================================================ */
 
 #gameplayEventHud #gameplayEventTitle{
   display:block;
-  margin-top:5px;
+
+  margin-top:3px;
+
   color:#fff5d2;
-  font-size:12.5px;
+
+  font-size:12px;
+
   font-weight:900;
-  letter-spacing:.09em;
+
+  letter-spacing:.075em;
+
   line-height:1.15;
+
   white-space:nowrap;
+
   overflow:hidden;
+
   text-overflow:ellipsis;
-  text-shadow:0 0 15px rgba(255,208,110,.2);
+
+  text-shadow:
+    0 0 10px rgba(255,208,110,.15),
+    0 0 22px rgba(255,208,110,.06);
 }
+
+
+/* ============================================================
+   DETAIL
+   ============================================================ */
 
 #gameplayEventHud #gameplayEventDetail{
   display:block;
-  margin-top:5px;
+
+  margin-top:4px;
+
   color:#71889c;
-  font-size:7.3px;
+
+  font-size:7.1px;
+
   font-weight:800;
-  letter-spacing:.1em;
-  line-height:1.35;
+
+  letter-spacing:.085em;
+
+  line-height:1.3;
+
   white-space:nowrap;
+
   overflow:hidden;
+
   text-overflow:ellipsis;
+
   text-transform:uppercase;
 }
 
+
+/* ============================================================
+   METER
+   ============================================================ */
+
 #gameplayEventHud .gameplay-event-meter{
   position:absolute;
-  right:13px;
-  bottom:9px;
-  width:72px;
+
+  right:12px;
+  bottom:8px;
+
+  width:68px;
   height:2px;
+
   overflow:hidden;
-  background:rgba(255,255,255,.08);
+
+  background:
+    rgba(255,255,255,.07);
+
   z-index:2;
+
+  box-shadow:
+    0 0 5px rgba(255,208,110,.05);
 }
+
 
 #gameplayEventHud .gameplay-event-meter i{
   display:block;
+
   width:100%;
   height:100%;
+
   transform-origin:left;
-  background:#ffd06e;
-  box-shadow:0 0 9px rgba(255,208,110,.8);
+
+  background:
+    linear-gradient(
+      90deg,
+      #ffd06e,
+      #fff1bc
+    );
+
+  box-shadow:
+    0 0 8px rgba(255,208,110,.80),
+    0 0 14px rgba(255,208,110,.24);
 }
 
+
 #gameplayEventHud.is-visible .gameplay-event-meter i{
-  animation:gameplayEventMeter var(--event-duration,1.1s) linear both;
+  animation:
+    gameplayEventMeter
+    var(--event-duration,1.1s)
+    linear
+    both;
 }
+
+
+/* ============================================================
+   BOTTOM ENERGY LINE
+   ============================================================ */
 
 #gameplayEventHud .gameplay-event-line{
   position:absolute;
-  left:13px;
-  right:13px;
+
+  left:12px;
+  right:12px;
   bottom:0;
+
   height:1px;
+
   background:
     linear-gradient(
       90deg,
       transparent,
-      #ffd06e 20%,
-      #ffd06e 80%,
+      #ffd06e 18%,
+      #ffd06e 82%,
       transparent
     );
-  box-shadow:0 0 12px rgba(255,208,110,.8);
+
+  box-shadow:
+    0 0 10px rgba(255,208,110,.80),
+    0 0 18px rgba(255,208,110,.22);
+
   z-index:2;
 }
 
+
+/* ============================================================
+   BRACKETS
+   ============================================================ */
+
 #gameplayEventHud .gameplay-event-bracket{
   position:absolute;
+
   top:8px;
+
   width:7px;
+
   height:calc(100% - 16px);
+
   z-index:3;
-  border-top:1px solid rgba(255,208,110,.8);
-  border-bottom:1px solid rgba(255,208,110,.8);
-  opacity:.75;
+
+  border-top:
+    1px solid
+    rgba(255,208,110,.78);
+
+  border-bottom:
+    1px solid
+    rgba(255,208,110,.78);
+
+  opacity:.72;
 }
+
 
 #gameplayEventHud .gameplay-event-bracket-left{
   left:-1px;
-  border-left:2px solid #ffd06e;
+
+  border-left:
+    2px solid
+    #ffd06e;
 }
+
 
 #gameplayEventHud .gameplay-event-bracket-right{
   right:-1px;
-  border-right:2px solid #ffd06e;
+
+  border-right:
+    2px solid
+    #ffd06e;
 }
 
 
-/* DANGER */
+/* ============================================================
+   DANGER
+   ============================================================ */
 
 #gameplayEventHud[data-type="danger"] .gameplay-event-card{
-  border-color:rgba(255,130,110,.82);
+  border-color:
+    rgba(255,130,110,.84);
+
   box-shadow:
-    0 0 0 1px rgba(255,130,110,.04),
-    0 0 30px rgba(255,130,110,.17),
+    0 0 0 1px rgba(255,130,110,.035),
+    0 0 28px rgba(255,130,110,.18),
+    0 10px 34px rgba(0,0,0,.36),
     inset 0 1px rgba(255,255,255,.08);
 }
 
+
 #gameplayEventHud[data-type="danger"] .gameplay-event-card::before{
   background:
-    radial-gradient(
-      circle at 8% 50%,
-      rgba(255,130,110,.16),
-      transparent 27%
-    ),
     linear-gradient(
-      115deg,
-      transparent 0 42%,
-      rgba(255,130,110,.035) 50%,
-      transparent 58%
+      90deg,
+      transparent,
+      rgba(255,130,110,.12) 45%,
+      #ff826e 50%,
+      rgba(255,130,110,.12) 55%,
+      transparent
     );
+
+  box-shadow:
+    0 0 12px rgba(255,130,110,.50);
 }
 
+
 #gameplayEventHud[data-type="danger"] .gameplay-event-icon{
-  border-color:rgba(255,130,110,.9);
+  border-color:
+    rgba(255,130,110,.92);
+
   box-shadow:
     0 0 20px rgba(255,130,110,.18),
     inset 0 0 12px rgba(255,130,110,.08);
 }
+
 
 #gameplayEventHud[data-type="danger"] .gameplay-event-icon::before,
 #gameplayEventHud[data-type="danger"] .gameplay-event-icon::after,
 #gameplayEventHud[data-type="danger"] .gameplay-event-icon i::before,
 #gameplayEventHud[data-type="danger"] .gameplay-event-icon i::after{
   background:#ff826e;
-  box-shadow:0 0 9px rgba(255,130,110,.9);
+
+  box-shadow:
+    0 0 9px rgba(255,130,110,.92);
 }
+
 
 #gameplayEventHud[data-type="danger"] .gameplay-event-head b{
   color:#ff9c91;
 }
 
+
 #gameplayEventHud[data-type="danger"] .gameplay-event-meter i{
-  background:#ff826e;
-  box-shadow:0 0 10px rgba(255,130,110,.9);
+  background:
+    linear-gradient(
+      90deg,
+      #ff826e,
+      #ffc0b5
+    );
+
+  box-shadow:
+    0 0 10px rgba(255,130,110,.92);
 }
+
 
 #gameplayEventHud[data-type="danger"] .gameplay-event-line{
   background:
@@ -363,54 +738,82 @@
       #ff826e 80%,
       transparent
     );
-  box-shadow:0 0 12px rgba(255,130,110,.85);
+
+  box-shadow:
+    0 0 12px rgba(255,130,110,.88);
 }
 
+
 #gameplayEventHud[data-type="danger"] .gameplay-event-bracket{
-  border-color:rgba(255,130,110,.85);
+  border-color:
+    rgba(255,130,110,.86);
 }
+
 
 #gameplayEventHud[data-type="danger"] .gameplay-event-bracket-left{
   border-left-color:#ff826e;
 }
+
 
 #gameplayEventHud[data-type="danger"] .gameplay-event-bracket-right{
   border-right-color:#ff826e;
 }
 
 
-/* COMBAT */
+/* ============================================================
+   COMBAT
+   ============================================================ */
 
 #gameplayEventHud[data-type="combat"] .gameplay-event-card{
-  border-color:rgba(141,244,255,.78);
+  border-color:
+    rgba(141,244,255,.82);
+
   box-shadow:
+    0 0 0 1px rgba(141,244,255,.025),
     0 0 30px rgba(141,244,255,.16),
+    0 10px 34px rgba(0,0,0,.34),
     inset 0 1px rgba(255,255,255,.09);
 }
 
+
 #gameplayEventHud[data-type="combat"] .gameplay-event-icon{
-  border-color:rgba(141,244,255,.9);
+  border-color:
+    rgba(141,244,255,.92);
+
   box-shadow:
     0 0 20px rgba(141,244,255,.18),
     inset 0 0 12px rgba(141,244,255,.08);
 }
+
 
 #gameplayEventHud[data-type="combat"] .gameplay-event-icon::before,
 #gameplayEventHud[data-type="combat"] .gameplay-event-icon::after,
 #gameplayEventHud[data-type="combat"] .gameplay-event-icon i::before,
 #gameplayEventHud[data-type="combat"] .gameplay-event-icon i::after{
   background:#8df4ff;
-  box-shadow:0 0 9px rgba(141,244,255,.9);
+
+  box-shadow:
+    0 0 9px rgba(141,244,255,.92);
 }
+
 
 #gameplayEventHud[data-type="combat"] .gameplay-event-head b{
   color:#8df4ff;
 }
 
+
 #gameplayEventHud[data-type="combat"] .gameplay-event-meter i{
-  background:#8df4ff;
-  box-shadow:0 0 9px rgba(141,244,255,.9);
+  background:
+    linear-gradient(
+      90deg,
+      #8df4ff,
+      #d9fcff
+    );
+
+  box-shadow:
+    0 0 9px rgba(141,244,255,.88);
 }
+
 
 #gameplayEventHud[data-type="combat"] .gameplay-event-line{
   background:
@@ -421,27 +824,45 @@
       #8df4ff 80%,
       transparent
     );
-  box-shadow:0 0 12px rgba(141,244,255,.8);
+
+  box-shadow:
+    0 0 12px rgba(141,244,255,.82);
 }
 
 
-/* COMPLETE */
+/* ============================================================
+   COMPLETE
+   ============================================================ */
 
 #gameplayEventHud[data-type="complete"] .gameplay-event-card{
-  border-color:rgba(174,227,127,.82);
+  border-color:
+    rgba(174,227,127,.84);
+
   box-shadow:
+    0 0 0 1px rgba(174,227,127,.025),
     0 0 30px rgba(174,227,127,.17),
+    0 10px 34px rgba(0,0,0,.34),
     inset 0 1px rgba(255,255,255,.09);
 }
+
 
 #gameplayEventHud[data-type="complete"] .gameplay-event-head b{
   color:#aee37f;
 }
 
+
 #gameplayEventHud[data-type="complete"] .gameplay-event-meter i{
-  background:#aee37f;
-  box-shadow:0 0 10px rgba(174,227,127,.9);
+  background:
+    linear-gradient(
+      90deg,
+      #aee37f,
+      #e4ffc7
+    );
+
+  box-shadow:
+    0 0 10px rgba(174,227,127,.92);
 }
+
 
 #gameplayEventHud[data-type="complete"] .gameplay-event-line{
   background:
@@ -452,88 +873,162 @@
       #aee37f 80%,
       transparent
     );
-  box-shadow:0 0 12px rgba(174,227,127,.8);
+
+  box-shadow:
+    0 0 12px rgba(174,227,127,.84);
 }
 
 
-/* SPECIAL STATES */
+/* ============================================================
+   READY
+   ============================================================ */
 
 #gameplayEventHud[data-type="ready"] .gameplay-event-card{
-  border-color:rgba(255,208,110,.86);
+  border-color:
+    rgba(255,208,110,.88);
 }
+
+
+/* ============================================================
+   CHECKPOINT ICON
+   ============================================================ */
 
 #gameplayEventHud[data-type="checkpoint"] .gameplay-event-icon::before{
   transform:rotate(45deg);
+
   width:9px;
   height:9px;
+
   left:11px;
   top:11px;
 }
 
+
+/* ============================================================
+   WORLD ICON
+   ============================================================ */
+
 #gameplayEventHud[data-type="world"] .gameplay-event-icon::before{
   width:14px;
   height:1px;
+
   left:8px;
   top:15px;
 }
+
 
 #gameplayEventHud[data-type="world"] .gameplay-event-icon::after{
   width:1px;
   height:14px;
+
   left:15px;
   top:8px;
 }
 
+
+/* ============================================================
+   GEAR ICON
+   ============================================================ */
+
 #gameplayEventHud[data-type="gear"] .gameplay-event-icon::before{
   width:14px;
   height:6px;
+
   left:8px;
   top:13px;
+
   border-radius:2px;
 }
+
+
+/* ============================================================
+   MOVEMENT ICON
+   ============================================================ */
 
 #gameplayEventHud[data-type="movement"] .gameplay-event-icon::before{
   width:15px;
   height:2px;
+
   left:8px;
   top:15px;
 }
 
+
 #gameplayEventHud[data-type="movement"] .gameplay-event-icon::after{
   width:7px;
   height:7px;
+
   left:8px;
   top:10px;
+
   transform:rotate(45deg);
 }
 
 
-/* EVENT ANIMATIONS */
+/* ============================================================
+   EVENT ANIMATIONS
+   ============================================================ */
 
 #gameplayEventHud[data-type="checkpoint"] .gameplay-event-card{
-  animation:gameplayEventCheckpoint .42s ease-out both;
+  animation:
+    gameplayEventCheckpoint
+    .42s
+    ease-out
+    both;
 }
+
 
 #gameplayEventHud[data-type="combat"] .gameplay-event-card{
-  animation:gameplayEventCombat .24s ease-out both;
+  animation:
+    gameplayEventCombat
+    .24s
+    ease-out
+    both;
 }
+
 
 #gameplayEventHud[data-type="danger"] .gameplay-event-card{
-  animation:gameplayEventDanger .28s ease-out both;
+  animation:
+    gameplayEventDanger
+    .28s
+    ease-out
+    both;
 }
+
 
 #gameplayEventHud[data-type="complete"] .gameplay-event-card{
-  animation:gameplayEventComplete .48s ease-out both;
+  animation:
+    gameplayEventComplete
+    .48s
+    ease-out
+    both;
 }
 
 
-/* BASE ANIMATIONS */
+/* ============================================================
+   BASE ANIMATIONS
+   ============================================================ */
 
 @keyframes gameplayEventScan{
-  to{
-    transform:translateX(120%) skewX(-14deg);
+  0%{
+    opacity:0;
+    transform:
+      translateX(-120%)
+      skewX(-14deg);
+  }
+
+  20%{
+    opacity:1;
+  }
+
+  100%{
+    opacity:0;
+    transform:
+      translateX(120%)
+      skewX(-14deg);
   }
 }
+
 
 @keyframes gameplayEventMeter{
   from{
@@ -545,58 +1040,118 @@
   }
 }
 
+
 @keyframes gameplayEventPop{
   0%{
     opacity:0;
-    transform:translateY(6px) scale(.97);
-  }
 
-  60%{
-    opacity:1;
-    transform:translateY(-1px) scale(1.012);
-  }
-
-  100%{
-    opacity:1;
-    transform:translateY(0) scale(1);
-  }
-}
-
-@keyframes gameplayEventCombat{
-  0%{
-    transform:translateX(-3px) scale(.99);
+    transform:
+      translateY(8px)
+      scale(.95);
   }
 
   45%{
-    transform:translateX(2px) scale(1.015);
+    opacity:1;
+
+    transform:
+      translateY(-2px)
+      scale(1.018);
+  }
+
+  72%{
+    transform:
+      translateY(0)
+      scale(.998);
   }
 
   100%{
-    transform:translateX(0) scale(1);
+    opacity:1;
+
+    transform:
+      translateY(0)
+      scale(1);
   }
 }
+
+
+@keyframes gameplayEventIconPulse{
+  0%{
+    transform:scale(.88);
+
+    box-shadow:
+      0 0 0 rgba(255,208,110,0),
+      inset 0 0 0 rgba(255,208,110,0);
+  }
+
+  45%{
+    transform:scale(1.06);
+
+    box-shadow:
+      0 0 28px rgba(255,208,110,.22),
+      inset 0 0 16px rgba(255,208,110,.12);
+  }
+
+  100%{
+    transform:scale(1);
+
+    box-shadow:
+      0 0 18px rgba(255,208,110,.16),
+      inset 0 0 12px rgba(255,208,110,.09);
+  }
+}
+
+
+@keyframes gameplayEventCombat{
+  0%{
+    transform:
+      translateX(-4px)
+      scale(.98);
+  }
+
+  45%{
+    transform:
+      translateX(2px)
+      scale(1.015);
+  }
+
+  100%{
+    transform:
+      translateX(0)
+      scale(1);
+  }
+}
+
 
 @keyframes gameplayEventDanger{
   0%{
-    transform:translateX(-2px) scale(.99);
+    transform:
+      translateX(-3px)
+      scale(.985);
   }
 
   25%{
-    transform:translateX(2px) scale(1.01);
+    transform:
+      translateX(3px)
+      scale(1.01);
   }
 
   50%{
-    transform:translateX(-1px) scale(1);
+    transform:
+      translateX(-1px)
+      scale(1);
   }
 
   100%{
-    transform:translateX(0) scale(1);
+    transform:
+      translateX(0)
+      scale(1);
   }
 }
 
+
 @keyframes gameplayEventCheckpoint{
   0%{
-    transform:scale(.96);
+    transform:scale(.95);
   }
 
   55%{
@@ -608,107 +1163,233 @@
   }
 }
 
+
 @keyframes gameplayEventComplete{
   0%{
-    transform:scale(.94);
-    filter:brightness(.9);
+    transform:
+      scale(.92);
+
+    filter:brightness(.88);
   }
 
-  45%{
-    transform:scale(1.025);
-    filter:brightness(1.18);
+  42%{
+    transform:
+      scale(1.025);
+
+    filter:brightness(1.20);
   }
 
-  75%{
-    transform:scale(1.008);
+  72%{
+    transform:
+      scale(1.008);
+
     filter:brightness(1.06);
   }
 
   100%{
-    transform:scale(1);
+    transform:
+      scale(1);
+
     filter:brightness(1);
   }
 }
 
 
-/* MOBILE */
+/* ============================================================
+   MOBILE
+   ============================================================ */
 
 @media(max-width:768px){
+
   #gameplayEventHud{
-    top:calc(100% + 12px);
-    width:min(320px,calc(100vw - 18px));
+    top:
+      calc(
+        88px +
+        env(
+          safe-area-inset-top,
+          0px
+        )
+      );
+
+    left:50%;
+
+    width:
+      min(
+        320px,
+        calc(100vw - 18px)
+      );
   }
 
+
   #gameplayEventHud .gameplay-event-card{
-    min-height:60px;
-    grid-template-columns:30px minmax(0,1fr);
-    gap:9px;
-    padding:9px 10px 11px;
-    border-radius:9px;
+    min-height:58px;
+
+    grid-template-columns:
+      29px
+      minmax(0,1fr);
+
+    gap:7px;
+
+    padding:
+      8px
+      9px
+      10px;
+
+    border-radius:10px;
   }
+
 
   #gameplayEventHud .gameplay-event-icon{
     width:27px;
     height:27px;
   }
 
+
   #gameplayEventHud .gameplay-event-icon::before{
     left:7px;
     top:13px;
   }
+
 
   #gameplayEventHud .gameplay-event-icon::after{
     left:12px;
     top:8px;
   }
 
-  #gameplayEventHud #gameplayEventTitle{
-    font-size:10.5px;
-    line-height:1.12;
-  }
-
-  #gameplayEventHud #gameplayEventDetail{
-    font-size:6.6px;
-    line-height:1.3;
-  }
-
-  #gameplayEventHud .gameplay-event-meter{
-    right:10px;
-    width:58px;
-  }
-}
-
-
-/* LANDSCAPE MOBILE */
-
-@media(orientation:landscape) and (max-height:560px){
-  #gameplayEventHud{
-    top:calc(100% + 9px);
-    width:min(330px,44vw);
-  }
-
-  #gameplayEventHud .gameplay-event-card{
-    min-height:56px;
-    padding:8px 10px 9px;
-  }
 
   #gameplayEventHud #gameplayEventTitle{
     font-size:10px;
+
+    line-height:1.12;
   }
 
+
   #gameplayEventHud #gameplayEventDetail{
-    font-size:6px;
+    font-size:6.2px;
+
+    line-height:1.25;
+  }
+
+
+  #gameplayEventHud .gameplay-event-head small{
+    font-size:6.5px;
+  }
+
+
+  #gameplayEventHud .gameplay-event-head b{
+    font-size:6.5px;
+  }
+
+
+  #gameplayEventHud .gameplay-event-meter{
+    right:9px;
+
+    width:54px;
+
+    bottom:7px;
+  }
+
+
+  #gameplayEventHud .gameplay-event-line{
+    left:9px;
+    right:9px;
   }
 }
 
 
-/* REDUCED MOTION */
+/* ============================================================
+   LANDSCAPE MOBILE
+   ============================================================ */
+
+@media(
+  orientation:landscape
+) and (
+  max-height:560px
+){
+
+  #gameplayEventHud{
+    top:78px;
+
+    width:
+      min(
+        320px,
+        42vw
+      );
+  }
+
+
+  #gameplayEventHud .gameplay-event-card{
+    min-height:53px;
+
+    padding:
+      7px
+      9px
+      8px;
+  }
+
+
+  #gameplayEventHud #gameplayEventTitle{
+    font-size:9.8px;
+  }
+
+
+  #gameplayEventHud #gameplayEventDetail{
+    font-size:5.8px;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL MOBILE
+   ============================================================ */
+
+@media(max-width:380px){
+
+  #gameplayEventHud{
+    width:
+      calc(
+        100vw - 16px
+      );
+  }
+
+
+  #gameplayEventHud .gameplay-event-card{
+    grid-template-columns:
+      27px
+      minmax(0,1fr);
+
+    gap:6px;
+
+    padding:
+      7px
+      8px
+      9px;
+  }
+
+
+  #gameplayEventHud .gameplay-event-icon{
+    width:25px;
+    height:25px;
+  }
+
+
+  #gameplayEventHud #gameplayEventTitle{
+    font-size:9.5px;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
 
 @media(prefers-reduced-motion:reduce){
+
   #gameplayEventHud,
   #gameplayEventHud .gameplay-event-scan,
   #gameplayEventHud .gameplay-event-meter i,
-  #gameplayEventHud .gameplay-event-card{
+  #gameplayEventHud .gameplay-event-card,
+  #gameplayEventHud .gameplay-event-icon{
     transition:none!important;
     animation:none!important;
   }
