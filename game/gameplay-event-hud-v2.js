@@ -169,15 +169,7 @@ state.hideTimer = setTimeout(
 
     const handlers = [
       ['feedback', feedback],
-    ['checkpoint', (signals, secrets, lost) =>
-  show([
-    'CHECKPOINT',
-    'CHECKPOINT SECURED',
-    `${signals} SIGNALS · ${secrets} SECRETS${lost ? ` · ${lost} LOST` : ''}`,
-    'checkpoint',
-    1500
-  ])
-],
+['checkpoint', () => {}],
       ['sector', data =>
   show([
     'WORLD',
