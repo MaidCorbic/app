@@ -257,23 +257,7 @@
     document.head.appendChild(style);
   };
 
-  const typeMissionGoal = node => {
-    if (!node || node.dataset.v3Typed === node.textContent) return;
-    const target = node.textContent.trim();
-    node.dataset.v3Typed = target;
-    if (!target) return;
-    node.closest('.world-marker')?.classList.add('is-typing');
-    node.textContent = '';
-    let index = 0;
-    const step = () => {
-      if (!node.isConnected) return;
-      node.textContent = target.slice(0, index);
-      index += 1;
-      if (index <= target.length) window.setTimeout(step, 24);
-      else window.setTimeout(() => node.closest('.world-marker')?.classList.remove('is-typing'), 700);
-    };
-    step();
-  };
+
 
   const ensureHome = () => {
     const intro = byId('intro');
@@ -313,12 +297,7 @@
   const boot = () => {
     installStyles();
     ensureHome();
-    const marker = byId('worldGoal');
-    if (marker && !marker.dataset.v3Observer) {
-      marker.dataset.v3Observer = '1';
-      new MutationObserver(() => typeMissionGoal(marker)).observe(marker, { childList:true, characterData:true, subtree:true });
-      typeMissionGoal(marker);
-    }
+  
     hideLiveIntel();
     if (!timer) timer = window.setInterval(() => {
       try { ensureHome(); hideLiveIntel(); } catch {}
