@@ -1,290 +1,1107 @@
 /* =========================================================
-   RUNNER RELAY — FAQ UI
-   Premium Gaming / Terminal Design
-   Functional selectors preserved
+   RUNNER RELAY — FAQ / INFO
+   FINAL PREMIUM GAME UI
+   VISUAL ONLY
    ========================================================= */
 
-.relay-faq{
-  width:100%;
-  box-sizing:border-box;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
 
 /* =========================================================
-   FAQ HEADER
+   TOKENS
    ========================================================= */
 
-.relay-faq-header{
+:root{
+  --relay-gold:#ffd06e;
+  --relay-gold-2:#ffe6ae;
+  --relay-cyan:#63dcff;
+  --relay-cyan-2:#19c8f5;
+
+  --relay-white:#f1f7fb;
+  --relay-text:#d9e5ee;
+  --relay-muted:#9db0c0;
+  --relay-dim:#728699;
+
+  --relay-bg-1:rgba(15,28,44,.985);
+  --relay-bg-2:rgba(4,11,20,.99);
+
+  --relay-line:rgba(173,201,220,.14);
+
+  --relay-radius:10px;
+}
+
+
+/* =========================================================
+   LAUNCHER
+   ========================================================= */
+
+.info-launcher{
+  position:absolute;
+  top:22px;
+  right:22px;
+  z-index:80;
+
   display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:4px;
+  align-items:center;
+  justify-content:flex-end;
+
+  gap:9px;
+
+  isolation:isolate;
+  pointer-events:auto;
 }
 
-.relay-faq-header h3{
-  margin:0;
-  color:#edf7ff;
-  font-family:'DM Mono',monospace;
-  font-size:clamp(18px,2vw,24px);
-  font-weight:900;
-  line-height:1.05;
-  letter-spacing:-.035em;
-  text-transform:uppercase;
+
+/* =========================================================
+   LAUNCHER BUTTONS
+   ========================================================= */
+
+.faq-launcher,
+.info-circle{
+
+  position:relative;
+
+  height:46px;
+
+  border:1px solid rgba(214,231,244,.20);
+  border-radius:8px;
+
+  color:var(--relay-white);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(18,34,53,.99),
+      rgba(5,12,22,.99)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.065),
+    inset 0 -1px 0 rgba(0,0,0,.5),
+    0 8px 26px rgba(0,0,0,.38);
+
+  cursor:pointer;
+
+  font:
+    900 11px/1
+    "DM Mono",
+    monospace;
+
+  letter-spacing:1px;
+
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+
+  overflow:hidden;
+
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    color .16s ease,
+    box-shadow .16s ease,
+    background .16s ease;
 }
 
-.relay-faq-header p{
-  margin:5px 0 0;
-  color:#8fa6b9;
-  font-family:'DM Mono',monospace;
-  font-size:11px;
-  font-weight:700;
-  line-height:1.5;
-  letter-spacing:1.1px;
-  text-transform:uppercase;
+
+/* inner frame */
+
+.faq-launcher::before,
+.info-circle::before{
+
+  content:"";
+
+  position:absolute;
+  inset:4px;
+
+  border:1px solid rgba(255,255,255,.035);
+  border-radius:5px;
+
+  pointer-events:none;
 }
+
+
+/* energy line */
+
+.faq-launcher::after,
+.info-circle::after{
+
+  content:"";
+
+  position:absolute;
+
+  left:10px;
+  right:10px;
+  bottom:4px;
+
+  height:1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,208,110,.75),
+      rgba(99,220,255,.55),
+      transparent
+    );
+
+  opacity:.28;
+
+  transform:scaleX(.8);
+
+  transition:
+    opacity .16s ease,
+    transform .16s ease;
+}
+
+
+/* hover */
+
+.faq-launcher:hover,
+.faq-launcher:focus-visible,
+.info-circle:hover,
+.info-circle:focus-visible{
+
+  color:var(--relay-gold);
+
+  border-color:
+    rgba(255,208,110,.62);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(30,45,61,.99),
+      rgba(8,17,29,.99)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 12px 30px rgba(0,0,0,.46),
+    0 0 24px rgba(255,208,110,.08);
+
+  transform:
+    translateY(-2px);
+
+  outline:none;
+}
+
+
+.faq-launcher:hover::after,
+.faq-launcher:focus-visible::after,
+.info-circle:hover::after,
+.info-circle:focus-visible::after{
+
+  opacity:1;
+  transform:scaleX(1);
+}
+
+
+/* click */
+
+.faq-launcher:active,
+.info-circle:active{
+
+  transform:
+    translateY(0)
+    scale(.97);
+
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.4),
+    0 4px 12px rgba(0,0,0,.3);
+}
+
+
+/* FAQ launcher */
+
+.faq-launcher{
+
+  min-width:88px;
+
+  padding:
+    0 15px;
+
+  display:inline-flex;
+
+  align-items:center;
+  justify-content:center;
+
+  gap:9px;
+
+  white-space:nowrap;
+}
+
+
+/* =========================================================
+   FAQ GLYPH
+   ========================================================= */
+
+.faq-glyph{
+
+  width:20px;
+  height:20px;
+
+  display:grid;
+  place-items:center;
+
+  flex:0 0 20px;
+
+  border:
+    1px solid currentColor;
+
+  border-radius:50%;
+
+  font:
+    900 11px/1
+    "Manrope",
+    sans-serif;
+
+  box-shadow:
+    0 0 0 3px rgba(255,208,110,.025);
+
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease;
+}
+
+
+.faq-launcher:hover .faq-glyph,
+.faq-launcher:focus-visible .faq-glyph{
+
+  transform:
+    scale(1.07)
+    rotate(-8deg);
+
+  box-shadow:
+    0 0 0 4px rgba(255,208,110,.05),
+    0 0 16px rgba(255,208,110,.16);
+}
+
+
+/* =========================================================
+   INFO CIRCLE
+   ========================================================= */
+
+.info-circle{
+
+  width:46px;
+  min-width:46px;
+
+  padding:0;
+
+  border-radius:50%;
+
+  display:grid;
+  place-items:center;
+}
+
+
+/* icon */
+
+.info-glyph{
+
+  position:relative;
+
+  width:18px;
+  height:18px;
+
+  border:
+    1px solid currentColor;
+
+  border-radius:50%;
+
+  transition:
+    transform .16s ease;
+}
+
+
+.info-glyph::after{
+
+  content:"i";
+
+  position:absolute;
+  inset:0;
+
+  display:grid;
+  place-items:center;
+
+  font:
+    900 12px/1
+    "Manrope",
+    sans-serif;
+}
+
+
+.info-circle:hover .info-glyph,
+.info-circle:focus-visible .info-glyph{
+
+  transform:
+    scale(1.08);
+}
+
+
+/* =========================================================
+   FULLSCREEN INFO PANEL
+   ========================================================= */
+
+.relay-info-panel{
+
+  position:fixed;
+  inset:0;
+
+  z-index:5000;
+
+  display:grid;
+  place-items:center;
+
+  padding:20px;
+
+  background:
+
+    radial-gradient(
+      circle at 50% 10%,
+      rgba(255,208,110,.075),
+      transparent 28%
+    ),
+
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(25,200,245,.055),
+      transparent 42%
+    ),
+
+    rgba(1,5,10,.94);
+
+  backdrop-filter:
+    blur(14px)
+    saturate(115%);
+
+  -webkit-backdrop-filter:
+    blur(14px)
+    saturate(115%);
+
+  animation:
+    relayFaqPanelIn
+    .16s ease-out;
+}
+
+
+.relay-info-panel.hidden{
+  display:none;
+}
+
+
+/* =========================================================
+   MAIN CARD
+   ========================================================= */
+
+.relay-info-card{
+
+  position:relative;
+
+  width:min(900px,100%);
+
+  max-height:
+    min(86dvh,820px);
+
+  overflow:auto;
+
+  padding:
+    42px 42px 38px;
+
+  box-sizing:border-box;
+
+  color:var(--relay-white);
+
+  border:
+    1px solid rgba(205,225,239,.18);
+
+  border-radius:
+    12px;
+
+  background:
+
+    radial-gradient(
+      circle at 92% 8%,
+      rgba(255,208,110,.075),
+      transparent 25%
+    ),
+
+    linear-gradient(
+      145deg,
+      var(--relay-bg-1),
+      var(--relay-bg-2)
+    );
+
+  box-shadow:
+
+    inset 0 1px 0 rgba(255,255,255,.06),
+
+    inset 0 -1px 0 rgba(0,0,0,.55),
+
+    0 38px 110px rgba(0,0,0,.76),
+
+    0 0 55px rgba(25,200,245,.035);
+}
+
+
+/* =========================================================
+   CARD TOP BAR
+   ========================================================= */
+
+.relay-info-card::before{
+
+  content:"";
+
+  position:absolute;
+
+  top:0;
+  left:0;
+  right:0;
+
+  height:2px;
+
+  background:
+
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(25,200,245,.28) 14%,
+      rgba(255,208,110,.92) 42%,
+      #ffe4a2 50%,
+      rgba(25,200,245,.56) 72%,
+      transparent
+    );
+
+  box-shadow:
+    0 0 16px rgba(255,208,110,.16);
+
+  pointer-events:none;
+}
+
+
+/* =========================================================
+   CORNER MARK
+   ========================================================= */
+
+.relay-info-card::after{
+
+  content:"";
+
+  position:absolute;
+
+  top:12px;
+  left:12px;
+
+  width:38px;
+  height:38px;
+
+  border-top:
+    1px solid rgba(255,208,110,.5);
+
+  border-left:
+    1px solid rgba(255,208,110,.5);
+
+  pointer-events:none;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.relay-info-card{
+  scrollbar-width:thin;
+  scrollbar-color:
+    rgba(255,208,110,.48)
+    transparent;
+}
+
+
+.relay-info-card::-webkit-scrollbar{
+  width:5px;
+}
+
+
+.relay-info-card::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+
+.relay-info-card::-webkit-scrollbar-thumb{
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,208,110,.58),
+      rgba(25,200,245,.28)
+    );
+
+  border-radius:999px;
+}
+
+
+/* =========================================================
+   CLOSE — SINGLE AUTHORITATIVE X
+   ========================================================= */
+
+.relay-info-card > .relay-info-close{
+
+  position:absolute;
+
+  top:15px;
+  right:15px;
+
+  z-index:20;
+
+  width:40px;
+  height:40px;
+
+  display:grid;
+  place-items:center;
+
+  padding:0;
+
+  border:
+    1px solid rgba(216,231,242,.18);
+
+  border-radius:50%;
+
+  color:#b2c2cf;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(16,31,48,.99),
+      rgba(5,12,22,.99)
+    );
+
+  cursor:pointer;
+
+  font:
+    400 24px/1
+    Arial,
+    sans-serif;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 6px 18px rgba(0,0,0,.3);
+
+  transition:
+    transform .17s ease,
+    color .17s ease,
+    border-color .17s ease,
+    background .17s ease,
+    box-shadow .17s ease;
+}
+
+
+/* If some legacy JS places another close inside content,
+   keep the card with ONE visible close button. */
+
+#relayInfoContent .relay-info-close,
+#relayInfoContent [data-relay-close]{
+  display:none !important;
+}
+
+
+.relay-info-card > .relay-info-close:hover,
+.relay-info-card > .relay-info-close:focus-visible{
+
+  color:var(--relay-gold);
+
+  border-color:
+    rgba(255,208,110,.68);
+
+  background:
+    rgba(255,208,110,.055);
+
+  box-shadow:
+    0 0 22px rgba(255,208,110,.13);
+
+  transform:
+    rotate(90deg);
+
+  outline:none;
+}
+
+
+.relay-info-card > .relay-info-close:active{
+
+  transform:
+    rotate(90deg)
+    scale(.91);
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.relay-info-eyebrow{
+
+  margin:
+    0 0 10px;
+
+  color:
+    var(--relay-gold);
+
+  font:
+    900 10px/1
+    "DM Mono",
+    monospace;
+
+  letter-spacing:
+    2px;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    0 0 14px rgba(255,208,110,.12);
+}
+
+
+.relay-info-card h2{
+
+  position:relative;
+
+  margin:
+    0 0 30px;
+
+  max-width:780px;
+
+  color:
+    var(--relay-white);
+
+  font-family:
+    "Manrope",
+    sans-serif;
+
+  font-size:
+    clamp(34px,5.4vw,62px);
+
+  font-weight:
+    900;
+
+  line-height:
+    .94;
+
+  letter-spacing:
+    -.055em;
+
+  text-wrap:
+    balance;
+
+  text-shadow:
+    0 4px 26px rgba(0,0,0,.38);
+}
+
+
+/* title marker */
+
+.relay-info-card h2::after{
+
+  content:"";
+
+  display:inline-block;
+
+  width:9px;
+  height:9px;
+
+  margin-left:10px;
+
+  vertical-align:.14em;
+
+  border-radius:50%;
+
+  background:
+    var(--relay-gold);
+
+  box-shadow:
+    0 0 10px rgba(255,208,110,.58),
+    0 0 24px rgba(255,208,110,.2);
+
+  animation:
+    relayFaqPulse
+    2.8s ease-in-out infinite;
+}
+
 
 /* =========================================================
    FAQ LIST
    ========================================================= */
 
 .relay-faq-list{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+
+  display:grid;
+
+  gap:11px;
+
   width:100%;
 }
+
 
 /* =========================================================
    FAQ ITEM
    ========================================================= */
 
 .relay-faq-item{
-  position:relative;
-  overflow:hidden;
-  width:100%;
-  box-sizing:border-box;
 
-  border:1px solid rgba(151,181,205,.16);
-  border-radius:10px;
+  position:relative;
+
+  overflow:hidden;
+
+  width:100%;
+
+  border:
+    1px solid var(--relay-line);
+
+  border-radius:
+    var(--relay-radius);
 
   background:
+
     linear-gradient(
-      135deg,
-      rgba(255,255,255,.055),
-      rgba(255,255,255,.018)
+      145deg,
+      rgba(255,255,255,.043),
+      rgba(255,255,255,.012)
     ),
-    rgba(5,12,20,.82);
+
+    rgba(4,11,20,.82);
 
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 8px 28px rgba(0,0,0,.18);
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 7px 22px rgba(0,0,0,.14);
 
   transition:
-    border-color 180ms ease,
-    background 180ms ease,
-    transform 180ms ease,
-    box-shadow 180ms ease;
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
 }
+
+
+/* left energy rail */
 
 .relay-faq-item::before{
-  content:'';
+
+  content:"";
+
   position:absolute;
+
   left:0;
-  top:0;
-  bottom:0;
+  top:9px;
+  bottom:9px;
+
   width:2px;
 
-  background:linear-gradient(
-    180deg,
-    rgba(25,200,245,.9),
-    rgba(255,208,110,.55),
-    transparent
-  );
+  background:
 
-  opacity:.35;
-  transition:opacity 180ms ease;
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(25,200,245,.55),
+      rgba(255,208,110,.8),
+      transparent
+    );
+
+  opacity:.55;
+
+  pointer-events:none;
+
+  transition:
+    opacity .16s ease;
 }
 
+
 /* =========================================================
-   QUESTION BUTTON
+   QUESTION
    ========================================================= */
 
 .relay-faq-question{
+
   position:relative;
   z-index:2;
 
   width:100%;
-  min-height:58px;
+
+  min-height:64px;
 
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
 
-  padding:15px 17px;
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:18px;
+
+  padding:
+    17px 18px;
 
   border:0;
-  outline:0;
 
-  background:transparent;
-  color:#edf7ff;
+  color:
+    var(--relay-white);
+
+  background:
+    transparent;
 
   cursor:pointer;
+
   text-align:left;
 
-  font-family:'DM Mono',monospace;
-  font-size:14px;
-  font-weight:900;
-  line-height:1.35;
-  letter-spacing:.02em;
-  text-transform:uppercase;
+  font:
+    900 15px/1.4
+    "DM Mono",
+    monospace;
 
-  -webkit-tap-highlight-color:transparent;
+  letter-spacing:
+    .015em;
+
+  text-transform:
+    uppercase;
+
+  -webkit-tap-highlight-color:
+    transparent;
+
+  touch-action:
+    manipulation;
 }
 
-/* Question text */
+
+/* safeguard against text squeezing */
+
 .relay-faq-question span{
+
   display:block;
+
   min-width:0;
 
-  color:#e9f5ff;
+  flex:1 1 auto;
+
+  overflow-wrap:
+    anywhere;
+
+  color:
+    #edf6fb;
 
   text-shadow:
-    0 0 18px rgba(25,200,245,.08);
+    0 0 18px rgba(25,200,245,.055);
 }
+
 
 /* =========================================================
    PLUS / MINUS
    ========================================================= */
 
 .relay-faq-question::after{
-  content:'+';
 
-  flex:0 0 27px;
+  content:"+";
 
-  width:27px;
-  height:27px;
+  flex:
+    0 0 30px;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  width:30px;
+  height:30px;
 
-  border:1px solid rgba(25,200,245,.30);
-  border-radius:7px;
+  display:grid;
+
+  place-items:center;
+
+  border:
+    1px solid rgba(99,220,255,.34);
+
+  border-radius:
+    7px;
+
+  color:
+    var(--relay-cyan);
 
   background:
+
     linear-gradient(
       145deg,
-      rgba(25,200,245,.12),
-      rgba(25,200,245,.025)
+      rgba(25,200,245,.11),
+      rgba(25,200,245,.018)
     );
 
-  color:#72dcff;
-
-  font-family:Arial,sans-serif;
-  font-size:19px;
-  font-weight:400;
-  line-height:1;
-
   box-shadow:
-    0 0 18px rgba(25,200,245,.05),
-    inset 0 1px 0 rgba(255,255,255,.05);
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 0 15px rgba(25,200,245,.035);
+
+  font:
+    400 21px/1
+    Arial,
+    sans-serif;
 
   transition:
-    transform 180ms ease,
-    color 180ms ease,
-    border-color 180ms ease,
-    background 180ms ease;
+    transform .16s ease,
+    color .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
 }
+
 
 /* =========================================================
    ANSWER
    ========================================================= */
 
 .relay-faq-answer{
+
   box-sizing:border-box;
 
-  padding:0 17px 17px;
+  padding:
+    0 18px 19px;
 
-  color:#aebfd0;
+  color:
+    var(--relay-muted);
 
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,
-    "Segoe UI",sans-serif;
+  font-family:
+    "Manrope",
+    system-ui,
+    sans-serif;
 
-  font-size:14px;
-  font-weight:500;
-  line-height:1.65;
+  font-size:
+    15px;
 
-  letter-spacing:.01em;
+  font-weight:
+    500;
+
+  line-height:
+    1.72;
+
+  letter-spacing:
+    .005em;
+
+  overflow-wrap:
+    anywhere;
 }
+
 
 .relay-faq-answer p{
   margin:0;
 }
 
+
 /* =========================================================
-   HOVER / FOCUS
+   HOVER
    ========================================================= */
 
 .relay-faq-item:hover{
-  transform:translateY(-1px);
 
-  border-color:rgba(25,200,245,.32);
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(99,220,255,.32);
 
   background:
+
     linear-gradient(
-      135deg,
-      rgba(25,200,245,.075),
-      rgba(255,255,255,.018)
+      145deg,
+      rgba(25,200,245,.055),
+      rgba(255,255,255,.012)
     ),
-    rgba(5,12,20,.88);
+
+    rgba(4,11,20,.9);
 
   box-shadow:
-    0 14px 38px rgba(0,0,0,.28),
-    0 0 28px rgba(25,200,245,.045),
-    inset 2px 0 0 rgba(25,200,245,.22);
+
+    inset 2px 0 0 rgba(25,200,245,.18),
+
+    0 12px 32px rgba(0,0,0,.25),
+
+    0 0 22px rgba(25,200,245,.035);
 }
 
+
 .relay-faq-item:hover::before{
-  opacity:.9;
+  opacity:.95;
 }
+
 
 .relay-faq-question:hover span{
   color:#ffffff;
 }
 
+
 .relay-faq-question:hover::after{
-  border-color:rgba(25,200,245,.55);
-  background:rgba(25,200,245,.10);
+
+  border-color:
+    rgba(99,220,255,.64);
+
+  color:
+    #b4edff;
+
+  background:
+    rgba(25,200,245,.1);
+
   box-shadow:
-    0 0 22px rgba(25,200,245,.10);
+    0 0 20px rgba(25,200,245,.085);
+
+  transform:
+    scale(1.05);
 }
 
-.relay-faq-question:focus-visible{
-  outline:2px solid rgba(25,200,245,.65);
-  outline-offset:-2px;
-}
 
 /* =========================================================
    OPEN STATE
-   Supports common aria-expanded implementation
    ========================================================= */
 
-.relay-faq-question[aria-expanded="true"]{
-  color:#ffffff;
-}
+.relay-faq-item.open{
 
-.relay-faq-question[aria-expanded="true"]::after{
-  content:'−';
-
-  color:#ffd06e;
-
-  border-color:rgba(255,208,110,.48);
+  border-color:
+    rgba(255,208,110,.36);
 
   background:
+
+    linear-gradient(
+      145deg,
+      rgba(255,208,110,.055),
+      rgba(255,255,255,.012)
+    ),
+
+    rgba(4,11,20,.9);
+
+  box-shadow:
+
+    inset 3px 0 0 rgba(255,208,110,.48),
+
+    0 12px 34px rgba(0,0,0,.24),
+
+    0 0 26px rgba(255,208,110,.035);
+}
+
+
+.relay-faq-item.open::before{
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(255,208,110,.85),
+      rgba(25,200,245,.35),
+      transparent
+    );
+
+  opacity:.95;
+}
+
+
+/* support both JS class and aria-expanded */
+
+.relay-faq-item.open
+.relay-faq-question::after,
+.relay-faq-question[aria-expanded="true"]::after{
+
+  content:"−";
+
+  color:
+    var(--relay-gold);
+
+  border-color:
+    rgba(255,208,110,.54);
+
+  background:
+
     linear-gradient(
       145deg,
       rgba(255,208,110,.14),
@@ -292,85 +1109,132 @@
     );
 
   box-shadow:
-    0 0 22px rgba(255,208,110,.08);
+    0 0 20px rgba(255,208,110,.085);
 
-  transform:rotate(180deg);
+  transform:
+    rotate(180deg);
 }
 
-.relay-faq-item:has(
-  .relay-faq-question[aria-expanded="true"]
-){
-  border-color:rgba(255,208,110,.28);
-
-  box-shadow:
-    0 12px 38px rgba(0,0,0,.28),
-    0 0 30px rgba(255,208,110,.035),
-    inset 2px 0 0 rgba(255,208,110,.28);
-}
 
 /* =========================================================
-   FAQ LINKS
+   FAQ ANSWER LINK
    ========================================================= */
 
 .relay-faq-answer a{
-  color:#69d9ff;
-  font-weight:800;
-  text-decoration:none;
 
-  border-bottom:1px solid rgba(105,217,255,.30);
+  color:
+    var(--relay-cyan);
+
+  font-weight:
+    800;
+
+  text-decoration:
+    none;
+
+  border-bottom:
+    1px solid rgba(99,220,255,.3);
 
   transition:
-    color 160ms ease,
-    border-color 160ms ease;
+    color .14s ease,
+    border-color .14s ease;
 }
+
 
 .relay-faq-answer a:hover{
+
   color:#ffffff;
-  border-color:rgba(255,255,255,.65);
+
+  border-color:
+    rgba(255,255,255,.7);
 }
 
+
 /* =========================================================
-   SMALL META / LABELS
+   FAQ META
    ========================================================= */
 
 .relay-faq-meta{
+
   display:flex;
+
   align-items:center;
+
   gap:8px;
 
-  margin:0 0 12px;
+  margin:
+    0 0 12px;
 
-  color:#7f97ab;
+  color:
+    var(--relay-dim);
 
-  font-family:'DM Mono',monospace;
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:1.4px;
-  text-transform:uppercase;
+  font:
+    800 10px/1
+    "DM Mono",
+    monospace;
+
+  letter-spacing:
+    1.5px;
+
+  text-transform:
+    uppercase;
 }
 
+
 .relay-faq-meta::before{
-  content:'FAQ';
+
+  content:"FAQ";
 
   display:inline-flex;
+
   align-items:center;
   justify-content:center;
 
-  min-height:20px;
-  padding:0 7px;
+  min-height:21px;
 
-  border:1px solid rgba(25,200,245,.28);
-  border-radius:999px;
+  padding:
+    0 8px;
 
-  color:#69d9ff;
-  background:rgba(25,200,245,.055);
+  border:
+    1px solid rgba(99,220,255,.3);
+
+  border-radius:
+    999px;
+
+  color:
+    var(--relay-cyan);
+
+  background:
+    rgba(25,200,245,.055);
 
   box-shadow:
-    0 0 16px rgba(25,200,245,.045);
+    0 0 14px rgba(25,200,245,.035);
 
-  font-size:9px;
-  letter-spacing:1px;
+  font:
+    900 9px/1
+    "DM Mono",
+    monospace;
+
+  letter-spacing:
+    1px;
 }
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.faq-launcher:focus-visible,
+.info-circle:focus-visible,
+.relay-info-card > .relay-info-close:focus-visible,
+.relay-faq-question:focus-visible{
+
+  outline:
+    2px solid rgba(255,208,110,.75);
+
+  outline-offset:
+    3px;
+}
+
 
 /* =========================================================
    MOBILE
@@ -378,135 +1242,481 @@
 
 @media (max-width:600px){
 
-  .relay-faq{
-    gap:10px;
+  .info-launcher{
+
+    top:
+      max(
+        10px,
+        env(safe-area-inset-top,0px)
+      );
+
+    right:
+      max(
+        10px,
+        env(safe-area-inset-right,0px)
+      );
+
+    gap:7px;
   }
 
-  .relay-faq-header{
-    align-items:flex-start;
-    flex-direction:column;
-    gap:5px;
+
+  .faq-launcher,
+  .info-circle{
+
+    height:42px;
   }
 
-  .relay-faq-header h3{
-    font-size:19px;
-  }
 
-  .relay-faq-header p{
+  .faq-launcher{
+
+    min-width:82px;
+
+    padding:
+      0 12px;
+
     font-size:10px;
-    line-height:1.45;
   }
+
+
+  .info-circle{
+
+    width:42px;
+    min-width:42px;
+  }
+
+
+  .faq-glyph{
+
+    width:18px;
+    height:18px;
+
+    flex-basis:18px;
+
+    font-size:10px;
+  }
+
+
+  .info-glyph{
+
+    width:17px;
+    height:17px;
+  }
+
+
+  .relay-info-panel{
+
+    padding:
+      max(
+        8px,
+        env(safe-area-inset-top,0px)
+      )
+      8px
+      max(
+        8px,
+        env(safe-area-inset-bottom,0px)
+      );
+  }
+
+
+  .relay-info-card{
+
+    width:100%;
+    max-width:100%;
+
+    max-height:
+      calc(
+        100dvh
+        - 16px
+        - env(safe-area-inset-top,0px)
+        - env(safe-area-inset-bottom,0px)
+      );
+
+    padding:
+      34px 15px 18px;
+
+    border-radius:
+      10px;
+  }
+
+
+  .relay-info-card h2{
+
+    margin-bottom:
+      22px;
+
+    font-size:
+      clamp(
+        32px,
+        10vw,
+        46px
+      );
+
+    line-height:
+      .94;
+  }
+
+
+  .relay-info-card h2::after{
+
+    width:7px;
+    height:7px;
+
+    margin-left:7px;
+  }
+
+
+  .relay-info-eyebrow{
+
+    margin-bottom:
+      9px;
+
+    font-size:
+      8px;
+
+    letter-spacing:
+      1.6px;
+  }
+
+
+  .relay-info-card > .relay-info-close{
+
+    top:11px;
+    right:11px;
+
+    width:36px;
+    height:36px;
+
+    font-size:21px;
+  }
+
 
   .relay-faq-list{
+
     gap:8px;
   }
 
+
   .relay-faq-item{
-    border-radius:9px;
+
+    border-radius:
+      8px;
   }
+
 
   .relay-faq-question{
-    min-height:56px;
 
-    padding:14px 13px;
+    min-height:
+      62px;
 
-    gap:12px;
+    padding:
+      15px 13px;
 
-    font-size:13px;
-    line-height:1.4;
+    gap:
+      11px;
+
+    font-size:
+      13px;
+
+    line-height:
+      1.42;
   }
+
 
   .relay-faq-question::after{
-    flex-basis:25px;
 
-    width:25px;
-    height:25px;
+    flex-basis:
+      27px;
 
-    border-radius:6px;
+    width:
+      27px;
 
-    font-size:18px;
+    height:
+      27px;
+
+    border-radius:
+      6px;
+
+    font-size:
+      19px;
   }
+
 
   .relay-faq-answer{
-    padding:
-      0
-      13px
-      15px;
 
-    font-size:13px;
-    line-height:1.65;
+    padding:
+      0 13px 17px;
+
+    font-size:
+      13.5px;
+
+    line-height:
+      1.68;
   }
+
 
   .relay-faq-meta{
-    margin-bottom:10px;
-    font-size:9px;
-    letter-spacing:1.1px;
+
+    margin-bottom:
+      9px;
+
+    font-size:
+      9px;
+
+    letter-spacing:
+      1.1px;
   }
+
 
   .relay-faq-meta::before{
-    min-height:19px;
-    padding:0 6px;
-    font-size:8px;
-  }
 
-  .relay-faq-item:hover{
-    transform:none;
+    min-height:
+      19px;
+
+    padding:
+      0 6px;
+
+    font-size:
+      8px;
   }
 }
 
+
 /* =========================================================
-   VERY SMALL PHONES
+   SMALL PHONES
    ========================================================= */
 
 @media (max-width:380px){
 
+  .info-launcher{
+
+    top:
+      max(
+        7px,
+        env(safe-area-inset-top,0px)
+      );
+
+    right:
+      8px;
+  }
+
+
+  .faq-launcher{
+
+    min-width:
+      76px;
+
+    padding:
+      0 9px;
+
+    gap:6px;
+
+    font-size:
+      9px;
+  }
+
+
+  .info-circle{
+
+    width:39px;
+    min-width:39px;
+
+    height:39px;
+  }
+
+
+  .relay-info-card{
+
+    padding:
+      31px 12px 15px;
+  }
+
+
+  .relay-info-card h2{
+
+    font-size:
+      31px;
+
+    margin-bottom:
+      19px;
+  }
+
+
+  .relay-info-card > .relay-info-close{
+
+    width:34px;
+    height:34px;
+
+    top:9px;
+    right:9px;
+
+    font-size:
+      20px;
+  }
+
+
   .relay-faq-question{
-    min-height:54px;
-    padding:13px 12px;
 
-    font-size:12.5px;
+    min-height:
+      60px;
+
+    padding:
+      14px 11px;
+
+    gap:
+      9px;
+
+    font-size:
+      12.2px;
   }
 
-  .relay-faq-answer{
-    padding-left:12px;
-    padding-right:12px;
-
-    font-size:12.5px;
-    line-height:1.6;
-  }
 
   .relay-faq-question::after{
-    flex-basis:23px;
 
-    width:23px;
-    height:23px;
+    flex-basis:
+      25px;
 
-    font-size:17px;
+    width:
+      25px;
+
+    height:
+      25px;
+
+    font-size:
+      18px;
+  }
+
+
+  .relay-faq-answer{
+
+    padding:
+      0 11px 15px;
+
+    font-size:
+      12.5px;
+
+    line-height:
+      1.62;
   }
 }
 
+
 /* =========================================================
-   TOUCH DEVICES
+   LANDSCAPE PHONE
+   ========================================================= */
+
+@media (
+  orientation:landscape
+)
+and (
+  max-height:560px
+){
+
+  .relay-info-panel{
+
+    padding:
+      7px;
+  }
+
+
+  .relay-info-card{
+
+    max-height:
+      96dvh;
+
+    padding:
+      28px 18px 18px;
+  }
+
+
+  .relay-info-card h2{
+
+    margin-bottom:
+      16px;
+
+    font-size:
+      34px;
+  }
+
+
+  .relay-faq-list{
+
+    gap:
+      6px;
+  }
+
+
+  .relay-faq-question{
+
+    min-height:
+      50px;
+
+    padding:
+      11px 13px;
+
+    font-size:
+      11.5px;
+  }
+
+
+  .relay-faq-answer{
+
+    padding-bottom:
+      12px;
+
+    font-size:
+      12px;
+  }
+}
+
+
+/* =========================================================
+   TOUCH
    ========================================================= */
 
 @media (hover:none){
 
   .relay-faq-item:hover{
+
     transform:none;
+
+    border-color:
+      var(--relay-line);
+
+    background:
+
+      linear-gradient(
+        145deg,
+        rgba(255,255,255,.043),
+        rgba(255,255,255,.012)
+      ),
+
+      rgba(4,11,20,.82);
+
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.025),
+      0 7px 22px rgba(0,0,0,.14);
   }
 
-  .relay-faq-question{
-    min-height:60px;
+
+  .relay-faq-item:hover::before{
+    opacity:.55;
   }
+
 
   .relay-faq-question:active{
-    background:rgba(25,200,245,.055);
+
+    background:
+      rgba(25,200,245,.045);
   }
 
+
   .relay-faq-question:active::after{
-    transform:scale(.94);
+
+    transform:
+      scale(.94);
   }
 }
+
 
 /* =========================================================
    REDUCED MOTION
@@ -514,13 +1724,62 @@
 
 @media (prefers-reduced-motion:reduce){
 
+  .relay-info-panel,
+  .relay-info-card,
+  .relay-faq-card,
+  .relay-faq-card::after,
+  .relay-info-card h2::after{
+
+    animation:none!important;
+  }
+
+
+  .faq-launcher,
+  .info-circle,
+  .faq-glyph,
+  .info-glyph,
+  .relay-info-close,
   .relay-faq-item,
-  .relay-faq-question::after,
-  .relay-faq-question{
+  .relay-faq-question,
+  .relay-faq-question::after{
+
     transition:none!important;
   }
 
+
   .relay-faq-item:hover{
+
     transform:none;
   }
-     }
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes relayFaqPanelIn{
+
+  from{
+    opacity:0;
+  }
+
+  to{
+    opacity:1;
+  }
+}
+
+
+@keyframes relayFaqPulse{
+
+  0%,
+  100%{
+    opacity:.55;
+    transform:scale(.9);
+  }
+
+  50%{
+    opacity:1;
+    transform:scale(1.08);
+  }
+}
