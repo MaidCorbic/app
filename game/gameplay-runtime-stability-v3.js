@@ -322,37 +322,49 @@
   /*
    * Runtime mission typing effect.
    */
- function typeMission() {
-  if (!gameplay()) return;
-
+function typeMission() {
   const badge = q('#game .world-marker');
   const target = q('#worldGoal');
+  const scene = window.__relayRunnerScene;
 
-  if (!badge || !target) return;
+  if (!badge || !target || !gameplay()) return;
   if (badge.__runtimeTypeTimer) return;
 
-  // Originalni tekst čuvamo izvan textContenta
-  // da ga drugi sistemi ne mogu "pojesti".
+  const missionId =
+    scene?.mission?.id ||
+    scene?.sys?.settings?.data?.missionId ||
+    scene?.registry?.get?.('missionId') ||
+    scene?.registry?.get?.('activeMission')?.id ||
+    null;
+
+  const missionObjectives = {
+    'first-delivery': 'DELIVER THE SIGNAL PACKAGE',
+    'dead-drop': 'SECURE THE DROP',
+    blackout: 'RESTORE THE GRID',
+    pursuit: 'ESCAPE THE INTERCEPTOR',
+    'signal-storm': 'STABILIZE THE ARRAY',
+    'corporate-lockdown': 'BREACH THE LOCKDOWN',
+    'final-relay': 'REACH THE FINAL RELAY'
+  };
+
   const source =
+    missionObjectives[missionId] ||
     target.dataset.missionSource ||
     target.textContent?.trim() ||
-    '';
+    'FOLLOW THE RELAY';
 
   const current = source.toUpperCase();
 
   if (!current) return;
 
-  // Isti tekst je već ispisan.
   if (badge.dataset.runtimeTyped === current) {
     target.textContent = current;
     return;
   }
 
   target.dataset.missionSource = current;
-
   badge.dataset.runtimeTyped = '';
   badge.classList.add('is-runtime-typing');
-
   target.textContent = '';
 
   let i = 0;
@@ -374,12 +386,10 @@
 
       target.textContent = current;
       badge.dataset.runtimeTyped = current;
-
       badge.classList.remove('is-runtime-typing');
     }
   }, 90);
 }
-
   /*
    * Optimized countdown.
    *
@@ -703,11 +713,9 @@
 
   function boot() {
     installHome();
-
     bindAudio();
-
     smoothCountdown();
-
+    typeMission();
     /*
      * Keep the legacy cleanup poll lightweight.
      * 180ms is sufficient for presentation cleanup and avoids
