@@ -51,6 +51,70 @@ import { SPAWN_SHIELD_MS } from './src/config/gameplay-timing.js';
     });
   };
 
+  const startVoidDeath = scene => {
+  if (
+    scene.__finalDeathLock ||
+    scene.__finalDeathPending ||
+    scene.finished ||
+    scene.respawning ||
+    !scene.player?.active
+  ) {
+    return;
+  }
+
+  scene.__finalDeathLock = true;
+  scene.__finalDeathPending = true;
+  scene.__forceVoidDeath = true;
+
+  makeVoidVisual(scene);
+  resetInput(scene);
+
+  scene.player
+    .setAngle(0)
+    .setAlpha(1)
+    .setScale(1)
+    .clearTint()
+    .play('runner-hit', true);
+
+  const ring = scene.add
+    .circle(
+      scene.player.x,
+      scene.player.y + 22,
+      12,
+      0xff826e,
+      .22
+    )
+    .setStrokeStyle(2, 0xff826e, .9)
+    .setDepth(18);
+
+  scene.tweens.add({
+    targets: ring,
+    scale: 3.4,
+    alpha: 0,
+    duration: 220,
+    onComplete: () => ring.destroy()
+  });
+
+  if (!scene.motionReduced) {
+    scene.shake(120, .006);
+  }
+
+  scene.time.delayedCall(220, () => {
+    if (
+      !scene ||
+      scene.finished ||
+      scene.respawning ||
+      !scene.__finalDeathPending
+    ) {
+      return;
+    }
+
+    scene.__finalDeathPending = false;
+    scene.fail('The courier fell into the relay void.');
+  });
+};
+  
+
   RunnerScene.prototype.update = function finalDeathUpdate(time, delta) {
     if (this.__finalDeathLock) { resetInput(this); return; }
     if (!this.finished && !this.respawning && this.player?.active) {
@@ -114,6 +178,7 @@ import { SPAWN_SHIELD_MS } from './src/config/gameplay-timing.js';
   RunnerScene.prototype.respawnCheckpoint = function finalRespawn(...args) {
     const result = originalRespawnCheckpoint.apply(this, args);
     this.__finalDeathLock = false;
+    this.__finalDeathPending = false;
     this.__forceVoidDeath = false;
     resetInput(this);
     const checkpointX = Number.isFinite(Number(this.checkpoint?.x)) ? Number(this.checkpoint.x) : this.player?.x;
