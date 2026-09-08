@@ -1,25 +1,810 @@
-/* HUD V2 — visual-only layer. Gameplay logic intentionally untouched. */
-#play .hud{isolation:isolate;z-index:40;gap:14px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.22))}
-#play .hud-route,#play .hud-progress,#play .hud-xp,#play .hud-actions>button{border:1px solid rgba(141,244,255,.28);background:linear-gradient(145deg,rgba(7,16,28,.94),rgba(10,24,40,.78));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 22px rgba(0,0,0,.24),0 0 18px rgba(141,244,255,.06)}
-#play .hud-route{padding:9px 12px;min-width:190px;border-radius:10px}
-#play .hud-route .route-dot{box-shadow:0 0 12px rgba(141,244,255,.9);animation:hud-pulse 2.2s ease-in-out infinite}
-#play .hud-route small{color:#8df4ff;letter-spacing:1.4px}
-#play .hud-route b{letter-spacing:.8px}
-#play .hud-progress{padding:8px 11px;border-radius:10px;min-width:145px}
-#play .hud-progress>div{height:5px;border-radius:99px;background:rgba(220,232,241,.12);overflow:hidden;box-shadow:inset 0 0 5px rgba(0,0,0,.5)}
-#play .hud-progress i{border-radius:99px;box-shadow:0 0 10px rgba(141,244,255,.65);transition:width .22s ease}
-#play .hud-actions{display:flex;align-items:center;justify-content:center;gap:10px}
-#play .hud-xp{padding:7px 10px;border-radius:9px;min-width:52px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
-#play .hud-xp small{color:#8ba0b8;letter-spacing:1px}
-#play .hud-xp b{color:#f7d98a;text-shadow:0 0 10px rgba(247,217,138,.3);letter-spacing:1px}
-#play .hud-actions>button{width:46px;height:42px;border-radius:10px;color:#dffcff;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;flex:0 0 auto}
-#play .hud-actions>button:hover,#play .hud-actions>button:focus-visible{transform:translateY(-1px);border-color:rgba(141,244,255,.72);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 24px rgba(0,0,0,.3),0 0 22px rgba(141,244,255,.18)}
-#play .hud-actions>button:active{transform:scale(.95)}
-#play .world-marker{padding:8px 12px;border:1px solid rgba(247,217,138,.28);border-radius:8px;background:linear-gradient(90deg,rgba(8,16,27,.9),rgba(8,16,27,.52));box-shadow:0 8px 24px rgba(0,0,0,.22)}
-#play .world-marker span{color:#f7d98a;letter-spacing:1.2px}
-#play .world-marker b{text-shadow:0 0 10px rgba(141,244,255,.2)}
-@keyframes hud-pulse{0%,100%{opacity:.7;transform:scale(.92)}50%{opacity:1;transform:scale(1)}}
-@media(max-width:880px),(hover:none) and (pointer:coarse){#play .hud{padding:12px 14px}#play .hud-route{min-width:0;padding:8px 10px;border-radius:9px}#play .hud-route b{font-size:10px}#play .hud-actions{gap:8px}#play .hud-xp{min-width:50px;padding:6px 8px}#play .hud-actions>button{width:44px;height:40px}#play .world-marker{border-radius:7px}}
-@media(max-width:430px){#play .hud-route{max-width:52vw}#play .hud-route b{display:block;max-width:36vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#play .hud-actions{gap:6px}#play .hud-xp{min-width:48px;padding:6px 7px}#play .hud-actions>button{width:42px;height:38px}#play .world-marker{max-width:72vw}}
-@media(max-height:480px) and (orientation:landscape){#play .hud{padding:8px 12px}#play .hud-route{padding:6px 9px}#play .hud-progress{padding:6px 9px;min-width:125px}#play .hud-xp{padding:5px 7px}#play .hud-actions>button{width:40px;height:36px}#play .world-marker{bottom:118px}}
-@media(prefers-reduced-motion:reduce){#play .hud-route .route-dot{animation:none}#play .hud-progress i,#play .hud-actions>button{transition:none}}
+/* =========================================================
+   HUD V2
+   VISUAL-ONLY LAYER
+   Gameplay logic intentionally untouched.
+   ========================================================= */
+
+
+/* =========================================================
+   BASE HUD
+   ========================================================= */
+
+#play .hud{
+
+  isolation:isolate;
+
+  z-index:40;
+
+  box-sizing:border-box;
+
+  gap:14px;
+
+  filter:
+    drop-shadow(0 10px 24px rgba(0,0,0,.22));
+}
+
+
+/* =========================================================
+   SHARED SURFACE
+   ========================================================= */
+
+#play .hud-route,
+#play .hud-progress,
+#play .hud-xp,
+#play .hud-actions>button{
+
+  border:
+    1px solid rgba(141,244,255,.28);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(7,16,28,.96),
+      rgba(10,24,40,.82)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 8px 22px rgba(0,0,0,.24),
+    0 0 18px rgba(141,244,255,.06);
+}
+
+
+/* =========================================================
+   ROUTE / MISSION HEADER
+   ========================================================= */
+
+#play .hud-route{
+
+  min-width:190px;
+
+  padding:9px 12px;
+
+  border-radius:10px;
+
+  box-sizing:border-box;
+
+  overflow:hidden;
+}
+
+
+#play .hud-route .route-dot{
+
+  box-shadow:
+    0 0 12px rgba(141,244,255,.9);
+
+  animation:
+    hud-pulse 2.2s ease-in-out infinite;
+}
+
+
+#play .hud-route small{
+
+  color:#8df4ff;
+
+  letter-spacing:1.4px;
+}
+
+
+#play .hud-route b{
+
+  letter-spacing:.8px;
+}
+
+
+/* =========================================================
+   SIGNALS PANEL
+   ========================================================= */
+
+#play .hud-progress{
+
+  width:clamp(200px,25vw,430px);
+
+  min-width:200px;
+
+  max-width:430px;
+
+  min-height:48px;
+
+  padding:9px 12px;
+
+  border-radius:11px;
+
+  box-sizing:border-box;
+
+  overflow:hidden;
+
+  justify-self:center;
+
+  display:grid;
+
+  grid-template-columns:1fr auto;
+
+  grid-template-rows:auto 7px;
+
+  column-gap:12px;
+
+  row-gap:7px;
+
+  align-items:center;
+}
+
+
+/* =========================================================
+   SIGNAL LABEL
+   ========================================================= */
+
+#play .hud-progress>small{
+
+  color:#8df4ff;
+
+  font-size:8px;
+
+  font-weight:800;
+
+  letter-spacing:.16em;
+
+  text-transform:uppercase;
+}
+
+
+/* =========================================================
+   SIGNAL COUNT
+   ========================================================= */
+
+#play .hud-progress>span{
+
+  justify-self:end;
+
+  color:#f7f0d1;
+
+  font-size:13px;
+
+  font-weight:900;
+
+  line-height:1;
+
+  font-variant-numeric:tabular-nums;
+
+  text-shadow:
+    0 0 10px rgba(247,217,138,.18);
+}
+
+
+/* =========================================================
+   SIGNAL TRACK
+   ========================================================= */
+
+#play .hud-progress>div{
+
+  grid-column:1 / -1;
+
+  position:relative;
+
+  width:100%;
+
+  height:6px;
+
+  min-height:6px;
+
+  border:
+    1px solid rgba(141,244,255,.15);
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.055),
+      rgba(0,0,0,.34)
+    );
+
+  overflow:hidden;
+
+  box-shadow:
+    inset 0 0 7px rgba(0,0,0,.60),
+    inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+
+/* =========================================================
+   SIGNAL FILL
+   Only this element changes width.
+   ========================================================= */
+
+#play .hud-progress i{
+
+  display:block;
+
+  width:0;
+
+  height:100%;
+
+  min-width:0;
+
+  max-width:100%;
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #7de9fa,
+      #8df4ff 55%,
+      #d9fcff
+    );
+
+  transform-origin:left center;
+
+  box-shadow:
+    0 0 8px rgba(141,244,255,.50),
+    0 0 18px rgba(141,244,255,.20);
+
+  transition:
+    width .22s cubic-bezier(.22,.61,.36,1);
+}
+
+
+/* =========================================================
+   SIGNAL FILL HIGHLIGHT
+   ========================================================= */
+
+#play .hud-progress i::after{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  width:32px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.30),
+      transparent
+    );
+
+  pointer-events:none;
+}
+
+
+/* =========================================================
+   RIGHT HUD ACTIONS
+   ========================================================= */
+
+#play .hud-actions{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:flex-end;
+
+  gap:10px;
+
+  box-sizing:border-box;
+}
+
+
+/* =========================================================
+   XP PANEL
+   ========================================================= */
+
+#play .hud-xp{
+
+  min-width:58px;
+
+  padding:7px 10px;
+
+  border-radius:9px;
+
+  box-sizing:border-box;
+
+  text-align:center;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:center;
+
+  line-height:1.05;
+}
+
+
+#play .hud-xp small{
+
+  color:#8ba0b8;
+
+  font-size:7px;
+
+  letter-spacing:.14em;
+
+  text-transform:uppercase;
+}
+
+
+#play .hud-xp b{
+
+  color:#f7d98a;
+
+  font-size:14px;
+
+  font-weight:900;
+
+  font-variant-numeric:tabular-nums;
+
+  letter-spacing:.03em;
+
+  text-shadow:
+    0 0 10px rgba(247,217,138,.32);
+}
+
+
+/* =========================================================
+   PAUSE / MENU BUTTON
+   ========================================================= */
+
+#play .hud-actions>button{
+
+  width:46px;
+
+  height:42px;
+
+  min-width:46px;
+
+  min-height:42px;
+
+  padding:0;
+
+  margin:0;
+
+  border-radius:10px;
+
+  color:#e8fbff;
+
+  flex:0 0 auto;
+
+  box-sizing:border-box;
+
+  display:grid;
+
+  place-items:center;
+
+  transition:
+    transform .12s ease,
+    box-shadow .12s ease,
+    border-color .12s ease,
+    background .12s ease;
+}
+
+
+/* =========================================================
+   PAUSE HOVER / FOCUS
+   ========================================================= */
+
+#play .hud-actions>button:hover,
+#play .hud-actions>button:focus-visible{
+
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(141,244,255,.82);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10,29,45,.98),
+      rgba(8,18,30,.96)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 10px 26px rgba(0,0,0,.30),
+    0 0 24px rgba(141,244,255,.20);
+}
+
+
+/* =========================================================
+   PAUSE ACTIVE
+   ========================================================= */
+
+#play .hud-actions>button:active{
+
+  transform:
+    scale(.94);
+}
+
+
+/* =========================================================
+   WORLD MARKER
+   ========================================================= */
+
+#play .world-marker{
+
+  padding:8px 12px;
+
+  border:
+    1px solid rgba(247,217,138,.28);
+
+  border-radius:8px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(8,16,27,.92),
+      rgba(8,16,27,.55)
+    );
+
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.22);
+
+  box-sizing:border-box;
+}
+
+
+#play .world-marker span{
+
+  color:#f7d98a;
+
+  letter-spacing:1.2px;
+}
+
+
+#play .world-marker b{
+
+  text-shadow:
+    0 0 10px rgba(141,244,255,.20);
+}
+
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media (min-width:881px){
+
+  #play .hud{
+
+    display:grid;
+
+    width:100%;
+
+    /*
+      LEFT   = ROUTE
+      CENTER = SIGNALS
+      RIGHT  = XP + PAUSE
+
+      Equal outer columns guarantee
+      mathematical centering.
+    */
+
+    grid-template-columns:
+      minmax(0,1fr)
+      auto
+      minmax(0,1fr);
+
+    align-items:start;
+
+    box-sizing:border-box;
+  }
+
+
+  /* LEFT */
+
+  #play .hud-route{
+
+    grid-column:1;
+
+    justify-self:start;
+  }
+
+
+  /* CENTER */
+
+  #play .hud-progress{
+
+    grid-column:2;
+
+    justify-self:center;
+
+    margin-left:0;
+
+    margin-right:0;
+  }
+
+
+  /* RIGHT */
+
+  #play .hud-actions{
+
+    grid-column:3;
+
+    justify-self:end;
+
+    margin-left:auto;
+  }
+
+
+  #play .hud-xp{
+
+    min-width:62px;
+  }
+
+
+  #play .hud-actions>button{
+
+    width:48px;
+
+    height:44px;
+
+    min-width:48px;
+
+    min-height:44px;
+
+    border-radius:11px;
+  }
+}
+
+
+/* =========================================================
+   DESKTOP — LARGE SCREENS
+   ========================================================= */
+
+@media (min-width:1400px){
+
+  #play .hud{
+
+    gap:18px;
+  }
+
+
+  #play .hud-progress{
+
+    width:clamp(260px,24vw,430px);
+
+    min-width:260px;
+  }
+
+
+  #play .hud-route{
+
+    min-width:215px;
+  }
+
+
+  #play .hud-actions{
+
+    gap:11px;
+  }
+}
+
+
+/* =========================================================
+   TOUCH / TABLET
+   ========================================================= */
+
+@media(
+  max-width:880px
+),
+(hover:none) and (pointer:coarse){
+
+  #play .hud{
+
+    padding:12px 14px;
+
+    align-items:flex-start;
+  }
+
+
+  #play .hud-route{
+
+    min-width:0;
+
+    padding:8px 10px;
+
+    border-radius:9px;
+  }
+
+
+  #play .hud-route b{
+
+    font-size:10px;
+  }
+
+
+  #play .hud-progress{
+
+    display:none;
+  }
+
+
+  #play .hud-actions{
+
+    gap:7px;
+  }
+
+
+  #play .hud-xp{
+
+    display:none;
+  }
+
+
+  #play .hud-actions>button{
+
+    width:44px;
+
+    height:40px;
+
+    min-width:44px;
+
+    min-height:40px;
+  }
+
+
+  #play .world-marker{
+
+    border-radius:7px;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media(max-width:430px){
+
+  #play .hud-route{
+
+    max-width:52vw;
+  }
+
+
+  #play .hud-route b{
+
+    display:block;
+
+    max-width:36vw;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+  }
+
+
+  #play .hud-actions{
+
+    gap:6px;
+  }
+
+
+  #play .hud-actions>button{
+
+    width:42px;
+
+    height:38px;
+
+    min-width:42px;
+
+    min-height:38px;
+  }
+
+
+  #play .world-marker{
+
+    max-width:72vw;
+  }
+}
+
+
+/* =========================================================
+   SHORT LANDSCAPE
+   ========================================================= */
+
+@media(
+  max-height:480px
+)
+and (orientation:landscape){
+
+  #play .hud{
+
+    padding:8px 12px;
+  }
+
+
+  #play .hud-route{
+
+    padding:6px 9px;
+  }
+
+
+  #play .hud-progress{
+
+    width:clamp(160px,24vw,330px);
+
+    min-width:160px;
+
+    min-height:42px;
+
+    padding:7px 9px;
+  }
+
+
+  #play .hud-xp{
+
+    padding:5px 7px;
+
+    min-width:52px;
+  }
+
+
+  #play .hud-actions>button{
+
+    width:40px;
+
+    height:36px;
+
+    min-width:40px;
+
+    min-height:36px;
+  }
+
+
+  #play .world-marker{
+
+    bottom:118px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+  #play .hud-route .route-dot{
+
+    animation:none;
+  }
+
+
+  #play .hud-progress i,
+  #play .hud-actions>button{
+
+    transition:none;
+  }
+}
+
+
+/* =========================================================
+   HUD PULSE
+   ========================================================= */
+
+@keyframes hud-pulse{
+
+  0%,
+  100%{
+
+    opacity:.70;
+
+    transform:scale(.92);
+  }
+
+  50%{
+
+    opacity:1;
+
+    transform:scale(1);
+  }
+}
