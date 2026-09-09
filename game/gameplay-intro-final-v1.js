@@ -2903,154 +2903,1046 @@ const targetBottom = 490;
         })
         .join('');
 
-    svg.innerHTML = `
+   svg.innerHTML = `
 
-      <defs>
+  <defs>
 
-        <linearGradient
-          id="rv5mapGradient"
-          x1="0"
-          y1="0"
-          x2="1"
-          y2="1">
+    <!-- MAIN MAP BACKGROUND -->
+    <linearGradient
+      id="rv5MapBg"
+      x1="0"
+      y1="0"
+      x2="0"
+      y2="1">
 
-          <stop
-            offset="0%"
-            stop-color="#06131e">
-          </stop>
+      <stop
+        offset="0%"
+        stop-color="#08141d">
+      </stop>
 
-          <stop
-            offset="55%"
-            stop-color="#020a11">
-          </stop>
+      <stop
+        offset="48%"
+        stop-color="#030a10">
+      </stop>
 
-          <stop
-            offset="100%"
-            stop-color="#010508">
-          </stop>
+      <stop
+        offset="100%"
+        stop-color="#010406">
+      </stop>
 
-        </linearGradient>
+    </linearGradient>
 
-      </defs>
+    <!-- VIGNETTE -->
+    <radialGradient
+      id="rv5MapVignette"
+      cx="50%"
+      cy="48%"
+      r="75%">
 
+      <stop
+        offset="0%"
+        stop-color="#173344"
+        stop-opacity=".08">
+      </stop>
+
+      <stop
+        offset="68%"
+        stop-color="#000"
+        stop-opacity=".12">
+      </stop>
+
+      <stop
+        offset="100%"
+        stop-color="#000"
+        stop-opacity=".72">
+      </stop>
+
+    </radialGradient>
+
+    <!-- PLAYER / ROUTE GLOW -->
+    <filter
+      id="rv5Glow"
+      x="-100%"
+      y="-100%"
+      width="300%"
+      height="300%">
+
+      <feGaussianBlur
+        stdDeviation="4"
+        result="blur">
+      </feGaussianBlur>
+
+      <feMerge>
+        <feMergeNode in="blur"></feMergeNode>
+        <feMergeNode in="SourceGraphic"></feMergeNode>
+      </feMerge>
+
+    </filter>
+
+    <!-- SOFT GLOW -->
+    <filter
+      id="rv5SoftGlow"
+      x="-100%"
+      y="-100%"
+      width="300%"
+      height="300%">
+
+      <feGaussianBlur
+        stdDeviation="8">
+      </feGaussianBlur>
+
+    </filter>
+
+    <!-- CLIP -->
+    <clipPath id="rv5MapClip">
       <rect
+        x="0"
+        y="0"
         width="1000"
         height="560"
-        fill="url(#rv5mapGradient)">
+        rx="10">
+      </rect>
+    </clipPath>
+
+    <!-- GRID -->
+    <pattern
+      id="rv5GridSmall"
+      width="20"
+      height="20"
+      patternUnits="userSpaceOnUse">
+
+      <path
+        d="M 20 0 L 0 0 0 20"
+        fill="none"
+        stroke="#2f5367"
+        stroke-width=".6"
+        opacity=".20">
+      </path>
+
+    </pattern>
+
+    <pattern
+      id="rv5GridLarge"
+      width="100"
+      height="100"
+      patternUnits="userSpaceOnUse">
+
+      <path
+        d="M 100 0 L 0 0 0 100"
+        fill="none"
+        stroke="#3e657a"
+        stroke-width="1"
+        opacity=".18">
+      </path>
+
+    </pattern>
+
+    <!-- AREA GLOW -->
+    <radialGradient
+      id="rv5DangerGlow">
+
+      <stop
+        offset="0%"
+        stop-color="#ff4058"
+        stop-opacity=".24">
+      </stop>
+
+      <stop
+        offset="100%"
+        stop-color="#ff4058"
+        stop-opacity="0">
+      </stop>
+
+    </radialGradient>
+
+  </defs>
+
+
+  <!-- ===================================== -->
+  <!-- MAP FOUNDATION -->
+  <!-- ===================================== -->
+
+  <g clip-path="url(#rv5MapClip)">
+
+    <rect
+      x="0"
+      y="0"
+      width="1000"
+      height="560"
+      fill="url(#rv5MapBg)">
+    </rect>
+
+
+    <!-- MICRO GRID -->
+
+    <rect
+      x="0"
+      y="0"
+      width="1000"
+      height="560"
+      fill="url(#rv5GridSmall)">
+    </rect>
+
+
+    <!-- MAJOR GRID -->
+
+    <rect
+      x="0"
+      y="0"
+      width="1000"
+      height="560"
+      fill="url(#rv5GridLarge)">
+    </rect>
+
+
+    <!-- TOP / BOTTOM MAP STRIPS -->
+
+    <rect
+      x="0"
+      y="0"
+      width="1000"
+      height="30"
+      fill="#02070b"
+      opacity=".78">
+    </rect>
+
+    <rect
+      x="0"
+      y="530"
+      width="1000"
+      height="30"
+      fill="#02070b"
+      opacity=".82">
+    </rect>
+
+
+    <!-- MAP CORNER ACCENTS -->
+
+    <path
+      d="M 20 66 L 20 20 L 66 20"
+      fill="none"
+      stroke="#6de7ff"
+      stroke-width="2"
+      opacity=".65">
+    </path>
+
+    <path
+      d="M 934 20 L 980 20 L 980 66"
+      fill="none"
+      stroke="#6de7ff"
+      stroke-width="2"
+      opacity=".65">
+    </path>
+
+    <path
+      d="M 20 494 L 20 540 L 66 540"
+      fill="none"
+      stroke="#6de7ff"
+      stroke-width="2"
+      opacity=".42">
+    </path>
+
+    <path
+      d="M 934 540 L 980 540 L 980 494"
+      fill="none"
+      stroke="#6de7ff"
+      stroke-width="2"
+      opacity=".42">
+    </path>
+
+
+    <!-- ===================================== -->
+    <!-- TACTICAL SECTOR LINES -->
+    <!-- ===================================== -->
+
+    <g
+      fill="none"
+      stroke="#75b8d1"
+      stroke-width="1"
+      opacity=".13">
+
+      <path d="M 120 30 L 120 530"></path>
+      <path d="M 240 30 L 240 530"></path>
+      <path d="M 360 30 L 360 530"></path>
+      <path d="M 480 30 L 480 530"></path>
+      <path d="M 600 30 L 600 530"></path>
+      <path d="M 720 30 L 720 530"></path>
+      <path d="M 840 30 L 840 530"></path>
+
+      <path d="M 0 110 L 1000 110"></path>
+      <path d="M 0 190 L 1000 190"></path>
+      <path d="M 0 270 L 1000 270"></path>
+      <path d="M 0 350 L 1000 350"></path>
+      <path d="M 0 430 L 1000 430"></path>
+
+    </g>
+
+
+    <!-- ===================================== -->
+    <!-- TACTICAL ROAD / BLOCK STRUCTURES -->
+    <!-- ===================================== -->
+
+    <g
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round">
+
+      <!-- PRIMARY ROADS -->
+
+      <path
+        d="M 70 130
+           L 205 155
+           L 320 135
+           L 460 180
+           L 610 145
+           L 755 185
+           L 920 130"
+        stroke="#304c59"
+        stroke-width="18"
+        opacity=".20">
+      </path>
+
+      <path
+        d="M 95 440
+           L 215 390
+           L 350 420
+           L 500 365
+           L 655 405
+           L 810 350
+           L 930 400"
+        stroke="#2e4a57"
+        stroke-width="17"
+        opacity=".18">
+      </path>
+
+      <!-- ROAD CENTERLINES -->
+
+      <path
+        d="M 70 130
+           L 205 155
+           L 320 135
+           L 460 180
+           L 610 145
+           L 755 185
+           L 920 130"
+        stroke="#557888"
+        stroke-width="1.5"
+        stroke-dasharray="8 12"
+        opacity=".26">
+      </path>
+
+      <path
+        d="M 95 440
+           L 215 390
+           L 350 420
+           L 500 365
+           L 655 405
+           L 810 350
+           L 930 400"
+        stroke="#557888"
+        stroke-width="1.5"
+        stroke-dasharray="8 12"
+        opacity=".22">
+      </path>
+
+    </g>
+
+
+    <!-- ===================================== -->
+    <!-- WORLD BLOCKS -->
+    <!-- ===================================== -->
+
+    <g>
+
+      <rect
+        x="82"
+        y="205"
+        width="130"
+        height="55"
+        rx="3"
+        fill="#0a1821"
+        stroke="#2a5669"
+        stroke-width="1"
+        opacity=".88">
       </rect>
 
-      ${grid()}
+      <rect
+        x="245"
+        y="72"
+        width="145"
+        height="66"
+        rx="3"
+        fill="#0a1821"
+        stroke="#2b586b"
+        stroke-width="1"
+        opacity=".86">
+      </rect>
+
+      <rect
+        x="420"
+        y="220"
+        width="120"
+        height="74"
+        rx="3"
+        fill="#09161f"
+        stroke="#2e6174"
+        stroke-width="1"
+        opacity=".90">
+      </rect>
+
+      <rect
+        x="590"
+        y="76"
+        width="155"
+        height="60"
+        rx="3"
+        fill="#0a1821"
+        stroke="#2b586b"
+        stroke-width="1"
+        opacity=".88">
+      </rect>
+
+      <rect
+        x="760"
+        y="235"
+        width="150"
+        height="82"
+        rx="3"
+        fill="#09161f"
+        stroke="#315f70"
+        stroke-width="1"
+        opacity=".90">
+      </rect>
+
+      <rect
+        x="250"
+        y="350"
+        width="130"
+        height="65"
+        rx="3"
+        fill="#08151e"
+        stroke="#2e5868"
+        stroke-width="1"
+        opacity=".88">
+      </rect>
+
+      <rect
+        x="620"
+        y="350"
+        width="120"
+        height="68"
+        rx="3"
+        fill="#08151e"
+        stroke="#2d5869"
+        stroke-width="1"
+        opacity=".88">
+      </rect>
+
+    </g>
+
+
+    <!-- ===================================== -->
+    <!-- BLOCK DETAILS -->
+    <!-- ===================================== -->
+
+    <g
+      stroke="#538095"
+      stroke-width="1"
+      opacity=".16">
+
+      <path d="M 96 220 H 198"></path>
+      <path d="M 96 238 H 198"></path>
+      <path d="M 96 256 H 198"></path>
+
+      <path d="M 262 88 H 375"></path>
+      <path d="M 262 108 H 375"></path>
+      <path d="M 262 126 H 375"></path>
+
+      <path d="M 435 238 H 525"></path>
+      <path d="M 435 258 H 525"></path>
+      <path d="M 435 278 H 525"></path>
+
+      <path d="M 606 92 H 732"></path>
+      <path d="M 606 111 H 732"></path>
+
+      <path d="M 775 255 H 895"></path>
+      <path d="M 775 276 H 895"></path>
+      <path d="M 775 298 H 895"></path>
+
+      <path d="M 265 370 H 365"></path>
+      <path d="M 265 392 H 365"></path>
+
+      <path d="M 635 370 H 725"></path>
+      <path d="M 635 392 H 725"></path>
+
+    </g>
+
+
+    <!-- ===================================== -->
+    <!-- DANGER ZONE GLOW -->
+    <!-- ===================================== -->
+
+    <circle
+      cx="${d.points.goal.x}"
+      cy="${d.points.goal.y}"
+      r="82"
+      fill="url(#rv5DangerGlow)"
+      opacity=".45">
+    </circle>
+
+
+    <!-- ===================================== -->
+    <!-- ROUTE GLOW -->
+    <!-- ===================================== -->
+
+    <path
+      d="${route}"
+      class="route-halo"
+      fill="none"
+      stroke="#56ddff"
+      stroke-width="20"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      opacity=".09"
+      filter="url(#rv5SoftGlow)">
+    </path>
+
+    <path
+      d="${route}"
+      class="route-halo"
+      fill="none"
+      stroke="#54ddff"
+      stroke-width="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      opacity=".14"
+      filter="url(#rv5Glow)">
+    </path>
+
+    <path
+      d="${route}"
+      class="route"
+      fill="none"
+      stroke="#55dfff"
+      stroke-width="4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-dasharray="5 8"
+      opacity=".88">
+    </path>
+
+    <path
+      d="${route}"
+      class="route-core"
+      fill="none"
+      stroke="#d9fbff"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      opacity=".72">
+    </path>
+
+
+    <!-- ===================================== -->
+    <!-- MAP OBJECTS -->
+    <!-- ===================================== -->
+
+    ${platforms}
+    ${gates}
+    ${obstacles}
+    ${signals}
+
+
+    <!-- ===================================== -->
+    <!-- CHECKPOINTS -->
+    <!-- ===================================== -->
+
+    ${d.checkpoints.map((item, i) => {
+
+      const p = d.point(item);
+
+      return `
+
+        <g>
+
+          <circle
+            cx="${p.x}"
+            cy="${p.y}"
+            r="23"
+            fill="none"
+            stroke="#58dbff"
+            stroke-width="1"
+            stroke-dasharray="3 5"
+            opacity=".22">
+          </circle>
+
+          <circle
+            cx="${p.x}"
+            cy="${p.y}"
+            r="17"
+            class="checkpoint">
+          </circle>
+
+          <circle
+            cx="${p.x}"
+            cy="${p.y}"
+            r="5"
+            class="checkpoint-dot">
+          </circle>
+
+          <text
+            x="${p.x}"
+            y="${p.y - 27}"
+            text-anchor="middle"
+            class="label"
+            style="font-size:10px;letter-spacing:1.5px;">
+            CP ${i + 1}
+          </text>
+
+        </g>
+
+      `;
+
+    }).join('')}
+
+
+    <!-- ===================================== -->
+    <!-- HOSTILES -->
+    <!-- ===================================== -->
+
+    ${d.enemies.map(item => {
+
+      const p = d.point(item);
+
+      return `
+
+        <g>
+
+          <circle
+            cx="${p.x}"
+            cy="${p.y}"
+            r="23"
+            fill="none"
+            stroke="#ff4359"
+            stroke-width="1"
+            stroke-dasharray="2 5"
+            opacity=".22">
+          </circle>
+
+          <circle
+            cx="${p.x}"
+            cy="${p.y}"
+            r="13"
+            fill="#ff4056"
+            opacity=".08">
+          </circle>
+
+          <circle
+            cx="${p.x}"
+            cy="${p.y}"
+            r="8"
+            fill="#071017"
+            stroke="#ff5265"
+            stroke-width="2"
+            filter="url(#rv5Glow)">
+          </circle>
+
+          <path
+            d="
+              M ${p.x-5} ${p.y}
+              L ${p.x+5} ${p.y}
+              M ${p.x} ${p.y-5}
+              L ${p.x} ${p.y+5}
+            "
+            stroke="#ff7080"
+            stroke-width="1.5">
+          </path>
+
+          <text
+            x="${p.x + 17}"
+            y="${p.y + 4}"
+            class="label"
+            style="
+              fill:#ff7282;
+              font-size:9px;
+              letter-spacing:1.4px;
+            ">
+            HOSTILE
+          </text>
+
+        </g>
+
+      `;
+
+    }).join('')}
+
+
+    <!-- ===================================== -->
+    <!-- SIGNALS -->
+    <!-- ===================================== -->
+
+    ${d.signals.map(item => {
+
+      const p = d.point(item);
+
+      return `
+
+        <g>
+
+          <circle
+            cx="${p.x}"
+            cy="${p.y}"
+            r="13"
+            fill="none"
+            stroke="#ffd85c"
+            stroke-width="1"
+            stroke-dasharray="2 4"
+            opacity=".22">
+          </circle>
+
+          <circle
+            cx="${p.x}"
+            cy="${p.y}"
+            r="4"
+            class="signal">
+          </circle>
+
+          <circle
+            cx="${p.x}"
+            cy="${p.y}"
+            r="1.7"
+            fill="#fff3ab">
+          </circle>
+
+        </g>
+
+      `;
+
+    }).join('')}
+
+
+    <!-- ===================================== -->
+    <!-- START -->
+    <!-- ===================================== -->
+
+    <g>
+
+      <circle
+        cx="${d.points.start.x}"
+        cy="${d.points.start.y}"
+        r="26"
+        fill="none"
+        stroke="#73ff9c"
+        stroke-width="1"
+        stroke-dasharray="2 6"
+        opacity=".30">
+      </circle>
+
+      <circle
+        cx="${d.points.start.x}"
+        cy="${d.points.start.y}"
+        r="16"
+        fill="#69ff94"
+        opacity=".07">
+      </circle>
+
+      <circle
+        cx="${d.points.start.x}"
+        cy="${d.points.start.y}"
+        r="9"
+        class="start"
+        filter="url(#rv5Glow)">
+      </circle>
+
+      <circle
+        cx="${d.points.start.x}"
+        cy="${d.points.start.y}"
+        r="3"
+        fill="#e8fff0">
+      </circle>
+
+      <text
+        x="${d.points.start.x + 20}"
+        y="${d.points.start.y - 10}"
+        class="label"
+        style="
+          fill:#9affb2;
+          font-size:11px;
+          font-weight:700;
+          letter-spacing:2px;
+        ">
+        START
+      </text>
+
+      <text
+        x="${d.points.start.x + 20}"
+        y="${d.points.start.y + 7}"
+        class="label"
+        style="
+          fill:#6d8995;
+          font-size:7px;
+          letter-spacing:1px;
+        ">
+        DEPLOY
+      </text>
+
+    </g>
+
+
+    <!-- ===================================== -->
+    <!-- OBJECTIVE -->
+    <!-- ===================================== -->
+
+    <g>
+
+      <circle
+        cx="${d.points.goal.x}"
+        cy="${d.points.goal.y}"
+        r="35"
+        fill="none"
+        stroke="#ffd45b"
+        stroke-width="1"
+        stroke-dasharray="2 7"
+        opacity=".34">
+      </circle>
+
+      <circle
+        cx="${d.points.goal.x}"
+        cy="${d.points.goal.y}"
+        r="24"
+        fill="none"
+        stroke="#ffd45b"
+        stroke-width="1.5"
+        opacity=".40">
+      </circle>
+
+      <circle
+        cx="${d.points.goal.x}"
+        cy="${d.points.goal.y}"
+        r="12"
+        fill="#ffd45b"
+        opacity=".09">
+      </circle>
+
+      <circle
+        cx="${d.points.goal.x}"
+        cy="${d.points.goal.y}"
+        r="9"
+        class="goal"
+        filter="url(#rv5Glow)">
+      </circle>
 
       <path
-        d="${route}"
-        class="route-halo">
+        d="
+          M ${d.points.goal.x-6} ${d.points.goal.y}
+          L ${d.points.goal.x+6} ${d.points.goal.y}
+          M ${d.points.goal.x} ${d.points.goal.y-6}
+          L ${d.points.goal.x} ${d.points.goal.y+6}
+        "
+        stroke="#fff3b2"
+        stroke-width="1.5">
       </path>
+
+      <text
+        x="${d.points.goal.x + 23}"
+        y="${d.points.goal.y - 8}"
+        class="label"
+        style="
+          fill:#ffe28a;
+          font-size:11px;
+          font-weight:700;
+          letter-spacing:2px;
+        ">
+        OBJECTIVE
+      </text>
+
+      <text
+        x="${d.points.goal.x + 23}"
+        y="${d.points.goal.y + 9}"
+        class="label"
+        style="
+          fill:#8b7d55;
+          font-size:7px;
+          letter-spacing:1.3px;
+        ">
+        PRIMARY TARGET
+      </text>
+
+    </g>
+
+
+    <!-- ===================================== -->
+    <!-- PLAYER -->
+    <!-- ===================================== -->
+
+    <g id="rv5-player">
+
+      <circle
+        cx="${d.points.player.x}"
+        cy="${d.points.player.y}"
+        r="29"
+        fill="none"
+        stroke="#63eaff"
+        stroke-width="1"
+        stroke-dasharray="2 6"
+        opacity=".24">
+      </circle>
+
+      <circle
+        cx="${d.points.player.x}"
+        cy="${d.points.player.y}"
+        r="18"
+        fill="#5de4ff"
+        opacity=".08">
+      </circle>
+
+      <circle
+        cx="${d.points.player.x}"
+        cy="${d.points.player.y}"
+        r="11"
+        class="player-ring"
+        filter="url(#rv5Glow)">
+      </circle>
+
+      <circle
+        cx="${d.points.player.x}"
+        cy="${d.points.player.y}"
+        r="6"
+        class="player">
+      </circle>
 
       <path
-        d="${route}"
-        class="route">
+        d="
+          M ${d.points.player.x} ${d.points.player.y-18}
+          L ${d.points.player.x} ${d.points.player.y-11}
+          M ${d.points.player.x} ${d.points.player.y+11}
+          L ${d.points.player.x} ${d.points.player.y+18}
+          M ${d.points.player.x-18} ${d.points.player.y}
+          L ${d.points.player.x-11} ${d.points.player.y}
+          M ${d.points.player.x+11} ${d.points.player.y}
+          L ${d.points.player.x+18} ${d.points.player.y}
+        "
+        stroke="#8cefff"
+        stroke-width="1.2"
+        opacity=".75">
       </path>
 
-      <path
-        d="${route}"
-        class="route-core">
-      </path>
+      <text
+        x="${d.points.player.x + 17}"
+        y="${d.points.player.y - 15}"
+        class="label"
+        style="
+          fill:#94edff;
+          font-size:10px;
+          font-weight:700;
+          letter-spacing:1.8px;
+        ">
+        YOU
+      </text>
 
-      ${platforms}
-      ${gates}
-      ${obstacles}
-      ${signals}
-      ${checkpoints}
-      ${enemies}
-      ${guides}
+      <text
+        x="${d.points.player.x + 17}"
+        y="${d.points.player.y + 1}"
+        class="label"
+        style="
+          fill:#63818c;
+          font-size:7px;
+          letter-spacing:1px;
+        ">
+        OPERATOR
+      </text>
 
-      <!-- START -->
+    </g>
 
-      <g>
 
-        <circle
-          cx="${d.points.start.x}"
-          cy="${d.points.start.y}"
-          r="15"
-          fill="none"
-          stroke="#8df59b"
-          opacity=".2">
-        </circle>
+    <!-- ===================================== -->
+    <!-- GUIDES -->
+    <!-- ===================================== -->
 
-        <circle
-          cx="${d.points.start.x}"
-          cy="${d.points.start.y}"
-          r="8"
-          class="start">
-        </circle>
+    ${d.guides.map(item => {
 
-        <text
-          x="${d.points.start.x+14}"
-          y="${d.points.start.y+4}"
-          class="label">
-          START
-        </text>
+      const p = d.point(item);
 
-      </g>
+      return `
 
-      <!-- GOAL -->
+        <g>
 
-      <g>
+          <line
+            x1="${p.x}"
+            y1="${p.y - 6}"
+            x2="${p.x}"
+            y2="${p.y - 18}"
+            stroke="#81d9ea"
+            stroke-width="1"
+            opacity=".22">
+          </line>
 
-        <circle
-          cx="${d.points.goal.x}"
-          cy="${d.points.goal.y}"
-          r="20"
-          fill="none"
-          stroke="#ffd76a"
-          opacity=".2">
-        </circle>
+          <text
+            x="${p.x}"
+            y="${p.y - 23}"
+            text-anchor="middle"
+            class="guide">
+            ${esc(item?.text || '')}
+          </text>
 
-        <circle
-          cx="${d.points.goal.x}"
-          cy="${d.points.goal.y}"
-          r="10"
-          class="goal">
-        </circle>
+        </g>
 
-        <text
-          x="${d.points.goal.x+18}"
-          y="${d.points.goal.y+4}"
-          class="label">
-          OBJECTIVE
-        </text>
+      `;
 
-      </g>
+    }).join('')}
 
-      <!-- PLAYER -->
 
-      <g id="rv5-player">
+    <!-- ===================================== -->
+    <!-- TACTICAL COORDINATES -->
+    <!-- ===================================== -->
 
-        <circle
-          cx="${d.points.player.x}"
-          cy="${d.points.player.y}"
-          r="16"
-          class="player-ring">
-        </circle>
+    <g
+      fill="#7194a0"
+      font-family="monospace"
+      font-size="8"
+      opacity=".40"
+      letter-spacing="1">
 
-        <circle
-          cx="${d.points.player.x}"
-          cy="${d.points.player.y}"
-          r="7"
-          class="player">
-        </circle>
+      <text x="18" y="48">GRID 01</text>
+      <text x="165" y="48">GRID 02</text>
+      <text x="315" y="48">GRID 03</text>
+      <text x="465" y="48">GRID 04</text>
+      <text x="615" y="48">GRID 05</text>
+      <text x="765" y="48">GRID 06</text>
+      <text x="915" y="48">GRID 07</text>
 
-        <text
-          x="${d.points.player.x+13}"
-          y="${d.points.player.y-12}"
-          class="label">
-          YOU
-        </text>
+    </g>
 
-      </g>
 
-    `;
-  }
+    <!-- ===================================== -->
+    <!-- SCAN LINE -->
+    <!-- ===================================== -->
+
+    <rect
+      x="0"
+      y="0"
+      width="1000"
+      height="2"
+      fill="#6ee7ff"
+      opacity=".08">
+    </rect>
+
+
+    <!-- ===================================== -->
+    <!-- VIGNETTE -->
+    <!-- ===================================== -->
+
+    <rect
+      x="0"
+      y="0"
+      width="1000"
+      height="560"
+      fill="url(#rv5MapVignette)">
+    </rect>
+
+  </g>
+
+`;
 
   /*
    * ============================================================
