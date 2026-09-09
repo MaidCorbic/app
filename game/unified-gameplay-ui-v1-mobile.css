@@ -330,15 +330,15 @@
 
     order: 2 !important;
 
-    flex: 0 1 auto !important;
+    flex: 0 0 105px !important;
 
-    min-width: 122px !important;
+    min-width: 105px !important;
 
-    max-width: 190px !important;
+    width: 105px !important;
 
-    width: auto !important;
+    max-width: 105px !important;
 
-    padding: 6px 9px !important;
+    padding: 6px 8px !important;
 
     box-sizing: border-box !important;
 
@@ -586,16 +586,19 @@
   }
 
 
-  #game .hud-run {
+    #game .hud-run {
+
+    flex: 0 0 105px !important;
 
     min-width: 105px !important;
 
-    max-width: 150px !important;
+    width: 105px !important;
+
+    max-width: 105px !important;
 
     padding: 5px 7px !important;
-  }
 
-
+    }
   #game .hud-run > span {
 
     font-size: 10px !important;
@@ -663,12 +666,15 @@
     max-width: 27vw !important;
   }
 
-
   #game .hud-run {
+
+    flex: 0 0 96px !important;
 
     min-width: 96px !important;
 
-    max-width: 140px !important;
+    width: 96px !important;
+
+    max-width: 96px !important;
   }
 
 
@@ -876,3 +882,4 @@
     padding: 10px 11px !important;
   }
     }
+
