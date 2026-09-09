@@ -1,0 +1,67 @@
+/* Cargo Integrity — final lower HUD placement */
+#play #cargoIntegrityV2{
+  position: fixed !important;
+  left: 14px !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+  transform: none !important;
+  width: min(286px, calc(100vw - 28px)) !important;
+  max-width: 286px !important;
+  margin: 0 !important;
+  z-index: 950 !important;
+  pointer-events: none !important;
+}
+
+#play #cargoIntegrityV2 .cargo-card{
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,208,110,.30) !important;
+  border-left: 2px solid rgba(255,208,110,.80) !important;
+  background: linear-gradient(145deg, rgba(7,10,15,.97), rgba(2,3,5,.96)) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.06),
+    0 16px 36px rgba(0,0,0,.34),
+    0 0 28px rgba(255,208,110,.08) !important;
+  backdrop-filter: blur(10px) saturate(125%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(125%) !important;
+}
+
+@media (max-width: 900px){
+  #play #cargoIntegrityV2{
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 520px){
+  #play #cargoIntegrityV2{
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #play #cargoIntegrityV2 .cargo-card{
+    padding: 9px 10px !important;
+    border-radius: 12px !important;
+  }
+
+  #play #cargoIntegrityV2 .cargo-label{
+    font-size: 7px !important;
+    letter-spacing: .12em !important;
+  }
+
+  #play #cargoIntegrityV2 .cargo-type{
+    font-size: 7px !important;
+    letter-spacing: .08em !important;
+  }
+
+  #play #cargoIntegrityV2 .cargo-value{
+    min-width: 35px !important;
+    font-size: 10px !important;
+  }
+}
