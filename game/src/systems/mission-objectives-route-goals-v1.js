@@ -72,7 +72,6 @@ const FALLBACK_OBJECTIVE = {
    ========================================================= */
 
 function missionId(scene) {
-
   return (
     scene?.mission?.id ||
     scene?.sys?.settings?.data?.missionId ||
@@ -84,7 +83,6 @@ function missionId(scene) {
 
 
 function worldWidth(scene) {
-
   return (
     scene?.physics?.world?.bounds?.width ||
     scene?.scale?.width ||
@@ -94,7 +92,6 @@ function worldWidth(scene) {
 
 
 function clamp(v, min = 0, max = 1) {
-
   return Math.max(
     min,
     Math.min(
@@ -106,7 +103,6 @@ function clamp(v, min = 0, max = 1) {
 
 
 function viewport(scene) {
-
   const w =
     scene?.scale?.gameSize?.width ||
     scene?.scale?.width ||
@@ -132,7 +128,6 @@ function viewport(scene) {
    ========================================================= */
 
 function tutorialBounds(scene) {
-
   const list =
     scene?.children?.list || [];
 
@@ -155,7 +150,6 @@ function tutorialBounds(scene) {
 
 
   matches.forEach(child => {
-
     const bounds =
       child.getBounds?.();
 
@@ -198,37 +192,34 @@ function tutorialBounds(scene) {
     !matches.length &&
     !explicit
   ) {
-
     return null;
   }
 
 
   if (!Number.isFinite(minY)) {
-
     return {
-      x:40,
-      y:340,
-      right:500,
-      bottom:540
+      x: 40,
+      y: 340,
+      right: 500,
+      bottom: 540
     };
   }
 
 
   return {
-
-    x:Math.max(
+    x: Math.max(
       0,
       minX - 24
     ),
 
-    y:Math.max(
+    y: Math.max(
       0,
       minY - 24
     ),
 
-    right:maxX + 24,
+    right: maxX + 24,
 
-    bottom:maxY + 86
+    bottom: maxY + 86
   };
 }
 
@@ -253,11 +244,45 @@ function buildPanel(scene, objective) {
   );
 
 
-  /*
-    Compact tactical card.
-    Reduced from the previous 426x152
-    to improve lower-right composition.
-  */
+  /* =======================================================
+     PALETTE
+     ======================================================= */
+
+  const ORANGE = 0xff9f1c;
+  const ORANGE_BRIGHT = 0xffc247;
+  const ORANGE_PALE = 0xffd98a;
+
+  const CYAN = 0x52d9ff;
+  const CYAN_SOFT = 0x8ae9ff;
+
+  const WHITE = 0xf4f7fa;
+  const MUTED = 0x8fa4b5;
+
+  const BG = 0x05080c;
+  const BG_2 = 0x091018;
+  const TRACK = 0x101820;
+
+
+  /* =======================================================
+     DIM OUTER PLATE
+     ======================================================= */
+
+  const shadowPlate =
+    scene.add
+      .rectangle(
+        4,
+        5,
+        400,
+        150,
+        0x000000,
+        0.24
+      )
+      .setOrigin(0);
+
+
+  /* =======================================================
+     MAIN PLATE
+     ======================================================= */
 
   const bg =
     scene.add
@@ -265,195 +290,617 @@ function buildPanel(scene, objective) {
         0,
         0,
         400,
-        142,
-        0x070a0f,
-        .97
+        150,
+        BG,
+        0.975
       )
       .setOrigin(0)
       .setStrokeStyle(
         1,
-        0xffd06e,
-        .72
+        ORANGE,
+        0.82
       );
 
+
+  /* =======================================================
+     INNER PLATE
+     ======================================================= */
 
   const inner =
     scene.add
       .rectangle(
-        8,
-        8,
-        384,
-        126,
-        0x020305,
-        .30
+        7,
+        7,
+        386,
+        136,
+        BG_2,
+        0.76
       )
       .setOrigin(0)
       .setStrokeStyle(
         1,
-        0xffd06e,
-        .10
+        0xffffff,
+        0.055
       );
 
+
+  /* =======================================================
+     ORANGE SIDE ACCENT
+     ======================================================= */
 
   const accent =
     scene.add
       .rectangle(
         0,
         0,
-        3,
-        142,
-        0xffd06e,
-        .94
+        4,
+        150,
+        ORANGE,
+        1
       )
       .setOrigin(0);
 
+
+  /* =======================================================
+     TOP TACTICAL RAIL
+     ======================================================= */
 
   const topRail =
     scene.add
       .rectangle(
-        22,
+        24,
         10,
-        356,
+        350,
         1,
-        0xffd06e,
-        .22
+        ORANGE,
+        0.24
       )
       .setOrigin(0);
 
 
+  const cyanRail =
+    scene.add
+      .rectangle(
+        24,
+        12,
+        92,
+        1,
+        CYAN,
+        0.82
+      )
+      .setOrigin(0);
+
+
+  /* =======================================================
+     HEADER STATUS DOT
+     ======================================================= */
+
+  const statusDot =
+    scene.add
+      .circle(
+        28,
+        28,
+        4,
+        ORANGE_BRIGHT,
+        1
+      );
+
+
+  const statusRing =
+    scene.add
+      .circle(
+        28,
+        28,
+        7,
+        ORANGE,
+        0
+      )
+      .setStrokeStyle(
+        1,
+        ORANGE,
+        0.24
+      );
+
+
+  /* =======================================================
+     HEADER
+     ======================================================= */
+
   const kicker =
     scene.add.text(
-      22,
+      40,
       18,
       'MISSION OBJECTIVE',
       {
-        fontFamily:'monospace',
-        fontSize:'9px',
-        color:'#ffd06e',
-        letterSpacing:1.5
+        fontFamily: 'monospace',
+        fontSize: '9px',
+        fontStyle: 'bold',
+        color: '#ffb52e',
+        letterSpacing: 1.8
       }
     );
 
 
+  const live =
+    scene.add.text(
+      374,
+      18,
+      'ACTIVE',
+      {
+        fontFamily: 'monospace',
+        fontSize: '7px',
+        fontStyle: 'bold',
+        color: '#6de7ff',
+        letterSpacing: 1.4
+      }
+    ).setOrigin(1, 0);
+
+
+  /* =======================================================
+     MAIN OBJECTIVE TITLE
+     ======================================================= */
+
   const title =
     scene.add.text(
-      22,
-      41,
+      24,
+      44,
       objective.title,
       {
-        fontFamily:'monospace',
-        fontSize:'15px',
-        fontStyle:'bold',
-        color:'#f4f7fa',
-        wordWrap:{
-          width:356
+        fontFamily: 'monospace',
+        fontSize: '15px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        lineSpacing: 2,
+        wordWrap: {
+          width: 350
         }
       }
     );
 
 
+  /* =======================================================
+     ROUTE LABEL
+     ======================================================= */
+
   const label =
     scene.add.text(
-      22,
-      87,
-      objective.label,
+      24,
+      79,
+      `// ${objective.label}`,
       {
-        fontFamily:'monospace',
-        fontSize:'8px',
-        color:'#a89058',
-        letterSpacing:1.2
+        fontFamily: 'monospace',
+        fontSize: '8px',
+        color: '#8fa4b5',
+        letterSpacing: 1.2
       }
     );
 
+
+  /* =======================================================
+     PROGRESS HEADER
+     ======================================================= */
 
   const progress =
     scene.add.text(
-      22,
-      105,
-      'ROUTE PROGRESS  0%',
+      24,
+      98,
+      'ROUTE PROGRESS',
       {
-        fontFamily:'monospace',
-        fontSize:'10px',
-        fontStyle:'bold',
-        color:'#ffe7a6',
-        letterSpacing:.8
+        fontFamily: 'monospace',
+        fontSize: '8px',
+        fontStyle: 'bold',
+        color: '#9dafbc',
+        letterSpacing: 1.3
       }
     );
 
+
+  const percent =
+    scene.add.text(
+      374,
+      96,
+      '0%',
+      {
+        fontFamily: 'monospace',
+        fontSize: '11px',
+        fontStyle: 'bold',
+        color: '#ffd47a',
+        letterSpacing: 0.8
+      }
+    ).setOrigin(1, 0);
+
+
+  /* =======================================================
+     PROGRESS TRACK
+     ======================================================= */
 
   const track =
     scene.add
       .rectangle(
-        22,
-        126,
-        356,
-        7,
-        0x0c1219,
+        24,
+        118,
+        350,
+        8,
+        TRACK,
         1
       )
-      .setOrigin(0,.5)
+      .setOrigin(0, 0.5)
       .setStrokeStyle(
         1,
-        0xffd06e,
-        .16
+        ORANGE,
+        0.20
       );
 
+
+  /* subtle upper reflection */
+
+  const trackHighlight =
+    scene.add
+      .rectangle(
+        26,
+        116.5,
+        346,
+        1.5,
+        0xffffff,
+        0.05
+      )
+      .setOrigin(0, 0.5);
+
+
+  /* actual progress */
 
   const fill =
     scene.add
       .rectangle(
-        22,
-        126,
+        24,
+        118,
         0,
-        7,
-        0xffd06e,
+        8,
+        ORANGE,
         1
       )
-      .setOrigin(0,.5);
+      .setOrigin(0, 0.5);
+
+
+  /* brighter progress cap */
+
+  const fillHighlight =
+    scene.add
+      .rectangle(
+        24,
+        116.5,
+        0,
+        2,
+        ORANGE_BRIGHT,
+        0.88
+      )
+      .setOrigin(0, 0.5);
+
+
+  /* moving shine at end of progress */
+
+  const fillCap =
+    scene.add
+      .rectangle(
+        24,
+        118,
+        2,
+        10,
+        ORANGE_BRIGHT,
+        0.9
+      )
+      .setOrigin(0.5, 0.5);
+
+
+  /* =======================================================
+     PROGRESS SEGMENT DIVIDERS
+     ======================================================= */
+
+  const segments = [];
+
+  for (let i = 1; i < 10; i++) {
+
+    const x =
+      24 + (350 / 10) * i;
+
+    const divider =
+      scene.add
+        .rectangle(
+          x,
+          118,
+          1,
+          8,
+          0x05080c,
+          0.62
+        )
+        .setOrigin(0.5);
+
+    segments.push(divider);
+  }
+
+
+  /* =======================================================
+     FOOTER
+     ======================================================= */
+
+  const footerLine =
+    scene.add
+      .rectangle(
+        24,
+        132,
+        350,
+        1,
+        0xffffff,
+        0.06
+      )
+      .setOrigin(0);
 
 
   const status =
     scene.add.text(
-      22,
+      24,
       136,
-      'OBJECTIVE IN PROGRESS',
+      '●  OBJECTIVE IN PROGRESS',
       {
-        fontFamily:'monospace',
-        fontSize:'7px',
-        color:'#89764b',
-        letterSpacing:1.2
+        fontFamily: 'monospace',
+        fontSize: '7px',
+        fontStyle: 'bold',
+        color: '#927642',
+        letterSpacing: 1.1
       }
     );
 
 
+  /* =======================================================
+     TACTICAL CORNER DETAILS
+     ======================================================= */
+
+  const cornerTL =
+    scene.add
+      .rectangle(
+        0,
+        0,
+        24,
+        1,
+        CYAN,
+        0.55
+      )
+      .setOrigin(0);
+
+
+  const cornerTR =
+    scene.add
+      .rectangle(
+        376,
+        0,
+        24,
+        1,
+        ORANGE,
+        0.78
+      )
+      .setOrigin(0);
+
+
+  const cornerBR =
+    scene.add
+      .rectangle(
+        376,
+        149,
+        24,
+        1,
+        CYAN,
+        0.42
+      )
+      .setOrigin(0);
+
+
+  const cornerRight =
+    scene.add
+      .rectangle(
+        399,
+        14,
+        1,
+        24,
+        CYAN,
+        0.28
+      )
+      .setOrigin(0);
+
+
+  /* =======================================================
+     MICRO DECORATION
+     ======================================================= */
+
+  const micro1 =
+    scene.add
+      .rectangle(
+        340,
+        137,
+        5,
+        1,
+        CYAN,
+        0.38
+      )
+      .setOrigin(0);
+
+
+  const micro2 =
+    scene.add
+      .rectangle(
+        348,
+        137,
+        3,
+        1,
+        CYAN,
+        0.28
+      )
+      .setOrigin(0);
+
+
+  const micro3 =
+    scene.add
+      .rectangle(
+        354,
+        137,
+        10,
+        1,
+        ORANGE,
+        0.38
+      )
+      .setOrigin(0);
+
+
+  /* =======================================================
+     BUILD CONTAINER
+     ======================================================= */
+
   c.add([
+    shadowPlate,
     bg,
     inner,
     accent,
+
     topRail,
+    cyanRail,
+
+    statusRing,
+    statusDot,
+
     kicker,
+    live,
     title,
     label,
+
     progress,
+    percent,
+
     track,
+    trackHighlight,
     fill,
-    status
+    fillHighlight,
+    fillCap,
+
+    ...segments,
+
+    footerLine,
+    status,
+
+    cornerTL,
+    cornerTR,
+    cornerBR,
+    cornerRight,
+
+    micro1,
+    micro2,
+    micro3
   ]);
+
+
+  /* =======================================================
+     INITIAL ANIMATION
+     ======================================================= */
+
+  scene.tweens?.add?.({
+    targets: statusDot,
+    alpha: {
+      from: 0.28,
+      to: 1
+    },
+    scale: {
+      from: 0.88,
+      to: 1.08
+    },
+    duration: 700,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.easeInOut'
+  });
+
+
+  scene.tweens?.add?.({
+    targets: statusRing,
+    alpha: {
+      from: 0.10,
+      to: 0.42
+    },
+    scale: {
+      from: 0.92,
+      to: 1.16
+    },
+    duration: 1100,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.easeInOut'
+  });
+
+
+  scene.tweens?.add?.({
+    targets: topRail,
+    alpha: {
+      from: 0.10,
+      to: 0.34
+    },
+    duration: 1400,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.easeInOut'
+  });
+
+
+  scene.tweens?.add?.({
+    targets: cyanRail,
+    alpha: {
+      from: 0.30,
+      to: 0.95
+    },
+    duration: 1700,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.easeInOut'
+  });
 
 
   return {
     c,
+
+    shadowPlate,
     bg,
     inner,
     accent,
+
     topRail,
+    cyanRail,
+
+    statusDot,
+    statusRing,
+
     kicker,
+    live,
     title,
     label,
+
     progress,
+    percent,
+
     track,
+    trackHighlight,
     fill,
-    status
+    fillHighlight,
+    fillCap,
+
+    segments,
+
+    footerLine,
+    status,
+
+    cornerTL,
+    cornerTR,
+    cornerBR,
+    cornerRight,
+
+    micro1,
+    micro2,
+    micro3
   };
 }
 
@@ -480,7 +927,7 @@ function layout(
 
 
   const baseW = 400;
-  const baseH = 142;
+  const baseH = 150;
 
 
   /* =======================================================
@@ -491,9 +938,9 @@ function layout(
 
     const pw =
       Math.min(
-        270,
+        290,
         Math.max(
-          220,
+          224,
           w - 24
         )
       );
@@ -516,8 +963,8 @@ function layout(
 
     const y =
       Math.max(
-        86,
-        h - actualH - 106
+        80,
+        h - actualH - 108
       );
 
 
@@ -528,7 +975,6 @@ function layout(
       state.scale === scale &&
       state.tutorial === false
     ) {
-
       return;
     }
 
@@ -554,7 +1000,7 @@ function layout(
 
   const pw =
     Math.min(
-      420,
+      430,
       Math.max(
         360,
         w - 76
@@ -570,11 +1016,6 @@ function layout(
     baseH * scale;
 
 
-  /*
-    Lower-right tactical placement.
-    More breathing room from right/bottom edges.
-  */
-
   const x =
     Math.max(
       24,
@@ -589,9 +1030,9 @@ function layout(
     );
 
 
-  /*
-    Avoid tutorial overlays.
-  */
+  /* =======================================================
+     TUTORIAL COLLISION AVOIDANCE
+     ======================================================= */
 
   if (
     tutorial &&
@@ -614,7 +1055,6 @@ function layout(
     state.scale === scale &&
     state.tutorial === !!tutorial
   ) {
-
     return;
   }
 
@@ -645,7 +1085,6 @@ function skinExistingHud(
     !scene?.add ||
     window.__relayCinematicLock
   ) {
-
     return;
   }
 
@@ -779,7 +1218,7 @@ function skinExistingHud(
     const padY = 14;
 
 
-    const bg =
+    const existingBg =
       scene.add
         .rectangle(
           minX - padX,
@@ -816,11 +1255,13 @@ function skinExistingHud(
         )
         .setOrigin(0)
         .setScrollFactor(0)
-        .setDepth(minDepth);
+        .setDepth(
+          minDepth
+        );
 
 
     state.hudSkins.push(
-      bg,
+      existingBg,
       rail
     );
   }
@@ -876,16 +1317,21 @@ function reveal(
 
 
   scene.tweens?.add?.({
-    targets:state.c,
+    targets: state.c,
 
-    alpha:{
-      from:0,
-      to:1
+    alpha: {
+      from: 0,
+      to: 1
     },
 
-    duration:180,
+    x: {
+      from: state.x + 20,
+      to: state.x
+    },
 
-    ease:'Quad.easeOut'
+    duration: 220,
+
+    ease: 'Quad.easeOut'
   });
 }
 
@@ -930,25 +1376,25 @@ export function applyMissionObjective(
 
     ...ui,
 
-    completed:false,
+    completed: false,
 
-    last:-1,
+    last: -1,
 
-    visible:false,
+    visible: false,
 
-    pendingReveal:false,
+    pendingReveal: false,
 
-    x:null,
+    x: null,
 
-    y:null,
+    y: null,
 
-    scale:null,
+    scale: null,
 
-    tutorial:null,
+    tutorial: null,
 
-    hudSkinned:false,
+    hudSkinned: false,
 
-    hudSkins:[]
+    hudSkins: []
   };
 
 
@@ -992,7 +1438,6 @@ export function updateMissionObjective(
     !s ||
     !scene.player
   ) {
-
     return;
   }
 
@@ -1040,7 +1485,6 @@ export function updateMissionObjective(
       p - s.last
     ) < .002
   ) {
-
     return;
   }
 
@@ -1054,19 +1498,38 @@ export function updateMissionObjective(
     );
 
 
-  /*
-    IMPORTANT:
-    Mission card width is now 356px.
-  */
+  /* =======================================================
+     LIVE PROGRESS
+     ======================================================= */
+
+  const progressWidth =
+    350 * p;
+
 
   s.fill.width =
-    356 * p;
+    progressWidth;
 
 
-  s.progress.setText(
-    `ROUTE PROGRESS  ${pct}%`
+  s.fillHighlight.width =
+    progressWidth;
+
+
+  if (p > 0) {
+    s.fillCap.x =
+      24 + progressWidth;
+  } else {
+    s.fillCap.x = 24;
+  }
+
+
+  s.percent.setText(
+    `${pct}%`
   );
 
+
+  /* =======================================================
+     COMPLETION
+     ======================================================= */
 
   if (
     !s.completed &&
@@ -1076,11 +1539,19 @@ export function updateMissionObjective(
     s.completed = true;
 
 
-    s.fill.width = 356;
+    s.fill.width = 350;
+    s.fillHighlight.width = 350;
+
+    s.fillCap.x = 374;
+
+
+    s.percent.setText(
+      '100%'
+    );
 
 
     s.progress.setText(
-      'OBJECTIVE COMPLETE'
+      'ROUTE STATUS'
     );
 
 
@@ -1089,37 +1560,124 @@ export function updateMissionObjective(
     );
 
 
+    s.live.setText(
+      'SECURED'
+    );
+
+
     s.status.setText(
-      'ROUTE GOAL SECURED'
+      '●  ROUTE GOAL SECURED'
+    );
+
+
+    s.status.setColor?.(
+      '#63e6a8'
+    );
+
+
+    s.percent.setColor?.(
+      '#8cf5c2'
+    );
+
+
+    s.kicker.setColor?.(
+      '#7ff0b8'
+    );
+
+
+    s.fill.setFillStyle?.(
+      0x35d07f,
+      1
+    );
+
+
+    s.fillHighlight.setFillStyle?.(
+      0x7ff0b8,
+      0.92
+    );
+
+
+    s.fillCap.setFillStyle?.(
+      0x9df8cb,
+      0.95
+    );
+
+
+    s.accent.setFillStyle?.(
+      0x35d07f,
+      1
+    );
+
+
+    s.bg.setStrokeStyle?.(
+      1,
+      0x35d07f,
+      0.78
+    );
+
+
+    s.topRail.setFillStyle?.(
+      0x35d07f,
+      0.26
+    );
+
+
+    s.cyanRail.setFillStyle?.(
+      0x7ff0b8,
+      0.86
     );
 
 
     scene.tweens?.add?.({
 
-      targets:s.c,
+      targets: s.c,
 
-      scaleX:{
-        from:s.scale,
-        to:s.scale * 1.025
+      scaleX: {
+        from: s.scale,
+        to: s.scale * 1.025
       },
 
-      scaleY:{
-        from:s.scale,
-        to:s.scale * 1.025
+      scaleY: {
+        from: s.scale,
+        to: s.scale * 1.025
       },
 
-      yoyo:true,
+      yoyo: true,
 
-      duration:140,
+      duration: 140,
 
-      repeat:1
+      repeat: 1,
+
+      ease: 'Quad.easeOut'
+    });
+
+
+    scene.tweens?.add?.({
+
+      targets: [
+        s.statusDot,
+        s.statusRing
+      ],
+
+      alpha: {
+        from: 1,
+        to: 0.25
+      },
+
+      duration: 180,
+
+      yoyo: true,
+
+      repeat: 2,
+
+      ease: 'Quad.easeOut'
     });
 
 
     scene.events?.emit?.(
       'mission-objective-complete',
       {
-        id:missionId(scene),
+        id: missionId(scene),
 
         objective:
           s.objective
