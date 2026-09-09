@@ -1478,148 +1478,25 @@
        SMALL PHONES · READABILITY
        ========================================================= */
 
-    @media (max-width:430px){
+ @media (max-width:430px){
 
-      #${ROOT_ID} .map-briefing-shell{
-        width:99vw!important;
-        height:97dvh!important;
-        padding:7px!important;
-        gap:6px!important;
-      }
+  #${ROOT_ID} .map-briefing-title{
+    font-size:
+      clamp(
+        17px,
+        5vw,
+        23px
+      )!important;
 
-      #${ROOT_ID} .map-briefing-title{
-        font-size:
-          clamp(
-            20px,
-            6.8vw,
-            25px
-          )!important;
+    line-height:1.05!important;
+    letter-spacing:.055em!important;
+  }
 
-        line-height:1.05!important;
-        letter-spacing:.045em!important;
-      }
+  #${ROOT_ID} .aaa-map-card{
+  display:none!important;
+}
 
-      .aaa-map-topline,
-      .aaa-map-bottomline{
-        font-size:6px!important;
-        line-height:1.2!important;
-        letter-spacing:.045em!important;
-      }
-
-      #${ROOT_ID} .map-briefing-map .label{
-        font-size:8.5px!important;
-        font-weight:900!important;
-
-        fill:#f0e5c7!important;
-
-        paint-order:stroke!important;
-        stroke:#010204!important;
-        stroke-width:1.8px!important;
-        stroke-linejoin:round!important;
-      }
-
-      #${ROOT_ID} .map-briefing-map .legend{
-        font-size:8px!important;
-        font-weight:800!important;
-
-        fill:#d3c7a9!important;
-
-        paint-order:stroke!important;
-        stroke:#010204!important;
-        stroke-width:1.5px!important;
-      }
-
-      #${ROOT_ID} .map-briefing-map .guide{
-        font-size:8.5px!important;
-        font-weight:900!important;
-
-        fill:#bff1f7!important;
-
-        paint-order:stroke!important;
-        stroke:#010204!important;
-        stroke-width:1.6px!important;
-      }
-
-      .aaa-map-card{
-        left:7px!important;
-        right:7px!important;
-        bottom:7px!important;
-
-        padding:
-          10px
-          10px
-          9px!important;
-
-        border-radius:6px!important;
-      }
-
-      .aaa-card-status{
-        font-size:6.5px!important;
-        line-height:1.2!important;
-        letter-spacing:.11em!important;
-      }
-
-      .aaa-card-status b{
-        font-size:10px!important;
-      }
-
-      .aaa-card-kicker{
-        margin-top:8px!important;
-        font-size:6.5px!important;
-        line-height:1.25!important;
-      }
-
-      .aaa-card-title{
-        font-size:15px!important;
-        line-height:1.12!important;
-        letter-spacing:.02em!important;
-      }
-
-      .aaa-card-district{
-        font-size:7.5px!important;
-        line-height:1.35!important;
-        letter-spacing:.08em!important;
-      }
-
-      .aaa-card-grid{
-        margin-top:8px!important;
-      }
-
-      .aaa-card-grid > div{
-        padding:
-          7px
-          4px!important;
-      }
-
-      .aaa-card-grid small{
-        font-size:6px!important;
-        line-height:1.2!important;
-        letter-spacing:.08em!important;
-      }
-
-      .aaa-card-grid strong{
-        font-size:8px!important;
-        line-height:1.25!important;
-        margin-top:4px!important;
-      }
-
-      .aaa-card-objective{
-        margin-top:7px!important;
-        padding:
-          7px
-          8px!important;
-      }
-
-      .aaa-card-objective span{
-        font-size:6px!important;
-        line-height:1.2!important;
-      }
-
-      .aaa-card-objective strong{
-        font-size:7.5px!important;
-        line-height:1.4!important;
-      }
-    }
+}
 
     /* =========================================================
        LANDSCAPE PHONES
