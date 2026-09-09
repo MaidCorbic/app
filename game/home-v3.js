@@ -75,12 +75,15 @@
   };
 
   const buildHome = () => {
-    const intro = $('intro');
-    if (!intro || intro.dataset.homeV4Built === '1') return;
+   const intro = $('intro');
+if (!intro || intro.dataset.homeV4Built === '1') return;
 
-    intro.dataset.homeV4Built = '1';
-    intro.classList.add('home-v3');
-    intro.replaceChildren();
+const sourceStart = $('start');
+const sourceContinue = $('continue');
+
+intro.dataset.homeV4Built = '1';
+intro.classList.add('home-v3');
+intro.replaceChildren();
 
     const scene = document.createElement('div');
     scene.className = 'home-v4-scene';
@@ -93,8 +96,7 @@
       <div class="home-v4-scan"></div>
       <div class="home-v4-signal"></div>
       <div class="home-v4-float-line"></div>
-      <div class="home-v4-badge">LIVE RELAY CHANNEL // 01</div>
-    `;
+      `;
 
     const shell = document.createElement('div');
     shell.className = 'home-v4-shell';
@@ -156,8 +158,11 @@
               <div class="home-v4-stat"><small>MISSION XP</small><b>+120</b></div>
               <div class="home-v4-stat"><small>BEST RATING</small><b>A</b></div>
             </div>
-          </article>
+                   </article>
+
+          <div class="home-v4-badge">LIVE RELAY CHANNEL // 01</div>
         </section>
+    
       </main>
 
       <footer class="home-v4-bottom">
@@ -188,29 +193,58 @@
       openOptions();
     });
 
-    const start = shell.querySelector('#start');
-    bindOnce(start, 'keydown', event => {
-      if (event.key === 'Enter' || event.code === 'Space') {
-        event.preventDefault();
-        clickExisting('#start');
-      }
-    });
+ const start = shell.querySelector('#start');
+
+bindOnce(start, 'click', event => {
+  event.preventDefault();
+
+  if (!(sourceStart instanceof HTMLElement)) return;
+
+  try {
+    HTMLElement.prototype.click.call(sourceStart);
+  } catch {}
+});
 
     const continueButton = shell.querySelector('#continue');
-    const sourceContinue = $('continue');
+
     const syncContinue = () => {
-      if (!continueButton || !sourceContinue || continueButton === sourceContinue) return;
-      continueButton.classList.toggle('hidden', sourceContinue.classList.contains('hidden') || getComputedStyle(sourceContinue).display === 'none');
+      if (!(continueButton instanceof HTMLElement)) return;
+      if (!(sourceContinue instanceof HTMLElement)) return;
+
+      const hidden =
+        sourceContinue.classList.contains('hidden') ||
+        getComputedStyle(sourceContinue).display === 'none' ||
+        sourceContinue.hasAttribute('hidden');
+
+      continueButton.classList.toggle('hidden', hidden);
     };
+
     syncContinue();
-    if (sourceContinue && sourceContinue !== continueButton && !sourceContinue.dataset.homeV4Observed) {
+
+    if (
+      sourceContinue instanceof HTMLElement &&
+      sourceContinue !== continueButton &&
+      !sourceContinue.dataset.homeV4Observed
+    ) {
       sourceContinue.dataset.homeV4Observed = '1';
-      new MutationObserver(syncContinue).observe(sourceContinue, {attributes:true, attributeFilter:['class','style','hidden']});
+
+      new MutationObserver(syncContinue).observe(
+        sourceContinue,
+        {
+          attributes:true,
+          attributeFilter:['class','style','hidden']
+        }
+      );
     }
 
     bindOnce(continueButton, 'click', event => {
       event.preventDefault();
-      clickExisting('#continue');
+
+      if (!(sourceContinue instanceof HTMLElement)) return;
+
+      try {
+        HTMLElement.prototype.click.call(sourceContinue);
+      } catch {}
     });
   };
 
