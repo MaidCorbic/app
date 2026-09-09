@@ -1205,9 +1205,12 @@ body.is-touch #play .hud-route b{
   text-overflow:ellipsis;
 }
 
-body.is-touch #play .hud-progress{
+@media (orientation:portrait){
 
-  display:none !important;
+  body.is-touch #play .hud-progress{
+
+    display:none !important;
+  }
 }
 
 body.is-touch #play .hud-xp{
