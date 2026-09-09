@@ -1,133 +1,372 @@
 /* Gameplay Audio Start Fix V3
- * Bridges the existing adaptive procedural music to real Play/Continue gestures
- * and late-loading RunnerScene readiness. No external audio assets are required.
+ * Reliable bridge between Play/Continue gestures,
+ * RunnerScene readiness and adaptive procedural music.
+ *
+ * Compatible with existing gameplay hardening.
+ * No external audio assets required.
  */
 (() => {
   'use strict';
 
-  if (window.__relayGameplayAudioStartV3) return;
+  if (window.__relayGameplayAudioStartV3) {
+    return;
+  }
+
   window.__relayGameplayAudioStartV3 = true;
+
+  let retryTimer = 0;
+  let retryCount = 0;
+  let startingPromise = null;
+  let lastGestureTime = 0;
+
+  const MAX_RETRIES = 60;
+  const RETRY_DELAY = 150;
+  const GESTURE_DEBOUNCE = 450;
 
   const readState = () => {
     try {
       const value = JSON.parse(
-        localStorage.getItem('relay-runner-state') || 'null'
+        localStorage.getItem(
+          'relay-runner-state'
+        ) || 'null'
       );
 
-      return value && typeof value === 'object' ? value : {};
+      return value &&
+        typeof value === 'object'
+        ? value
+        : {};
     } catch {
       return {};
     }
   };
 
-  const apply = () => {
-    const music = window.relayAdaptiveMusic;
+  const getMusic = () => {
+    return window.relayAdaptiveMusic || null;
+  };
 
-    if (!music) return false;
+  const getScene = () => {
+    return window.__relayRunnerScene || null;
+  };
+
+  const isGameplayVisible = () => {
+    const play = document.getElementById('play');
+    const intro = document.getElementById('intro');
+
+    const playVisible =
+      !!play &&
+      !play.hidden &&
+      !play.classList.contains('hidden') &&
+      getComputedStyle(play).display !== 'none';
+
+    const introVisible =
+      !!intro &&
+      !intro.hidden &&
+      !intro.classList.contains('hidden') &&
+      getComputedStyle(intro).display !== 'none';
+
+    return playVisible && !introVisible;
+  };
+
+  const bindScene = () => {
+    const music = getMusic();
+    const scene = getScene();
+
+    if (
+      !music ||
+      !scene ||
+      typeof music.bind !== 'function'
+    ) {
+      return false;
+    }
 
     try {
-      const state = readState();
-
-      if (state.muted === true) {
-        music.setEnabled?.(false);
-        return true;
-      }
-
-      const volume = Number.isFinite(Number(state.musicVolume))
-        ? Number(state.musicVolume)
-        : 0.55;
-
-      music.setEnabled?.(true);
-      music.setVolume?.(volume);
-
-      const unlock = music.unlock;
-
-      if (typeof unlock === 'function') {
-        Promise.resolve(unlock.call(music))
-          .then(ok => {
-            try {
-              if (
-                ok !== false &&
-                document
-                  .getElementById('intro')
-                  ?.classList.contains('hidden')
-              ) {
-                music.start?.();
-              }
-            } catch {}
-          })
-          .catch(() => {});
-      } else if (
-        document
-          .getElementById('intro')
-          ?.classList.contains('hidden')
-      ) {
-        music.start?.();
-      }
-
+      music.bind(scene);
       return true;
     } catch {
       return false;
     }
   };
 
-let startTimer = 0;
-let starting = false;
+  const applySettings = music => {
+    const state = readState();
 
-const start = () => {
-  if (starting) return;
+    if (state.muted === true) {
+      music.setEnabled?.(false);
+      return false;
+    }
 
-  const current = window.relayAdaptiveMusic?.getState?.();
+    const rawVolume = Number(
+      state.musicVolume
+    );
 
-  if (current?.running || current?.enabled === false) {
-    return;
-  }
+    const volume =
+      Number.isFinite(rawVolume)
+        ? Math.max(
+            0,
+            Math.min(
+              0.85,
+              rawVolume
+            )
+          )
+        : 0.55;
 
-  starting = true;
+    music.setEnabled?.(true);
+    music.setVolume?.(volume);
 
-  let tries = 0;
+    return true;
+  };
 
-  const retry = () => {
-    const applied = apply();
-    const state = window.relayAdaptiveMusic?.getState?.();
+  const stopRetry = () => {
+    if (retryTimer) {
+      window.clearTimeout(
+        retryTimer
+      );
 
-    if (
-      state?.running ||
-      state?.enabled === false ||
-      ++tries >= 40
-    ) {
-      starting = false;
-      startTimer = 0;
+      retryTimer = 0;
+    }
+
+    retryCount = 0;
+  };
+
+  const unlockAndStart = async () => {
+    const music = getMusic();
+
+    if (!music) {
+      return false;
+    }
+
+    if (!isGameplayVisible()) {
+      return false;
+    }
+
+    const settingsApplied =
+      applySettings(music);
+
+    if (!settingsApplied) {
+      return true;
+    }
+
+    /*
+     * RunnerScene must be known before
+     * adaptive music is started.
+     */
+    bindScene();
+
+    const before =
+      music.getState?.();
+
+    if (before?.running) {
+      return true;
+    }
+
+    try {
+      if (
+        typeof music.unlock === 'function'
+      ) {
+        const unlocked =
+          await music.unlock();
+
+        if (unlocked === false) {
+          return false;
+        }
+      }
+
+      /*
+       * Scene may have become available
+       * while AudioContext was resuming.
+       */
+      bindScene();
+
+      const after =
+        music.getState?.();
+
+      if (after?.running) {
+        return true;
+      }
+
+      music.start?.();
+
+      const finalState =
+        music.getState?.();
+
+      return !!finalState?.running;
+    } catch {
+      return false;
+    }
+  };
+
+  const scheduleRetry = () => {
+    if (retryTimer) {
       return;
     }
 
-    startTimer = window.setTimeout(retry, 150);
+    const retry = async () => {
+      retryTimer = 0;
+
+      const music = getMusic();
+
+      if (!music) {
+        if (
+          ++retryCount >=
+          MAX_RETRIES
+        ) {
+          retryCount = 0;
+          return;
+        }
+
+        retryTimer =
+          window.setTimeout(
+            retry,
+            RETRY_DELAY
+          );
+
+        return;
+      }
+
+      const state =
+        music.getState?.();
+
+      if (
+        state?.running ||
+        state?.enabled === false
+      ) {
+        stopRetry();
+        return;
+      }
+
+      const started =
+        await unlockAndStart();
+
+      if (
+        started ||
+        music.getState?.()?.running
+      ) {
+        stopRetry();
+        return;
+      }
+
+      if (
+        ++retryCount >=
+        MAX_RETRIES
+      ) {
+        stopRetry();
+        return;
+      }
+
+      retryTimer =
+        window.setTimeout(
+          retry,
+          RETRY_DELAY
+        );
+    };
+
+    retry();
   };
 
-  retry();
-};
-  const isPlayGesture = event => {
-    const target = event.target;
+  const start = () => {
+    if (startingPromise) {
+      return startingPromise;
+    }
 
-    if (!(target instanceof Element)) return false;
+    startingPromise =
+      unlockAndStart()
+        .then(started => {
+          if (started) {
+            stopRetry();
+            return true;
+          }
 
-    return !!target.closest(
-      '#start,' +
-      '#continue,' +
-      '[data-v3-play],' +
-      '[data-v3-continue],' +
-      '[data-action="play"],' +
-      '[data-action="continue"]'
-    );
+          scheduleRetry();
+          return false;
+        })
+        .catch(() => {
+          scheduleRetry();
+          return false;
+        })
+        .finally(() => {
+          startingPromise = null;
+        });
+
+    return startingPromise;
+  };
+
+  const handleGesture = event => {
+    if (
+      event.type === 'keydown' &&
+      event.repeat
+    ) {
+      return;
+    }
+
+    const now =
+      performance.now();
+
+    /*
+     * Mobile browsers may emit
+     * pointerdown + touchstart for
+     * one physical gesture.
+     */
+    if (
+      event.type !== 'keydown' &&
+      now - lastGestureTime <
+        GESTURE_DEBOUNCE
+    ) {
+      return;
+    }
+
+    if (
+      event.type !== 'keydown'
+    ) {
+      lastGestureTime = now;
+    }
+
+    const target =
+      event.target instanceof Element
+        ? event.target
+        : null;
+
+    const relevant =
+      target?.closest?.(
+        '#start,' +
+        '#continue,' +
+        '#launchJob,' +
+        '#again,' +
+        '#nextMission,' +
+        '#retry,' +
+        '[data-v3-play],' +
+        '[data-v3-continue],' +
+        '[data-action="play"],' +
+        '[data-action="continue"],' +
+        '[data-mobile-action]'
+      );
+
+    const keyboardPlay =
+      event.type === 'keydown' &&
+      (
+        event.key === 'Enter' ||
+        event.code === 'Space'
+      );
+
+    if (
+      relevant ||
+      keyboardPlay
+    ) {
+      start();
+    }
   };
 
   document.addEventListener(
     'pointerdown',
-    event => {
-      if (isPlayGesture(event)) {
-        start();
-      }
-    },
+    handleGesture,
+    {
+      capture: true,
+      passive: true
+    }
+  );
+
+  document.addEventListener(
+    'touchstart',
+    handleGesture,
     {
       capture: true,
       passive: true
@@ -136,11 +375,7 @@ const start = () => {
 
   document.addEventListener(
     'keydown',
-    event => {
-      if (event.key === 'Enter' || event.code === 'Space') {
-        start();
-      }
-    },
+    handleGesture,
     {
       capture: true,
       passive: true
@@ -149,23 +384,57 @@ const start = () => {
 
   window.addEventListener(
     'relay:runner-scene-ready',
-    () => start(),
+    event => {
+      const scene =
+        event?.detail?.scene ||
+        window.__relayRunnerScene ||
+        null;
+
+      if (scene) {
+        window.__relayRunnerScene =
+          scene;
+      }
+
+      /*
+       * Important order:
+       * 1. Save scene
+       * 2. Bind adaptive music
+       * 3. Start
+       */
+      bindScene();
+      start();
+    },
     {
       passive: true
     }
   );
 
+  /*
+   * Late boot fallback.
+   */
   window.setTimeout(() => {
-    if (
-      document
-        .getElementById('intro')
-        ?.classList.contains('hidden')
-    ) {
+    if (isGameplayVisible()) {
       start();
     }
   }, 500);
 
+  /*
+   * Public compatibility API.
+   *
+   * V3 is the canonical API because other
+   * existing modules already call it.
+   */
   window.relayGameplayAudioStartV3 = {
-    start
+    start,
+    bindScene
+  };
+
+  /*
+   * Optional V4 alias for compatibility with
+   * anything that may already reference V4.
+   */
+  window.relayGameplayAudioStartV4 = {
+    start,
+    bindScene
   };
 })();
