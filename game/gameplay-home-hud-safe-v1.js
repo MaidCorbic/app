@@ -456,15 +456,25 @@
         continue;
       }
 
+if (
+  /DYNAMIC\s+CROWD/.test(normalized) ||
+  /^V10\b/.test(normalized) ||
+  /MISSION\s+INTELLIGENCE/.test(normalized) ||
+  /FEEDBACK/.test(normalized) ||
+  /LIVE\s+MISSION/.test(normalized)
+) {
+  try {
+    child.disableInteractive?.();
+    child.setVisible?.(false);
+    child.setAlpha?.(0);
+    child.setActive?.(false);
 
-      if (
-        /DYNAMIC\s+CROWD/.test(normalized) ||
-        /^V10\b/.test(normalized) ||
-        /MISSION\s+INTELLIGENCE/.test(normalized) ||
-        /FEEDBACK/.test(normalized) ||
-        /LIVE\s+MISSION/.test(normalized)
-      ) {
-
+    child.parentContainer?.disableInteractive?.();
+    child.parentContainer?.setVisible?.(false);
+    child.parentContainer?.setAlpha?.(0);
+    child.parentContainer?.setActive?.(false);
+  } catch {}
+}
         try {
 
           child.disableInteractive?.();
