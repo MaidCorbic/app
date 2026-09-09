@@ -3,6 +3,7 @@ import './systems/audio-context-gesture-gate-v1.js';
 import '../flight-hud-v1.js';
 import './systems/web-zoom-lock-v1.js';
 import './systems/enemy-dialogue-v1.css';
+import '../gameplay-keyboard-hud-v1.css';
 
 import { RunnerScene } from './scenes/RunnerScene.js';
 
@@ -17,6 +18,7 @@ import { installGrappleTraversal } from './systems/grapple-traversal-v1.js';
 import { installTeleportNetwork } from './systems/teleport-network-v1.js';
 import { installBiohazardContamination } from './systems/biohazard-contamination-v1.js';
 import { installAutonomousCharacter } from './systems/autonomous-character-v1.js';
+import '../gameplay-keyboard-hud-v1.js';
 
 /*
  * PLAYER VISUAL
