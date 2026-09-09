@@ -22,10 +22,8 @@
   const isGameplaySceneActive = () => {
     const current = window.__relayRunnerScene;
     if (!current) return false;
-    if (current.scene?.isActive) {
-      return current.scene.isActive('runner');
-    }
-    return true;
+    if (typeof current.scene?.isActive !== 'function') return false;
+    return Boolean(current.scene.isActive('runner'));
   };
 
   const isTypingTarget = target => {
@@ -148,11 +146,8 @@
 
     const tick = () => {
       wireSceneLifecycle();
-      if (isGameplaySceneActive()) {
-        show();
-      } else {
-        hide();
-      }
+      if (isGameplaySceneActive()) show();
+      else hide();
     };
 
     window.setInterval(tick, 350);
