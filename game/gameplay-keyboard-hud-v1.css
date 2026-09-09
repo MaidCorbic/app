@@ -151,6 +151,14 @@
     0 0 34px rgba(255,208,110,.09);
 }
 
+/* HOME ONLY — hide gameplay keyboard and faction dialogue while Home is visible. */
+body:has(#intro.home-v3:not(.hidden)) #relay-gameplay-keyboard-hud,
+body:has(#intro.home-v3:not(.hidden)) .relay-faction-dialogue {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 @media (max-width: 700px), (hover: none) and (pointer: coarse) {
   #relay-gameplay-keyboard-hud {
     display: none !important;
