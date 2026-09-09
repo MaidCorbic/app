@@ -532,6 +532,9 @@ function typeMission() {
     return;
   }
 
+  /*
+   * Read the canonical mission objective.
+   */
   const missionState =
     scene?.__missionObjectiveState || null;
 
@@ -562,20 +565,20 @@ function typeMission() {
   const previousMissionId =
     badge.dataset.runtimeMissionId || '';
 
-  const previousText =
-    badge.dataset.runtimeTyped || '';
-
   const previousSource =
     badge.dataset.runtimeSource || '';
 
+  const previousTyped =
+    badge.dataset.runtimeTyped || '';
+
   /*
-   * Same mission and already completed.
+   * Same mission already finished.
    * Do not restart the typewriter.
    */
   if (
     previousMissionId === String(missionId) &&
     previousSource === current &&
-    previousText === current
+    previousTyped === current
   ) {
     target.textContent = current;
 
@@ -587,19 +590,18 @@ function typeMission() {
   }
 
   /*
-   * Cancel a previous typewriter.
+   * A typewriter is already running.
+   * Never restart it from the 180ms runtime poll.
    */
-  if (badge.__runtimeTypeTimer) {
-    clearInterval(
-      badge.__runtimeTypeTimer
-    );
-
-    badge.__runtimeTypeTimer = 0;
+  if (
+    badge.__runtimeTypeTimer
+  ) {
+    return;
   }
 
-  target.dataset.missionSource =
-    current;
-
+  /*
+   * Store current mission before typing starts.
+   */
   badge.dataset.runtimeMissionId =
     String(missionId);
 
@@ -609,12 +611,15 @@ function typeMission() {
   badge.dataset.runtimeTyped =
     '';
 
-  badge.classList.add(
-    'is-runtime-typing'
-  );
+  target.dataset.missionSource =
+    current;
 
   badge.classList.remove(
     'is-runtime-complete'
+  );
+
+  badge.classList.add(
+    'is-runtime-typing'
   );
 
   target.textContent = '';
@@ -624,7 +629,11 @@ function typeMission() {
   badge.__runtimeTypeTimer =
     window.setInterval(
       () => {
-        if (!gameplay()) {
+        if (
+          !gameplay() ||
+          !badge.isConnected ||
+          !target.isConnected
+        ) {
           clearInterval(
             badge.__runtimeTypeTimer
           );
@@ -643,7 +652,9 @@ function typeMission() {
         target.textContent =
           current.slice(0, i);
 
-        if (i >= current.length) {
+        if (
+          i >= current.length
+        ) {
           clearInterval(
             badge.__runtimeTypeTimer
           );
@@ -677,6 +688,7 @@ function typeMission() {
       TYPE_SPEED_MS
     );
 }
+
 
   /*
    * Optimized countdown.
