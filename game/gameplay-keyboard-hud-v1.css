@@ -1,0 +1,192 @@
+/* Gameplay Keyboard HUD V1
+ * Presentation-only control strip. Does not own or emit gameplay input.
+ */
+
+#relay-gameplay-keyboard-hud {
+  --kb-accent: #b86cff;
+  --kb-accent-soft: rgba(184,108,255,.18);
+  --kb-accent-faint: rgba(184,108,255,.08);
+  --kb-gold: #ffd06e;
+  --kb-text: #f7fbff;
+  --kb-muted: rgba(224,238,248,.62);
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom) + 8px);
+  transform: translateX(-50%);
+  z-index: 1080;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(7px, 1vw, 12px);
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 8px 10px 9px;
+  box-sizing: border-box;
+  border: 1px solid rgba(184,108,255,.28);
+  border-radius: 15px;
+  background:
+    linear-gradient(180deg, rgba(8,10,19,.94), rgba(4,7,14,.88));
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.055),
+    inset 0 -1px rgba(0,0,0,.35),
+    0 10px 26px rgba(0,0,0,.34),
+    0 0 28px rgba(184,108,255,.08);
+  backdrop-filter: blur(10px) saturate(1.15);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  pointer-events: none;
+  user-select: none;
+}
+
+#relay-gameplay-keyboard-hud[hidden] {
+  display: none;
+}
+
+#relay-gameplay-keyboard-hud::before {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(184,108,255,.72), transparent);
+  box-shadow: 0 0 14px rgba(184,108,255,.28);
+}
+
+.relay-keyboard-key {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 52px;
+}
+
+.relay-keycap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 40px;
+  box-sizing: border-box;
+  border: 1px solid rgba(184,108,255,.52);
+  border-radius: 9px;
+  background:
+    linear-gradient(145deg, rgba(25,19,39,.98), rgba(8,10,18,.98));
+  color: var(--kb-text);
+  font: 900 15px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .05em;
+  text-shadow: 0 0 10px rgba(184,108,255,.28);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.07),
+    inset 0 -3px rgba(0,0,0,.24),
+    0 4px 0 rgba(48,28,73,.62),
+    0 0 13px rgba(184,108,255,.1);
+  transition:
+    transform 85ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.relay-keycap::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: 4px;
+  height: 1px;
+  background: rgba(255,255,255,.08);
+  border-radius: 999px;
+}
+
+.relay-keycap::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid var(--kb-accent-faint);
+  border-radius: 6px;
+  opacity: .8;
+}
+
+.relay-key-label {
+  width: 64px;
+  color: var(--kb-muted);
+  font: 700 8px/1.12 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .07em;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.relay-keyboard-key[data-key='E'] .relay-keycap,
+.relay-keyboard-key[data-key='F'] .relay-keycap {
+  border-color: rgba(255,208,110,.58);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.07),
+    inset 0 -3px rgba(0,0,0,.24),
+    0 4px 0 rgba(74,54,22,.58),
+    0 0 14px rgba(255,208,110,.1);
+}
+
+.relay-keyboard-key[data-key='E'] .relay-key-label,
+.relay-keyboard-key[data-key='F'] .relay-key-label {
+  color: rgba(255,208,110,.72);
+}
+
+.relay-keyboard-key.is-active .relay-keycap {
+  transform: translateY(3px) scale(.97);
+  border-color: rgba(184,108,255,.96);
+  color: #ffffff;
+  background: linear-gradient(145deg, rgba(47,28,70,.99), rgba(14,11,25,.99));
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.1),
+    inset 0 -1px rgba(0,0,0,.28),
+    0 1px 0 rgba(48,28,73,.72),
+    0 0 22px rgba(184,108,255,.4),
+    0 0 44px rgba(184,108,255,.12);
+}
+
+.relay-keyboard-key[data-key='E'].is-active .relay-keycap,
+.relay-keyboard-key[data-key='F'].is-active .relay-keycap {
+  border-color: rgba(255,224,150,1);
+  background: linear-gradient(145deg, rgba(74,53,20,.98), rgba(21,16,8,.99));
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.1),
+    inset 0 -1px rgba(0,0,0,.28),
+    0 1px 0 rgba(74,54,22,.78),
+    0 0 22px rgba(255,208,110,.38),
+    0 0 44px rgba(255,208,110,.1);
+}
+
+@media (max-width: 700px), (hover: none) and (pointer: coarse) {
+  #relay-gameplay-keyboard-hud {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .relay-keycap {
+    transition: none;
+  }
+}
+
+@media (max-width: 900px) and (min-width: 701px) {
+  #relay-gameplay-keyboard-hud {
+    gap: 7px;
+    padding-inline: 8px;
+  }
+
+  .relay-keyboard-key {
+    min-width: 46px;
+  }
+
+  .relay-keycap {
+    width: 44px;
+    height: 38px;
+  }
+
+  .relay-key-label {
+    width: 58px;
+    font-size: 7px;
+  }
+}
