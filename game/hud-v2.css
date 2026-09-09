@@ -587,19 +587,20 @@
 
 
 /* =========================================================
-   TOUCH / TABLET
+   MOBILE PORTRAIT
+   Clean gameplay
    ========================================================= */
 
-@media(
+@media (
   max-width:880px
-),
-(hover:none) and (pointer:coarse){
+) and (orientation:portrait){
 
   #play .hud{
 
     padding:12px 14px;
 
     align-items:flex-start;
+
   }
 
 
@@ -610,30 +611,37 @@
     padding:8px 10px;
 
     border-radius:9px;
+
   }
 
 
   #play .hud-route b{
 
     font-size:10px;
+
   }
 
+
+  /* Signals hidden only in portrait */
 
   #play .hud-progress{
 
     display:none;
+
   }
 
 
   #play .hud-actions{
 
     gap:7px;
+
   }
 
 
   #play .hud-xp{
 
     display:none;
+
   }
 
 
@@ -646,109 +654,189 @@
     min-width:44px;
 
     min-height:40px;
+
   }
 
 
   #play .world-marker{
 
     border-radius:7px;
+
   }
+
 }
 
 
 /* =========================================================
-   SMALL PHONES
+   MOBILE LANDSCAPE GAMEPLAY HUD
+   ROUTE | SIGNALS | XP + PAUSE
    ========================================================= */
 
-@media(max-width:430px){
+@media (
+  max-width:880px
+) and (orientation:landscape){
+
+  #play .hud{
+
+    display:grid !important;
+
+    width:100%;
+
+    padding:7px 10px !important;
+
+    gap:8px;
+
+    grid-template-columns:
+      minmax(0,1fr)
+      minmax(150px,24vw)
+      minmax(0,1fr);
+
+    align-items:start;
+
+    box-sizing:border-box;
+
+  }
+
+
+  /* =======================================================
+     LEFT — ROUTE
+     ======================================================= */
 
   #play .hud-route{
 
-    max-width:52vw;
+    grid-column:1;
+
+    justify-self:start;
+
+    min-width:0;
+
+    max-width:100%;
+
+    padding:6px 9px;
+
+    border-radius:8px;
+
   }
 
 
   #play .hud-route b{
 
-    display:block;
+    font-size:9px;
 
-    max-width:36vw;
+    max-width:100%;
 
     overflow:hidden;
 
     text-overflow:ellipsis;
 
     white-space:nowrap;
+
   }
 
 
-  #play .hud-actions{
-
-    gap:6px;
-  }
-
-
-  #play .hud-actions>button{
-
-    width:42px;
-
-    height:38px;
-
-    min-width:42px;
-
-    min-height:38px;
-  }
-
-
-  #play .world-marker{
-
-    max-width:72vw;
-  }
-}
-
-
-/* =========================================================
-   SHORT LANDSCAPE
-   ========================================================= */
-
-@media(
-  max-height:480px
-)
-and (orientation:landscape){
-
-  #play .hud{
-
-    padding:8px 12px;
-  }
-
-
-  #play .hud-route{
-
-    padding:6px 9px;
-  }
-
+  /* =======================================================
+     CENTER — SIGNALS
+     ======================================================= */
 
   #play .hud-progress{
 
-    width:clamp(160px,24vw,330px);
+    grid-column:2;
 
-    min-width:160px;
+    justify-self:center;
 
-    min-height:42px;
+    display:grid !important;
 
-    padding:7px 9px;
+    width:100% !important;
+
+    min-width:150px;
+
+    max-width:330px;
+
+    min-height:40px;
+
+    padding:6px 9px;
+
+    border-radius:9px;
+
+    box-sizing:border-box;
+
+  }
+
+
+  #play .hud-progress>small{
+
+    font-size:7px;
+
+  }
+
+
+  #play .hud-progress>span{
+
+    font-size:11px;
+
+  }
+
+
+  #play .hud-progress>div{
+
+    height:5px;
+
+    min-height:5px;
+
+  }
+
+
+  /* =======================================================
+     RIGHT — XP + PAUSE
+     ======================================================= */
+
+  #play .hud-actions{
+
+    grid-column:3;
+
+    justify-self:end;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:flex-end;
+
+    gap:6px;
+
   }
 
 
   #play .hud-xp{
 
-    padding:5px 7px;
+    display:flex !important;
 
     min-width:52px;
+
+    padding:5px 7px;
+
+    border-radius:8px;
+
+  }
+
+
+  #play .hud-xp small{
+
+    font-size:6px;
+
+  }
+
+
+  #play .hud-xp b{
+
+    font-size:11px;
+
   }
 
 
   #play .hud-actions>button{
+
+    display:grid !important;
 
     width:40px;
 
@@ -757,13 +845,130 @@ and (orientation:landscape){
     min-width:40px;
 
     min-height:36px;
+
+    border-radius:8px;
+
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE LANDSCAPE
+   ========================================================= */
+
+@media (
+  max-width:700px
+) and (
+  max-height:430px
+) and (
+  orientation:landscape
+){
+
+  #play .hud{
+
+    padding:5px 7px !important;
+
+    gap:5px;
+
+    grid-template-columns:
+      minmax(0,1fr)
+      minmax(125px,27vw)
+      minmax(0,1fr);
+
   }
 
 
-  #play .world-marker{
+  #play .hud-route{
 
-    bottom:118px;
+    padding:5px 7px;
+
   }
+
+
+  #play .hud-route small{
+
+    font-size:6px;
+
+  }
+
+
+  #play .hud-route b{
+
+    font-size:8px;
+
+  }
+
+
+  #play .hud-progress{
+
+    min-width:125px;
+
+    min-height:34px;
+
+    padding:5px 7px;
+
+  }
+
+
+  #play .hud-progress>small{
+
+    font-size:6px;
+
+  }
+
+
+  #play .hud-progress>span{
+
+    font-size:10px;
+
+  }
+
+
+  #play .hud-progress>div{
+
+    height:4px;
+
+    min-height:4px;
+
+  }
+
+
+  #play .hud-xp{
+
+    min-width:44px;
+
+    padding:4px 5px;
+
+  }
+
+
+  #play .hud-xp small{
+
+    font-size:5px;
+
+  }
+
+
+  #play .hud-xp b{
+
+    font-size:9px;
+
+  }
+
+
+  #play .hud-actions>button{
+
+    width:34px;
+
+    height:32px;
+
+    min-width:34px;
+
+    min-height:32px;
+
+  }
+
 }
 
 
@@ -807,4 +1012,4 @@ and (orientation:landscape){
 
     transform:scale(1);
   }
-}
+     }
