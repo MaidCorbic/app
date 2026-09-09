@@ -661,14 +661,47 @@
       letter-spacing:.14em;
     }
 
-    #${ROOT_ID} .rv5-map {
+    #${ROOT_ID} .rv5-map{
       position:relative;
       min-height:0;
       overflow:hidden;
-      background:#02080d;
+
+      background:
+        radial-gradient(
+          circle at 50% 48%,
+          rgba(101,232,255,.08),
+          transparent 52%
+        ),
+        linear-gradient(
+          180deg,
+          #061720 0%,
+          #020b11 52%,
+          #010508 100%
+        );
+
+      border-top:1px solid rgba(101,232,255,.18);
+      border-bottom:1px solid rgba(101,232,255,.18);
+
+      box-shadow:
+        inset 0 0 55px rgba(101,232,255,.045),
+        inset 0 0 120px rgba(0,0,0,.36),
+        0 0 35px rgba(0,0,0,.25);
     }
 
-    #${ROOT_ID} .rv5-svg {
+    #${ROOT_ID} .rv5-map::after{
+      content:"";
+      position:absolute;
+      inset:12px;
+      pointer-events:none;
+      z-index:5;
+
+      border:1px solid rgba(255,255,255,.025);
+
+      box-shadow:
+        inset 0 0 28px rgba(0,0,0,.22);
+    }
+
+    #${ROOT_ID} .rv5-svg{
       position:absolute;
       inset:0;
 
@@ -676,6 +709,9 @@
       height:100%;
 
       display:block;
+
+      object-fit:contain;
+      object-position:center center;
     }
 
     #${ROOT_ID} .rv5-scan {
@@ -715,25 +751,25 @@
       }
     }
 
-#${ROOT_ID} .rv5-vignette {
-  position:absolute;
-  inset:0;
-  pointer-events:none;
+    #${ROOT_ID} .rv5-vignette {
+      position:absolute;
+      inset:0;
+      pointer-events:none;
 
-  background:
-    radial-gradient(
-      ellipse at center,
-      transparent 55%,
-      rgba(0,0,0,.38) 100%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(0,0,0,.12),
-      transparent 18%,
-      transparent 82%,
-      rgba(0,0,0,.12)
-    );
-}
+      background:
+        radial-gradient(
+          ellipse at center,
+          transparent 55%,
+          rgba(0,0,0,.38) 100%
+        ),
+        linear-gradient(
+          90deg,
+          rgba(0,0,0,.12),
+          transparent 18%,
+          transparent 82%,
+          rgba(0,0,0,.12)
+        );
+    }
 
     #${ROOT_ID} .rv5-corner {
       position:absolute;
@@ -894,28 +930,28 @@
 
       background:rgba(1,6,10,.98);
     }
-    
-#${ROOT_ID} .rv5-objective{
-  display:flex;
-  align-items:center;
-  gap:14px;
 
-  min-width:0;
+    #${ROOT_ID} .rv5-objective{
+      display:flex;
+      align-items:center;
+      gap:14px;
 
-  padding:9px 13px;
+      min-width:0;
 
-  border:1px solid rgba(101,232,255,.12);
+      padding:9px 13px;
 
-  background:
-    linear-gradient(
-      135deg,
-      rgba(101,232,255,.055),
-      rgba(101,232,255,.012)
-    );
+      border:1px solid rgba(101,232,255,.12);
 
-  box-shadow:
-    inset 0 0 20px rgba(101,232,255,.025);
-}
+      background:
+        linear-gradient(
+          135deg,
+          rgba(101,232,255,.055),
+          rgba(101,232,255,.012)
+        );
+
+      box-shadow:
+        inset 0 0 20px rgba(101,232,255,.025);
+    }
 
     #${ROOT_ID} .rv5-objective-icon {
       width:32px;
@@ -987,6 +1023,11 @@
       box-shadow:0 0 10px var(--green);
     }
 
+    #${ROOT_ID} .rv5-svg text{
+      pointer-events:none;
+      user-select:none;
+    }
+
     /* SVG */
 
     #${ROOT_ID} .grid {
@@ -1001,10 +1042,11 @@
       opacity:.4;
     }
 
-    #${ROOT_ID} .platform {
-      fill:#102333;
-      stroke:#42677b;
-      stroke-width:1.3;
+    #${ROOT_ID} .platform{
+      fill:#0d2837;
+      stroke:#5c899b;
+      stroke-width:1.25;
+      filter:drop-shadow(0 0 4px rgba(77,210,235,.08));
     }
 
     #${ROOT_ID} .edge {
@@ -1012,27 +1054,40 @@
       opacity:.3;
     }
 
-    #${ROOT_ID} .route-halo {
+    #${ROOT_ID} .route-halo{
       fill:none;
-      stroke:var(--cyan);
-      stroke-width:15;
-      opacity:.07;
+      stroke:#61e8ff;
+      stroke-width:26;
+      opacity:.14;
+
+      filter:
+        drop-shadow(
+          0 0 10px
+          rgba(101,232,255,.30)
+        );
     }
 
-    #${ROOT_ID} .route {
+    #${ROOT_ID} .route{
       fill:none;
-      stroke:var(--cyan);
-      stroke-width:3.5;
+
+      stroke:#6cf1ff;
+      stroke-width:5;
       stroke-linecap:round;
       stroke-linejoin:round;
-      stroke-dasharray:11 8;
 
-      animation:rv5route 1.3s linear infinite;
+      stroke-dasharray:16 10;
+
+      animation:
+        rv5route 1.05s linear infinite;
 
       filter:
         drop-shadow(
           0 0 5px
-          rgba(101,232,255,.8)
+          rgba(101,232,255,.95)
+        )
+        drop-shadow(
+          0 0 14px
+          rgba(101,232,255,.40)
         );
     }
 
@@ -1042,39 +1097,94 @@
       }
     }
 
-    #${ROOT_ID} .route-core {
+    #${ROOT_ID} .route-core{
       fill:none;
-      stroke:#effcff;
-      stroke-width:1;
-      opacity:.75;
+
+      stroke:#f4fdff;
+      stroke-width:1.3;
+      opacity:.86;
     }
 
-    #${ROOT_ID} .start {
-      fill:var(--green);
-      stroke:#efffd9;
-      stroke-width:2;
-    }
+    /* MAP MARKERS */
 
-    #${ROOT_ID} .goal {
-      fill:var(--yellow);
-      stroke:#fff0c7;
-      stroke-width:2;
-    }
+    #${ROOT_ID} .start{
+      fill:#8df59b;
 
-    #${ROOT_ID} .player {
-      fill:#effcff;
-      stroke:var(--cyan);
-      stroke-width:2;
-    }
+      stroke:#f4ffe7;
+      stroke-width:3;
 
-    #${ROOT_ID} .player-ring {
-      fill:none;
-      stroke:var(--cyan);
-      stroke-width:1.5;
-      stroke-dasharray:4 5;
+      filter:
+        drop-shadow(
+          0 0 6px
+          rgba(141,245,155,.95)
+        )
+        drop-shadow(
+          0 0 16px
+          rgba(141,245,155,.38)
+        );
 
-      animation:rv5ring 2s linear infinite;
+      transform-box:fill-box;
       transform-origin:center;
+    }
+
+    #${ROOT_ID} .goal{
+      fill:#ffd76a;
+
+      stroke:#fff8ce;
+      stroke-width:3;
+
+      filter:
+        drop-shadow(
+          0 0 8px
+          rgba(255,215,106,.95)
+        )
+        drop-shadow(
+          0 0 20px
+          rgba(255,215,106,.42)
+        );
+
+      transform-box:fill-box;
+      transform-origin:center;
+    }
+
+    #${ROOT_ID} .player{
+      fill:#ffffff;
+      stroke:#64ebff;
+      stroke-width:3;
+
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(100,235,255,.8)
+        )
+        drop-shadow(
+          0 0 13px
+          rgba(100,235,255,.28)
+        );
+    }
+
+    #${ROOT_ID} .player-ring{
+      fill:none;
+
+      stroke:#6ff3ff;
+      stroke-width:2.8;
+
+      stroke-dasharray:7 5;
+
+      opacity:1;
+
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(100,235,255,.9)
+        )
+        drop-shadow(
+          0 0 15px
+          rgba(100,235,255,.32)
+        );
+
+      animation:
+        rv5ring 1.35s linear infinite;
     }
 
     @keyframes rv5ring {
@@ -1083,39 +1193,124 @@
       }
     }
 
-    #${ROOT_ID} .checkpoint {
-      fill:none;
-      stroke:var(--cyan);
-      stroke-width:1.5;
+    #${ROOT_ID} .checkpoint{
+      fill:rgba(100,235,255,.035);
+
+      stroke:#64ebff;
+      stroke-width:2;
+
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(100,235,255,.35)
+        );
     }
 
-    #${ROOT_ID} .checkpoint-dot {
-      fill:var(--cyan);
+    #${ROOT_ID} .checkpoint-dot{
+      fill:#ffffff;
+
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(100,235,255,.80)
+        );
     }
 
-    #${ROOT_ID} .danger-object {
-      fill:#301a27;
-      stroke:var(--red);
-      stroke-width:1.5;
+    #${ROOT_ID} .danger-object{
+      fill:#3a1725;
+
+      stroke:#ff6577;
+      stroke-width:2;
+
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(255,104,119,.32)
+        );
     }
 
-    #${ROOT_ID} .signal {
-      fill:var(--yellow);
+    #${ROOT_ID} .signal{
+      fill:#ffd76a;
+
+      filter:
+        drop-shadow(
+          0 0 6px
+          rgba(255,215,106,.55)
+        );
     }
 
-    #${ROOT_ID} .label {
-      fill:#7895a4;
-      font-family:ui-monospace,monospace;
-      font-size:9px;
-      font-weight:800;
-      letter-spacing:.1em;
+    /* MAP TEXT */
+
+    #${ROOT_ID} .label{
+      fill:#e9fbff;
+
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.08em;
+
+      paint-order:stroke;
+      stroke:#02070b;
+      stroke-width:3px;
+      stroke-linejoin:round;
+
+      text-shadow:
+        0 2px 8px rgba(0,0,0,.95);
+
+      pointer-events:none;
+      user-select:none;
     }
 
-    #${ROOT_ID} .guide {
-      fill:var(--cyan);
-      font-family:ui-monospace,monospace;
-      font-size:8px;
-      font-weight:900;
+    #${ROOT_ID} #rv5-player text{
+      fill:#ffffff;
+
+      font-size:14px;
+      font-weight:950;
+      letter-spacing:.04em;
+
+      paint-order:stroke;
+      stroke:#021018;
+      stroke-width:4px;
+      stroke-linejoin:round;
+
+      filter:
+        drop-shadow(
+          0 0 6px
+          rgba(101,232,255,.95)
+        )
+        drop-shadow(
+          0 0 14px
+          rgba(101,232,255,.38)
+        );
+    }
+
+    #${ROOT_ID} .guide{
+      fill:#72efff;
+
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.02em;
+
+      paint-order:stroke;
+
+      stroke:#02070b;
+      stroke-width:3px;
+      stroke-linejoin:round;
     }
 
     #${ROOT_ID}.opening .rv5-shell {
@@ -1283,7 +1478,7 @@
       }
     }
 
-        /* ============================================================
+    /* ============================================================
        FINAL AAA READABILITY / MAP REDESIGN OVERRIDE
        ============================================================ */
 
@@ -1364,52 +1559,53 @@
       font-weight:900;
       letter-spacing:.09em;
 
-      text-shadow:0 1px 8px rgba(0,0,0,.95);
+      text-shadow:
+        0 1px 8px rgba(0,0,0,.95);
     }
 
-   #${ROOT_ID} .rv5-timer{
-  position:relative;
+    #${ROOT_ID} .rv5-timer{
+      position:relative;
 
-  width:92px;
-  height:92px;
+      width:92px;
+      height:92px;
 
-  display:grid;
-  place-items:center;
+      display:grid;
+      place-items:center;
 
-  border-radius:50%;
+      border-radius:50%;
 
-  background:
-    radial-gradient(
-      circle,
-      rgba(255,215,106,.09) 0%,
-      rgba(255,215,106,.025) 42%,
-      transparent 72%
-    );
+      background:
+        radial-gradient(
+          circle,
+          rgba(255,215,106,.09) 0%,
+          rgba(255,215,106,.025) 42%,
+          transparent 72%
+        );
 
-  box-shadow:
-    0 0 24px rgba(255,215,106,.08),
-    inset 0 0 20px rgba(255,215,106,.035);
-}
+      box-shadow:
+        0 0 24px rgba(255,215,106,.08),
+        inset 0 0 20px rgba(255,215,106,.035);
+    }
 
     #${ROOT_ID} .rv5-timer circle{
       stroke-width:3;
     }
 
-  #${ROOT_ID} .rv5-timer strong{
-  position:relative;
-  z-index:3;
+    #${ROOT_ID} .rv5-timer strong{
+      position:relative;
+      z-index:3;
 
-  font-size:31px;
-  line-height:1;
+      font-size:31px;
+      line-height:1;
 
-  font-weight:950;
+      font-weight:950;
 
-  color:#ffe28b;
+      color:#ffe28b;
 
-  text-shadow:
-    0 0 8px rgba(255,215,106,.75),
-    0 0 22px rgba(255,215,106,.30);
-}
+      text-shadow:
+        0 0 8px rgba(255,215,106,.75),
+        0 0 22px rgba(255,215,106,.30);
+    }
 
     #${ROOT_ID} .rv5-timer small{
       font-size:7px;
@@ -1475,61 +1671,56 @@
 
     /* MAP */
 
- #${ROOT_ID} .rv5-map{
-  position:relative;
-  overflow:hidden;
+    #${ROOT_ID} .rv5-map{
+      position:relative;
+      overflow:hidden;
 
-  background:
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(85,220,255,.13) 0%,
-      rgba(25,100,125,.055) 26%,
-      transparent 58%
-    ),
-    linear-gradient(
-      180deg,
-      #041722 0%,
-      #020a10 52%,
-      #010509 100%
-    );
+      background:
+        radial-gradient(
+          circle at 50% 48%,
+          rgba(101,232,255,.08),
+          transparent 52%
+        ),
+        linear-gradient(
+          180deg,
+          #061720 0%,
+          #020b11 52%,
+          #010508 100%
+        );
 
-  border-top:1px solid rgba(101,232,255,.16);
-  border-bottom:1px solid rgba(101,232,255,.16);
+      border-top:1px solid rgba(101,232,255,.18);
+      border-bottom:1px solid rgba(101,232,255,.18);
 
-  box-shadow:
-    inset 0 0 45px rgba(101,232,255,.035),
-    inset 0 0 100px rgba(0,0,0,.22);
-}
+      box-shadow:
+        inset 0 0 55px rgba(101,232,255,.045),
+        inset 0 0 120px rgba(0,0,0,.36),
+        0 0 35px rgba(0,0,0,.25);
+    }
 
-#${ROOT_ID} .rv5-map::before{
-  content:"";
-  position:absolute;
-  inset:0;
+    #${ROOT_ID} .rv5-map::after{
+      content:"";
+      position:absolute;
+      inset:12px;
+      pointer-events:none;
+      z-index:5;
 
-  pointer-events:none;
-  z-index:4;
+      border:1px solid rgba(255,255,255,.025);
 
-  background:
-    linear-gradient(
-      90deg,
-      transparent 49.8%,
-      rgba(101,232,255,.08) 50%,
-      transparent 50.2%
-    ),
-    linear-gradient(
-      0deg,
-      transparent 49.8%,
-      rgba(101,232,255,.08) 50%,
-      transparent 50.2%
-    );
-
-  opacity:.65;
-}
+      box-shadow:
+        inset 0 0 28px rgba(0,0,0,.22);
+    }
 
     #${ROOT_ID} .rv5-svg{
+      position:absolute;
+      inset:0;
+
       width:100%;
       height:100%;
+
       display:block;
+
+      object-fit:contain;
+      object-position:center center;
     }
 
     /* stronger tactical grid */
@@ -1547,9 +1738,15 @@
     }
 
     #${ROOT_ID} .platform{
-      fill:#0c2432;
-      stroke:#49778a;
-      stroke-width:1.5;
+      fill:#0d2837;
+      stroke:#5c899b;
+      stroke-width:1.25;
+
+      filter:
+        drop-shadow(
+          0 0 4px
+          rgba(77,210,235,.08)
+        );
     }
 
     #${ROOT_ID} .edge{
@@ -1559,33 +1756,45 @@
 
     /* ROUTE */
 
- #${ROOT_ID} .route-halo{
-  fill:none;
-  stroke:#61e8ff;
-  stroke-width:26;
-  opacity:.14;
+    #${ROOT_ID} .route-halo{
+      fill:none;
+      stroke:#61e8ff;
+      stroke-width:26;
+      opacity:.14;
 
-  filter:
-    drop-shadow(0 0 10px rgba(101,232,255,.30));
-}
+      filter:
+        drop-shadow(
+          0 0 10px
+          rgba(101,232,255,.30)
+        );
+    }
 
- #${ROOT_ID} .route{
-  fill:none;
+    #${ROOT_ID} .route{
+      fill:none;
 
-  stroke:#6cf1ff;
-  stroke-width:5;
-  stroke-linecap:round;
-  stroke-linejoin:round;
+      stroke:#6cf1ff;
+      stroke-width:5;
+      stroke-linecap:round;
+      stroke-linejoin:round;
 
-  stroke-dasharray:16 10;
+      stroke-dasharray:16 10;
 
-  animation:
-    rv5route 1.05s linear infinite;
+      animation:
+        rv5route
+        1.05s
+        linear
+        infinite;
 
-  filter:
-    drop-shadow(0 0 5px rgba(101,232,255,.95))
-    drop-shadow(0 0 14px rgba(101,232,255,.40));
-}
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(101,232,255,.95)
+        )
+        drop-shadow(
+          0 0 14px
+          rgba(101,232,255,.40)
+        );
+    }
 
     #${ROOT_ID} .route-core{
       stroke:#f4fdff;
@@ -1595,100 +1804,139 @@
 
     /* MAP MARKERS */
 
-#${ROOT_ID} .start{
-  fill:#8df59b;
+    #${ROOT_ID} .start{
+      fill:#8df59b;
 
-  stroke:#f4ffe7;
-  stroke-width:3;
+      stroke:#f4ffe7;
+      stroke-width:3;
 
-  filter:
-    drop-shadow(0 0 6px rgba(141,245,155,.95))
-    drop-shadow(0 0 16px rgba(141,245,155,.38));
+      filter:
+        drop-shadow(
+          0 0 6px
+          rgba(141,245,155,.95)
+        )
+        drop-shadow(
+          0 0 16px
+          rgba(141,245,155,.38)
+        );
 
-  transform-box:fill-box;
-  transform-origin:center;
-}
+      transform-box:fill-box;
+      transform-origin:center;
+    }
 
-#${ROOT_ID} .goal{
-  fill:#ffd76a;
+    #${ROOT_ID} .goal{
+      fill:#ffd76a;
 
-  stroke:#fff8ce;
-  stroke-width:3;
+      stroke:#fff8ce;
+      stroke-width:3;
 
-  filter:
-    drop-shadow(0 0 8px rgba(255,215,106,.95))
-    drop-shadow(0 0 20px rgba(255,215,106,.42));
+      filter:
+        drop-shadow(
+          0 0 8px
+          rgba(255,215,106,.95)
+        )
+        drop-shadow(
+          0 0 20px
+          rgba(255,215,106,.42)
+        );
 
-  transform-box:fill-box;
-  transform-origin:center;
-}
+      transform-box:fill-box;
+      transform-origin:center;
+    }
 
-  #${ROOT_ID} .player{
-  fill:#ffffff;
-  stroke:#64ebff;
-  stroke-width:3;
+    #${ROOT_ID} .player{
+      fill:#ffffff;
+      stroke:#64ebff;
+      stroke-width:3;
 
-  filter:
-    drop-shadow(0 0 5px rgba(100,235,255,.8))
-    drop-shadow(0 0 13px rgba(100,235,255,.28));
-}
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(100,235,255,.8)
+        )
+        drop-shadow(
+          0 0 13px
+          rgba(100,235,255,.28)
+        );
+    }
 
-#${ROOT_ID} .player-ring{
-  fill:none;
+    #${ROOT_ID} .player-ring{
+      fill:none;
 
-  stroke:#6ff3ff;
-  stroke-width:2.8;
+      stroke:#6ff3ff;
+      stroke-width:2.8;
 
-  stroke-dasharray:7 5;
+      stroke-dasharray:7 5;
 
-  opacity:1;
+      opacity:1;
 
-  filter:
-    drop-shadow(0 0 5px rgba(100,235,255,.9))
-    drop-shadow(0 0 15px rgba(100,235,255,.32));
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(100,235,255,.9)
+        )
+        drop-shadow(
+          0 0 15px
+          rgba(100,235,255,.32)
+        );
 
-  animation:
-    rv5ring 1.35s linear infinite;
-}
+      animation:
+        rv5ring
+        1.35s
+        linear
+        infinite;
+    }
 
     #${ROOT_ID} .checkpoint{
-  fill:rgba(100,235,255,.035);
+      fill:rgba(100,235,255,.035);
 
-  stroke:#64ebff;
-  stroke-width:2;
+      stroke:#64ebff;
+      stroke-width:2;
 
-  filter:
-    drop-shadow(0 0 5px rgba(100,235,255,.35));
-}
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(100,235,255,.35)
+        );
+    }
 
-#${ROOT_ID} .checkpoint-dot{
-  fill:#ffffff;
+    #${ROOT_ID} .checkpoint-dot{
+      fill:#ffffff;
 
-  filter:
-    drop-shadow(0 0 5px rgba(100,235,255,.80));
-}
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(100,235,255,.80)
+        );
+    }
 
-   #${ROOT_ID} .danger-object{
-  fill:#3a1725;
+    #${ROOT_ID} .danger-object{
+      fill:#3a1725;
 
-  stroke:#ff6577;
-  stroke-width:2;
+      stroke:#ff6577;
+      stroke-width:2;
 
-  filter:
-    drop-shadow(0 0 5px rgba(255,104,119,.32));
-}
+      filter:
+        drop-shadow(
+          0 0 5px
+          rgba(255,104,119,.32)
+        );
+    }
 
     #${ROOT_ID} .signal{
       fill:#ffd76a;
 
       filter:
-        drop-shadow(0 0 6px rgba(255,215,106,.55));
+        drop-shadow(
+          0 0 6px
+          rgba(255,215,106,.55)
+        );
     }
 
     /* MAP TEXT */
 
     #${ROOT_ID} .label{
-      fill:#f2fbff;
+      fill:#e9fbff;
 
       font-family:
         ui-monospace,
@@ -1698,37 +1946,47 @@
         Consolas,
         monospace;
 
-     font-size:13px;
-font-weight:950;
-letter-spacing:.025em;
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.08em;
 
       paint-order:stroke;
 
       stroke:#02070b;
-      stroke-width:3.5px;
+      stroke-width:3px;
       stroke-linejoin:round;
 
       text-shadow:
-        0 2px 8px rgba(0,0,0,.95);
+        0 2px 8px
+        rgba(0,0,0,.95);
+
+      pointer-events:none;
+      user-select:none;
     }
 
     #${ROOT_ID} #rv5-player text{
-  fill:#ffffff;
+      fill:#ffffff;
 
-  font-size:14px;
-  font-weight:950;
-  letter-spacing:.04em;
+      font-size:14px;
+      font-weight:950;
+      letter-spacing:.04em;
 
-  paint-order:stroke;
-  stroke:#021018;
-  stroke-width:4px;
-  stroke-linejoin:round;
+      paint-order:stroke;
 
-  filter:
-    drop-shadow(0 0 6px rgba(101,232,255,.95))
-    drop-shadow(0 0 14px rgba(101,232,255,.38));
-}
+      stroke:#021018;
+      stroke-width:4px;
+      stroke-linejoin:round;
 
+      filter:
+        drop-shadow(
+          0 0 6px
+          rgba(101,232,255,.95)
+        )
+        drop-shadow(
+          0 0 14px
+          rgba(101,232,255,.38)
+        );
+    }
 
     #${ROOT_ID} .guide{
       fill:#72efff;
@@ -1741,9 +1999,10 @@ letter-spacing:.025em;
         Consolas,
         monospace;
 
-  font-size:12px;
-font-weight:950;
-letter-spacing:.02em;
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.02em;
+
       paint-order:stroke;
 
       stroke:#02070b;
@@ -1760,7 +2019,9 @@ letter-spacing:.02em;
       font-weight:950;
       letter-spacing:.10em;
 
-      text-shadow:0 2px 8px rgba(0,0,0,.95);
+      text-shadow:
+        0 2px 8px
+        rgba(0,0,0,.95);
     }
 
     #${ROOT_ID} .rv5-map-label strong{
@@ -1770,7 +2031,9 @@ letter-spacing:.02em;
       font-weight:950;
       letter-spacing:.07em;
 
-      text-shadow:0 2px 12px rgba(0,0,0,.95);
+      text-shadow:
+        0 2px 12px
+        rgba(0,0,0,.95);
     }
 
     #${ROOT_ID} .rv5-live-tag{
@@ -1792,8 +2055,10 @@ letter-spacing:.02em;
         );
 
       box-shadow:
-        0 0 18px rgba(101,232,255,.06),
-        inset 0 0 14px rgba(101,232,255,.03);
+        0 0 18px
+        rgba(101,232,255,.06),
+        inset 0 0 14px
+        rgba(101,232,255,.03);
     }
 
     /* STATS */
@@ -1820,27 +2085,30 @@ letter-spacing:.02em;
 
     #${ROOT_ID} .rv5-stats .danger{
       color:#ff7886;
-      text-shadow:0 0 10px rgba(255,104,119,.20);
+      text-shadow:
+        0 0 10px
+        rgba(255,104,119,.20);
     }
 
     /* FOOTER */
 
-  #${ROOT_ID} .rv5-footer{
-  min-height:86px;
-  padding:12px 20px;
+    #${ROOT_ID} .rv5-footer{
+      min-height:86px;
+      padding:12px 20px;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(3,14,20,.99),
-      rgba(1,6,10,1)
-    );
+      background:
+        linear-gradient(
+          180deg,
+          rgba(3,14,20,.99),
+          rgba(1,6,10,1)
+        );
 
-  border-top:1px solid rgba(101,232,255,.16);
+      border-top:1px solid rgba(101,232,255,.16);
 
-  box-shadow:
-    inset 0 10px 30px rgba(101,232,255,.025);
-}
+      box-shadow:
+        inset 0 10px 30px
+        rgba(101,232,255,.025);
+    }
 
     #${ROOT_ID} .rv5-objective small{
       font-size:8px;
@@ -1860,7 +2128,8 @@ letter-spacing:.02em;
       letter-spacing:.025em;
 
       text-shadow:
-        0 0 10px rgba(101,232,255,.08);
+        0 0 10px
+        rgba(101,232,255,.08);
     }
 
     /* ============================================================
@@ -1902,14 +2171,14 @@ letter-spacing:.02em;
         font-size:8px;
       }
 
-   #${ROOT_ID} .rv5-timer{
-  width:66px;
-  height:66px;
-}
+      #${ROOT_ID} .rv5-timer{
+        width:66px;
+        height:66px;
+      }
 
-#${ROOT_ID} .rv5-timer strong{
-  font-size:22px;
-}
+      #${ROOT_ID} .rv5-timer strong{
+        font-size:22px;
+      }
 
       #${ROOT_ID} .rv5-timer small{
         font-size:6px;
@@ -1974,23 +2243,22 @@ letter-spacing:.02em;
         font-size:7px;
       }
 
-     #${ROOT_ID} .objective-text{
-  max-width:72vw;
+      #${ROOT_ID} .objective-text{
+        max-width:72vw;
+        font-size:10px;
+        line-height:1.3;
 
-  font-size:10px;
-  line-height:1.3;
+        white-space:normal;
+        overflow:visible;
+        text-overflow:clip;
 
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
+        display:-webkit-box;
+        -webkit-box-orient:vertical;
+        -webkit-line-clamp:2;
 
-  display:-webkit-box;
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:2;
-
-  word-break:normal;
-  overflow-wrap:anywhere;
-}
+        word-break:normal;
+        overflow-wrap:anywhere;
+      }
 
       #${ROOT_ID} .label{
         font-size:11px;
@@ -2028,13 +2296,13 @@ letter-spacing:.02em;
       }
 
       #${ROOT_ID} .rv5-timer{
-  width:60px;
-  height:60px;
-}
+        width:60px;
+        height:60px;
+      }
 
-#${ROOT_ID} .rv5-timer strong{
-  font-size:20px;
-}
+      #${ROOT_ID} .rv5-timer strong{
+        font-size:20px;
+      }
 
       #${ROOT_ID} .rv5-main{
         grid-template-rows:39px minmax(0,1fr) 48px;
@@ -2077,23 +2345,22 @@ letter-spacing:.02em;
         font-size:6.5px;
       }
 
-    #${ROOT_ID} .objective-text{
-  max-width:68vw;
+      #${ROOT_ID} .objective-text{
+        max-width:68vw;
+        font-size:9px;
+        line-height:1.25;
 
-  font-size:9px;
-  line-height:1.25;
+        white-space:normal;
+        overflow:visible;
+        text-overflow:clip;
 
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
+        display:-webkit-box;
+        -webkit-box-orient:vertical;
+        -webkit-line-clamp:2;
 
-  display:-webkit-box;
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:2;
-
-  word-break:normal;
-  overflow-wrap:anywhere;
-}
+        word-break:normal;
+        overflow-wrap:anywhere;
+      }
 
       #${ROOT_ID} .label{
         font-size:10px;
@@ -2126,102 +2393,106 @@ letter-spacing:.02em;
         font-size:8px !important;
         line-height:1.1 !important;
         font-weight:950 !important;
-        letter-spacing:.06em !important;
+        letter-spacing:.08em !important;
       }
 
-      /* MAP CORNER LABELS */
+      /* MAP */
+
+      #${ROOT_ID} .rv5-map{
+        min-height:0 !important;
+        overflow:hidden !important;
+      }
+
+      #${ROOT_ID} .rv5-map::after{
+        inset:8px !important;
+      }
+
+      /* LABELS */
+
+      #${ROOT_ID} .rv5-map-label{
+        gap:3px !important;
+      }
+
+      #${ROOT_ID} .rv5-map-label.top{
+        top:8px !important;
+        left:9px !important;
+      }
+
+      #${ROOT_ID} .rv5-map-label.bottom{
+        right:9px !important;
+        bottom:8px !important;
+      }
 
       #${ROOT_ID} .rv5-map-label small{
-        font-size:8px !important;
-        line-height:1.2 !important;
-        font-weight:950 !important;
-        letter-spacing:.06em !important;
+        font-size:5px !important;
+        letter-spacing:.10em !important;
       }
 
       #${ROOT_ID} .rv5-map-label strong{
-        font-size:10px !important;
-        line-height:1.15 !important;
-        font-weight:950 !important;
-        letter-spacing:.04em !important;
+        font-size:7px !important;
+        letter-spacing:.045em !important;
       }
 
-      /* LIVE TAG */
-
       #${ROOT_ID} .rv5-live-tag{
-        font-size:8px !important;
-        line-height:1.1 !important;
-        font-weight:950 !important;
-        letter-spacing:.06em !important;
+        left:7px !important;
+        bottom:7px !important;
+        padding:6px 7px !important;
+        font-size:5px !important;
+      }
+
+      /* FOOTER */
+
+      #${ROOT_ID} .rv5-footer{
+        min-height:58px !important;
+        padding:8px !important;
+      }
+
+      #${ROOT_ID} .rv5-objective{
+        gap:7px !important;
         padding:7px 9px !important;
+        max-width:100% !important;
+      }
+
+      #${ROOT_ID} .rv5-objective-icon{
+        width:22px !important;
+        height:22px !important;
+        font-size:7px !important;
+      }
+
+      #${ROOT_ID} .rv5-objective small{
+        font-size:5px !important;
+        margin-bottom:3px !important;
+      }
+
+      #${ROOT_ID} .objective-text{
+        max-width:70vw !important;
+        font-size:8px !important;
+        line-height:1.2 !important;
       }
 
       /* STATS */
 
+      #${ROOT_ID} .rv5-stats{
+        min-height:42px !important;
+      }
+
       #${ROOT_ID} .rv5-stats small{
-        font-size:7px !important;
-        line-height:1.15 !important;
-        font-weight:900 !important;
-        letter-spacing:.06em !important;
+        font-size:5px !important;
       }
 
       #${ROOT_ID} .rv5-stats strong{
-        font-size:9px !important;
-        line-height:1.15 !important;
-        font-weight:950 !important;
-        letter-spacing:.04em !important;
-      }
-
-      /* OBJECTIVE */
-
-      #${ROOT_ID} .rv5-objective small{
         font-size:7px !important;
-        line-height:1.15 !important;
-        font-weight:950 !important;
-      }
-
-      #${ROOT_ID} .objective-text{
-        font-size:10px !important;
-        line-height:1.2 !important;
-        font-weight:950 !important;
-        letter-spacing:.02em !important;
-      }
-
-      /* REAL MAP LABELS */
-
-      #${ROOT_ID} .label{
-        font-size:11px !important;
-        line-height:1 !important;
-        font-weight:950 !important;
-        letter-spacing:.015em !important;
-
-        paint-order:stroke !important;
-        stroke:#02070b !important;
-        stroke-width:3.2px !important;
-        stroke-linejoin:round !important;
-      }
-
-      #${ROOT_ID} .guide{
-        font-size:10px !important;
-        line-height:1 !important;
-        font-weight:950 !important;
-        letter-spacing:.01em !important;
-
-        paint-order:stroke !important;
-        stroke:#02070b !important;
-        stroke-width:2.8px !important;
-        stroke-linejoin:round !important;
       }
     }
 
+    @media(prefers-reduced-motion:reduce){
 
-    @media(prefers-reduced-motion:reduce) {
-
-      #${ROOT_ID} *,
-      #${ROOT_ID} *::before,
-      #${ROOT_ID} *::after {
+      #${ROOT_ID} .rv5-live b,
+      #${ROOT_ID} .rv5-scan,
+      #${ROOT_ID} .route,
+      #${ROOT_ID} .player-ring{
         animation:none !important;
       }
-
     }
 
   `;
@@ -2234,416 +2505,193 @@ letter-spacing:.02em;
    * ============================================================
    */
 
-  
-    
-function mapModel(scene) {
-
-  const m = scene?.mission || {};
-
-  const bounds =
-    scene?.physics?.world?.bounds;
-
-  const width =
-    num(
-      bounds?.width,
-      num(m?.goal?.x, 6100) + 500
-    );
-
-  const height =
-    num(
-      bounds?.height,
-      720
-    );
-
-  /*
-   * ------------------------------------------------------------
-   * HORIZONTAL SCALE
-   * ------------------------------------------------------------
-   */
-
-  const sx =
-    920 / Math.max(width, 1);
-
-  const X = x =>
-    40 +
-    clamp(
-      num(x) * sx,
-      0,
-      920
-    );
-
-
-  /*
-   * ------------------------------------------------------------
-   * FIND REAL LEVEL CONTENT VERTICAL RANGE
-   *
-   * Stari kod je koristio:
-   *
-   *   Y = 50 + y * sy
-   *
-   * zbog čega je sadržaj na mobilnom završavao prenisko.
-   *
-   * Sada prvo pronađemo gdje se stvarni level nalazi,
-   * pa ga centriramo i povećamo u dostupnom prostoru.
-   * ------------------------------------------------------------
-   */
-
-  const ys = [];
-
-  const addPointY = item => {
-
-    if (Array.isArray(item)) {
-
-      if (Number.isFinite(Number(item[1]))) {
-        ys.push(Number(item[1]));
-      }
-
-      return;
-    }
-
-    if (
-      item &&
-      Number.isFinite(Number(item.y))
-    ) {
-      ys.push(Number(item.y));
-    }
-  };
-
-
-  const addRectY = item => {
-
-    if (Array.isArray(item)) {
-
-      const y =
-        Number(item[1]);
-
-      const h =
-        Number(item[3]);
-
-      if (Number.isFinite(y)) {
-        ys.push(y);
-
-        if (Number.isFinite(h)) {
-          ys.push(y + h);
-        }
-      }
-
-      return;
-    }
-
-    if (
-      item &&
-      Number.isFinite(Number(item.y))
-    ) {
-
-      const y =
-        Number(item.y);
-
-      const h =
-        Number(
-          item.height ??
-          item.h ??
-          0
-        );
-
-      ys.push(y);
-
-      if (Number.isFinite(h)) {
-        ys.push(y + h);
-      }
-    }
-  };
-
-
-  /*
-   * Main mission points
-   */
-
-  addPointY(
-    m?.spawn || {
-      x:120,
-      y:520
-    }
-  );
-
-  addPointY(
-    m?.goal || {
-      x:6100,
-      y:500
-    }
-  );
-
-
-  /*
-   * Real level objects
-   */
-
-  const pointArrays = [
-    'enemies',
-    'signals',
-    'secrets',
-    'checkpoints',
-    'boostPads',
-    'guides'
-  ];
-
-  pointArrays.forEach(key => {
-
-    const list =
-      Array.isArray(m?.[key])
-        ? m[key]
-        : [];
-
-    list.forEach(addPointY);
-
-  });
-
-
-  const rectArrays = [
-    'platforms',
-    'obstacles',
-    'movingGates'
-  ];
-
-  rectArrays.forEach(key => {
-
-    const list =
-      Array.isArray(m?.[key])
-        ? m[key]
-        : [];
-
-    list.forEach(addRectY);
-
-  });
-
-
-  /*
-   * Fallback ako level nema dovoljno podataka.
-   */
-
-  if (ys.length < 2) {
-
-    ys.push(0);
-    ys.push(height);
-
-  }
-
-
-  let minY =
-    Math.min(...ys);
-
-  let maxY =
-    Math.max(...ys);
-
-
-  /*
-   * Ako je range premalen, dodajemo malo prostora
-   * da mapa ne bude spljoštena.
-   */
-
-  if (
-    !Number.isFinite(minY) ||
-    !Number.isFinite(maxY)
-  ) {
-
-    minY = 0;
-    maxY = height;
-
-  }
-
-
-  const contentRange =
-    Math.max(
-      1,
-      maxY - minY
-    );
-
-
-  /*
-   * ------------------------------------------------------------
-   * MOBILE-FRIENDLY VERTICAL FIT
-   * ------------------------------------------------------------
-   *
-   * Level dobija više vertikalnog prostora.
-   *
-   * 110 = gornji padding
-   * 450 = donji padding
-   *
-   * Dakle stvarni level koristi približno 340px
-   * od ukupnih 560px SVG prostora.
-   */
-
- const targetTop = 70;
-const targetBottom = 490;
-
-  const targetHeight =
-    targetBottom - targetTop;
-
-
-  const sy =
-    targetHeight /
-    contentRange;
-
-
-  const Y = y => {
-
-    const value =
-      num(y, minY);
-
-    return targetTop +
-      clamp(
-        (value - minY) * sy,
-        0,
-        targetHeight
+  function mapModel(scene) {
+
+    const mission =
+      scene?.mission || {};
+
+    const bounds =
+      scene?.physics?.world?.bounds || {};
+
+    const worldW =
+      Math.max(
+        1,
+        num(
+          bounds.width,
+          num(mission.goal?.x, 6100) + 300
+        )
       );
 
-  };
+    const worldH =
+      Math.max(
+        1,
+        num(
+          bounds.height,
+          720
+        )
+      );
 
+    const W = 1000;
+    const H = 560;
 
-  /*
-   * ------------------------------------------------------------
-   * HELPERS
-   * ------------------------------------------------------------
-   */
+    const scaleX =
+      880 /
+      worldW;
 
-  const point = item => {
+    const scaleY =
+      460 /
+      worldH;
 
-    if (Array.isArray(item)) {
+    const X =
+      x =>
+        60 +
+        clamp(
+          num(x),
+          0,
+          worldW
+        ) *
+        scaleX;
 
-      return {
-        x: X(item[0]),
-        y: Y(item[1])
+    const Y =
+      y =>
+        50 +
+        clamp(
+          num(y),
+          0,
+          worldH
+        ) *
+        scaleY;
+
+    const arr =
+      key =>
+        Array.isArray(mission[key])
+          ? mission[key]
+          : [];
+
+    const point =
+      value => {
+
+        if (Array.isArray(value)) {
+          return {
+            x:X(value[0]),
+            y:Y(value[1])
+          };
+        }
+
+        return {
+          x:X(value?.x),
+          y:Y(value?.y)
+        };
       };
 
-    }
+    const rect =
+      value => {
 
-    return {
-      x: X(item?.x),
-      y: Y(item?.y)
-    };
+        const a =
+          Array.isArray(value)
+            ? value
+            : [
+                value?.x,
+                value?.y,
+                value?.width ??
+                  value?.w ??
+                  50,
+                value?.height ??
+                  value?.h ??
+                  20
+              ];
 
-  };
-
-
-  const rect = item => {
-
-    if (Array.isArray(item)) {
-
-      return {
-        x: X(item[0]),
-        y: Y(item[1]),
-        w: Math.max(
-          4,
-          num(item[2], 40) * sx
-        ),
-        h: Math.max(
-          3,
-          num(item[3], 20) * sy
-        )
+        return {
+          x:X(a[0]),
+          y:Y(a[1]),
+          w:Math.max(
+            6,
+            num(a[2],50) *
+              scaleX
+          ),
+          h:Math.max(
+            5,
+            num(a[3],20) *
+              scaleY
+          )
+        };
       };
 
-    }
+    const player =
+      scene?.player || {};
 
     return {
-      x: X(item?.x),
-      y: Y(item?.y),
-      w: Math.max(
-        4,
-        num(
-          item?.width ?? item?.w,
-          40
-        ) * sx
-      ),
-      h: Math.max(
-        3,
-        num(
-          item?.height ?? item?.h,
-          20
-        ) * sy
-      )
+
+      worldW,
+      worldH,
+      W,
+      H,
+
+      points: {
+
+        start:
+          point(
+            mission.spawn || {
+              x:120,
+              y:worldH - 120
+            }
+          ),
+
+        goal:
+          point(
+            mission.goal || {
+              x:worldW - 100,
+              y:worldH - 110
+            }
+          ),
+
+        player:
+          point({
+            x:
+              num(
+                player.x,
+                mission.spawn?.x ??
+                120
+              ),
+
+            y:
+              num(
+                player.y,
+                mission.spawn?.y ??
+                worldH - 120
+              )
+          })
+      },
+
+      checkpoints:
+        arr('checkpoints'),
+
+      platforms:
+        arr('platforms'),
+
+      obstacles:
+        arr('obstacles'),
+
+      movingGates:
+        arr('movingGates'),
+
+      enemies:
+        arr('enemies'),
+
+      signals:
+        arr('signals'),
+
+      boostPads:
+        arr('boostPads'),
+
+      guides:
+        arr('guides'),
+
+      point,
+      rect
     };
+  }
 
-  };
-
-
-  const arr = key =>
-    Array.isArray(m?.[key])
-      ? m[key]
-      : [];
-
-
-  /*
-   * ------------------------------------------------------------
-   * RETURN REAL LEVEL DATA
-   * ------------------------------------------------------------
-   */
-
-  return {
-
-    X,
-    Y,
-    point,
-    rect,
-
-    points: {
-
-      start:
-        point(
-          m?.spawn || {
-            x:120,
-            y:520
-          }
-        ),
-
-      goal:
-        point(
-          m?.goal || {
-            x:6100,
-            y:500
-          }
-        ),
-
-      player:
-        point(
-          scene?.player ||
-          m?.spawn || {
-            x:120,
-            y:520
-          }
-        )
-
-    },
-
-    platforms:
-      arr('platforms'),
-
-    obstacles:
-      arr('obstacles'),
-
-    movingGates:
-      arr('movingGates'),
-
-    enemies:
-      arr('enemies'),
-
-    signals:
-      arr('signals'),
-
-    secrets:
-      arr('secrets'),
-
-    checkpoints:
-      arr('checkpoints'),
-
-    boostPads:
-      arr('boostPads'),
-
-    guides:
-      arr('guides')
-
-  };
-
-}
   /*
    * ============================================================
    * GRID
@@ -2654,7 +2702,11 @@ const targetBottom = 490;
 
     let out = '';
 
-    for (let x=40;x<=960;x+=40) {
+    for (
+      let x = 40;
+      x <= 960;
+      x += 40
+    ) {
 
       out += `
         <line
@@ -2662,12 +2714,20 @@ const targetBottom = 490;
           y1="0"
           x2="${x}"
           y2="560"
-          class="${x % 120 === 0 ? 'grid-major' : 'grid'}">
+          class="${
+            x % 120 === 0
+              ? 'grid-major'
+              : 'grid'
+          }">
         </line>
       `;
     }
 
-    for (let y=40;y<=520;y+=40) {
+    for (
+      let y = 40;
+      y <= 520;
+      y += 40
+    ) {
 
       out += `
         <line
@@ -2675,7 +2735,11 @@ const targetBottom = 490;
           y1="${y}"
           x2="1000"
           y2="${y}"
-          class="${y % 120 === 0 ? 'grid-major' : 'grid'}">
+          class="${
+            y % 120 === 0
+              ? 'grid-major'
+              : 'grid'
+          }">
         </line>
       `;
     }
@@ -2692,15 +2756,23 @@ const targetBottom = 490;
   function renderMap(scene) {
 
     const svg =
-      root.querySelector('.rv5-svg');
+      root.querySelector(
+        '.rv5-svg'
+      );
 
-    if (!svg || !scene) return;
+    if (
+      !svg ||
+      !scene
+    ) return;
 
-    const d = mapModel(scene);
+    const d =
+      mapModel(scene);
 
     const routePoints = [
       d.points.start,
-      ...d.checkpoints.map(d.point),
+      ...d.checkpoints.map(
+        d.point
+      ),
       d.points.goal
     ];
 
@@ -2708,7 +2780,13 @@ const targetBottom = 490;
       routePoints
         .map(
           (p,i) =>
-            `${i ? 'L' : 'M'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`
+            `${
+              i ? 'L' : 'M'
+            } ${
+              p.x.toFixed(1)
+            } ${
+              p.y.toFixed(1)
+            }`
         )
         .join(' ');
 
@@ -2716,7 +2794,8 @@ const targetBottom = 490;
       d.platforms
         .map(item => {
 
-          const r = d.rect(item);
+          const r =
+            d.rect(item);
 
           return `
             <rect
@@ -2743,14 +2822,21 @@ const targetBottom = 490;
       d.obstacles
         .map(item => {
 
-          const p = d.point(item);
+          const p =
+            d.point(item);
 
           return `
             <path
               d="
-                M ${p.x-9} ${p.y+8}
-                L ${p.x} ${p.y-9}
-                L ${p.x+9} ${p.y+8}
+                M ${p.x-9}
+                  ${p.y+8}
+
+                L ${p.x}
+                  ${p.y-9}
+
+                L ${p.x+9}
+                  ${p.y+8}
+
                 Z
               "
               class="danger-object">
@@ -2763,7 +2849,8 @@ const targetBottom = 490;
       d.movingGates
         .map(item => {
 
-          const r = d.rect(item);
+          const r =
+            d.rect(item);
 
           return `
             <rect
@@ -2798,45 +2885,49 @@ const targetBottom = 490;
 
     const checkpoints =
       d.checkpoints
-        .map((item,i) => {
+        .map(
+          (item,i) => {
 
-          const p = d.point(item);
+            const p =
+              d.point(item);
 
-          return `
-            <g>
+            return `
+              <g>
 
-              <circle
-                cx="${p.x}"
-                cy="${p.y}"
-                r="17"
-                class="checkpoint">
-              </circle>
+                <circle
+                  cx="${p.x}"
+                  cy="${p.y}"
+                  r="17"
+                  class="checkpoint">
+                </circle>
 
-              <circle
-                cx="${p.x}"
-                cy="${p.y}"
-                r="4"
-                class="checkpoint-dot">
-              </circle>
+                <circle
+                  cx="${p.x}"
+                  cy="${p.y}"
+                  r="4"
+                  class="checkpoint-dot">
+                </circle>
 
-              <text
-                x="${p.x}"
-                y="${p.y-21}"
-                text-anchor="middle"
-                class="label">
-                CP ${i+1}
-              </text>
+                <text
+                  x="${p.x}"
+                  y="${p.y-21}"
+                  text-anchor="middle"
+                  class="label">
+                  CP ${i+1}
+                </text>
 
-            </g>
-          `;
-        })
+              </g>
+            `;
+          }
+        )
         .join('');
 
     const signals =
       d.signals
         .map(item => {
 
-          const p = d.point(item);
+          const p =
+            d.point(item);
 
           return `
             <circle
@@ -2853,7 +2944,8 @@ const targetBottom = 490;
       d.enemies
         .map(item => {
 
-          const p = d.point(item);
+          const p =
+            d.point(item);
 
           return `
             <g>
@@ -2890,14 +2982,18 @@ const targetBottom = 490;
       d.guides
         .map(item => {
 
-          const p = d.point(item);
+          const p =
+            d.point(item);
 
           return `
             <text
               x="${p.x}"
               y="${p.y-12}"
               class="guide">
-              ${esc(item?.text || '')}
+              ${esc(
+                item?.text ||
+                ''
+              )}
             </text>
           `;
         })
@@ -2916,22 +3012,92 @@ const targetBottom = 490;
 
           <stop
             offset="0%"
-            stop-color="#06131e">
+            stop-color="#071923">
           </stop>
 
           <stop
-            offset="55%"
-            stop-color="#020a11">
+            offset="42%"
+            stop-color="#03111a">
           </stop>
 
           <stop
             offset="100%"
-            stop-color="#010508">
+            stop-color="#01060a">
           </stop>
 
         </linearGradient>
 
+        <radialGradient
+          id="rv5mapGlow"
+          cx="50%"
+          cy="48%"
+          r="68%">
+
+          <stop
+            offset="0%"
+            stop-color="#1e92ae"
+            stop-opacity=".18">
+          </stop>
+
+          <stop
+            offset="48%"
+            stop-color="#0b4f62"
+            stop-opacity=".08">
+          </stop>
+
+          <stop
+            offset="100%"
+            stop-color="#000000"
+            stop-opacity="0">
+          </stop>
+
+        </radialGradient>
+
+        <pattern
+          id="rv5microGrid"
+          width="20"
+          height="20"
+          patternUnits="userSpaceOnUse">
+
+          <path
+            d="M20 0H0V20"
+            fill="none"
+            stroke="#63dff5"
+            stroke-opacity=".035"
+            stroke-width="1">
+          </path>
+
+        </pattern>
+
+        <filter
+          id="rv5softGlow"
+          x="-40%"
+          y="-40%"
+          width="180%"
+          height="180%">
+
+          <feGaussianBlur
+            stdDeviation="3"
+            result="blur">
+          </feGaussianBlur>
+
+          <feMerge>
+
+            <feMergeNode
+              in="blur">
+            </feMergeNode>
+
+            <feMergeNode
+              in="SourceGraphic">
+            </feMergeNode>
+
+          </feMerge>
+
+        </filter>
+
       </defs>
+
+      <!-- BASE -->
 
       <rect
         width="1000"
@@ -2939,7 +3105,154 @@ const targetBottom = 490;
         fill="url(#rv5mapGradient)">
       </rect>
 
-      ${grid()}
+      <rect
+        width="1000"
+        height="560"
+        fill="url(#rv5mapGlow)">
+      </rect>
+
+      <rect
+        width="1000"
+        height="560"
+        fill="url(#rv5microGrid)">
+      </rect>
+
+
+      <!-- TACTICAL FRAME -->
+
+      <rect
+        x="18"
+        y="18"
+        width="964"
+        height="524"
+        rx="5"
+        fill="none"
+        stroke="#6cecff"
+        stroke-opacity=".11">
+      </rect>
+
+      <rect
+        x="28"
+        y="28"
+        width="944"
+        height="504"
+        rx="3"
+        fill="none"
+        stroke="#ffd76a"
+        stroke-opacity=".055">
+      </rect>
+
+
+      <!-- DISTRICT ZONES -->
+
+      <path
+        d="M52 88H285L330 132V242H52Z"
+        fill="#0a2632"
+        fill-opacity=".48"
+        stroke="#6cecff"
+        stroke-opacity=".07">
+      </path>
+
+      <path
+        d="M330 72H620L662 115V260H330Z"
+        fill="#08202b"
+        fill-opacity=".44"
+        stroke="#6cecff"
+        stroke-opacity=".065">
+      </path>
+
+      <path
+        d="M640 92H948V275L905 311H662V238H640Z"
+        fill="#0b222b"
+        fill-opacity=".42"
+        stroke="#6cecff"
+        stroke-opacity=".06">
+      </path>
+
+      <path
+        d="M54 284H314V468H54Z"
+        fill="#071c25"
+        fill-opacity=".5"
+        stroke="#6cecff"
+        stroke-opacity=".055">
+      </path>
+
+      <path
+        d="M334 292H620V510H334Z"
+        fill="#0a2029"
+        fill-opacity=".43"
+        stroke="#6cecff"
+        stroke-opacity=".05">
+      </path>
+
+      <path
+        d="M640 326H946V508H640Z"
+        fill="#081a23"
+        fill-opacity=".48"
+        stroke="#6cecff"
+        stroke-opacity=".055">
+      </path>
+
+
+      <!-- PRIMARY ARTERIES -->
+
+      <path
+        d="M60 455 Q190 398 305 371 T512 280 T710 184 T944 100"
+        fill="none"
+        stroke="#01070b"
+        stroke-width="44"
+        opacity=".9">
+      </path>
+
+      <path
+        d="M60 455 Q190 398 305 371 T512 280 T710 184 T944 100"
+        fill="none"
+        stroke="#24434e"
+        stroke-width="29"
+        opacity=".9">
+      </path>
+
+      <path
+        d="M60 455 Q190 398 305 371 T512 280 T710 184 T944 100"
+        fill="none"
+        stroke="#102932"
+        stroke-width="21"
+        opacity=".95">
+      </path>
+
+      <path
+        d="M116 96L204 185L287 248L378 318L460 377L558 447"
+        fill="none"
+        stroke="#0b1d25"
+        stroke-width="18"
+        opacity=".9">
+      </path>
+
+      <path
+        d="M116 96L204 185L287 248L378 318L460 377L558 447"
+        fill="none"
+        stroke="#1b3842"
+        stroke-width="10"
+        opacity=".85">
+      </path>
+
+      <path
+        d="M612 76L585 162L570 254L624 354L692 478"
+        fill="none"
+        stroke="#0a2029"
+        stroke-width="15"
+        opacity=".9">
+      </path>
+
+
+      <!-- LIVE WORLD -->
+
+      ${platforms}
+      ${gates}
+      ${obstacles}
+
+
+      <!-- ROUTE -->
 
       <path
         d="${route}"
@@ -2956,17 +3269,30 @@ const targetBottom = 490;
         class="route-core">
       </path>
 
-      ${platforms}
-      ${gates}
-      ${obstacles}
+
+      <!-- MISSION DATA -->
+
       ${signals}
       ${checkpoints}
       ${enemies}
       ${guides}
 
+
       <!-- START -->
 
-      <g>
+      <g
+        filter="url(#rv5softGlow)">
+
+        <circle
+          cx="${d.points.start.x}"
+          cy="${d.points.start.y}"
+          r="24"
+          fill="none"
+          stroke="#8df59b"
+          stroke-width="1"
+          stroke-dasharray="4 6"
+          opacity=".45">
+        </circle>
 
         <circle
           cx="${d.points.start.x}"
@@ -2974,7 +3300,8 @@ const targetBottom = 490;
           r="15"
           fill="none"
           stroke="#8df59b"
-          opacity=".2">
+          stroke-width="2"
+          opacity=".22">
         </circle>
 
         <circle
@@ -2985,17 +3312,30 @@ const targetBottom = 490;
         </circle>
 
         <text
-          x="${d.points.start.x+14}"
-          y="${d.points.start.y+4}"
+          x="${d.points.start.x + 18}"
+          y="${d.points.start.y + 4}"
           class="label">
           START
         </text>
 
       </g>
 
-      <!-- GOAL -->
 
-      <g>
+      <!-- OBJECTIVE -->
+
+      <g
+        filter="url(#rv5softGlow)">
+
+        <circle
+          cx="${d.points.goal.x}"
+          cy="${d.points.goal.y}"
+          r="31"
+          fill="none"
+          stroke="#ffd76a"
+          stroke-width="1"
+          stroke-dasharray="6 7"
+          opacity=".38">
+        </circle>
 
         <circle
           cx="${d.points.goal.x}"
@@ -3003,7 +3343,8 @@ const targetBottom = 490;
           r="20"
           fill="none"
           stroke="#ffd76a"
-          opacity=".2">
+          stroke-width="2"
+          opacity=".25">
         </circle>
 
         <circle
@@ -3014,23 +3355,36 @@ const targetBottom = 490;
         </circle>
 
         <text
-          x="${d.points.goal.x+18}"
-          y="${d.points.goal.y+4}"
+          x="${d.points.goal.x + 22}"
+          y="${d.points.goal.y + 4}"
           class="label">
           OBJECTIVE
         </text>
 
       </g>
 
+
       <!-- PLAYER -->
 
-      <g id="rv5-player">
+      <g
+        id="rv5-player"
+        filter="url(#rv5softGlow)">
 
         <circle
           cx="${d.points.player.x}"
           cy="${d.points.player.y}"
-          r="16"
+          r="21"
           class="player-ring">
+        </circle>
+
+        <circle
+          cx="${d.points.player.x}"
+          cy="${d.points.player.y}"
+          r="12"
+          fill="none"
+          stroke="#64ebff"
+          stroke-width="1"
+          opacity=".28">
         </circle>
 
         <circle
@@ -3040,9 +3394,26 @@ const targetBottom = 490;
           class="player">
         </circle>
 
+        <path
+          d="
+            M ${d.points.player.x}
+              ${d.points.player.y-14}
+
+            L ${d.points.player.x+4}
+              ${d.points.player.y-7}
+
+            L ${d.points.player.x-4}
+              ${d.points.player.y-7}
+
+            Z
+          "
+          fill="#64ebff"
+          opacity=".9">
+        </path>
+
         <text
-          x="${d.points.player.x+13}"
-          y="${d.points.player.y-12}"
+          x="${d.points.player.x + 17}"
+          y="${d.points.player.y - 15}"
           class="label">
           YOU
         </text>
@@ -3065,23 +3436,37 @@ const targetBottom = 490;
     const scene = runner();
 
     const svg =
-      root.querySelector('.rv5-svg');
+      root.querySelector(
+        '.rv5-svg'
+      );
 
     const player =
-      svg?.querySelector('#rv5-player');
+      svg?.querySelector(
+        '#rv5-player'
+      );
 
-    if (!scene || !player) return;
+    if (
+      !scene ||
+      !player
+    ) return;
 
-    const d = mapModel(scene);
+    const d =
+      mapModel(scene);
 
     const circle =
-      player.querySelector('.player');
+      player.querySelector(
+        '.player'
+      );
 
     const ring =
-      player.querySelector('.player-ring');
+      player.querySelector(
+        '.player-ring'
+      );
 
     const label =
-      player.querySelector('text');
+      player.querySelector(
+        'text'
+      );
 
     circle?.setAttribute(
       'cx',
@@ -3157,7 +3542,9 @@ const targetBottom = 490;
     const seconds =
       Math.max(
         0,
-        Math.ceil(ms / 1000)
+        Math.ceil(
+          ms / 1000
+        )
       );
 
     const number =
@@ -3177,7 +3564,8 @@ const targetBottom = 490;
 
     if (progress) {
 
-      const circumference = 270.18;
+      const circumference =
+        270.18;
 
       const ratio =
         clamp(
@@ -3189,7 +3577,7 @@ const targetBottom = 490;
       progress.style.strokeDashoffset =
         String(
           circumference *
-          (1-ratio)
+          (1 - ratio)
         );
     }
   }
@@ -3212,7 +3600,9 @@ const targetBottom = 490;
 
     active = false;
 
-    root.classList.remove('opening');
+    root.classList.remove(
+      'opening'
+    );
 
     lockGame(false);
 
@@ -3235,43 +3625,62 @@ const targetBottom = 490;
 
     root.hidden = false;
 
-    root.classList.remove('opening');
+    root.classList.remove(
+      'opening'
+    );
 
     void root.offsetWidth;
 
-    root.classList.add('opening');
+    root.classList.add(
+      'opening'
+    );
 
     const startedWait =
       performance.now();
 
-    let data = getMission();
+    let data =
+      getMission();
 
     while (
       !data.scene &&
-      performance.now() - startedWait < 4500
+      performance.now() -
+        startedWait <
+        4500
     ) {
 
       await WAIT(80);
 
-      data = getMission();
+      data =
+        getMission();
     }
 
-    data = getMission();
+    data =
+      getMission();
 
-    root.querySelector('.rv5-meta')
+    root
+      .querySelector(
+        '.rv5-meta'
+      )
       .textContent =
       `${data.district} // ${data.title}`;
 
-    root.querySelector('.objective-text')
+    root
+      .querySelector(
+        '.objective-text'
+      )
       .textContent =
       data.objective;
 
-    renderMap(data.scene);
+    renderMap(
+      data.scene
+    );
 
     const started =
       performance.now();
 
-    updateTimer(10000);
+    updateTimer(
+      10000
+    );
 
     timerId =
       setInterval(
@@ -3338,7 +3747,10 @@ const targetBottom = 490;
           PLAY_BUTTONS
         );
 
-      if (!button || active) return;
+      if (
+        !button ||
+        active
+      ) return;
 
       /*
        * VAŽNO:
@@ -3362,7 +3774,9 @@ const targetBottom = 490;
    */
 
   const lockStyle =
-    document.createElement('style');
+    document.createElement(
+      'style'
+    );
 
   lockStyle.textContent = `
 
@@ -3382,7 +3796,9 @@ const targetBottom = 490;
 
   `;
 
-  document.head.appendChild(lockStyle);
+  document.head.appendChild(
+    lockStyle
+  );
 
   /*
    * ============================================================
@@ -3394,17 +3810,25 @@ const targetBottom = 490;
 
     show,
 
-    close:finish,
+    close:
+      finish,
 
     refresh() {
 
-      if (!active) return;
+      if (!active)
+        return;
 
-      const data = getMission();
+      const data =
+        getMission();
 
       if (data.scene) {
-        renderMap(data.scene);
+
+        renderMap(
+          data.scene
+        );
+
       }
+
     },
 
     getRoot() {
