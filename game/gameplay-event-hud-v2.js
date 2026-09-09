@@ -8,18 +8,8 @@
   const text = selector => document.querySelector(selector)?.textContent?.trim() || '';
 
   function ensure() {
-    if (state.root?.isConnected) return state.root;
-    const hud = document.querySelector('.hud');
-    if (!hud) return null;
-    const root = document.createElement('section');
-    root.id = 'gameplayEventHud'; root.className = 'gameplay-event-hud';
-    root.setAttribute('aria-live', 'polite'); root.setAttribute('aria-atomic', 'true');
-    root.innerHTML = '<div class="gameplay-event-bracket gameplay-event-bracket-left" aria-hidden="true"></div><div class="gameplay-event-bracket gameplay-event-bracket-right" aria-hidden="true"></div><div class="gameplay-event-card"><span class="gameplay-event-scan" aria-hidden="true"></span><span class="gameplay-event-grid" aria-hidden="true"></span><div class="gameplay-event-icon" aria-hidden="true"><i></i></div><div class="gameplay-event-copy"><div class="gameplay-event-head"><small id="gameplayEventType">EVENT</small><b id="gameplayEventValue">LIVE</b></div><strong id="gameplayEventTitle">SYSTEM READY</strong><span id="gameplayEventDetail">GAMEPLAY TELEMETRY</span></div><div class="gameplay-event-meter" aria-hidden="true"><i></i></div><span class="gameplay-event-line" aria-hidden="true"></span></div>';
-    const progress = hud.querySelector('.hud-progress');
-    if (progress?.nextSibling) hud.insertBefore(root, progress.nextSibling); else hud.appendChild(root);
-    state.root = root; return root;
-  }
-
+  return null;
+}
   function show(event) {
     const root = ensure(); if (!root || !event) return;
     const now = performance.now(); const key = `${event[0]}|${event[1]}|${event[2]}`;
@@ -342,6 +332,11 @@ state.hideTimer = setTimeout(
     window.addEventListener('resize', ensure, { passive: true }); window.addEventListener('orientationchange', ensure, { passive: true });
   }
 
-  window.relayGameplayEventHud = { show, bind };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, { once: true }); else bind();
+window.relayGameplayEventHud = {
+  show: () => {},
+  bind: () => {}
+};
+
+// Gameplay Event HUD disabled.
+// Checkpoint, respawn and recovery gameplay logic remain active.
 })();
