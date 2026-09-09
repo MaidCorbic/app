@@ -80,7 +80,7 @@ import './src/systems/city-atmosphere-cleanup-v1.js';
 import './game-feel-v1.js';
 import './audio-feedback-v2.js';
 import './adaptive-music-v1.js';
-import './gameplay-event-hud-v2.js';
+//import './gameplay-event-hud-v2.js';
 import './src/systems/world-variation-game-feel-v1.js';
 import './src/systems/barrier-gameplay-visual-cleanup-v1.js';
 import './src/systems/city-backdrop-replacement-v1.js';
