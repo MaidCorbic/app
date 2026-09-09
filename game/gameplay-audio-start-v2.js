@@ -1,23 +1,28 @@
-/* Gameplay Audio Start Fix V3
+/* Gameplay Audio Start Fix V4
  * Reliable bridge between Play/Continue gestures,
  * RunnerScene readiness and adaptive procedural music.
  *
- * Compatible with existing gameplay hardening.
- * No external audio assets required.
+ * Compatibility fix:
+ * adaptive-music-v1.js can be evaluated before the autoplay guard restores
+ * AudioContext. On the first real user gesture we therefore re-import that
+ * module with a cache-busting query after unlocking the existing guard.
+ *
+ * No gameplay logic, HUD, CSS, physics, missions or controls are changed.
  */
 (() => {
   'use strict';
 
-  if (window.__relayGameplayAudioStartV3) {
+  if (window.__relayGameplayAudioStartV4) {
     return;
   }
 
-  window.__relayGameplayAudioStartV3 = true;
+  window.__relayGameplayAudioStartV4 = true;
 
   let retryTimer = 0;
   let retryCount = 0;
   let startingPromise = null;
   let lastGestureTime = 0;
+  let musicImportPromise = null;
 
   const MAX_RETRIES = 60;
   const RETRY_DELAY = 150;
@@ -128,8 +133,39 @@
     retryCount = 0;
   };
 
+  const ensureMusicModule = async () => {
+    const existing = getMusic();
+
+    if (existing) {
+      return existing;
+    }
+
+    try {
+      window.relayAudioAutoplayGuard?.unlock?.();
+    } catch {}
+
+    if (!musicImportPromise) {
+      const cacheKey =
+        `relay-music-${Date.now()}-${Math.random()}`;
+
+      musicImportPromise = import(
+        `./adaptive-music-v1.js?${cacheKey}`
+      ).catch(() => null);
+    }
+
+    try {
+      await musicImportPromise;
+    } catch {}
+
+    return getMusic();
+  };
+
   const unlockAndStart = async () => {
-    const music = getMusic();
+    let music = getMusic();
+
+    if (!music) {
+      music = await ensureMusicModule();
+    }
 
     if (!music) {
       return false;
@@ -203,7 +239,8 @@
     const retry = async () => {
       retryTimer = 0;
 
-      const music = getMusic();
+      const music =
+        getMusic();
 
       if (!music) {
         if (
@@ -398,8 +435,9 @@
       /*
        * Important order:
        * 1. Save scene
-       * 2. Bind adaptive music
-       * 3. Start
+       * 2. Ensure adaptive music module
+       * 3. Bind adaptive music
+       * 4. Start
        */
       bindScene();
       start();
@@ -420,19 +458,13 @@
 
   /*
    * Public compatibility API.
-   *
-   * V3 is the canonical API because other
-   * existing modules already call it.
+   * V3 remains available for existing callers.
    */
   window.relayGameplayAudioStartV3 = {
     start,
     bindScene
   };
 
-  /*
-   * Optional V4 alias for compatibility with
-   * anything that may already reference V4.
-   */
   window.relayGameplayAudioStartV4 = {
     start,
     bindScene
