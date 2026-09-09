@@ -71,11 +71,24 @@
         720
       );
 
-    const W = 1000;
-    const H = 560;
+const W = 1000;
+const H = 560;
 
-    const sx =
-      900 / Math.max(worldW, 1);
+el.setAttribute(
+  'viewBox',
+  `0 0 ${W} ${H}`
+);
+
+el.setAttribute(
+  'preserveAspectRatio',
+  'xMidYMid meet'
+);
+
+el.setAttribute('width', '100%');
+el.setAttribute('height', '100%');
+
+const sx =
+  900 / Math.max(worldW, 1);
 
     const sy =
       430 / Math.max(worldH, 1);
@@ -93,6 +106,22 @@
         0,
         430
       );
+
+ const labelX = (x, width = 90, gap = 12) =>
+  x > W - width
+    ? Math.max(8, x - gap)
+    : Math.min(W - 8, x + gap);
+
+const labelAnchor = (x, width = 90) =>
+  x > W - width
+    ? 'end'
+    : 'start';
+
+const labelY = (y, offset = 3) => {
+  if (y < 26) return y + 20;
+  if (y > H - 26) return y - 14;
+  return y + offset;
+};
 
     const arr = k =>
       Array.isArray(m[k])
@@ -141,12 +170,12 @@
       goal
     ];
 
-    const path =
-      route
-        .map((v, i) =>
-          `${i ? 'L' : 'M'}${X(v.x / sx - 50)} ${Y(v.y / sy - 55)}`
-        )
-        .join(' ');
+const path =
+  route
+    .map((v, i) =>
+      `${i ? 'L' : 'M'}${v.x} ${v.y}`
+    )
+    .join(' ');
 
 
     /* =======================================================
@@ -230,10 +259,11 @@
                 r="${radius}"
               />
 
-              <text
-                x="${cx + 10}"
-                y="${cy + 3}"
-              >
+ <text
+  x="${labelX(cx, 90)}"
+  y="${labelY(cy)}"
+  text-anchor="${labelAnchor(cx, 90)}"
+>
                 ${
                   label ||
                   (
@@ -278,10 +308,11 @@
                 r="3"
               />
 
-              <text
-                x="${cx + 17}"
-                y="${cy + 3}"
-              >
+          <text
+  x="${labelX(cx, 70)}"
+  y="${labelY(cy)}"
+  text-anchor="${labelAnchor(cx, 70)}"
+>
                 CP ${i + 1}
               </text>
 
@@ -413,20 +444,27 @@
             );
         }
 
-        .checkpoint text {
-          fill: #f2c94c;
+ .checkpoint text {
+  fill: #f2c94c;
 
-          font:
-            900 10px
-            ui-monospace,
-            SFMono-Regular,
-            Menlo,
-            Monaco,
-            Consolas,
-            monospace;
+  font:
+    900 11px/1.2
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
 
-          letter-spacing: .1em;
-        }
+  letter-spacing: .08em;
+
+  paint-order: stroke;
+  stroke: #030405;
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+  pointer-events: none;
+user-select: none;
+}
 
 
         /* =====================================================
@@ -445,16 +483,27 @@
             );
         }
 
-        .start text {
-          fill: #75eba1;
+       .start text {
+  fill: #75eba1;
 
-          font:
-            900 10px
-            ui-monospace,
-            monospace;
+  font:
+    900 11px/1.2
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
 
-          letter-spacing: .12em;
-        }
+  letter-spacing: .08em;
+
+  paint-order: stroke;
+  stroke: #030405;
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+  pointer-events: none;
+user-select: none;
+}
 
 
         /* =====================================================
@@ -478,23 +527,33 @@
             infinite;
         }
 
-        .you text {
-          fill: #55dcff;
+       .you text {
+  fill: #55dcff;
 
-          font:
-            900 10px
-            ui-monospace,
-            monospace;
+  font:
+    900 11px/1.2
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
 
-          letter-spacing: .12em;
+  letter-spacing: .08em;
 
-          filter:
-            drop-shadow(
-              0 0 4px
-              rgba(77,216,255,.5)
-            );
-        }
+  paint-order: stroke;
+  stroke: #030405;
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
 
+  filter:
+    drop-shadow(
+      0 0 4px
+      rgba(77,216,255,.5)
+    );
+    pointer-events: none;
+user-select: none;
+}
 
         /* =====================================================
            TARGET
@@ -521,15 +580,26 @@
         }
 
         .goal text {
-          fill: #f2c94c;
+  fill: #f2c94c;
 
-          font:
-            900 10px
-            ui-monospace,
-            monospace;
+  font:
+    900 11px/1.2
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
 
-          letter-spacing: .12em;
-        }
+  letter-spacing: .08em;
+
+  paint-order: stroke;
+  stroke: #030405;
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+  pointer-events: none;
+user-select: none;
+}
 
 
         /* =====================================================
@@ -553,16 +623,33 @@
             infinite;
         }
 
-        .hostile text {
-          fill: #ff8585;
+    .hostile text {
+  fill: #ff8585;
 
-          font:
-            900 8px
-            ui-monospace,
-            monospace;
+  font:
+    900 10px/1.2
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
 
-          letter-spacing: .08em;
-        }
+  letter-spacing: .06em;
+
+  paint-order: stroke;
+  stroke: #030405;
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+
+  filter:
+    drop-shadow(
+      0 0 4px
+      rgba(210,45,55,.45)
+    );
+    pointer-events: none;
+user-select: none;
+}
 
 
         /* =====================================================
@@ -581,53 +668,100 @@
             );
         }
 
-        .signal text {
-          fill: #79ddff;
+     .signal text {
+  fill: #79ddff;
 
-          font:
-            900 8px
-            ui-monospace,
-            monospace;
+  font:
+    900 10px/1.2
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
 
-          letter-spacing: .08em;
-        }
+  letter-spacing: .06em;
 
+  paint-order: stroke;
+  stroke: #030405;
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+
+  filter:
+    drop-shadow(
+      0 0 4px
+      rgba(121,221,255,.45)
+    );
+
+  pointer-events: none;
+  user-select: none;
+}
 
         /* =====================================================
            DISTRICT
            ===================================================== */
 
-        .district {
-          fill: #f2c94c;
+      .district {
+  fill: #f2c94c;
 
-          font:
-            900 12px
-            ui-monospace,
-            monospace;
+  font:
+    900 13px/1.15
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
 
-          letter-spacing: .18em;
+  letter-spacing: .12em;
 
-          paint-order: stroke;
+  paint-order: stroke;
 
-          stroke: #030405;
-          stroke-width: 4px;
-        }
+  stroke: #030405;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+
+  text-anchor: start;
+  dominant-baseline: middle;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(242,201,76,.22)
+    );
+
+  pointer-events: none;
+  user-select: none;
+}
 
 
         /* =====================================================
            LEGEND
            ===================================================== */
 
-        .legend {
-          fill: rgba(235,235,235,.62);
+     .legend {
+  fill: rgba(235,235,235,.82);
 
-          font:
-            800 8px
-            ui-monospace,
-            monospace;
+  font:
+    800 9px/1.2
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
 
-          letter-spacing: .1em;
-        }
+  letter-spacing: .07em;
+
+  paint-order: stroke;
+  stroke: #030405;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  pointer-events: none;
+user-select: none;
+text-anchor: end;
+dominant-baseline: middle;
+}
 
 
         /* =====================================================
@@ -839,12 +973,13 @@
           r="8"
         />
 
-        <text
-          x="${start.x + 14}"
-          y="${start.y + 4}"
-        >
-          START
-        </text>
+       <text
+  x="${labelX(start.x, 70)}"
+  y="${labelY(start.y, 3)}"
+  text-anchor="${labelAnchor(start.x, 70)}"
+>
+  START
+</text>
 
       </g>
 
@@ -859,12 +994,13 @@
           r="9"
         />
 
-        <text
-          x="${goal.x + 14}"
-          y="${goal.y + 4}"
-        >
-          TARGET
-        </text>
+      <text
+  x="${labelX(goal.x, 80)}"
+  y="${labelY(goal.y, 3)}"
+  text-anchor="${labelAnchor(goal.x, 80)}"
+>
+  TARGET
+</text>
 
       </g>
 
@@ -879,21 +1015,21 @@
           r="7"
         />
 
-        <text
-          x="${you.x + 12}"
-          y="${you.y - 10}"
-        >
-          YOU
-        </text>
-
+       <text
+  x="${labelX(you.x, 55)}"
+  y="${labelY(you.y, -10)}"
+  text-anchor="${labelAnchor(you.x, 55)}"
+>
+  YOU
+</text>
       </g>
 
 
       <!-- DISTRICT -->
 
       <text
-        x="30"
-        y="30"
+        x="34"
+        y="34"
         class="district"
       >
         ${String(
@@ -984,29 +1120,24 @@
          SHELL
          ===================================================== */
 
-      #relayGameplayIntroFinalV3
-      .map-briefing-shell {
+   #relayGameplayIntroFinalV3
+.map-briefing-shell {
 
-        position: absolute !important;
+  position: absolute !important;
 
-        inset: 0 !important;
+  inset: 0 !important;
 
-        width: 100% !important;
+  width: 100% !important;
 
-        height: 100% !important;
+  height: 100% !important;
 
-        min-width: 0 !important;
+  min-width: 0 !important;
 
-        min-height: 0 !important;
+  min-height: 0 !important;
 
-        display: grid !important;
+  display: grid !important;
 
-        grid-template-rows:
-          auto
-          minmax(0, 1fr)
-          auto !important;
-
-        gap: 0 !important;
+  gap: 0 !important;
 
         padding:
           max(7px, env(safe-area-inset-top))
@@ -1040,14 +1171,14 @@
 
         position: relative !important;
 
-        display: grid !important;
+        display: flex !important;
 
         grid-template-columns:
           minmax(0, 1fr)
           auto !important;
 
         align-items: center !important;
-
+        justify-content: space-between !important;
         min-height: 61px !important;
 
         margin:
@@ -1259,12 +1390,18 @@
          MAP CONTAINER
          ===================================================== */
 
-      #relayGameplayIntroFinalV3
-      .map-briefing-map-wrap {
+    #relayGameplayIntroFinalV3
+.map-briefing-map-wrap {
 
-        position: relative !important;
+  position: relative !important;
 
-        width: 100% !important;
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  width: 100% !important;
 
         height: 100% !important;
 
@@ -1313,6 +1450,18 @@
         height:
           100% !important;
 
+                  max-width:
+          100% !important;
+
+        max-height:
+          100% !important;
+
+        object-fit:
+          contain !important;
+
+        object-position:
+          center center !important;
+
         min-width:
           0 !important;
 
@@ -1322,12 +1471,12 @@
         background:
           #020304 !important;
 
-        overflow:
-          hidden !important;
+       overflow:
+  visible !important;
 
-        touch-action:
-          none !important;
-      }
+    touch-action:
+  manipulation !important;
+  }
 
 
       /* =====================================================
