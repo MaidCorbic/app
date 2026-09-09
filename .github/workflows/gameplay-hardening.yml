@@ -30,11 +30,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Refresh APT indexes
+      - name: Prepare APT for Playwright
         run: |
+          set -e
+          for f in /etc/apt/sources.list.d/*; do
+            if [ -f "$f" ] && sudo grep -qi 'dl.google.com/linux/chrome' "$f" 2>/dev/null; then
+              echo "Disabling stale Google Chrome APT source: $f"
+              sudo mv "$f" "$f.disabled"
+            fi
+          done
           sudo rm -rf /var/lib/apt/lists/*
           sudo apt-get clean
-          sudo apt-get update
+          sudo apt-get update -o Acquire::Retries=3
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
