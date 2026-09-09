@@ -1,729 +1,222 @@
 /* =========================================================
-   RELAY RUNNER — AAA CYBER TACTICAL SPLASH
-   CSS ONLY
+   AAA CYBER PROGRESS
    ========================================================= */
 
-:root{
-  --rr-bg:#010308;
-  --rr-cyan:#00eaff;
-  --rr-cyan2:#75f7ff;
-  --rr-blue:#008cff;
-  --rr-gold:#ffd23c;
-  --rr-white:#f5fdff;
-  --rr-dim:rgba(210,245,255,.68);
+#intro.home-v3 .home-v4-progress-bar{
+  position:relative;
+
+  height:7px;
+
+  margin-top:8px;
+
+  border:
+    1px solid
+    rgba(117,247,255,.22);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,234,255,.035),
+      rgba(255,255,255,.055),
+      rgba(0,140,255,.025)
+    );
+
+  box-shadow:
+    inset 0 0 8px rgba(0,0,0,.75),
+    0 0 12px rgba(0,234,255,.06);
+
+  overflow:hidden;
+
+  border-radius:999px;
 }
 
 
-/* =========================================================
-   CORE
-   ========================================================= */
+/* MOVING GRID INSIDE TRACK */
 
-.relay-splash{
-  position:fixed;
+#intro.home-v3 .home-v4-progress-bar::before{
+  content:"";
+
+  position:absolute;
   inset:0;
 
-  width:100vw!important;
-  height:100vh!important;
-  width:100dvw!important;
-  height:100dvh!important;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 22px,
+      rgba(117,247,255,.13) 23px,
+      transparent 24px 44px
+    );
 
-  z-index:2147483647;
+  opacity:.55;
 
-  display:grid;
-  place-items:center;
+  animation:
+    homeV5ProgressGrid
+    1.1s
+    linear
+    infinite;
 
-  overflow:hidden;
-  isolation:isolate;
+  pointer-events:none;
+}
 
-  background:var(--rr-bg);
 
-  opacity:1;
-  visibility:visible;
+/* PROGRESS FILL */
+
+#intro.home-v3 .home-v4-progress-fill{
+  position:relative;
+
+  width:25%;
+
+  height:100%;
+
+  border-radius:inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      #008cff 0%,
+      #00eaff 42%,
+      #75f7ff 76%,
+      #f5fdff 100%
+    );
+
+  box-shadow:
+    0 0 6px #00eaff,
+    0 0 14px rgba(0,234,255,.75),
+    0 0 28px rgba(0,140,255,.55),
+    0 0 45px rgba(0,140,255,.25);
 
   transition:
-    opacity .75s cubic-bezier(.16,1,.3,1),
-    visibility .75s;
-}
-
-
-/* =========================================================
-   CYBER ATMOSPHERE
-   ========================================================= */
-
-.relay-splash::before{
-  content:"";
-
-  position:absolute;
-  inset:-25%;
-
-  z-index:1;
-  pointer-events:none;
-
-  background:
-
-    radial-gradient(
-      circle at 50% 48%,
-      rgba(0,234,255,.22) 0%,
-      rgba(0,140,255,.10) 22%,
-      transparent 48%
-    ),
-
-    radial-gradient(
-      circle at 8% 90%,
-      rgba(0,234,255,.12),
-      transparent 34%
-    ),
-
-    radial-gradient(
-      circle at 92% 10%,
-      rgba(0,140,255,.12),
-      transparent 32%
-    ),
-
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.2),
-      transparent 35%,
-      rgba(0,0,0,.78)
-    );
-
-  animation:rr-atmosphere 5s ease-in-out infinite alternate;
-}
-
-
-/* =========================================================
-   HUD / CRT OVERLAY
-   ========================================================= */
-
-.relay-splash::after{
-  content:"";
-
-  position:absolute;
-  inset:0;
-
-  z-index:5;
-  pointer-events:none;
-
-  background:
-
-    repeating-linear-gradient(
-      180deg,
-      rgba(255,255,255,.025) 0,
-      rgba(255,255,255,.025) 1px,
-      transparent 1px,
-      transparent 4px
-    ),
-
-    linear-gradient(
-      90deg,
-      rgba(0,0,0,.72),
-      transparent 18%,
-      transparent 82%,
-      rgba(0,0,0,.72)
-    ),
-
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.72),
-      transparent 20%,
-      transparent 68%,
-      rgba(0,0,0,.86)
-    );
-
-  opacity:.82;
-
-  mix-blend-mode:screen;
-}
-
-
-/* =========================================================
-   IMAGE
-   ========================================================= */
-
-.relay-splash-art{
-  position:absolute;
-  inset:0;
-
-  z-index:0;
-
-  display:block!important;
-
-  width:100vw!important;
-  height:100vh!important;
-
-  width:100dvw!important;
-  height:100dvh!important;
-
-  min-width:100%!important;
-  min-height:100%!important;
-
-  max-width:none!important;
-  max-height:none!important;
-
-  object-fit:cover!important;
-  object-position:center!important;
-
-  background:#010308;
-
-  filter:
-    saturate(.92)
-    contrast(1.16)
-    brightness(.72);
-
-  transform:none!important;
-  animation:none!important;
-}
-
-
-/* =========================================================
-   CORNER HUD FRAME
-   ========================================================= */
-
-.relay-splash-brand{
-  position:absolute;
-
-  z-index:8;
-
-  left:max(24px,env(safe-area-inset-left));
-  top:max(24px,env(safe-area-inset-top));
-
-  display:flex;
-  align-items:center;
-
-  gap:12px;
-
-  color:var(--rr-white);
-
-  font:
-    900 11px/1
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    monospace;
-
-  letter-spacing:.24em;
-
-  text-transform:uppercase;
-
-  text-shadow:
-    0 2px 12px #000,
-    0 0 16px rgba(0,234,255,.45);
-}
-
-
-/* =========================================================
-   LOGO CORE
-   ========================================================= */
-
-.relay-splash-brand b{
-  position:relative;
-
-  display:grid;
-  place-items:center;
-
-  width:38px;
-  height:38px;
-
-  color:var(--rr-cyan2);
-
-  border:1px solid rgba(0,234,255,.9);
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(0,234,255,.18),
-      rgba(0,20,35,.86)
-    );
-
-  box-shadow:
-    0 0 7px rgba(0,234,255,.85),
-    0 0 22px rgba(0,234,255,.42),
-    0 0 48px rgba(0,140,255,.2),
-    inset 0 0 18px rgba(0,234,255,.18);
-
-  font-size:14px;
-
-  animation:rr-logo 2s ease-in-out infinite;
-}
-
-
-/* corner brackets */
-
-.relay-splash-brand b::before,
-.relay-splash-brand b::after{
-  content:"";
-
-  position:absolute;
-
-  width:8px;
-  height:8px;
-
-  border-color:var(--rr-cyan);
-  border-style:solid;
-}
-
-.relay-splash-brand b::before{
-  left:-3px;
-  top:-3px;
-
-  border-width:2px 0 0 2px;
-}
-
-.relay-splash-brand b::after{
-  right:-3px;
-  bottom:-3px;
-
-  border-width:0 2px 2px 0;
-}
-
-
-/* =========================================================
-   LOADING HUD
-   ========================================================= */
-
-.relay-splash-ui{
-  position:absolute;
-
-  z-index:9;
-
-  left:max(24px,env(safe-area-inset-left));
-  right:max(24px,env(safe-area-inset-right));
-
-  bottom:max(
-    30px,
-    calc(env(safe-area-inset-bottom) + 22px)
-  );
-
-  width:min(
-    860px,
-    calc(100vw - 48px)
-  );
-
-  margin:auto;
-
-  display:grid;
-
-  gap:11px;
-}
-
-
-/* =========================================================
-   STATUS
-   ========================================================= */
-
-.relay-splash-meta{
-  display:flex;
-
-  align-items:center;
-  justify-content:space-between;
-
-  gap:20px;
-}
-
-
-.relay-splash-status{
-  display:flex;
-  align-items:center;
-
-  color:var(--rr-dim);
-
-  font:
-    800 10px/1.2
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace;
-
-  letter-spacing:.2em;
-
-  text-transform:uppercase;
-
-  text-shadow:
-    0 2px 10px #000,
-    0 0 14px rgba(0,234,255,.2);
-}
-
-
-/* LIVE DOT */
-
-.relay-splash-status::before{
-  content:"";
-
-  width:6px;
-  height:6px;
-
-  margin-right:10px;
-
-  border-radius:50%;
-
-  background:var(--rr-cyan);
-
-  box-shadow:
-    0 0 6px var(--rr-cyan),
-    0 0 14px var(--rr-cyan),
-    0 0 28px rgba(0,234,255,.75);
-
-  animation:rr-live .85s ease-in-out infinite;
-}
-
-
-/* =========================================================
-   PERCENT
-   ========================================================= */
-
-.relay-splash-percent{
-  color:var(--rr-cyan2);
-
-  font:
-    900 15px/1
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace;
-
-  font-variant-numeric:tabular-nums;
-
-  letter-spacing:.1em;
-
-  text-shadow:
-    0 0 8px rgba(0,234,255,1),
-    0 0 20px rgba(0,234,255,.75),
-    0 0 38px rgba(0,140,255,.35);
-}
-
-
-/* =========================================================
-   PROGRESS TRACK
-   ========================================================= */
-
-.relay-splash-track{
-  position:relative;
-
-  height:8px;
-
-  border:1px solid rgba(117,247,255,.42);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,20,32,.96),
-      rgba(0,4,10,.98)
-    );
-
-  box-shadow:
-    0 0 8px rgba(0,234,255,.35),
-    0 0 30px rgba(0,140,255,.18),
-    inset 0 0 16px #000;
+    width .35s
+    cubic-bezier(.16,1,.3,1);
 
   overflow:hidden;
+
+  z-index:2;
 }
 
 
-/* technical inner line */
+/* HOT CORE AT THE END */
 
-.relay-splash-track::before{
+#intro.home-v3 .home-v4-progress-fill::before{
   content:"";
 
   position:absolute;
-  inset:1px;
 
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(117,247,255,.08) 0 1px,
-      transparent 1px 18px
-    );
+  top:0;
+  right:0;
 
-  pointer-events:none;
-}
-
-
-/* =========================================================
-   ENERGY BAR
-   ========================================================= */
-
-.relay-splash-progress{
-  position:relative;
-
-  display:block;
-
-  width:0;
+  width:75px;
   height:100%;
 
   background:
     linear-gradient(
       90deg,
-      #006d8a 0%,
-      var(--rr-blue) 28%,
-      var(--rr-cyan) 65%,
-      var(--rr-cyan2) 88%,
-      #ffffff 100%
+      transparent,
+      rgba(117,247,255,.55),
+      #ffffff
     );
 
-  box-shadow:
-    0 0 7px rgba(0,234,255,1),
-    0 0 18px rgba(0,234,255,.85),
-    0 0 42px rgba(0,140,255,.55);
+  filter:blur(2px);
 
-  transition:
-    width .16s cubic-bezier(.16,1,.3,1);
+  opacity:.9;
+
+  animation:
+    homeV5ProgressCore
+    .7s
+    ease-in-out
+    infinite alternate;
+
+  pointer-events:none;
 }
 
 
-/* =========================================================
-   ENERGY SCANNER
-   ========================================================= */
+/* MOVING LIGHT */
 
-.relay-splash-progress::after{
+#intro.home-v3 .home-v4-progress-fill::after{
   content:"";
 
   position:absolute;
 
-  top:-4px;
-  bottom:-4px;
+  top:0;
+  bottom:0;
 
-  left:-150px;
+  left:-45%;
 
-  width:150px;
+  width:42%;
 
   background:
     linear-gradient(
       90deg,
       transparent,
-      rgba(255,255,255,.15),
-      rgba(255,255,255,1),
-      rgba(117,247,255,.75),
+      rgba(255,255,255,.85),
       transparent
     );
 
-  filter:
-    blur(.3px)
-    drop-shadow(
-      0 0 10px rgba(255,255,255,1)
-    );
+  filter:blur(3px);
 
   animation:
-    rr-energy-scan 1s linear infinite;
+    homeV5ProgressScan
+    1.25s
+    cubic-bezier(.16,1,.3,1)
+    infinite;
+
+  pointer-events:none;
 }
 
 
 /* =========================================================
-   FINISHED / READY STATE
+   PROGRESS ANIMATIONS
    ========================================================= */
 
-.relay-splash[aria-busy="false"]
-.relay-splash-progress{
-
-  background:
-    linear-gradient(
-      90deg,
-      var(--rr-cyan),
-      var(--rr-cyan2),
-      var(--rr-gold),
-      #ffffff
-    );
-
-  box-shadow:
-    0 0 10px rgba(0,234,255,1),
-    0 0 25px rgba(255,210,60,.85),
-    0 0 55px rgba(255,210,60,.35);
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media(max-width:700px){
-
-  .relay-splash-art{
-    object-position:center!important;
-
-    filter:
-      saturate(.94)
-      contrast(1.13)
-      brightness(.7);
-  }
-
-  .relay-splash-brand{
-    left:max(16px,env(safe-area-inset-left));
-    top:max(16px,env(safe-area-inset-top));
-
-    gap:9px;
-
-    font-size:9px;
-
-    letter-spacing:.15em;
-  }
-
-  .relay-splash-brand b{
-    width:29px;
-    height:29px;
-
-    font-size:11px;
-  }
-
-  .relay-splash-ui{
-    left:max(14px,env(safe-area-inset-left));
-    right:max(14px,env(safe-area-inset-right));
-
-    bottom:max(
-      18px,
-      calc(env(safe-area-inset-bottom) + 13px)
-    );
-
-    width:calc(100vw - 28px);
-
-    gap:9px;
-  }
-
-  .relay-splash-status{
-    font-size:8px;
-    letter-spacing:.14em;
-  }
-
-  .relay-splash-percent{
-    font-size:12px;
-  }
-
-  .relay-splash-track{
-    height:6px;
-  }
-}
-
-
-/* =========================================================
-   PORTRAIT
-   ========================================================= */
-
-@media(
-  max-width:700px
-) and (
-  orientation:portrait
-){
-
-  .relay-splash-art{
-    object-fit:cover!important;
-    object-position:center!important;
-  }
-
-  .relay-splash-ui{
-    width:calc(100vw - 24px);
-  }
-}
-
-
-/* =========================================================
-   LANDSCAPE / SHORT DISPLAY
-   ========================================================= */
-
-@media(
-  orientation:landscape
-) and (
-  max-height:520px
-){
-
-  .relay-splash-brand{
-    top:max(
-      10px,
-      calc(env(safe-area-inset-top) + 6px)
-    );
-  }
-
-  .relay-splash-ui{
-    bottom:max(
-      10px,
-      calc(env(safe-area-inset-bottom) + 7px)
-    );
-  }
-}
-
-
-/* =========================================================
-   REDUCED MOTION
-   ========================================================= */
-
-@media(prefers-reduced-motion:reduce){
-
-  .relay-splash::before,
-  .relay-splash-brand b,
-  .relay-splash-status::before,
-  .relay-splash-progress::after{
-    animation:none!important;
-  }
-
-  .relay-splash,
-  .relay-splash-progress{
-    transition:none!important;
-  }
-}
-
-
-/* =========================================================
-   ANIMATIONS
-   ========================================================= */
-
-@keyframes rr-atmosphere{
-
-  0%{
-    transform:scale(1);
-    opacity:.7;
-  }
-
-  50%{
-    opacity:1;
-  }
-
-  100%{
-    transform:scale(1.055);
-    opacity:.82;
-  }
-}
-
-
-@keyframes rr-logo{
-
-  0%,100%{
-    box-shadow:
-      0 0 7px rgba(0,234,255,.55),
-      0 0 22px rgba(0,234,255,.22),
-      0 0 42px rgba(0,140,255,.12),
-      inset 0 0 15px rgba(0,234,255,.1);
-  }
-
-  50%{
-    box-shadow:
-      0 0 12px rgba(0,234,255,1),
-      0 0 30px rgba(0,234,255,.55),
-      0 0 60px rgba(0,140,255,.25),
-      inset 0 0 22px rgba(0,234,255,.2);
-  }
-}
-
-
-@keyframes rr-live{
-
-  0%,100%{
-    opacity:.3;
-    transform:scale(.7);
-  }
-
-  50%{
-    opacity:1;
-    transform:scale(1.25);
-  }
-}
-
-
-@keyframes rr-energy-scan{
+@keyframes homeV5ProgressGrid{
 
   from{
     transform:translateX(0);
   }
 
   to{
-    transform:translateX(1050px);
+    transform:translateX(44px);
   }
+
+}
+
+
+@keyframes homeV5ProgressCore{
+
+  from{
+    opacity:.55;
+    transform:scaleX(.72);
   }
+
+  to{
+    opacity:1;
+    transform:scaleX(1.12);
+  }
+
+}
+
+
+@keyframes homeV5ProgressScan{
+
+  0%{
+    transform:translateX(-30%);
+  }
+
+  100%{
+    transform:translateX(330%);
+  }
+
+}
+
+
+/* =========================================================
+   PERCENTAGE — MATCH PROGRESS
+   ========================================================= */
+
+#intro.home-v3 .home-v4-progress-meta strong{
+  color:#75f7ff;
+
+  text-shadow:
+    0 0 7px rgba(0,234,255,.65),
+    0 0 18px rgba(0,140,255,.35);
+}
