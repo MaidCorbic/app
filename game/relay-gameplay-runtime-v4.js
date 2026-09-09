@@ -1682,6 +1682,17 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         }
       }
 
+            /* =========================================================
+         REMOVE SECONDARY WORLD MISSION CARD
+         ========================================================= */
+
+      #game #play .world-marker{
+        display:none!important;
+        visibility:hidden!important;
+        opacity:0!important;
+        pointer-events:none!important;
+      }
+
       /* =========================================================
          FLOW / SIGNALS
          ========================================================= */
@@ -1702,76 +1713,30 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       }
 
 
-      /* =========================================================
-         MISSION OBJECTIVE
+               /* =========================================================
+         DIAGNOSTICS / DEBUG — HARD HIDE
          ========================================================= */
 
-      #play .world-marker{
-        left:14px!important;
-        right:auto!important;
-        bottom:78px!important;
-        top:auto!important;
-        transform:none!important;
-        width:min(286px,34vw)!important;
-        max-width:286px!important;
-        padding:8px 11px!important;
-        border:1px solid rgba(255,208,110,.24)!important;
-        border-left:2px solid #ffd06e!important;
-        border-radius:11px!important;
-        background:linear-gradient(
-          145deg,
-          rgba(7,10,15,.95),
-          rgba(2,3,5,.94)
-        )!important;
-        box-shadow:
-          0 14px 32px rgba(0,0,0,.30),
-          0 0 24px rgba(255,208,110,.035)!important;
-        text-align:left!important;
-        z-index:290!important;
-      }
+     #game #relayGameplayIntel,
+#game .relay-gameplay-intel,
+#game [data-relay-mission-intelligence],
+#game [data-mission-intelligence],
 
-      #play .world-marker span{
-        color:#ffd06e!important;
-        font:900 6px/1 'DM Mono',monospace!important;
-        letter-spacing:1.45px!important;
-      }
+#game .relay-debug-hud,
+#game [data-relay-debug-hud],
+#game [data-debug-hud],
+#game .gameplay-debug-hud,
 
-      #play .world-marker b{
-        display:block!important;
-        margin-top:4px!important;
-        color:#f4f7fa!important;
-        font:900 9px/1.15 'DM Mono',monospace!important;
-        letter-spacing:.5px!important;
-        white-space:nowrap!important;
+#game [aria-label*="FEEDBACK"]{
+        display:none!important;
+        visibility:hidden!important;
+        opacity:0!important;
+        pointer-events:none!important;
+        width:0!important;
+        height:0!important;
+        max-width:0!important;
+        max-height:0!important;
         overflow:hidden!important;
-        text-overflow:ellipsis!important;
-      }
-
-
-    
-
-
-      /* =========================================================
-         DIAGNOSTICS / DEBUG
-         ========================================================= */
-
-      #relayGameplayIntel,
-      .relay-gameplay-intel,
-      [data-relay-mission-intelligence],
-      [data-mission-intelligence]{
-        display:none!important;
-        visibility:hidden!important;
-        pointer-events:none!important;
-      }
-
-      #game .relay-debug-hud,
-      #game [data-relay-debug-hud],
-      #game [data-debug-hud],
-      [id*='dynamic-crowd'],
-      [class*='dynamic-crowd']{
-        display:none!important;
-        visibility:hidden!important;
-        pointer-events:none!important;
       }
 
 
@@ -1781,18 +1746,16 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
       @media(max-width:900px){
 
-        #play .hud{
-          width:calc(100vw - 14px)!important;
-          grid-template-columns:
-            minmax(0,1fr)
-            minmax(154px,190px)
-            auto!important;
-          gap:6px!important;
-        }
+  #play .hud{
+    width:calc(100vw - 14px)!important;
+    grid-template-columns:
+      minmax(0,1fr)
+      minmax(154px,190px)
+      auto!important;
+    gap:6px!important;
+  }
+}
 
-        #play .world-marker{
-          width:min(260px,42vw)!important;
-        }
       }
 
 
@@ -1862,14 +1825,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
           font-size:17px!important;
         }
 
-        #play .world-marker{
-          left:8px!important;
-          bottom:84px!important;
-          width:min(216px,48vw)!important;
-          padding:6px 8px!important;
-        }
-
-        #relay-gameplay-feel-v3 .gf-strip{
+          #relay-gameplay-feel-v3 .gf-strip{
           right:7px!important;
           top:56px!important;
           max-width:calc(100vw - 14px)!important;
@@ -1891,9 +1847,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
           width:53px!important;
         }
 
-        #play .world-marker{
-          width:min(202px,53vw)!important;
-        }
+      
       }
 
 
@@ -1903,10 +1857,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
           top:6px!important;
         }
 
-        #play .world-marker{
-          bottom:70px!important;
-        }
-      }
+              }
           `;
 
     document.head.appendChild(style);
@@ -2157,11 +2108,12 @@ function canonicalHomeButtons() {
             .trim()
             .toUpperCase();
 
-        if (
-          /DYNAMIC\s+CROWD/.test(text) ||
-          /^V10\b/.test(text) ||
-          /MISSION\s+INTELLIGENCE/.test(text)
-        ) {
+       if (
+  /DYNAMIC\s+CROWD/.test(text) ||
+  /^V10\b/.test(text) ||
+  /MISSION\s+INTELLIGENCE/.test(text) ||
+  /FEEDBACK/.test(text)
+) {
           node.setVisible?.(false);
           node.setAlpha?.(0);
           node.disableInteractive?.();
