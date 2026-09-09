@@ -2,6 +2,7 @@
 import './systems/audio-context-gesture-gate-v1.js';
 import '../flight-hud-v1.js';
 import './systems/web-zoom-lock-v1.js';
+import './systems/enemy-dialogue-v1.css';
 
 import { RunnerScene } from './scenes/RunnerScene.js';
 

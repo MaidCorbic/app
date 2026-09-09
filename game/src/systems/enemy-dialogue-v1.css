@@ -1,0 +1,282 @@
+:root {
+  --relay-faction-cyan: #8df4ff;
+  --relay-faction-blue: #39b9ff;
+  --relay-faction-amber: #ffd06e;
+  --relay-faction-white: #f5fbff;
+  --relay-faction-muted: rgba(220, 238, 248, .68);
+  --relay-faction-panel: rgba(4, 10, 20, .975);
+}
+
+/* Premium in-game faction encounter presentation.
+ * The dialogue system owns markup/state; this file owns visual treatment.
+ */
+.relay-faction-dialogue {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: max(22px, env(safe-area-inset-bottom) + 12px) !important;
+  transform: translateX(-50%) translateY(10px) !important;
+  width: min(660px, calc(100vw - 28px)) !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+  padding: 17px 18px 15px !important;
+  overflow: hidden !important;
+  isolation: isolate;
+  border: 1px solid rgba(141, 244, 255, .44) !important;
+  border-radius: 14px !important;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(57, 185, 255, .14), transparent 34%),
+    linear-gradient(150deg, rgba(3, 10, 20, .985), rgba(8, 25, 42, .975)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .075),
+    inset 0 -1px 0 rgba(57, 185, 255, .08),
+    0 22px 70px rgba(0, 0, 0, .52),
+    0 0 0 1px rgba(57, 185, 255, .035),
+    0 0 36px rgba(57, 185, 255, .12) !important;
+  color: var(--relay-faction-white) !important;
+  font: 500 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  opacity: 0;
+  pointer-events: auto;
+  transition: opacity 180ms ease, transform 180ms ease, box-shadow 180ms ease !important;
+}
+
+.relay-faction-dialogue:not([hidden]) {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+.relay-faction-dialogue::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, .018) 0,
+      rgba(255, 255, 255, .018) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  opacity: .35;
+  pointer-events: none;
+}
+
+.relay-faction-dialogue::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--relay-faction-cyan), var(--relay-faction-blue), transparent);
+  box-shadow: 0 0 16px rgba(141, 244, 255, .5);
+  opacity: .9;
+  pointer-events: none;
+}
+
+.relay-faction-dialogue .relay-faction-kicker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px !important;
+  color: var(--relay-faction-cyan) !important;
+  font: 900 9px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(141, 244, 255, .32);
+}
+
+.relay-faction-dialogue .relay-faction-kicker::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border: 1px solid rgba(141, 244, 255, .9);
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(141, 244, 255, .5);
+  animation: relay-faction-pulse 1.5s ease-in-out infinite;
+}
+
+.relay-faction-dialogue .relay-faction-name {
+  display: block;
+  margin: 0 0 10px !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--relay-faction-amber) !important;
+  font: 900 11px/1.25 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  letter-spacing: .11em !important;
+  text-transform: uppercase;
+  text-shadow: 0 0 14px rgba(255, 208, 110, .18);
+}
+
+.relay-faction-dialogue .relay-faction-text {
+  min-height: 47px !important;
+  margin: 0 !important;
+  max-width: 58ch;
+  color: #fff !important;
+  font: 650 clamp(15px, 2vw, 17px)/1.52 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  letter-spacing: .005em;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.relay-faction-dialogue .relay-faction-footer {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+  margin-top: 13px !important;
+  padding-top: 11px;
+  border-top: 1px solid rgba(141, 244, 255, .10);
+}
+
+.relay-faction-dialogue .relay-faction-hint {
+  margin: 0 !important;
+  color: var(--relay-faction-muted) !important;
+  font: 800 9px/1.25 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  letter-spacing: .10em !important;
+  text-transform: uppercase;
+}
+
+.relay-faction-dialogue button {
+  position: relative;
+  min-width: 116px !important;
+  min-height: 42px !important;
+  padding: 9px 15px !important;
+  border: 1px solid rgba(141, 244, 255, .52) !important;
+  border-radius: 9px !important;
+  background:
+    linear-gradient(180deg, rgba(24, 62, 88, .98), rgba(7, 22, 35, .98)) !important;
+  color: #eaffff !important;
+  font: 900 10px/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  letter-spacing: .13em !important;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 6px 20px rgba(0, 0, 0, .24),
+    0 0 16px rgba(57, 185, 255, .08) !important;
+  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease, background 120ms ease !important;
+}
+
+.relay-faction-dialogue button::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .08), transparent);
+  opacity: 0;
+  transform: translateX(-35%);
+  pointer-events: none;
+}
+
+.relay-faction-dialogue button:hover,
+.relay-faction-dialogue button:focus-visible {
+  border-color: rgba(141, 244, 255, .92) !important;
+  background: linear-gradient(180deg, rgba(30, 82, 114, .98), rgba(8, 28, 45, .98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .10),
+    0 8px 24px rgba(0, 0, 0, .3),
+    0 0 22px rgba(57, 185, 255, .18) !important;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.relay-faction-dialogue button:hover::before,
+.relay-faction-dialogue button:focus-visible::before {
+  opacity: 1;
+  animation: relay-faction-sweep 700ms ease-out forwards;
+}
+
+.relay-faction-dialogue button:active {
+  transform: translateY(0) scale(.985);
+}
+
+.relay-faction-dialogue button:disabled {
+  opacity: .65;
+  cursor: default;
+  transform: none;
+}
+
+@keyframes relay-faction-pulse {
+  0%, 100% { opacity: .55; box-shadow: 0 0 7px rgba(141, 244, 255, .25); }
+  50% { opacity: 1; box-shadow: 0 0 14px rgba(141, 244, 255, .7); }
+}
+
+@keyframes relay-faction-sweep {
+  from { transform: translateX(-35%); }
+  to { transform: translateX(140%); }
+}
+
+@media (max-width: 700px) {
+  .relay-faction-dialogue {
+    width: min(640px, calc(100vw - 20px)) !important;
+    bottom: max(10px, env(safe-area-inset-bottom) + 7px) !important;
+    padding: 15px 14px 13px !important;
+    border-radius: 12px !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-text {
+    min-height: 56px !important;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-footer {
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+    margin-top: 11px !important;
+    padding-top: 10px;
+  }
+
+  .relay-faction-dialogue .relay-faction-hint {
+    order: 2;
+    text-align: center;
+    font-size: 8px !important;
+  }
+
+  .relay-faction-dialogue button {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .relay-faction-dialogue {
+    width: calc(100vw - 14px) !important;
+    padding: 13px 12px 12px !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-kicker {
+    font-size: 8px !important;
+    letter-spacing: .15em !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-name {
+    font-size: 10px !important;
+    letter-spacing: .08em !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-text {
+    font-size: 14px !important;
+    min-height: 61px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .relay-faction-dialogue,
+  .relay-faction-dialogue button {
+    transition: none !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-kicker::before,
+  .relay-faction-dialogue button::before {
+    animation: none !important;
+  }
+}
