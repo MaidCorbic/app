@@ -98,11 +98,11 @@
 
 #play .hud-progress{
 
-  width:clamp(200px,25vw,430px);
+  width:clamp(150px,18vw,300px);
 
-  min-width:200px;
+  min-width:150px;
 
-  max-width:430px;
+  max-width:300px;
 
   min-height:48px;
 
@@ -567,9 +567,9 @@
 
   #play .hud-progress{
 
-    width:clamp(260px,24vw,430px);
+    width:clamp(210px,18vw,300px);
 
-    min-width:260px;
+    min-width:210px;
   }
 
 
