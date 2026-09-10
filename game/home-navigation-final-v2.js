@@ -106,7 +106,28 @@
 
   window.relayHomeNavigationV2 = {
     focusHome,
-    options: () => activateLegacy('[data-title-panel="controls"]'),
+    options: () => {
+  const panel = document.getElementById('titlePanel');
+  const content = document.getElementById('titlePanelContent');
+
+  if (!panel || !content) return false;
+
+  panel.classList.remove('hidden');
+  panel.removeAttribute('hidden');
+  panel.setAttribute('aria-hidden', 'false');
+
+  document.dispatchEvent(
+    new CustomEvent('relay-open-home-options', {
+      detail: {
+        panel,
+        content,
+        source: 'home-api',
+      },
+    })
+  );
+
+  return true;
+},
     faq: () => activateLegacy('[data-relay-info="faq"]'),
     exit: () => activateLegacy('#exitTitle'),
   };
