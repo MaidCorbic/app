@@ -30,7 +30,6 @@
     "test:double-fall-statistics": "node tests/double-fall-statistics.mjs",
     "test:respawn-transient-state": "node tests/respawn-transient-state.mjs",
     "test:special-event-reward": "node tests/special-event-reward.mjs",
-    "test:special-event-reward": "node tests/special-event-reward.mjs",
     "test:gameplay-smoke": "npm run build && node tests/gameplay-smoke.mjs",
     "test:final-hardening": "node tests/final-hardening-contract.mjs",
     "test:final-stability": "node tests/final-stability-suite.mjs",
