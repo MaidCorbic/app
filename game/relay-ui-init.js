@@ -16,6 +16,7 @@ import './mobile-top-card-map-legend-fix-v1.css';
 import './mobile-ui-cleanup-v1.css';
 import './map-aaa-tactical-redesign-v1.js';
 import './release-ux-gameplay-polish-v1.css';
+import './release-final-ui-v1.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
