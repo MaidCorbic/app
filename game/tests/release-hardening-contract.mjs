@@ -13,7 +13,8 @@ const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
 
 assert.equal(packageJson.scripts['test:final-stability']?.length > 0, true, 'final stability suite must remain wired');
-assert.equal(packageJson.scripts['test:release-hardening'], 'node tests/release-hardening-contract.mjs && npm run test:final-stability && npm run build', 'release hardening command must be canonical');
+assert.equal(packageJson.scripts['test:release-ux-gameplay-polish'], 'node tests/release-ux-gameplay-polish.mjs', 'release UX/gameplay polish suite must remain wired');
+assert.equal(packageJson.scripts['test:release-hardening'], 'node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:final-stability && npm run build', 'release hardening command must include all release gates');
 assert.equal(packageJson.engines?.node, '24.x', 'release Node runtime must stay pinned to Vercel runtime');
 assert.match(config, /export default defineConfig/);
 assert.doesNotMatch(index, /href=["']mobile-viewport\.css["']/);
