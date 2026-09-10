@@ -1,13 +1,104 @@
-/* RELAY RUNNER — Settings / Options scroll only.
- * No visual, sizing, spacing, color, or layout changes.
- * Adds vertical wheel/trackpad scroll on web and swipe scroll on touch devices.
+/* RELAY RUNNER — Settings / Options interaction only.
+ * Keep the existing visual design unchanged.
+ * Guarantees desktop wheel/trackpad scrolling, mobile swipe scrolling,
+ * and clickable controls inside the canonical Settings content.
  */
+
+#titlePanel.relay-options-unified .title-panel-card,
+#pauseMenu.relay-options-unified .menu{
+  min-height:0 !important;
+}
+
+#titlePanel.relay-options-unified .title-panel-card{
+  display:grid !important;
+  grid-template-rows:auto minmax(0,1fr) !important;
+  max-height:calc(100dvh - 20px) !important;
+  overflow:hidden !important;
+}
+
+#pauseMenu.relay-options-unified .menu{
+  display:flex !important;
+  flex-direction:column !important;
+  max-height:calc(100dvh - 20px) !important;
+  overflow:hidden !important;
+}
+
+#titlePanel.relay-options-unified #titlePanelContent,
+#pauseMenu.relay-options-unified #panelContent{
+  min-width:0 !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+  position:relative !important;
+  z-index:25 !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-shell,
+#pauseMenu.relay-options-unified .relay-options-shell{
+  min-width:0 !important;
+  min-height:0 !important;
+  height:100% !important;
+}
 
 #titlePanel.relay-options-unified .relay-options-body,
 #pauseMenu.relay-options-unified .relay-options-body{
-  overflow-y:auto !important;
+  position:relative !important;
+  z-index:30 !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  height:100% !important;
+  overflow-y:scroll !important;
   overflow-x:hidden !important;
   overscroll-behavior-y:contain !important;
+  overscroll-behavior-x:none !important;
   -webkit-overflow-scrolling:touch !important;
-  touch-action:pan-y !important;
+  touch-action:auto !important;
+  pointer-events:auto !important;
+  scrollbar-width:thin !important;
+  scrollbar-gutter:stable !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar,
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar{
+  width:8px !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-track,
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.025) !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb,
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb{
+  background:rgba(141,244,255,.30) !important;
+  border-radius:0 !important;
+}
+
+/* Keep every interactive Settings control above decorative layers. */
+#titlePanel.relay-options-unified .relay-options-body button,
+#titlePanel.relay-options-unified .relay-options-body input,
+#titlePanel.relay-options-unified .relay-options-body select,
+#titlePanel.relay-options-unified .relay-options-body a,
+#pauseMenu.relay-options-unified .relay-options-body button,
+#pauseMenu.relay-options-unified .relay-options-body input,
+#pauseMenu.relay-options-unified .relay-options-body select,
+#pauseMenu.relay-options-unified .relay-options-body a{
+  position:relative !important;
+  z-index:40 !important;
+  pointer-events:auto !important;
+  touch-action:manipulation !important;
+}
+
+@media (max-width:760px){
+  #titlePanel.relay-options-unified .title-panel-card,
+  #pauseMenu.relay-options-unified .menu{
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 12px) !important;
+  }
+
+  #titlePanel.relay-options-unified .relay-options-body,
+  #pauseMenu.relay-options-unified .relay-options-body{
+    touch-action:auto !important;
+    overscroll-behavior-y:contain !important;
+    -webkit-overflow-scrolling:touch !important;
+    scrollbar-width:auto !important;
+  }
 }
