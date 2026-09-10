@@ -10,12 +10,23 @@
 
   const isUnified = id => {
     const node = document.getElementById(id);
-    return !!node?.classList.contains('relay-cinematic-overlay') && !!node.querySelector('.relay-cinematic-panel, .relay-pause-shell');
+    if (!node) return false;
+
+    const hasCanonicalOptions =
+      node.classList.contains('relay-options-unified') &&
+      !!node.querySelector('.relay-options-shell');
+
+    const hasCinematicShell =
+      node.classList.contains('relay-cinematic-overlay') &&
+      !!node.querySelector('.relay-cinematic-panel, .relay-pause-shell');
+
+    return hasCanonicalOptions || hasCinematicShell;
   };
 
   const reconcile = () => {
     const api = window.relayUnifiedCinematicUI;
     if (!api) return;
+
     const title = document.getElementById('titlePanel');
     const info = document.getElementById('relayInfoPanel');
     const pause = document.getElementById('pauseMenu');
@@ -24,9 +35,11 @@
       api.openOptions();
       return;
     }
+
     if (info && visible('relayInfoPanel') && !isUnified('relayInfoPanel')) {
-  return;
-}
+      return;
+    }
+
     if (pause && visible('pauseMenu') && !isUnified('pauseMenu')) {
       api.openPause('resume');
     }
@@ -34,10 +47,18 @@
 
   const start = () => {
     const observer = new MutationObserver(reconcile);
-    observer.observe(document.body, { subtree:true, childList:true, attributes:true, attributeFilter:['class','hidden','style'] });
+    observer.observe(document.body, {
+      subtree:true,
+      childList:true,
+      attributes:true,
+      attributeFilter:['class','hidden','style']
+    });
     reconcile();
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
-  else window.setTimeout(start, 0);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once:true });
+  } else {
+    window.setTimeout(start, 0);
+  }
 })();
