@@ -5,7 +5,7 @@ const FLIGHT_KEY = Phaser.Input.Keyboard.KeyCodes.F;
 const MAX_DELTA_MS = 50;
 const MIN_GLIDE_GRAVITY_SCALE = 0.08;
 const MAX_GLIDE_GRAVITY_SCALE = 0.35;
-const DEFAULT_FLIGHT_DURATION_MS = 8000;
+const DEFAULT_FLIGHT_DURATION_MS = 15000;
 const DEFAULT_GLIDE_WINDOW_MS = 1200;
 const DEFAULT_GLIDE_MAX_FALL_SPEED = 180;
 
@@ -129,9 +129,6 @@ function installFlightHoverGlide(RunnerScene) {
     data.flightEndsAt = 0;
     data.flightWarningSent = false;
 
-    // Manual F-off is an explicit player command: restore normal gravity now.
-    // Timeout/energy depletion still use a short controlled glide so the player
-    // is not dropped abruptly when the resource expires naturally.
     if (reason === 'manual-off') {
       data.glideUntil = 0;
       this.restoreFlightBody?.();
@@ -156,10 +153,7 @@ function installFlightHoverGlide(RunnerScene) {
     if (now - data.lastToggleAt < data.toggleCooldownMs) return false;
     data.lastToggleAt = now;
 
-    if (isFlightState(data.state)) {
-      return this.endFlight?.('manual-off') ?? false;
-    }
-
+    if (isFlightState(data.state)) return this.endFlight?.('manual-off') ?? false;
     if (data.state === FLIGHT_STATE.GLIDING) {
       this.playerCue?.('LANDING · FLIGHT LOCKED', '#ffcf82');
       return false;
@@ -188,7 +182,7 @@ function installFlightHoverGlide(RunnerScene) {
     body.setVelocityY?.(0);
     this.emitFlightState?.(FLIGHT_STATE.FLYING, { source, reason: 'manual-on' });
     this.game?.events?.emit('feedback', 'flight');
-    this.playerCue?.('FLIGHT ONLINE · 8 SEC · F / W S / SPACE', '#8df4ff');
+    this.playerCue?.('FLIGHT ONLINE · 15 SEC · F / W S / SPACE', '#8df4ff');
     return true;
   };
 
