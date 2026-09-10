@@ -1,6 +1,8 @@
 /* Death / respawn / retry guard V1.
  * Narrow stability patch only. No audio, progression, mission or input ownership.
  */
+import { RunnerScene } from '../scenes/RunnerScene.js';
+
 (() => {
   'use strict';
 
