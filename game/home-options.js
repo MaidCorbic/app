@@ -1,6 +1,7 @@
 // Unified bootstrap: one Options owner plus deterministic Home/gameplay presentation layers.
 // Gameplay-feel-v3 is intentionally not loaded: its duplicate FLOW/SIGNALS layer
 // competes with the canonical HUD and creates the unwanted cyan top-center overlay.
+import './settings-command-deck-v1.css';
 import './settings-style-blocker-v1.js';
 import './unified-options-ui-v1.js';
 import './src/systems/audio-autoplay-guard-v1.js';
