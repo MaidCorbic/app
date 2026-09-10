@@ -1,4 +1,3 @@
-import './canonical-ui-v1.css';
 import './cinematic-arrival-v2.css';
 
 /* Cinematic Arrival V5 — keep the mission card visible long enough to actually read. */
