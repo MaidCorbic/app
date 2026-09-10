@@ -11,6 +11,7 @@
     const el = document.getElementById(id);
     return !!el && !el.classList.contains('hidden') && getComputedStyle(el).display !== 'none';
   };
+  const boundScrollBodies = new WeakSet();
 
   const fitScrollHost = host => {
     if (!host) return;
@@ -29,7 +30,10 @@
     const top = Number(panel.dataset.releaseScrollTop || 0);
     fitScrollHost(body);
     if (top > 0) body.scrollTop = Math.min(top, Math.max(0, body.scrollHeight - body.clientHeight));
-    body.addEventListener('scroll', () => { panel.dataset.releaseScrollTop = String(body.scrollTop); }, { passive: true });
+    if (!boundScrollBodies.has(body)) {
+      boundScrollBodies.add(body);
+      body.addEventListener('scroll', () => { panel.dataset.releaseScrollTop = String(body.scrollTop); }, { passive: true });
+    }
   };
 
   const hardenOpenOnce = () => {
@@ -41,13 +45,14 @@
       window.setTimeout(() => {
         const panel = document.getElementById('titlePanel');
         if (!panel || !optionsIntent) return;
+        const wasHidden = panel.classList.contains('hidden');
         panel.classList.remove('hidden');
         panel.removeAttribute('hidden');
         panel.setAttribute('aria-hidden', 'false');
         panel.classList.add('relay-options-unified');
+        if (wasHidden) window.dispatchEvent(new Event('relay-open-home-options'));
         fitScrollHost(panel.querySelector('.relay-options-body'));
         rememberScroll(panel);
-        window.dispatchEvent(new Event('relay-open-home-options'));
       }, 0);
     }, true);
   };
