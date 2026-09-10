@@ -40,7 +40,7 @@
     "test:runtime-wrapper-order": "node tests/runtime-wrapper-order.mjs",
     "test:runtime-lifecycle-dom-audit": "node tests/runtime-lifecycle-dom-audit.mjs",
     "test:final-stability-suite": "node tests/final-stability-suite.mjs",
-    "test:canonical-css": "node tests/canonical-css-contract.mjs",
+    "test:canonical-css": "node tests/css-canonical-contract.mjs",
     "test:release-ux-gameplay-polish": "node tests/release-ux-gameplay-polish.mjs",
     "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:final-stability && npm run build"
   },
