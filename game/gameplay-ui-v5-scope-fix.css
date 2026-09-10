@@ -1,0 +1,208 @@
+/* RUNNER RELAY — GAMEPLAY UI V5 SCOPE FIX
+ * Corrects document-body HUD targets without changing their owners.
+ */
+
+/* Body-mounted HUDs: Cargo, keyboard, faction dialogue. */
+#cargoIntegrityV2 {
+  left:18px !important;
+  right:auto !important;
+  top:auto !important;
+  bottom:18px !important;
+  width:min(290px,28vw) !important;
+  transform:none !important;
+  z-index:240 !important;
+}
+
+#cargoIntegrityV2 .cargo-card {
+  position:relative !important;
+  overflow:hidden !important;
+  min-height:56px !important;
+  padding:9px 11px !important;
+  border:1px solid rgba(85,230,209,.34) !important;
+  border-left:2px solid #55e6d1 !important;
+  border-radius:9px !important;
+  background:
+    radial-gradient(circle at 92% 0%,rgba(141,244,255,.13),transparent 34%),
+    linear-gradient(135deg,rgba(8,15,28,.975),rgba(4,8,17,.99)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 12px 30px rgba(0,0,0,.4),
+    0 0 24px rgba(85,230,209,.08) !important;
+  backdrop-filter:blur(11px) !important;
+  -webkit-backdrop-filter:blur(11px) !important;
+}
+
+#cargoIntegrityV2 .cargo-track {
+  height:6px !important;
+  background:rgba(255,255,255,.055) !important;
+  border:1px solid rgba(85,230,209,.18) !important;
+  border-radius:999px !important;
+  overflow:hidden !important;
+}
+
+#cargoIntegrityV2 .cargo-fill {
+  background:linear-gradient(90deg,#55e6d1 0%,#8df4ff 52%,#d9ffff 100%) !important;
+  box-shadow:0 0 12px rgba(85,230,209,.36),0 0 22px rgba(141,244,255,.12) !important;
+}
+
+#cargoIntegrityV2 .cargo-label { color:#8df4ff !important; }
+#cargoIntegrityV2 .cargo-type { color:#b8d8e3 !important; }
+#cargoIntegrityV2 .cargo-state { color:#ffd06e !important; }
+#cargoIntegrityV2 .cargo-value { color:#efffff !important; }
+
+#relay-gameplay-keyboard-hud {
+  bottom:9px !important;
+  opacity:.72 !important;
+  transform:translateX(-50%) scale(.84) !important;
+  transform-origin:center bottom !important;
+  z-index:235 !important;
+}
+
+#relay-gameplay-keyboard-hud .relay-keyboard-key {
+  min-width:38px !important;
+  gap:2px !important;
+}
+
+#relay-gameplay-keyboard-hud .relay-keycap {
+  width:34px !important;
+  height:28px !important;
+  border-radius:7px !important;
+  font-size:11px !important;
+}
+
+#relay-gameplay-keyboard-hud .relay-key-label {
+  width:48px !important;
+  font-size:6px !important;
+}
+
+/* Functional dynamic control: keep P2 flight in the grid. */
+@media (max-width:760px){
+  #play .mobile-actions > button.relay-p2-flight-button,
+  #play .mobile-actions > button#relayP2FlightButton {
+    display:flex !important;
+    grid-column:1 !important;
+    grid-row:3 !important;
+    visibility:visible !important;
+    opacity:1 !important;
+  }
+
+  #cargoIntegrityV2 {
+    left:max(12px,env(safe-area-inset-left)) !important;
+    right:auto !important;
+    top:auto !important;
+    bottom:calc(108px + env(safe-area-inset-bottom)) !important;
+    width:min(210px,48vw) !important;
+  }
+
+  #cargoIntegrityV2 .cargo-card {
+    min-height:45px !important;
+    padding:7px 9px !important;
+  }
+
+  #relay-gameplay-keyboard-hud {
+    display:none !important;
+  }
+
+  .relay-faction-dialogue {
+    left:50% !important;
+    right:auto !important;
+    top:auto !important;
+    bottom:calc(116px + env(safe-area-inset-bottom)) !important;
+    width:min(500px,calc(100vw - 24px)) !important;
+    max-height:min(38dvh,250px) !important;
+    overflow:auto !important;
+    padding:12px 13px 11px !important;
+    border-radius:8px !important;
+    clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px)) !important;
+    background:
+      radial-gradient(circle at 90% 0%,rgba(184,108,255,.16),transparent 34%),
+      linear-gradient(145deg,rgba(6,8,17,.99),rgba(15,10,28,.985) 62%,rgba(6,17,28,.99)) !important;
+    box-shadow:
+      0 18px 46px rgba(0,0,0,.52),
+      0 0 28px rgba(184,108,255,.10),
+      inset 0 1px rgba(255,255,255,.05) !important;
+    z-index:560 !important;
+    font-family:Bahnschrift,"Arial Narrow","Trebuchet MS",sans-serif !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-kicker,
+  .relay-faction-dialogue .relay-faction-name,
+  .relay-faction-dialogue .relay-faction-text,
+  .relay-faction-dialogue .relay-faction-hint,
+  .relay-faction-dialogue button {
+    font-family:Bahnschrift,"Arial Narrow","Trebuchet MS",sans-serif !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-text {
+    min-height:0 !important;
+    font-size:14px !important;
+    line-height:1.42 !important;
+    max-width:100% !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-footer {
+    margin-top:9px !important;
+    padding-top:8px !important;
+    gap:7px !important;
+  }
+
+  .relay-faction-dialogue button {
+    min-height:38px !important;
+  }
+
+  .relay-faction-keyword {
+    color:#ffd06e !important;
+    font-weight:950 !important;
+    text-shadow:0 0 9px rgba(255,208,110,.28) !important;
+  }
+}
+
+@media (max-width:390px){
+  #cargoIntegrityV2 {
+    bottom:calc(101px + env(safe-area-inset-bottom)) !important;
+    width:min(190px,46vw) !important;
+  }
+
+  .relay-faction-dialogue {
+    bottom:calc(105px + env(safe-area-inset-bottom)) !important;
+    max-height:34dvh !important;
+  }
+}
+
+@media (min-width:761px){
+  .relay-faction-dialogue {
+    left:50% !important;
+    right:auto !important;
+    top:auto !important;
+    bottom:18px !important;
+    width:min(680px,52vw) !important;
+    max-height:220px !important;
+    overflow:auto !important;
+    padding:15px 18px 13px !important;
+    border:1px solid rgba(184,108,255,.34) !important;
+    border-right:2px solid #ffd06e !important;
+    border-radius:7px !important;
+    clip-path:polygon(0 0,calc(100% - 13px) 0,100% 13px,100% 100%,13px 100%,0 calc(100% - 13px)) !important;
+    background:
+      radial-gradient(circle at 88% 8%,rgba(184,108,255,.16),transparent 32%),
+      linear-gradient(135deg,rgba(7,8,18,.99),rgba(16,11,29,.98) 58%,rgba(8,18,29,.99)) !important;
+    box-shadow:
+      inset 0 1px rgba(255,255,255,.055),
+      0 22px 58px rgba(0,0,0,.50),
+      0 0 34px rgba(184,108,255,.11) !important;
+    z-index:560 !important;
+    font-family:Bahnschrift,"Arial Narrow","Trebuchet MS",sans-serif !important;
+  }
+
+  .relay-faction-dialogue .relay-faction-text {
+    font-family:Bahnschrift,"Arial Narrow","Trebuchet MS",sans-serif !important;
+    font-size:17px !important;
+    line-height:1.4 !important;
+  }
+
+  .relay-faction-keyword {
+    color:#ffd06e !important;
+    font-weight:950 !important;
+    text-shadow:0 0 10px rgba(255,208,110,.28) !important;
+  }
+}
