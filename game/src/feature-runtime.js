@@ -12,7 +12,7 @@ import './systems/faction-dialogue-presentation-v2.js';
 import './systems/signals-hud-collection-progress-v1.js';
 import './systems/gameplay-ui-v7-legacy-feedback-hide.js';
 
-import { RunnerScene } from './scenes/RunnerScene.js';
+import { RunnerScene as RelayRunnerScene } from './scenes/RunnerScene.js';
 
 import { installMissionFeatureGating } from './systems/mission-feature-gating-v1.js';
 import { installEnemyRuntime } from './systems/enemy-runtime-v2.js';
@@ -78,6 +78,8 @@ import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.j
 import { installWaterSurvival } from './systems/water-survival-v1.js';
 import { installForwardCollapseZone } from './systems/forward-collapse-zone-v1.js';
 
+
+const RunnerScene = RelayRunnerScene;
 
 if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   RunnerScene.prototype.__relayFeatureRuntimeInstalled = true;
