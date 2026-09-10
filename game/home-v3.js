@@ -30,15 +30,7 @@
     }
   };
 
-  const openOptions = () => {
-    try {
-      if (typeof window.relayUnifiedCinematicUI?.openOptions === 'function') {
-        window.relayUnifiedCinematicUI.openOptions();
-        return true;
-      }
-    } catch {}
-    return clickExisting('[data-title-panel="controls"]');
-  };
+  const openOptions = () => clickExisting('[data-title-panel="controls"]');
 
   const openFaq = () => {
     try {
