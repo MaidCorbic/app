@@ -7,6 +7,7 @@ import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
 import './settings-command-deck-v1.css';
+import './settings-style-blocker-v1.js';
 
 import './gameplay-ui-visibility-v3.js';
 import './gameplay-hud-polish-v1.css';
