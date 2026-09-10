@@ -1,7 +1,17 @@
-/* Production cinematic splash V3. Owns first-load presentation and fails open safely. */
+/* Production cinematic splash V3 — single owner for readiness, progress and removal. */
 (() => {
   if (window.__relaySplashV3) return;
   window.__relaySplashV3 = true;
+
+  const asset = name => new URL(`./assets/${name}`, import.meta.url).href;
+
+  const applyAssetSources = splash => {
+    const picture = splash?.querySelector('#relaySplashPicture');
+    const image = splash?.querySelector('#relaySplashArt, .relay-splash-art');
+    const landscape = picture?.querySelector('source[media*="landscape"]');
+    if (landscape) landscape.srcset = asset('loading-landscape.jpg');
+    if (image && !image.src.includes('/assets/loading.jpg')) image.src = asset('loading.jpg');
+  };
 
   const applyFirstPaintHardening = () => {
     const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
@@ -26,13 +36,12 @@
     image.style.opacity = '1';
   };
 
-  applyFirstPaintHardening();
-
   const boot = () => {
-    applyFirstPaintHardening();
-    document.getElementById('bootLoader')?.remove();
     const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
     if (!splash) return;
+    applyAssetSources(splash);
+    applyFirstPaintHardening();
+    document.getElementById('bootLoader')?.remove();
     if (!splash.classList.contains('relay-splash')) splash.classList.add('relay-splash');
 
     const image = splash.querySelector('.relay-splash-art, #relaySplashArt');
@@ -74,8 +83,7 @@
       const duration = Math.max(180, Math.min(650, (target - from) * 10));
       const step = () => {
         const t = Math.min(1, (performance.now() - started) / duration);
-        const eased = t * (2 - t);
-        setProgress(from + (target - from) * eased, text);
+        setProgress(from + (target - from) * (t * (2 - t)), text);
         if (t < 1) window.setTimeout(step, 32);
         else resolve();
       };
@@ -86,46 +94,81 @@
       if (finishing) return;
       const elapsed = performance.now() - startedAt;
       if (!forced && (!imageReady || !pageReady || !engineReady)) return;
-      if (!forced && elapsed < MIN_SPLASH_MS) { window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed); return; }
+      if (!forced && elapsed < MIN_SPLASH_MS) {
+        window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed);
+        return;
+      }
       finishing = true;
       await animateTo(100, 'READY');
+      splash.dataset.cinematicReleased = 'true';
       splash.setAttribute('aria-busy', 'false');
-      splash.classList.add('is-hidden');
+      splash.classList.add('is-leaving');
+      window.dispatchEvent(new CustomEvent('relay:splash-released', { detail: { forced } }));
       window.setTimeout(() => splash.remove(), 700);
     };
 
     const markImageReady = () => {
       if (imageReady) return;
       imageReady = true;
-      animateTo(26, 'LOADING INTERFACE').then(() => finish());
+      animateTo(26, 'LOADING INTERFACE').then(finish);
     };
 
     if (imageReady) setProgress(26, 'LOADING INTERFACE');
     else {
       image.addEventListener('load', markImageReady, { once: true });
-      image.addEventListener('error', () => { imageReady = true; setProgress(22, 'USING SAFE MODE'); finish(); }, { once: true });
+      image.addEventListener('error', () => {
+        imageReady = true;
+        setProgress(22, 'USING SAFE MODE');
+        finish();
+      }, { once: true });
     }
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => animateTo(48, 'LOADING GAME SYSTEMS'), { once: true });
-    else animateTo(48, 'LOADING GAME SYSTEMS');
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => animateTo(48, 'LOADING GAME SYSTEMS'), { once: true });
+    } else {
+      animateTo(48, 'LOADING GAME SYSTEMS');
+    }
 
-    if (!pageReady) window.addEventListener('load', () => { pageReady = true; animateTo(68, 'CONNECTING WORLD').then(finish); }, { once: true });
-    else setProgress(68, 'CONNECTING WORLD');
+    if (!pageReady) {
+      window.addEventListener('load', () => {
+        pageReady = true;
+        animateTo(68, 'CONNECTING WORLD').then(finish);
+      }, { once: true });
+    } else {
+      setProgress(68, 'CONNECTING WORLD');
+    }
 
     const checkEngine = () => {
       const canvas = document.querySelector('#phaser-game canvas');
-      if (canvas) { engineReady = true; animateTo(86, 'PREPARING HOME').then(finish); return; }
+      if (canvas) {
+        engineReady = true;
+        animateTo(86, 'PREPARING HOME').then(finish);
+        return;
+      }
       if (!finishing) window.setTimeout(checkEngine, 60);
     };
     checkEngine();
 
     const orientation = window.matchMedia('(orientation: landscape)');
-    const onOrientation = () => { if (finishing) return; imageReady = image.complete && image.naturalWidth > 0; applyFirstPaintHardening(); };
+    const onOrientation = () => {
+      if (finishing) return;
+      applyAssetSources(splash);
+      imageReady = image.complete && image.naturalWidth > 0;
+      applyFirstPaintHardening();
+    };
     orientation.addEventListener?.('change', onOrientation);
     window.addEventListener('resize', onOrientation, { passive: true });
 
-    window.setTimeout(() => { if (finishing || timedOut) return; timedOut = true; label.textContent = 'STARTING HOME'; finish(true); }, MAX_SPLASH_MS);
-    stages.forEach(([value, text], index) => window.setTimeout(() => { if (!finishing && !timedOut) setProgress(value, text); }, 220 + index * 360));
+    window.setTimeout(() => {
+      if (finishing || timedOut) return;
+      timedOut = true;
+      label.textContent = 'STARTING HOME';
+      finish(true);
+    }, MAX_SPLASH_MS);
+
+    stages.forEach(([value, text], index) => window.setTimeout(() => {
+      if (!finishing && !timedOut) setProgress(value, text);
+    }, 220 + index * 360));
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
