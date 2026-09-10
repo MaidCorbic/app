@@ -12,7 +12,11 @@
 #titlePanel.relay-options-unified .title-panel-card{
   display:grid !important;
   grid-template-rows:auto minmax(0,1fr) !important;
+
+  height:calc(100dvh - 20px) !important;
   max-height:calc(100dvh - 20px) !important;
+
+  min-height:0 !important;
   overflow:hidden !important;
 }
 
@@ -43,23 +47,29 @@
 #pauseMenu.relay-options-unified .relay-options-body{
   position:relative !important;
   z-index:30 !important;
+
   min-width:0 !important;
   min-height:0 !important;
   height:100% !important;
-  overflow-y:scroll !important;
+
+  overflow-y:auto !important;
   overflow-x:hidden !important;
+
   overscroll-behavior-y:contain !important;
   overscroll-behavior-x:none !important;
+
   -webkit-overflow-scrolling:touch !important;
+
   touch-action:auto !important;
   pointer-events:auto !important;
-  scrollbar-width:thin !important;
-  scrollbar-gutter:stable !important;
+
+  scrollbar-width:auto !important;
+scrollbar-gutter:stable both-edges !important;
 }
 
 #titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar,
 #pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar{
-  width:8px !important;
+  width:10px !important;
 }
 
 #titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-track,
@@ -69,8 +79,9 @@
 
 #titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb,
 #pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb{
-  background:rgba(141,244,255,.30) !important;
-  border-radius:0 !important;
+  background:rgba(141,244,255,.55) !important;
+  border-radius:2px !important;
+  min-height:36px !important;
 }
 
 /* Keep every interactive Settings control above decorative layers. */
@@ -88,10 +99,36 @@
   touch-action:manipulation !important;
 }
 
+#titlePanel.relay-options-unified .relay-options-body input[type="range"],
+#pauseMenu.relay-options-unified .relay-options-body input[type="range"]{
+  touch-action:auto !important;
+  cursor:pointer !important;
+}
+
 @media (max-width:760px){
-  #titlePanel.relay-options-unified .title-panel-card,
+  #titlePanel.relay-options-unified .title-panel-card{
+    height:calc(
+      100dvh
+      - env(safe-area-inset-top,0px)
+      - env(safe-area-inset-bottom,0px)
+      - 12px
+    ) !important;
+
+    max-height:calc(
+      100dvh
+      - env(safe-area-inset-top,0px)
+      - env(safe-area-inset-bottom,0px)
+      - 12px
+    ) !important;
+  }
+
   #pauseMenu.relay-options-unified .menu{
-    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 12px) !important;
+    max-height:calc(
+      100dvh
+      - env(safe-area-inset-top,0px)
+      - env(safe-area-inset-bottom,0px)
+      - 12px
+    ) !important;
   }
 
   #titlePanel.relay-options-unified .relay-options-body,
