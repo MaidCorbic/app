@@ -4,6 +4,7 @@
 import './options-polish-v2.css';
 import './home-settings-scroll-v1.css';
 import './unified-options-ui-v1.js';
+import './home-settings-scroll-runtime-v1.js';
 import './src/systems/audio-autoplay-guard-v1.js';
 import './gameplay-music-v6.js';
 import './home-navigation-final-v2.js';
