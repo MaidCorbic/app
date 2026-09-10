@@ -174,11 +174,11 @@
         place-items: center;
         align-content: center;
         gap: 4px;
-        border: 1px solid rgba(255, 208, 110, .70);
+        border: 1px solid rgba(141, 244, 255, .70);
         border-radius: 14px;
-        background: linear-gradient(145deg, rgba(28, 22, 10, .98), rgba(7, 6, 3, .99));
-        color: #fff0b5;
-        box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 24px rgba(255,208,110,.18), inset 0 1px 0 rgba(255,255,255,.09);
+        background: linear-gradient(145deg, rgba(4, 16, 28, .98), rgba(8, 35, 52, .98));
+        color: #effcff;
+        box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 24px rgba(141,244,255,.18), inset 0 1px 0 rgba(255,255,255,.09);
         font: 900 17px/1 "DM Mono", monospace;
         pointer-events: auto;
         touch-action: manipulation;
@@ -190,7 +190,7 @@
       .mobile-menu-button small {
         font: 900 6px/1 "DM Mono", monospace;
         letter-spacing: 1px;
-        color: #d4bf70;
+        color: #bcefff;
       }
 
       .mobile-menu-button:active { transform: scale(.92); }
