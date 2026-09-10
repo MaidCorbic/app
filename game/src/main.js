@@ -53,54 +53,6 @@ document.addEventListener('keydown', event => { if (event.key !== 'Escape') retu
 // Do not create a second action dispatcher or inject duplicate buttons here.
 document.querySelector('[data-rotate-dismiss]')?.addEventListener('click', () => document.body.classList.add('rotate-dismissed'));
 window.addEventListener('orientationchange', () => document.body.classList.remove('rotate-dismissed'));
-const joystick = document.querySelector('[data-mobile-joystick]');
-const joystickThumb = joystick?.querySelector('.mobile-joystick-thumb');
-if (joystick && joystickThumb) {
-  const maxDrag = 38;
-  const deadzone = 10;
-  let activePointerId = null;
-  let currentDirection = null;
-  const setDirection = direction => {
-    if (direction !== currentDirection) {
-      currentDirection = direction;
-      game.events.emit('mobile-move', direction);
-    }
-  };
-  const moveThumb = (clientX, clientY) => {
-    const rect = joystick.getBoundingClientRect();
-    const dx = clientX - (rect.left + rect.width / 2);
-    const dy = clientY - (rect.top + rect.height / 2);
-    const distance = Math.min(Math.hypot(dx, dy), maxDrag);
-    const angle = Math.atan2(dy, dx);
-    joystickThumb.style.transform = `translate(${(Math.cos(angle) * distance).toFixed(1)}px,${(Math.sin(angle) * distance).toFixed(1)}px)`;
-    if (Math.abs(dx) <= deadzone) setDirection(null);
-    else setDirection(dx < 0 ? 'left' : 'right');
-  };
-  const resetThumb = () => { joystickThumb.style.transform = 'translate(0px,0px)'; };
-  const endDrag = event => {
-    if (event && event.pointerId !== activePointerId) return;
-    activePointerId = null;
-    joystick.classList.remove('is-active');
-    resetThumb();
-    setDirection(null);
-  };
-  joystick.addEventListener('pointerdown', event => {
-    if (activePointerId !== null) return;
-    activePointerId = event.pointerId;
-    joystick.setPointerCapture?.(activePointerId);
-    joystick.classList.add('is-active');
-    moveThumb(event.clientX, event.clientY);
-    event.preventDefault();
-  }, { passive: false });
-  const trackDrag = event => { if (event.pointerId === activePointerId) { moveThumb(event.clientX, event.clientY); event.preventDefault(); } };
-  joystick.addEventListener('pointermove', trackDrag, { passive: false });
-  window.addEventListener('pointermove', trackDrag, { passive: false });
-  window.addEventListener('pointerup', endDrag);
-  window.addEventListener('pointercancel', endDrag);
-  window.addEventListener('blur', () => endDrag());
-  window.addEventListener('pagehide', () => endDrag());
-  document.addEventListener('visibilitychange', () => { if (document.hidden) endDrag(); });
-}
 let audioContext;
 let audioBed;
 let musicTimer;

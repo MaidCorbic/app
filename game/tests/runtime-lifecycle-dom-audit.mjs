@@ -22,11 +22,13 @@ assert.doesNotMatch(main, /insertAdjacentHTML\([^\n]*data-mobile-action/);
 assert.doesNotMatch(main, /game\.events\.emit\('mobile-action'/);
 assert.doesNotMatch(main, /querySelectorAll\('\[data-mobile-action\]'\)/);
 
-// Joystick remains available but has a single pointer owner and lifecycle release.
-assert.match(main, /const joystick = document\.querySelector\('\[data-mobile-joystick\]'\)/);
-assert.match(main, /if \(activePointerId !== null\) return/);
-assert.match(main, /window\.addEventListener\('pagehide'/);
+// main.js must not own joystick pointer dispatch; the dedicated mobile input system does.
+assert.doesNotMatch(main, /const joystick = document\.querySelector\('\[data-mobile-joystick\]'\)/);
+assert.doesNotMatch(main, /game\.events\.emit\('mobile-move'/);
+assert.doesNotMatch(main, /activePointerId/);
 assert.match(mobile, /window\.__relayMobileInputSingleOwnerV9/);
+assert.match(mobile, /activePointerId/);
+assert.match(mobile, /pagehide/);
 assert.match(mobile, /seen\.has\(action\)/);
 
 // Runtime authority rejects stale run completion and cleans scene state.
