@@ -17,6 +17,23 @@ const keyEvent = (code, key, type, keyCode) => {
 const emit = ([keyCode, key, code], type) => window.dispatchEvent(keyEvent(code, key, type, keyCode));
 const replaceNode = node => { const clone = node.cloneNode(true); node.replaceWith(clone); return clone; };
 
+// RunnerScene kept legacy event listeners for backward compatibility. They are no
+// longer an input owner: V9 drives Phaser key/cursor state directly. Detach the old
+// listeners when the scene becomes available so there is exactly one mobile owner.
+const detachLegacyRunnerInput = scene => {
+  const events = scene?.game?.events;
+  if (!events) return;
+  if (scene.mobileActionHandler) events.off('mobile-action', scene.mobileActionHandler);
+  if (scene.mobileMoveHandler) events.off('mobile-move', scene.mobileMoveHandler);
+  scene.mobileActionHandler = null;
+  scene.mobileMoveHandler = null;
+};
+
+window.addEventListener('relay:runner-scene-ready', event => {
+  detachLegacyRunnerInput(event?.detail?.scene || window.__relayRunnerScene);
+});
+if (window.__relayRunnerScene) detachLegacyRunnerInput(window.__relayRunnerScene);
+
 // Legacy boot code can temporarily add an action button before this single-owner
 // module runs. Normalize that DOM on every device so duplicate actions never remain
 // in the page, even when touch controls are hidden on desktop.
