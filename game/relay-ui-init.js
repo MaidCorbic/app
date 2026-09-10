@@ -1,5 +1,22 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 
+// CSS bootstrap ownership: feature styles are loaded here so runtime UI has one
+// predictable entry point. canonical-ui-v1.css is loaded after shared feature
+// layers and before the narrow release HUD layer, making it the shared UI
+// authority without changing feature-specific presentation.
+import './splash-progress-visibility.css';
+import './cinematic-splash.css';
+import './mobile-final-polish.css';
+import './styles.css';
+import './main-menu.css';
+import './menu-overrides.css';
+import './home-v3.css';
+import './hud-v2.css';
+import './streak.css';
+import './faq.css';
+import './player-profile-v1.css';
+import './campaign-v2.css';
+import './relay-update-tutorial.css';
 import './update-ui.css';
 import './gameplay-event-hud-v2.css';
 import './dynamic-environment-reactions-v1.css';
@@ -7,16 +24,17 @@ import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
 import './gameplay-ui-v8-settings-polish.css';
-
-import './gameplay-ui-visibility-v3.js';
 import './gameplay-hud-polish-v1.css';
 import './mobile-map-all-levels-contract-v1.css';
 import './mobile-map-web-parity-all-levels-v1.css';
 import './mobile-top-card-map-legend-fix-v1.css';
 import './mobile-ui-cleanup-v1.css';
-import './map-aaa-tactical-redesign-v1.js';
 import './release-ux-gameplay-polish-v1.css';
+import './canonical-ui-v1.css';
 import './release-final-ui-v1.css';
+
+import './gameplay-ui-visibility-v3.js';
+import './map-aaa-tactical-redesign-v1.js';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -84,7 +102,6 @@ import './src/systems/city-atmosphere-cleanup-v1.js';
 import './game-feel-v1.js';
 import './audio-feedback-v2.js';
 import './adaptive-music-v1.js';
-//import './gameplay-event-hud-v2.js';
 import './src/systems/world-variation-game-feel-v1.js';
 import './src/systems/barrier-gameplay-visual-cleanup-v1.js';
 import './src/systems/city-backdrop-replacement-v1.js';
@@ -126,9 +143,6 @@ import './src/systems/gameplay-ui-v7-legacy-feedback-hide.js';
 import './src/systems/signals-hud-run-persistence-v1.js';
 import './release-ux-gameplay-polish-v1.js';
 
-// Scene-dependent prototype patches must initialize after the main Phaser entry
-// has evaluated RunnerScene. DOMContentLoaded guarantees all module scripts in
-// index.html completed before these dynamic imports run.
 window.addEventListener('DOMContentLoaded', () => {
   import('./src/systems/mission-objectives-route-goals-v1.js').catch(error => {
     console.error('[RelayRunner] mission runtime patch failed to load', error);
