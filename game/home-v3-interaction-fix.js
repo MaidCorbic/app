@@ -9,26 +9,11 @@ import './unified-gameplay-ui-v1-mobile.css';
 import './presentation-final-v1.css';
 import './presentation-final-v1.js';
 
-/* Final Home interaction owner. Existing gameplay/UI systems remain authoritative. */
 (() => {
   'use strict';
   if (window.__relayHomeFinalV1) return;
   window.__relayHomeFinalV1 = true;
 
-  const $ = sel => document.querySelector(sel);
-
-  /*
-   * Canonical Options router.
-   *
-   * unified-options-ui-v1 is the only Settings/Options renderer.
-   * unified-cinematic-ui-v1 remains loaded for FAQ/pause compatibility, but its
-   * legacy Options renderer is never used by this entry point.
-   *
-   * IMPORTANT: the final Home builders intentionally remove the old
-   * [data-title-panel="controls"] button from #intro. Therefore this router
-   * creates a temporary canonical trigger when opening Options instead of
-   * depending on a DOM button that may no longer exist.
-   */
   const openCanonicalOptions = () => {
     const panel = document.getElementById('titlePanel');
     const heading = document.getElementById('titlePanelHeading');
@@ -43,16 +28,11 @@ import './presentation-final-v1.js';
       heading.textContent = 'OPTIONS';
       heading.className = 'relay-options-title';
 
-      /*
-       * unified-options-ui-v1 listens in capture phase for this canonical
-       * trigger. Use a temporary node so the Home redesign does not need to
-       * keep a legacy-looking trigger in the visible DOM.
-       */
       const trigger = document.createElement('button');
       trigger.type = 'button';
       trigger.dataset.titlePanel = 'controls';
-      trigger.hidden = true;
       trigger.setAttribute('aria-hidden', 'true');
+      trigger.style.display = 'none';
       document.body.appendChild(trigger);
 
       try {
@@ -68,18 +48,14 @@ import './presentation-final-v1.js';
     }
   };
 
-  const installCanonicalOptionsRouter = () => {
+  const installOptionsRouter = () => {
     const api = window.relayUnifiedCinematicUI;
     if (!api || typeof api.openOptions !== 'function') return;
-    if (api.__canonicalOptionsRouterV3) return;
+    if (api.__canonicalOptionsRouterV4) return;
 
-    /*
-     * Preserve FAQ/pause on the cinematic owner, but hard-route Options to the
-     * canonical unified renderer with no legacy fallback.
-     */
     api.openOptions = () => openCanonicalOptions();
 
-    Object.defineProperty(api, '__canonicalOptionsRouterV3', {
+    Object.defineProperty(api, '__canonicalOptionsRouterV4', {
       value: true,
       configurable: false,
       enumerable: false,
@@ -87,12 +63,7 @@ import './presentation-final-v1.js';
     });
   };
 
-  /*
-   * Home is assembled by more than one presentation layer. Intercept every
-   * visible Home Options control at document-capture level so an old owner
-   * cannot swallow the click before it reaches the canonical Settings route.
-   */
-  const installCanonicalHomeOptionsClickGuard = () => {
+  const installHomeOptionsGuard = () => {
     if (document.documentElement.dataset.canonicalHomeOptionsGuard === '1') return;
     document.documentElement.dataset.canonicalHomeOptionsGuard = '1';
 
@@ -101,9 +72,7 @@ import './presentation-final-v1.js';
       if (!(target instanceof Element)) return;
 
       const optionsButton = target.closest(
-        '[data-final-home="options"],
-         [data-final-home-button="options"],
-         [data-home-v4-action="options"]'
+        '[data-final-home="options"], [data-final-home-button="options"], [data-home-v4-action="options"]'
       );
 
       if (!optionsButton) return;
@@ -114,71 +83,31 @@ import './presentation-final-v1.js';
     }, true);
   };
 
-  /*
-   * The legacy cinematic renderer can still exist for FAQ/pause compatibility.
-   * This guard makes the title-panel boundary explicit: a cinematic Options
-   * card can never become a visible Settings surface under #titlePanel.
-   */
-  const installLegacyOptionsVisualGuard = () => {
-    if (document.getElementById('relay-canonical-options-guard-v1')) return;
+  const installLegacyOptionsGuard = () => {
+    if (document.getElementById('relay-canonical-options-guard-v2')) return;
 
     const style = document.createElement('style');
-    style.id = 'relay-canonical-options-guard-v1';
+    style.id = 'relay-canonical-options-guard-v2';
     style.textContent = `
       #titlePanel > .relay-cinematic-panel,
-      #titlePanel.relay-options-unified > .relay-cinematic-panel{
+      #titlePanel.relay-options-unified > .relay-cinematic-panel {
         display:none !important;
         visibility:hidden !important;
         pointer-events:none !important;
       }
     `;
-
     document.head.appendChild(style);
   };
 
-  installCanonicalOptionsRouter();
-  installCanonicalHomeOptionsClickGuard();
-  installLegacyOptionsVisualGuard();
-
-  const call = (name, fallback) => {
-    try {
-      if (name === 'options' && window.relayUnifiedCinematicUI?.openOptions) return window.relayUnifiedCinematicUI.openOptions();
-      if (name === 'faq' && window.relayUnifiedCinematicUI?.openFAQ) return window.relayUnifiedCinematicUI.openFAQ();
-      if (name === 'update' && window.relayOpenInfo) return window.relayOpenInfo('update');
-    } catch {}
-    if (typeof fallback === 'function') window.setTimeout(fallback, 0);
+  const boot = () => {
+    installOptionsRouter();
+    installHomeOptionsGuard();
+    installLegacyOptionsGuard();
   };
 
-  const install = () => {
-    const intro = $('#intro');
-    if (!intro) return;
-
-    const launcher = intro.querySelector('.info-launcher');
-    launcher?.querySelector('[data-relay-info="faq"]')?.setAttribute('aria-label', 'Open FAQ');
-    launcher?.querySelector('[data-relay-info="update"]')?.setAttribute('aria-label', 'Open latest updates');
-
-    const make = (id, label, detail, handler) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'home-v3-card relay-home-nav-card';
-      button.dataset.finalHome = id;
-      button.innerHTML = `<span>${label}</span><small>${detail}</small>`;
-      button.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        handler();
-      });
-      return button;
-    };
-
-    const update = launcher?.querySelector('[data-relay-info="update"]');
-    update?.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      call('update');
-    }, { capture: true });
-  };
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once:true });
-  else window.setTimeout(install, 0);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
 })();
