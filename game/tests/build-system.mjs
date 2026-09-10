@@ -31,7 +31,10 @@ assert.match(index, /data-mobile-action="gadget1"/, 'Touch controls must include
 assert.match(index, /data-mobile-action="jump"/, 'Touch controls must include a jump button');
 assert.match(index, /data-mobile-joystick/, 'Touch controls must include a drag joystick for movement');
 assert.match(index, /mobile-joystick-thumb/, 'The joystick must render a draggable thumb element');
-assert.match(main, /game\.events\.emit\('mobile-action'/, 'Touch controls must send gameplay actions');
+assert.match(mobileOwner, /ACTION_KEYS/, 'Single mobile owner must define gameplay action bindings');
+assert.match(mobileOwner, /emit\(ACTION_KEYS\[action\], 'keydown'\)/, 'Single mobile owner must send gameplay action keydown events');
+assert.match(mobileOwner, /emit\(ACTION_KEYS\[action\], 'keyup'\)/, 'Single mobile owner must send gameplay action keyup events');
+assert.match(mobileOwner, /window\.dispatchEvent\(keyEvent/, 'Single mobile owner must dispatch synthetic gameplay keyboard events');
 assert.match(main, /function speakNarration\(text\)/, 'English browser narration must be available for cinematic subtitles');
 assert.match(main, /claimLoginReward/, 'The challenge board must provide persistent login rewards');
 assert.match(main, /WEEKLY/, 'The challenge board must explain and display weekly missions');
