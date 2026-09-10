@@ -11,6 +11,7 @@ const arrivalCss = await read('cinematic-arrival-v2.css');
 const config = await read('vite.config.mjs');
 const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
+const mobileOwner = await read('src/systems/mobile-input-single-owner-v1.js');
 
 assert.equal(packageJson.scripts['test:final-stability']?.length > 0, true, 'final stability suite must remain wired');
 assert.equal(packageJson.scripts['test:release-ux-gameplay-polish'], 'node tests/release-ux-gameplay-polish.mjs', 'release UX/gameplay polish suite must remain wired');
@@ -29,6 +30,14 @@ assert.match(arrivalCss, /\.arrival-mission[^}]*animation:arrivalMission \.6s 2\
 assert.match(config, /phaser-vendor/);
 assert.match(config, /strictExecutionOrder:\s*true/);
 assert.match(main, /mobile-input-single-owner-v1/);
+
+// V9 is the only mobile input owner. Legacy RunnerScene listeners are detached
+// at runtime instead of being allowed to compete with Phaser key/cursor state.
+assert.match(mobileOwner, /window\.addEventListener\('relay:runner-scene-ready'/);
+assert.match(mobileOwner, /detachLegacyRunnerInput/);
+assert.match(mobileOwner, /events\.off\('mobile-action'/);
+assert.match(mobileOwner, /events\.off\('mobile-move'/);
+assert.match(mobileOwner, /window\.__relayMobileInputSingleOwnerV9/);
 
 await assert.rejects(access(fileURLToPath(new URL('../vite.config.js', gameRoot))), /ENOENT/, 'legacy Vite config must not return');
 
