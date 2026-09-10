@@ -2,6 +2,7 @@
 // Gameplay-feel-v3 is intentionally not loaded: its duplicate FLOW/SIGNALS layer
 // competes with the canonical HUD and creates the unwanted cyan top-center overlay.
 import './options-polish-v2.css';
+import './home-settings-scroll-v1.css';
 import './unified-options-ui-v1.js';
 import './src/systems/audio-autoplay-guard-v1.js';
 import './gameplay-music-v6.js';

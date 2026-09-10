@@ -1,5 +1,6 @@
 (() => {
   'use strict';
+
   if (window.__relayUnifiedCinematicUiBridgeV1) return;
   window.__relayUnifiedCinematicUiBridgeV1 = true;
 
@@ -10,12 +11,31 @@
 
   const isUnified = id => {
     const node = document.getElementById(id);
-    return !!node?.classList.contains('relay-cinematic-overlay') && !!node.querySelector('.relay-cinematic-panel, .relay-pause-shell');
+    if (!node) return false;
+
+    /*
+     * Home Options is owned by unified-options-ui-v1, not the cinematic
+     * overlay renderer. Treat the canonical options marker as a valid
+     * unified surface so this bridge does not overwrite it after opening.
+     */
+    if (
+      id === 'titlePanel' &&
+      node.classList.contains('relay-options-unified') &&
+      !!node.querySelector('.relay-options-shell')
+    ) {
+      return true;
+    }
+
+    return (
+      node.classList.contains('relay-cinematic-overlay') &&
+      !!node.querySelector('.relay-cinematic-panel, .relay-pause-shell')
+    );
   };
 
   const reconcile = () => {
     const api = window.relayUnifiedCinematicUI;
     if (!api) return;
+
     const title = document.getElementById('titlePanel');
     const info = document.getElementById('relayInfoPanel');
     const pause = document.getElementById('pauseMenu');
@@ -24,9 +44,11 @@
       api.openOptions();
       return;
     }
+
     if (info && visible('relayInfoPanel') && !isUnified('relayInfoPanel')) {
-  return;
-}
+      return;
+    }
+
     if (pause && visible('pauseMenu') && !isUnified('pauseMenu')) {
       api.openPause('resume');
     }
@@ -34,10 +56,18 @@
 
   const start = () => {
     const observer = new MutationObserver(reconcile);
-    observer.observe(document.body, { subtree:true, childList:true, attributes:true, attributeFilter:['class','hidden','style'] });
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['class', 'hidden', 'style'],
+    });
     reconcile();
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
-  else window.setTimeout(start, 0);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    window.setTimeout(start, 0);
+  }
 })();
