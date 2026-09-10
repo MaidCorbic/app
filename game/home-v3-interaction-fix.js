@@ -57,9 +57,9 @@ import './presentation-final-v1.js';
   };
 
   /*
-   * The legacy cinematic renderer can still exist for FAQ/pause compatibility.
-   * This guard makes the title-panel boundary explicit: the cinematic Options
-   * card can never become a visible Settings surface under #titlePanel.
+   * Retire both known legacy Gold Home surfaces. The canonical trigger remains
+   * in the DOM for accessibility/compatibility, but it is not a visible menu
+   * item: all visible Home Options controls use the modern Home/Settings owner.
    */
   const installLegacyOptionsVisualGuard = () => {
     if (document.getElementById('relay-canonical-options-guard-v1')) return;
@@ -67,12 +67,25 @@ import './presentation-final-v1.js';
     const style = document.createElement('style');
     style.id = 'relay-canonical-options-guard-v1';
     style.textContent = `
-      #titlePanel > .relay-cinematic-panel{
+      #titlePanel > .relay-cinematic-panel,
+      #titlePanel.relay-options-unified > .relay-cinematic-panel{
         display:none !important;
       }
 
-      #titlePanel.relay-options-unified > .relay-cinematic-panel{
+      #intro.home-v3 .title-secondary{
         display:none !important;
+        visibility:hidden !important;
+        opacity:0 !important;
+        pointer-events:none !important;
+      }
+
+      /* Older safe-HUD CSS hides the modern Home side menu; override that
+       * presentation rule so the V4 Home remains the visible navigation owner. */
+      #intro.home-v3.home-v3 .home-v3-side.home-v3-side{
+        display:flex !important;
+        visibility:visible !important;
+        opacity:1 !important;
+        pointer-events:auto !important;
       }
     `;
 
