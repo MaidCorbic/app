@@ -23,7 +23,7 @@ assert.match(runner, /this\.useGadget\(0\)/, 'Key 3 must activate gadget slot on
 assert.match(runner, /this\.keys\.FOUR/, 'Key 4 must be wired');
 assert.match(runner, /this\.useGadget\(1\)/, 'Key 4 must activate gadget slot two');
 assert.match(runner, /this\.keys\.E[\s\S]{0,160}?this\.useBlaster\(\)/, 'E must fire the spawn blaster');
-assert.match(runner, /Phaser\.Input\.Keyboard\.JustDown\(this\.keys\.Q\)/, 'Q must activate the always-available sword');
+assert.match(runner, /Phaser\.Input\.Keyboard\.JustDown\(\s*this\.keys\.Q\s*\)/, 'Q must activate the always-available sword');
 assert.match(index, /data-mobile-action="sword"/, 'Touch controls must include a sword button');
 assert.match(index, /data-mobile-action="dash"/, 'Touch controls must include a nitro button');
 assert.match(index, /data-mobile-action="build1"/, 'Touch controls must include build slot one');
