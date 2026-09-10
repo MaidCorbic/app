@@ -102,7 +102,6 @@ import './mission-flow-performance-v1.js';
 import './mission-performance-results-bridge-v1.js';
 import './src/systems/dynamic-encounter-events-v1.js';
 import './src/systems/adaptive-mission-modifiers-v1.js';
-import './src/systems/mission-objectives-route-goals-v1.js';
 import './presentation-final-v1.js';
 import './dynamic-camera-language-v1.js';
 import './gameplay-new-layer-v2.js';
@@ -123,3 +122,15 @@ import './runtime-authority-v1.js';
 import './gameplay-runtime-stability-v3.js';
 import './src/systems/gameplay-ui-v7-legacy-feedback-hide.js';
 import './src/systems/signals-hud-run-persistence-v1.js';
+
+// Scene-dependent prototype patches must initialize after the main Phaser entry
+// has evaluated RunnerScene. DOMContentLoaded guarantees all module scripts in
+// index.html completed before these dynamic imports run.
+window.addEventListener('DOMContentLoaded', () => {
+  import('./src/systems/mission-objectives-route-goals-v1.js').catch(error => {
+    console.error('[RelayRunner] mission runtime patch failed to load', error);
+  });
+  import('./chaser-runtime-stability-v1.js').catch(error => {
+    console.error('[RelayRunner] chaser runtime patch failed to load', error);
+  });
+}, { once: true });
