@@ -30,9 +30,11 @@ assert.match(main, /game\.events\.emit\('mobile-action'/, 'Touch controls must s
 assert.match(main, /function speakNarration\(text\)/, 'English browser narration must be available for cinematic subtitles');
 assert.match(main, /claimLoginReward/, 'The challenge board must provide persistent login rewards');
 assert.match(main, /WEEKLY/, 'The challenge board must explain and display weekly missions');
-assert.match(main, /const joystick = document\.querySelector\('\[data-mobile-joystick\]'\)/, 'App must wire up the joystick drag element');
-assert.match(main, /game\.events\.emit\('mobile-move', direction\)/, 'The joystick must send movement directions while dragging');
-assert.match(main, /setDirection\(null\)/, 'The joystick must clear movement direction on release');
+const mobileOwner = await readFile(new URL('../src/systems/mobile-input-single-owner-v1.js', import.meta.url), 'utf8');
+assert.match(mobileOwner, /const joystickNode = root\.querySelector\('\[data-mobile-joystick\]'\)/, 'Single mobile owner must wire the joystick drag element');
+assert.match(mobileOwner, /mobile-move|setPhaserDirection/, 'Single mobile owner must route joystick movement');
+assert.match(mobileOwner, /setDirection\(null\)/, 'Single mobile owner must clear movement direction on release');
+assert.doesNotMatch(main, /data-mobile-joystick|mobile-move|activePointerId/, 'main.js must not own mobile joystick dispatch');
 assert.match(runner, /this\.mobileActions\.sword/, 'The runner must consume the mobile sword action');
 assert.match(runner, /this\.mobileActions\.dash/, 'The runner must consume the mobile nitro action');
 assert.match(runner, /this\.mobileActions\.build1/, 'The runner must consume mobile build actions');
