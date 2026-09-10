@@ -22,15 +22,47 @@ import './presentation-final-v1.js';
    *
    * unified-options-ui-v1 is the only Settings/Options renderer.
    * unified-cinematic-ui-v1 remains loaded for FAQ/pause compatibility, but its
-   * legacy Options renderer must never be used as a fallback.
+   * legacy Options renderer is never used by this entry point.
+   *
+   * IMPORTANT: the final Home builders intentionally remove the old
+   * [data-title-panel="controls"] button from #intro. Therefore this router
+   * creates a temporary canonical trigger when opening Options instead of
+   * depending on a DOM button that may no longer exist.
    */
   const openCanonicalOptions = () => {
-    const button = document.querySelector('[data-title-panel="controls"]');
-    if (!(button instanceof HTMLElement) || button.disabled) return false;
+    const panel = document.getElementById('titlePanel');
+    const heading = document.getElementById('titlePanelHeading');
+    const content = document.getElementById('titlePanelContent');
+
+    if (!(panel instanceof HTMLElement) || !(heading instanceof HTMLElement) || !(content instanceof HTMLElement)) {
+      return false;
+    }
 
     try {
-      HTMLElement.prototype.click.call(button);
-      return true;
+      panel.classList.remove('hidden');
+      heading.textContent = 'OPTIONS';
+      heading.className = 'relay-options-title';
+
+      /*
+       * unified-options-ui-v1 listens in capture phase for this canonical
+       * trigger. Use a temporary node so the Home redesign does not need to
+       * keep a legacy-looking trigger in the visible DOM.
+       */
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.dataset.titlePanel = 'controls';
+      trigger.hidden = true;
+      trigger.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(trigger);
+
+      try {
+        HTMLElement.prototype.click.call(trigger);
+      } finally {
+        trigger.remove();
+      }
+
+      return panel.classList.contains('relay-options-unified') &&
+        !!content.querySelector('.relay-options-shell');
     } catch {
       return false;
     }
@@ -39,16 +71,15 @@ import './presentation-final-v1.js';
   const installCanonicalOptionsRouter = () => {
     const api = window.relayUnifiedCinematicUI;
     if (!api || typeof api.openOptions !== 'function') return;
-    if (api.__canonicalOptionsRouterV2) return;
+    if (api.__canonicalOptionsRouterV3) return;
 
     /*
      * Preserve FAQ/pause on the cinematic owner, but hard-route Options to the
-     * canonical unified trigger. There is intentionally NO legacy fallback:
-     * showing the old Gold/Cinematic Settings panel is a functional regression.
+     * canonical unified renderer with no legacy fallback.
      */
     api.openOptions = () => openCanonicalOptions();
 
-    Object.defineProperty(api, '__canonicalOptionsRouterV2', {
+    Object.defineProperty(api, '__canonicalOptionsRouterV3', {
       value: true,
       configurable: false,
       enumerable: false,
@@ -57,9 +88,9 @@ import './presentation-final-v1.js';
   };
 
   /*
-   * Retire both known legacy Gold Home surfaces. The canonical trigger remains
-   * in the DOM for accessibility/compatibility, but it is not a visible menu
-   * item: all visible Home Options controls use the modern Home/Settings owner.
+   * The legacy cinematic renderer can still exist for FAQ/pause compatibility.
+   * This guard makes the title-panel boundary explicit: a cinematic Options
+   * card can never become a visible Settings surface under #titlePanel.
    */
   const installLegacyOptionsVisualGuard = () => {
     if (document.getElementById('relay-canonical-options-guard-v1')) return;
@@ -70,22 +101,8 @@ import './presentation-final-v1.js';
       #titlePanel > .relay-cinematic-panel,
       #titlePanel.relay-options-unified > .relay-cinematic-panel{
         display:none !important;
-      }
-
-      #intro.home-v3 .title-secondary{
-        display:none !important;
         visibility:hidden !important;
-        opacity:0 !important;
         pointer-events:none !important;
-      }
-
-      /* Older safe-HUD CSS hides the modern Home side menu; override that
-       * presentation rule so the V4 Home remains the visible navigation owner. */
-      #intro.home-v3.home-v3 .home-v3-side.home-v3-side{
-        display:flex !important;
-        visibility:visible !important;
-        opacity:1 !important;
-        pointer-events:auto !important;
       }
     `;
 
