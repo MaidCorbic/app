@@ -12,4 +12,8 @@
     if (isLegacyStyle(node)) return node;
     return nativeInsertBefore.call(this, node, referenceNode);
   };
+  queueMicrotask(() => {
+    Node.prototype.appendChild = nativeAppendChild;
+    Node.prototype.insertBefore = nativeInsertBefore;
+  });
 })();
