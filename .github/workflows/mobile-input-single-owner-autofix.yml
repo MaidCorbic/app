@@ -1,0 +1,78 @@
+name: Mobile Input Owner Migration
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.event.pull_request.head.repo.full_name == github.repository && !contains(github.event.pull_request.head.ref, 'migration-complete')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Remove duplicate joystick dispatcher
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path('game/src/main.js')
+          text = path.read_text()
+
+          pattern = re.compile(
+              r"document\.querySelector\('\[data-rotate-dismiss\]'\)\?\.addEventListener\('click', \(\) => document\.body\.classList\.add\('rotate-dismissed'\)\);\n"
+              r"window\.addEventListener\('orientationchange', \(\) => document\.body\.classList\.remove\('rotate-dismissed'\)\);\n"
+              r"const joystick = document\.querySelector\('\[data-mobile-joystick\]'\);\n"
+              r"const joystickThumb = joystick\?\.querySelector\('\.mobile-joystick-thumb'\);\n"
+              r"if \(joystick && joystickThumb\) \{.*?\n\}\n(?=let audioContext;)",
+              re.S,
+          )
+
+          replacement = (
+              "document.querySelector('[data-rotate-dismiss]')?.addEventListener('click', () => document.body.classList.add('rotate-dismissed'));\n"
+              "window.addEventListener('orientationchange', () => document.body.classList.remove('rotate-dismissed'));\n"
+          )
+
+          updated, count = pattern.subn(replacement, text, count=1)
+          if count != 1:
+              raise SystemExit('Expected exactly one duplicate mobile joystick dispatcher block')
+          path.write_text(updated)
+
+      - name: Update lifecycle contract
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('game/tests/runtime-lifecycle-dom-audit.mjs')
+          text = path.read_text()
+          text = text.replace(
+              "// Joystick remains available but has a single pointer owner and lifecycle release.\nassert.match(main, /const joystick = document\\.querySelector\\('\\[data-mobile-joystick\\]'\\)/);\nassert.match(main, /if \\(activePointerId !== null\\) return/);\nassert.match(main, /window\\.addEventListener\\('pagehide'/);\nassert.match(mobile, /window\\.__relayMobileInputSingleOwnerV9/);",
+              "// main.js must not own joystick pointer dispatch; the dedicated mobile input system does.\nassert.doesNotMatch(main, /const joystick = document\\.querySelector\\('\\[data-mobile-joystick\\]'\\)/);\nassert.doesNotMatch(main, /game\\.events\\.emit\\('mobile-move'/);\nassert.doesNotMatch(main, /activePointerId/);\nassert.match(mobile, /window\\.__relayMobileInputSingleOwnerV9/);\nassert.match(mobile, /activePointerId/);\nassert.match(mobile, /pagehide/);"
+          )
+          path.write_text(text)
+
+      - name: Verify migration
+        run: |
+          cd game
+          npm run test:release-hardening
+          npm run build
+
+      - name: Commit migration
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/src/main.js game/tests/runtime-lifecycle-dom-audit.mjs
+          if git diff --cached --quiet; then
+            echo "No migration changes needed"
+            exit 0
+          fi
+          git commit -m "fix: make mobile input single-owner"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
