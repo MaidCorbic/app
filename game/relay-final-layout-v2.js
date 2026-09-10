@@ -202,17 +202,8 @@
       'OPTIONS',
       'SETTINGS · AUDIO · DISPLAY',
       () => {
-        if (
-          window.relayUnifiedCinematicUI
-            ?.openOptions
-        ) {
-          window.relayUnifiedCinematicUI.openOptions();
-          return;
-        }
-
-        nativeClick(
-          '[data-title-panel="controls"]'
-        );
+        /* Options belongs exclusively to unified-options-ui-v1. */
+        nativeClick('[data-title-panel="controls"]');
       }
     );
 

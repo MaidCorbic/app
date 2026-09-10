@@ -1,6 +1,7 @@
 import './unified-cinematic-ui-v1.css';
 import './unified-cinematic-ui-v1.js';
 import './unified-cinematic-ui-bridge-v1.js';
+import './unified-options-ui-v1.js';
 import './unified-gameplay-ui-v1.css';
 import './unified-gameplay-ui-v1-polish.css';
 import './unified-gameplay-ui-v1.js';
@@ -8,53 +9,53 @@ import './unified-gameplay-ui-v1-mobile.css';
 import './presentation-final-v1.css';
 import './presentation-final-v1.js';
 
-/* Final Home interaction owner. Existing gameplay/UI systems remain authoritative. */
 (() => {
   'use strict';
   if (window.__relayHomeFinalV1) return;
   window.__relayHomeFinalV1 = true;
 
-  const $ = sel => document.querySelector(sel);
-
-  /*
-   * Canonical Options router.
-   *
-   * The cinematic UI still owns FAQ/pause compatibility, but Options must
-   * always enter the canonical unified-options-ui-v1 renderer. This prevents
-   * the legacy gold/cinematic Options panel from becoming the active
-   * Settings surface.
-   */
   const openCanonicalOptions = () => {
-    const button = document.querySelector('[data-title-panel="controls"]');
-    if (!(button instanceof HTMLElement) || button.disabled) return false;
+    const panel = document.getElementById('titlePanel');
+    const heading = document.getElementById('titlePanelHeading');
+    const content = document.getElementById('titlePanelContent');
+
+    if (!(panel instanceof HTMLElement) || !(heading instanceof HTMLElement) || !(content instanceof HTMLElement)) {
+      return false;
+    }
 
     try {
-      HTMLElement.prototype.click.call(button);
-      return true;
+      panel.classList.remove('hidden');
+      heading.textContent = 'OPTIONS';
+      heading.className = 'relay-options-title';
+
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.dataset.titlePanel = 'controls';
+      trigger.setAttribute('aria-hidden', 'true');
+      trigger.style.display = 'none';
+      document.body.appendChild(trigger);
+
+      try {
+        HTMLElement.prototype.click.call(trigger);
+      } finally {
+        trigger.remove();
+      }
+
+      return panel.classList.contains('relay-options-unified') &&
+        !!content.querySelector('.relay-options-shell');
     } catch {
       return false;
     }
   };
 
-  const installCanonicalOptionsRouter = () => {
+  const installOptionsRouter = () => {
     const api = window.relayUnifiedCinematicUI;
     if (!api || typeof api.openOptions !== 'function') return;
-    if (api.__canonicalOptionsRouterV1) return;
+    if (api.__canonicalOptionsRouterV4) return;
 
-    const legacyOpenOptions = api.openOptions;
+    api.openOptions = () => openCanonicalOptions();
 
-    api.openOptions = () => {
-      if (openCanonicalOptions()) return true;
-
-      /* Keep a safe compatibility fallback if the canonical trigger is not mounted yet. */
-      try {
-        return legacyOpenOptions() || false;
-      } catch {
-        return false;
-      }
-    };
-
-    Object.defineProperty(api, '__canonicalOptionsRouterV1', {
+    Object.defineProperty(api, '__canonicalOptionsRouterV4', {
       value: true,
       configurable: false,
       enumerable: false,
@@ -62,47 +63,51 @@ import './presentation-final-v1.js';
     });
   };
 
-  installCanonicalOptionsRouter();
+  const installHomeOptionsGuard = () => {
+    if (document.documentElement.dataset.canonicalHomeOptionsGuard === '1') return;
+    document.documentElement.dataset.canonicalHomeOptionsGuard = '1';
 
-  const call = (name, fallback) => {
-    try {
-      if (name === 'options' && window.relayUnifiedCinematicUI?.openOptions) return window.relayUnifiedCinematicUI.openOptions();
-      if (name === 'faq' && window.relayUnifiedCinematicUI?.openFAQ) return window.relayUnifiedCinematicUI.openFAQ();
-      if (name === 'update' && window.relayOpenInfo) return window.relayOpenInfo('update');
-    } catch {}
-    if (typeof fallback === 'function') window.setTimeout(fallback, 0);
-  };
+    document.addEventListener('click', event => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
 
-  const install = () => {
-    const intro = $('#intro');
-    if (!intro) return;
+      const optionsButton = target.closest(
+        '[data-final-home="options"], [data-final-home-button="options"], [data-home-v4-action="options"]'
+      );
 
-    const launcher = intro.querySelector('.info-launcher');
-    launcher?.querySelector('[data-relay-info="faq"]')?.setAttribute('aria-label', 'Open FAQ');
-    launcher?.querySelector('[data-relay-info="update"]')?.setAttribute('aria-label', 'Open latest updates');
+      if (!optionsButton) return;
 
-    const make = (id, label, detail, handler) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'home-v3-card relay-home-nav-card';
-      button.dataset.finalHome = id;
-      button.innerHTML = `<span>${label}</span><small>${detail}</small>`;
-      button.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        handler();
-      });
-      return button;
-    };
-
-    const update = launcher?.querySelector('[data-relay-info="update"]');
-    update?.addEventListener('click', event => {
       event.preventDefault();
-      event.stopPropagation();
-      call('update');
-    }, { capture: true });
+      event.stopImmediatePropagation();
+      openCanonicalOptions();
+    }, true);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once:true });
-  else window.setTimeout(install, 0);
+  const installLegacyOptionsGuard = () => {
+    if (document.getElementById('relay-canonical-options-guard-v2')) return;
+
+    const style = document.createElement('style');
+    style.id = 'relay-canonical-options-guard-v2';
+    style.textContent = `
+      #titlePanel > .relay-cinematic-panel,
+      #titlePanel.relay-options-unified > .relay-cinematic-panel {
+        display:none !important;
+        visibility:hidden !important;
+        pointer-events:none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
+  const boot = () => {
+    installOptionsRouter();
+    installHomeOptionsGuard();
+    installLegacyOptionsGuard();
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
 })();
