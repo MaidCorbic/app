@@ -1,0 +1,206 @@
+/* RUNNER RELAY — SIGNAL / FACTION FINAL PRESENTATION TUNE
+ * Presentation-only. No gameplay, progression, save, audio or input ownership.
+ */
+
+/* =========================================================
+   SIGNALS HUD — CLEAR, CENTERED, SIGNAL-COLLECTION PROGRESS
+   ========================================================= */
+
+#play .hud-progress.hud-run {
+  min-width:126px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  gap:4px !important;
+}
+
+#play .hud-progress.hud-run > span#signalCount {
+  display:block !important;
+  width:100% !important;
+  margin:0 !important;
+  text-align:center !important;
+  font-size:clamp(17px,1.8vw,24px) !important;
+  font-weight:950 !important;
+  line-height:1 !important;
+  letter-spacing:.08em !important;
+}
+
+#play .hud-progress.hud-run > small {
+  display:block !important;
+  width:100% !important;
+  margin:0 !important;
+  text-align:center !important;
+  font-size:10px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+  letter-spacing:.18em !important;
+}
+
+#play .hud-progress.hud-run > div {
+  width:min(150px,100%) !important;
+  height:5px !important;
+  margin:2px auto 0 !important;
+}
+
+#play .hud-progress.hud-run > div > i#progress {
+  display:block !important;
+  width:0 !important;
+  max-width:100% !important;
+  transform:none !important;
+  transition:width 180ms ease !important;
+}
+
+@media (max-width:760px){
+  #play .hud-progress.hud-run {
+    min-width:104px !important;
+    gap:3px !important;
+  }
+
+  #play .hud-progress.hud-run > span#signalCount {
+    font-size:19px !important;
+    letter-spacing:.09em !important;
+  }
+
+  #play .hud-progress.hud-run > small {
+    font-size:9px !important;
+    letter-spacing:.15em !important;
+  }
+
+  #play .hud-progress.hud-run > div {
+    width:94px !important;
+    height:5px !important;
+    margin-top:2px !important;
+  }
+}
+
+/* =========================================================
+   FACTION — SMALLER / CLEANER / NO BOTTOM SCROLL SLIDER
+   ========================================================= */
+
+#play .relay-faction-dialogue {
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+
+#play .relay-faction-dialogue::-webkit-scrollbar {
+  width:0 !important;
+  height:0 !important;
+  display:none !important;
+}
+
+#play .relay-faction-dialogue::after {
+  display:none !important;
+}
+
+#play .relay-faction-dialogue .relay-faction-footer {
+  border-top:0 !important;
+  margin-top:7px !important;
+  padding-top:4px !important;
+}
+
+#play .relay-faction-dialogue .relay-faction-kicker::before {
+  content:"◈" !important;
+  width:auto !important;
+  height:auto !important;
+  flex:0 0 auto !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  font:900 12px/1 system-ui,sans-serif !important;
+  color:#8df4ff !important;
+  animation:none !important;
+}
+
+@media (min-width:761px){
+  #play .relay-faction-dialogue {
+    width:min(560px,44vw) !important;
+    max-height:176px !important;
+    bottom:16px !important;
+    padding:11px 14px 9px !important;
+    border-radius:7px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-kicker {
+    margin-bottom:4px !important;
+    font-size:8px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-name {
+    margin-bottom:6px !important;
+    font-size:10px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-text {
+    max-width:54ch !important;
+    min-height:0 !important;
+    font-size:14px !important;
+    line-height:1.34 !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-footer {
+    gap:8px !important;
+  }
+
+  #play .relay-faction-dialogue button {
+    min-width:96px !important;
+    min-height:34px !important;
+    padding:7px 11px !important;
+    font-size:9px !important;
+  }
+}
+
+@media (max-width:760px){
+  #play .relay-faction-dialogue {
+    width:calc(100vw - 32px) !important;
+    max-height:31dvh !important;
+    bottom:calc(128px + env(safe-area-inset-bottom)) !important;
+    padding:10px 11px 8px !important;
+    border-radius:7px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-kicker {
+    margin-bottom:3px !important;
+    font-size:8px !important;
+    letter-spacing:.13em !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-name {
+    margin-bottom:5px !important;
+    font-size:9px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-text {
+    min-height:0 !important;
+    max-width:none !important;
+    font-size:13px !important;
+    line-height:1.34 !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-footer {
+    gap:6px !important;
+    margin-top:5px !important;
+    padding-top:2px !important;
+  }
+
+  #play .relay-faction-dialogue button {
+    min-height:34px !important;
+    padding:7px 10px !important;
+    font-size:8px !important;
+  }
+}
+
+@media (max-width:390px){
+  #play .relay-faction-dialogue {
+    width:calc(100vw - 24px) !important;
+    max-height:28dvh !important;
+    bottom:calc(120px + env(safe-area-inset-bottom)) !important;
+    padding:9px 10px 7px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-text {
+    font-size:12px !important;
+    line-height:1.3 !important;
+  }
+}
