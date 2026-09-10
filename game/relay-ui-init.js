@@ -6,6 +6,7 @@ import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
+import './gameplay-ui-v8-settings-polish.css';
 
 import './gameplay-ui-visibility-v3.js';
 import './gameplay-hud-polish-v1.css';
@@ -120,3 +121,5 @@ import './gameplay-home-hud-safe-v2.js';
 import './gameplay-audio-start-v2.js';
 import './runtime-authority-v1.js';
 import './gameplay-runtime-stability-v3.js';
+import './src/systems/gameplay-ui-v7-legacy-feedback-hide.js';
+import './src/systems/signals-hud-run-persistence-v1.js';
