@@ -16,6 +16,54 @@ import './presentation-final-v1.js';
 
   const $ = sel => document.querySelector(sel);
 
+  /*
+   * Canonical Options router.
+   *
+   * The cinematic UI still owns FAQ/pause compatibility, but Options must
+   * always enter the canonical unified-options-ui-v1 renderer. This prevents
+   * the legacy gold/cinematic Options panel from becoming the active
+   * Settings surface.
+   */
+  const openCanonicalOptions = () => {
+    const button = document.querySelector('[data-title-panel="controls"]');
+    if (!(button instanceof HTMLElement) || button.disabled) return false;
+
+    try {
+      HTMLElement.prototype.click.call(button);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const installCanonicalOptionsRouter = () => {
+    const api = window.relayUnifiedCinematicUI;
+    if (!api || typeof api.openOptions !== 'function') return;
+    if (api.__canonicalOptionsRouterV1) return;
+
+    const legacyOpenOptions = api.openOptions;
+
+    api.openOptions = () => {
+      if (openCanonicalOptions()) return true;
+
+      /* Keep a safe compatibility fallback if the canonical trigger is not mounted yet. */
+      try {
+        return legacyOpenOptions() || false;
+      } catch {
+        return false;
+      }
+    };
+
+    Object.defineProperty(api, '__canonicalOptionsRouterV1', {
+      value: true,
+      configurable: false,
+      enumerable: false,
+      writable: false,
+    });
+  };
+
+  installCanonicalOptionsRouter();
+
   const call = (name, fallback) => {
     try {
       if (name === 'options' && window.relayUnifiedCinematicUI?.openOptions) return window.relayUnifiedCinematicUI.openOptions();
@@ -27,7 +75,7 @@ import './presentation-final-v1.js';
 
   const install = () => {
     const intro = $('#intro');
-   
+    if (!intro) return;
 
     const launcher = intro.querySelector('.info-launcher');
     launcher?.querySelector('[data-relay-info="faq"]')?.setAttribute('aria-label', 'Open FAQ');
