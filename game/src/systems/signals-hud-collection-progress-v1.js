@@ -20,12 +20,12 @@
     const total = document.getElementById('signalTotal');
     const progress = document.getElementById('progress');
 
-    if (!root || !count || !progress) return;
+    if (!root || !count || !total || !progress) return;
 
     const collected = Math.max(0, getNumber(count));
-    const target = Math.max(collected, getNumber(total));
-    const percent = target > 0
-      ? Math.max(0, Math.min(100, Math.round((collected / target) * 100)))
+    const totalSignals = Math.max(0, getNumber(total));
+    const percent = totalSignals > 0
+      ? Math.max(0, Math.min(100, Math.round((collected / totalSignals) * 100)))
       : 0;
 
     progress.style.width = `${percent}%`;
@@ -35,35 +35,20 @@
     progress.dataset.signalProgress = String(percent);
   };
 
-  const observe = () => {
+  const boot = () => {
     const count = document.getElementById('signalCount');
     const total = document.getElementById('signalTotal');
-    if (!count && !total) return;
+    if (!count || !total) return;
 
     const observer = new MutationObserver(sync);
-    if (count) observer.observe(count, { childList: true, characterData: true, subtree: true });
-    if (total) observer.observe(total, { childList: true, characterData: true, subtree: true });
-    sync();
-  };
-
-  const boot = () => {
-    observe();
+    observer.observe(count, { childList: true, characterData: true, subtree: true });
+    observer.observe(total, { childList: true, characterData: true, subtree: true });
     sync();
   };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true, passive: true });
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
   } else {
     boot();
   }
-
-  const bodyObserver = new MutationObserver(() => {
-    const count = document.getElementById('signalCount');
-    const total = document.getElementById('signalTotal');
-    if (!count && !total) return;
-    bodyObserver.disconnect();
-    observe();
-  });
-
-  bodyObserver.observe(document.body, { childList: true, subtree: true });
 })();
