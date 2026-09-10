@@ -1,0 +1,116 @@
+/* RUNNER RELAY — GAMEPLAY UI V6 FINAL FIXES
+ * Final presentation-only corrections layered after V5.
+ * No gameplay, audio, progression, mission-state or input ownership changes.
+ */
+
+/* Remove duplicate mission/intel presentation while keeping the canonical HUD. */
+#play .world-marker,
+#play #worldMissionLabel,
+#play #worldGoal,
+#play .relay-gameplay-intel,
+#play .gameplay-intel-v9,
+#play [data-relay-mission-intel],
+#play .live-mission-intel,
+#play .mission-intelligence-overlay {
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
+@media (max-width:760px){
+  /* Real 3x3 touch matrix. Six core actions + functional P2 flight. */
+  #play .mobile-actions {
+    display:grid !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    grid-template-rows:repeat(3,58px) !important;
+    grid-auto-rows:58px !important;
+    gap:7px !important;
+    width:min(252px,52vw) !important;
+    max-width:252px !important;
+    right:max(12px,env(safe-area-inset-right)) !important;
+    bottom:max(12px,env(safe-area-inset-bottom)) !important;
+  }
+
+  #play .mobile-actions > button[data-mobile-action="jump"] { grid-column:1 !important; grid-row:1 !important; }
+  #play .mobile-actions > button[data-mobile-action="fire"] { grid-column:2 !important; grid-row:1 !important; }
+  #play .mobile-actions > button[data-mobile-action="sword"] { grid-column:3 !important; grid-row:1 !important; }
+  #play .mobile-actions > button[data-mobile-action="dash"] { grid-column:1 !important; grid-row:2 !important; }
+  #play .mobile-actions > button[data-mobile-action="build1"] { grid-column:2 !important; grid-row:2 !important; }
+  #play .mobile-actions > button[data-mobile-action="gadget1"] { grid-column:3 !important; grid-row:2 !important; }
+
+  #play .mobile-actions > button.relay-p2-flight-button,
+  #play .mobile-actions > button#relayP2FlightButton {
+    display:flex !important;
+    grid-column:1 !important;
+    grid-row:3 !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    z-index:2 !important;
+  }
+
+  /* Remove only truly non-functional legacy controls. */
+  #play .mobile-actions > button:not([data-mobile-action]):not(.relay-p2-flight-button):not(#relayP2FlightButton) {
+    display:none !important;
+  }
+
+  #play .mobile-joystick {
+    width:88px !important;
+    height:88px !important;
+    min-width:88px !important;
+    min-height:88px !important;
+    left:max(12px,env(safe-area-inset-left)) !important;
+    bottom:max(12px,env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Cargo stays above the joystick and outside the action grid. */
+  #play #cargoIntegrityV2 {
+    left:max(12px,env(safe-area-inset-left)) !important;
+    bottom:calc(112px + env(safe-area-inset-bottom)) !important;
+    width:min(208px,46vw) !important;
+    z-index:540 !important;
+  }
+
+  /* Faction panel rises above the controls so it never covers touch targets. */
+  #play .relay-faction-dialogue {
+    left:50% !important;
+    right:auto !important;
+    top:auto !important;
+    bottom:calc(198px + env(safe-area-inset-bottom)) !important;
+    width:min(500px,calc(100vw - 24px)) !important;
+    max-height:min(32dvh,225px) !important;
+    overflow:auto !important;
+    z-index:700 !important;
+  }
+}
+
+@media (max-width:390px){
+  #play .mobile-actions {
+    grid-template-rows:repeat(3,54px) !important;
+    grid-auto-rows:54px !important;
+    gap:6px !important;
+    width:min(231px,56vw) !important;
+  }
+
+  #play .mobile-actions > button {
+    height:54px !important;
+    min-height:54px !important;
+  }
+
+  #play .mobile-joystick {
+    width:82px !important;
+    height:82px !important;
+    min-width:82px !important;
+    min-height:82px !important;
+  }
+
+  #play #cargoIntegrityV2 {
+    bottom:calc(105px + env(safe-area-inset-bottom)) !important;
+    width:min(188px,45vw) !important;
+  }
+
+  #play .relay-faction-dialogue {
+    bottom:calc(184px + env(safe-area-inset-bottom)) !important;
+    max-height:30dvh !important;
+  }
+}
