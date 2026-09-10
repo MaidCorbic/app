@@ -46,7 +46,8 @@ assert.match(runner, /this\.mobileActions\.sword/, 'The runner must consume the 
 assert.match(runner, /this\.mobileActions\.dash/, 'The runner must consume the mobile nitro action');
 assert.match(runner, /this\.mobileActions\.build1/, 'The runner must consume mobile build actions');
 assert.match(runner, /this\.mobileActions\.gadget1/, 'The runner must consume mobile gadget actions');
-assert.match(runner, /this\.mobileDirection === 'left'/, 'The runner must consume touch movement directions');
+assert.match(runner, /this\.cursors\.left\.isDown[\s\S]{0,120}?this\.keys\.A\.isDown/, 'The runner must consume left movement through Phaser input state');
+assert.match(runner, /this\.cursors\.right\.isDown[\s\S]{0,120}?this\.keys\.D\.isDown/, 'The runner must consume right movement through Phaser input state');
 assert.match(runner, /this\.mobileActions\.jump/, 'The runner must consume the touch jump action');
 assert.match(styles, /body #pauseMenu \.menu-grid\{grid-template-columns:1fr/, 'Pause settings must collapse to one column on touch screens');
 assert.match(styles, /body\.is-touch \.mobile-joystick\{/, 'Joystick styling must be scoped to detected touch devices');
