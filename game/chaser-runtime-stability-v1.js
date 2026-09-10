@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
 // CHASER RUNTIME STABILITY V1
@@ -44,13 +45,10 @@ if (!RunnerScene.prototype.__relayChaserRuntimeStabilityV1) {
     if (sectionIndex !== this.chaseSection) {
       this.chaseSection = sectionIndex;
 
-      this.chaser
-        .setPosition?.(this.player.x - 210, this.player.y)
-        ?.setVisible?.(true);
-
-      this.chaser.body
-        ?.setEnable?.(true)
-        ?.updateFromGameObject?.();
+      this.chaser.setPosition?.(this.player.x - 210, this.player.y);
+      this.chaser.setVisible?.(true);
+      this.chaser.body?.setEnable?.(true);
+      this.chaser.body?.updateFromGameObject?.();
 
       this.game?.events?.emit?.('feedback', 'chase');
       this.game?.events?.emit?.('chase', true);
