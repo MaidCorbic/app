@@ -1066,6 +1066,27 @@ import { loadState, saveState } from './src/state.js';
        ================================================================ */
 
     document.addEventListener(
+  'relay-open-home-options',
+  () => {
+    const panel = document.getElementById('titlePanel');
+    const heading = document.getElementById('titlePanelHeading');
+
+    if (!panel) return;
+
+    panel.classList.remove('hidden');
+    panel.removeAttribute('hidden');
+    panel.setAttribute('aria-hidden', 'false');
+
+    if (heading) {
+      heading.textContent = 'OPTIONS';
+      heading.className = 'relay-options-title';
+    }
+
+    renderHome();
+  }
+);
+
+    document.addEventListener(
       'click',
       event => {
 
