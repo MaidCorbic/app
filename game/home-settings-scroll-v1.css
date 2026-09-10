@@ -1,92 +1,13 @@
-/* RELAY RUNNER — Home Settings / Options scroll hardening.
- * Canonical overflow ownership lives on the Settings body.
- * Works on desktop + touch mobile without affecting gameplay scroll.
+/* RELAY RUNNER — Settings / Options scroll only.
+ * No visual, sizing, spacing, color, or layout changes.
+ * Adds vertical wheel/trackpad scroll on web and swipe scroll on touch devices.
  */
-
-#titlePanel.relay-options-unified,
-#pauseMenu.relay-options-unified{
-  overflow:hidden !important;
-  overscroll-behavior:contain !important;
-  touch-action:none !important;
-}
-
-#titlePanel.relay-options-unified .title-panel-card{
-  display:grid !important;
-  grid-template-rows:auto minmax(0,1fr) !important;
-  min-height:0 !important;
-  max-height:calc(100dvh - 24px) !important;
-  overflow:hidden !important;
-}
-
-#titlePanel.relay-options-unified #titlePanelContent,
-#pauseMenu.relay-options-unified #panelContent{
-  min-height:0 !important;
-  overflow:hidden !important;
-  overscroll-behavior:contain !important;
-  touch-action:pan-y !important;
-  -webkit-overflow-scrolling:touch !important;
-}
-
-#titlePanel.relay-options-unified .relay-options-shell,
-#pauseMenu.relay-options-unified .relay-options-shell{
-  min-height:0 !important;
-  max-height:none !important;
-}
 
 #titlePanel.relay-options-unified .relay-options-body,
 #pauseMenu.relay-options-unified .relay-options-body{
-  min-height:0 !important;
-  max-height:none !important;
   overflow-y:auto !important;
   overflow-x:hidden !important;
-  overscroll-behavior:contain !important;
-  touch-action:pan-y !important;
+  overscroll-behavior-y:contain !important;
   -webkit-overflow-scrolling:touch !important;
-  scrollbar-gutter:stable !important;
-  scroll-behavior:smooth !important;
-}
-
-#titlePanel.relay-options-unified .relay-options-body > *,
-#pauseMenu.relay-options-unified .relay-options-body > *{
-  min-width:0 !important;
-}
-
-@media (max-width:760px){
-  #titlePanel.relay-options-unified .title-panel-card,
-  #pauseMenu.relay-options-unified .menu{
-    max-height:calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 14px) !important;
-  }
-
-  #titlePanel.relay-options-unified #titlePanelContent,
-  #pauseMenu.relay-options-unified #panelContent{
-    min-height:0 !important;
-    touch-action:pan-y !important;
-  }
-
-  #titlePanel.relay-options-unified .relay-options-body,
-  #pauseMenu.relay-options-unified .relay-options-body{
-    padding:
-      14px
-      max(12px, env(safe-area-inset-right, 0px))
-      max(18px, env(safe-area-inset-bottom, 0px))
-      max(12px, env(safe-area-inset-left, 0px)) !important;
-    scrollbar-width:auto !important;
-  }
-
-  #titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar,
-  #pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar{
-    width:8px !important;
-  }
-
-  #titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb,
-  #pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb{
-    min-height:44px !important;
-  }
-}
-
-@media (prefers-reduced-motion:reduce){
-  #titlePanel.relay-options-unified .relay-options-body,
-  #pauseMenu.relay-options-unified .relay-options-body{
-    scroll-behavior:auto !important;
-  }
+  touch-action:pan-y !important;
 }
