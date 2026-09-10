@@ -1,0 +1,69 @@
+name: Cleanup Merged Branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only report branches; do not delete them'
+        required: false
+        default: 'true'
+        type: boolean
+  schedule:
+    - cron: '30 3 * * 0'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete branches fully merged into main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          set -euo pipefail
+
+          repo="${GITHUB_REPOSITORY}"
+          default_branch="main"
+
+          echo "Scanning $repo for branches fully merged into $default_branch..."
+
+          gh api --paginate \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/$repo/branches?per_page=100" \
+            --jq '.[].name' > /tmp/branches.txt
+
+          while IFS= read -r branch; do
+            [ -n "$branch" ] || continue
+
+            case "$branch" in
+              main|develop|master|release/*|backup/*|backup-*|chore/auto-clean*)
+                echo "KEEP  $branch (protected name)"
+                continue
+                ;;
+            esac
+
+            status=$(gh api \
+              -H 'Accept: application/vnd.github+json' \
+              "/repos/$repo/compare/$branch...$default_branch" \
+              --jq '.status')
+
+            # GitHub reports 'behind' when the branch has no commits that are
+            # ahead of main. 'identical' is also safe to remove.
+            if [ "$status" != "behind" ] && [ "$status" != "identical" ]; then
+              echo "KEEP  $branch (not fully merged: status=$status)"
+              continue
+            fi
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "DRY-RUN DELETE  $branch"
+              continue
+            fi
+
+            echo "DELETE  $branch"
+            gh api --method DELETE \
+              -H 'Accept: application/vnd.github+json' \
+              "/repos/$repo/git/refs/heads/$branch"
+          done < /tmp/branches.txt
