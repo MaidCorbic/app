@@ -88,6 +88,33 @@ import './presentation-final-v1.js';
   };
 
   /*
+   * Home is assembled by more than one presentation layer. Intercept every
+   * visible Home Options control at document-capture level so an old owner
+   * cannot swallow the click before it reaches the canonical Settings route.
+   */
+  const installCanonicalHomeOptionsClickGuard = () => {
+    if (document.documentElement.dataset.canonicalHomeOptionsGuard === '1') return;
+    document.documentElement.dataset.canonicalHomeOptionsGuard = '1';
+
+    document.addEventListener('click', event => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const optionsButton = target.closest(
+        '[data-final-home="options"],
+         [data-final-home-button="options"],
+         [data-home-v4-action="options"]'
+      );
+
+      if (!optionsButton) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      openCanonicalOptions();
+    }, true);
+  };
+
+  /*
    * The legacy cinematic renderer can still exist for FAQ/pause compatibility.
    * This guard makes the title-panel boundary explicit: a cinematic Options
    * card can never become a visible Settings surface under #titlePanel.
@@ -110,6 +137,7 @@ import './presentation-final-v1.js';
   };
 
   installCanonicalOptionsRouter();
+  installCanonicalHomeOptionsClickGuard();
   installLegacyOptionsVisualGuard();
 
   const call = (name, fallback) => {
