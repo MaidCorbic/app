@@ -3,14 +3,15 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
 // UPDATE 11 — DYNAMIC WORLD MECHANICS V4
 // Exactly ONE authored world-control object per campaign mission.
 // Each mechanic targets a named, authored barrier coordinate from the mission data.
-// We intentionally do NOT use array indexes or nearest-object discovery.
-// If the authored target is missing/moved, the mechanic refuses to spawn instead
-// of silently attaching to the wrong gameplay object.
+// We intentionally do NOT use array indexes or nearest-object discovery on legacy worlds.
+// Futuristic Neon World V1 is an intentional exception: its route is procedurally rebuilt,
+// so the nearest generated barrier in the authored control lane is used as the compatible target.
 // Existing barrier bodies are reused. No new physics bodies are created.
 
 const INTERACT_DISTANCE = 118;
 const COOLDOWN_MS = 300;
 const TARGET_TOLERANCE = 1;
+const FUTURISTIC_TARGET_RADIUS = 700;
 
 const MISSION_CONFIG = {
   'first-delivery': {
@@ -175,14 +176,43 @@ function makeControl(scene, x, y, config, missionId) {
 
 function getAuthoredBarrier(scene, config) {
   const barriers = scene?.barriers?.getChildren?.() || [];
-  const target = barriers.find(barrier => {
+  const expectedX = config.targetX + 24;
+  const expectedY = config.targetY + 32;
+
+  const exact = barriers.find(barrier => {
     if (!barrier?.active || barrier.visible === false) return false;
-    return Math.abs((barrier.x || 0) - (config.targetX + 24)) <= TARGET_TOLERANCE
-      && Math.abs((barrier.y || 0) - (config.targetY + 32)) <= TARGET_TOLERANCE;
+    return Math.abs((barrier.x || 0) - expectedX) <= TARGET_TOLERANCE
+      && Math.abs((barrier.y || 0) - expectedY) <= TARGET_TOLERANCE;
   });
 
-  if (target) target.setData?.('dynamicWorldTargetId', config.targetId);
-  return target || null;
+  if (exact) {
+    exact.setData?.('dynamicWorldTargetId', config.targetId);
+    return exact;
+  }
+
+  // The Futuristic Neon World intentionally rebuilds the route at runtime, so
+  // legacy authored coordinates no longer exist. Rebind the same mechanic to
+  // the closest generated barrier near its old control lane instead of failing.
+  if (scene.__futuristicWorld) {
+    const candidate = barriers
+      .filter(barrier => barrier?.active && barrier.visible !== false)
+      .map(barrier => ({
+        barrier,
+        score: Math.hypot(
+          (barrier.x || 0) - expectedX,
+          (barrier.y || 0) - expectedY
+        )
+      }))
+      .filter(item => item.score <= FUTURISTIC_TARGET_RADIUS)
+      .sort((a, b) => a.score - b.score)[0]?.barrier || null;
+
+    if (candidate) {
+      candidate.setData?.('dynamicWorldTargetId', config.targetId);
+      return candidate;
+    }
+  }
+
+  return null;
 }
 
 function setup(scene) {
