@@ -1,0 +1,151 @@
+/* Relay Runner — release-candidate UX/gameplay polish.
+ * Presentation/interaction guardrails for desktop + mobile.
+ * Keeps the existing visual language but removes legacy overlap and release-only rough edges.
+ */
+
+/* HOME / SETTINGS: exactly one readable scroll surface. */
+#titlePanel.relay-options-unified .relay-options-body,
+#pauseMenu.relay-options-unified .relay-options-body{
+  scrollbar-width:thin !important;
+  scrollbar-color:rgba(141,244,255,.72) rgba(255,255,255,.045) !important;
+  overscroll-behavior:contain !important;
+  scroll-behavior:smooth !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar,
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar{width:8px !important;height:8px !important}
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-track,
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-track{background:rgba(255,255,255,.045) !important;border-radius:999px !important}
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb,
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(141,244,255,.86),rgba(85,189,218,.56)) !important;border:1px solid rgba(1,8,16,.75) !important;border-radius:999px !important;box-shadow:0 0 10px rgba(141,244,255,.12) !important}
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb:hover,
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(232,253,255,.98),rgba(94,211,245,.8)) !important}
+
+/* Settings controls should not collapse into an overlap on narrow devices. */
+#titlePanel.relay-options-unified .relay-option-card,
+#pauseMenu.relay-options-unified .relay-option-card{min-width:0 !important}
+#titlePanel.relay-options-unified .relay-option-copy,
+#pauseMenu.relay-options-unified .relay-option-copy{min-width:0 !important;overflow-wrap:anywhere !important}
+#titlePanel.relay-options-unified .relay-option-copy strong,
+#pauseMenu.relay-options-unified .relay-option-copy strong{max-width:100% !important;line-height:1.1 !important}
+
+/* GAMEPLAY PAUSE STATUS — neutral cyan presentation instead of the old gold block. */
+#pauseMenu .relay-pause-brief{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:10px 12px;
+  align-items:center;
+  margin:0 24px 14px;
+  padding:11px 14px;
+  border:1px solid rgba(141,244,255,.24);
+  border-left:2px solid rgba(141,244,255,.78);
+  border-radius:10px;
+  background:linear-gradient(145deg,rgba(9,23,36,.94),rgba(3,10,17,.97));
+  box-shadow:inset 0 0 22px rgba(141,244,255,.035),0 10px 30px rgba(0,0,0,.26);
+}
+#pauseMenu .relay-pause-brief .pause-badge{
+  min-width:74px;
+  color:#8df4ff;
+  font:900 9px/1.1 "DM Mono",monospace;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+#pauseMenu .relay-pause-brief .pause-copy{min-width:0}
+#pauseMenu .relay-pause-brief strong{display:block;color:#f3fbff;font:900 10px/1.25 "DM Mono",monospace;letter-spacing:.12em}
+#pauseMenu .relay-pause-brief span{display:block;margin-top:3px;color:rgba(213,235,246,.66);font:700 10px/1.35 "DM Mono",monospace}
+
+/* Remove only known legacy yellow rectangle / strip variants from active game surfaces. */
+#intro .gold-rect,#intro .gold-bar,#intro .gold-strip,#intro .yellow-rect,#intro .yellow-bar,
+#play .gold-rect,#play .gold-bar,#play .gold-strip,#play .yellow-rect,#play .yellow-bar,
+#intro [data-gold-rect],#play [data-gold-rect],
+#intro .legacy-gold-block,#play .legacy-gold-block{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+/* Faction intel: always stays inside the viewport. */
+#play .relay-faction-dialogue{
+  width:min(420px,calc(100vw - 28px)) !important;
+  max-width:min(420px,calc(100vw - 28px)) !important;
+  min-width:0 !important;
+}
+#play .relay-faction-dialogue .relay-faction-text,
+#play .relay-faction-dialogue .relay-faction-footer,
+#play .relay-faction-dialogue .relay-faction-name,
+#play .relay-faction-dialogue .relay-faction-kicker{min-width:0 !important;overflow-wrap:anywhere !important}
+
+/* Tactical mission map: modern competitive-FPS briefing language. */
+#relayGameplayIntroFinalV3 .map-briefing-shell{width:min(1440px,97vw) !important;height:min(900px,94dvh) !important}
+#relayGameplayIntroFinalV3 .map-briefing-map-wrap{background:radial-gradient(circle at 50% 50%,rgba(44,115,136,.16),transparent 58%),#02070a !important;border-color:rgba(80,201,229,.28) !important}
+#relayGameplayIntroFinalV3 .map-briefing-map .grid{stroke:#1b6174 !important;opacity:.44 !important}
+#relayGameplayIntroFinalV3 .map-briefing-map .platform{fill:#0c1920 !important;stroke:#2f7182 !important}
+#relayGameplayIntroFinalV3 .map-briefing-map .route{stroke:#66d8ef !important;stroke-width:3.2 !important;stroke-dasharray:7 6 !important;filter:drop-shadow(0 0 5px rgba(102,216,239,.22)) !important}
+#relayGameplayIntroFinalV3 .map-briefing-map .route-halo{stroke:#66d8ef !important;opacity:.18 !important}
+#relayGameplayIntroFinalV3 .map-briefing-map .marker-start{fill:#49b879 !important;stroke:#d7ffe8 !important}
+#relayGameplayIntroFinalV3 .map-briefing-map .marker-goal{fill:#ff5f6f !important;stroke:#ffe1e5 !important}
+#relayGameplayIntroFinalV3 .map-briefing-map .marker-player{fill:#f3fbff !important;stroke:#66d8ef !important}
+#relayGameplayIntroFinalV3 .aaa-map-chrome{pointer-events:none !important}
+#relayGameplayIntroFinalV3 .aaa-map-topline,#relayGameplayIntroFinalV3 .aaa-map-bottomline{color:rgba(173,227,239,.72) !important;letter-spacing:.16em !important}
+#relayGameplayIntroFinalV3 .aaa-map-live{color:#78e9f7 !important}
+#relayGameplayIntroFinalV3 .aaa-map-live i{background:#78e9f7 !important;box-shadow:0 0 10px rgba(120,233,247,.64) !important}
+#relayGameplayIntroFinalV3 .aaa-map-card{border-color:rgba(80,201,229,.25) !important;background:linear-gradient(145deg,rgba(7,16,23,.96),rgba(2,8,12,.98)) !important;box-shadow:0 20px 60px rgba(0,0,0,.52),inset 0 0 24px rgba(80,201,229,.035) !important}
+#relayGameplayIntroFinalV3 .aaa-card-accent{background:linear-gradient(180deg,#66d8ef,transparent) !important}
+#relayGameplayIntroFinalV3 .aaa-card-status span:last-of-type,#relayGameplayIntroFinalV3 .aaa-card-title,#relayGameplayIntroFinalV3 .aaa-card-objective strong{color:#edfaff !important}
+#relayGameplayIntroFinalV3 .aaa-card-status b,#relayGameplayIntroFinalV3 .aaa-card-kicker,#relayGameplayIntroFinalV3 .aaa-card-objective span{color:#66d8ef !important}
+
+/* Mobile: map becomes a true full-width tactical surface with no card overflow. */
+@media (max-width:760px){
+  #relayGameplayIntroFinalV3 .map-briefing-shell{width:calc(100vw - 10px) !important;height:calc(100dvh - 10px) !important;padding:10px !important;gap:10px !important;border-radius:8px !important}
+  #relayGameplayIntroFinalV3 .map-briefing-head{gap:8px !important;padding:4px 4px 2px !important}
+  #relayGameplayIntroFinalV3 .map-briefing-title{font-size:clamp(20px,6vw,30px) !important;max-width:calc(100% - 76px) !important}
+  #relayGameplayIntroFinalV3 .map-briefing-timer{width:58px !important;height:58px !important;min-width:58px !important;min-height:58px !important;flex-basis:58px !important}
+  #relayGameplayIntroFinalV3 .map-briefing-map-wrap{min-height:0 !important}
+  #relayGameplayIntroFinalV3 .aaa-map-topline,#relayGameplayIntroFinalV3 .aaa-map-bottomline{font-size:7px !important;letter-spacing:.08em !important}
+  #relayGameplayIntroFinalV3 .aaa-map-card{display:none !important}
+
+  #play .relay-faction-dialogue{
+    width:calc(100vw - 20px) !important;
+    max-width:calc(100vw - 20px) !important;
+    padding:10px !important;
+    font-size:12px !important;
+    line-height:1.28 !important;
+  }
+  #play .relay-faction-dialogue .relay-faction-footer{gap:6px !important}
+
+  #pauseMenu .relay-pause-brief{margin:0 12px 10px;padding:9px 10px;grid-template-columns:60px minmax(0,1fr)}
+  #pauseMenu .relay-pause-brief .pause-badge{min-width:0;font-size:8px}
+  #pauseMenu .relay-pause-brief strong{font-size:9px}
+  #pauseMenu .relay-pause-brief span{font-size:9px}
+
+  #titlePanel.relay-options-unified .title-panel-card{width:calc(100vw - 10px) !important;max-width:none !important}
+  #titlePanel.relay-options-unified .relay-options-body,
+  #pauseMenu.relay-options-unified .relay-options-body{padding-right:2px !important}
+}
+
+@media (max-width:380px){
+  #play .relay-faction-dialogue{width:calc(100vw - 14px) !important;max-width:calc(100vw - 14px) !important;padding:8px !important;font-size:11px !important}
+  #pauseMenu .relay-pause-brief{grid-template-columns:1fr}
+  #pauseMenu .relay-pause-brief .pause-badge{letter-spacing:.12em}
+}
+
+/* Never render the rotate prompt over portrait gameplay; portrait shows the instruction only. */
+@media (orientation:portrait){
+  body.is-touch #play .rotate-prompt:not(.hidden){display:flex !important;visibility:visible !important;opacity:1 !important}
+  body.is-touch #play .hud,
+  body.is-touch #play .input-guide,
+  body.is-touch #play .mobile-controls,
+  body.is-touch #play #phaser-game{visibility:hidden !important}
+}
+@media (orientation:landscape){
+  body.is-touch #play .rotate-prompt{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important}
+  body.is-touch #play .hud,
+  body.is-touch #play .input-guide,
+  body.is-touch #play .mobile-controls,
+  body.is-touch #play #phaser-game{visibility:visible !important}
+}
+
+/* Safe-area aware mobile pause controls. */
+@media (orientation:landscape) and (max-height:700px){
+  body.is-touch #play .hud{padding-top:max(6px,env(safe-area-inset-top,0px)) !important}
+}
