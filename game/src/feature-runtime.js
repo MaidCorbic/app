@@ -10,6 +10,7 @@ import '../gameplay-ui-v6-final-fixes.css';
 import '../gameplay-ui-v5-signal-faction-final.css';
 import './systems/faction-dialogue-presentation-v2.js';
 import './systems/signals-hud-collection-progress-v1.js';
+import './systems/gameplay-ui-v7-legacy-feedback-hide.js';
 
 import { RunnerScene } from './scenes/RunnerScene.js';
 
