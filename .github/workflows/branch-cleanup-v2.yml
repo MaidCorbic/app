@@ -31,30 +31,49 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
           repo="${GITHUB_REPOSITORY}"
           main="main"
+
           git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
           mapfile -t branches < <(gh api --paginate "/repos/$repo/branches?per_page=100" --jq '.[].name')
+
           for branch in "${branches[@]}"; do
             [ -n "$branch" ] || continue
+
             case "$branch" in
               main|develop|master|release/*|backup/*|backup-*|chore/auto-clean*|chore/branch-value-cleanup*)
-                echo "KEEP     $branch (protected)"; continue ;;
+                echo "KEEP     $branch (protected)"
+                continue
+                ;;
             esac
+
+            # Never remove a branch with an open PR.
             open_prs=$(gh pr list --repo "$repo" --head "$branch" --state open --json number --jq 'length')
             if [ "$open_prs" -gt 0 ]; then
-              echo "KEEP     $branch (open PR)"; continue
-            fi
-            if git merge-base --is-ancestor "origin/$branch" "origin/$main"; then
-              echo "DELETE   $branch (tip already in main)"
-              if [ "$DRY_RUN" != "true" ]; then gh api --method DELETE "/repos/$repo/git/refs/heads/$branch"; fi
+              echo "KEEP     $branch (open PR)"
               continue
             fi
+
+            # If the branch tip is already contained in main, it has no unique commits.
+            if git merge-base --is-ancestor "origin/$branch" "origin/$main"; then
+              echo "DELETE   $branch (tip already in main)"
+              if [ "$DRY_RUN" != "true" ]; then
+                gh api --method DELETE "/repos/$repo/git/refs/heads/$branch"
+              fi
+              continue
+            fi
+
+            # Detect branches whose commits are all already represented by main,
+            # including branches whose changes were cherry-picked or squashed.
             unique_patch_count=$(git cherry "origin/$main" "origin/$branch" | awk '$1 == "+" {n++} END {print n+0}')
             if [ "$unique_patch_count" -eq 0 ]; then
               echo "DELETE   $branch (no unique patches versus main)"
-              if [ "$DRY_RUN" != "true" ]; then gh api --method DELETE "/repos/$repo/git/refs/heads/$branch"; fi
+              if [ "$DRY_RUN" != "true" ]; then
+                gh api --method DELETE "/repos/$repo/git/refs/heads/$branch"
+              fi
               continue
             fi
+
             echo "KEEP     $branch (unique work: $unique_patch_count patch(es))"
           done
