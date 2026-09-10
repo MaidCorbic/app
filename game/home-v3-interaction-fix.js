@@ -1,6 +1,7 @@
 import './unified-cinematic-ui-v1.css';
 import './unified-cinematic-ui-v1.js';
 import './unified-cinematic-ui-bridge-v1.js';
+import './unified-options-ui-v1.js';
 import './unified-gameplay-ui-v1.css';
 import './unified-gameplay-ui-v1-polish.css';
 import './unified-gameplay-ui-v1.js';
@@ -19,10 +20,9 @@ import './presentation-final-v1.js';
   /*
    * Canonical Options router.
    *
-   * The cinematic UI still owns FAQ/pause compatibility, but Options must
-   * always enter the canonical unified-options-ui-v1 renderer. This prevents
-   * the legacy gold/cinematic Options panel from becoming the active
-   * Settings surface.
+   * unified-options-ui-v1 is the only Settings/Options renderer.
+   * unified-cinematic-ui-v1 remains loaded for FAQ/pause compatibility, but its
+   * legacy Options renderer must never be used as a fallback.
    */
   const openCanonicalOptions = () => {
     const button = document.querySelector('[data-title-panel="controls"]');
@@ -39,22 +39,16 @@ import './presentation-final-v1.js';
   const installCanonicalOptionsRouter = () => {
     const api = window.relayUnifiedCinematicUI;
     if (!api || typeof api.openOptions !== 'function') return;
-    if (api.__canonicalOptionsRouterV1) return;
+    if (api.__canonicalOptionsRouterV2) return;
 
-    const legacyOpenOptions = api.openOptions;
+    /*
+     * Preserve FAQ/pause on the cinematic owner, but hard-route Options to the
+     * canonical unified trigger. There is intentionally NO legacy fallback:
+     * showing the old Gold/Cinematic Settings panel is a functional regression.
+     */
+    api.openOptions = () => openCanonicalOptions();
 
-    api.openOptions = () => {
-      if (openCanonicalOptions()) return true;
-
-      /* Keep a safe compatibility fallback if the canonical trigger is not mounted yet. */
-      try {
-        return legacyOpenOptions() || false;
-      } catch {
-        return false;
-      }
-    };
-
-    Object.defineProperty(api, '__canonicalOptionsRouterV1', {
+    Object.defineProperty(api, '__canonicalOptionsRouterV2', {
       value: true,
       configurable: false,
       enumerable: false,
@@ -62,7 +56,31 @@ import './presentation-final-v1.js';
     });
   };
 
+  /*
+   * The legacy cinematic renderer can still exist for FAQ/pause compatibility.
+   * This guard makes the title-panel boundary explicit: the cinematic Options
+   * card can never become a visible Settings surface under #titlePanel.
+   */
+  const installLegacyOptionsVisualGuard = () => {
+    if (document.getElementById('relay-canonical-options-guard-v1')) return;
+
+    const style = document.createElement('style');
+    style.id = 'relay-canonical-options-guard-v1';
+    style.textContent = `
+      #titlePanel > .relay-cinematic-panel{
+        display:none !important;
+      }
+
+      #titlePanel.relay-options-unified > .relay-cinematic-panel{
+        display:none !important;
+      }
+    `;
+
+    document.head.appendChild(style);
+  };
+
   installCanonicalOptionsRouter();
+  installLegacyOptionsVisualGuard();
 
   const call = (name, fallback) => {
     try {
