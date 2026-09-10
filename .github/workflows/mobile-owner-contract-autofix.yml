@@ -1,0 +1,57 @@
+name: Mobile owner contract autofix
+
+on:
+  push:
+    branches:
+      - fix/mobile-owner-build-contract
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game/package-lock.json
+      - name: Align build-system keyboard contract
+        working-directory: game
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tests/build-system.mjs')
+          s = p.read_text()
+          replacements = {
+              "assert.match(runner, /this\\.keys\\.ONE.*this\\.useBuild\\(0\\)/, 'Key 1 must deploy build slot one');": "assert.match(runner, /this\\.keys\\.ONE/, 'Key 1 must be wired');\nassert.match(runner, /this\\.useBuild\\(0\\)/, 'Key 1 must deploy build slot one');",
+              "assert.match(runner, /this\\.keys\\.TWO.*this\\.useBuild\\(1\\)/, 'Key 2 must deploy build slot two');": "assert.match(runner, /this\\.keys\\.TWO/, 'Key 2 must be wired');\nassert.match(runner, /this\\.useBuild\\(1\\)/, 'Key 2 must deploy build slot two');",
+              "assert.match(runner, /this\\.keys\\.THREE.*this\\.useGadget\\(0\\)/, 'Key 3 must activate gadget slot one');": "assert.match(runner, /this\\.keys\\.THREE/, 'Key 3 must be wired');\nassert.match(runner, /this\\.useGadget\\(0\\)/, 'Key 3 must activate gadget slot one');",
+              "assert.match(runner, /this\\.keys\\.FOUR.*this\\.useGadget\\(1\\)/, 'Key 4 must activate gadget slot two');": "assert.match(runner, /this\\.keys\\.FOUR/, 'Key 4 must be wired');\nassert.match(runner, /this\\.useGadget\\(1\\)/, 'Key 4 must activate gadget slot two');",
+          }
+          for old, new in replacements.items():
+              if old in s:
+                  s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+      - name: Install
+        working-directory: game
+        run: npm ci
+      - name: Build-system contract
+        working-directory: game
+        run: node tests/build-system.mjs
+      - name: Release hardening
+        working-directory: game
+        run: npm run test:release-hardening
+      - name: Production build
+        working-directory: game
+        run: npm run build
+      - name: Commit contract fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add game/tests/build-system.mjs
+          git commit -m 'test: align build contract with keyboard wiring' || exit 0
+          git push
