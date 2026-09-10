@@ -1,0 +1,358 @@
+/* RUNNER RELAY — GAMEPLAY UI V8 SETTINGS POLISH
+ * Visual-only settings / options refinement.
+ * Existing option handlers, tabs and controls remain authoritative.
+ */
+
+:root{
+  --relay-cyan:#8df4ff;
+  --relay-blue:#39b9ff;
+  --relay-amber:#ffd06e;
+  --relay-green:#aee37f;
+  --relay-ink:#f3fbff;
+  --relay-muted:#8298aa;
+  --relay-panel:rgba(4,10,18,.985);
+}
+
+/* =========================================================
+   PAUSE / SETTINGS SHELL
+   ========================================================= */
+
+#pauseMenu.relay-options-unified .menu,
+#titlePanel.relay-options-unified .title-panel-card{
+  background:
+    radial-gradient(circle at 100% 0,rgba(141,244,255,.055),transparent 32%),
+    linear-gradient(145deg,rgba(7,13,23,.99),rgba(2,7,13,.995)) !important;
+  border-color:rgba(141,244,255,.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 30px 80px rgba(0,0,0,.62),
+    0 0 48px rgba(57,185,255,.06) !important;
+}
+
+#pauseMenu.relay-options-unified .menu-grid{
+  grid-template-columns:minmax(150px,190px) minmax(0,1fr) !important;
+  gap:0 !important;
+}
+
+#pauseMenu.relay-options-unified .menu-grid > aside{
+  padding:18px 14px !important;
+  background:linear-gradient(180deg,rgba(10,20,32,.78),rgba(3,8,14,.58)) !important;
+  border-right:1px solid rgba(141,244,255,.08) !important;
+}
+
+#pauseMenu.relay-options-unified .eyebrow,
+#pauseMenu.relay-options-unified aside .eyebrow{
+  color:var(--relay-cyan) !important;
+  font:900 8px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:.18em !important;
+}
+
+#pauseMenu.relay-options-unified aside h2{
+  color:var(--relay-ink) !important;
+  font-weight:950 !important;
+  letter-spacing:.01em !important;
+  text-wrap:balance !important;
+  text-shadow:0 0 20px rgba(141,244,255,.06) !important;
+}
+
+#pauseMenu.relay-options-unified .tab{
+  min-height:42px !important;
+  margin:4px 0 !important;
+  padding:8px 10px !important;
+  border:1px solid transparent !important;
+  border-radius:9px !important;
+  background:rgba(255,255,255,.018) !important;
+  color:#91a7b9 !important;
+  font:950 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:.14em !important;
+  text-align:left !important;
+}
+
+#pauseMenu.relay-options-unified .tab:hover,
+#pauseMenu.relay-options-unified .tab:focus-visible{
+  color:var(--relay-amber) !important;
+  border-color:rgba(255,208,110,.18) !important;
+  background:rgba(255,208,110,.045) !important;
+  outline:none !important;
+}
+
+#pauseMenu.relay-options-unified .tab.active{
+  color:var(--relay-ink) !important;
+  border-color:rgba(141,244,255,.22) !important;
+  background:
+    linear-gradient(90deg,rgba(57,185,255,.10),rgba(141,244,255,.025)) !important;
+  box-shadow:inset 2px 0 var(--relay-cyan),0 8px 20px rgba(0,0,0,.18) !important;
+}
+
+#pauseMenu.relay-options-unified #panelContent{
+  min-width:0 !important;
+}
+
+/* =========================================================
+   OPTIONS TYPOGRAPHY / CARDS
+   ========================================================= */
+
+#pauseMenu .relay-options-title,
+#titlePanel .relay-options-title{
+  color:var(--relay-ink) !important;
+  font-weight:950 !important;
+  letter-spacing:.11em !important;
+  text-shadow:0 0 22px rgba(141,244,255,.08) !important;
+}
+
+#pauseMenu .relay-options-subtitle,
+#titlePanel .relay-options-subtitle{
+  color:#91a9ba !important;
+  font-weight:750 !important;
+  letter-spacing:.05em !important;
+}
+
+#pauseMenu .relay-section-title,
+#titlePanel .relay-section-title{
+  color:#9bb1c1 !important;
+  font-weight:950 !important;
+  letter-spacing:.2em !important;
+}
+
+#pauseMenu .relay-option-card,
+#titlePanel .relay-option-card{
+  min-height:66px !important;
+  padding:12px 13px !important;
+  border-color:rgba(141,244,255,.10) !important;
+  border-radius:11px !important;
+  background:
+    linear-gradient(145deg,rgba(10,23,37,.95),rgba(3,9,16,.985)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 9px 24px rgba(0,0,0,.22) !important;
+}
+
+#pauseMenu .relay-option-card:hover,
+#titlePanel .relay-option-card:hover{
+  border-color:rgba(141,244,255,.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 12px 28px rgba(0,0,0,.28),
+    0 0 18px rgba(141,244,255,.045) !important;
+}
+
+#pauseMenu .relay-option-copy strong,
+#titlePanel .relay-option-copy strong{
+  color:#f3fbff !important;
+  font:950 10px/1.15 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:.1em !important;
+}
+
+#pauseMenu .relay-option-copy small,
+#titlePanel .relay-option-copy small{
+  color:#7991a3 !important;
+  font:700 8px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  letter-spacing:.035em !important;
+}
+
+#pauseMenu .relay-toggle,
+#titlePanel .relay-toggle,
+#pauseMenu .relay-action,
+#titlePanel .relay-action,
+#pauseMenu .relay-select > button,
+#titlePanel .relay-select > button{
+  font-weight:950 !important;
+}
+
+#pauseMenu .relay-toggle{
+  min-width:82px !important;
+  height:36px !important;
+  font-size:8px !important;
+}
+
+#pauseMenu .relay-action-row,
+#titlePanel .relay-action-row{
+  gap:8px !important;
+}
+
+#pauseMenu .relay-action,
+#titlePanel .relay-action{
+  min-height:44px !important;
+  border-color:rgba(141,244,255,.14) !important;
+  color:#d9eef7 !important;
+  font-size:8px !important;
+  letter-spacing:.12em !important;
+}
+
+#pauseMenu .relay-controls-strip,
+#titlePanel .relay-controls-strip{
+  border-color:rgba(141,244,255,.08) !important;
+  background:rgba(255,255,255,.015) !important;
+}
+
+#pauseMenu .relay-key kbd,
+#titlePanel .relay-key kbd{
+  font-size:8px !important;
+  font-weight:950 !important;
+}
+
+/* =========================================================
+   SETTINGS HIDE-CONTROL WIRING
+   ========================================================= */
+
+body.relay-hide-intel #play .relay-gameplay-intel,
+body.relay-hide-intel #play .gameplay-intel-v9,
+body.relay-hide-intel #play [data-relay-mission-intel],
+body.relay-hide-intel #play .live-mission-intel,
+body.relay-hide-intel #play .mission-intelligence-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+}
+
+body.relay-hide-ally #play .relay-enemy-discovery,
+body.relay-hide-ally #play .relay-enemy-card{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+}
+
+body.relay-hide-events #play #toast,
+body.relay-hide-events #play #gameplayEventHud,
+body.relay-hide-events #play .gameplay-event-hud,
+body.relay-hide-events #play .relay-gameplay-event{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
+body.relay-hide-tutorials #play .input-guide,
+body.relay-hide-tutorials #play .relay-controls-strip,
+body.relay-hide-tutorials #play [data-tutorial-hint],
+body.relay-hide-tutorials #play .tutorial-hint{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+}
+
+/* =========================================================
+   DESKTOP LAYOUT
+   ========================================================= */
+
+@media (min-width:900px){
+  #titlePanel.relay-options-unified .title-panel-card{
+    width:min(900px,92vw) !important;
+  }
+
+  #titlePanel.relay-options-unified .relay-options-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:12px !important;
+  }
+
+  #pauseMenu.relay-options-unified .relay-options-body{
+    padding:16px 18px 20px !important;
+  }
+
+  #pauseMenu.relay-options-unified .relay-options-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:11px !important;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width:760px){
+  #pauseMenu.relay-options-unified .menu-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  #pauseMenu.relay-options-unified .menu-grid > aside{
+    border-right:0 !important;
+    border-bottom:1px solid rgba(141,244,255,.08) !important;
+    padding:10px !important;
+  }
+
+  #pauseMenu.relay-options-unified aside h2{
+    display:none !important;
+  }
+
+  #pauseMenu.relay-options-unified aside nav{
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:6px !important;
+  }
+
+  #pauseMenu.relay-options-unified .tab{
+    min-height:38px !important;
+    margin:0 !important;
+    padding:7px 5px !important;
+    text-align:center !important;
+    font-size:7px !important;
+    letter-spacing:.1em !important;
+  }
+
+  #pauseMenu .relay-options-head,
+  #titlePanel .relay-options-head{
+    padding-right:56px !important;
+  }
+
+  #pauseMenu .relay-options-title,
+  #titlePanel .relay-options-title{
+    font-size:24px !important;
+    letter-spacing:.1em !important;
+  }
+
+  #pauseMenu .relay-option-card,
+  #titlePanel .relay-option-card{
+    grid-template-columns:minmax(0,1fr) auto !important;
+    min-height:62px !important;
+  }
+
+  #pauseMenu .relay-option-copy strong,
+  #titlePanel .relay-option-copy strong{
+    font-size:9px !important;
+  }
+
+  #pauseMenu .relay-option-copy small,
+  #titlePanel .relay-option-copy small{
+    font-size:7px !important;
+  }
+
+  #pauseMenu .relay-range{
+    min-width:0 !important;
+    width:118px !important;
+  }
+
+  #pauseMenu .relay-action-row,
+  #titlePanel .relay-action-row{
+    grid-template-columns:1fr 1fr !important;
+  }
+
+  #pauseMenu .relay-action-row .relay-action:last-child,
+  #titlePanel .relay-action-row .relay-action:last-child{
+    grid-column:1/-1 !important;
+  }
+}
+
+@media (max-width:390px){
+  #pauseMenu .relay-options-title,
+  #titlePanel .relay-options-title{
+    font-size:21px !important;
+  }
+
+  #pauseMenu.relay-options-unified aside nav{
+    gap:4px !important;
+  }
+
+  #pauseMenu.relay-options-unified .tab{
+    font-size:6.5px !important;
+  }
+
+  #pauseMenu .relay-option-card,
+  #titlePanel .relay-option-card{
+    padding:9px !important;
+  }
+
+  #pauseMenu .relay-toggle{
+    min-width:70px !important;
+    height:33px !important;
+  }
+}
