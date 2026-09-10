@@ -9,7 +9,7 @@
   window.__relayGameplayUiV7LegacyFeedbackHide = true;
 
   const HIDDEN = new WeakSet();
-  const TEXT_RE = /DYNAMIC\s+CROWD|CROWD\s+FEEDBACK|DYNAMIC\s+FEEDBACK|CHECKPOINT\s+SECURED|RESPAWN\s+LINK\s+ACTIVE|MISSION\s+INTELLIGENCE|LIVE\s+MISSION\s+INTEL|^V10\b|^ALT\+Q\s*\/\s*W\s*\/\s*E\b/i;
+  const TEXT_RE = /DYNAMIC\s+CROWD|CROWD\s+FEEDBACK|DYNAMIC\s+FEEDBACK|CHECKPOINT\s+(SECURED|RESTORED|SAVED)|RESPAWN\s+LINK\s+ACTIVE|MISSION\s+INTELLIGENCE|LIVE\s+MISSION\s+INTEL|SIGNAL\s+(COLLECTED|SECURED|CAPTURED|RECOVERED)|^V10\b|^ALT\+Q\s*\/\s*W\s*\/\s*E\b/i;
 
   const hideNode = node => {
     if (!node || HIDDEN.has(node)) return;
@@ -61,13 +61,16 @@
         '#play #toast,' +
         '#play #gameplayEventHud,' +
         '#play .gameplay-event-hud,' +
+        '#play .relay-gameplay-event,' +
         '#play [data-dynamic-crowd],' +
         '#play [data-debug-hud],' +
         '#play [data-relay-debug-hud],' +
         '#play .relay-debug-hud,' +
         '#play .gameplay-debug-hud,' +
         '#play [class*="dynamic-crowd"],' +
-        '#play [id*="dynamic-crowd"]'
+        '#play [id*="dynamic-crowd"],' +
+        '#play [class*="mission-intel"],' +
+        '#play [id*="mission-intel"]'
       )
       .forEach(node => {
         node.style.setProperty('display', 'none', 'important');
