@@ -42,9 +42,12 @@ jobs:
           )
 
           updated, count = pattern.subn(replacement, text, count=1)
-          if count != 1:
-              raise SystemExit('Expected exactly one duplicate mobile joystick dispatcher block')
-          path.write_text(updated)
+          if count > 1:
+              raise SystemExit('Found multiple duplicate mobile joystick dispatcher blocks')
+          if count == 1:
+              path.write_text(updated)
+          else:
+              print('Duplicate joystick dispatcher already removed; continuing')
 
       - name: Update lifecycle contract
         shell: python
@@ -58,11 +61,17 @@ jobs:
           )
           path.write_text(text)
 
+      - name: Install game dependencies
+        working-directory: game
+        run: npm ci
+
       - name: Verify migration
-        run: |
-          cd game
-          npm run test:release-hardening
-          npm run build
+        working-directory: game
+        run: npm run test:release-hardening
+
+      - name: Production build
+        working-directory: game
+        run: npm run build
 
       - name: Commit migration
         if: success()
