@@ -5,6 +5,7 @@ import './systems/web-zoom-lock-v1.js';
 import './systems/enemy-dialogue-v1.css';
 import '../gameplay-keyboard-hud-v1.css';
 import '../gameplay-ui-v5-compact.css';
+import '../gameplay-ui-v5-scope-fix.css';
 import './systems/faction-dialogue-presentation-v2.js';
 
 import { RunnerScene } from './scenes/RunnerScene.js';
