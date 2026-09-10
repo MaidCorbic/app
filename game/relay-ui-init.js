@@ -6,7 +6,6 @@ import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
-import './gameplay-ui-v8-settings-polish.css';
 import './gameplay-ui-v9-settings-home-redesign.css';
 
 import './gameplay-ui-visibility-v3.js';
