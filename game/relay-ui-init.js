@@ -1,4 +1,5 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
+
 import './update-ui.css';
 import './gameplay-event-hud-v2.css';
 import './dynamic-environment-reactions-v1.css';
@@ -6,6 +7,7 @@ import './cargo-integrity-v2-polish.css';
 import './signal-network-v1.css';
 import './city-response-v1.css';
 import './gameplay-ui-v8-settings-polish.css';
+
 import './gameplay-ui-visibility-v3.js';
 import './gameplay-hud-polish-v1.css';
 import './mobile-map-all-levels-contract-v1.css';
@@ -14,20 +16,58 @@ import './mobile-top-card-map-legend-fix-v1.css';
 import './mobile-ui-cleanup-v1.css';
 import './map-aaa-tactical-redesign-v1.js';
 import './release-ux-gameplay-polish-v1.css';
-import './pause-menu-v2.css';
-import './pause-menu-v2.js';
-import './settings-scroll-persistence-v2.js';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
-  document.querySelector('#intro .title-lockup')?.replaceChildren(Object.assign(document.createElement('p'), { className: 'eyebrow', textContent: 'SESSION CLOSED' }),Object.assign(document.createElement('h1'), { innerHTML: 'SEE YOU<br><em>SOON</em>' }),Object.assign(document.createElement('p'), { className: 'menu-tagline', textContent: 'The relay is offline. You can close this browser tab.' }));
+  document.querySelector('#intro .title-lockup')?.replaceChildren(
+    Object.assign(document.createElement('p'), { className: 'eyebrow', textContent: 'SESSION CLOSED' }),
+    Object.assign(document.createElement('h1'), { innerHTML: 'SEE YOU<br><em>SOON</em>' }),
+    Object.assign(document.createElement('p'), { className: 'menu-tagline', textContent: 'The relay is offline. You can close this browser tab.' })
+  );
 });
-const panel=document.getElementById('relayInfoPanel'),eyebrow=document.getElementById('relayInfoEyebrow'),heading=document.getElementById('relayInfoHeading'),content=document.getElementById('relayInfoContent');
-const open=kind=>{if(!panel||!eyebrow||!heading||!content)return;panel.classList.remove('hidden');panel.classList.toggle('relay-update-mode',kind==='update');if(kind==='faq'){eyebrow.textContent='RELAY RUNNER // FIELD GUIDE';heading.textContent='FAQ';content.innerHTML='<div class="relay-faq-list">'+RELAY_FAQ.map(item=>`<article class="relay-faq-item"><button class="relay-faq-question" type="button">${item[0]}</button><div class="relay-faq-answer">${item[1]}</div></article>`).join('')+'</div>';}else{eyebrow.textContent=LATEST_UPDATE.version;heading.textContent=LATEST_UPDATE.title;content.innerHTML='<p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT</p><div class="relay-update-list">'+LATEST_UPDATE.items.map(item=>`<div class="relay-update-item">${item}</div>`).join('');}};
-window.relayOpenInfo=open;
-document.querySelectorAll('[data-relay-info]').forEach(button=>button.addEventListener('click',()=>open(button.dataset.relayInfo)));
-document.addEventListener('click',event=>{const question=event.target.closest('.relay-faq-question');if(question)question.closest('.relay-faq-item')?.classList.toggle('open');if(event.target.closest('[data-relay-close]')||event.target===panel){panel?.classList.add('hidden');panel?.classList.remove('relay-update-mode');}});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'){panel?.classList.add('hidden');panel?.classList.remove('relay-update-mode');}});
+
+const panel = document.getElementById('relayInfoPanel');
+const eyebrow = document.getElementById('relayInfoEyebrow');
+const heading = document.getElementById('relayInfoHeading');
+const content = document.getElementById('relayInfoContent');
+
+const open = kind => {
+  if (!panel || !eyebrow || !heading || !content) return;
+  panel.classList.remove('hidden');
+  panel.classList.toggle('relay-update-mode', kind === 'update');
+  if (kind === 'faq') {
+    eyebrow.textContent = 'RELAY RUNNER // FIELD GUIDE';
+    heading.textContent = 'FAQ';
+    content.innerHTML = '<div class="relay-faq-list">' + RELAY_FAQ.map(item => `<article class="relay-faq-item"><button class="relay-faq-question" type="button">${item[0]}</button><div class="relay-faq-answer">${item[1]}</div></article>`).join('') + '</div>';
+  } else {
+    eyebrow.textContent = LATEST_UPDATE.version;
+    heading.textContent = LATEST_UPDATE.title;
+    content.innerHTML = '<p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT</p><div class="relay-update-list">' + LATEST_UPDATE.items.map(item => `<div class="relay-update-item">${item}</div>`).join('') + '</div>';
+  }
+};
+
+window.relayOpenInfo = open;
+
+document.querySelectorAll('[data-relay-info]').forEach(button => {
+  button.addEventListener('click', () => open(button.dataset.relayInfo));
+});
+
+document.addEventListener('click', event => {
+  const question = event.target.closest('.relay-faq-question');
+  if (question) question.closest('.relay-faq-item')?.classList.toggle('open');
+  if (event.target.closest('[data-relay-close]') || event.target === panel) {
+    panel?.classList.add('hidden');
+    panel?.classList.remove('relay-update-mode');
+  }
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    panel?.classList.add('hidden');
+    panel?.classList.remove('relay-update-mode');
+  }
+});
+
 import './cargo-integrity-v2.js';
 import './cargo-integrity-v2-visibility-v1.js';
 import './signal-network-v1.js';
@@ -84,4 +124,15 @@ import './gameplay-runtime-stability-v3.js';
 import './src/systems/gameplay-ui-v7-legacy-feedback-hide.js';
 import './src/systems/signals-hud-run-persistence-v1.js';
 import './release-ux-gameplay-polish-v1.js';
-window.addEventListener('DOMContentLoaded',()=>{import('./src/systems/mission-objectives-route-goals-v1.js').catch(error=>console.error('[RelayRunner] mission runtime patch failed to load',error));import('./chaser-runtime-stability-v1.js').catch(error=>console.error('[RelayRunner] chaser runtime patch failed to load',error));},{once:true});
+
+// Scene-dependent prototype patches must initialize after the main Phaser entry
+// has evaluated RunnerScene. DOMContentLoaded guarantees all module scripts in
+// index.html completed before these dynamic imports run.
+window.addEventListener('DOMContentLoaded', () => {
+  import('./src/systems/mission-objectives-route-goals-v1.js').catch(error => {
+    console.error('[RelayRunner] mission runtime patch failed to load', error);
+  });
+  import('./chaser-runtime-stability-v1.js').catch(error => {
+    console.error('[RelayRunner] chaser runtime patch failed to load', error);
+  });
+}, { once: true });
