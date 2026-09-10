@@ -4,10 +4,9 @@
   /*
    * RELAY RUNNER — HOME SETTINGS SCROLL RUNTIME V1
    *
-   * This is intentionally scoped to the Home -> Options panel.
-   * It establishes a real viewport-constrained scroll surface after the
-   * canonical Settings UI mounts and provides a desktop wheel/trackpad
-   * fallback without touching gameplay scrolling or browser zoom handling.
+   * Scoped only to Home -> Options. The runtime owns the scroll viewport,
+   * desktop wheel/trackpad fallback, and preservation of scroll position
+   * when the canonical Settings UI re-renders its body element.
    */
 
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
@@ -29,6 +28,11 @@
     element.style.setProperty(property, value, 'important');
   };
 
+  const clampScrollTop = (body, value) => {
+    const max = Math.max(0, body.scrollHeight - body.clientHeight);
+    return Math.max(0, Math.min(max, Number(value) || 0));
+  };
+
   const fitPanel = panel => {
     if (!panel) return null;
 
@@ -39,6 +43,7 @@
     const body = shell?.querySelector('.relay-options-body');
     if (!card || !host || !shell || !body) return null;
 
+    const panelState = panels.get(panel);
     const compact = window.innerWidth <= 760;
     const inset = compact ? 12 : 20;
     const availableHeight = Math.max(260, Math.floor(window.innerHeight - inset));
@@ -98,6 +103,16 @@
     setImportant(body, 'pointer-events', 'auto');
     setImportant(body, 'scrollbar-gutter', 'stable');
 
+    if (panelState) {
+      const restore = () => {
+        const next = clampScrollTop(body, panelState.scrollTop);
+        if (Math.abs(body.scrollTop - next) > 0.5) body.scrollTop = next;
+      };
+      restore();
+      window.requestAnimationFrame(restore);
+      window.setTimeout(restore, 0);
+    }
+
     return body;
   };
 
@@ -115,13 +130,29 @@
       raf: 0,
       observer: null,
       resizeObserver: null,
+      scrollTop: 0,
+      body: null,
+    };
+
+    const rememberScroll = body => {
+      if (body) state.scrollTop = body.scrollTop;
+    };
+
+    const attachBody = body => {
+      if (!body || state.body === body) return;
+      rememberScroll(state.body);
+      state.body = body;
+      body.addEventListener('scroll', () => rememberScroll(body), { passive: true });
+      body.scrollTop = clampScrollTop(body, state.scrollTop);
     };
 
     const scheduleFit = () => {
       if (state.raf) window.cancelAnimationFrame(state.raf);
       state.raf = window.requestAnimationFrame(() => {
         state.raf = 0;
-        fitPanel(panel);
+        const body = fitPanel(panel);
+        attachBody(body);
+        if (body) body.scrollTop = clampScrollTop(body, state.scrollTop);
       });
     };
 
@@ -133,18 +164,19 @@
 
       const body = target.closest('.relay-options-body');
       if (!body || body.closest('#titlePanel') !== panel) return;
+      attachBody(body);
+
       if (body.scrollHeight <= body.clientHeight + 1) return;
 
       const delta = normalizeWheelDelta(event, body);
       if (!delta) return;
 
       const before = body.scrollTop;
-      const max = Math.max(0, body.scrollHeight - body.clientHeight);
-      const next = Math.max(0, Math.min(max, before + delta));
-
-      if (next === before) return;
+      const next = clampScrollTop(body, before + delta);
+      if (Math.abs(next - before) < 0.01) return;
 
       body.scrollTop = next;
+      state.scrollTop = next;
       event.preventDefault();
     };
 
@@ -153,7 +185,10 @@
     window.addEventListener('orientationchange', scheduleFit, { passive: true });
 
     state.observer = new MutationObserver(mutations => {
-      if (mutations.some(mutation => mutation.type === 'childList')) scheduleFit();
+      if (mutations.some(mutation => mutation.type === 'childList')) {
+        rememberScroll(state.body);
+        scheduleFit();
+      }
     });
     state.observer.observe(panel, { childList: true, subtree: true });
 
@@ -170,8 +205,15 @@
   const sync = () => {
     const panel = getPanel();
     if (!panel) return;
-    bindPanel(panel);
-    fitPanel(panel);
+    const state = bindPanel(panel);
+    const body = fitPanel(panel);
+    if (!body) return;
+    if (state.body !== body) {
+      if (state.body) state.scrollTop = state.body.scrollTop;
+      state.body = body;
+      body.addEventListener('scroll', () => { state.scrollTop = body.scrollTop; }, { passive: true });
+    }
+    body.scrollTop = clampScrollTop(body, state.scrollTop);
   };
 
   const boot = () => {
