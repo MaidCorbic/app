@@ -15,6 +15,7 @@ import './mobile-map-web-parity-all-levels-v1.css';
 import './mobile-top-card-map-legend-fix-v1.css';
 import './mobile-ui-cleanup-v1.css';
 import './map-aaa-tactical-redesign-v1.js';
+import './release-ux-gameplay-polish-v1.css';
 
 const exitTitle = document.getElementById('exitTitle');
 exitTitle?.addEventListener('click', () => {
@@ -122,6 +123,7 @@ import './runtime-authority-v1.js';
 import './gameplay-runtime-stability-v3.js';
 import './src/systems/gameplay-ui-v7-legacy-feedback-hide.js';
 import './src/systems/signals-hud-run-persistence-v1.js';
+import './release-ux-gameplay-polish-v1.js';
 
 // Scene-dependent prototype patches must initialize after the main Phaser entry
 // has evaluated RunnerScene. DOMContentLoaded guarantees all module scripts in
