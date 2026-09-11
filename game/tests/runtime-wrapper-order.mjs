@@ -23,7 +23,7 @@ assert.match(owner, /MOBILE INPUT SINGLE OWNER V9/);
 assert.doesNotMatch(owner, /window\.addEventListener\(['"]mobile-action['"]/);
 
 assert.match(core, /__relayCoreStabilityV1Installed/);
-assert.match(runtime, /__relayRuntimeAuthorityV2/);
+assert.match(runtime, /__relayRuntimeAuthorityV3/);
 assert.match(runtime, /gameState/);
 assert.match(runtime, /sceneState/);
 assert.match(runtime, /activeRunId/);
@@ -33,8 +33,8 @@ assert.match(main, /scene: \[\]/);
 assert.match(main, /game\.scene\.add\('runner', RunnerScene, false\)/);
 
 ordered(index, 'src/systems/runtime-guard.js', 'src/systems/core-stability.js');
-ordered(index, 'src/systems/core-stability.js', 'src/systems/mobile-input-single-owner-v1.js');
-ordered(index, 'src/systems/mobile-input-single-owner-v1.js', 'src/main.js');
+ordered(index, 'src/systems/core-stability.js', 'src/main.js');
+ordered(index, 'src/main.js', 'src/systems/mobile-input-single-owner-v1.js');
 
 const wrapperFiles = [
   'wall-slide-v1.js','route-mutation-v1.js','pressure-route-node-v1.js',
