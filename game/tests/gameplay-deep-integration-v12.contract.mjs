@@ -14,7 +14,7 @@ for (const token of [
 for (const event of [
   'feedback', 'dash-start', 'dash-end', 'slide-jump', 'breakable-destroyed', 'game-over',
   'complete', 'energy', 'ammo', 'signal-network', 'signal-network-node', 'signal-network-complete',
-]) assert.match(source, new RegExp(`['"]${event}['"]`));
+]) assert.match(source, new RegExp(`['\"]${event}['\"]`));
 
 assert.match(source, /relay:gameplay:v12/);
 assert.match(source, /relay:gameplay:v11/);
@@ -23,9 +23,9 @@ assert.match(source, /new CustomEvent\('gameplay:v12:event'/);
 assert.match(source, /localStorage/);
 assert.match(source, /RunnerScene\.prototype\.create/);
 assert.match(source, /__deepV12Installed/);
-assert.match(source, /scene\.events\?\.once\?\('shutdown'/);
-assert.match(source, /listeners\.forEach\(off=>off\(\)\)/);
-assert.match(source, /scene\.__deepV12=\{state,relay\}/);
+assert.ok(source.includes("scene.events?.once?.('shutdown'"), 'Missing V12 shutdown cleanup hook');
+assert.ok(source.includes('listeners.forEach(off=>off())'), 'Missing V12 listener cleanup');
+assert.ok(source.includes('scene.__deepV12={state,relay}'), 'Missing V12 runtime state bridge');
 assert.doesNotMatch(source, /setInteractive|pointerdown|keydown|keyup|input\.keyboard|prototype\.update/);
 assert.match(loader, /installGameplayDeepIntegrationV12/);
 console.log('Deep gameplay V12 contract: PASS');
