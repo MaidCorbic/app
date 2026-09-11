@@ -9,8 +9,6 @@ const MOBILE_VIEWPORTS = [
   { width: 360, height: 800, orientation: 'portrait' },
   { width: 390, height: 844, orientation: 'portrait' },
   { width: 430, height: 932, orientation: 'portrait' },
-  // Keep landscape smoke widths inside the project's <=760px mobile CSS breakpoint.
-  // The short side still exercises the 320/360/390/430px mobile-height targets.
   { width: 720, height: 320, orientation: 'landscape' },
   { width: 720, height: 360, orientation: 'landscape' },
   { width: 720, height: 390, orientation: 'landscape' },
@@ -106,8 +104,6 @@ async function runMobileViewport(browser, viewport) {
     await waitForHidden(page, '#intro');
 
     if (viewport.orientation === 'landscape') {
-      // The start flow may run a tactical route briefing before touch controls are released.
-      // Wait for that lifecycle lock to clear instead of sampling the HUD mid-briefing.
       await waitForGameplayBriefingRelease(page);
       await waitForVisible(page, '.mobile-controls');
     }
@@ -135,7 +131,6 @@ async function runMobileViewport(browser, viewport) {
     assert.equal(initial.joystickCount, 1, `Expected exactly 1 movement joystick at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.pointerCoarse, true, `Release QA requires a coarse primary pointer at ${viewport.width}x${viewport.height}`);
     assert(initial.touchPoints > 0, `Release QA requires touch points at ${viewport.width}x${viewport.height}`);
-    assert.equal(initial.briefingLock, false, `Gameplay briefing lock remained active at ${viewport.width}x${viewport.height}`);
     assert(
       initial.scrollWidth <= initial.innerWidth + 1,
       `Horizontal overflow detected at ${viewport.width}x${viewport.height}: ${initial.scrollWidth}px > ${initial.innerWidth}px`,
@@ -148,6 +143,7 @@ async function runMobileViewport(browser, viewport) {
       return;
     }
 
+    assert.equal(initial.briefingLock, false, `Gameplay briefing lock remained active at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
 
