@@ -1,3 +1,7 @@
+import { RunnerScene as RelaySignalHudRunnerScene } from '../scenes/RunnerScene.js';
+
+const RunnerScene = RelaySignalHudRunnerScene;
+
 /* RUNNER RELAY — SIGNAL HUD RUN PROGRESS V2
  * Presentation/runtime run-memory binding only.
  * Remembers collected signal ids for the current browser session, restores
