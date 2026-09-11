@@ -10,7 +10,7 @@ const init = await readFile(fileURLToPath(new URL('relay-ui-init.js', root)), 'u
 
 assert.match(authority, /hasBlockingOverlay/);
 assert.match(authority, /mobile-action/);
-assert.match(authority, /< 90/);
+assert.match(authority, /now\s*-\s*previous\s*<\s*90/);
 assert.match(authority, /relay:runner-scene-ready/);
 assert.match(authority, /shutdown/);
 assert.match(eventHud, /games: new WeakMap/);
