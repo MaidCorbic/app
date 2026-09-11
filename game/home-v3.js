@@ -50,15 +50,60 @@
     return clickExisting('[data-relay-info="faq"]');
   };
 
-  const openUpdate = () => {
-    try {
-      if (typeof window.relayOpenInfo === 'function') {
-        window.relayOpenInfo('update');
-        return true;
-      }
-    } catch {}
-    return clickExisting('[data-relay-info="update"]');
-  };
+const openUpdate = () => {
+  console.log('[RelayRunner] UPDATE CLICKED');
+
+  const panel = document.getElementById('relayInfoPanel');
+  const eyebrow = document.getElementById('relayInfoEyebrow');
+  const heading = document.getElementById('relayInfoHeading');
+  const content = document.getElementById('relayInfoContent');
+
+  try {
+    if (typeof window.relayOpenInfo === 'function') {
+      window.relayOpenInfo('update');
+    }
+  } catch (error) {
+    console.error('[RelayRunner] UPDATE open failed:', error);
+  }
+
+  if (!(panel instanceof HTMLElement)) {
+    console.error('[RelayRunner] relayInfoPanel NOT FOUND');
+    return false;
+  }
+
+  panel.classList.remove('hidden');
+  panel.classList.add('relay-update-mode');
+
+  if (
+    eyebrow instanceof HTMLElement &&
+    !eyebrow.textContent.trim()
+  ) {
+    eyebrow.textContent = 'LATEST UPDATE';
+  }
+
+  if (
+    heading instanceof HTMLElement &&
+    !heading.textContent.trim()
+  ) {
+    heading.textContent = 'UPDATE';
+  }
+
+  if (
+    content instanceof HTMLElement &&
+    !content.innerHTML.trim()
+  ) {
+    content.innerHTML = `
+      <p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT</p>
+      <div class="relay-update-list">
+        <div class="relay-update-item">LIVE UPDATE CHANNEL ONLINE</div>
+        <div class="relay-update-item">LATEST PATCH DATA AVAILABLE</div>
+        <div class="relay-update-item">GAMEPLAY SYSTEMS SYNCHRONIZED</div>
+      </div>
+    `;
+  }
+
+  return true;
+};
 
   const setHomeState = () => {
     const visible = introVisible();
