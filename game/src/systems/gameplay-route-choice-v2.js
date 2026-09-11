@@ -11,40 +11,52 @@ const ACTIONS = new Set(['dash', 'jump', 'vault', 'sword', 'fire', 'build']);
 const DEFAULT_WINDOW_MS = 5200;
 const ACTIVATION_PROGRESS = 0.42;
 
-// The route choice changes the kind of pressure per mission while reusing the
-// existing enemy/dynamic-encounter state. No new gameplay owner is created.
-const MISSION_ROUTE_CONSEQUENCES = Object.freeze({
+// Single source of truth for the tactical route consequences shown by the UI and
+// consumed by gameplay. Each mission has a distinct SAFE/HOT identity.
+export const MISSION_ROUTE_CONSEQUENCES = Object.freeze({
   'first-delivery': {
-    safe: { targetCount: 1, windowMs: 5200, multiplier: 1, cue: 'SAFE ROUTE // TRAINING LINE CLEAR' },
-    hot: { targetCount: 1, windowMs: 5000, multiplier: 1.35, encounter: 'ambush', cue: 'HOT ROUTE // FIRST CONTACT AMBUSH' }
+    safe: { targetCount: 1, windowMs: 5200, multiplier: 1, cue: 'SAFE ROUTE // TRAINING LINE CLEAR', label: 'STABLE LINE', risk: 'LOW PRESSURE', reward: 'CLEAN RUN' },
+    hot: { targetCount: 1, windowMs: 5000, multiplier: 1.35, encounter: 'ambush', cue: 'HOT ROUTE // FIRST CONTACT AMBUSH', label: 'FIRST CONTACT', risk: 'AMBUSH', reward: '+35% VARIETY' }
   },
   'dead-drop': {
-    safe: { targetCount: 1, windowMs: 5600, multiplier: 1, cue: 'SAFE ROUTE // DOCK LINE SECURED' },
-    hot: { targetCount: 2, windowMs: 6200, multiplier: 1.5, encounter: 'ambush', cue: 'HOT ROUTE // DOCK CUT-OFF' }
+    safe: { targetCount: 1, windowMs: 5600, multiplier: 1, cue: 'SAFE ROUTE // DOCK LINE SECURED', label: 'DOCK LINE', risk: 'LOW PRESSURE', reward: 'CLEAN RUN' },
+    hot: { targetCount: 2, windowMs: 6200, multiplier: 1.5, encounter: 'ambush', cue: 'HOT ROUTE // DOCK CUT-OFF', label: 'DOCK CUT-OFF', risk: '2-TARGET AMBUSH', reward: '+50% VARIETY' }
   },
   blackout: {
-    safe: { targetCount: 2, windowMs: 6200, multiplier: 1, cue: 'SAFE ROUTE // LIGHT CORRIDOR STABLE' },
-    hot: { targetCount: 2, windowMs: 5600, multiplier: 1.55, encounter: 'ambush', cue: 'HOT ROUTE // GRID SECURITY SURGE' }
+    safe: { targetCount: 2, windowMs: 6200, multiplier: 1, cue: 'SAFE ROUTE // LIGHT CORRIDOR STABLE', label: 'LIGHT CORRIDOR', risk: 'LOW PRESSURE', reward: 'CLEAN RUN' },
+    hot: { targetCount: 2, windowMs: 5600, multiplier: 1.55, encounter: 'ambush', cue: 'HOT ROUTE // GRID SECURITY SURGE', label: 'GRID SURGE', risk: 'SECURITY SURGE', reward: '+55% VARIETY' }
   },
   pursuit: {
-    safe: { targetCount: 1, windowMs: 4500, multiplier: 1, cue: 'SAFE ROUTE // ESCAPE WINDOW OPEN' },
-    hot: { targetCount: 2, windowMs: 7600, multiplier: 1.65, encounter: 'pursuit', cue: 'HOT ROUTE // INTERCEPTORS INBOUND' }
+    safe: { targetCount: 1, windowMs: 4500, multiplier: 1, cue: 'SAFE ROUTE // ESCAPE WINDOW OPEN', label: 'ESCAPE WINDOW', risk: 'CONTROLLED', reward: 'CLEAN RUN' },
+    hot: { targetCount: 2, windowMs: 7600, multiplier: 1.65, encounter: 'pursuit', cue: 'HOT ROUTE // INTERCEPTORS INBOUND', label: 'INTERCEPT', risk: 'PURSUIT', reward: '+65% VARIETY' }
   },
   'signal-storm': {
-    safe: { targetCount: 1, windowMs: 5400, multiplier: 1, cue: 'SAFE ROUTE // SIGNAL LANE STABLE' },
-    hot: { targetCount: 2, windowMs: 6200, multiplier: 1.55, encounter: 'ambush', cue: 'HOT ROUTE // STORM INTERCEPT' }
+    safe: { targetCount: 1, windowMs: 5400, multiplier: 1, cue: 'SAFE ROUTE // SIGNAL LANE STABLE', label: 'SIGNAL LANE', risk: 'LOW PRESSURE', reward: 'CLEAN RUN' },
+    hot: { targetCount: 2, windowMs: 6200, multiplier: 1.55, encounter: 'ambush', cue: 'HOT ROUTE // STORM INTERCEPT', label: 'STORM INTERCEPT', risk: 'NETWORK CHAOS', reward: '+55% VARIETY' }
   },
   'corporate-lockdown': {
-    safe: { targetCount: 2, windowMs: 5000, multiplier: 1, cue: 'SAFE ROUTE // SECURITY WINDOW OPEN' },
-    hot: { targetCount: 2, windowMs: 7600, multiplier: 1.7, encounter: 'pursuit', cue: 'HOT ROUTE // HELIX INTERCEPTOR DEPLOYED' }
+    safe: { targetCount: 2, windowMs: 5000, multiplier: 1, cue: 'SAFE ROUTE // SECURITY WINDOW OPEN', label: 'SECURITY BYPASS', risk: 'CONTROLLED', reward: 'CLEAN RUN' },
+    hot: { targetCount: 2, windowMs: 7600, multiplier: 1.7, encounter: 'pursuit', cue: 'HOT ROUTE // HELIX INTERCEPTOR DEPLOYED', label: 'HELIX INTERCEPT', risk: 'PURSUIT', reward: '+70% VARIETY' }
   },
   'final-relay': {
-    safe: { targetCount: 1, windowMs: 4600, multiplier: 1, cue: 'SAFE ROUTE // FINAL LINE STABILIZED' },
-    hot: { targetCount: 2, windowMs: 8200, multiplier: 1.75, encounter: 'pursuit', cue: 'HOT ROUTE // FINAL INTERCEPT' }
+    safe: { targetCount: 1, windowMs: 4600, multiplier: 1, cue: 'SAFE ROUTE // FINAL LINE STABILIZED', label: 'FINAL STABILIZER', risk: 'CONTROLLED', reward: 'CLEAN FINISH' },
+    hot: { targetCount: 2, windowMs: 8200, multiplier: 1.75, encounter: 'pursuit', cue: 'HOT ROUTE // FINAL INTERCEPT', label: 'FINAL INTERCEPT', risk: 'MAXIMUM PRESSURE', reward: '+75% VARIETY' }
   }
 });
 
-const clamp = (v, min = 0, max = 1) => Math.max(min, Math.min(max, Number(v) || 0));
+export function getMissionRouteConsequence(scene, route) {
+  const id = missionId(scene);
+  return MISSION_ROUTE_CONSEQUENCES[id]?.[route] || {
+    targetCount: 1,
+    windowMs: DEFAULT_WINDOW_MS,
+    multiplier: route === 'hot' ? 1.5 : 1,
+    encounter: route === 'hot' ? 'ambush' : null,
+    cue: route === 'hot' ? 'HOT ROUTE // INTERCEPTOR ENGAGED' : 'SAFE ROUTE // THREAT DISENGAGED',
+    label: route === 'hot' ? 'INTERCEPT' : 'STABLE LINE',
+    risk: route === 'hot' ? 'HIGH PRESSURE' : 'CONTROLLED',
+    reward: route === 'hot' ? '+50% VARIETY' : 'CLEAN RUN'
+  };
+}
 
 function missionId(scene) {
   const candidates = [
@@ -57,13 +69,7 @@ function missionId(scene) {
 }
 
 function routeConfig(scene, route) {
-  return MISSION_ROUTE_CONSEQUENCES[missionId(scene)]?.[route] || {
-    targetCount: 1,
-    windowMs: DEFAULT_WINDOW_MS,
-    multiplier: route === 'hot' ? 1.5 : 1,
-    encounter: route === 'hot' ? 'ambush' : null,
-    cue: route === 'hot' ? 'HOT ROUTE // INTERCEPTOR ENGAGED' : 'SAFE ROUTE // THREAT DISENGAGED'
-  };
+  return getMissionRouteConsequence(scene, route);
 }
 
 function progressOf(scene) {
@@ -72,7 +78,7 @@ function progressOf(scene) {
   const goal = Number(mission?.goal?.x ?? start + 3200);
   const player = Number(scene?.player?.x);
   if (!Number.isFinite(player) || goal <= start) return 0;
-  return clamp((player - start) / (goal - start));
+  return Math.max(0, Math.min(1, (player - start) / (goal - start)));
 }
 
 function enemiesOf(scene) {
@@ -83,10 +89,6 @@ function enemiesOf(scene) {
     }
   }
   return [];
-}
-
-function distance(a, b) {
-  return Math.hypot((Number(a?.x) || 0) - (Number(b?.x) || 0), (Number(a?.y) || 0) - (Number(b?.y) || 0));
 }
 
 function showCue(scene, message) {
@@ -118,12 +120,8 @@ function restoreEnemy(state, enemy) {
       enemy.body.velocity.x = snapshot.velocityX;
       enemy.body.velocity.y = snapshot.velocityY;
     }
-    if (snapshot.bodyEnabled && enemy.body?.enable === false) {
-      enemy.enableBody?.(true, enemy.x, enemy.y, true, true);
-    }
-    if (!snapshot.bodyEnabled && enemy.body?.enable !== false) {
-      enemy.disableBody?.(false, false);
-    }
+    if (snapshot.bodyEnabled && enemy.body?.enable === false) enemy.enableBody?.(true, enemy.x, enemy.y, true, true);
+    if (!snapshot.bodyEnabled && enemy.body?.enable !== false) enemy.disableBody?.(false, false);
     enemy.clearTint?.();
     if (snapshot.tint != null) enemy.setTint?.(snapshot.tint);
     if (snapshot.varietyRoute == null) enemy.removeData?.('varietyRoute');
@@ -154,9 +152,7 @@ function selectTargets(scene, route, config) {
 
   if (!candidates.length) return [];
   const count = Math.max(1, Math.min(Number(config.targetCount) || 1, candidates.length));
-  return route === 'hot'
-    ? candidates.slice(Math.max(0, candidates.length - count))
-    : candidates.slice(0, count);
+  return route === 'hot' ? candidates.slice(Math.max(0, candidates.length - count)) : candidates.slice(0, count);
 }
 
 function activateRoute(scene, state, route) {
@@ -175,15 +171,7 @@ function activateRoute(scene, state, route) {
 
   if (!targets.length) {
     showCue(scene, config.cue);
-    try {
-      scene?.game?.events?.emit?.('relay:variety-route-effect', {
-        missionId: id,
-        route,
-        effect: state.routeEffect,
-        targetCount: 0,
-        durationMs: config.windowMs
-      });
-    } catch {}
+    emitRouteApplied(scene, state, config, 0);
     return;
   }
 
@@ -208,34 +196,52 @@ function activateRoute(scene, state, route) {
     });
 
     showCue(scene, config.cue);
-    try {
-      scene?.game?.events?.emit?.('relay:variety-route-effect', {
-        missionId: id,
-        route,
-        effect: state.routeEffect,
-        targetCount: targets.length,
-        durationMs: config.windowMs
-      });
-    } catch {}
+    emitRouteApplied(scene, state, config, targets.length);
   } catch (error) {
     console.warn('[GameplayRouteChoiceV2] route effect skipped', error);
   }
 }
 
+function emitRouteApplied(scene, state, config, targetCount) {
+  try {
+    scene?.game?.events?.emit?.('relay:variety-route-applied', {
+      route: state.route,
+      multiplier: state.multiplier,
+      missionId: missionId(scene),
+      label: config.label,
+      risk: config.risk,
+      reward: config.reward,
+      missionConsequence: config.encounter || (state.route === 'safe' ? 'threat-disengaged' : 'pressure-targeted'),
+      targetCount,
+      durationMs: config.windowMs
+    });
+    scene?.game?.events?.emit?.('relay:variety-route-effect', {
+      missionId: missionId(scene),
+      route: state.route,
+      effect: state.routeEffect,
+      targetCount,
+      durationMs: config.windowMs
+    });
+  } catch {}
+}
+
 function applyChoice(scene, state, route) {
-  if (state.routeChoices > 0) return;
+  if (state.routeChoices > 0 || !['safe', 'hot'].includes(route)) return;
   state.routeChoices += 1;
+  const config = routeConfig(scene, route);
   state.route = route;
-  state.multiplier = routeConfig(scene, route).multiplier;
+  state.multiplier = config.multiplier;
   state.requestedAt = performance.now();
   state.armed = true;
-  const config = routeConfig(scene, route);
-  showCue(scene, route === 'hot' ? 'HOT ROUTE // ARMED' : 'SAFE ROUTE // ARMED');
+  showCue(scene, route === 'hot' ? `HOT ROUTE // ${config.label}` : `SAFE ROUTE // ${config.label}`);
   try {
     scene?.game?.events?.emit?.('relay:variety-route', {
       route,
       multiplier: state.multiplier,
       missionId: missionId(scene),
+      label: config.label,
+      risk: config.risk,
+      reward: config.reward,
       missionConsequence: config.encounter || (route === 'safe' ? 'threat-disengaged' : 'pressure-targeted'),
       gameplayIntegrated: true
     });
@@ -260,7 +266,7 @@ function cleanup(scene, state) {
 function init(scene) {
   if (!scene || states.has(scene)) return;
   const state = {
-    route: 'safe', multiplier: 1, routeChoices: 0, requestedAt: 0,
+    route: null, multiplier: 1, routeChoices: 0, requestedAt: 0,
     armed: false, effectActive: false, effectUntil: 0, targets: [], routeEffect: null,
     enemySnapshots: new Map(), raf: 0, feedbackBound: false, feedbackHandler: null
   };
@@ -271,9 +277,7 @@ function init(scene) {
   if (events) {
     state.feedbackHandler = kind => {
       const value = String(kind || '').toLowerCase();
-      if (ACTIONS.has(value) && state.route === 'hot') {
-        state.hotFlow = Math.min(8, (state.hotFlow || 0) + 1);
-      }
+      if (ACTIONS.has(value) && state.route === 'hot') state.hotFlow = Math.min(8, (state.hotFlow || 0) + 1);
     };
     events.on('feedback', state.feedbackHandler);
     state.feedbackBound = true;
@@ -292,9 +296,7 @@ function init(scene) {
         state.targets = [];
         try {
           scene?.game?.events?.emit?.('relay:variety-route-effect', {
-            missionId: missionId(scene),
-            route: state.route,
-            effect: 'window-complete'
+            missionId: missionId(scene), route: state.route, effect: 'window-complete'
           });
         } catch {}
         showCue(scene, state.route === 'hot' ? 'HOT ROUTE // PRESSURE WINDOW COMPLETE' : 'SAFE ROUTE // LANE STABLE');
