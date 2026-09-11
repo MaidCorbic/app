@@ -57,6 +57,17 @@ async function waitForHidden(page, selector, timeout = 15000) {
   );
 }
 
+async function waitForGameplayBriefingRelease(page, timeout = 20000) {
+  await page.waitForFunction(() => {
+    const briefing = document.getElementById('relayGameplayIntroFinalV5');
+    const play = document.getElementById('play');
+    if (play?.classList.contains('relay-map-briefing-lock')) return false;
+    if (!briefing) return true;
+    const style = getComputedStyle(briefing);
+    return briefing.hidden || style.display === 'none' || style.visibility === 'hidden';
+  }, { timeout });
+}
+
 function assertNoPairwiseOverlap(rects, label) {
   for (let i = 0; i < rects.length; i += 1) {
     for (let j = i + 1; j < rects.length; j += 1) {
@@ -94,6 +105,13 @@ async function runMobileViewport(browser, viewport) {
     await page.locator('#start').click();
     await waitForHidden(page, '#intro');
 
+    if (viewport.orientation === 'landscape') {
+      // The start flow may run a tactical route briefing before touch controls are released.
+      // Wait for that lifecycle lock to clear instead of sampling the HUD mid-briefing.
+      await waitForGameplayBriefingRelease(page);
+      await waitForVisible(page, '.mobile-controls');
+    }
+
     const initial = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
       innerWidth: window.innerWidth,
@@ -110,12 +128,14 @@ async function runMobileViewport(browser, viewport) {
         const rect = el.getBoundingClientRect();
         return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0' && rect.width > 0 && rect.height > 0;
       })(),
+      briefingLock: document.querySelector('#play')?.classList.contains('relay-map-briefing-lock') || false,
     }));
 
     assert.equal(initial.touchControls, 6, `Expected exactly 6 mobile action buttons at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.joystickCount, 1, `Expected exactly 1 movement joystick at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.pointerCoarse, true, `Release QA requires a coarse primary pointer at ${viewport.width}x${viewport.height}`);
     assert(initial.touchPoints > 0, `Release QA requires touch points at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.briefingLock, false, `Gameplay briefing lock remained active at ${viewport.width}x${viewport.height}`);
     assert(
       initial.scrollWidth <= initial.innerWidth + 1,
       `Horizontal overflow detected at ${viewport.width}x${viewport.height}: ${initial.scrollWidth}px > ${initial.innerWidth}px`,
