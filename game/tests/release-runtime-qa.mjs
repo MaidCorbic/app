@@ -11,6 +11,8 @@ const MOBILE_VIEWPORTS = [
   { width: 430, height: 932, orientation: 'portrait' },
   { width: 760, height: 430, orientation: 'landscape' },
 ];
+const VIEWPORT_TIMEOUT_MS = 45000;
+const NAVIGATION_TIMEOUT_MS = 20000;
 
 function waitForServer(url, timeoutMs = 15000) {
   const start = Date.now();
@@ -96,14 +98,16 @@ async function runMobileViewport(browser, viewport) {
     deviceScaleFactor: 1,
   });
   const page = await context.newPage();
+  page.setDefaultTimeout(15000);
+  page.setDefaultNavigationTimeout(NAVIGATION_TIMEOUT_MS);
   const errors = [];
   page.on('pageerror', error => errors.push(`pageerror: ${error.message}`));
   page.on('console', message => {
     if (message.type() === 'error') errors.push(`console: ${message.text()}`);
   });
 
-  try {
-    await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+  const run = async () => {
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: NAVIGATION_TIMEOUT_MS });
     await waitForVisible(page, '#start');
     await clickDom(page, '#start');
     await waitForHidden(page, '#intro');
@@ -172,8 +176,6 @@ async function runMobileViewport(browser, viewport) {
     assert(controls.joystick, `Missing movement joystick at ${viewport.width}x${viewport.height}`);
     assertNoPairwiseOverlap(controls.buttons, `Mobile action layout ${viewport.width}x${viewport.height}`);
 
-    // On mobile, the canonical Pause control is #mobilePauseButton. This keeps the
-    // runtime QA aligned with the actual mobile HUD ownership instead of the legacy #pause node.
     await clickDom(page, '#mobilePauseButton');
     await waitForVisible(page, '#pauseMenu');
     await waitForVisible(page, '[data-pause-tab="resume"]');
@@ -210,6 +212,24 @@ async function runMobileViewport(browser, viewport) {
     assert.equal(resumed.pauseHidden, true, `Pause menu remained open after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(resumed.runnerActive, true, `Runner scene is not active after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
+  };
+
+  try {
+    await Promise.race([
+      run(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error(`Release runtime QA timed out after ${VIEWPORT_TIMEOUT_MS}ms at ${viewport.width}x${viewport.height} ${viewport.orientation}`)), VIEWPORT_TIMEOUT_MS)),
+    ]);
+  } catch (error) {
+    const diagnostics = await page.evaluate(() => ({
+      url: location.href,
+      readyState: document.readyState,
+      introHidden: document.querySelector('#intro')?.classList.contains('hidden'),
+      briefingLock: document.querySelector('#play')?.classList.contains('relay-map-briefing-lock'),
+      mobileControls: Boolean(document.querySelector('.mobile-controls')),
+      mobilePause: Boolean(document.querySelector('#mobilePauseButton')),
+      errors,
+    })).catch(() => ({ errors }));
+    throw new Error(`${error.message}; diagnostics=${JSON.stringify(diagnostics)}`);
   } finally {
     await context.close();
   }
