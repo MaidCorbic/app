@@ -13,6 +13,7 @@ import { missions } from './src/missions.js';
     fallPenalty: 10,
     collisionPenalty: 3,
     minimumTimeMs: 1000,
+    hotRouteBonus: 8,
   });
 
   const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, Number(value) || 0));
@@ -37,17 +38,12 @@ import { missions } from './src/missions.js';
     return missions.find(item => item.id === missionId) || null;
   };
 
-  // Some older gameplay builds do not expose a checkpoint counter on RunnerScene.
-  // In that case, derive the progress from the authoritative player position and
-  // the mission checkpoint coordinates. This is read-only and never changes gameplay.
   function deriveCheckpointProgress(scene, mission) {
     const total = Array.isArray(mission?.checkpoints) ? mission.checkpoints.length : 0;
     if (!scene || total === 0) return 0;
     if (state.checkpoints > 0) return Math.min(state.checkpoints, total);
-
     const playerX = Number(scene.player?.x ?? scene.playerSprite?.x ?? scene.courier?.x);
     if (!Number.isFinite(playerX)) return 0;
-
     let reached = 0;
     for (const checkpoint of mission.checkpoints) {
       const checkpointX = Number(Array.isArray(checkpoint) ? checkpoint[0] : checkpoint?.x);
@@ -60,7 +56,6 @@ import { missions } from './src/missions.js';
     const scene = sceneOverride || getScene();
     const mission = scene?.mission || getMission(scene);
     if (!scene || !mission?.id) return null;
-
     const signals = integer(scene.collected);
     const totalSignals = Array.isArray(mission.signals) ? mission.signals.length : 0;
     const elapsedMs = Math.max(0, Number(scene.elapsedMs) || 0);
@@ -71,29 +66,12 @@ import { missions } from './src/missions.js';
     const secrets = integer(scene.secretsCollected);
     const checkpointTotal = Array.isArray(mission.checkpoints) ? mission.checkpoints.length : 0;
     const checkpoints = deriveCheckpointProgress(scene, mission);
-
-    return {
-      missionId: mission.id,
-      missionIndex: state.missionIndex >= 0 ? state.missionIndex : missions.findIndex(item => item.id === mission.id),
-      runSequence: state.runSequence,
-      elapsedMs,
-      signals,
-      totalSignals,
-      checkpoints,
-      checkpointTotal,
-      deaths: state.deaths,
-      falls,
-      collisions,
-      enemyDefeats,
-      jumps,
-      secrets,
-    };
+    return { missionId: mission.id, missionIndex: state.missionIndex >= 0 ? state.missionIndex : missions.findIndex(item => item.id === mission.id), runSequence: state.runSequence, elapsedMs, signals, totalSignals, checkpoints, checkpointTotal, deaths: state.deaths, falls, collisions, enemyDefeats, jumps, secrets };
   }
 
   function resetForScene(scene) {
     const mission = scene?.mission;
     if (!mission?.id) return false;
-
     state.active = true;
     state.settled = false;
     state.missionId = mission.id;
@@ -103,74 +81,48 @@ import { missions } from './src/missions.js';
     state.deaths = 0;
     state.checkpoints = 0;
     state.lastScene = scene;
-
     window.__missionFlowPerformanceV1.latest = null;
     window.__missionFlowPerformanceV1.current = sceneStats;
-
     scene.events?.once?.('shutdown', () => {
       if (state.lastScene === scene && !state.settled) {
         state.active = false;
         state.lastScene = null;
       }
     });
-
     return true;
   }
 
   function scoreRun({ completed, elapsedMs, signals, totalSignals, checkpoints, checkpointTotal, deaths, falls, collisions, missionId }) {
     const mission = getMission({ mission: { id: missionId } });
     if (!mission) return null;
-
     const completion = completed ? 100 : 0;
     const parTime = Math.max(CONFIG.minimumTimeMs, Number(mission.parTime) || 90000);
-    const speed = completed
-      ? clamp((parTime / Math.max(CONFIG.minimumTimeMs, elapsedMs)) * 100)
-      : 0;
+    const speed = completed ? clamp((parTime / Math.max(CONFIG.minimumTimeMs, elapsedMs)) * 100) : 0;
     const signalScore = totalSignals > 0 ? clamp((signals / totalSignals) * 100) : 100;
-    const routeScore = checkpointTotal > 0
-      ? clamp((checkpoints / checkpointTotal) * 100)
-      : completion;
-    const survival = clamp(
-      100 - deaths * CONFIG.deathPenalty - falls * CONFIG.fallPenalty - collisions * CONFIG.collisionPenalty
-    );
-
-    const weighted =
-      completion * CONFIG.weights.completion / 100 +
-      speed * CONFIG.weights.speed / 100 +
-      signalScore * CONFIG.weights.signals / 100 +
-      routeScore * CONFIG.weights.route / 100 +
-      survival * CONFIG.weights.survival / 100;
-
+    const routeScore = checkpointTotal > 0 ? clamp((checkpoints / checkpointTotal) * 100) : completion;
+    const survival = clamp(100 - deaths * CONFIG.deathPenalty - falls * CONFIG.fallPenalty - collisions * CONFIG.collisionPenalty);
+    const weighted = completion * CONFIG.weights.completion / 100 + speed * CONFIG.weights.speed / 100 + signalScore * CONFIG.weights.signals / 100 + routeScore * CONFIG.weights.route / 100 + survival * CONFIG.weights.survival / 100;
     const score = Math.round(clamp(weighted));
     const rating = score >= 95 ? 'S+' : score >= 90 ? 'S' : score >= 80 ? 'A' : score >= 70 ? 'B' : score >= 60 ? 'C' : 'D';
-
     return {
-      version: '1.0',
-      missionId: mission.id,
-      missionIndex: state.missionIndex,
-      runSequence: state.runSequence,
-      score,
-      rating,
-      completed,
-      metrics: {
-        completion,
-        speed: Math.round(speed),
-        signals: Math.round(signalScore),
-        route: Math.round(routeScore),
-        survival: Math.round(survival),
-      },
-      raw: {
-        elapsedMs,
-        parTime,
-        signals,
-        totalSignals,
-        checkpoints,
-        checkpointTotal,
-        deaths,
-        falls,
-        collisions,
-      },
+      version: '1.0', missionId: mission.id, missionIndex: state.missionIndex, runSequence: state.runSequence,
+      score, rating, completed, routeChoice: 'safe', routeBonus: 0,
+      metrics: { completion, speed: Math.round(speed), signals: Math.round(signalScore), route: Math.round(routeScore), survival: Math.round(survival), routeBonus: 0 },
+      raw: { elapsedMs, parTime, signals, totalSignals, checkpoints, checkpointTotal, deaths, falls, collisions },
     };
+  }
+
+  function applyRouteReward(result, scene) {
+    if (!result || !scene || !result.completed) return result;
+    const routeChoice = scene.__relayGameplayRouteChoiceV2?.route === 'hot' ? 'hot' : 'safe';
+    const routeBonus = routeChoice === 'hot' ? CONFIG.hotRouteBonus : 0;
+    const boostedScore = Math.round(clamp(result.score + routeBonus));
+    result.routeChoice = routeChoice;
+    result.routeBonus = routeBonus;
+    result.score = boostedScore;
+    result.rating = boostedScore >= 95 ? 'S+' : boostedScore >= 90 ? 'S' : boostedScore >= 80 ? 'A' : boostedScore >= 70 ? 'B' : boostedScore >= 60 ? 'C' : 'D';
+    result.metrics.routeBonus = routeBonus;
+    return result;
   }
 
   function publish(result) {
@@ -185,10 +137,9 @@ import { missions } from './src/missions.js';
     if (!state.active || state.settled) return window.__missionFlowPerformanceV1.latest || null;
     const data = sceneStats(sceneOverride);
     if (!data) return null;
-
     const result = scoreRun({ completed, ...data, missionId: data.missionId });
     if (!result) return null;
-
+    applyRouteReward(result, sceneOverride || state.lastScene || getScene());
     publish(result);
     if (!completed) window.__missionFlowPerformanceV1.lastFailedRun = result;
     return result;
@@ -197,72 +148,33 @@ import { missions } from './src/missions.js';
   function finalize(sceneOverride = null) {
     const scene = sceneOverride || getScene();
     if (!scene?.mission?.id) return null;
-
-    if (!state.active || state.missionId !== scene.mission.id || state.lastScene !== scene) {
-      resetForScene(scene);
-    }
-
+    if (!state.active || state.missionId !== scene.mission.id || state.lastScene !== scene) resetForScene(scene);
     return settle(true, scene);
   }
 
   function onSceneReady(event) {
     const scene = event?.detail?.scene || window.__relayRunnerScene;
-    if (scene) {
-      if (!state.active || state.missionId !== scene.mission?.id || state.lastScene !== scene) {
-        resetForScene(scene);
-      }
-    }
+    if (scene && (!state.active || state.missionId !== scene.mission?.id || state.lastScene !== scene)) resetForScene(scene);
   }
-
-  function onDeath() {
-    if (state.active && !state.settled) state.deaths += 1;
-  }
-
-  function onCheckpoint() {
-    if (state.active && !state.settled) state.checkpoints += 1;
-  }
-
+  function onDeath() { if (state.active && !state.settled) state.deaths += 1; }
+  function onCheckpoint() { if (state.active && !state.settled) state.checkpoints += 1; }
   function onMissionComplete(event) {
     const scene = event?.detail?.scene || window.__relayRunnerScene || state.lastScene;
     if (scene) finalize(scene);
   }
-
-  function listen(type, handler) {
-    window.addEventListener(type, handler);
-  }
-
+  function listen(type, handler) { window.addEventListener(type, handler); }
   function install() {
     listen('relay:runner-scene-ready', onSceneReady);
     listen('relay:death', onDeath);
     listen('relay:checkpoint', onCheckpoint);
     listen('relay:mission-complete', onMissionComplete);
-
     if (window.__relayRunnerScene) resetForScene(window.__relayRunnerScene);
   }
-
   function reset() {
-    state.active = false;
-    state.settled = false;
-    state.missionId = null;
-    state.missionIndex = -1;
-    state.startedAt = 0;
-    state.deaths = 0;
-    state.checkpoints = 0;
-    state.lastScene = null;
-    window.__missionFlowPerformanceV1.current = null;
-    window.__missionFlowPerformanceV1.latest = null;
+    state.active = false; state.settled = false; state.missionId = null; state.missionIndex = -1; state.startedAt = 0; state.deaths = 0; state.checkpoints = 0; state.lastScene = null;
+    window.__missionFlowPerformanceV1.current = null; window.__missionFlowPerformanceV1.latest = null;
   }
 
-  window.__missionFlowPerformanceV1 = {
-    version: '1.0',
-    current: null,
-    latest: null,
-    lastFailedRun: null,
-    reset,
-    snapshot: sceneStats,
-    scoreRun,
-    finalize,
-  };
-
+  window.__missionFlowPerformanceV1 = { version: '1.1', current: null, latest: null, lastFailedRun: null, reset, snapshot: sceneStats, scoreRun, finalize };
   install();
 })();
