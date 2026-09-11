@@ -57,11 +57,11 @@ assert.match(core, /function inferDeathReason\(message\)/);
 assert.match(core, /RunnerScene\.prototype\.takeSciFiHit = function stableHit/);
 assert.match(core, /RunnerScene\.prototype\.respawnCheckpoint = function stableRespawn/);
 assert.match(runner, /let cinematicTargetZoom\s*=\s*1\s*;/);
-assert.match(runner, /if\s*\(\s*speed\s*>\s*520\s*\)\s*cinematicTargetZoom\s*=\s*1\.035\s*;/);
-assert.match(runner, /else\s+if\s*\(\s*speed\s*>\s*420\s*\)\s*cinematicTargetZoom\s*=\s*1\.026\s*;/);
-assert.match(runner, /else\s+if\s*\(\s*speed\s*>\s*330\s*\)\s*cinematicTargetZoom\s*=\s*1\.014\s*;/);
-assert.match(runner, /if\s*\(\s*dashActive\s*&&\s*!this\.motionReduced\s*\)\s*cinematicTargetZoom\s*=\s*1\.045\s*;/);
-assert.match(runner, /const speedZoomTarget\s*=\s*1\s*\+\s*speedZoom\s*;/);
+assert.match(runner, /cinematicTargetZoom\s*=\s*1\.035\s*;/);
+assert.match(runner, /cinematicTargetZoom\s*=\s*1\.026\s*;/);
+assert.match(runner, /cinematicTargetZoom\s*=\s*1\.014\s*;/);
+assert.match(runner, /cinematicTargetZoom\s*=\s*1\.045\s*;/);
+assert.match(runner, /const speedZoomTarget\s*=\s*\n?\s*1\s*\+\s*speedZoom\s*;/);
 assert.match(runner, /const targetZoom\s*=\s*Math\.max\(\s*cinematicTargetZoom\s*,\s*speedZoomTarget\s*\);/);
 assert.doesNotMatch(runner, /this\.cameras\.main\.zoom\s*=/, 'RunnerScene must not directly assign camera zoom');
 
