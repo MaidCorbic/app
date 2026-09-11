@@ -49,6 +49,7 @@
     "test:route-choice-branching-v1": "node tests/route-choice-branching-v1.mjs",
     "test:route-choice-duplicate-event-guard": "node tests/route-choice-duplicate-event-guard-v1.mjs",
     "test:route-mutation-choice-coordination": "node tests/route-mutation-choice-coordination-v1.mjs",
+    "test:release-runtime-qa": "node tests/release-runtime-qa.mjs",
     "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:gameplay-variety-safe-layer && npm run test:gameplay-route-choice-v2 && npm run test:gameplay-route-score-bonus && npm run test:route-choice-branching-v1 && npm run test:route-choice-duplicate-event-guard && npm run test:route-mutation-choice-coordination && npm run test:final-stability && npm run test:runner-runtime-stability && npm run build"
   },
   "engines": {"node": "24.x"},
