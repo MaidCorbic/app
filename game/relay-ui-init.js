@@ -143,6 +143,8 @@ import './src/systems/gameplay-ui-v7-legacy-feedback-hide.js';
 import './src/systems/signals-hud-run-persistence-v1.js';
 import './release-ux-gameplay-polish-v1.js';
 import './src/systems/gameplay-variety-safe-layer-v1.js';
+import './src/systems/gameplay-route-choice-v2.js';
+import './src/systems/gameplay-route-choice-bridge-v1.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   import('./src/systems/mission-objectives-route-goals-v1.js').catch(error => {
