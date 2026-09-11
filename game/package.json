@@ -44,7 +44,9 @@
     "test:release-ux-gameplay-polish": "node tests/release-ux-gameplay-polish.mjs",
     "test:runner-runtime-stability": "node tests/runner-runtime-stability-contract.mjs",
     "test:gameplay-variety-safe-layer": "node tests/gameplay-variety-safe-layer.mjs",
-    "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:gameplay-variety-safe-layer && npm run test:final-stability && npm run test:runner-runtime-stability && npm run build"
+    "test:gameplay-route-choice-v2": "node tests/gameplay-route-choice-v2.mjs",
+    "test:route-choice-branching-v1": "node tests/route-choice-branching-v1.mjs",
+    "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:gameplay-variety-safe-layer && npm run test:gameplay-route-choice-v2 && npm run test:route-choice-branching-v1 && npm run test:final-stability && npm run test:runner-runtime-stability && npm run build"
   },
   "engines": {"node": "24.x"},
   "dependencies": {"phaser": "^3.90.0", "vite": "^8.2.1"},
