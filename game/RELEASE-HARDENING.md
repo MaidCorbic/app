@@ -9,7 +9,7 @@ This checklist is the release gate for the public game build.
 - [x] Consolidate CSS/runtime ownership in `relay-ui-init.js`. Do not add another `v1/v2/v3/final/polish` override layer.
 - [x] Make `canonical-ui-v1.css` the single authority for HUD, Home, Pause, Settings, overlays and touch layout.
 - [x] Reduce direct stylesheet loading in `index.html` to the intended canonical bootstrap dependencies.
-- [ ] Move the remaining stable behaviour still injected by `vite.config.mjs` (`cargo` state import and RunnerScene zoom normalization) into source modules, then remove the obsolete build-time patches.
+- [x] Move the remaining stable behavior out of `vite.config.mjs`: `cargo` state access is source-owned by `cargo-integrity-v2.js`, RunnerScene zoom normalization is source-owned by `RunnerScene.js`, and obsolete runtime patchers are removed.
 
 ## P1 — public quality
 
