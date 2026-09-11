@@ -145,6 +145,7 @@ import './release-ux-gameplay-polish-v1.js';
 import './src/systems/gameplay-variety-safe-layer-v1.js';
 import './src/systems/gameplay-route-choice-v2.js';
 import './src/systems/gameplay-route-choice-bridge-v1.js';
+import './src/systems/route-choice-branching-v1.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   import('./src/systems/mission-objectives-route-goals-v1.js').catch(error => {
