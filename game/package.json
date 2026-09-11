@@ -42,7 +42,8 @@
     "test:final-stability-suite": "node tests/final-stability-suite.mjs",
     "test:canonical-css": "node tests/css-canonical-contract.mjs",
     "test:release-ux-gameplay-polish": "node tests/release-ux-gameplay-polish.mjs",
-    "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:final-stability && npm run build"
+    "test:release-p1-e2e": "node tests/release-p1-e2e.mjs",
+    "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:final-stability && npm run build && npm run test:release-p1-e2e"
   },
   "engines": {"node": "24.x"},
   "dependencies": {"phaser": "^3.90.0", "vite": "^8.2.1"},
