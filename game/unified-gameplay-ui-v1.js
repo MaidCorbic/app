@@ -12,7 +12,7 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
     { id:'menu-unification', version:'1.1.0', date:'2026-08-30', title:'Unified cinematic menus', detail:'Options, FAQ and Pause now share the same ultra-cinematic gold UI system across web and mobile.' },
     { id:'gameplay-hud', version:'1.1.0', date:'2026-08-30', title:'Gameplay HUD refinement', detail:'Mission and Signals panels are now compact, aligned and optimized for desktop and mobile gameplay.' },
     { id:'mission-intelligence', version:'1.1.0', date:'2026-08-30', title:'Mission Intelligence', detail:'Contextual intelligence appears only when the current mission introduces a mechanic, threat or route change.' },
-    { id:'orientation', version:'1.1.0', date:'2026-08-30', title:'Landscape guidance', detail:'Mobile portrait mode now presents a dedicated cinematic rotation card before full gameplay controls are shown.' },
+    { id:'orientation', version:'1.1.0', date:'2026-08-30', title:'Landscape guidance', detail:'Mobile portrait mode keeps the gameplay controls hidden until the active layout is ready.' },
   ];
   const readUpdates = () => { try { const parsed = JSON.parse(localStorage.getItem(UPDATE_KEY) || '[]'); return Array.isArray(parsed) && parsed.length ? parsed.slice(0,12) : latestUpdates.slice(); } catch { return latestUpdates.slice(); } };
   const writeUpdates = value => { try { localStorage.setItem(UPDATE_KEY, JSON.stringify(value.slice(0,12))); } catch {} };
@@ -90,7 +90,6 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
   const ensureGameplayElements = () => {
     const play = $('play'); if (!play) return;
     let intel = $('relayGameplayIntel'); if (!intel) { intel = document.createElement('section'); intel.id = 'relayGameplayIntel'; intel.className = 'relay-gameplay-intel'; intel.setAttribute('aria-live','polite'); intel.innerHTML = '<p class="intel-kicker">MISSION INTELLIGENCE</p><h3 class="intel-title"></h3><p class="intel-detail"></p><div class="intel-meta"></div>'; play.append(intel); }
-    let rotate = $('relayRotateCard'); if (!rotate) { rotate = document.createElement('section'); rotate.id = 'relayRotateCard'; rotate.className = 'relay-rotate-card'; rotate.setAttribute('role','status'); rotate.innerHTML = '<div class="rotate-icon" aria-hidden="true">↻</div><h3>ROTATE YOUR DEVICE</h3><p>LANDSCAPE MODE RECOMMENDED<br>More space. Better control. Better run.</p><button type="button" data-relay-rotate-dismiss>CONTINUE</button>'; document.body.append(rotate); rotate.querySelector('[data-relay-rotate-dismiss]')?.addEventListener('click', () => { document.body.classList.add('rotate-dismissed'); rotate.classList.remove('is-visible'); }); }
   };
   const getMission = () => { const number = Number(($('missionNumber')?.textContent || '').replace(/\D/g,'')); if (number >= 1 && missions[number - 1]) return missions[number - 1]; const title = ($('objective')?.textContent || '').trim().toLowerCase(); return missions.find(mission => mission.title.toLowerCase() === title) || missions[0]; };
   const missionIntel = mission => {
@@ -109,14 +108,13 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
   };
   let intelTimer;
   const showIntel = reason => { ensureGameplayElements(); const play = $('play'); const intro = $('intro'); const intel = $('relayGameplayIntel'); const mission = getMission(); if (!intel || !mission || !play || intro && !intro.classList.contains('hidden')) return; const [title,detail,meta] = missionIntel(mission); intel.querySelector('.intel-title').textContent = title; intel.querySelector('.intel-detail').textContent = detail; intel.querySelector('.intel-meta').innerHTML = meta.map(item=>`<span class="intel-pill">${item}</span>`).join('') + `<span class="intel-pill">${String(reason || 'MISSION').toUpperCase()}</span>`; intel.classList.add('is-active'); window.clearTimeout(intelTimer); intelTimer = window.setTimeout(()=>intel.classList.remove('is-active'),4200); };
-  const syncRotateCard = () => { ensureGameplayElements(); const rotate=$('relayRotateCard'), play=$('play'), intro=$('intro'), finish=$('finish'), gameOver=$('gameOver'); if (!rotate || !play) return; const gameplayVisible=!play.classList.contains('hidden') && !!intro?.classList.contains('hidden') && !!finish?.classList.contains('hidden') && !!gameOver?.classList.contains('hidden'); const shouldShow=!!(window.innerWidth<=760 || document.body.classList.contains('is-touch')) && window.matchMedia('(orientation: portrait)').matches && gameplayVisible && !document.body.classList.contains('rotate-dismissed'); rotate.classList.toggle('is-visible',shouldShow); };
-  const bindGameplayObservers = () => { ensureGameplayElements(); ['missionNumber','objective','routeIntel'].map(id=>$(id)).filter(Boolean).forEach(node=>new MutationObserver(()=>{showIntel('ROUTE UPDATE');syncRotateCard();}).observe(node,{childList:true,characterData:true,subtree:true})); window.addEventListener('resize',syncRotateCard,{passive:true}); window.addEventListener('orientationchange',()=>{document.body.classList.remove('rotate-dismissed');window.setTimeout(syncRotateCard,120)},{passive:true}); window.addEventListener('gameplay:v12:event',event=>showIntel(event.detail?.type || 'EVENT')); window.addEventListener('relay:mission-intelligence',event=>showIntel(event.detail?.reason || 'INTEL')); };
-  const install = () => { 
+  const bindGameplayObservers = () => { ensureGameplayElements(); ['missionNumber','objective','routeIntel'].map(id=>$(id)).filter(Boolean).forEach(node=>new MutationObserver(()=>{showIntel('ROUTE UPDATE');}).observe(node,{childList:true,characterData:true,subtree:true})); window.addEventListener('gameplay:v12:event',event=>showIntel(event.detail?.type || 'EVENT')); window.addEventListener('relay:mission-intelligence',event=>showIntel(event.detail?.reason || 'INTEL')); };
+  const install = () => {
     if (!document.querySelector('link[href="./unified-gameplay-ui-v1.css"]')) { const link=document.createElement('link'); link.rel='stylesheet'; link.href='./unified-gameplay-ui-v1.css'; document.head.append(link); }
     if (!$('relayUpdateCenter')) { const host=document.createElement('section'); host.id='relayUpdateCenter'; host.className='relay-update-center hidden'; host.setAttribute('aria-label','Live updates'); document.body.append(host); }
-    injectHomeLinks(); bindLegacyUpdateSurface(); bindGameplayObservers(); syncRotateCard();
+    injectHomeLinks(); bindLegacyUpdateSurface(); bindGameplayObservers();
     window.relayUpdateCenter=Object.freeze({open:renderUpdateCenter,refresh:refreshUpdates,publish:addLiveUpdate});
-    window.relayGameplayUI=Object.freeze({showIntel,syncRotate:syncRotateCard});
+    window.relayGameplayUI=Object.freeze({showIntel});
     window.addEventListener('relay:update',event=>addLiveUpdate(event.detail));
     window.addEventListener('relay:live-update',event=>addLiveUpdate(event.detail));
     window.addEventListener('storage',event=>{if(event.key===UPDATE_KEY && $('relayUpdateCenter') && !$('relayUpdateCenter').classList.contains('hidden')) renderUpdateCenter();});

@@ -12,7 +12,7 @@
 
    Notes:
    - Gameplay HUD is landscape-only on touch devices.
-   - Portrait is intentionally blocked with a rotate prompt.
+   - Portrait hides the gameplay controls without showing a rotate prompt.
    - Input ownership remains in mobile-input-single-owner-v1.js.
    - Crouch/Dash injected controls remain supported by ID.
    ========================================================= */
@@ -326,34 +326,12 @@
   }
 
   /* ---------------------------------------------------------
-     PORTRAIT — ROTATE DEVICE / DO NOT SHOW GAME HUD
+     PORTRAIT — HIDE GAME CONTROLS WITHOUT A ROTATE PROMPT
      --------------------------------------------------------- */
 
   @media (orientation: portrait) {
     html body.is-touch #play .mobile-controls {
       display: none !important;
-    }
-
-    html body.is-touch #play::before {
-      content: "ROTATE YOUR DEVICE" !important;
-      position: fixed !important;
-      inset: 0 !important;
-      z-index: 10000 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      padding: 28px !important;
-      box-sizing: border-box !important;
-      background:
-        radial-gradient(circle at center, rgba(17,40,58,.97), rgba(2,7,14,.995)) !important;
-      color: #e8fbff !important;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
-      font-size: clamp(18px, 5vw, 30px) !important;
-      font-weight: 900 !important;
-      letter-spacing: .12em !important;
-      line-height: 1.15 !important;
-      text-align: center !important;
-      text-wrap: balance !important;
     }
   }
 
