@@ -9,8 +9,17 @@ const bootstrap = fs.readFileSync(new URL('relay-ui-init.js', root), 'utf8');
 
 const syntax = spawnSync(process.execPath, ['--check', runtimePath.pathname], { encoding: 'utf8' });
 assert.equal(syntax.status, 0, syntax.stderr || 'route choice branching failed node --check');
-assert.match(runtime, /SAFE ROUTE \/\/ STABLE LINE OPEN/);
-assert.match(runtime, /HOT ROUTE \/\/ ALTERNATE LINE OPEN/);
+
+for (const mission of ['first-delivery', 'dead-drop', 'blackout', 'pursuit', 'signal-storm', 'corporate-lockdown', 'final-relay']) {
+  assert.match(runtime, new RegExp(`['\\"]?${mission.replace('-', '\\-')}['\\"]?\\s*:`), `missing mission profile: ${mission}`);
+}
+
+assert.match(runtime, /safeIndex: 1/);
+assert.match(runtime, /hotIndex: 2/);
+assert.match(runtime, /activationProgress/);
+assert.match(runtime, /source: 'mission-profile'/);
+assert.match(runtime, /SAFE ROUTE/);
+assert.match(runtime, /HOT ROUTE/);
 assert.match(runtime, /relay:variety-route/);
 assert.match(runtime, /relay:route-branch-applied/);
 assert.match(runtime, /disableBody/);
