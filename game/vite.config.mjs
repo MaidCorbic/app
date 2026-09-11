@@ -45,107 +45,6 @@ function relayLegacyAssetAliases() {
   };
 }
 
-function relayTransform(name, predicate, transform) {
-  return { name, transform(code, id) {
-    if (!predicate(id)) return null;
-    const transformed = transform(code);
-    return transformed === code ? null : { code: transformed, map: null };
-  } };
-}
-
-function relayCargoStateImportFix() {
-  return relayTransform(
-    'relay-cargo-state-import-fix',
-    id => id.endsWith('/cargo-integrity-v2.js'),
-    code => code
-      .replace("import { packages } from './src/packages.js';", "import { packages } from './src/packages.js';\nimport { loadState, saveState } from './src/state.js';")
-      .replace("import('./src/state.js').then(({ loadState, saveState }) => {", "Promise.resolve().then(() => ({ loadState, saveState })).then(({ loadState, saveState }) => {")
-  );
-}
-
-function relayRunnerZoomStabilityFix() {
-  return {
-    name: 'relay-runner-zoom-stability-fix',
-    enforce: 'post',
-    transform(code, id) {
-      if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
-
-      const hasBrokenZoomSignature =
-        code.includes('CAMERA · SPEED ZOOM') ||
-        code.includes('targetZoom = 1.035') ||
-        code.includes('targetZoom = 1.026') ||
-        code.includes('targetZoom = 1.014') ||
-        code.includes('targetZoom = 1.045') ||
-        code.includes('this.cameras.main.zoom =');
-
-      const hasHardLandingTdzSignature =
-        /const hardLanding\s*=\s*this\.fallSpeed\s*>\s*260\s*;/.test(code) &&
-        /this\.game\.events\.emit\(\s*'feedback',\s*hardLanding/.test(code) &&
-        /const hardLanding\s*=\s*this\.landingTimer\s*>\s*0\s*&&\s*this\.fallSpeed\s*>\s*260\s*;/.test(code);
-
-      if (!hasBrokenZoomSignature && !hasHardLandingTdzSignature) return null;
-
-      let transformed = code;
-
-      transformed = transformed.replace(
-        /\/\/ CAMERA · SPEED ZOOM[\s\S]*?\n\}\s*\n\s*const parallaxBoost\s*=/,
-        'const parallaxBoost ='
-      );
-
-      transformed = transformed.replace(
-        /(\/\* Speed-based cinematic zoom\. \*\/)([\s\S]*?)(\/\* Smooth camera motion\. \*\/)/,
-        (_match, start, block, end) => `${start}${block.replace(/\btargetZoom\s*=\s*1\.(035|026|014|045)/g, 'cinematicTargetZoom = 1.$1')}${end}`
-      );
-
-      if (!/const targetZoom = Math\.max\(\s*cinematicTargetZoom,\s*speedZoomTarget\s*\);/.test(transformed)) {
-        transformed = transformed.replace(
-          /(const speedZoomTarget\s*=\s*1 \+ speedZoom;)/,
-          '$1\n\nconst targetZoom = Math.max(\n  cinematicTargetZoom,\n  speedZoomTarget\n);'
-        );
-      }
-
-      if (hasHardLandingTdzSignature) {
-        transformed = transformed.replace(
-          /\n\s*const hardLanding\s*=\s*this\.landingTimer\s*>\s*0\s*&&\s*this\.fallSpeed\s*>\s*260\s*;/,
-          ''
-        );
-
-        transformed = transformed.replace(
-          /(if\s*\(\s*onGround\s*&&\s*!this\.wasGrounded\s*&&\s*this\.fallSpeed\s*>\s*80\s*\)\s*\{)/,
-          'let hardLanding = false;\n\n$1'
-        );
-
-        transformed = transformed.replace(
-          /\bconst hardLanding\s*=\s*this\.fallSpeed\s*>\s*260\s*;/,
-          'hardLanding = this.fallSpeed > 260;'
-        );
-
-        if (!/let hardLanding = false;/.test(transformed) || !/hardLanding = this\.fallSpeed > 260;/.test(transformed)) {
-          throw new Error(`relay-runner-zoom-stability-fix: failed to normalize hardLanding state in ${id}`);
-        }
-
-        if (/const hardLanding\s*=\s*this\.landingTimer\s*>\s*0/.test(transformed)) {
-          throw new Error(`relay-runner-zoom-stability-fix: duplicate outer hardLanding declaration remains in ${id}`);
-        }
-      }
-
-      if (/targetZoom\s*=\s*1\.(035|026|014|045)/.test(transformed)) {
-        throw new Error(`relay-runner-zoom-stability-fix: unresolved targetZoom assignment in ${id}`);
-      }
-
-      if (!/const targetZoom = Math\.max\(\s*cinematicTargetZoom,\s*speedZoomTarget\s*\);/.test(transformed)) {
-        throw new Error(`relay-runner-zoom-stability-fix: missing final targetZoom declaration in ${id}`);
-      }
-
-      if (/this\.cameras\.main\.zoom\s*=/.test(transformed)) {
-        throw new Error(`relay-runner-zoom-stability-fix: duplicate direct camera zoom remains in ${id}`);
-      }
-
-      return { code: transformed, map: null };
-    },
-  };
-}
-
 export default defineConfig({
   server: {
     host: '0.0.0.0',
@@ -153,8 +52,6 @@ export default defineConfig({
     allowedHosts: ['.diploi.me'],
   },
   plugins: [
-    relayCargoStateImportFix(),
-    relayRunnerZoomStabilityFix(),
     relayLegacyAssetAliases(),
   ],
   build: {
