@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { chromium } from 'playwright';
+import { chromium, devices } from 'playwright';
 
 const PORT = 4173;
 const BASE_URL = `http://localhost:${PORT}/`;
@@ -73,7 +73,9 @@ function assertNoPairwiseOverlap(rects, label) {
 }
 
 async function runMobileViewport(browser, viewport) {
+  const device = devices['Pixel 5'];
   const context = await browser.newContext({
+    ...device,
     viewport: { width: viewport.width, height: viewport.height },
     isMobile: true,
     hasTouch: true,
@@ -95,6 +97,9 @@ async function runMobileViewport(browser, viewport) {
     const initial = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
       innerWidth: window.innerWidth,
+      pointerCoarse: matchMedia('(pointer:coarse)').matches,
+      hoverNone: matchMedia('(hover:none)').matches,
+      touchPoints: navigator.maxTouchPoints,
       touchControls: document.querySelectorAll('[data-mobile-action]').length,
       joystickCount: document.querySelectorAll('[data-mobile-joystick]').length,
       pauseVisible: !document.querySelector('#pauseMenu')?.classList.contains('hidden'),
@@ -109,15 +114,14 @@ async function runMobileViewport(browser, viewport) {
 
     assert.equal(initial.touchControls, 6, `Expected exactly 6 mobile action buttons at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.joystickCount, 1, `Expected exactly 1 movement joystick at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.pointerCoarse, true, `Release QA requires a coarse primary pointer at ${viewport.width}x${viewport.height}`);
+    assert(initial.touchPoints > 0, `Release QA requires touch points at ${viewport.width}x${viewport.height}`);
     assert(
       initial.scrollWidth <= initial.innerWidth + 1,
       `Horizontal overflow detected at ${viewport.width}x${viewport.height}: ${initial.scrollWidth}px > ${initial.innerWidth}px`,
     );
 
     if (viewport.orientation === 'portrait') {
-      // Portrait is intentionally orientation-locked: gameplay touch controls are hidden.
-      // The dedicated gameplay-touch-lock and portrait-controls contracts validate the
-      // orientation/prompt styling; this browser smoke test only asserts the effective runtime state.
       assert.equal(initial.mobileControlsVisible, false, `Touch controls should be locked in portrait at ${viewport.width}x${viewport.height}`);
       assert.equal(initial.pauseVisible, false, `Pause HUD should remain inaccessible while portrait lock is active at ${viewport.width}x${viewport.height}`);
       assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
