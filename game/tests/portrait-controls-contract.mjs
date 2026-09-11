@@ -1,8 +1,16 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 const css=fs.readFileSync(new URL('../mobile-final-polish.css',import.meta.url),'utf8');
+const js=fs.readFileSync(new URL('../pause-interactions.js',import.meta.url),'utf8');
 assert.match(css,/orientation:portrait.*pointer:coarse/);
 assert.match(css,/body\.is-touch \.mobile-controls\{display:none!important\}/);
 assert.match(css,/orientation:landscape.*pointer:coarse/);
 assert.match(css,/body\.is-touch \.mobile-controls\{display:flex!important\}/);
+assert.match(js,/id = 'mobileRotatePrompt'/);
+assert.match(js,/ROTATE YOUR DEVICE/);
+assert.match(js,/#cargoIntegrityV2/);
+assert.match(js,/#play \.hud-xp/);
+assert.match(js,/#play #pause/);
+assert.match(js,/#mobileBottomHud \.mobile-menu-pause/);
+assert.match(js,/orientation: portrait/);
 console.log('portrait/landscape controls contract passed');
