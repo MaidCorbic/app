@@ -14,8 +14,14 @@ assert.match(runtime, /boostedScore/);
 assert.match(runtime, /publish\(result\)/);
 
 assert.match(routeRuntime, /state\.route\s*=\s*route/);
-assert.match(routeRuntime, /multiplier\s*=\s*route === 'hot' \? 1\.5 : 1/);
+assert.match(routeRuntime, /MISSION_ROUTE_CONSEQUENCES/);
+assert.match(routeRuntime, /multiplier:\s*1\.35/);
+assert.match(routeRuntime, /multiplier:\s*1\.5/);
+assert.match(routeRuntime, /multiplier:\s*1\.55/);
+assert.match(routeRuntime, /multiplier:\s*1\.65/);
+assert.match(routeRuntime, /multiplier:\s*1\.7/);
+assert.match(routeRuntime, /multiplier:\s*1\.75/);
 assert.match(routeRuntime, /varietyRoute.*hot/);
 assert.match(routeRuntime, /dynamicEncounter.*ambush/);
 
-console.log('gameplay route score bonus contract: ok');
+console.log('gameplay route score bonus mission multiplier contract: ok');
