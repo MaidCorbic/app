@@ -1,17 +1,70 @@
 // RUNNER RELAY — GAMEPLAY ROUTE CHOICE V2
 // Integrates the existing gameplay systems without becoming a new mission/enemy owner.
-// SAFE reduces one nearby non-boss threat for a short window.
-// HOT marks one nearby non-boss threat as an aggressive pressure target for a short window.
+// SAFE reduces nearby non-boss threats for a short mission-specific window.
+// HOT marks nearby non-boss threats as mission-specific pressure targets for a short window.
 // Both effects are reversible and scoped to one run.
 
 import { RunnerScene } from '../scenes/RunnerScene.js';
 
 const states = new WeakMap();
 const ACTIONS = new Set(['dash', 'jump', 'vault', 'sword', 'fire', 'build']);
-const WINDOW_MS = 5200;
+const DEFAULT_WINDOW_MS = 5200;
 const ACTIVATION_PROGRESS = 0.42;
 
+// The route choice now changes the *kind* of pressure per mission while reusing
+// the existing enemy/dynamic-encounter state. No new gameplay owner is created.
+const MISSION_ROUTE_CONSEQUENCES = Object.freeze({
+  'first-delivery': {
+    safe: { targetCount: 1, windowMs: 5200, multiplier: 1, cue: 'SAFE ROUTE // TRAINING LINE CLEAR' },
+    hot: { targetCount: 1, windowMs: 5000, multiplier: 1.35, encounter: 'ambush', cue: 'HOT ROUTE // FIRST CONTACT AMBUSH' }
+  },
+  'dead-drop': {
+    safe: { targetCount: 1, windowMs: 5600, multiplier: 1, cue: 'SAFE ROUTE // DOCK LINE SECURED' },
+    hot: { targetCount: 2, windowMs: 6200, multiplier: 1.5, encounter: 'ambush', cue: 'HOT ROUTE // DOCK CUT-OFF' }
+  },
+  blackout: {
+    safe: { targetCount: 2, windowMs: 6200, multiplier: 1, cue: 'SAFE ROUTE // LIGHT CORRIDOR STABLE' },
+    hot: { targetCount: 2, windowMs: 5600, multiplier: 1.55, encounter: 'ambush', cue: 'HOT ROUTE // GRID SECURITY SURGE' }
+  },
+  pursuit: {
+    safe: { targetCount: 1, windowMs: 4500, multiplier: 1, cue: 'SAFE ROUTE // ESCAPE WINDOW OPEN' },
+    hot: { targetCount: 2, windowMs: 7600, multiplier: 1.65, encounter: 'pursuit', cue: 'HOT ROUTE // INTERCEPTORS INBOUND' }
+  },
+  'signal-storm': {
+    safe: { targetCount: 1, windowMs: 5400, multiplier: 1, cue: 'SAFE ROUTE // SIGNAL LANE STABLE' },
+    hot: { targetCount: 2, windowMs: 6200, multiplier: 1.55, encounter: 'ambush', cue: 'HOT ROUTE // STORM INTERCEPT' }
+  },
+  'corporate-lockdown': {
+    safe: { targetCount: 2, windowMs: 5000, multiplier: 1, cue: 'SAFE ROUTE // SECURITY WINDOW OPEN' },
+    hot: { targetCount: 2, windowMs: 7600, multiplier: 1.7, encounter: 'pursuit', cue: 'HOT ROUTE // HELIX INTERCEPTOR DEPLOYED' }
+  },
+  'final-relay': {
+    safe: { targetCount: 1, windowMs: 4600, multiplier: 1, cue: 'SAFE ROUTE // FINAL LINE STABILIZED' },
+    hot: { targetCount: 2, windowMs: 8200, multiplier: 1.75, encounter: 'pursuit', cue: 'HOT ROUTE // FINAL INTERCEPT' }
+  }
+});
+
 const clamp = (v, min = 0, max = 1) => Math.max(min, Math.min(max, Number(v) || 0));
+
+function missionId(scene) {
+  const candidates = [
+    scene?.mission?.id,
+    scene?.sys?.settings?.data?.missionId,
+    scene?.sys?.settings?.data?.mission,
+    scene?.registry?.get?.('missionId')
+  ];
+  return candidates.find(value => typeof value === 'string' && value.length > 0) || 'unknown';
+}
+
+function routeConfig(scene, route) {
+  return MISSION_ROUTE_CONSEQUENCES[missionId(scene)]?.[route] || {
+    targetCount: route === 'hot' ? 1 : 1,
+    windowMs: DEFAULT_WINDOW_MS,
+    multiplier: route === 'hot' ? 1.5 : 1,
+    encounter: route === 'hot' ? 'ambush' : null,
+    cue: route === 'hot' ? 'HOT ROUTE // INTERCEPTOR ENGAGED' : 'SAFE ROUTE // THREAT DISENGAGED'
+  };
+}
 
 function progressOf(scene) {
   const mission = scene?.mission;
@@ -84,9 +137,10 @@ function restoreAll(state) {
   state.enemySnapshots.clear();
 }
 
-function selectTarget(scene, route) {
+function selectTargets(scene, route, config) {
   const player = scene?.player;
-  if (!player) return null;
+  if (!player) return [];
+
   const candidates = enemiesOf(scene)
     .filter(enemy => !enemy.getData?.('boss'))
     .filter(enemy => {
@@ -94,43 +148,72 @@ function selectTarget(scene, route) {
       return dx > 180 && dx < 1050 && Math.abs(Number(enemy.y) - Number(player.y)) < 420;
     })
     .sort((a, b) => Math.abs(Number(a.x) - Number(player.x)) - Math.abs(Number(b.x) - Number(player.x)));
-  if (!candidates.length) return null;
-  return route === 'hot' ? candidates[Math.min(1, candidates.length - 1)] : candidates[0];
+
+  if (!candidates.length) return [];
+  const count = Math.max(1, Math.min(Number(config.targetCount) || 1, candidates.length));
+  return route === 'hot'
+    ? candidates.slice(Math.max(0, candidates.length - count))
+    : candidates.slice(0, count);
 }
 
 function activateRoute(scene, state, route) {
   if (state.effectActive || !['safe', 'hot'].includes(route)) return;
-  const target = selectTarget(scene, route);
+
+  const config = routeConfig(scene, route);
+  const targets = selectTargets(scene, route, config);
+  const id = missionId(scene);
+
   state.route = route;
-  state.multiplier = route === 'hot' ? 1.5 : 1;
+  state.multiplier = config.multiplier;
+  state.routeEffect = config.encounter || (route === 'safe' ? 'threat-disengaged' : 'pressure-targeted');
   state.effectActive = true;
-  state.effectUntil = performance.now() + WINDOW_MS;
-  state.target = target;
-  if (!target) {
-    showCue(scene, route === 'hot' ? 'HOT ROUTE // NO TARGET — CLEAR LANE' : 'SAFE ROUTE // CLEAR LANE');
+  state.effectUntil = performance.now() + config.windowMs;
+  state.targets = targets;
+
+  if (!targets.length) {
+    showCue(scene, config.cue);
+    try {
+      scene?.game?.events?.emit?.('relay:variety-route-effect', {
+        missionId: id,
+        route,
+        effect: state.routeEffect,
+        targetCount: 0,
+        durationMs: config.windowMs
+      });
+    } catch {}
     return;
   }
 
-  snapshotEnemy(state, target);
+  targets.forEach(target => snapshotEnemy(state, target));
+
   try {
-    if (route === 'safe') {
-      target.disableBody?.(false, false);
-      target.setData?.('varietyRoute', 'safe');
-      target.setTint?.(0x527686);
-      showCue(scene, 'SAFE ROUTE // THREAT DISENGAGED');
-      try { scene?.game?.events?.emit?.('relay:variety-route-effect', { route, effect: 'threat-disengaged' }); } catch {}
-    } else {
-      const player = scene?.player;
-      target.setData?.('varietyRoute', 'hot');
-      target.setData?.('dynamicEncounter', 'ambush');
-      target.setData?.('dynamicEncounterUntil', state.effectUntil);
-      target.setData?.('dynamicEncounterRoute', 'hot');
-      target.setTint?.(0xff6b6b);
-      const direction = Number(target.x) < Number(player?.x) ? 1 : -1;
-      target.setVelocityX?.(direction * 125);
-      showCue(scene, 'HOT ROUTE // INTERCEPTOR ENGAGED');
-      try { scene?.game?.events?.emit?.('relay:variety-route-effect', { route, effect: 'pressure-targeted' }); } catch {}
-    }
+    targets.forEach(target => {
+      if (route === 'safe') {
+        target.disableBody?.(false, false);
+        target.setData?.('varietyRoute', 'safe');
+        target.setTint?.(0x527686);
+      } else {
+        const player = scene?.player;
+        target.setData?.('varietyRoute', 'hot');
+        target.setData?.('dynamicEncounter', config.encounter || 'ambush');
+        target.setData?.('dynamicEncounterUntil', state.effectUntil);
+        target.setData?.('dynamicEncounterRoute', 'hot');
+        target.setTint?.(0xff6b6b);
+        const direction = Number(target.x) < Number(player?.x) ? 1 : -1;
+        target.setVelocityX?.(direction * (config.encounter === 'pursuit' ? 145 : 125));
+      }
+    });
+
+    showCue(scene, config.cue);
+    try {
+      scene?.game?.events?.emit?.('relay:variety-route-effect', {
+        missionId: id,
+        route,
+        effect: state.routeEffect,
+        targetCount: targets.length,
+        durationMs: config.windowMs
+      });
+    } catch {}
   } catch (error) {
     console.warn('[GameplayRouteChoiceV2] route effect skipped', error);
   }
@@ -139,20 +222,23 @@ function activateRoute(scene, state, route) {
 function applyChoice(scene, state, route) {
   state.routeChoices += 1;
   state.route = route;
-  state.multiplier = route === 'hot' ? 1.5 : 1;
+  state.multiplier = routeConfig(scene, route).multiplier;
   state.requestedAt = performance.now();
   state.armed = true;
+  const config = routeConfig(scene, route);
   showCue(scene, route === 'hot' ? 'HOT ROUTE // ARMED' : 'SAFE ROUTE // ARMED');
   try {
     scene?.game?.events?.emit?.('relay:variety-route', {
       route,
       multiplier: state.multiplier,
+      missionId: missionId(scene),
+      missionConsequence: config.encounter || (route === 'safe' ? 'threat-disengaged' : 'pressure-targeted'),
       gameplayIntegrated: true
     });
   } catch {}
 }
 
-function update(scene, state, now) {
+function update(scene, state) {
   if (!state?.armed || state.effectActive || progressOf(scene) < ACTIVATION_PROGRESS) return;
   activateRoute(scene, state, state.route);
 }
@@ -171,7 +257,7 @@ function init(scene) {
   if (!scene || states.has(scene)) return;
   const state = {
     route: 'safe', multiplier: 1, routeChoices: 0, requestedAt: 0,
-    armed: false, effectActive: false, effectUntil: 0, target: null,
+    armed: false, effectActive: false, effectUntil: 0, targets: [], routeEffect: null,
     enemySnapshots: new Map(), raf: 0, feedbackBound: false, feedbackHandler: null
   };
   states.set(scene, state);
@@ -199,11 +285,17 @@ function init(scene) {
       if (state.effectActive && now >= state.effectUntil) {
         restoreAll(state);
         state.effectActive = false;
-        state.target = null;
-        try { scene?.game?.events?.emit?.('relay:variety-route-effect', { route: state.route, effect: 'window-complete' }); } catch {}
+        state.targets = [];
+        try {
+          scene?.game?.events?.emit?.('relay:variety-route-effect', {
+            missionId: missionId(scene),
+            route: state.route,
+            effect: 'window-complete'
+          });
+        } catch {}
         showCue(scene, state.route === 'hot' ? 'HOT ROUTE // PRESSURE WINDOW COMPLETE' : 'SAFE ROUTE // LANE STABLE');
       }
-      update(scene, state, now);
+      update(scene, state);
     } catch (error) {
       console.warn('[GameplayRouteChoiceV2] update skipped', error);
     }
