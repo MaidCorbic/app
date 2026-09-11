@@ -1,107 +1,2223 @@
 /* Relay Runner — release-candidate UX/gameplay polish.
  * Presentation/interaction guardrails for desktop + mobile.
- * Keeps the existing visual language but removes legacy overlap and release-only rough edges.
+ * WARZONE TACTICAL MAP REDESIGN
+ * Keeps existing gameplay/map renderer and removes legacy overlap.
  */
 
-/* HOME / SETTINGS: exactly one readable scroll surface. */
+
+/* =========================================================
+   HOME / SETTINGS
+   ========================================================= */
+
 #titlePanel.relay-options-unified .relay-options-body,
 #pauseMenu.relay-options-unified .relay-options-body{
   scrollbar-width:thin !important;
-  scrollbar-color:rgba(141,244,255,.72) rgba(255,255,255,.045) !important;
+  scrollbar-color:
+    rgba(141,244,255,.72)
+    rgba(255,255,255,.045) !important;
+
   overscroll-behavior:contain !important;
   scroll-behavior:smooth !important;
 }
+
 #titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar,
-#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar{width:8px !important;height:8px !important}
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar{
+  width:8px !important;
+  height:8px !important;
+}
+
 #titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-track,
-#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-track{background:rgba(255,255,255,.045) !important;border-radius:999px !important}
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.045) !important;
+  border-radius:999px !important;
+}
+
 #titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb,
-#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(141,244,255,.86),rgba(85,189,218,.56)) !important;border:1px solid rgba(1,8,16,.75) !important;border-radius:999px !important;box-shadow:0 0 10px rgba(141,244,255,.12) !important}
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(141,244,255,.86),
+      rgba(85,189,218,.56)
+    ) !important;
+
+  border:
+    1px solid
+    rgba(1,8,16,.75) !important;
+
+  border-radius:999px !important;
+
+  box-shadow:
+    0 0 10px
+    rgba(141,244,255,.12) !important;
+}
+
 #titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb:hover,
-#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(232,253,255,.98),rgba(94,211,245,.8)) !important}
+#pauseMenu.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb:hover{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(232,253,255,.98),
+      rgba(94,211,245,.8)
+    ) !important;
+}
+
 #titlePanel.relay-options-unified .relay-option-card,
-#pauseMenu.relay-options-unified .relay-option-card{min-width:0 !important}
+#pauseMenu.relay-options-unified .relay-option-card{
+  min-width:0 !important;
+}
+
 #titlePanel.relay-options-unified .relay-option-copy,
-#pauseMenu.relay-options-unified .relay-option-copy{min-width:0 !important;overflow-wrap:anywhere !important}
+#pauseMenu.relay-options-unified .relay-option-copy{
+  min-width:0 !important;
+  overflow-wrap:anywhere !important;
+}
+
 #titlePanel.relay-options-unified .relay-option-copy strong,
-#pauseMenu.relay-options-unified .relay-option-copy strong{max-width:100% !important;line-height:1.1 !important}
+#pauseMenu.relay-options-unified .relay-option-copy strong{
+  max-width:100% !important;
+  line-height:1.1 !important;
+}
 
-/* GAMEPLAY PAUSE STATUS — neutral cyan presentation instead of the old gold block. */
+
+/* =========================================================
+   GAMEPLAY PAUSE STATUS
+   ========================================================= */
+
 #pauseMenu .relay-pause-brief{
-  display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 12px;align-items:center;
-  margin:0 24px 14px;padding:11px 14px;border:1px solid rgba(141,244,255,.24);border-left:2px solid rgba(141,244,255,.78);border-radius:10px;
-  background:linear-gradient(145deg,rgba(9,23,36,.94),rgba(3,10,17,.97));box-shadow:inset 0 0 22px rgba(141,244,255,.035),0 10px 30px rgba(0,0,0,.26)
+  display:grid;
+
+  grid-template-columns:
+    auto
+    minmax(0,1fr);
+
+  gap:10px 12px;
+
+  align-items:center;
+
+  margin:
+    0
+    24px
+    14px;
+
+  padding:
+    11px
+    14px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.24);
+
+  border-left:
+    2px solid
+    rgba(141,244,255,.78);
+
+  border-radius:10px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(9,23,36,.94),
+      rgba(3,10,17,.97)
+    );
+
+  box-shadow:
+    inset 0 0 22px
+      rgba(141,244,255,.035),
+    0 10px 30px
+      rgba(0,0,0,.26);
 }
-#pauseMenu .relay-pause-brief .pause-badge{min-width:74px;color:#8df4ff;font:900 9px/1.1 "DM Mono",monospace;letter-spacing:.18em;text-transform:uppercase}
-#pauseMenu .relay-pause-brief .pause-copy{min-width:0}
-#pauseMenu .relay-pause-brief strong{display:block;color:#f3fbff;font:900 10px/1.25 "DM Mono",monospace;letter-spacing:.12em}
-#pauseMenu .relay-pause-brief span{display:block;margin-top:3px;color:rgba(213,235,246,.66);font:700 10px/1.35 "DM Mono",monospace}
 
-/* Remove only known legacy yellow rectangle / strip variants. */
-#intro .gold-rect,#intro .gold-bar,#intro .gold-strip,#intro .yellow-rect,#intro .yellow-bar,
-#play .gold-rect,#play .gold-bar,#play .gold-strip,#play .yellow-rect,#play .yellow-bar,
-#intro [data-gold-rect],#play [data-gold-rect],#intro .legacy-gold-block,#play .legacy-gold-block,
-#intro .release-hidden-yellow,#play .release-hidden-yellow{display:none !important;visibility:hidden !important;pointer-events:none !important}
-#intro .backdrop-sun{display:none !important;visibility:hidden !important}
+#pauseMenu .relay-pause-brief .pause-badge{
+  min-width:74px;
 
-/* Faction intel: always stays inside the viewport. */
-#play .relay-faction-dialogue{width:min(420px,calc(100vw - 28px)) !important;max-width:min(420px,calc(100vw - 28px)) !important;min-width:0 !important}
-#play .relay-faction-dialogue .relay-faction-text,#play .relay-faction-dialogue .relay-faction-footer,#play .relay-faction-dialogue .relay-faction-name,#play .relay-faction-dialogue .relay-faction-kicker{min-width:0 !important;overflow-wrap:anywhere !important}
+  color:#8df4ff;
 
-/* Tactical mission map: modern competitive-FPS briefing language. */
-#relayGameplayIntroFinalV3 .map-briefing-shell{width:min(1440px,97vw) !important;height:min(900px,94dvh) !important}
-#relayGameplayIntroFinalV3 .map-briefing-map-wrap{background:radial-gradient(circle at 50% 50%,rgba(44,115,136,.16),transparent 58%),#02070a !important;border-color:rgba(80,201,229,.28) !important}
-#relayGameplayIntroFinalV3 .map-briefing-map .grid{stroke:#1b6174 !important;opacity:.44 !important}
-#relayGameplayIntroFinalV3 .map-briefing-map .platform{fill:#0c1920 !important;stroke:#2f7182 !important}
-#relayGameplayIntroFinalV3 .map-briefing-map .route{stroke:#66d8ef !important;stroke-width:3.2 !important;stroke-dasharray:7 6 !important;filter:drop-shadow(0 0 5px rgba(102,216,239,.22)) !important}
-#relayGameplayIntroFinalV3 .map-briefing-map .route-halo{stroke:#66d8ef !important;opacity:.18 !important}
-#relayGameplayIntroFinalV3 .map-briefing-map .marker-start{fill:#49b879 !important;stroke:#d7ffe8 !important}
-#relayGameplayIntroFinalV3 .map-briefing-map .marker-goal{fill:#ff5f6f !important;stroke:#ffe1e5 !important}
-#relayGameplayIntroFinalV3 .map-briefing-map .marker-player{fill:#f3fbff !important;stroke:#66d8ef !important}
-#relayGameplayIntroFinalV3 .aaa-map-chrome{pointer-events:none !important}
-#relayGameplayIntroFinalV3 .aaa-map-topline,#relayGameplayIntroFinalV3 .aaa-map-bottomline{color:rgba(173,227,239,.72) !important;letter-spacing:.16em !important}
-#relayGameplayIntroFinalV3 .aaa-map-live{color:#78e9f7 !important}
-#relayGameplayIntroFinalV3 .aaa-map-live i{background:#78e9f7 !important;box-shadow:0 0 10px rgba(120,233,247,.64) !important}
-#relayGameplayIntroFinalV3 .aaa-map-card{border-color:rgba(80,201,229,.25) !important;background:linear-gradient(145deg,rgba(7,16,23,.96),rgba(2,8,12,.98)) !important;box-shadow:0 20px 60px rgba(0,0,0,.52),inset 0 0 24px rgba(80,201,229,.035) !important}
-#relayGameplayIntroFinalV3 .aaa-card-accent{background:linear-gradient(180deg,#66d8ef,transparent) !important}
-#relayGameplayIntroFinalV3 .aaa-card-status span:last-of-type,#relayGameplayIntroFinalV3 .aaa-card-title,#relayGameplayIntroFinalV3 .aaa-card-objective strong{color:#edfaff !important}
-#relayGameplayIntroFinalV3 .aaa-card-status b,#relayGameplayIntroFinalV3 .aaa-card-kicker,#relayGameplayIntroFinalV3 .aaa-card-objective span{color:#66d8ef !important}
-#relayGameplayIntroFinalV3 .release-map-legend{position:absolute;left:12px;bottom:12px;z-index:12;display:flex;flex-wrap:wrap;gap:8px;padding:7px 9px;border:1px solid rgba(102,216,239,.20);border-radius:7px;background:rgba(1,8,12,.78);backdrop-filter:blur(6px);pointer-events:none}
-#relayGameplayIntroFinalV3 .release-map-legend span{display:inline-flex;align-items:center;gap:5px;color:rgba(220,244,249,.75);font:800 7px/1 "DM Mono",monospace;letter-spacing:.09em}
-#relayGameplayIntroFinalV3 .release-map-legend i{width:7px;height:7px;border-radius:50%;display:block}.legend-start{background:#49b879}.legend-route{background:#66d8ef}.legend-goal{background:#ff5f6f}.legend-threat{background:#d8a1ff}
+  font:
+    900 9px/1.1
+    "DM Mono",
+    monospace;
 
-/* Progress fill color refresh — same bar, new release palette. */
-#play .hud-progress>div{border-color:rgba(102,216,239,.22) !important;background:rgba(2,10,16,.84) !important}
-#play #progress{background:linear-gradient(90deg,#66d8ef 0%,#8df4ff 55%,#e8fdff 100%) !important;box-shadow:0 0 10px rgba(102,216,239,.25) !important}
+  letter-spacing:.18em;
 
-/* Mobile: map becomes a true full-width tactical surface with no card overflow. */
+  text-transform:uppercase;
+}
+
+#pauseMenu .relay-pause-brief .pause-copy{
+  min-width:0;
+}
+
+#pauseMenu .relay-pause-brief strong{
+  display:block;
+
+  color:#f3fbff;
+
+  font:
+    900 10px/1.25
+    "DM Mono",
+    monospace;
+
+  letter-spacing:.12em;
+}
+
+#pauseMenu .relay-pause-brief span{
+  display:block;
+
+  margin-top:3px;
+
+  color:
+    rgba(213,235,246,.66);
+
+  font:
+    700 10px/1.35
+    "DM Mono",
+    monospace;
+}
+
+
+/* =========================================================
+   REMOVE LEGACY YELLOW BLOCKS
+   ========================================================= */
+
+#intro .gold-rect,
+#intro .gold-bar,
+#intro .gold-strip,
+#intro .yellow-rect,
+#intro .yellow-bar,
+#play .gold-rect,
+#play .gold-bar,
+#play .gold-strip,
+#play .yellow-rect,
+#play .yellow-bar,
+#intro [data-gold-rect],
+#play [data-gold-rect],
+#intro .legacy-gold-block,
+#play .legacy-gold-block,
+#intro .release-hidden-yellow,
+#play .release-hidden-yellow{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+#intro .backdrop-sun{
+  display:none !important;
+  visibility:hidden !important;
+}
+
+
+/* =========================================================
+   FACTION INTEL
+   ========================================================= */
+
+#play .relay-faction-dialogue{
+  width:
+    min(
+      420px,
+      calc(100vw - 28px)
+    ) !important;
+
+  max-width:
+    min(
+      420px,
+      calc(100vw - 28px)
+    ) !important;
+
+  min-width:0 !important;
+}
+
+#play .relay-faction-dialogue .relay-faction-text,
+#play .relay-faction-dialogue .relay-faction-footer,
+#play .relay-faction-dialogue .relay-faction-name,
+#play .relay-faction-dialogue .relay-faction-kicker{
+  min-width:0 !important;
+  overflow-wrap:anywhere !important;
+}
+
+
+/* =========================================================
+   WARZONE TACTICAL MISSION MAP
+   ========================================================= */
+
+/* Main briefing shell */
+
+#relayGameplayIntroFinalV3 .map-briefing-shell{
+  position:relative !important;
+
+  width:
+    min(
+      1500px,
+      98vw
+    ) !important;
+
+  height:
+    min(
+      920px,
+      96dvh
+    ) !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+
+  display:grid !important;
+
+  grid-template-rows:
+    auto
+    minmax(0,1fr)
+    auto !important;
+
+  padding:
+    16px !important;
+
+  gap:
+    12px !important;
+
+  overflow:hidden !important;
+
+  border:
+    1px solid
+    rgba(190,201,188,.24) !important;
+
+  border-radius:
+    4px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #060808 0%,
+      #0b0e0e 42%,
+      #050708 100%
+    ) !important;
+
+  box-shadow:
+    0 30px 100px
+      rgba(0,0,0,.84),
+
+    inset 0 1px
+      rgba(255,255,255,.035),
+
+    0 0 45px
+      rgba(216,182,78,.04) !important;
+
+  isolation:isolate !important;
+}
+
+
+/* Top header */
+
+#relayGameplayIntroFinalV3 .map-briefing-head{
+  position:relative !important;
+
+  z-index:30 !important;
+
+  width:100% !important;
+
+  min-width:0 !important;
+
+  display:flex !important;
+
+  align-items:flex-start !important;
+
+  justify-content:space-between !important;
+
+  gap:24px !important;
+
+  padding:
+    4px
+    4px
+    2px !important;
+}
+
+
+/* left title */
+
+#relayGameplayIntroFinalV3 .map-briefing-kicker{
+  margin-bottom:6px !important;
+
+  color:
+    #c7a94e !important;
+
+  font-size:
+    10px !important;
+
+  line-height:1.1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .20em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+#relayGameplayIntroFinalV3 .map-briefing-title{
+  min-width:0 !important;
+
+  max-width:
+    72% !important;
+
+  margin:0 !important;
+
+  color:
+    #f3f1e8 !important;
+
+  font-size:
+    clamp(
+      27px,
+      4vw,
+      52px
+    ) !important;
+
+  line-height:
+    .94 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .055em !important;
+
+  text-transform:
+    uppercase !important;
+
+  overflow-wrap:
+    anywhere !important;
+
+  text-shadow:
+    0 2px 14px
+    rgba(0,0,0,.85) !important;
+}
+
+#relayGameplayIntroFinalV3 .map-briefing-meta{
+  margin-top:
+    9px !important;
+
+  color:
+    rgba(208,216,210,.58) !important;
+
+  font-size:
+    10px !important;
+
+  line-height:
+    1.3 !important;
+
+  font-weight:
+    700 !important;
+
+  letter-spacing:
+    .12em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+
+/* =========================================================
+   LARGE COUNTER — TOP RIGHT
+   ========================================================= */
+
+#relayGameplayIntroFinalV3 .map-briefing-timer{
+  position:relative !important;
+
+  flex:
+    0 0 auto !important;
+
+  width:
+    108px !important;
+
+  height:
+    108px !important;
+
+  min-width:
+    108px !important;
+
+  min-height:
+    108px !important;
+
+  display:flex !important;
+
+  flex-direction:
+    column !important;
+
+  align-items:
+    center !important;
+
+  justify-content:
+    center !important;
+
+  gap:0 !important;
+
+  border:
+    1px solid
+    rgba(215,184,76,.50) !important;
+
+  border-radius:
+    3px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(32,29,17,.96),
+      rgba(9,11,10,.96)
+    ) !important;
+
+  box-shadow:
+    inset 0 0 30px
+      rgba(215,184,76,.035),
+
+    0 0 30px
+      rgba(215,184,76,.06),
+
+    0 12px 30px
+      rgba(0,0,0,.46) !important;
+
+  overflow:hidden !important;
+}
+
+
+/* Counter tactical top strip */
+
+#relayGameplayIntroFinalV3 .map-briefing-timer::before{
+  content:
+    "DEPLOYMENT" !important;
+
+  position:absolute !important;
+
+  top:
+    8px !important;
+
+  left:
+    0 !important;
+
+  right:
+    0 !important;
+
+  text-align:
+    center !important;
+
+  color:
+    rgba(214,188,91,.72) !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .18em !important;
+}
+
+
+/* Corner marks */
+
+#relayGameplayIntroFinalV3 .map-briefing-timer::after{
+  content:"";
+
+  position:absolute;
+
+  right:0;
+  bottom:0;
+
+  width:17px;
+  height:17px;
+
+  border-right:
+    2px solid
+    #d7b84c;
+
+  border-bottom:
+    2px solid
+    #d7b84c;
+}
+
+
+/* Large number */
+
+#relayGameplayIntroFinalV3 .map-briefing-timer b{
+  position:relative !important;
+
+  z-index:2 !important;
+
+  margin:
+    4px
+    0
+    0 !important;
+
+  color:
+    #f5f2e8 !important;
+
+  font-family:
+    "Arial Narrow",
+    "Roboto Condensed",
+    Arial,
+    sans-serif !important;
+
+  font-size:
+    clamp(
+      42px,
+      5vw,
+      58px
+    ) !important;
+
+  line-height:
+    .86 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    -.035em !important;
+
+  text-shadow:
+    0 0 16px
+    rgba(215,184,76,.18) !important;
+}
+
+
+/* seconds label */
+
+#relayGameplayIntroFinalV3 .map-briefing-timer span{
+  position:
+    relative !important;
+
+  z-index:
+    2 !important;
+
+  margin-top:
+    10px !important;
+
+  color:
+    #d7b84c !important;
+
+  font-size:
+    9px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .24em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+
+/* =========================================================
+   MAIN MAP AREA
+   ========================================================= */
+
+#relayGameplayIntroFinalV3 .map-briefing-map-wrap{
+  position:relative !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+
+  display:flex !important;
+
+  align-items:center !important;
+  justify-content:center !important;
+
+  overflow:hidden !important;
+
+  border:
+    1px solid
+    rgba(178,190,177,.25) !important;
+
+  border-radius:
+    3px !important;
+
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(60,75,68,.15),
+      transparent 50%
+    ),
+    #020506 !important;
+
+  box-shadow:
+    inset 0 0 90px
+      rgba(0,0,0,.78),
+
+    inset 0 0 25px
+      rgba(203,170,72,.025) !important;
+}
+
+
+/* Dark tactical vignette */
+
+#relayGameplayIntroFinalV3 .map-briefing-map-wrap::before{
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  z-index:5;
+
+  pointer-events:none;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 36%,
+      rgba(0,0,0,.18) 70%,
+      rgba(0,0,0,.60) 100%
+    );
+}
+
+
+/* Scan line */
+
+#relayGameplayIntroFinalV3 .map-briefing-map-wrap::after{
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  right:0;
+
+  top:-2px;
+
+  height:2px;
+
+  z-index:12;
+
+  pointer-events:none;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(211,180,79,.72),
+      transparent
+    );
+
+  box-shadow:
+    0 0 14px
+    rgba(211,180,79,.38);
+
+  animation:
+    relayWzScan
+    5s
+    linear
+    infinite;
+}
+
+@keyframes relayWzScan{
+
+  0%{
+    transform:translateY(0);
+    opacity:0;
+  }
+
+  10%{
+    opacity:.65;
+  }
+
+  90%{
+    opacity:.35;
+  }
+
+  100%{
+    transform:translateY(100%);
+    opacity:0;
+  }
+}
+
+
+/* =========================================================
+   ACTUAL MAP SVG
+   ========================================================= */
+
+#relayGameplayIntroFinalV3 .map-briefing-map{
+  position:absolute !important;
+
+  inset:0 !important;
+
+  display:block !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+
+  max-width:100% !important;
+  max-height:100% !important;
+
+  background:
+    #020506 !important;
+}
+
+
+/* grid */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .grid{
+  stroke:
+    #536054 !important;
+
+  opacity:
+    .32 !important;
+}
+
+
+/* background */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .bg{
+  fill:
+    #020506 !important;
+}
+
+
+/* terrain / platform */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .platform{
+  fill:
+    #111716 !important;
+
+  stroke:
+    #536056 !important;
+
+  stroke-width:
+    1.1 !important;
+}
+
+
+/* route */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .route{
+  stroke:
+    #d5b650 !important;
+
+  stroke-width:
+    3.4 !important;
+
+  stroke-linecap:
+    round !important;
+
+  stroke-linejoin:
+    round !important;
+
+  stroke-dasharray:
+    12 8 !important;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(213,182,80,.28)
+    ) !important;
+}
+
+
+/* route halo */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .route-halo{
+  stroke:
+    #d5b650 !important;
+
+  opacity:
+    .13 !important;
+
+  stroke-width:
+    8 !important;
+}
+
+
+/* start */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .marker-start{
+  fill:
+    #72b06e !important;
+
+  stroke:
+    #e6f1dc !important;
+
+  stroke-width:
+    2 !important;
+
+  filter:
+    drop-shadow(
+      0 0 7px
+      rgba(114,176,110,.35)
+    ) !important;
+}
+
+
+/* goal */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .marker-goal{
+  fill:
+    #e04d55 !important;
+
+  stroke:
+    #ffe0e0 !important;
+
+  stroke-width:
+    2 !important;
+
+  filter:
+    drop-shadow(
+      0 0 8px
+      rgba(224,77,85,.38)
+    ) !important;
+}
+
+
+/* player */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .marker-player{
+  fill:
+    #f5f2e7 !important;
+
+  stroke:
+    #68d7e4 !important;
+
+  stroke-width:
+    2 !important;
+
+  filter:
+    drop-shadow(
+      0 0 8px
+      rgba(104,215,228,.38)
+    ) !important;
+}
+
+
+/* enemy */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .enemy{
+  fill:
+    #d14f57 !important;
+
+  stroke:
+    #ffd3d7 !important;
+
+  filter:
+    drop-shadow(
+      0 0 6px
+      rgba(209,79,87,.32)
+    ) !important;
+}
+
+
+/* checkpoint */
+
+#relayGameplayIntroFinalV3 .map-briefing-map .checkpoint-ring{
+  stroke:
+    #d5b650 !important;
+
+  opacity:
+    .72 !important;
+}
+
+
+/* =========================================================
+   MAP CHROME
+   ========================================================= */
+
+#relayGameplayIntroFinalV3 .aaa-map-chrome{
+  position:absolute !important;
+
+  inset:0 !important;
+
+  z-index:20 !important;
+
+  pointer-events:none !important;
+}
+
+
+/* top line */
+
+#relayGameplayIntroFinalV3 .aaa-map-topline{
+  position:absolute !important;
+
+  top:12px !important;
+  left:14px !important;
+  right:14px !important;
+
+  display:flex !important;
+
+  align-items:center !important;
+
+  justify-content:space-between !important;
+
+  gap:14px !important;
+
+  padding:
+    7px
+    10px !important;
+
+  border:
+    1px solid
+    rgba(191,199,185,.12) !important;
+
+  background:
+    rgba(4,7,7,.76) !important;
+
+  backdrop-filter:
+    blur(8px) !important;
+
+  color:
+    rgba(223,228,216,.72) !important;
+
+  font-family:
+    "DM Mono",
+    monospace !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .15em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-map-live{
+  display:inline-flex !important;
+
+  align-items:center !important;
+
+  gap:7px !important;
+
+  color:
+    #7be3df !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-map-live i{
+  width:7px !important;
+  height:7px !important;
+
+  flex:0 0 7px !important;
+
+  border-radius:50% !important;
+
+  background:
+    #7be3df !important;
+
+  box-shadow:
+    0 0 10px
+    rgba(123,227,223,.7) !important;
+
+  animation:
+    relayWzLive
+    1.4s
+    ease-in-out
+    infinite;
+}
+
+@keyframes relayWzLive{
+
+  0%,
+  100%{
+    opacity:1;
+  }
+
+  50%{
+    opacity:.42;
+  }
+}
+
+
+/* bottom line */
+
+#relayGameplayIntroFinalV3 .aaa-map-bottomline{
+  position:absolute !important;
+
+  left:14px !important;
+  right:14px !important;
+  bottom:12px !important;
+
+  display:flex !important;
+
+  align-items:center !important;
+
+  justify-content:space-between !important;
+
+  padding:
+    7px
+    10px !important;
+
+  border:
+    1px solid
+    rgba(191,199,185,.10) !important;
+
+  background:
+    rgba(4,7,7,.74) !important;
+
+  color:
+    rgba(185,199,181,.56) !important;
+
+  font-family:
+    "DM Mono",
+    monospace !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .14em !important;
+}
+
+
+/* =========================================================
+   TACTICAL MAP CORNERS
+   ========================================================= */
+
+#relayGameplayIntroFinalV3 .aaa-map-corner{
+  position:absolute !important;
+
+  width:25px !important;
+  height:25px !important;
+
+  z-index:25 !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-map-corner-tl{
+  top:7px;
+  left:7px;
+
+  border-top:
+    2px solid
+    rgba(211,182,83,.8);
+
+  border-left:
+    2px solid
+    rgba(211,182,83,.8);
+}
+
+#relayGameplayIntroFinalV3 .aaa-map-corner-tr{
+  top:7px;
+  right:7px;
+
+  border-top:
+    2px solid
+    rgba(211,182,83,.8);
+
+  border-right:
+    2px solid
+    rgba(211,182,83,.8);
+}
+
+#relayGameplayIntroFinalV3 .aaa-map-corner-bl{
+  bottom:7px;
+  left:7px;
+
+  border-bottom:
+    2px solid
+    rgba(211,182,83,.8);
+
+  border-left:
+    2px solid
+    rgba(211,182,83,.8);
+}
+
+#relayGameplayIntroFinalV3 .aaa-map-corner-br{
+  bottom:7px;
+  right:7px;
+
+  border-bottom:
+    2px solid
+    rgba(211,182,83,.8);
+
+  border-right:
+    2px solid
+    rgba(211,182,83,.8);
+}
+
+
+/* =========================================================
+   MISSION CARD
+   ========================================================= */
+
+#relayGameplayIntroFinalV3 .aaa-map-card{
+  position:absolute !important;
+
+  left:24px !important;
+  bottom:24px !important;
+
+  z-index:40 !important;
+
+  width:
+    min(
+      360px,
+      calc(100% - 48px)
+    ) !important;
+
+  min-width:0 !important;
+
+  padding:
+    15px
+    16px
+    16px !important;
+
+  border:
+    1px solid
+    rgba(190,201,188,.20) !important;
+
+  border-left:
+    2px solid
+    #d4b653 !important;
+
+  border-radius:
+    3px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10,14,14,.95),
+      rgba(3,7,8,.97)
+    ) !important;
+
+  box-shadow:
+    0 20px 55px
+      rgba(0,0,0,.58),
+
+    inset 0 0 22px
+      rgba(212,182,83,.025) !important;
+
+  backdrop-filter:
+    blur(12px) !important;
+}
+
+
+/* accent */
+
+#relayGameplayIntroFinalV3 .aaa-card-accent{
+  position:absolute !important;
+
+  top:0 !important;
+  left:0 !important;
+
+  width:3px !important;
+  height:72px !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      #d8b955,
+      transparent
+    ) !important;
+}
+
+
+/* status */
+
+#relayGameplayIntroFinalV3 .aaa-card-status{
+  display:flex !important;
+
+  align-items:center !important;
+
+  gap:8px !important;
+
+  min-width:0 !important;
+
+  margin-bottom:10px !important;
+
+  color:
+    rgba(215,222,211,.66) !important;
+
+  font-family:
+    "DM Mono",
+    monospace !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .14em !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-status-dot{
+  width:7px !important;
+  height:7px !important;
+
+  flex:
+    0 0 7px !important;
+
+  border-radius:50% !important;
+
+  background:
+    #74d087 !important;
+
+  box-shadow:
+    0 0 9px
+    rgba(116,208,135,.58) !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-card-status b{
+  margin-left:auto !important;
+
+  color:
+    #d8b955 !important;
+
+  font-size:
+    15px !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .05em !important;
+}
+
+
+/* kicker */
+
+#relayGameplayIntroFinalV3 .aaa-card-kicker{
+  margin-bottom:
+    5px !important;
+
+  color:
+    #d7b955 !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1.15 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .16em !important;
+}
+
+
+/* title */
+
+#relayGameplayIntroFinalV3 .aaa-card-title{
+  margin:
+    0 !important;
+
+  color:
+    #f1efe5 !important;
+
+  font-size:
+    19px !important;
+
+  line-height:
+    1.08 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .045em !important;
+
+  text-transform:
+    uppercase !important;
+
+  overflow-wrap:
+    anywhere !important;
+}
+
+
+/* district */
+
+#relayGameplayIntroFinalV3 .aaa-card-district{
+  margin:
+    5px
+    0
+    13px !important;
+
+  color:
+    rgba(205,214,208,.52) !important;
+
+  font-size:
+    9px !important;
+
+  line-height:
+    1.25 !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .14em !important;
+
+  text-transform:
+    uppercase !important;
+
+  overflow-wrap:
+    anywhere !important;
+}
+
+
+/* grid */
+
+#relayGameplayIntroFinalV3 .aaa-card-grid{
+  display:grid !important;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0,1fr)
+    ) !important;
+
+  gap:
+    8px !important;
+
+  margin-bottom:
+    12px !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-card-grid > div{
+  min-width:0 !important;
+
+  padding:
+    8px
+    9px !important;
+
+  border:
+    1px solid
+    rgba(194,203,194,.10) !important;
+
+  background:
+    rgba(255,255,255,.018) !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-card-grid small{
+  display:block !important;
+
+  margin-bottom:
+    4px !important;
+
+  color:
+    rgba(170,181,171,.54) !important;
+
+  font-size:
+    7px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .12em !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-card-grid strong{
+  display:block !important;
+
+  color:
+    #edf4ed !important;
+
+  font-size:
+    10px !important;
+
+  line-height:
+    1.1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .05em !important;
+
+  overflow-wrap:
+    anywhere !important;
+}
+
+
+/* objective */
+
+#relayGameplayIntroFinalV3 .aaa-card-objective{
+  min-width:0 !important;
+
+  padding-top:
+    11px !important;
+
+  border-top:
+    1px solid
+    rgba(194,203,194,.10) !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-card-objective span{
+  display:block !important;
+
+  margin-bottom:
+    5px !important;
+
+  color:
+    #d7b955 !important;
+
+  font-size:
+    7px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .16em !important;
+}
+
+#relayGameplayIntroFinalV3 .aaa-card-objective strong{
+  display:block !important;
+
+  color:
+    #edf3ee !important;
+
+  font-size:
+    11px !important;
+
+  line-height:
+    1.25 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .06em !important;
+
+  overflow-wrap:
+    anywhere !important;
+}
+
+
+/* =========================================================
+   MAP LEGEND
+   ========================================================= */
+
+#relayGameplayIntroFinalV3 .release-map-legend{
+  position:absolute !important;
+
+  left:
+    14px !important;
+
+  right:
+    auto !important;
+
+  bottom:
+    14px !important;
+
+  z-index:
+    31 !important;
+
+  display:flex !important;
+
+  flex-wrap:wrap !important;
+
+  gap:
+    7px !important;
+
+  padding:
+    8px
+    10px !important;
+
+  max-width:
+    min(
+      440px,
+      calc(100% - 28px)
+    ) !important;
+
+  border:
+    1px solid
+    rgba(194,203,194,.14) !important;
+
+  border-radius:
+    3px !important;
+
+  background:
+    rgba(3,7,8,.82) !important;
+
+  backdrop-filter:
+    blur(8px) !important;
+
+  pointer-events:
+    none !important;
+}
+
+#relayGameplayIntroFinalV3 .release-map-legend span{
+  display:inline-flex !important;
+
+  align-items:center !important;
+
+  gap:
+    6px !important;
+
+  color:
+    rgba(226,234,226,.72) !important;
+
+  font-family:
+    "DM Mono",
+    monospace !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .08em !important;
+}
+
+#relayGameplayIntroFinalV3 .release-map-legend i{
+  width:
+    7px !important;
+
+  height:
+    7px !important;
+
+  flex:
+    0 0 7px !important;
+
+  display:block !important;
+
+  border-radius:
+    50% !important;
+}
+
+#relayGameplayIntroFinalV3 .legend-start{
+  background:#72b06e !important;
+}
+
+#relayGameplayIntroFinalV3 .legend-route{
+  background:#d5b650 !important;
+}
+
+#relayGameplayIntroFinalV3 .legend-goal{
+  background:#e04d55 !important;
+}
+
+#relayGameplayIntroFinalV3 .legend-threat{
+  background:#c58ce4 !important;
+}
+
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+#play .hud-progress>div{
+  border-color:
+    rgba(102,216,239,.22) !important;
+
+  background:
+    rgba(2,10,16,.84) !important;
+}
+
+#play #progress{
+  background:
+    linear-gradient(
+      90deg,
+      #66d8ef 0%,
+      #8df4ff 55%,
+      #e8fdff 100%
+    ) !important;
+
+  box-shadow:
+    0 0 10px
+    rgba(102,216,239,.25) !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
 @media (max-width:760px){
-  #relayGameplayIntroFinalV3 .map-briefing-shell{width:calc(100vw - 10px) !important;height:calc(100dvh - 10px) !important;padding:10px !important;gap:10px !important;border-radius:8px !important}
-  #relayGameplayIntroFinalV3 .map-briefing-head{gap:8px !important;padding:4px 4px 2px !important}
-  #relayGameplayIntroFinalV3 .map-briefing-title{font-size:clamp(20px,6vw,30px) !important;max-width:calc(100% - 76px) !important}
-  #relayGameplayIntroFinalV3 .map-briefing-timer{width:58px !important;height:58px !important;min-width:58px !important;min-height:58px !important;flex-basis:58px !important}
-  #relayGameplayIntroFinalV3 .aaa-map-topline,#relayGameplayIntroFinalV3 .aaa-map-bottomline{font-size:7px !important;letter-spacing:.08em !important}
-  #relayGameplayIntroFinalV3 .aaa-map-card{display:none !important}
-  #relayGameplayIntroFinalV3 .release-map-legend{left:7px;right:7px;bottom:7px;gap:5px;padding:6px 7px}.release-map-legend span{font-size:6px}
-  #play .relay-faction-dialogue{width:calc(100vw - 20px) !important;max-width:calc(100vw - 20px) !important;padding:10px !important;font-size:12px !important;line-height:1.28 !important}
-  #play .relay-faction-dialogue .relay-faction-footer{gap:6px !important}
-  #pauseMenu .relay-pause-brief{margin:0 12px 10px;padding:9px 10px;grid-template-columns:60px minmax(0,1fr)}
-  #pauseMenu .relay-pause-brief .pause-badge{min-width:0;font-size:8px}#pauseMenu .relay-pause-brief strong{font-size:9px}#pauseMenu .relay-pause-brief span{font-size:9px}
-  #titlePanel.relay-options-unified .title-panel-card{width:calc(100vw - 10px) !important;max-width:none !important}
-  #titlePanel.relay-options-unified .relay-options-body,#pauseMenu.relay-options-unified .relay-options-body{padding-right:2px !important}
-}
-@media (max-width:380px){
-  #play .relay-faction-dialogue{width:calc(100vw - 14px) !important;max-width:calc(100vw - 14px) !important;padding:8px !important;font-size:11px !important}
-  #pauseMenu .relay-pause-brief{grid-template-columns:1fr}#pauseMenu .relay-pause-brief .pause-badge{letter-spacing:.12em}
+
+  #relayGameplayIntroFinalV3 .map-briefing-shell{
+    width:
+      calc(100vw - 8px) !important;
+
+    height:
+      calc(100dvh - 8px) !important;
+
+    padding:
+      8px !important;
+
+    gap:
+      8px !important;
+
+    border-radius:
+      4px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-head{
+    gap:
+      10px !important;
+
+    padding:
+      3px
+      3px
+      1px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-kicker{
+    font-size:
+      7px !important;
+
+    letter-spacing:
+      .12em !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-title{
+    max-width:
+      calc(100% - 88px) !important;
+
+    font-size:
+      clamp(
+        20px,
+        6vw,
+        30px
+      ) !important;
+
+    letter-spacing:
+      .045em !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-meta{
+    margin-top:
+      5px !important;
+
+    font-size:
+      7px !important;
+
+    line-height:
+      1.2 !important;
+
+    letter-spacing:
+      .08em !important;
+  }
+
+
+  /* large mobile counter */
+
+  #relayGameplayIntroFinalV3 .map-briefing-timer{
+    width:
+      78px !important;
+
+    height:
+      78px !important;
+
+    min-width:
+      78px !important;
+
+    min-height:
+      78px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-timer::before{
+    top:
+      7px !important;
+
+    font-size:
+      6px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-timer b{
+    font-size:
+      35px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-timer span{
+    margin-top:
+      8px !important;
+
+    font-size:
+      7px !important;
+
+    letter-spacing:
+      .18em !important;
+  }
+
+
+  /* map chrome */
+
+  #relayGameplayIntroFinalV3 .aaa-map-topline{
+    top:
+      7px !important;
+
+    left:
+      7px !important;
+
+    right:
+      7px !important;
+
+    padding:
+      6px
+      7px !important;
+
+    font-size:
+      6px !important;
+
+    letter-spacing:
+      .08em !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-map-bottomline{
+    left:
+      7px !important;
+
+    right:
+      7px !important;
+
+    bottom:
+      7px !important;
+
+    padding:
+      6px
+      7px !important;
+
+    font-size:
+      6px !important;
+
+    letter-spacing:
+      .08em !important;
+  }
+
+
+  /* mission card becomes compact */
+
+  #relayGameplayIntroFinalV3 .aaa-map-card{
+    left:
+      10px !important;
+
+    right:
+      10px !important;
+
+    bottom:
+      10px !important;
+
+    width:
+      auto !important;
+
+    max-width:
+      none !important;
+
+    padding:
+      10px
+      11px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-kicker{
+    font-size:
+      6px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-title{
+    font-size:
+      15px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-district{
+    margin-bottom:
+      9px !important;
+
+    font-size:
+      7px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-grid{
+    gap:
+      5px !important;
+
+    margin-bottom:
+      8px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-grid > div{
+    padding:
+      6px
+      7px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-grid small{
+    font-size:
+      6px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-grid strong{
+    font-size:
+      8px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-objective{
+    padding-top:
+      8px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-objective span{
+    font-size:
+      6px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-objective strong{
+    font-size:
+      9px !important;
+  }
+
+
+  /* legend */
+
+  #relayGameplayIntroFinalV3 .release-map-legend{
+    left:
+      7px !important;
+
+    right:
+      7px !important;
+
+    bottom:
+      7px !important;
+
+    max-width:
+      none !important;
+
+    gap:
+      5px !important;
+
+    padding:
+      6px
+      7px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .release-map-legend span{
+    font-size:
+      6px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .release-map-legend i{
+    width:
+      6px !important;
+
+    height:
+      6px !important;
+
+    flex-basis:
+      6px !important;
+  }
+
+
+  #play .relay-faction-dialogue{
+    width:
+      calc(100vw - 20px) !important;
+
+    max-width:
+      calc(100vw - 20px) !important;
+
+    padding:
+      10px !important;
+
+    font-size:
+      12px !important;
+
+    line-height:
+      1.28 !important;
+  }
+
+
+  #play .relay-faction-dialogue .relay-faction-footer{
+    gap:
+      6px !important;
+  }
+
+
+  #pauseMenu .relay-pause-brief{
+    margin:
+      0
+      12px
+      10px !important;
+
+    padding:
+      9px
+      10px !important;
+
+    grid-template-columns:
+      60px
+      minmax(0,1fr);
+  }
+
+
+  #pauseMenu .relay-pause-brief .pause-badge{
+    min-width:
+      0 !important;
+
+    font-size:
+      8px !important;
+  }
+
+
+  #pauseMenu .relay-pause-brief strong{
+    font-size:
+      9px !important;
+  }
+
+
+  #pauseMenu .relay-pause-brief span{
+    font-size:
+      9px !important;
+  }
+
+
+  #titlePanel.relay-options-unified .title-panel-card{
+    width:
+      calc(100vw - 10px) !important;
+
+    max-width:
+      none !important;
+  }
+
+
+  #titlePanel.relay-options-unified .relay-options-body,
+  #pauseMenu.relay-options-unified .relay-options-body{
+    padding-right:
+      2px !important;
+  }
 }
 
-/* Portrait: do not reveal gameplay under the rotate screen instruction. */
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width:430px){
+
+  #relayGameplayIntroFinalV3 .map-briefing-title{
+    font-size:
+      18px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-timer{
+    width:
+      70px !important;
+
+    height:
+      70px !important;
+
+    min-width:
+      70px !important;
+
+    min-height:
+      70px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .map-briefing-timer b{
+    font-size:
+      31px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-map-card{
+    left:
+      7px !important;
+
+    right:
+      7px !important;
+
+    bottom:
+      7px !important;
+
+    padding:
+      9px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-title{
+    font-size:
+      13px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-grid{
+    display:none !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-objective{
+    margin-top:
+      7px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .aaa-card-objective strong{
+    font-size:
+      8px !important;
+  }
+
+
+  #relayGameplayIntroFinalV3 .release-map-legend{
+    display:none !important;
+  }
+
+
+  #play .relay-faction-dialogue{
+    width:
+      calc(100vw - 14px) !important;
+
+    max-width:
+      calc(100vw - 14px) !important;
+
+    padding:
+      8px !important;
+
+    font-size:
+      11px !important;
+  }
+
+
+  #pauseMenu .relay-pause-brief{
+    grid-template-columns:
+      1fr;
+  }
+
+
+  #pauseMenu .relay-pause-brief .pause-badge{
+    letter-spacing:
+      .12em;
+  }
+}
+
+
+/* =========================================================
+   PORTRAIT / LANDSCAPE
+   ========================================================= */
+
 @media (orientation:portrait){
-  body.is-touch #play .rotate-prompt:not(.hidden){display:flex !important;visibility:visible !important;opacity:1 !important}
-  body.is-touch #play .hud,body.is-touch #play .input-guide,body.is-touch #play .mobile-controls,body.is-touch #play #phaser-game{visibility:hidden !important}
+
+  body.is-touch
+  #play
+  .rotate-prompt:not(.hidden){
+    display:flex !important;
+
+    visibility:visible !important;
+
+    opacity:1 !important;
+  }
+
+
+  body.is-touch
+  #play
+  .hud,
+
+  body.is-touch
+  #play
+  .input-guide,
+
+  body.is-touch
+  #play
+  .mobile-controls,
+
+  body.is-touch
+  #play
+  #phaser-game{
+    visibility:hidden !important;
+  }
 }
+
+
 @media (orientation:landscape){
-  body.is-touch #play .rotate-prompt{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important}
-  body.is-touch #play .hud,body.is-touch #play .input-guide,body.is-touch #play .mobile-controls,body.is-touch #play #phaser-game{visibility:visible !important}
+
+  body.is-touch
+  #play
+  .rotate-prompt{
+    display:none !important;
+
+    visibility:hidden !important;
+
+    opacity:0 !important;
+
+    pointer-events:none !important;
+  }
+
+
+  body.is-touch
+  #play
+  .hud,
+
+  body.is-touch
+  #play
+  .input-guide,
+
+  body.is-touch
+  #play
+  .mobile-controls,
+
+  body.is-touch
+  #play
+  #phaser-game{
+    visibility:visible !important;
+  }
 }
-@media (orientation:landscape) and (max-height:700px){body.is-touch #play .hud{padding-top:max(6px,env(safe-area-inset-top,0px)) !important}}
+
+
+@media (orientation:landscape) and (max-height:700px){
+
+  body.is-touch
+  #play
+  .hud{
+    padding-top:
+      max(
+        6px,
+        env(
+          safe-area-inset-top,
+          0px
+        )
+      ) !important;
+  }
+}
