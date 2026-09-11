@@ -1,9 +1,9 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 
-// CSS bootstrap ownership: feature styles are loaded here so runtime UI has one
-// predictable entry point. canonical-ui-v1.css is loaded after shared feature
-// layers and before the narrow release HUD layer, making it the shared UI
-// authority without changing feature-specific presentation.
+// CSS bootstrap ownership: feature styles are loaded here from one entry point.
+// release-final-ui-v1.css provides the feature-complete baseline; canonical-ui-v1.css
+// is deliberately last so shared HUD/Home/Pause/Settings/touch rules have one final
+// authority instead of depending on import order between legacy overrides.
 import './splash-progress-visibility.css';
 import './cinematic-splash.css';
 import './mobile-final-polish.css';
@@ -30,8 +30,8 @@ import './mobile-map-web-parity-all-levels-v1.css';
 import './mobile-top-card-map-legend-fix-v1.css';
 import './mobile-ui-cleanup-v1.css';
 import './release-ux-gameplay-polish-v1.css';
-import './canonical-ui-v1.css';
 import './release-final-ui-v1.css';
+import './canonical-ui-v1.css';
 
 import './gameplay-ui-visibility-v3.js';
 import './map-aaa-tactical-redesign-v1.js';
