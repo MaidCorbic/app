@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 
 const commands = [
   'test:runtime-wrapper-order',
@@ -20,4 +21,20 @@ const commands = [
 ];
 
 assert.equal(commands.length, new Set(commands).size, 'Final stability suite contains duplicate commands');
-console.log(`Final stability suite defined: ${commands.length} checks`);
+
+const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+for (const command of commands) {
+  console.log(`\n=== ${command} ===`);
+  const result = spawnSync(npm, ['run', command], {
+    cwd: new URL('..', import.meta.url),
+    stdio: 'inherit',
+    env: process.env,
+  });
+
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(`Final stability check failed: ${command} (exit ${result.status})`);
+  }
+}
+
+console.log(`\nFinal stability suite passed: ${commands.length} checks`);
