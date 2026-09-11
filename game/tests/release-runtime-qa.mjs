@@ -114,6 +114,7 @@ async function runMobileViewport(browser, viewport) {
     if (viewport.orientation === 'landscape') {
       await waitForGameplayBriefingRelease(page);
       await waitForVisible(page, '.mobile-controls');
+      await waitForVisible(page, '#mobilePauseButton');
     }
 
     const initial = await page.evaluate(() => ({
@@ -174,7 +175,9 @@ async function runMobileViewport(browser, viewport) {
     assert(controls.joystick, `Missing movement joystick at ${viewport.width}x${viewport.height}`);
     assertNoPairwiseOverlap(controls.buttons, `Mobile action layout ${viewport.width}x${viewport.height}`);
 
-    await clickDom(page, '#pause');
+    // On mobile the canonical Pause control is #mobilePauseButton. The legacy
+    // #pause button is kept for the desktop HUD and is not the mobile entry point.
+    await clickDom(page, '#mobilePauseButton');
     await waitForVisible(page, '#pauseMenu');
     await waitForVisible(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-pause-tab="settings"]');
