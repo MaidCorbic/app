@@ -65,6 +65,7 @@ function styleRoot() {
 #relayGameplayVariety .rv-route button{min-width:0;border:1px solid rgba(141,244,255,.22);background:rgba(7,18,30,.86);color:#dffcff;padding:9px 8px;font:800 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:1px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px));transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease,background .15s ease}
 #relayGameplayVariety .rv-route button:hover{transform:translateY(-1px);border-color:rgba(141,244,255,.72);box-shadow:0 0 16px rgba(56,189,248,.15)}
 #relayGameplayVariety .rv-route button.is-active{border-color:rgba(141,244,255,.95);background:linear-gradient(135deg,rgba(23,67,86,.9),rgba(8,27,43,.94));box-shadow:inset 0 0 18px rgba(56,189,248,.08),0 0 16px rgba(56,189,248,.14)}
+#relayGameplayVariety .rv-route button:disabled{cursor:default;opacity:.72}
 #relayGameplayVariety .rv-meta{display:flex;justify-content:space-between;gap:8px;margin-top:10px;font-size:8px;letter-spacing:1px;color:#6e8f9f}
 #relayGameplayVariety .rv-objective{margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;gap:8px;font-size:8px;letter-spacing:1px;color:#9eb9c6}
 #relayGameplayVariety .rv-objective strong{color:#dffcff}
@@ -90,7 +91,7 @@ function showToast(state, title, detail) {
 }
 
 function chooseRoute(scene, state, route) {
-  if (!GAMEPLAY_VARIETY_FLAGS.routeChoice || !['safe', 'hot'].includes(route)) return;
+  if (!GAMEPLAY_VARIETY_FLAGS.routeChoice || !['safe', 'hot'].includes(route) || state.routeChoices > 0) return;
   state.route = route;
   state.multiplier = route === 'hot' ? 1.5 : 1;
   state.routeChoices += 1;
@@ -98,6 +99,7 @@ function chooseRoute(scene, state, route) {
     const active = button.dataset.route === route;
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-pressed', String(active));
+    button.disabled = true;
   });
   showToast(state, route === 'hot' ? 'HOT ROUTE ARMED' : 'SAFE ROUTE SELECTED', route === 'hot' ? 'Higher variety reward // higher pressure' : 'Stable route // clean run focus');
   try { scene?.game?.events?.emit?.('relay:variety-route', { route, multiplier: state.multiplier }); } catch {}

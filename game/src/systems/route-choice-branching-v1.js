@@ -7,20 +7,20 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
 const states = new WeakMap();
 const DEFAULT_ACTIVATION_PROGRESS = 0.5;
 const BRANCH_WINDOW_MS = 900;
+const MIN_FORWARD_DISTANCE = 120;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, Number(value) || 0));
 
-// Barrier indices are based on each shipped mission's ordered obstacle list.
-// The two selected barriers form the route decision window: SAFE clears the
-// stable-line gate, HOT clears the alternate-line gate. A small mission-specific
-// activation point keeps the choice aligned with the physical obstacle segment.
+// Offsets are resolved against barriers that are still ahead of the player when
+// the branch is actually applied. This prevents a profile from mutating an
+// obstacle that the courier has already passed.
 const BRANCH_PROFILES = Object.freeze({
-  'first-delivery': { safeIndex: 1, hotIndex: 2, activationProgress: 0.40, label: 'OLD QUARTER // MID-ROUTE SPLIT' },
-  'dead-drop': { safeIndex: 3, hotIndex: 4, activationProgress: 0.48, label: 'SALT DOCKS // LOW-HIGH SPLIT' },
-  blackout: { safeIndex: 3, hotIndex: 4, activationProgress: 0.46, label: 'GRID NINE // LIT-DARK SPLIT' },
-  pursuit: { safeIndex: 1, hotIndex: 2, activationProgress: 0.42, label: 'RAIL SPINE // ESCAPE-INTERCEPT SPLIT' },
-  'signal-storm': { safeIndex: 2, hotIndex: 3, activationProgress: 0.46, label: 'CROWN ARRAY // CLEAN-STORM SPLIT' },
-  'corporate-lockdown': { safeIndex: 2, hotIndex: 3, activationProgress: 0.45, label: 'HELIX TOWER // SECURITY SPLIT' },
-  'final-relay': { safeIndex: 2, hotIndex: 3, activationProgress: 0.48, label: 'APEX SPINE // FINAL SPLIT' }
+  'first-delivery': { safeOffset: 0, hotOffset: 1, activationProgress: 0.40, label: 'OLD QUARTER // MID-ROUTE SPLIT' },
+  'dead-drop': { safeOffset: 0, hotOffset: 1, activationProgress: 0.48, label: 'SALT DOCKS // LOW-HIGH SPLIT' },
+  blackout: { safeOffset: 0, hotOffset: 1, activationProgress: 0.46, label: 'GRID NINE // LIT-DARK SPLIT' },
+  pursuit: { safeOffset: 0, hotOffset: 1, activationProgress: 0.42, label: 'RAIL SPINE // ESCAPE-INTERCEPT SPLIT' },
+  'signal-storm': { safeOffset: 0, hotOffset: 1, activationProgress: 0.46, label: 'CROWN ARRAY // CLEAN-STORM SPLIT' },
+  'corporate-lockdown': { safeOffset: 0, hotOffset: 1, activationProgress: 0.45, label: 'HELIX TOWER // SECURITY SPLIT' },
+  'final-relay': { safeOffset: 0, hotOffset: 1, activationProgress: 0.48, label: 'APEX SPINE // FINAL SPLIT' }
 });
 
 function missionId(scene) {
@@ -29,8 +29,8 @@ function missionId(scene) {
     scene?.sys?.settings?.data?.missionId,
     scene?.sys?.settings?.data?.mission,
     scene?.registry?.get?.('missionId'),
-    document?.documentElement?.dataset?.missionId,
-    document?.body?.dataset?.missionId
+    typeof document !== 'undefined' ? document?.documentElement?.dataset?.missionId : null,
+    typeof document !== 'undefined' ? document?.body?.dataset?.missionId : null
   ];
   return candidates.find(value => typeof value === 'string' && value.length > 0) || null;
 }
@@ -52,23 +52,32 @@ function getBarriers(scene) {
     .sort((a, b) => Number(a.x) - Number(b.x));
 }
 
+function getForwardBarriers(scene) {
+  const playerX = Number(scene?.player?.x);
+  if (!Number.isFinite(playerX)) return [];
+  return getBarriers(scene).filter(item => Number(item.x) > playerX + MIN_FORWARD_DISTANCE);
+}
+
 function pickBranch(scene) {
   const id = missionId(scene);
   const profile = BRANCH_PROFILES[id];
-  const ordered = getBarriers(scene);
-  if (!ordered.length) return null;
+  const ordered = getForwardBarriers(scene);
+  if (ordered.length < 2) return null;
 
   if (profile) {
-    const left = ordered[profile.safeIndex];
-    const right = ordered[profile.hotIndex];
-    if (left && right && left !== right) return { left, right, profile, source: 'mission-profile' };
+    const safeIndex = Math.max(0, Number(profile.safeOffset) || 0);
+    const hotIndex = Math.max(safeIndex + 1, Number(profile.hotOffset) || safeIndex + 1);
+    const left = ordered[safeIndex];
+    const right = ordered[hotIndex];
+    if (left && right && left !== right) {
+      return { left, right, profile, source: 'mission-profile' };
+    }
   }
 
-  if (ordered.length < 2) return null;
-  const left = ordered[Math.max(0, Math.floor(ordered.length * 0.42))];
-  const right = ordered[Math.max(0, Math.floor(ordered.length * 0.64))];
+  const left = ordered[0];
+  const right = ordered[1];
   if (!left || !right || left === right) return null;
-  return { left, right, profile: profile || null, source: 'fallback' };
+  return { left, right, profile: profile || null, source: 'forward-fallback' };
 }
 
 function setBarrierOpen(barrier, open) {
@@ -100,11 +109,11 @@ function pulse(scene, barrier, color = 0x8df4ff) {
 
 function applyBranch(scene, state) {
   if (state.branchApplied || !['safe', 'hot'].includes(state.route)) return;
-  const profile = state.branch?.profile;
+  const branch = state.branch || pickBranch(scene);
+  const profile = branch?.profile;
   const activationProgress = Number(profile?.activationProgress) || DEFAULT_ACTIVATION_PROGRESS;
   if (progressOf(scene) < activationProgress) return;
 
-  const branch = state.branch || pickBranch(scene);
   if (!branch?.left || !branch?.right || branch.left === branch.right) {
     state.branchApplied = true;
     return;
@@ -166,11 +175,13 @@ function init(scene) {
   if (events) {
     state.choiceHandler = payload => {
       const route = payload?.route;
-      if (!['safe', 'hot'].includes(route)) return;
+      if (!['safe', 'hot'].includes(route) || state.branchApplied) return;
       state.route = route;
       state.branchApplied = false;
-      state.branch = state.branch || pickBranch(scene);
-      const profile = state.branch?.profile;
+      // Resolve the actual barrier pair only when the route reaches its
+      // activation window, so the chosen pair is guaranteed to be forward.
+      state.branch = null;
+      const profile = BRANCH_PROFILES[missionId(scene)];
       if (profile?.label) {
         try { scene.playerCue?.(`ROUTE LOCK // ${profile.label}`, '#b9f5ff'); } catch {}
       }
