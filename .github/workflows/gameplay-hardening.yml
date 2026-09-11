@@ -9,10 +9,15 @@ on:
     branches:
       - main
 
+concurrency:
+  group: gameplay-hardening-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   gameplay-hardening:
     name: Gameplay Hardening Suite
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: game
