@@ -1,4 +1,5 @@
 import { packages } from './src/packages.js';
+import { loadState, saveState } from './src/state.js';
 
 const STYLE_ID = 'cargo-integrity-v2-style';
 const ROOT_ID = 'cargoIntegrityV2';
@@ -262,14 +263,12 @@ function init() {
       finish.dataset.cargoPackage = result.packageType;
     }
     if (result.condition >= 100 && result.missionId) {
-      import('./src/state.js').then(({ loadState, saveState }) => {
-        const state = loadState();
-        const mastery = new Set(state.mastery?.[result.missionId] || []);
-        if (!mastery.has('PERFECT PACKAGE')) {
-          state.mastery = { ...state.mastery, [result.missionId]: [...mastery, 'PERFECT PACKAGE'] };
-          saveState(state);
-        }
-      }).catch(() => {});
+      const state = loadState();
+      const mastery = new Set(state.mastery?.[result.missionId] || []);
+      if (!mastery.has('PERFECT PACKAGE')) {
+        state.mastery = { ...state.mastery, [result.missionId]: [...mastery, 'PERFECT PACKAGE'] };
+        saveState(state);
+      }
     }
   });
   window.setInterval(syncScene, 180);
