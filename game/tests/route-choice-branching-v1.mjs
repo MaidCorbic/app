@@ -14,9 +14,12 @@ for (const mission of ['first-delivery', 'dead-drop', 'blackout', 'pursuit', 'si
   assert.match(runtime, new RegExp(`['\\"]?${mission.replace('-', '\\-')}['\\"]?\\s*:`), `missing mission profile: ${mission}`);
 }
 
-assert.match(runtime, /safeIndex: 1/);
-assert.match(runtime, /hotIndex: 2/);
+assert.match(runtime, /safeOffset: 0/);
+assert.match(runtime, /hotOffset: 1/);
 assert.match(runtime, /activationProgress/);
+assert.match(runtime, /getForwardBarriers/);
+assert.match(runtime, /MIN_FORWARD_DISTANCE/);
+assert.match(runtime, /state\.branch = null/);
 assert.match(runtime, /source: 'mission-profile'/);
 assert.match(runtime, /SAFE ROUTE/);
 assert.match(runtime, /HOT ROUTE/);
@@ -30,4 +33,4 @@ assert.doesNotMatch(runtime, /RunnerScene\.prototype\.update\s*=|originalUpdate/
 assert.doesNotMatch(runtime, /setGravityY|setMaxVelocity|state\.js|mobile-input-single-owner/);
 assert.match(bootstrap, /src\/systems\/route-choice-branching-v1\.js/);
 assert.equal((bootstrap.match(/src\/systems\/route-choice-branching-v1\.js/g) || []).length, 1);
-console.log('route-choice-branching-v1: PASS');
+console.log('route-choice-branching-v1 forward-profile contract: PASS');
