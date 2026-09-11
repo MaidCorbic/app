@@ -19,6 +19,11 @@ mustInclude(runtime, 'varietyRoute', 'route marker snapshot');
 mustInclude(runtime, 'removeData?.(\'varietyRoute\')', 'route marker cleanup');
 mustInclude(runtime, 'state.routeChoices > 0', 'single route choice lock');
 mustInclude(runtime, 'MISSION_ROUTE_CONSEQUENCES', 'mission-specific consequence table');
+mustInclude(runtime, 'getMissionRouteConsequence', 'shared route profile accessor');
+mustInclude(runtime, 'label:', 'mission-specific route label');
+mustInclude(runtime, 'risk:', 'route risk metadata');
+mustInclude(runtime, 'reward:', 'route reward metadata');
+mustInclude(runtime, 'relay:variety-route-applied', 'route applied UI sync event');
 for (const mission of ['first-delivery', 'dead-drop', 'blackout', 'pursuit', 'signal-storm', 'corporate-lockdown', 'final-relay']) {
   mustInclude(runtime, mission, `mission consequence ${mission}`);
 }
@@ -35,6 +40,8 @@ mustInclude(bridge, 'relay:gameplay-variety-route-choice', 'DOM-to-gameplay brid
 mustInclude(bridge, "#relayGameplayVariety", 'canonical HUD click guard');
 mustInclude(variety, 'state.routeChoices > 0', 'canonical HUD single-choice lock');
 mustInclude(variety, 'button.disabled = true', 'canonical HUD button lock');
+mustInclude(variety, 'in-game-tactical-event', 'gameplay-only route source');
+mustInclude(variety, 'getMissionRouteConsequence', 'UI shares gameplay route consequence source');
 mustInclude(bootstrap, "./src/systems/gameplay-route-choice-v2.js", 'runtime bootstrap import');
 mustInclude(bootstrap, "./src/systems/gameplay-route-choice-bridge-v1.js", 'bridge bootstrap import');
 
