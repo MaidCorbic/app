@@ -36,7 +36,7 @@ for (const gate of [
   'npm run test:runner-runtime-stability',
   'npm run build'
 ]) {
-  assert.match(hardening, new RegExp(gate.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')), `release hardening gate must remain wired: ${gate}`);
+  assert.equal(hardening.includes(gate), true, `release hardening gate must remain wired: ${gate}`);
 }
 assert.equal(hardening.endsWith('npm run build'), true, 'release hardening must finish with the production build');
 assert.equal(packageJson.engines?.node, '24.x', 'release Node runtime must stay pinned to Vercel runtime');
