@@ -1,4 +1,6 @@
-import { RunnerScene } from './src/scenes/RunnerScene.js';
+import { RunnerScene as RelayFeatureDockScene } from './src/scenes/RunnerScene.js';
+
+const RunnerScene = RelayFeatureDockScene;
 
 (() => {
   'use strict';
