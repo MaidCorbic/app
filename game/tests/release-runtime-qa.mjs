@@ -5,10 +5,14 @@ import { chromium } from 'playwright';
 const PORT = 4173;
 const BASE_URL = `http://localhost:${PORT}/`;
 const MOBILE_VIEWPORTS = [
-  { width: 320, height: 800 },
-  { width: 360, height: 800 },
-  { width: 390, height: 844 },
-  { width: 430, height: 932 },
+  { width: 320, height: 800, orientation: 'portrait' },
+  { width: 360, height: 800, orientation: 'portrait' },
+  { width: 390, height: 844, orientation: 'portrait' },
+  { width: 430, height: 932, orientation: 'portrait' },
+  { width: 800, height: 320, orientation: 'landscape' },
+  { width: 844, height: 360, orientation: 'landscape' },
+  { width: 932, height: 390, orientation: 'landscape' },
+  { width: 1024, height: 430, orientation: 'landscape' },
 ];
 
 function waitForServer(url, timeoutMs = 15000) {
@@ -33,7 +37,7 @@ async function waitForVisible(page, selector, timeout = 15000) {
       const el = document.querySelector(sel);
       if (!el) return false;
       const style = getComputedStyle(el);
-      return style.display !== 'none' && style.visibility !== 'hidden' && !el.classList.contains('hidden');
+      return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0' && !el.classList.contains('hidden');
     },
     selector,
     { timeout },
@@ -68,7 +72,7 @@ function assertNoPairwiseOverlap(rects, label) {
 
 async function runMobileViewport(browser, viewport) {
   const context = await browser.newContext({
-    viewport,
+    viewport: { width: viewport.width, height: viewport.height },
     isMobile: true,
     hasTouch: true,
     deviceScaleFactor: 1,
@@ -85,23 +89,46 @@ async function runMobileViewport(browser, viewport) {
     await waitForVisible(page, '#start');
     await page.locator('#start').click();
     await waitForHidden(page, '#intro');
-    await waitForVisible(page, '#pause');
 
     const initial = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
       innerWidth: window.innerWidth,
-      touchControls: Array.from(document.querySelectorAll('[data-mobile-action]')).length,
+      touchControls: document.querySelectorAll('[data-mobile-action]').length,
       joystickCount: document.querySelectorAll('[data-mobile-joystick]').length,
       pauseVisible: !document.querySelector('#pauseMenu')?.classList.contains('hidden'),
+      mobileControlsVisible: (() => {
+        const el = document.querySelector('.mobile-controls');
+        if (!el) return false;
+        const style = getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0' && rect.width > 0 && rect.height > 0;
+      })(),
+      rotatePromptVisible: (() => {
+        const el = document.querySelector('.rotate-prompt');
+        if (!el) return false;
+        const style = getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0' && rect.width > 0 && rect.height > 0;
+      })(),
     }));
 
-    assert.equal(initial.touchControls, 6, `Expected exactly 6 mobile action buttons at ${viewport.width}px`);
-    assert.equal(initial.joystickCount, 1, `Expected exactly 1 movement joystick at ${viewport.width}px`);
+    assert.equal(initial.touchControls, 6, `Expected exactly 6 mobile action buttons at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.joystickCount, 1, `Expected exactly 1 movement joystick at ${viewport.width}x${viewport.height}`);
     assert(
       initial.scrollWidth <= initial.innerWidth + 1,
-      `Horizontal overflow detected at ${viewport.width}px: ${initial.scrollWidth}px > ${initial.innerWidth}px`,
+      `Horizontal overflow detected at ${viewport.width}x${viewport.height}: ${initial.scrollWidth}px > ${initial.innerWidth}px`,
     );
-    assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}px`);
+
+    if (viewport.orientation === 'portrait') {
+      assert.equal(initial.mobileControlsVisible, false, `Touch controls should be locked in portrait at ${viewport.width}x${viewport.height}`);
+      assert.equal(initial.pauseVisible, false, `Pause HUD should remain inaccessible while portrait lock is active at ${viewport.width}x${viewport.height}`);
+      assert.equal(initial.rotatePromptVisible, true, `Orientation prompt should be visible in portrait at ${viewport.width}x${viewport.height}`);
+      assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
+      return;
+    }
+
+    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
 
     const controls = await page.evaluate(() => ({
       viewport: { width: window.innerWidth, height: window.innerHeight },
@@ -116,12 +143,12 @@ async function runMobileViewport(browser, viewport) {
     }));
 
     controls.buttons.forEach((rect, index) => {
-      assert(rect.width > 0 && rect.height > 0, `Mobile action ${index + 1} has zero size at ${viewport.width}px`);
-      assert(rect.left >= -1 && rect.right <= controls.viewport.width + 1, `Mobile action ${index + 1} leaves viewport at ${viewport.width}px`);
-      assert(rect.bottom <= controls.viewport.height + 1, `Mobile action ${index + 1} falls below viewport at ${viewport.width}px`);
+      assert(rect.width > 0 && rect.height > 0, `Mobile action ${index + 1} has zero size at ${viewport.width}x${viewport.height}`);
+      assert(rect.left >= -1 && rect.right <= controls.viewport.width + 1, `Mobile action ${index + 1} leaves viewport at ${viewport.width}x${viewport.height}`);
+      assert(rect.bottom <= controls.viewport.height + 1, `Mobile action ${index + 1} falls below viewport at ${viewport.width}x${viewport.height}`);
     });
-    assert(controls.joystick, `Missing movement joystick at ${viewport.width}px`);
-    assertNoPairwiseOverlap(controls.buttons, `Mobile action layout ${viewport.width}px`);
+    assert(controls.joystick, `Missing movement joystick at ${viewport.width}x${viewport.height}`);
+    assertNoPairwiseOverlap(controls.buttons, `Mobile action layout ${viewport.width}x${viewport.height}`);
 
     await page.locator('#pause').click();
     await waitForVisible(page, '#pauseMenu');
@@ -135,15 +162,15 @@ async function runMobileViewport(browser, viewport) {
       toggleCount: document.querySelectorAll('[data-unified-setting]').length,
       bodyOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
     }));
-    assert.equal(settings.title, 'OPTIONS', `Settings panel failed to render at ${viewport.width}px`);
-    assert(settings.toggleCount >= 4, `Settings panel is incomplete at ${viewport.width}px`);
-    assert.equal(settings.bodyOverflow, false, `Settings created horizontal overflow at ${viewport.width}px`);
+    assert.equal(settings.title, 'OPTIONS', `Settings panel failed to render at ${viewport.width}x${viewport.height}`);
+    assert(settings.toggleCount >= 4, `Settings panel is incomplete at ${viewport.width}x${viewport.height}`);
+    assert.equal(settings.bodyOverflow, false, `Settings created horizontal overflow at ${viewport.width}x${viewport.height}`);
 
     const firstToggle = page.locator('[data-unified-setting]').first();
     const beforeToggle = await firstToggle.getAttribute('aria-pressed');
     await firstToggle.click();
     const afterToggle = await firstToggle.getAttribute('aria-pressed');
-    assert.notEqual(beforeToggle, afterToggle, `Settings toggle did not react at ${viewport.width}px`);
+    assert.notEqual(beforeToggle, afterToggle, `Settings toggle did not react at ${viewport.width}x${viewport.height}`);
 
     await page.locator('[data-pause-tab="resume"]').click();
     await waitForVisible(page, '[data-unified-resume]');
@@ -155,10 +182,10 @@ async function runMobileViewport(browser, viewport) {
       pauseHidden: document.querySelector('#pauseMenu')?.classList.contains('hidden'),
       runnerActive: Boolean(window.__relayRunnerScene?.scene?.isActive?.()),
     }));
-    assert.equal(resumed.introHidden, true, `Intro reappeared after resume at ${viewport.width}px`);
-    assert.equal(resumed.pauseHidden, true, `Pause menu remained open after resume at ${viewport.width}px`);
-    assert.equal(resumed.runnerActive, true, `Runner scene is not active after resume at ${viewport.width}px`);
-    assert.equal(errors.length, 0, `Browser errors at ${viewport.width}px: ${errors.join(' | ')}`);
+    assert.equal(resumed.introHidden, true, `Intro reappeared after resume at ${viewport.width}x${viewport.height}`);
+    assert.equal(resumed.pauseHidden, true, `Pause menu remained open after resume at ${viewport.width}x${viewport.height}`);
+    assert.equal(resumed.runnerActive, true, `Runner scene is not active after resume at ${viewport.width}x${viewport.height}`);
+    assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
   } finally {
     await context.close();
   }
@@ -176,9 +203,9 @@ try {
   browser = await chromium.launch();
   for (const viewport of MOBILE_VIEWPORTS) {
     await runMobileViewport(browser, viewport);
-    console.log(`Release runtime QA passed: ${viewport.width}x${viewport.height}`);
+    console.log(`Release runtime QA passed: ${viewport.width}x${viewport.height} ${viewport.orientation}`);
   }
-  console.log('Release runtime QA passed: Home → Mission → Pause → Settings → Resume across 320/360/390/430px with zero browser errors.');
+  console.log('Release runtime QA passed: portrait orientation lock + landscape gameplay/pause/settings/resume across release viewports with zero browser errors.');
 } finally {
   if (browser) await browser.close();
   server.kill();
