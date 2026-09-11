@@ -11,8 +11,8 @@ const ACTIONS = new Set(['dash', 'jump', 'vault', 'sword', 'fire', 'build']);
 const DEFAULT_WINDOW_MS = 5200;
 const ACTIVATION_PROGRESS = 0.42;
 
-// The route choice now changes the *kind* of pressure per mission while reusing
-// the existing enemy/dynamic-encounter state. No new gameplay owner is created.
+// The route choice changes the kind of pressure per mission while reusing the
+// existing enemy/dynamic-encounter state. No new gameplay owner is created.
 const MISSION_ROUTE_CONSEQUENCES = Object.freeze({
   'first-delivery': {
     safe: { targetCount: 1, windowMs: 5200, multiplier: 1, cue: 'SAFE ROUTE // TRAINING LINE CLEAR' },
@@ -58,7 +58,7 @@ function missionId(scene) {
 
 function routeConfig(scene, route) {
   return MISSION_ROUTE_CONSEQUENCES[missionId(scene)]?.[route] || {
-    targetCount: route === 'hot' ? 1 : 1,
+    targetCount: 1,
     windowMs: DEFAULT_WINDOW_MS,
     multiplier: route === 'hot' ? 1.5 : 1,
     encounter: route === 'hot' ? 'ambush' : null,
@@ -103,6 +103,7 @@ function snapshotEnemy(state, enemy) {
     active: enemy.active !== false,
     bodyEnabled: enemy.body?.enable !== false,
     tint: enemy.tint,
+    varietyRoute: enemy.getData?.('varietyRoute'),
     dynamicEncounter: enemy.getData?.('dynamicEncounter'),
     dynamicUntil: enemy.getData?.('dynamicEncounterUntil'),
     route: enemy.getData?.('dynamicEncounterRoute')
@@ -125,6 +126,8 @@ function restoreEnemy(state, enemy) {
     }
     enemy.clearTint?.();
     if (snapshot.tint != null) enemy.setTint?.(snapshot.tint);
+    if (snapshot.varietyRoute == null) enemy.removeData?.('varietyRoute');
+    else enemy.setData?.('varietyRoute', snapshot.varietyRoute);
     enemy.setData?.('dynamicEncounter', snapshot.dynamicEncounter);
     enemy.setData?.('dynamicEncounterUntil', snapshot.dynamicUntil);
     enemy.setData?.('dynamicEncounterRoute', snapshot.route);
@@ -220,6 +223,7 @@ function activateRoute(scene, state, route) {
 }
 
 function applyChoice(scene, state, route) {
+  if (state.routeChoices > 0) return;
   state.routeChoices += 1;
   state.route = route;
   state.multiplier = routeConfig(scene, route).multiplier;
