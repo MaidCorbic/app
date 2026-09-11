@@ -16,6 +16,8 @@ function emitRouteChoice(route) {
 
 document.addEventListener('click', event => {
   const button = event.target?.closest?.('[data-route]');
-  if (!button) return;
+  // The canonical variety HUD already emits relay:variety-route from its own
+  // button handler. Do not dispatch the same choice a second time here.
+  if (!button || button.closest?.('#relayGameplayVariety')) return;
   emitRouteChoice(button.dataset.route);
 }, { passive: true });
