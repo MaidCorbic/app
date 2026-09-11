@@ -48,3 +48,6 @@ jobs:
 
       - name: Run final release hardening
         run: npm run test:release-hardening
+
+      - name: Run release runtime QA
+        run: npm run test:release-runtime-qa
