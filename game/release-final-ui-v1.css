@@ -1,6 +1,6 @@
-/* RELAY RUNNER — FINAL MOBILE HUD RELEASE LAYER
-   Last visual authority for the in-game mobile pause/settings HUD.
-   Scope is deliberately narrow: gameplay only, touch devices only.
+/* RELAY RUNNER — FINAL UI RELEASE LAYER
+   Final touch HUD authority plus desktop/mobile gameplay HUD polish.
+   Presentation only; does not own gameplay, input or progression.
 */
 
 @media (max-width: 768px) {
@@ -18,9 +18,7 @@
     pointer-events: none !important;
   }
 
-  body.is-touch #mobileBottomHud.is-active {
-    display: flex !important;
-  }
+  body.is-touch #mobileBottomHud.is-active { display: flex !important; }
 
   body.is-touch #mobileBottomHud .mobile-menu-button {
     position: relative !important;
@@ -30,125 +28,108 @@
     min-width: 58px !important;
     min-height: 54px !important;
     padding: 7px 6px !important;
-    border: 1px solid rgba(56, 189, 248, .78) !important;
+    border: 1px solid rgba(56,189,248,.78) !important;
     border-radius: 14px !important;
-    background: linear-gradient(145deg, rgba(3, 12, 24, .98), rgba(8, 32, 52, .96)) !important;
-    color: #e8f8ff !important;
-    box-shadow:
-      0 0 10px rgba(56, 189, 248, .28),
-      0 0 26px rgba(56, 189, 248, .18),
-      0 10px 28px rgba(0, 0, 0, .52),
-      inset 0 1px 0 rgba(255, 255, 255, .12) !important;
-    font-family: "DM Mono", ui-monospace, monospace !important;
-    pointer-events: auto !important;
-    touch-action: manipulation !important;
-    -webkit-tap-highlight-color: transparent !important;
-    overflow: hidden;
-    transform: translateZ(0);
-    transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease, filter .14s ease !important;
+    background: linear-gradient(145deg,rgba(3,12,24,.98),rgba(8,32,52,.96)) !important;
+    color:#e8f8ff !important;
+    box-shadow:0 0 10px rgba(56,189,248,.28),0 0 26px rgba(56,189,248,.18),0 10px 28px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.12) !important;
+    font-family:"DM Mono",ui-monospace,monospace !important;
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+    -webkit-tap-highlight-color:transparent !important;
+    overflow:hidden;
+    transform:translateZ(0);
+    transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease,filter .14s ease !important;
   }
 
-  body.is-touch #mobileBottomHud .mobile-menu-button::before {
-    content: "";
-    position: absolute;
-    inset: 1px;
-    border-radius: 13px;
-    background: linear-gradient(180deg, rgba(255,255,255,.08), transparent 38%);
-    pointer-events: none;
-    z-index: -1;
+  body.is-touch #mobileBottomHud .mobile-menu-button::before{content:"";position:absolute;inset:1px;border-radius:13px;background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 38%);pointer-events:none;z-index:-1}
+  body.is-touch #mobileBottomHud .mobile-menu-button::after{content:"";position:absolute;left:10px;right:10px;bottom:4px;height:2px;border-radius:999px;background:rgba(56,189,248,.9);box-shadow:0 0 10px rgba(56,189,248,.8);opacity:.8;pointer-events:none}
+  body.is-touch #mobileBottomHud .mobile-menu-button span{display:block !important;line-height:1 !important;font-size:18px !important;font-weight:900 !important;text-shadow:0 0 12px rgba(56,189,248,.55)}
+  body.is-touch #mobileBottomHud .mobile-menu-button small{display:block !important;margin:2px 0 0 !important;line-height:1 !important;font-size:7px !important;font-weight:900 !important;letter-spacing:1.1px !important;white-space:nowrap !important;color:rgba(221,247,255,.92) !important}
+  body.is-touch #mobileBottomHud .mobile-menu-button:active{transform:scale(.92) translateY(2px) !important;border-color:rgba(125,211,252,.98) !important;box-shadow:0 0 14px rgba(56,189,248,.48),0 0 34px rgba(56,189,248,.28),0 7px 18px rgba(0,0,0,.52) !important}
+  body.is-touch #mobileBottomHud .mobile-menu-button:focus-visible{outline:2px solid rgba(186,230,253,.95) !important;outline-offset:2px !important}
+  body.is-touch #mobileBottomHud .mobile-menu-pause{border-color:rgba(56,189,248,.85) !important}
+  body.is-touch #mobileBottomHud .mobile-menu-settings{border-color:rgba(167,139,250,.82) !important;background:linear-gradient(145deg,rgba(20,12,38,.98),rgba(9,18,34,.97)) !important;box-shadow:0 0 10px rgba(167,139,250,.24),0 0 26px rgba(167,139,250,.16),0 10px 28px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.12) !important}
+  body.is-touch #mobileBottomHud .mobile-menu-settings::after{background:rgba(167,139,250,.9);box-shadow:0 0 10px rgba(167,139,250,.78)}
+  body.is-touch #mobileBottomHud .mobile-menu-settings span{text-shadow:0 0 12px rgba(167,139,250,.58)}
+
+  @media (max-width: 380px){
+    body.is-touch #mobileBottomHud{right:max(7px,calc(env(safe-area-inset-right,0px) + 7px)) !important;bottom:max(10px,calc(env(safe-area-inset-bottom,0px) + 10px)) !important;gap:7px !important}
+    body.is-touch #mobileBottomHud .mobile-menu-button{width:50px !important;height:50px !important;min-width:50px !important;min-height:50px !important;border-radius:12px !important;padding:6px 4px !important}
+    body.is-touch #mobileBottomHud .mobile-menu-button span{font-size:16px !important}
+    body.is-touch #mobileBottomHud .mobile-menu-button small{font-size:6px !important;letter-spacing:.9px !important}
   }
+  @media (prefers-reduced-motion:reduce){body.is-touch #mobileBottomHud .mobile-menu-button{transition:none !important}}
+}
 
-  body.is-touch #mobileBottomHud .mobile-menu-button::after {
-    content: "";
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    bottom: 4px;
-    height: 2px;
-    border-radius: 999px;
-    background: rgba(56, 189, 248, .9);
-    box-shadow: 0 0 10px rgba(56, 189, 248, .8);
-    opacity: .8;
-    pointer-events: none;
-  }
+/* --------------------------------------------------------------------------
+   FINAL GAMEPLAY HUD HIERARCHY
+   -------------------------------------------------------------------------- */
+#play #gameplayEventHud,
+#play .gameplay-event-hud{
+  position:fixed !important;
+  top:clamp(78px,9vh,100px) !important;
+  left:50% !important;
+  width:min(320px,calc(100vw - 28px)) !important;
+  max-width:320px !important;
+  margin:0 !important;
+  transform:translate(-50%,-6px) scale(.965) !important;
+  z-index:1240 !important;
+  pointer-events:none !important;
+}
 
-  body.is-touch #mobileBottomHud .mobile-menu-button span {
-    display: block !important;
-    line-height: 1 !important;
-    font-size: 18px !important;
-    font-weight: 900 !important;
-    text-shadow: 0 0 12px rgba(56, 189, 248, .55);
-  }
+#play #gameplayEventHud.is-visible,
+#play .gameplay-event-hud.is-visible{transform:translate(-50%,0) scale(1) !important}
 
-  body.is-touch #mobileBottomHud .mobile-menu-button small {
-    display: block !important;
-    margin: 2px 0 0 !important;
-    line-height: 1 !important;
-    font-size: 7px !important;
-    font-weight: 900 !important;
-    letter-spacing: 1.1px !important;
-    white-space: nowrap !important;
-    color: rgba(221, 247, 255, .92) !important;
-  }
+#play .gameplay-event-card{
+  min-height:58px !important;
+  grid-template-columns:30px minmax(0,1fr) !important;
+  gap:8px !important;
+  padding:8px 10px 9px !important;
+  border-radius:10px !important;
+  border-color:rgba(103,232,249,.26) !important;
+  background:linear-gradient(145deg,rgba(3,10,19,.975),rgba(8,24,39,.95)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 28px rgba(0,0,0,.34),0 0 22px rgba(34,211,238,.07) !important;
+}
 
-  body.is-touch #mobileBottomHud .mobile-menu-button:active {
-    transform: scale(.92) translateY(2px) !important;
-    border-color: rgba(125, 211, 252, .98) !important;
-    box-shadow:
-      0 0 14px rgba(56, 189, 248, .48),
-      0 0 34px rgba(56, 189, 248, .28),
-      0 7px 18px rgba(0, 0, 0, .52) !important;
-  }
+#play .gameplay-event-icon{width:27px !important;height:27px !important;border-radius:8px !important}
+#play #gameplayEventTitle{font-size:11px !important;line-height:1.12 !important;letter-spacing:.32px !important}
+#play #gameplayEventDetail{font-size:6.5px !important;line-height:1.18 !important;letter-spacing:.3px !important}
+#play #gameplayEventType,#play #gameplayEventValue{font-size:6.5px !important}
 
-  body.is-touch #mobileBottomHud .mobile-menu-button:focus-visible {
-    outline: 2px solid rgba(186, 230, 253, .95) !important;
-    outline-offset: 2px !important;
-  }
+/* Event semantic colours: cyan=system, gold=objective, red=danger, purple=special. */
+#play #gameplayEventHud[data-event-tone="system"] .gameplay-event-card{border-color:rgba(56,189,248,.42) !important;box-shadow:0 0 24px rgba(56,189,248,.10),inset 0 1px 0 rgba(255,255,255,.06) !important}
+#play #gameplayEventHud[data-event-tone="objective"] .gameplay-event-card{border-color:rgba(255,208,110,.44) !important;box-shadow:0 0 24px rgba(255,208,110,.10),inset 0 1px 0 rgba(255,255,255,.06) !important}
+#play #gameplayEventHud[data-event-tone="danger"] .gameplay-event-card{border-color:rgba(255,83,100,.56) !important;box-shadow:0 0 28px rgba(255,83,100,.13),inset 0 1px 0 rgba(255,255,255,.06) !important}
+#play #gameplayEventHud[data-event-tone="special"] .gameplay-event-card{border-color:rgba(167,139,250,.50) !important;box-shadow:0 0 26px rgba(167,139,250,.11),inset 0 1px 0 rgba(255,255,255,.06) !important}
 
-  body.is-touch #mobileBottomHud .mobile-menu-pause {
-    border-color: rgba(56, 189, 248, .85) !important;
-  }
+/* Compact keyboard hint: presentation only. */
+#relay-gameplay-keyboard-hud{
+  bottom:max(10px,calc(env(safe-area-inset-bottom,0px) + 7px)) !important;
+  gap:4px !important;
+  padding:5px 7px 6px !important;
+  border-color:rgba(56,189,248,.24) !important;
+  background:linear-gradient(180deg,rgba(4,11,20,.95),rgba(2,7,13,.91)) !important;
+  box-shadow:inset 0 1px rgba(255,255,255,.05),0 8px 24px rgba(0,0,0,.34),0 0 18px rgba(56,189,248,.06) !important;
+}
+#relay-gameplay-keyboard-hud .relay-keyboard-key{min-width:42px !important;gap:2px !important}
+#relay-gameplay-keyboard-hud .relay-keycap{width:37px !important;height:29px !important;border-radius:7px !important;border-color:rgba(56,189,248,.40) !important;box-shadow:inset 0 1px rgba(255,255,255,.06),0 2px 0 rgba(14,38,54,.55),0 0 10px rgba(56,189,248,.08) !important}
+#relay-gameplay-keyboard-hud .relay-key-label{width:54px !important;font-size:6.5px !important;color:rgba(199,228,241,.68) !important}
+#relay-gameplay-keyboard-hud .relay-keyboard-key[data-key="E"] .relay-keycap{border-color:rgba(255,208,110,.64) !important;box-shadow:inset 0 1px rgba(255,255,255,.06),0 2px 0 rgba(74,54,22,.55),0 0 12px rgba(255,208,110,.10) !important}
+#relay-gameplay-keyboard-hud .relay-keyboard-key[data-key="F"] .relay-keycap{border-color:rgba(167,139,250,.62) !important}
+#relay-gameplay-keyboard-hud .relay-keyboard-key.is-active .relay-keycap{border-color:rgba(103,232,249,.95) !important;box-shadow:0 0 18px rgba(56,189,248,.30),0 0 30px rgba(56,189,248,.09) !important}
 
-  body.is-touch #mobileBottomHud .mobile-menu-settings {
-    border-color: rgba(167, 139, 250, .82) !important;
-    background: linear-gradient(145deg, rgba(20, 12, 38, .98), rgba(9, 18, 34, .97)) !important;
-    box-shadow:
-      0 0 10px rgba(167, 139, 250, .24),
-      0 0 26px rgba(167, 139, 250, .16),
-      0 10px 28px rgba(0, 0, 0, .52),
-      inset 0 1px 0 rgba(255, 255, 255, .12) !important;
-  }
-
-  body.is-touch #mobileBottomHud .mobile-menu-settings::after {
-    background: rgba(167, 139, 250, .9);
-    box-shadow: 0 0 10px rgba(167, 139, 250, .78);
-  }
-
-  body.is-touch #mobileBottomHud .mobile-menu-settings span {
-    text-shadow: 0 0 12px rgba(167, 139, 250, .58);
-  }
-
-  @media (max-width: 380px) {
-    body.is-touch #mobileBottomHud {
-      right: max(7px, calc(env(safe-area-inset-right, 0px) + 7px)) !important;
-      bottom: max(10px, calc(env(safe-area-inset-bottom, 0px) + 10px)) !important;
-      gap: 7px !important;
-    }
-
-    body.is-touch #mobileBottomHud .mobile-menu-button {
-      width: 50px !important;
-      height: 50px !important;
-      min-width: 50px !important;
-      min-height: 50px !important;
-      border-radius: 12px !important;
-      padding: 6px 4px !important;
-    }
-
-    body.is-touch #mobileBottomHud .mobile-menu-button span { font-size: 16px !important; }
-    body.is-touch #mobileBottomHud .mobile-menu-button small { font-size: 6px !important; letter-spacing: .9px !important; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    body.is-touch #mobileBottomHud .mobile-menu-button { transition: none !important; }
-  }
+@media (max-width: 760px){
+  #play #gameplayEventHud,#play .gameplay-event-hud{top:clamp(72px,11vh,92px) !important;width:min(292px,calc(100vw - 24px)) !important;max-width:292px !important}
+}
+@media (max-width: 430px){
+  #play #gameplayEventHud,#play .gameplay-event-hud{top:clamp(68px,10vh,84px) !important;width:min(270px,calc(100vw - 18px)) !important;max-width:270px !important}
+  #relay-gameplay-keyboard-hud{max-width:calc(100vw - 14px) !important}
+}
+@media (max-width: 360px){
+  #play #gameplayEventHud,#play .gameplay-event-hud{width:min(252px,calc(100vw - 14px)) !important;max-width:252px !important}
+  #relay-gameplay-keyboard-hud{gap:2px !important;padding-inline:5px !important}
+  #relay-gameplay-keyboard-hud .relay-keyboard-key{min-width:39px !important}
+  #relay-gameplay-keyboard-hud .relay-keycap{width:34px !important;height:27px !important}
+  #relay-gameplay-keyboard-hud .relay-key-label{width:48px !important;font-size:6px !important}
 }
