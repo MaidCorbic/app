@@ -24,6 +24,15 @@ function setup(scene) {
 function update(scene) {
   const state = sceneState.get(scene);
   if (!state || state.mutated || scene.finished || !scene.player?.active) return;
+
+  // An explicit SAFE/HOT route branch is authoritative once applied. The legacy
+  // generic mutation must not reopen a different barrier later in the same run.
+  const routeState = scene.__relayRouteChoiceBranchingV1;
+  if (routeState?.branchApplied && ['safe', 'hot'].includes(routeState.route)) {
+    state.mutated = true;
+    return;
+  }
+
   const start = Number(scene.mission?.spawn?.x ?? scene.player.x ?? 0);
   const goal = Number(scene.mission?.goal?.x ?? start + 3200);
   const threshold = start + (goal - start) * .55;
