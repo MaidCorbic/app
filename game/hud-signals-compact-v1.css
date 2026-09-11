@@ -1,0 +1,151 @@
+/* RUNNER RELAY — COMPACT SIGNAL HUD
+ * Presentation only. Existing IDs and gameplay behavior remain untouched.
+ */
+
+#play .hud-progress.hud-run {
+  position:relative !important;
+  box-sizing:border-box !important;
+  width:clamp(112px,13vw,148px) !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  padding:7px 9px 8px !important;
+  display:grid !important;
+  grid-template-columns:auto 1fr !important;
+  grid-template-rows:auto 5px !important;
+  column-gap:8px !important;
+  row-gap:5px !important;
+  align-items:center !important;
+  text-align:left !important;
+  border:1px solid rgba(141,244,255,.16) !important;
+  border-radius:9px !important;
+  background:linear-gradient(135deg,rgba(5,12,22,.94),rgba(8,20,32,.88)) !important;
+  box-shadow:inset 0 1px rgba(255,255,255,.035),0 7px 18px rgba(0,0,0,.22),0 0 16px rgba(56,189,248,.05) !important;
+  backdrop-filter:blur(8px) !important;
+  -webkit-backdrop-filter:blur(8px) !important;
+}
+
+#play .hud-progress.hud-run > span#signalCount {
+  grid-column:1 !important;
+  grid-row:1 !important;
+  width:auto !important;
+  margin:0 !important;
+  font-size:17px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  letter-spacing:.08em !important;
+  font-variant-numeric:tabular-nums !important;
+  text-align:left !important;
+}
+
+#play .hud-progress.hud-run > small {
+  grid-column:2 !important;
+  grid-row:1 !important;
+  width:auto !important;
+  margin:0 !important;
+  align-self:center !important;
+  font-size:8px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+  letter-spacing:.16em !important;
+  opacity:.72 !important;
+  white-space:nowrap !important;
+  text-align:left !important;
+}
+
+#play .hud-progress.hud-run > div:not(.hud-vital) {
+  grid-column:1 / -1 !important;
+  grid-row:2 !important;
+  width:100% !important;
+  height:5px !important;
+  margin:0 !important;
+  overflow:hidden !important;
+  border:1px solid rgba(141,244,255,.12) !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.055) !important;
+}
+
+#play .hud-progress.hud-run > div:not(.hud-vital) > i#progress {
+  display:block !important;
+  width:var(--signal-progress,0%) !important;
+  max-width:100% !important;
+  height:100% !important;
+  margin:0 !important;
+  border-radius:inherit !important;
+  transform:none !important;
+  transition:width 220ms cubic-bezier(.22,.61,.36,1) !important;
+  box-shadow:0 0 9px rgba(141,244,255,.25) !important;
+}
+
+#play .hud-progress.hud-run > .hud-vital.energy {
+  grid-column:1 / -1 !important;
+  grid-row:3 !important;
+  width:100% !important;
+  margin:1px 0 0 !important;
+}
+
+#play .hud-progress.hud-run > .hud-vital.energy[hidden] {
+  display:none !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy > span {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:8px !important;
+  margin:0 0 3px !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy small {
+  font-size:7px !important;
+  letter-spacing:.14em !important;
+  opacity:.62 !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy b {
+  font-size:8px !important;
+  line-height:1 !important;
+  font-variant-numeric:tabular-nums !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy > div {
+  width:100% !important;
+  height:4px !important;
+  margin:0 !important;
+  overflow:hidden !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.05) !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy #energyBar {
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  border-radius:inherit !important;
+  transform:none !important;
+  transition:width 180ms ease !important;
+}
+
+@media (max-width:760px) {
+  #play .hud-progress.hud-run {
+    width:112px !important;
+    padding:6px 8px 7px !important;
+    grid-template-rows:auto 4px !important;
+    column-gap:7px !important;
+    row-gap:4px !important;
+    border-radius:8px !important;
+  }
+
+  #play .hud-progress.hud-run > span#signalCount { font-size:15px !important; }
+  #play .hud-progress.hud-run > small { font-size:7px !important; letter-spacing:.13em !important; }
+  #play .hud-progress.hud-run > div:not(.hud-vital) { height:4px !important; }
+  #play .hud-progress.hud-run .hud-vital.energy b { font-size:7px !important; }
+}
+
+@media (max-width:390px) {
+  #play .hud-progress.hud-run {
+    width:104px !important;
+    padding:5px 7px 6px !important;
+  }
+  #play .hud-progress.hud-run > span#signalCount { font-size:14px !important; }
+  #play .hud-progress.hud-run > small { font-size:6px !important; }
+}
