@@ -86,19 +86,25 @@ function relayRunnerRuntimeStability() {
 }
 
 function relayExplicitRunnerSceneBinding() {
+  let projectRoot = process.cwd();
   return {
     name: 'relay-explicit-runner-scene-binding',
     enforce: 'post',
+    configResolved(config) { projectRoot = config.root; },
     transform(code, id) {
       if (!id.endsWith('.js') || id.endsWith('/src/scenes/RunnerScene.js')) return null;
       if (!/\bRunnerScene\b/.test(code)) return null;
-      if (/import\s*\{[^}]*\bRunnerScene\b[^}]*\}\s*from\s*['"]\.\/?(?:\.\.\/)+src\/scenes\/RunnerScene\.js['"]/.test(code)) return null;
+      if (/import\s*\{[^}]*\bRunnerScene\b[^}]*\}\s*from\s*['"][^'"]*scenes\/RunnerScene\.js['"]/.test(code)) return null;
       if (/function\s+\w+\s*\(\s*RunnerScene\b/.test(code)) return null;
       if (/\b(?:const|let|var)\s+RunnerScene\s*=/.test(code)) return null;
       if (!/\bRunnerScene\.prototype\b/.test(code)) return null;
 
+      const runnerPath = path.join(projectRoot, 'src', 'scenes', 'RunnerScene.js');
+      let importPath = path.relative(path.dirname(id), runnerPath).replace(/\\/g, '/');
+      if (!importPath.startsWith('.')) importPath = `./${importPath}`;
+
       return {
-        code: `import { RunnerScene as RelayRunnerScene } from './src/scenes/RunnerScene.js';\nconst RunnerScene = RelayRunnerScene;\n${code}`,
+        code: `import { RunnerScene as RelayRunnerScene } from '${importPath}';\nconst RunnerScene = RelayRunnerScene;\n${code}`,
         map: null,
       };
     },
@@ -124,7 +130,7 @@ export default defineConfig({
           minSize: 20000,
           groups: [
             { name: 'phaser-vendor', test: /node_modules[\\/]phaser[\\/]/, priority: 20 },
-            { name: 'vendor', test: /node_modules[\\/]/, priority: 10 },
+            { name: 'vendor', test: /node_modules[\\/]node_modules[\\/]/, priority: 10 },
           ],
         },
       },
