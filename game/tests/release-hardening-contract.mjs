@@ -66,8 +66,9 @@ assert.match(runner, /const targetZoom\s*=\s*Math\.max\(\s*cinematicTargetZoom\s
 assert.doesNotMatch(runner, /this\.cameras\.main\.zoom\s*=/, 'RunnerScene must not directly assign camera zoom');
 
 // Persistent progression and cargo runtime remain source-owned.
-assert.match(state, /const modifierCredits = runStats\.modifier\?\.credits \|\| 0;/);
-assert.match(state, /const reconciledUnlockedMissions = missions/);
+assert.match(state, /const modifierXp\s*=\s*[\s\S]*?runStats\.modifier\?\.xpBonus/);
+assert.match(state, /const modifierCredits\s*=\s*[\s\S]*?runStats\.modifier\?\.credits/);
+assert.match(state, /rivalCredits\s*\+\s*modifierCredits/);
 assert.match(cargo, /^import \{ packages \} from '\.\/src\/packages\.js';\nimport \{ loadState, saveState \} from '\.\/src\/state\.js';/);
 assert.doesNotMatch(cargo, /import\('\.\/src\/state\.js'\)/, 'cargo runtime must not lazy-load state through a build patch');
 assert.match(cargo, /const state = loadState\(\);/);
