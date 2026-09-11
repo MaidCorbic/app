@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const file='game/src/systems/gameplay-v13-level-wiring-v1.js';
-const loader='game/gameplay-expansion-loader-v1.js';
-const v13='game/src/systems/gameplay-expansion-v13-34-systems.js';
-const src=fs.readFileSync(file,'utf8');
-const boot=fs.readFileSync(loader,'utf8');
-const systems=fs.readFileSync(v13,'utf8');
+const read = relativePath => fs.readFileSync(new URL(relativePath, import.meta.url), 'utf8');
+const file='../src/systems/gameplay-v13-level-wiring-v1.js';
+const loader='../gameplay-expansion-loader-v1.js';
+const v13='../src/systems/gameplay-expansion-v13-34-systems.js';
+const src=read(file);
+const boot=read(loader);
+const systems=read(v13);
 const ids=[...systems.matchAll(/\['([A-Z0-9]+)','[^']+'\]/g)].map(m=>m[1]);
 const levelIds=[...src.matchAll(/\{ id:'([^']+)', active:/g)].map(m=>m[1]);
 assert.equal(ids.length,34,'V13 must define exactly 34 systems');
