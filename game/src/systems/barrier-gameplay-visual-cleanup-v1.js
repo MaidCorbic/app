@@ -28,20 +28,23 @@
     });
   };
 
-  const barrierObjects = scene => [
-    ...(scene?.barriers?.getChildren?.() || []),
-    ...(scene?.movingGates?.getChildren?.() || []),
-  ].filter(object => object?.active && object?.body);
+  const bindLethalGroup = (scene, group, hit) => {
+    if (!group?.getChildren?.().length || !scene?.physics?.add?.overlap) return null;
+    try { return scene.physics.add.overlap(scene.player, group, hit); } catch (error) {
+      console.warn('[BarrierCleanupV118] overlap group skipped', error);
+      return null;
+    }
+  };
 
   const killOnBarrierContact = scene => {
     if (!scene?.physics?.add?.overlap || !scene?.player?.body) return;
     if (scene.__relayBarrierLethalContactV1) return;
 
-    const barriers = barrierObjects(scene);
-    if (!barriers.length) return;
+    const barriers = scene.barriers;
+    const movingGates = scene.movingGates;
+    if (!barriers?.getChildren?.().length && !movingGates?.getChildren?.().length) return;
 
     scene.__relayBarrierLethalContactV1 = true;
-    const player = scene.player;
     const hit = (_player, barrier) => {
       if (!barrier?.active || scene.finished || scene.respawning) return;
       const now = performance.now();
@@ -51,7 +54,10 @@
       try { scene.fail?.('BARRIER'); } catch (error) { console.warn('[BarrierCleanupV118] barrier fail skipped', error); }
     };
 
-    scene.__relayBarrierOverlapV1 = scene.physics.add.overlap(player, barriers, hit);
+    scene.__relayBarrierOverlapV1 = [
+      bindLethalGroup(scene, barriers, hit),
+      bindLethalGroup(scene, movingGates, hit),
+    ].filter(Boolean);
   };
 
   const ready = event => {
