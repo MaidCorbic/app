@@ -1,13 +1,19 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
 // UPDATE 09 — WORLD INTERACTION V1
-// Uses the real RunnerScene checkpoints. No duplicate save, mission, progression,
-// combat, or checkpoint system is created here.
+// Uses real RunnerScene checkpoints. One owner for E/TAP world interaction.
 const INTERACT_DISTANCE = 150;
 const MIN_SPAWN_DISTANCE = 220;
 const sceneState = new WeakMap();
 
 const distance = (a, b) => Math.hypot((a?.x || 0) - (b?.x || 0), (a?.y || 0) - (b?.y || 0));
+
+function directionName(current, next) {
+  if (!next) return 'FORWARD';
+  const dx = Number(next.x) - Number(current?.x || 0);
+  if (Math.abs(dx) < 90) return 'FORWARD';
+  return dx > 0 ? 'EASTBOUND' : 'WESTBOUND';
+}
 
 function ensureUi() {
   let button = document.getElementById('worldInteractButton');
@@ -15,90 +21,23 @@ function ensureUi() {
     if (!document.getElementById('world-interaction-style')) {
       const style = document.createElement('style');
       style.id = 'world-interaction-style';
-     style.textContent = `
-  #worldInteractButton{
-    position:fixed;
-    left:50%;
-    bottom:calc(132px + env(safe-area-inset-bottom,0px));
-    transform:translateX(-50%);
-    z-index:180;
-    display:none;
-    min-width:174px;
-    min-height:52px;
-    padding:11px 20px;
-    border:1px solid rgba(141,244,255,.9);
-    border-radius:14px;
-    background:
-      linear-gradient(145deg,rgba(4,15,28,.98),rgba(7,30,48,.97));
-    box-shadow:
-      0 0 10px rgba(141,244,255,.38),
-      0 0 26px rgba(25,200,245,.20),
-      inset 0 0 18px rgba(141,244,255,.07);
-    color:#e9fdff;
-    font:900 12px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;
-    letter-spacing:.12em;
-    text-align:center;
-    text-transform:uppercase;
-    pointer-events:auto;
-    touch-action:manipulation;
-    user-select:none;
-    -webkit-user-select:none;
-    -webkit-tap-highlight-color:transparent;
-  }
-
-  #worldInteractButton.is-visible{
-    display:block;
-    animation:relayInteractPulse 1s ease-in-out infinite alternate;
-  }
-
-  #worldInteractButton.is-active{
-    border-color:#aee37f;
-    color:#efffdc;
-    box-shadow:
-      0 0 12px rgba(174,227,127,.55),
-      0 0 30px rgba(174,227,127,.24),
-      inset 0 0 18px rgba(174,227,127,.08);
-  }
-
-  #worldInteractButton small{
-    display:block;
-    margin-top:6px;
-    color:#8df4ff;
-    font-size:9px;
-    letter-spacing:.08em;
-    line-height:1.2;
-  }
-
-  @keyframes relayInteractPulse{
-    from{
-      transform:translateX(-50%) scale(1);
-    }
-    to{
-      transform:translateX(-50%) scale(1.035);
-    }
-  }
-
-  @media(min-width:769px){
-    #worldInteractButton{
-      bottom:30px;
-      min-width:160px;
-    }
-  }
-
-  @media(prefers-reduced-motion:reduce){
-    #worldInteractButton{
-      animation:none;
-    }
-  }
+      style.textContent = `
+#worldInteractButton{position:fixed;left:50%;bottom:calc(132px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:180;display:none;min-width:194px;min-height:54px;padding:11px 18px;border:1px solid rgba(141,244,255,.92);border-radius:14px;background:linear-gradient(145deg,rgba(4,15,28,.98),rgba(7,30,48,.97));box-shadow:0 0 10px rgba(141,244,255,.38),0 0 26px rgba(25,200,245,.20),inset 0 0 18px rgba(141,244,255,.07);color:#e9fdff;font:900 12px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.10em;text-align:center;text-transform:uppercase;pointer-events:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+#worldInteractButton.is-visible{display:block;animation:relayInteractPulse 1s ease-in-out infinite alternate}
+#worldInteractButton.is-active{border-color:#aee37f;color:#efffdc;box-shadow:0 0 12px rgba(174,227,127,.55),0 0 30px rgba(174,227,127,.24),inset 0 0 18px rgba(174,227,127,.08)}
+#worldInteractButton small{display:block;margin-top:6px;color:#8df4ff;font-size:8px;line-height:1.2;letter-spacing:.07em}
+@keyframes relayInteractPulse{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.03)}}
+@media(min-width:769px){#worldInteractButton{bottom:30px;min-width:186px}}
+@media(prefers-reduced-motion:reduce){#worldInteractButton{animation:none}}
 `;
       document.head.appendChild(style);
     }
     button = document.createElement('button');
     button.id = 'worldInteractButton';
     button.type = 'button';
-    button.innerHTML = 'INTERACT<small>E / TAP</small>';
     document.body.appendChild(button);
   }
+
   if (!button.dataset.bound) {
     button.dataset.bound = '1';
     button.addEventListener('pointerdown', event => {
@@ -155,10 +94,7 @@ export function setupWorldInteraction(scene) {
   if (!checkpoints.length) return;
 
   const spawn = scene.mission?.spawn || scene.player;
-  const ordered = checkpoints
-    .map((checkpoint,index)=>({checkpoint,index,spawnDistance:distance(spawn,checkpoint)}))
-    .sort((a,b)=>a.checkpoint.x-b.checkpoint.x);
-
+  const ordered = checkpoints.map((checkpoint,index)=>({checkpoint,index,spawnDistance:distance(spawn,checkpoint)})).sort((a,b)=>a.checkpoint.x-b.checkpoint.x);
   const eligible = ordered.filter(item => item.spawnDistance >= MIN_SPAWN_DISTANCE);
   const source = eligible.length ? eligible : ordered;
   const terminals = source.map(item => makeTerminal(scene,item.checkpoint,item.index));
@@ -170,31 +106,40 @@ export function setupWorldInteraction(scene) {
 }
 
 function activate(scene, terminal) {
+  const state = sceneState.get(scene);
   const checkpoint = terminal?.getData('checkpoint');
-  if (!scene || !terminal?.active || !checkpoint?.active || terminal.getData('activated')) return false;
+  if (!state || !scene || !terminal?.active || !checkpoint?.active || terminal.getData('activated')) return false;
+
+  const ordered = state.terminals.filter(item => item?.active).sort((a,b)=>Number(a.getData('index'))-Number(b.getData('index')));
+  const position = ordered.findIndex(item => item === terminal);
+  const nextTerminal = position >= 0 ? ordered[position + 1] : null;
+  const nextCheckpoint = nextTerminal?.getData('checkpoint');
+  const direction = directionName(checkpoint, nextCheckpoint);
 
   terminal.setData('activated', true);
+  terminal.setData('linkDirection', direction);
   const children = terminal.getData('children');
   children?.body?.setStrokeStyle?.(2,0xaee37f,1);
   children?.screen?.setFillStyle?.(0xaee37f,.42);
   children?.core?.setFillStyle?.(0xaee37f,1);
-  children?.label?.setText?.('SECURED');
+  children?.label?.setText?.(direction);
 
   scene.activateCheckpoint?.(checkpoint);
   markCheckpointSecured(scene, checkpoint);
 
-  const barrier = (scene.barriers?.getChildren?.() || [])
-    .filter(item=>item?.active)
-    .sort((a,b)=>distance(terminal,a)-distance(terminal,b))[0];
-if (barrier && distance(terminal,barrier) < 220) {
-  try { barrier.disableBody(true,true); } catch {}
-}
+  const barrier = (scene.barriers?.getChildren?.() || []).filter(item=>item?.active).sort((a,b)=>distance(terminal,a)-distance(terminal,b))[0];
+  if (barrier && distance(terminal,barrier) < 220) {
+    try { barrier.disableBody(true,true); } catch {}
+  }
+
+  scene.__relayRelayLinkDirection = direction;
+  try { scene.playerCue?.(`RELAY LINK // ${direction}`, '#8df4ff'); } catch {}
+  try { scene.game?.events?.emit?.('world-interaction', { type:'checkpoint-terminal', index:terminal.getData('index'), secured:true, direction }); } catch {}
 
   const button = ensureUi();
   button.classList.remove('is-visible');
   button.classList.add('is-active');
   window.setTimeout(()=>button.classList.remove('is-active'),900);
-  scene.game?.events?.emit('world-interaction',{type:'checkpoint-terminal',index:terminal.getData('index'),secured:true});
   return true;
 }
 
@@ -203,10 +148,7 @@ export function updateWorldInteraction(scene) {
   if (!scene?.player?.active || !state) return;
   window.__relayRunnerScene = scene;
   const button = ensureUi();
-  const candidates = state.terminals
-    .filter(terminal=>terminal?.active && !terminal.getData('activated'))
-    .filter(terminal=>distance(scene.player,terminal)<=INTERACT_DISTANCE)
-    .sort((a,b)=>distance(scene.player,a)-distance(scene.player,b));
+  const candidates = state.terminals.filter(terminal=>terminal?.active && !terminal.getData('activated')).filter(terminal=>distance(scene.player,terminal)<=INTERACT_DISTANCE).sort((a,b)=>distance(scene.player,a)-distance(scene.player,b));
   const nearest = candidates[0] || null;
   scene.worldInteractionTarget = nearest;
 
@@ -214,15 +156,17 @@ export function updateWorldInteraction(scene) {
     button.classList.remove('is-visible','is-active');
     return;
   }
-  button.innerHTML = 'INTERACT<small>E / TAP · CHECKPOINT</small>';
+
+  const ordered = state.terminals.filter(item => item?.active).sort((a,b)=>Number(a.getData('index'))-Number(b.getData('index')));
+  const position = ordered.findIndex(item => item === nearest);
+  const nextCheckpoint = position >= 0 ? ordered[position + 1]?.getData('checkpoint') : null;
+  const direction = directionName(nearest.getData('checkpoint'), nextCheckpoint);
+
+  button.innerHTML = `RELAY LINK <small>E / TAP · ${direction}</small>`;
   button.classList.add('is-visible');
   button.classList.remove('is-active');
 }
 
-// Critical runtime hook: main.js creates the Phaser game before this module executes,
-// but RunnerScene does not start until the player launches a mission. Patch the actual
-// class now, before the first mission starts, so setup/update cannot be lost to another
-// wrapper around RunnerScene.prototype.create/update.
 const originalCreate = RunnerScene.prototype.create;
 const originalUpdate = RunnerScene.prototype.update;
 if (!RunnerScene.prototype.__worldInteractionCreatePatched) {
