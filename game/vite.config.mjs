@@ -1,12 +1,10 @@
 import { defineConfig } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
-import { patchSeasonalProgression } from './seasonal-progression-patch.mjs';
 import { patchDeathReason } from './death-reason-patch.mjs';
 import { patchInitialSpawnShield } from './initial-spawn-shield-patch.mjs';
 import { patchCheckpointCollectibles } from './checkpoint-collectible-patch.mjs';
 import { patchRespawnTransientState } from './respawn-transient-state-patch.mjs';
-import { patchSpecialEventCreditReward } from './special-event-credit-reward-patch.mjs';
 
 const LEGACY_TEXT_ASSETS = ['campaign-v2.css', 'gameplay-core-v1.css', 'world-atmosphere.css'];
 const LEGACY_BINARY_ASSETS = [
@@ -69,9 +67,6 @@ function relayCargoStateImportFix() {
   );
 }
 
-function relaySeasonalProgressionFix() {
-  return relayTransform('relay-seasonal-progression-fix', id => id.endsWith('/src/state.js'), patchSeasonalProgression);
-}
 function relayDeathReasonFix() {
   return relayTransform('relay-death-reason-fix', id => id.endsWith('/src/scenes/RunnerScene.js'), patchDeathReason);
 }
@@ -83,9 +78,6 @@ function relayCheckpointCollectiblesFix() {
 }
 function relayRespawnTransientStateFix() {
   return relayTransform('relay-respawn-transient-state-fix', id => id.endsWith('/src/scenes/RunnerScene.js'), patchRespawnTransientState);
-}
-function relaySpecialEventCreditRewardFix() {
-  return relayTransform('relay-special-event-credit-reward-fix', id => id.endsWith('/src/state.js'), patchSpecialEventCreditReward);
 }
 
 function relayRunnerZoomStabilityFix() {
@@ -179,12 +171,10 @@ export default defineConfig({
   },
   plugins: [
     relayCargoStateImportFix(),
-    relaySeasonalProgressionFix(),
     relayDeathReasonFix(),
     relayInitialSpawnShieldFix(),
     relayCheckpointCollectiblesFix(),
     relayRespawnTransientStateFix(),
-    relaySpecialEventCreditRewardFix(),
     relayRunnerZoomStabilityFix(),
     relayLegacyAssetAliases(),
   ],
