@@ -19,48 +19,24 @@ import './presentation-final-v1.js';
     const heading = document.getElementById('titlePanelHeading');
     const content = document.getElementById('titlePanelContent');
 
-    if (!(panel instanceof HTMLElement) || !(heading instanceof HTMLElement) || !(content instanceof HTMLElement)) {
-      return false;
-    }
+    if (!(panel instanceof HTMLElement) || !(heading instanceof HTMLElement) || !(content instanceof HTMLElement)) return false;
 
     try {
       panel.classList.remove('hidden');
+      panel.removeAttribute('hidden');
+      panel.setAttribute('aria-hidden', 'false');
       heading.textContent = 'OPTIONS';
       heading.className = 'relay-options-title';
 
-      const trigger = document.createElement('button');
-      trigger.type = 'button';
-      trigger.dataset.titlePanel = 'controls';
-      trigger.setAttribute('aria-hidden', 'true');
-      trigger.style.display = 'none';
-      document.body.appendChild(trigger);
-
-      try {
-        HTMLElement.prototype.click.call(trigger);
-      } finally {
-        trigger.remove();
-      }
-
-      return panel.classList.contains('relay-options-unified') &&
-        !!content.querySelector('.relay-options-shell');
+      // Use the canonical Options owner directly. Do not synthesize a hidden
+      // click, which can re-enter the Home/Settings event chain.
+      document.dispatchEvent(new CustomEvent('relay-open-home-options', {
+        detail: { panel, content, source: 'canonical-home-router' },
+      }));
+      return true;
     } catch {
       return false;
     }
-  };
-
-  const installOptionsRouter = () => {
-    const api = window.relayUnifiedCinematicUI;
-    if (!api || typeof api.openOptions !== 'function') return;
-    if (api.__canonicalOptionsRouterV4) return;
-
-    api.openOptions = () => openCanonicalOptions();
-
-    Object.defineProperty(api, '__canonicalOptionsRouterV4', {
-      value: true,
-      configurable: false,
-      enumerable: false,
-      writable: false,
-    });
   };
 
   const installHomeOptionsGuard = () => {
@@ -70,13 +46,8 @@ import './presentation-final-v1.js';
     document.addEventListener('click', event => {
       const target = event.target;
       if (!(target instanceof Element)) return;
-
-      const optionsButton = target.closest(
-        '[data-final-home="options"], [data-final-home-button="options"], [data-home-v4-action="options"]'
-      );
-
+      const optionsButton = target.closest('[data-final-home="options"],[data-final-home-button="options"],[data-home-v4-action="options"]');
       if (!optionsButton) return;
-
       event.preventDefault();
       event.stopImmediatePropagation();
       openCanonicalOptions();
@@ -85,29 +56,20 @@ import './presentation-final-v1.js';
 
   const installLegacyOptionsGuard = () => {
     if (document.getElementById('relay-canonical-options-guard-v2')) return;
-
     const style = document.createElement('style');
     style.id = 'relay-canonical-options-guard-v2';
     style.textContent = `
       #titlePanel > .relay-cinematic-panel,
-      #titlePanel.relay-options-unified > .relay-cinematic-panel {
-        display:none !important;
-        visibility:hidden !important;
-        pointer-events:none !important;
-      }
+      #titlePanel.relay-options-unified > .relay-cinematic-panel { display:none !important; visibility:hidden !important; pointer-events:none !important; }
     `;
     document.head.appendChild(style);
   };
 
   const boot = () => {
-    installOptionsRouter();
     installHomeOptionsGuard();
     installLegacyOptionsGuard();
   };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
-  } else {
-    boot();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true });
+  else boot();
 })();
