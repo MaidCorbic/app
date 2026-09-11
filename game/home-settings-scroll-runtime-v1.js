@@ -5,6 +5,25 @@
   window.__relayHomeSettingsScrollRuntimeV1 = true;
 
   const panels = new WeakMap();
+  const SCROLL_KEY = 'relay.home.settings.scrollTop.v1';
+
+const readSavedScroll = () => {
+  try {
+    const value = Number(sessionStorage.getItem(SCROLL_KEY));
+    return Number.isFinite(value) && value >= 0 ? value : 0;
+  } catch {
+    return 0;
+  }
+};
+
+const saveScroll = value => {
+  try {
+    sessionStorage.setItem(
+      SCROLL_KEY,
+      String(Math.max(0, Number(value) || 0))
+    );
+  } catch {}
+};
   const getPanel = () => {
     const panel = document.getElementById('titlePanel');
     if (!panel || panel.classList.contains('hidden') || !panel.classList.contains('relay-options-unified')) return null;
@@ -93,13 +112,49 @@
     return delta;
   };
 
-  const attachBody = (state, body) => {
-    if (!body || state.body === body) return;
-    if (state.body) state.scrollTop = state.body.scrollTop;
-    state.body = body;
-    body.addEventListener('scroll', () => { state.scrollTop = body.scrollTop; }, { passive: true });
+ const attachBody = (state, body) => {
+  if (!body) return;
+
+  if (state.body && state.body !== body) {
+    state.scrollTop = state.body.scrollTop;
+    saveScroll(state.scrollTop);
+  }
+
+  if (state.body === body) {
     body.scrollTop = clamp(body, state.scrollTop);
+    return;
+  }
+
+  state.body = body;
+
+  const onScroll = () => {
+    state.scrollTop = clamp(body, body.scrollTop);
+    saveScroll(state.scrollTop);
   };
+
+  body.addEventListener('scroll', onScroll, {
+    passive: true
+  });
+
+  const saved = Math.max(
+    0,
+    Number(state.scrollTop) || readSavedScroll()
+  );
+
+  const restore = () => {
+    const value = clamp(body, saved);
+    body.scrollTop = value;
+    state.scrollTop = value;
+  };
+
+  restore();
+
+  requestAnimationFrame(restore);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(restore);
+  });
+};
 
   const bindPanel = panel => {
     if (panels.has(panel)) return panels.get(panel);
@@ -115,22 +170,41 @@
       });
     };
 
-    panel.addEventListener('wheel', event => {
-      if (event.ctrlKey || event.metaKey) return;
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-      const body = target.closest('.relay-options-body');
-      if (!body || body.closest('#titlePanel') !== panel || body.scrollHeight <= body.clientHeight + 1) return;
-      attachBody(state, body);
-      const delta = normalizeWheelDelta(event, body);
-      if (!delta) return;
-      const before = body.scrollTop;
-      const next = clamp(body, before + delta);
-      if (Math.abs(next - before) < 0.01) return;
-      body.scrollTop = next;
-      state.scrollTop = next;
-      event.preventDefault();
-    }, { capture: true, passive: false });
+panel.addEventListener('wheel', event => {
+  if (event.ctrlKey || event.metaKey) return;
+
+  const body = panel.querySelector('.relay-options-body');
+  if (!body) return;
+
+  if (body.scrollHeight <= body.clientHeight + 1) return;
+
+  const delta = normalizeWheelDelta(event, body);
+  if (!delta) return;
+
+  const before = body.scrollTop;
+
+  const max = Math.max(
+    0,
+    body.scrollHeight - body.clientHeight
+  );
+
+  const next = Math.max(
+    0,
+    Math.min(max, before + delta)
+  );
+
+  if (Math.abs(next - before) < 0.01) return;
+
+  body.scrollTop = next;
+  state.scrollTop = next;
+  saveScroll(next);
+
+  event.preventDefault();
+  event.stopPropagation();
+}, {
+  capture: true,
+  passive: false
+});
 
     window.addEventListener('resize', scheduleFit, { passive: true });
     window.addEventListener('orientationchange', scheduleFit, { passive: true });
@@ -157,7 +231,20 @@
     const body = fitPanel(panel);
     if (!body) return;
     attachBody(state, body);
-    body.scrollTop = clamp(body, state.scrollTop);
+    const remembered = Math.max(
+  0,
+  Number(state.scrollTop) || readSavedScroll()
+);
+
+body.scrollTop = clamp(body, remembered);
+state.scrollTop = body.scrollTop;
+saveScroll(state.scrollTop);
+
+requestAnimationFrame(() => {
+  const restored = clamp(body, readSavedScroll());
+  body.scrollTop = restored;
+  state.scrollTop = restored;
+});
   };
 
   const boot = () => {
@@ -174,3 +261,132 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
 })();
+
+/* =========================================================
+   FINAL STABLE HOME SETTINGS SCROLL
+   ========================================================= */
+
+#titlePanel.relay-options-unified{
+  overflow:hidden !important;
+  touch-action:none !important;
+}
+
+#titlePanel.relay-options-unified .title-panel-card{
+  overflow:hidden !important;
+  min-height:0 !important;
+}
+
+#titlePanel.relay-options-unified #titlePanelContent{
+  overflow:hidden !important;
+  min-height:0 !important;
+  height:100% !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-shell{
+  display:grid !important;
+  grid-template-rows:auto minmax(0,1fr) !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+
+  overflow:hidden !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body{
+  display:block !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+  max-height:100% !important;
+
+  overflow-y:scroll !important;
+  overflow-x:hidden !important;
+
+  -webkit-overflow-scrolling:touch !important;
+
+  overscroll-behavior-y:contain !important;
+  overscroll-behavior-x:none !important;
+
+  scroll-behavior:auto !important;
+  scroll-snap-type:none !important;
+
+  touch-action:pan-y !important;
+  pointer-events:auto !important;
+
+  scrollbar-gutter:stable !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-grid{
+  min-width:0 !important;
+  min-height:0 !important;
+
+  height:auto !important;
+
+  overflow:visible !important;
+
+  padding-bottom:24px !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body button,
+#titlePanel.relay-options-unified .relay-options-body input,
+#titlePanel.relay-options-unified .relay-options-body select{
+  pointer-events:auto !important;
+  touch-action:manipulation !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body input[type="range"]{
+  touch-action:auto !important;
+}
+
+/* Chrome / Edge scrollbar */
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar{
+  width:10px !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.025) !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb{
+  background:rgba(141,244,255,.55) !important;
+  min-height:40px !important;
+  border-radius:6px !important;
+}
+
+#titlePanel.relay-options-unified .relay-options-body::-webkit-scrollbar-thumb:hover{
+  background:rgba(141,244,255,.72) !important;
+}
+
+/* Mobile */
+@media (max-width:760px){
+
+  #titlePanel.relay-options-unified .title-panel-card{
+    width:calc(100vw - 12px) !important;
+
+    height:calc(
+      100dvh
+      - env(safe-area-inset-top,0px)
+      - env(safe-area-inset-bottom,0px)
+      - 12px
+    ) !important;
+
+    max-height:calc(
+      100dvh
+      - env(safe-area-inset-top,0px)
+      - env(safe-area-inset-bottom,0px)
+      - 12px
+    ) !important;
+  }
+
+  #titlePanel.relay-options-unified .relay-options-body{
+    overflow-y:scroll !important;
+    touch-action:pan-y !important;
+    -webkit-overflow-scrolling:touch !important;
+  }
+}
