@@ -5,11 +5,11 @@ This checklist is the release gate for the public game build.
 ## P0 — must be resolved before public release
 
 - [x] Wire `test:canonical-css` to the existing `tests/css-canonical-contract.mjs` contract.
-- [ ] Make `src/systems/mobile-input-single-owner-v1.js` the only mobile input owner. Remove the duplicate joystick/pointer dispatcher from `src/main.js`.
-- [ ] Consolidate CSS/runtime ownership in `relay-ui-init.js`. Do not add another `v1/v2/v3/final/polish` override layer.
-- [ ] Make `canonical-ui-v1.css` the single authority for HUD, Home, Pause, Settings, overlays and touch layout.
-- [ ] Reduce direct stylesheet loading in `index.html` to the intended canonical bootstrap dependencies.
-- [ ] Move stable behaviour currently injected by `vite.config.mjs` patch functions into the real source modules, then remove obsolete build-time patches.
+- [x] Make `src/systems/mobile-input-single-owner-v1.js` the only mobile input owner. Remove the duplicate joystick/pointer dispatcher from `src/main.js`.
+- [x] Consolidate CSS/runtime ownership in `relay-ui-init.js`. Do not add another `v1/v2/v3/final/polish` override layer.
+- [x] Make `canonical-ui-v1.css` the single authority for HUD, Home, Pause, Settings, overlays and touch layout.
+- [x] Reduce direct stylesheet loading in `index.html` to the intended canonical bootstrap dependencies.
+- [ ] Move the remaining stable behaviour still injected by `vite.config.mjs` (`cargo` state import and RunnerScene zoom normalization) into source modules, then remove the obsolete build-time patches.
 
 ## P1 — public quality
 
@@ -24,10 +24,10 @@ This checklist is the release gate for the public game build.
 
 ## P2 — cleanup
 
-- [ ] Fix the page title typo: `Rooftrop Game` → `Rooftop Game`.
+- [x] Fix the page title typo: `Rooftrop Game` → `Rooftop Game`.
 - [ ] Confirm favicon/base paths against the final hosting base URL.
 - [ ] Archive obsolete experimental `v1/v2/v3/final/hotfix` assets after dependency verification.
-- [ ] Keep `RunnerScene.js` gameplay-only and `state.js` as the canonical persistent progression owner.
+- [x] Keep `RunnerScene.js` gameplay-only and `state.js` as the canonical persistent progression owner.
 
 ## Release rule
 

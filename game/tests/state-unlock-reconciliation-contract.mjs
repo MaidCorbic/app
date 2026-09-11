@@ -2,16 +2,14 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('../src/state.js', import.meta.url), 'utf8');
-const { patchSeasonalProgression } = await import(new URL('../seasonal-progression-patch.mjs', import.meta.url));
-const transformed = patchSeasonalProgression(source);
 
-assert.match(transformed, /import \{ missions \} from '\.\/missions\.js';/, 'State runtime must import mission definitions');
-assert.match(transformed, /const reconciledUnlockedDistricts = districts/, 'State loader must derive district unlocks from completed missions');
-assert.match(transformed, /const reconciledUnlockedMissions = missions/, 'State loader must derive mission unlocks from completed missions');
-assert.match(transformed, /unlockedDistricts: reconciledUnlockedDistricts,/, 'Persisted district unlock list must not override derived progression');
-assert.match(transformed, /unlockedMissions: reconciledUnlockedMissions/, 'Persisted mission unlock list must not override derived progression');
+assert.match(source, /import \{ missions \} from '\.\/missions\.js';/, 'State runtime must import mission definitions');
+assert.match(source, /const reconciledUnlockedDistricts = districts/, 'State loader must derive district unlocks from completed missions');
+assert.match(source, /const reconciledUnlockedMissions = missions/, 'State loader must derive mission unlocks from completed missions');
+assert.match(source, /unlockedDistricts: reconciledUnlockedDistricts,/, 'Persisted district unlock list must not override derived progression');
+assert.match(source, /unlockedMissions: reconciledUnlockedMissions/, 'Persisted mission unlock list must not override derived progression');
 
-const executable = transformed.replace(
+const executable = source.replace(
   "import { missions } from './missions.js';\n",
   "const missions = [{ id: 'first-delivery', unlockRequirement: null }, { id: 'dead-drop', unlockRequirement: 'first-delivery' }, { id: 'blackout', unlockRequirement: 'dead-drop' }];\n",
 );

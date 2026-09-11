@@ -133,6 +133,74 @@ if (!RunnerScene.prototype.__relayCoreStabilityV1Installed) {
     game.__relaySafeRunnerStart = true;
   }
 
+  function resetTransientRespawnState(scene) {
+    if (!scene) return;
+    scene.alarmTimer = 0;
+    scene.empTimer = 0;
+    scene.decoyTimer = 0;
+    scene.boosterTimer = 0;
+    scene.comboTimer = 0;
+    scene.combatCombo = 0;
+    scene.blasterCooldown = 0;
+    scene.swordCooldown = 0;
+    scene.vaultCooldown = 0;
+    scene.boostCooldown = 0;
+    scene.lowEnergyCueTimer = 0;
+    scene.slideTimer = 0;
+    scene.airDashUsed = false;
+    scene.gadgetCooldowns = [0, 0];
+    scene.buildCooldowns = [0, 0];
+    scene.chaseSection = -1;
+    if (scene.chaser) {
+      scene.chaser.setVisible(false);
+      scene.chaser.body?.setEnable(false);
+    }
+    [scene.eggs, scene.comets, scene.kineticBalls, scene.plasma, scene.turrets, scene.shields, scene.springPads]
+      .forEach(group => group?.getChildren?.().forEach(entity => entity.active && entity.destroy()));
+    scene.decoyBeacon?.destroy();
+    scene.decoyBeacon = null;
+    scene.boosterAura?.destroy();
+    scene.boosterAura = null;
+  }
+
+  function rememberCheckpointCollectibles(scene) {
+    for (const [groupName] of [['signals'], ['secrets']]) {
+      scene?.[groupName]?.getChildren?.().forEach(item => {
+        if (!Number.isFinite(item.getData('spawnX'))) item.setData('spawnX', item.x);
+        if (!Number.isFinite(item.getData('spawnY'))) item.setData('spawnY', item.y);
+      });
+    }
+  }
+
+  function restoreCheckpointCollectibles(scene) {
+    for (const groupName of ['signals', 'secrets']) {
+      scene?.[groupName]?.getChildren?.().forEach(item => {
+        const spawnX = Number(item.getData('spawnX'));
+        const spawnY = Number(item.getData('spawnY'));
+        if (!Number.isFinite(spawnX) || !Number.isFinite(spawnY) || !item.active) return;
+        item.enableBody?.(true, spawnX, spawnY, true, true);
+      });
+    }
+  }
+
+  function inferDeathReason(message) {
+    const value = String(message || '').toLowerCase();
+    if (value.includes('barrier') || value.includes('security gate') || value.includes('interceptor')) return 'collision';
+    if (value.includes('enemy') || value.includes('dinosaur')) return 'enemy';
+    return 'fall';
+  }
+
+  function applyDeathReasonCorrection(scene, reason, before) {
+    if (reason !== 'enemy') return;
+    const fell = (Number(scene.falls) || 0) - before.falls;
+    if (fell > 0) scene.falls = Math.max(0, (Number(scene.falls) || 0) - fell);
+    scene.enemyHits = (Number(scene.enemyHits) || 0) + Math.max(1, fell);
+    const packageWasReduced = Number(scene.packageCondition) < before.packageCondition;
+    if (packageWasReduced && fell > 0) {
+      scene.packageCondition = Math.min(100, Number(scene.packageCondition) + 10 * fell);
+    }
+  }
+
   RunnerScene.prototype.create = function stableCreate(...args) {
     const mission = this.mission;
     if (!mission?.id || !mission.spawn || !mission.goal) {
@@ -146,8 +214,19 @@ if (!RunnerScene.prototype.__relayCoreStabilityV1Installed) {
     this.__relayLastHitFrame = -1;
     this.__relayRespawnInProgress = false;
     this.__relayPhysicsRecoveryPending = false;
+    this.enemyHits = Number.isFinite(this.enemyHits) ? this.enemyHits : 0;
     try {
       const result = originalCreate.apply(this, args);
+      if (this.player) {
+        this.healthInvulnerable = Math.max(Number(this.healthInvulnerable) || 0, SPAWN_SHIELD_MS);
+        this.respawnGrace = Math.max(Number(this.respawnGrace) || 0, SPAWN_SHIELD_MS);
+        if (!this.__relaySpawnShieldVisual && this.add?.circle && this.tweens?.add) {
+          const spawnShield = this.add.circle(this.player.x, this.player.y, 24, 0x8df4ff, .22).setDepth(11);
+          this.__relaySpawnShieldVisual = spawnShield;
+          this.tweens.add({ targets: spawnShield, scale: 2.6, alpha: 0, duration: SPAWN_SHIELD_MS, onComplete: () => { spawnShield.destroy(); this.__relaySpawnShieldVisual = null; } });
+        }
+      }
+      rememberCheckpointCollectibles(this);
       ensureWebKeyboardRefs(this);
       recoverWebPresentationState(this);
       window.__relayRunnerScene = this;
@@ -160,17 +239,33 @@ if (!RunnerScene.prototype.__relayCoreStabilityV1Installed) {
 
   RunnerScene.prototype.fail = function stableFail(message) {
     if (this.briefingProtected || this.finished || this.respawning || this.respawnGrace > 0 || this.__relayRespawnInProgress) return;
+    const reason = this.__relayPendingDeathReason || inferDeathReason(message);
+    const before = {
+      falls: Number(this.falls) || 0,
+      collisions: Number(this.collisions) || 0,
+      packageCondition: Number(this.packageCondition),
+    };
     stop(this);
-    return fail.call(this, message);
+    try {
+      return fail.call(this, message);
+    } finally {
+      applyDeathReasonCorrection(this, reason, before);
+      this.__relayPendingDeathReason = null;
+    }
   };
 
-  RunnerScene.prototype.takeSciFiHit = function stableHit(message) {
+  RunnerScene.prototype.takeSciFiHit = function stableHit(message, reason) {
     if (this.briefingProtected || this.respawning || this.finished || this.respawnGrace > 0 || this.healthInvulnerable > 0 || this.__relayRespawnInProgress) return;
     const frame = Number.isFinite(this.game?.loop?.frame) ? this.game.loop.frame : Math.floor(Number(this.elapsedMs || 0));
     if (this.__relayLastHitFrame === frame) return;
     this.__relayLastHitFrame = frame;
+    this.__relayPendingDeathReason = reason || inferDeathReason(message);
     stop(this);
-    return hit.call(this, message);
+    try {
+      return hit.call(this, message);
+    } finally {
+      if (this.health > 0) this.__relayPendingDeathReason = null;
+    }
   };
 
   RunnerScene.prototype.respawnCheckpoint = function stableRespawn() {
@@ -181,12 +276,17 @@ if (!RunnerScene.prototype.__relayCoreStabilityV1Installed) {
       if ((!this.checkpoint || !Number.isFinite(this.checkpoint.x) || !Number.isFinite(this.checkpoint.y) || this.checkpoint.y > 760) && spawn) {
         this.checkpoint = { x: Number.isFinite(spawn.x) ? spawn.x : 120, y: Number.isFinite(spawn.y) ? spawn.y : 520, signals: new Set(), secrets: new Set() };
       }
+      resetTransientRespawnState(this);
+      rememberCheckpointCollectibles(this);
       respawn.call(this);
+      restoreCheckpointCollectibles(this);
       if (this.player?.body) {
         this.player.body.enable = true;
         this.player.body.checkCollision.none = false;
         this.player.body.setVelocity(0, 0);
       }
+      this.healthInvulnerable = Math.max(Number(this.healthInvulnerable) || 0, SPAWN_SHIELD_MS);
+      this.respawnGrace = Math.max(Number(this.respawnGrace) || 0, SPAWN_SHIELD_MS);
       this.respawning = false;
       this.__relayRespawnCompletedAt = performance.now();
     } finally {

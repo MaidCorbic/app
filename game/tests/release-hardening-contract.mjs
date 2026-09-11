@@ -13,15 +13,20 @@ const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
 const mobileOwner = await read('src/systems/mobile-input-single-owner-v1.js');
 const uiInit = await read('relay-ui-init.js');
+const core = await read('src/systems/core-stability.js');
+const cargo = await read('cargo-integrity-v2.js');
+const state = await read('src/state.js');
 
 assert.equal(packageJson.scripts['test:final-stability']?.length > 0, true, 'final stability suite must remain wired');
 assert.equal(packageJson.scripts['test:release-ux-gameplay-polish'], 'node tests/release-ux-gameplay-polish.mjs', 'release UX/gameplay polish suite must remain wired');
 assert.equal(packageJson.scripts['test:release-hardening'], 'node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:final-stability && npm run build', 'release hardening command must include all release gates');
 assert.equal(packageJson.engines?.node, '24.x', 'release Node runtime must stay pinned to Vercel runtime');
 assert.match(config, /export default defineConfig/);
-assert.doesNotMatch(index, /href=["']mobile-viewport\.css["']/);
+assert.doesNotMatch(config, /patch(DeathReason|InitialSpawnShield|CheckpointCollectibles|RespawnTransientState|SeasonalProgression|SpecialEventCreditReward)/);
+assert.doesNotMatch(config, /relay-(death-reason|initial-spawn-shield|checkpoint-collectibles|respawn-transient-state)-fix/);
 assert.match(index, /<script type="module" src="\.\/cinematic-arrival-v2\.js"><\/script>/);
 assert.doesNotMatch(index, /<script src=["']\.\/cinematic-arrival-v2\.js["']/);
+assert.doesNotMatch(index, /href=["']mobile-viewport\.css["']/);
 assert.doesNotMatch(arrival, /^import ['"]\.\/canonical-ui-v1\.css['"];?$/m, 'cinematic arrival must not own canonical UI CSS');
 assert.match(arrival, /^import ['"]\.\/cinematic-arrival-v2\.css['"];?$/m);
 assert.match(uiInit, /^import ['"]\.\/canonical-ui-v1\.css['"];?$/m);
@@ -41,6 +46,19 @@ assert.match(mobileOwner, /detachLegacyRunnerInput/);
 assert.match(mobileOwner, /events\.off\('mobile-action'/);
 assert.match(mobileOwner, /events\.off\('mobile-move'/);
 assert.match(mobileOwner, /window\.__relayMobileInputSingleOwnerV9/);
+
+// RunnerScene stability behavior is source-owned by the runtime authority.
+assert.match(core, /SPAWN_SHIELD_MS/);
+assert.match(core, /function resetTransientRespawnState\(scene\)/);
+assert.match(core, /function rememberCheckpointCollectibles\(scene\)/);
+assert.match(core, /function inferDeathReason\(message\)/);
+assert.match(core, /RunnerScene\.prototype\.takeSciFiHit = function stableHit/);
+assert.match(core, /RunnerScene\.prototype\.respawnCheckpoint = function stableRespawn/);
+
+// Persistent progression and cargo runtime remain source-owned.
+assert.match(state, /const modifierCredits = runStats\.modifier\?\.credits \|\| 0;/);
+assert.match(state, /const reconciledUnlockedMissions = missions/);
+assert.match(cargo, /packages/);
 
 await assert.rejects(access(fileURLToPath(new URL('../vite.config.js', gameRoot))), /ENOENT/, 'legacy Vite config must not return');
 
