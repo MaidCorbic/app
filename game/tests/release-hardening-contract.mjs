@@ -15,6 +15,7 @@ const mobileOwner = await read('src/systems/mobile-input-single-owner-v1.js');
 const uiInit = await read('relay-ui-init.js');
 const core = await read('src/systems/core-stability.js');
 const cargo = await read('cargo-integrity-v2.js');
+const runner = await read('src/scenes/RunnerScene.js');
 const state = await read('src/state.js');
 
 assert.equal(packageJson.scripts['test:final-stability']?.length > 0, true, 'final stability suite must remain wired');
@@ -23,7 +24,8 @@ assert.equal(packageJson.scripts['test:release-hardening'], 'node tests/release-
 assert.equal(packageJson.engines?.node, '24.x', 'release Node runtime must stay pinned to Vercel runtime');
 assert.match(config, /export default defineConfig/);
 assert.doesNotMatch(config, /patch(DeathReason|InitialSpawnShield|CheckpointCollectibles|RespawnTransientState|SeasonalProgression|SpecialEventCreditReward)/);
-assert.doesNotMatch(config, /relay-(death-reason|initial-spawn-shield|checkpoint-collectibles|respawn-transient-state)-fix/);
+assert.doesNotMatch(config, /relay-(death-reason|initial-spawn-shield|checkpoint-collectibles|respawn-transient-state|cargo-state-import|runner-zoom-stability)-fix/);
+assert.doesNotMatch(config, /relayTransform\(/, 'Vite config must not rewrite gameplay source');
 assert.match(index, /<script type="module" src="\.\/cinematic-arrival-v2\.js"><\/script>/);
 assert.doesNotMatch(index, /<script src=["']\.\/cinematic-arrival-v2\.js["']/);
 assert.doesNotMatch(index, /href=["']mobile-viewport\.css["']/);
@@ -54,11 +56,22 @@ assert.match(core, /function rememberCheckpointCollectibles\(scene\)/);
 assert.match(core, /function inferDeathReason\(message\)/);
 assert.match(core, /RunnerScene\.prototype\.takeSciFiHit = function stableHit/);
 assert.match(core, /RunnerScene\.prototype\.respawnCheckpoint = function stableRespawn/);
+assert.match(runner, /let cinematicTargetZoom = 1;/);
+assert.match(runner, /if \(speed > 520\) cinematicTargetZoom = 1\.035;/);
+assert.match(runner, /else if \(speed > 420\) cinematicTargetZoom = 1\.026;/);
+assert.match(runner, /else if \(speed > 330\) cinematicTargetZoom = 1\.014;/);
+assert.match(runner, /if \(dashActive && !this\.motionReduced\) cinematicTargetZoom = 1\.045;/);
+assert.match(runner, /const speedZoomTarget = 1 \+ speedZoom;/);
+assert.match(runner, /const targetZoom = Math\.max\(\s*cinematicTargetZoom,\s*speedZoomTarget\s*\);/);
+assert.doesNotMatch(runner, /this\.cameras\.main\.zoom\s*=/, 'RunnerScene must not directly assign camera zoom');
 
 // Persistent progression and cargo runtime remain source-owned.
 assert.match(state, /const modifierCredits = runStats\.modifier\?\.credits \|\| 0;/);
 assert.match(state, /const reconciledUnlockedMissions = missions/);
-assert.match(cargo, /packages/);
+assert.match(cargo, /^import \{ packages \} from '\.\/src\/packages\.js';\nimport \{ loadState, saveState \} from '\.\/src\/state\.js';/);
+assert.doesNotMatch(cargo, /import\('\.\/src\/state\.js'\)/, 'cargo runtime must not lazy-load state through a build patch');
+assert.match(cargo, /const state = loadState\(\);/);
+assert.match(cargo, /saveState\(state\);/);
 
 await assert.rejects(access(fileURLToPath(new URL('../vite.config.js', gameRoot))), /ENOENT/, 'legacy Vite config must not return');
 
