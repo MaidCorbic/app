@@ -277,1954 +277,2928 @@
 
   style.id = 'relay-gameplay-intro-v5-style';
 
-  style.textContent = `
-
-    #${ROOT_ID} {
-      --cyan:#65e8ff;
-      --yellow:#ffd76a;
-      --green:#8df59b;
-      --red:#ff6877;
-      --white:#eefcff;
-      --muted:#647e8b;
-
-      position:fixed !important;
-      inset:0 !important;
-      z-index:2147483647 !important;
-
-      display:grid !important;
-      place-items:center !important;
-
-      padding:12px !important;
-      box-sizing:border-box;
-
-      overflow:hidden;
-
-      background:
-        radial-gradient(
-          circle at 50% 45%,
-          rgba(35,150,180,.13),
-          transparent 42%
-        ),
-        #020609;
-
-      color:var(--white);
-
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        monospace;
-
-      isolation:isolate;
-    }
-
-    #${ROOT_ID}[hidden] {
-      display:none !important;
-    }
-
-    #${ROOT_ID} .rv5-bg {
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-
-      background:
-        linear-gradient(
-          90deg,
-          rgba(0,0,0,.4),
-          transparent 30%,
-          transparent 70%,
-          rgba(0,0,0,.4)
-        );
-    }
-
-    #${ROOT_ID} .rv5-bg::before {
-      content:"";
-      position:absolute;
-      inset:0;
-
-      background-image:
-        linear-gradient(
-          rgba(101,232,255,.025) 1px,
-          transparent 1px
-        ),
-        linear-gradient(
-          90deg,
-          rgba(101,232,255,.025) 1px,
-          transparent 1px
-        );
-
-      background-size:40px 40px;
-    }
-
-    #${ROOT_ID} .rv5-noise {
-      position:absolute;
-      inset:0;
-      opacity:.035;
-      pointer-events:none;
-
-      background-image:
-        radial-gradient(
-          white .5px,
-          transparent .5px
-        );
-
-      background-size:4px 4px;
-    }
-
-    #${ROOT_ID} .rv5-shell {
-      position:relative;
-
-      width:min(1320px,97vw);
-      height:min(900px,94dvh);
-
-      min-height:520px;
-
-      display:grid;
-      grid-template-rows:auto minmax(0,1fr) auto;
-
-      overflow:hidden;
-
-      background:
-        linear-gradient(
-          145deg,
-          rgba(7,20,29,.99),
-          rgba(2,7,11,.99)
-        );
-
-      border:1px solid rgba(101,232,255,.2);
-
-      box-shadow:
-        0 35px 120px rgba(0,0,0,.85),
-        0 0 100px rgba(40,180,215,.08),
-        inset 0 1px rgba(255,255,255,.05);
-
-      border-radius:10px;
-    }
-
-    #${ROOT_ID} .rv5-topline {
-      position:absolute;
-      top:0;
-      left:0;
-      right:0;
-      height:3px;
-
-      display:flex;
-      z-index:20;
-    }
-
-    #${ROOT_ID} .rv5-topline i {
-      flex:1;
-      background:rgba(101,232,255,.2);
-    }
-
-    #${ROOT_ID} .rv5-topline i:first-child,
-    #${ROOT_ID} .rv5-topline i:last-child {
-      background:var(--yellow);
-    }
-
-    #${ROOT_ID} .rv5-topline i:nth-child(3) {
-      background:var(--cyan);
-    }
-
-    #${ROOT_ID} .rv5-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-
-      padding:20px 24px;
-
-      border-bottom:1px solid rgba(101,232,255,.1);
-    }
-
-    #${ROOT_ID} .rv5-live {
-      display:flex;
-      align-items:center;
-      gap:7px;
-
-      margin-bottom:8px;
-
-      color:#607984;
-      font-size:7px;
-      font-weight:900;
-      letter-spacing:.18em;
-    }
-
-    #${ROOT_ID} .rv5-live b {
-      width:6px;
-      height:6px;
-      border-radius:50%;
-      background:var(--cyan);
-
-      box-shadow:0 0 12px var(--cyan);
-
-      animation:rv5pulse 1.3s infinite;
-    }
-
-    #${ROOT_ID} .rv5-live span {
-      color:#78919d;
-    }
-
-    @keyframes rv5pulse {
-      50% {
-        transform:scale(1.35);
-        opacity:.55;
-      }
-    }
-
-    #${ROOT_ID} .rv5-kicker {
-      color:var(--yellow);
-      font-size:7px;
-      font-weight:900;
-      letter-spacing:.2em;
-      margin-bottom:5px;
-    }
-
-    #${ROOT_ID} h1 {
-      margin:0;
-
-      font-size:clamp(28px,4vw,50px);
-      line-height:.9;
-      letter-spacing:.05em;
-      font-weight:950;
-    }
-
-    #${ROOT_ID} h1 strong {
-      color:var(--cyan);
-      text-shadow:0 0 20px rgba(101,232,255,.25);
-    }
-
-    #${ROOT_ID} .rv5-meta {
-      margin-top:8px;
-
-      color:#637d89;
-      font-size:7px;
-      font-weight:800;
-      letter-spacing:.13em;
-
-      max-width:65vw;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    #${ROOT_ID} .rv5-right {
-      display:flex;
-      align-items:center;
-      gap:15px;
-    }
-
-    #${ROOT_ID} .rv5-status {
-      position:relative;
-
-      min-width:110px;
-      padding:10px 12px;
-
-      border:1px solid rgba(101,232,255,.1);
-      background:rgba(101,232,255,.025);
-    }
-
-    #${ROOT_ID} .rv5-status small {
-      display:block;
-      margin-bottom:5px;
-
-      color:#536c78;
-      font-size:6px;
-      letter-spacing:.15em;
-    }
-
-    #${ROOT_ID} .rv5-status strong {
-      color:var(--green);
-      font-size:9px;
-      letter-spacing:.14em;
-    }
-
-    #${ROOT_ID} .rv5-status i {
-      position:absolute;
-      right:9px;
-      bottom:9px;
-
-      width:5px;
-      height:5px;
-      border-radius:50%;
-
-      background:var(--green);
-      box-shadow:0 0 8px var(--green);
-    }
-
-    #${ROOT_ID} .rv5-timer {
-      position:relative;
-
-      width:72px;
-      height:72px;
-
-      display:grid;
-      place-items:center;
-    }
-
-    #${ROOT_ID} .rv5-timer svg {
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      transform:rotate(-90deg);
-    }
-
-    #${ROOT_ID} .rv5-timer circle {
-      fill:none;
-      stroke-width:2.5;
-    }
-
-    #${ROOT_ID} .timer-track {
-      stroke:rgba(255,215,106,.08);
-    }
-
-    #${ROOT_ID} .timer-progress {
-      stroke:var(--yellow);
-      stroke-linecap:round;
-
-      stroke-dasharray:270.18;
-      stroke-dashoffset:0;
-
-      filter:
-        drop-shadow(
-          0 0 6px
-          rgba(255,215,106,.7)
-        );
-    }
-
-    #${ROOT_ID} .rv5-timer strong {
-      position:relative;
-      z-index:2;
-
-      color:var(--yellow);
-      font-size:24px;
-    }
-
-    #${ROOT_ID} .rv5-timer small {
-      position:absolute;
-      bottom:5px;
-
-      color:#637983;
-      font-size:5px;
-      letter-spacing:.15em;
-    }
-
-    #${ROOT_ID} .rv5-main {
-      min-height:0;
-
-      display:grid;
-      grid-template-rows:38px minmax(0,1fr) 40px;
-
-      overflow:hidden;
-    }
-
-    #${ROOT_ID} .rv5-mapbar {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-
-      padding:0 15px;
-
-      border-bottom:1px solid rgba(101,232,255,.08);
-
-      background:rgba(1,7,11,.9);
-    }
-
-    #${ROOT_ID} .rv5-mapbar > div {
-      display:flex;
-      gap:6px;
-    }
-
-    #${ROOT_ID} .rv5-mapbar span {
-      padding:5px 8px;
-
-      color:#506b78;
-      font-size:5px;
-      font-weight:900;
-      letter-spacing:.14em;
-
-      border:1px solid rgba(101,232,255,.07);
-    }
-
-    #${ROOT_ID} .rv5-mapbar span.active {
-      color:var(--cyan);
-      border-color:rgba(101,232,255,.25);
-      background:rgba(101,232,255,.04);
-    }
-
-    #${ROOT_ID} .rv5-mapbar b {
-      color:#4d6672;
-      font-size:6px;
-      letter-spacing:.14em;
-    }
-
-    #${ROOT_ID} .rv5-map {
-      position:relative;
-      min-height:0;
-      overflow:hidden;
-      background:#02080d;
-    }
-
-    #${ROOT_ID} .rv5-svg {
-      position:absolute;
-      inset:0;
-
-      width:100%;
-      height:100%;
-
-      display:block;
-    }
-
-    #${ROOT_ID} .rv5-scan {
-      position:absolute;
-      left:0;
-      right:0;
-
-      height:100px;
-
-      pointer-events:none;
-
-      background:
-        linear-gradient(
-          180deg,
-          transparent,
-          rgba(101,232,255,.05),
-          transparent
-        );
-
-      animation:
-        rv5scan 4s linear infinite;
-    }
-
-    @keyframes rv5scan {
-      from {
-        transform:translateY(-120px);
-        opacity:0;
-      }
-
-      15% {
-        opacity:1;
-      }
-
-      to {
-        transform:translateY(650px);
-        opacity:0;
-      }
-    }
-
-#${ROOT_ID} .rv5-vignette {
-  position:absolute;
-  inset:0;
-  pointer-events:none;
+style.textContent = `
+
+/* ============================================================
+   RELAY RUNNER V5
+   COD / WARZONE INSPIRED TACTICAL MISSION MAP
+   VISUAL REDESIGN ONLY
+   Existing SVG / route / gameplay remain untouched.
+   ============================================================ */
+
+
+/* ============================================================
+   ROOT
+   ============================================================ */
+
+#${ROOT_ID}{
+  --wz-bg:#030607;
+  --wz-bg-2:#070b0b;
+
+  --wz-panel:rgba(7,11,11,.90);
+  --wz-panel-2:rgba(10,14,13,.96);
+
+  --wz-white:#f2f2ea;
+  --wz-soft:#bcc4bc;
+  --wz-muted:#727b74;
+
+  --wz-amber:#d5b553;
+  --wz-amber-bright:#f0cf69;
+
+  --wz-green:#78c879;
+  --wz-red:#e45c63;
+
+  --wz-cyan:#74dce5;
+
+  position:fixed !important;
+  inset:0 !important;
+
+  z-index:2147483647 !important;
+
+  display:grid !important;
+  place-items:center !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  padding:10px !important;
+
+  overflow:hidden !important;
+
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(109,126,112,.075),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 50% 80%,
+      rgba(213,181,83,.025),
+      transparent 35%
+    ),
+    #030607 !important;
+
+  color:var(--wz-white) !important;
+
+  font-family:
+    "Arial Narrow",
+    "Roboto Condensed",
+    "Segoe UI",
+    Arial,
+    sans-serif !important;
+
+  isolation:isolate !important;
+
+  overscroll-behavior:none !important;
+}
+
+
+#${ROOT_ID}[hidden]{
+  display:none !important;
+}
+
+
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
+
+#${ROOT_ID} .rv5-bg{
+  position:absolute !important;
+  inset:0 !important;
+
+  pointer-events:none !important;
 
   background:
     radial-gradient(
       ellipse at center,
-      transparent 55%,
-      rgba(0,0,0,.38) 100%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(0,0,0,.12),
-      transparent 18%,
-      transparent 82%,
-      rgba(0,0,0,.12)
-    );
+      transparent 38%,
+      rgba(0,0,0,.30) 100%
+    ) !important;
 }
 
-    #${ROOT_ID} .rv5-corner {
-      position:absolute;
 
-      width:30px;
-      height:30px;
-
-      border-color:rgba(101,232,255,.3);
-      border-style:solid;
-
-      z-index:10;
-    }
-
-    #${ROOT_ID} .rv5-corner.tl {
-      top:10px;
-      left:10px;
-      border-width:1px 0 0 1px;
-    }
-
-    #${ROOT_ID} .rv5-corner.tr {
-      top:10px;
-      right:10px;
-      border-width:1px 1px 0 0;
-    }
-
-    #${ROOT_ID} .rv5-corner.bl {
-      bottom:10px;
-      left:10px;
-      border-width:0 0 1px 1px;
-    }
-
-    #${ROOT_ID} .rv5-corner.br {
-      bottom:10px;
-      right:10px;
-      border-width:0 1px 1px 0;
-    }
-
-    #${ROOT_ID} .rv5-map-label {
-      position:absolute;
-      z-index:12;
-
-      display:grid;
-      gap:4px;
-
-      pointer-events:none;
-    }
-
-    #${ROOT_ID} .rv5-map-label.top {
-      top:20px;
-      left:24px;
-    }
-
-    #${ROOT_ID} .rv5-map-label.bottom {
-      right:24px;
-      bottom:20px;
-      text-align:right;
-    }
-
-    #${ROOT_ID} .rv5-map-label small {
-      color:#526b78;
-      font-size:6px;
-      letter-spacing:.16em;
-    }
-
-    #${ROOT_ID} .rv5-map-label strong {
-      color:#a9c0c9;
-      font-size:8px;
-      letter-spacing:.1em;
-    }
-
-    #${ROOT_ID} .rv5-live-tag {
-      position:absolute;
-
-      left:16px;
-      bottom:16px;
-
-      z-index:15;
-
-      display:flex;
-      align-items:center;
-      gap:7px;
-
-      padding:8px 10px;
-
-      color:var(--cyan);
-
-      font-size:6px;
-      font-weight:900;
-      letter-spacing:.14em;
-
-      border:1px solid rgba(101,232,255,.18);
-      background:rgba(2,9,14,.82);
-      backdrop-filter:blur(8px);
-    }
-
-    #${ROOT_ID} .rv5-live-tag i {
-      width:5px;
-      height:5px;
-      border-radius:50%;
-
-      background:var(--cyan);
-      box-shadow:0 0 8px var(--cyan);
-    }
-
-    #${ROOT_ID} .rv5-stats {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-
-      background:rgba(1,6,10,.96);
-
-      border-top:1px solid rgba(101,232,255,.07);
-    }
-
-    #${ROOT_ID} .rv5-stats div {
-      min-width:0;
-
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      gap:3px;
-
-      border-right:1px solid rgba(101,232,255,.06);
-    }
-
-    #${ROOT_ID} .rv5-stats div:last-child {
-      border-right:0;
-    }
-
-    #${ROOT_ID} .rv5-stats small {
-      color:#465e69;
-      font-size:5px;
-      letter-spacing:.15em;
-    }
-
-    #${ROOT_ID} .rv5-stats strong {
-      color:#a5bbc3;
-      font-size:6px;
-      letter-spacing:.1em;
-    }
-
-    #${ROOT_ID} .rv5-stats .danger {
-      color:var(--red);
-    }
-
-    #${ROOT_ID} .rv5-footer {
-      min-height:72px;
-
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-
-      gap:15px;
-
-      padding:10px 20px;
-
-      border-top:1px solid rgba(101,232,255,.1);
-
-      background:rgba(1,6,10,.98);
-    }
-    
-#${ROOT_ID} .rv5-objective{
-  display:flex;
-  align-items:center;
-  gap:14px;
-
-  min-width:0;
-
-  padding:9px 13px;
-
-  border:1px solid rgba(101,232,255,.12);
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(101,232,255,.055),
-      rgba(101,232,255,.012)
-    );
-
-  box-shadow:
-    inset 0 0 20px rgba(101,232,255,.025);
-}
-
-    #${ROOT_ID} .rv5-objective-icon {
-      width:32px;
-      height:32px;
-
-      flex:0 0 auto;
-
-      display:grid;
-      place-items:center;
-
-      color:var(--yellow);
-
-      border:1px solid rgba(255,215,106,.25);
-      background:rgba(255,215,106,.04);
-
-      transform:rotate(45deg);
-    }
-
-    #${ROOT_ID} .rv5-objective-icon::first-letter {
-      transform:rotate(-45deg);
-    }
-
-    #${ROOT_ID} .rv5-objective small {
-      display:block;
-
-      margin-bottom:4px;
-
-      color:var(--yellow);
-
-      font-size:6px;
-      font-weight:900;
-      letter-spacing:.16em;
-    }
-
-    #${ROOT_ID} .objective-text {
-      display:block;
-
-      max-width:65vw;
-
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-
-      color:#dcecef;
-
-      font-size:9px;
-      letter-spacing:.04em;
-    }
-
-    #${ROOT_ID} .rv5-ready {
-      display:flex;
-      align-items:center;
-      gap:8px;
-
-      color:#6d858f;
-
-      font-size:6px;
-      font-weight:900;
-      letter-spacing:.14em;
-      white-space:nowrap;
-    }
-
-    #${ROOT_ID} .rv5-ready i {
-      width:7px;
-      height:7px;
-      border-radius:50%;
-
-      background:var(--green);
-      box-shadow:0 0 10px var(--green);
-    }
-
-    /* SVG */
-
-    #${ROOT_ID} .grid {
-      stroke:#123044;
-      stroke-width:1;
-      opacity:.5;
-    }
-
-    #${ROOT_ID} .grid-major {
-      stroke:#1c465b;
-      stroke-width:1.4;
-      opacity:.4;
-    }
-
-    #${ROOT_ID} .platform {
-      fill:#102333;
-      stroke:#42677b;
-      stroke-width:1.3;
-    }
-
-    #${ROOT_ID} .edge {
-      stroke:var(--cyan);
-      opacity:.3;
-    }
-
-    #${ROOT_ID} .route-halo {
-      fill:none;
-      stroke:var(--cyan);
-      stroke-width:15;
-      opacity:.07;
-    }
-
-    #${ROOT_ID} .route {
-      fill:none;
-      stroke:var(--cyan);
-      stroke-width:3.5;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-      stroke-dasharray:11 8;
-
-      animation:rv5route 1.3s linear infinite;
-
-      filter:
-        drop-shadow(
-          0 0 5px
-          rgba(101,232,255,.8)
-        );
-    }
-
-    @keyframes rv5route {
-      to {
-        stroke-dashoffset:-38;
-      }
-    }
-
-    #${ROOT_ID} .route-core {
-      fill:none;
-      stroke:#effcff;
-      stroke-width:1;
-      opacity:.75;
-    }
-
-    #${ROOT_ID} .start {
-      fill:var(--green);
-      stroke:#efffd9;
-      stroke-width:2;
-    }
-
-    #${ROOT_ID} .goal {
-      fill:var(--yellow);
-      stroke:#fff0c7;
-      stroke-width:2;
-    }
-
-    #${ROOT_ID} .player {
-      fill:#effcff;
-      stroke:var(--cyan);
-      stroke-width:2;
-    }
-
-    #${ROOT_ID} .player-ring {
-      fill:none;
-      stroke:var(--cyan);
-      stroke-width:1.5;
-      stroke-dasharray:4 5;
-
-      animation:rv5ring 2s linear infinite;
-      transform-origin:center;
-    }
-
-    @keyframes rv5ring {
-      to {
-        transform:rotate(360deg);
-      }
-    }
-
-    #${ROOT_ID} .checkpoint {
-      fill:none;
-      stroke:var(--cyan);
-      stroke-width:1.5;
-    }
-
-    #${ROOT_ID} .checkpoint-dot {
-      fill:var(--cyan);
-    }
-
-    #${ROOT_ID} .danger-object {
-      fill:#301a27;
-      stroke:var(--red);
-      stroke-width:1.5;
-    }
-
-    #${ROOT_ID} .signal {
-      fill:var(--yellow);
-    }
-
-    #${ROOT_ID} .label {
-      fill:#7895a4;
-      font-family:ui-monospace,monospace;
-      font-size:9px;
-      font-weight:800;
-      letter-spacing:.1em;
-    }
-
-    #${ROOT_ID} .guide {
-      fill:var(--cyan);
-      font-family:ui-monospace,monospace;
-      font-size:8px;
-      font-weight:900;
-    }
-
-    #${ROOT_ID}.opening .rv5-shell {
-      animation:
-        rv5open
-        .45s
-        cubic-bezier(.16,.84,.22,1)
-        both;
-    }
-
-    @keyframes rv5open {
-      from {
-        opacity:0;
-        transform:translateY(15px) scale(.985);
-        filter:blur(5px);
-      }
-
-      to {
-        opacity:1;
-        transform:none;
-        filter:none;
-      }
-    }
-
-    @media(max-width:820px) {
-
-      #${ROOT_ID} {
-        padding:5px !important;
-      }
-
-      #${ROOT_ID} .rv5-shell {
-        width:98vw;
-        height:97dvh;
-        min-height:0;
-        border-radius:10px;
-      }
-
-      #${ROOT_ID} .rv5-header {
-        padding:12px;
-      }
-
-      #${ROOT_ID} .rv5-status {
-        display:none;
-      }
-
-      #${ROOT_ID} .rv5-main {
-        grid-template-rows:34px minmax(0,1fr) 34px;
-      }
-
-      #${ROOT_ID} .rv5-footer {
-        min-height:58px;
-        padding:8px 11px;
-      }
-
-      #${ROOT_ID} .rv5-ready {
-        display:none;
-      }
-    }
-
-    @media(max-width:520px) {
-
-      #${ROOT_ID} .rv5-header {
-        min-height:70px;
-        padding:9px 10px;
-      }
-
-      #${ROOT_ID} .rv5-live {
-        font-size:5px;
-        margin-bottom:5px;
-      }
-
-      #${ROOT_ID} .rv5-kicker {
-        font-size:5px;
-      }
-
-      #${ROOT_ID} h1 {
-        font-size:20px;
-      }
-
-      #${ROOT_ID} .rv5-meta {
-        max-width:62vw;
-        font-size:5px;
-      }
-
-      #${ROOT_ID} .rv5-timer {
-        width:53px;
-        height:53px;
-      }
-
-      #${ROOT_ID} .rv5-timer strong {
-        font-size:17px;
-      }
-
-      #${ROOT_ID} .rv5-mapbar {
-        padding:0 7px;
-      }
-
-      #${ROOT_ID} .rv5-mapbar span {
-        padding:4px 5px;
-        font-size:4px;
-      }
-
-      #${ROOT_ID} .rv5-mapbar span:nth-child(3) {
-        display:none;
-      }
-
-      #${ROOT_ID} .rv5-mapbar b {
-        display:none;
-      }
-
-      #${ROOT_ID} .rv5-map-label.top {
-        top:12px;
-        left:12px;
-      }
-
-      #${ROOT_ID} .rv5-map-label.bottom {
-        right:12px;
-        bottom:12px;
-      }
-
-      #${ROOT_ID} .rv5-map-label small {
-        font-size:4px;
-      }
-
-      #${ROOT_ID} .rv5-map-label strong {
-        font-size:5px;
-      }
-
-      #${ROOT_ID} .rv5-live-tag {
-        left:8px;
-        bottom:8px;
-        padding:6px 7px;
-        font-size:4px;
-      }
-
-      #${ROOT_ID} .rv5-stats small {
-        font-size:4px;
-      }
-
-      #${ROOT_ID} .rv5-stats strong {
-        font-size:5px;
-      }
-
-      #${ROOT_ID} .rv5-footer {
-        min-height:55px;
-      }
-
-      #${ROOT_ID} .rv5-objective {
-        gap:8px;
-      }
-
-      #${ROOT_ID} .rv5-objective-icon {
-        width:24px;
-        height:24px;
-        font-size:8px;
-      }
-
-      #${ROOT_ID} .rv5-objective small {
-        font-size:4px;
-      }
-
-      #${ROOT_ID} .objective-text {
-        max-width:78vw;
-        font-size:6px;
-      }
-    }
-
-        /* ============================================================
-       FINAL AAA READABILITY / MAP REDESIGN OVERRIDE
-       ============================================================ */
-
-    #${ROOT_ID} .rv5-shell{
-      width:min(1440px,98vw);
-      height:min(920px,96dvh);
-
-      background:
-        radial-gradient(
-          circle at 50% 45%,
-          rgba(55,190,225,.08),
-          transparent 42%
-        ),
-        linear-gradient(
-          145deg,
-          #06131b 0%,
-          #02080d 58%,
-          #010407 100%
-        );
-
-      border:1px solid rgba(101,232,255,.28);
-
-      box-shadow:
-        0 35px 120px rgba(0,0,0,.88),
-        0 0 80px rgba(65,205,235,.11),
-        inset 0 0 60px rgba(101,232,255,.025);
-    }
-
-    #${ROOT_ID} .rv5-header{
-      padding:22px 26px;
-      gap:24px;
-
-      background:
-        linear-gradient(
-          180deg,
-          rgba(10,28,38,.72),
-          rgba(2,9,14,.35)
-        );
-
-      border-bottom:1px solid rgba(101,232,255,.14);
-    }
-
-    #${ROOT_ID} .rv5-live{
-      font-size:10px;
-      line-height:1.2;
-      letter-spacing:.13em;
-      color:#9cc1cc;
-      text-shadow:0 1px 8px rgba(0,0,0,.9);
-    }
-
-    #${ROOT_ID} .rv5-kicker{
-      font-size:10px;
-      line-height:1.25;
-      letter-spacing:.13em;
-      font-weight:950;
-      color:var(--yellow);
-      text-shadow:0 1px 8px rgba(0,0,0,.9);
-    }
-
-    #${ROOT_ID} h1{
-      font-size:clamp(32px,4.8vw,56px);
-      line-height:.95;
-      letter-spacing:.055em;
-      font-weight:950;
-
-      text-shadow:
-        0 0 20px rgba(255,255,255,.06),
-        0 0 32px rgba(101,232,255,.10);
-    }
-
-    #${ROOT_ID} .rv5-meta{
-      margin-top:10px;
-
-      color:#b1d0d8;
-
-      font-size:10px;
-      line-height:1.25;
-      font-weight:900;
-      letter-spacing:.09em;
-
-      text-shadow:0 1px 8px rgba(0,0,0,.95);
-    }
-
-   #${ROOT_ID} .rv5-timer{
-  position:relative;
-
-  width:92px;
-  height:92px;
-
-  display:grid;
-  place-items:center;
-
-  border-radius:50%;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(255,215,106,.09) 0%,
-      rgba(255,215,106,.025) 42%,
-      transparent 72%
-    );
-
-  box-shadow:
-    0 0 24px rgba(255,215,106,.08),
-    inset 0 0 20px rgba(255,215,106,.035);
-}
-
-    #${ROOT_ID} .rv5-timer circle{
-      stroke-width:3;
-    }
-
-  #${ROOT_ID} .rv5-timer strong{
-  position:relative;
-  z-index:3;
-
-  font-size:31px;
-  line-height:1;
-
-  font-weight:950;
-
-  color:#ffe28b;
-
-  text-shadow:
-    0 0 8px rgba(255,215,106,.75),
-    0 0 22px rgba(255,215,106,.30);
-}
-
-    #${ROOT_ID} .rv5-timer small{
-      font-size:7px;
-      font-weight:900;
-      letter-spacing:.15em;
-    }
-
-    /* MAP BAR */
-
-    #${ROOT_ID} .rv5-mapbar{
-      min-height:42px;
-      padding:0 16px;
-
-      background:
-        linear-gradient(
-          180deg,
-          rgba(5,20,29,.98),
-          rgba(2,9,14,.98)
-        );
-    }
-
-    #${ROOT_ID} .rv5-mapbar > div{
-      gap:7px;
-    }
-
-    #${ROOT_ID} .rv5-mapbar span{
-      padding:7px 10px;
-
-      color:#91b0bb;
-      font-size:9px;
-      line-height:1.1;
-      font-weight:950;
-      letter-spacing:.09em;
-
-      border:1px solid rgba(101,232,255,.13);
-      background:rgba(101,232,255,.025);
-    }
-
-    #${ROOT_ID} .rv5-mapbar span.active{
-      color:#72f1ff;
-
-      border-color:rgba(101,232,255,.38);
-
-      background:
-        linear-gradient(
-          90deg,
-          rgba(101,232,255,.10),
-          rgba(101,232,255,.025)
-        );
-
-      box-shadow:
-        inset 0 0 12px rgba(101,232,255,.04),
-        0 0 12px rgba(101,232,255,.05);
-    }
-
-    #${ROOT_ID} .rv5-mapbar b{
-      color:#a1bdc6;
-      font-size:9px;
-      line-height:1.1;
-      font-weight:950;
-      letter-spacing:.09em;
-    }
-
-    /* MAP */
-
- #${ROOT_ID} .rv5-map{
-  position:relative;
-  overflow:hidden;
-
-  background:
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(85,220,255,.13) 0%,
-      rgba(25,100,125,.055) 26%,
-      transparent 58%
-    ),
-    linear-gradient(
-      180deg,
-      #041722 0%,
-      #020a10 52%,
-      #010509 100%
-    );
-
-  border-top:1px solid rgba(101,232,255,.16);
-  border-bottom:1px solid rgba(101,232,255,.16);
-
-  box-shadow:
-    inset 0 0 45px rgba(101,232,255,.035),
-    inset 0 0 100px rgba(0,0,0,.22);
-}
-
-#${ROOT_ID} .rv5-map::before{
+#${ROOT_ID} .rv5-bg::before{
   content:"";
+
   position:absolute;
   inset:0;
 
-  pointer-events:none;
-  z-index:4;
+  background:
+    linear-gradient(
+      rgba(170,180,170,.018) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(170,180,170,.018) 1px,
+      transparent 1px
+    );
+
+  background-size:
+    44px 44px;
+
+  opacity:.9;
+}
+
+
+#${ROOT_ID} .rv5-bg::after{
+  content:"";
+
+  position:absolute;
+  inset:0;
 
   background:
     linear-gradient(
       90deg,
-      transparent 49.8%,
-      rgba(101,232,255,.08) 50%,
-      transparent 50.2%
-    ),
-    linear-gradient(
-      0deg,
-      transparent 49.8%,
-      rgba(101,232,255,.08) 50%,
-      transparent 50.2%
+      rgba(0,0,0,.45),
+      transparent 16%,
+      transparent 84%,
+      rgba(0,0,0,.45)
     );
-
-  opacity:.65;
-}
-
-    #${ROOT_ID} .rv5-svg{
-      width:100%;
-      height:100%;
-      display:block;
-    }
-
-    /* stronger tactical grid */
-
-    #${ROOT_ID} .grid{
-      stroke:#163c50;
-      stroke-width:1;
-      opacity:.58;
-    }
-
-    #${ROOT_ID} .grid-major{
-      stroke:#286078;
-      stroke-width:1.6;
-      opacity:.48;
-    }
-
-    #${ROOT_ID} .platform{
-      fill:#0c2432;
-      stroke:#49778a;
-      stroke-width:1.5;
-    }
-
-    #${ROOT_ID} .edge{
-      stroke:#70e9ff;
-      opacity:.42;
-    }
-
-    /* ROUTE */
-
- #${ROOT_ID} .route-halo{
-  fill:none;
-  stroke:#61e8ff;
-  stroke-width:26;
-  opacity:.14;
-
-  filter:
-    drop-shadow(0 0 10px rgba(101,232,255,.30));
-}
-
- #${ROOT_ID} .route{
-  fill:none;
-
-  stroke:#6cf1ff;
-  stroke-width:5;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-
-  stroke-dasharray:16 10;
-
-  animation:
-    rv5route 1.05s linear infinite;
-
-  filter:
-    drop-shadow(0 0 5px rgba(101,232,255,.95))
-    drop-shadow(0 0 14px rgba(101,232,255,.40));
-}
-
-    #${ROOT_ID} .route-core{
-      stroke:#f4fdff;
-      stroke-width:1.3;
-      opacity:.86;
-    }
-
-    /* MAP MARKERS */
-
-#${ROOT_ID} .start{
-  fill:#8df59b;
-
-  stroke:#f4ffe7;
-  stroke-width:3;
-
-  filter:
-    drop-shadow(0 0 6px rgba(141,245,155,.95))
-    drop-shadow(0 0 16px rgba(141,245,155,.38));
-
-  transform-box:fill-box;
-  transform-origin:center;
-}
-
-#${ROOT_ID} .goal{
-  fill:#ffd76a;
-
-  stroke:#fff8ce;
-  stroke-width:3;
-
-  filter:
-    drop-shadow(0 0 8px rgba(255,215,106,.95))
-    drop-shadow(0 0 20px rgba(255,215,106,.42));
-
-  transform-box:fill-box;
-  transform-origin:center;
-}
-
-  #${ROOT_ID} .player{
-  fill:#ffffff;
-  stroke:#64ebff;
-  stroke-width:3;
-
-  filter:
-    drop-shadow(0 0 5px rgba(100,235,255,.8))
-    drop-shadow(0 0 13px rgba(100,235,255,.28));
-}
-
-#${ROOT_ID} .player-ring{
-  fill:none;
-
-  stroke:#6ff3ff;
-  stroke-width:2.8;
-
-  stroke-dasharray:7 5;
-
-  opacity:1;
-
-  filter:
-    drop-shadow(0 0 5px rgba(100,235,255,.9))
-    drop-shadow(0 0 15px rgba(100,235,255,.32));
-
-  animation:
-    rv5ring 1.35s linear infinite;
-}
-
-    #${ROOT_ID} .checkpoint{
-  fill:rgba(100,235,255,.035);
-
-  stroke:#64ebff;
-  stroke-width:2;
-
-  filter:
-    drop-shadow(0 0 5px rgba(100,235,255,.35));
-}
-
-#${ROOT_ID} .checkpoint-dot{
-  fill:#ffffff;
-
-  filter:
-    drop-shadow(0 0 5px rgba(100,235,255,.80));
-}
-
-   #${ROOT_ID} .danger-object{
-  fill:#3a1725;
-
-  stroke:#ff6577;
-  stroke-width:2;
-
-  filter:
-    drop-shadow(0 0 5px rgba(255,104,119,.32));
-}
-
-    #${ROOT_ID} .signal{
-      fill:#ffd76a;
-
-      filter:
-        drop-shadow(0 0 6px rgba(255,215,106,.55));
-    }
-
-    /* MAP TEXT */
-
-    #${ROOT_ID} .label{
-      fill:#f2fbff;
-
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        monospace;
-
-     font-size:13px;
-font-weight:950;
-letter-spacing:.025em;
-
-      paint-order:stroke;
-
-      stroke:#02070b;
-      stroke-width:3.5px;
-      stroke-linejoin:round;
-
-      text-shadow:
-        0 2px 8px rgba(0,0,0,.95);
-    }
-
-    #${ROOT_ID} #rv5-player text{
-  fill:#ffffff;
-
-  font-size:14px;
-  font-weight:950;
-  letter-spacing:.04em;
-
-  paint-order:stroke;
-  stroke:#021018;
-  stroke-width:4px;
-  stroke-linejoin:round;
-
-  filter:
-    drop-shadow(0 0 6px rgba(101,232,255,.95))
-    drop-shadow(0 0 14px rgba(101,232,255,.38));
 }
 
 
-    #${ROOT_ID} .guide{
-      fill:#72efff;
+/* noise */
 
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        monospace;
+#${ROOT_ID} .rv5-noise{
+  position:absolute !important;
+  inset:0 !important;
 
-  font-size:12px;
-font-weight:950;
-letter-spacing:.02em;
-      paint-order:stroke;
+  pointer-events:none !important;
 
-      stroke:#02070b;
-      stroke-width:3px;
-      stroke-linejoin:round;
-    }
+  opacity:.025 !important;
 
-    /* MAP OVERLAY LABELS */
+  background-image:
+    radial-gradient(
+      #fff .45px,
+      transparent .45px
+    ) !important;
 
-    #${ROOT_ID} .rv5-map-label small{
-      color:#9bb7c1;
-      font-size:10px;
-      line-height:1.2;
-      font-weight:950;
-      letter-spacing:.10em;
+  background-size:
+    4px 4px !important;
 
-      text-shadow:0 2px 8px rgba(0,0,0,.95);
-    }
+  mix-blend-mode:
+    screen !important;
+}
 
-    #${ROOT_ID} .rv5-map-label strong{
-      color:#f2fbff;
-      font-size:14px;
-      line-height:1.15;
-      font-weight:950;
-      letter-spacing:.07em;
 
-      text-shadow:0 2px 12px rgba(0,0,0,.95);
-    }
+/* ============================================================
+   MAIN SHELL
+   ============================================================ */
 
-    #${ROOT_ID} .rv5-live-tag{
-      padding:9px 12px;
+#${ROOT_ID} .rv5-shell{
+  position:relative !important;
 
-      color:#70efff;
-      font-size:9px;
-      line-height:1.1;
-      font-weight:950;
-      letter-spacing:.09em;
+  width:
+    min(
+      1520px,
+      98vw
+    ) !important;
 
-      border:1px solid rgba(101,232,255,.28);
+  height:
+    min(
+      920px,
+      96dvh
+    ) !important;
 
-      background:
-        linear-gradient(
-          135deg,
-          rgba(3,19,28,.94),
-          rgba(1,8,13,.90)
-        );
+  min-width:0 !important;
+  min-height:0 !important;
 
-      box-shadow:
-        0 0 18px rgba(101,232,255,.06),
-        inset 0 0 14px rgba(101,232,255,.03);
-    }
+  display:grid !important;
 
-    /* STATS */
+  grid-template-rows:
+    auto
+    minmax(0,1fr)
+    auto !important;
 
-    #${ROOT_ID} .rv5-stats{
-      min-height:48px;
-    }
+  overflow:hidden !important;
 
-    #${ROOT_ID} .rv5-stats small{
-      color:#7899a5;
-      font-size:8px;
-      line-height:1.2;
-      font-weight:900;
-      letter-spacing:.10em;
-    }
+  background:
+    linear-gradient(
+      150deg,
+      rgba(13,16,15,.98),
+      rgba(5,8,8,.985) 58%,
+      rgba(2,4,5,.995)
+    ) !important;
 
-    #${ROOT_ID} .rv5-stats strong{
-      color:#ecf9fc;
-      font-size:10px;
-      line-height:1.2;
-      font-weight:950;
-      letter-spacing:.07em;
-    }
+  border:
+    1px solid
+    rgba(191,197,184,.20) !important;
 
-    #${ROOT_ID} .rv5-stats .danger{
-      color:#ff7886;
-      text-shadow:0 0 10px rgba(255,104,119,.20);
-    }
+  border-radius:
+    3px !important;
 
-    /* FOOTER */
+  box-shadow:
+    0 35px 110px
+      rgba(0,0,0,.82),
 
-  #${ROOT_ID} .rv5-footer{
-  min-height:86px;
-  padding:12px 20px;
+    0 0 60px
+      rgba(213,181,83,.045),
+
+    inset 0 1px
+      rgba(255,255,255,.045) !important;
+}
+
+
+/* ============================================================
+   TOP TACTICAL STRIP
+   ============================================================ */
+
+#${ROOT_ID} .rv5-topline{
+  position:absolute !important;
+
+  top:0 !important;
+  left:0 !important;
+  right:0 !important;
+
+  height:3px !important;
+
+  z-index:100 !important;
+
+  display:flex !important;
+}
+
+
+#${ROOT_ID} .rv5-topline i{
+  flex:1 !important;
+
+  background:
+    rgba(183,192,180,.18) !important;
+}
+
+
+#${ROOT_ID} .rv5-topline i:nth-child(1),
+#${ROOT_ID} .rv5-topline i:nth-child(6){
+  background:
+    var(--wz-amber) !important;
+}
+
+
+#${ROOT_ID} .rv5-topline i:nth-child(3){
+  background:
+    var(--wz-cyan) !important;
+}
+
+
+/* ============================================================
+   HEADER / COMMAND HUD
+   ============================================================ */
+
+#${ROOT_ID} .rv5-header{
+  position:relative !important;
+
+  z-index:50 !important;
+
+  display:flex !important;
+
+  align-items:flex-start !important;
+
+  justify-content:space-between !important;
+
+  gap:30px !important;
+
+  padding:
+    22px
+    25px
+    17px !important;
+
+  border-bottom:
+    1px solid
+    rgba(185,193,183,.12) !important;
 
   background:
     linear-gradient(
       180deg,
-      rgba(3,14,20,.99),
-      rgba(1,6,10,1)
-    );
+      rgba(6,9,9,.98),
+      rgba(6,9,9,.90),
+      rgba(6,9,9,.55)
+    ) !important;
+}
 
-  border-top:1px solid rgba(101,232,255,.16);
+
+/* left side */
+
+#${ROOT_ID} .rv5-brand{
+  min-width:0 !important;
+
+  display:flex !important;
+
+  flex-direction:column !important;
+
+  align-items:flex-start !important;
+
+  gap:5px !important;
+
+  max-width:
+    calc(
+      100% - 210px
+    ) !important;
+}
+
+
+/* live */
+
+#${ROOT_ID} .rv5-live{
+  display:flex !important;
+
+  align-items:center !important;
+
+  gap:8px !important;
+
+  margin:0 !important;
+
+  color:
+    var(--wz-soft) !important;
+
+  font-size:
+    10px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .16em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+
+#${ROOT_ID} .rv5-live b{
+  width:7px !important;
+  height:7px !important;
+
+  flex:
+    0 0 7px !important;
+
+  border-radius:50% !important;
+
+  background:
+    var(--wz-green) !important;
 
   box-shadow:
-    inset 0 10px 30px rgba(101,232,255,.025);
+    0 0 10px
+    rgba(120,200,121,.72) !important;
+
+  animation:
+    rv5wzLive
+    1.4s
+    ease-in-out
+    infinite !important;
 }
 
-    #${ROOT_ID} .rv5-objective small{
-      font-size:8px;
-      line-height:1.2;
-      font-weight:950;
-      letter-spacing:.11em;
-    }
 
-    #${ROOT_ID} .objective-text{
-      max-width:65vw;
+@keyframes rv5wzLive{
 
-      color:#f1fbfd;
+  0%,
+  100%{
+    opacity:1;
+  }
 
-      font-size:13px;
-      line-height:1.2;
-      font-weight:950;
-      letter-spacing:.025em;
-
-      text-shadow:
-        0 0 10px rgba(101,232,255,.08);
-    }
-
-    /* ============================================================
-       MOBILE
-       ============================================================ */
-
-    @media(max-width:820px){
-
-      #${ROOT_ID}{
-        padding:4px !important;
-      }
-
-      #${ROOT_ID} .rv5-shell{
-        width:99vw;
-        height:98dvh;
-        border-radius:8px;
-      }
-
-      #${ROOT_ID} .rv5-header{
-        padding:12px 12px;
-        gap:8px;
-      }
-
-      #${ROOT_ID} .rv5-live{
-        font-size:8px;
-      }
-
-      #${ROOT_ID} .rv5-kicker{
-        font-size:8px;
-        letter-spacing:.09em;
-      }
-
-      #${ROOT_ID} h1{
-        font-size:clamp(25px,7vw,38px);
-      }
-
-      #${ROOT_ID} .rv5-meta{
-        max-width:67vw;
-        font-size:8px;
-      }
-
-   #${ROOT_ID} .rv5-timer{
-  width:66px;
-  height:66px;
+  50%{
+    opacity:.42;
+  }
 }
+
+
+#${ROOT_ID} .rv5-live span{
+  color:
+    #828b84 !important;
+}
+
+
+/* kicker */
+
+#${ROOT_ID} .rv5-kicker{
+  margin:
+    5px 0 0 !important;
+
+  color:
+    var(--wz-amber) !important;
+
+  font-size:
+    10px !important;
+
+  line-height:
+    1.1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .17em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+
+/* title */
+
+#${ROOT_ID} h1{
+  margin:
+    2px
+    0
+    0 !important;
+
+  color:
+    var(--wz-white) !important;
+
+  font-size:
+    clamp(
+      32px,
+      4.4vw,
+      54px
+    ) !important;
+
+  line-height:
+    .90 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .045em !important;
+
+  text-transform:
+    uppercase !important;
+
+  text-shadow:
+    0 3px 13px
+    rgba(0,0,0,.9) !important;
+}
+
+
+#${ROOT_ID} h1 strong{
+  color:
+    #f0eee3 !important;
+
+  text-shadow:
+    none !important;
+}
+
+
+/* mission metadata */
+
+#${ROOT_ID} .rv5-meta{
+  margin:
+    8px
+    0
+    0 !important;
+
+  max-width:
+    100% !important;
+
+  overflow:hidden !important;
+
+  text-overflow:ellipsis !important;
+
+  white-space:nowrap !important;
+
+  color:
+    #a5aea6 !important;
+
+  font-size:
+    10px !important;
+
+  line-height:
+    1.2 !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .09em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+
+/* ============================================================
+   RIGHT COMMAND HUD
+   ============================================================ */
+
+#${ROOT_ID} .rv5-right{
+  display:flex !important;
+
+  align-items:flex-start !important;
+
+  gap:13px !important;
+
+  flex:
+    0 0 auto !important;
+}
+
+
+/* status */
+
+#${ROOT_ID} .rv5-status{
+  position:relative !important;
+
+  min-width:
+    156px !important;
+
+  min-height:
+    70px !important;
+
+  padding:
+    11px 13px !important;
+
+  border:
+    1px solid
+    rgba(196,202,192,.17) !important;
+
+  border-top:
+    2px solid
+    var(--wz-green) !important;
+
+  border-radius:
+    2px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(15,20,18,.95),
+      rgba(5,9,8,.97)
+    ) !important;
+
+  box-shadow:
+    inset 0 0 24px
+      rgba(120,200,121,.02),
+
+    0 12px 30px
+      rgba(0,0,0,.36) !important;
+}
+
+
+#${ROOT_ID} .rv5-status small{
+  display:block !important;
+
+  margin-bottom:
+    8px !important;
+
+  color:
+    #828a83 !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .17em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+
+#${ROOT_ID} .rv5-status strong{
+  color:
+    var(--wz-green) !important;
+
+  font-size:
+    17px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .13em !important;
+}
+
+
+#${ROOT_ID} .rv5-status i{
+  position:absolute !important;
+
+  right:
+    11px !important;
+
+  bottom:
+    11px !important;
+
+  width:7px !important;
+  height:7px !important;
+
+  border-radius:50% !important;
+
+  background:
+    var(--wz-green) !important;
+
+  box-shadow:
+    0 0 10px
+    rgba(120,200,121,.72) !important;
+}
+
+
+/* ============================================================
+   LARGE COUNTER
+   ============================================================ */
+
+#${ROOT_ID} .rv5-timer{
+  position:relative !important;
+
+  width:
+    108px !important;
+
+  height:
+    108px !important;
+
+  min-width:
+    108px !important;
+
+  min-height:
+    108px !important;
+
+  flex:
+    0 0 108px !important;
+
+  display:flex !important;
+
+  flex-direction:
+    column !important;
+
+  align-items:center !important;
+
+  justify-content:center !important;
+
+  border:
+    1px solid
+    rgba(213,181,83,.58) !important;
+
+  border-radius:
+    2px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(32,29,17,.97),
+      rgba(9,11,10,.98)
+    ) !important;
+
+  box-shadow:
+    0 0 30px
+      rgba(213,181,83,.07),
+
+    inset 0 0 30px
+      rgba(213,181,83,.035) !important;
+
+  overflow:hidden !important;
+}
+
+
+/* hide old circular progress visually */
+
+#${ROOT_ID} .rv5-timer svg{
+  position:absolute !important;
+
+  inset:0 !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  transform:none !important;
+
+  opacity:.25 !important;
+}
+
+
+/* timer track */
+
+#${ROOT_ID} .rv5-timer .timer-track{
+  stroke:
+    rgba(213,181,83,.11) !important;
+
+  stroke-width:
+    1.5 !important;
+}
+
+
+/* timer progress */
+
+#${ROOT_ID} .rv5-timer .timer-progress{
+  stroke:
+    var(--wz-amber-bright) !important;
+
+  stroke-width:
+    2.5 !important;
+
+  stroke-linecap:
+    square !important;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(240,207,105,.55)
+    ) !important;
+}
+
+
+/* top tactical label */
+
+#${ROOT_ID} .rv5-timer::before{
+  content:
+    "DEPLOYMENT" !important;
+
+  position:absolute !important;
+
+  top:
+    10px !important;
+
+  left:
+    0 !important;
+
+  right:
+    0 !important;
+
+  z-index:
+    4 !important;
+
+  color:
+    rgba(240,207,105,.80) !important;
+
+  text-align:
+    center !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .18em !important;
+}
+
+
+/* bottom tactical corner */
+
+#${ROOT_ID} .rv5-timer::after{
+  content:"";
+
+  position:absolute !important;
+
+  right:0 !important;
+  bottom:0 !important;
+
+  width:18px !important;
+  height:18px !important;
+
+  border-right:
+    2px solid
+    var(--wz-amber) !important;
+
+  border-bottom:
+    2px solid
+    var(--wz-amber) !important;
+}
+
+
+/* BIG NUMBER */
 
 #${ROOT_ID} .rv5-timer strong{
-  font-size:22px;
+  position:relative !important;
+
+  z-index:5 !important;
+
+  margin:
+    6px
+    0
+    0 !important;
+
+  color:
+    #f5f1df !important;
+
+  font-family:
+    "Arial Narrow",
+    "Roboto Condensed",
+    Arial,
+    sans-serif !important;
+
+  font-size:
+    52px !important;
+
+  line-height:
+    .82 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    -.035em !important;
+
+  text-shadow:
+    0 0 15px
+    rgba(240,207,105,.16) !important;
 }
 
-      #${ROOT_ID} .rv5-timer small{
-        font-size:6px;
-      }
 
-      #${ROOT_ID} .rv5-main{
-        grid-template-rows:40px minmax(0,1fr) 48px;
-      }
+/* seconds */
 
-      #${ROOT_ID} .rv5-mapbar{
-        padding:0 8px;
-      }
+#${ROOT_ID} .rv5-timer small{
+  position:relative !important;
 
-      #${ROOT_ID} .rv5-mapbar span{
-        padding:6px 7px;
-        font-size:8px;
-      }
+  z-index:5 !important;
 
-      #${ROOT_ID} .rv5-mapbar b{
-        font-size:8px;
-      }
+  margin:
+    10px
+    0
+    0 !important;
 
-      #${ROOT_ID} .rv5-map-label.top{
-        top:10px;
-        left:10px;
-      }
+  color:
+    var(--wz-amber-bright) !important;
 
-      #${ROOT_ID} .rv5-map-label.bottom{
-        right:10px;
-        bottom:10px;
-      }
+  font-size:
+    9px !important;
 
-      #${ROOT_ID} .rv5-map-label small{
-        font-size:8px;
-      }
+  line-height:
+    1 !important;
 
-      #${ROOT_ID} .rv5-map-label strong{
-        font-size:11px;
-      }
+  font-weight:
+    950 !important;
 
-      #${ROOT_ID} .rv5-live-tag{
-        left:8px;
-        bottom:8px;
-        padding:7px 9px;
-        font-size:8px;
-      }
+  letter-spacing:
+    .26em !important;
 
-      #${ROOT_ID} .rv5-stats small{
-        font-size:7px;
-      }
-
-      #${ROOT_ID} .rv5-stats strong{
-        font-size:9px;
-      }
-
-      #${ROOT_ID} .rv5-footer{
-        min-height:62px;
-        padding:9px 10px;
-      }
-
-      #${ROOT_ID} .rv5-objective small{
-        font-size:7px;
-      }
-
-     #${ROOT_ID} .objective-text{
-  max-width:72vw;
-
-  font-size:10px;
-  line-height:1.3;
-
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
-
-  display:-webkit-box;
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:2;
-
-  word-break:normal;
-  overflow-wrap:anywhere;
+  text-transform:
+    uppercase !important;
 }
 
-      #${ROOT_ID} .label{
-        font-size:11px;
-        stroke-width:3px;
-      }
 
-      #${ROOT_ID} .guide{
-        font-size:10px;
-        stroke-width:2.5px;
-      }
-    }
+/* ============================================================
+   MAP AREA
+   ============================================================ */
 
-    @media(max-width:520px){
+#${ROOT_ID} .rv5-main{
+  position:relative !important;
 
-      #${ROOT_ID} .rv5-header{
-        min-height:80px;
-        padding:9px 10px;
-      }
+  min-width:0 !important;
+  min-height:0 !important;
 
-      #${ROOT_ID} .rv5-live{
-        font-size:7px;
-      }
+  display:grid !important;
 
-      #${ROOT_ID} .rv5-kicker{
-        font-size:7px;
-      }
+  grid-template-rows:
+    44px
+    minmax(0,1fr)
+    48px !important;
 
-      #${ROOT_ID} h1{
-        font-size:clamp(23px,7.4vw,32px);
-      }
-
-      #${ROOT_ID} .rv5-meta{
-        max-width:63vw;
-        font-size:7px;
-      }
-
-      #${ROOT_ID} .rv5-timer{
-  width:60px;
-  height:60px;
+  overflow:hidden !important;
 }
 
-#${ROOT_ID} .rv5-timer strong{
-  font-size:20px;
+
+/* map top bar */
+
+#${ROOT_ID} .rv5-mapbar{
+  position:relative !important;
+
+  z-index:30 !important;
+
+  min-width:0 !important;
+
+  display:flex !important;
+
+  align-items:center !important;
+
+  justify-content:space-between !important;
+
+  gap:14px !important;
+
+  padding:
+    0
+    16px !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8,12,12,.98),
+      rgba(4,7,7,.98)
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(191,198,188,.08) !important;
+
+  border-bottom:
+    1px solid
+    rgba(191,198,188,.12) !important;
 }
 
-      #${ROOT_ID} .rv5-main{
-        grid-template-rows:39px minmax(0,1fr) 48px;
-      }
 
-      #${ROOT_ID} .rv5-mapbar span{
-        padding:6px;
-        font-size:7px;
-      }
+#${ROOT_ID} .rv5-mapbar > div{
+  display:flex !important;
 
-      #${ROOT_ID} .rv5-mapbar b{
-        font-size:7px;
-      }
+  align-items:center !important;
 
-      #${ROOT_ID} .rv5-map-label small{
-        font-size:7px;
-      }
+  gap:
+    7px !important;
 
-      #${ROOT_ID} .rv5-map-label strong{
-        font-size:9px;
-      }
-
-      #${ROOT_ID} .rv5-live-tag{
-        font-size:7px;
-      }
-
-      #${ROOT_ID} .rv5-stats small{
-        font-size:6px;
-      }
-
-      #${ROOT_ID} .rv5-stats strong{
-        font-size:8px;
-      }
-
-      #${ROOT_ID} .rv5-footer{
-        min-height:58px;
-      }
-
-      #${ROOT_ID} .rv5-objective small{
-        font-size:6.5px;
-      }
-
-    #${ROOT_ID} .objective-text{
-  max-width:68vw;
-
-  font-size:9px;
-  line-height:1.25;
-
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
-
-  display:-webkit-box;
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:2;
-
-  word-break:normal;
-  overflow-wrap:anywhere;
+  min-width:
+    0 !important;
 }
 
-      #${ROOT_ID} .label{
-        font-size:10px;
-      }
 
-      #${ROOT_ID} .guide{
-        font-size:9px;
-      }
-    }
+#${ROOT_ID} .rv5-mapbar span{
+  display:inline-flex !important;
 
-    /* ============================================================
-       FINAL MOBILE VISIBILITY LOCK
-       ============================================================ */
+  align-items:center !important;
 
-    @media(max-width:520px){
+  min-height:
+    28px !important;
 
-      #${ROOT_ID} .rv5-map{
-        min-height:0 !important;
-      }
+  padding:
+    5px 9px !important;
 
-      #${ROOT_ID} .rv5-svg{
-        width:100% !important;
-        height:100% !important;
-        display:block !important;
-      }
+  color:
+    #7f8982 !important;
 
-      /* MAP BAR */
+  font-size:
+    9px !important;
 
-      #${ROOT_ID} .rv5-mapbar span{
-        font-size:8px !important;
-        line-height:1.1 !important;
-        font-weight:950 !important;
-        letter-spacing:.06em !important;
-      }
+  line-height:
+    1 !important;
 
-      /* MAP CORNER LABELS */
+  font-weight:
+    900 !important;
 
-      #${ROOT_ID} .rv5-map-label small{
-        font-size:8px !important;
-        line-height:1.2 !important;
-        font-weight:950 !important;
-        letter-spacing:.06em !important;
-      }
+  letter-spacing:
+    .10em !important;
 
-      #${ROOT_ID} .rv5-map-label strong{
-        font-size:10px !important;
-        line-height:1.15 !important;
-        font-weight:950 !important;
-        letter-spacing:.04em !important;
-      }
+  border:
+    1px solid
+    rgba(180,189,179,.11) !important;
 
-      /* LIVE TAG */
+  background:
+    rgba(255,255,255,.018) !important;
 
-      #${ROOT_ID} .rv5-live-tag{
-        font-size:8px !important;
-        line-height:1.1 !important;
-        font-weight:950 !important;
-        letter-spacing:.06em !important;
-        padding:7px 9px !important;
-      }
-
-      /* STATS */
-
-      #${ROOT_ID} .rv5-stats small{
-        font-size:7px !important;
-        line-height:1.15 !important;
-        font-weight:900 !important;
-        letter-spacing:.06em !important;
-      }
-
-      #${ROOT_ID} .rv5-stats strong{
-        font-size:9px !important;
-        line-height:1.15 !important;
-        font-weight:950 !important;
-        letter-spacing:.04em !important;
-      }
-
-      /* OBJECTIVE */
-
-      #${ROOT_ID} .rv5-objective small{
-        font-size:7px !important;
-        line-height:1.15 !important;
-        font-weight:950 !important;
-      }
-
-      #${ROOT_ID} .objective-text{
-        font-size:10px !important;
-        line-height:1.2 !important;
-        font-weight:950 !important;
-        letter-spacing:.02em !important;
-      }
-
-      /* REAL MAP LABELS */
-
-      #${ROOT_ID} .label{
-        font-size:11px !important;
-        line-height:1 !important;
-        font-weight:950 !important;
-        letter-spacing:.015em !important;
-
-        paint-order:stroke !important;
-        stroke:#02070b !important;
-        stroke-width:3.2px !important;
-        stroke-linejoin:round !important;
-      }
-
-      #${ROOT_ID} .guide{
-        font-size:10px !important;
-        line-height:1 !important;
-        font-weight:950 !important;
-        letter-spacing:.01em !important;
-
-        paint-order:stroke !important;
-        stroke:#02070b !important;
-        stroke-width:2.8px !important;
-        stroke-linejoin:round !important;
-      }
-    }
+  white-space:
+    nowrap !important;
+}
 
 
-    @media(prefers-reduced-motion:reduce) {
+#${ROOT_ID} .rv5-mapbar span.active{
+  color:
+    var(--wz-green) !important;
 
-      #${ROOT_ID} *,
-      #${ROOT_ID} *::before,
-      #${ROOT_ID} *::after {
-        animation:none !important;
-      }
+  border-color:
+    rgba(120,200,121,.28) !important;
 
-    }
+  background:
+    rgba(120,200,121,.045) !important;
+}
 
-  `;
+
+#${ROOT_ID} .rv5-mapbar b{
+  flex:
+    0 0 auto !important;
+
+  color:
+    var(--wz-amber) !important;
+
+  font-size:
+    9px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .13em !important;
+
+  white-space:
+    nowrap !important;
+}
+
+
+/* ============================================================
+   MAP FRAME
+   ============================================================ */
+
+#${ROOT_ID} .rv5-map{
+  position:relative !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+
+  overflow:hidden !important;
+
+  background:
+    radial-gradient(
+      ellipse at 50% 43%,
+      rgba(64,84,74,.18),
+      transparent 53%
+    ),
+    linear-gradient(
+      180deg,
+      #0a0f0f,
+      #030707 70%
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(194,200,190,.10) !important;
+
+  border-bottom:
+    1px solid
+    rgba(194,200,190,.10) !important;
+
+  box-shadow:
+    inset 0 0 90px
+      rgba(0,0,0,.72) !important;
+}
+
+
+/* central crosshair */
+
+#${ROOT_ID} .rv5-map::before{
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  z-index:4;
+
+  pointer-events:none;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 49.9%,
+      rgba(214,186,91,.09) 50%,
+      transparent 50.1%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 49.9%,
+      rgba(214,186,91,.07) 50%,
+      transparent 50.1%
+    );
+
+  opacity:.7;
+}
+
+
+/* scan */
+
+#${ROOT_ID} .rv5-scan{
+  position:absolute !important;
+
+  left:0 !important;
+  right:0 !important;
+
+  top:-130px !important;
+
+  z-index:8 !important;
+
+  height:
+    120px !important;
+
+  pointer-events:none !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(213,181,83,.05),
+      transparent
+    ) !important;
+
+  animation:
+    rv5wzScan
+    5s
+    linear
+    infinite !important;
+}
+
+
+@keyframes rv5wzScan{
+
+  0%{
+    transform:translateY(0);
+    opacity:0;
+  }
+
+  12%{
+    opacity:.9;
+  }
+
+  85%{
+    opacity:.25;
+  }
+
+  100%{
+    transform:translateY(760px);
+    opacity:0;
+  }
+}
+
+
+/* vignette */
+
+#${ROOT_ID} .rv5-vignette{
+  position:absolute !important;
+
+  inset:0 !important;
+
+  z-index:9 !important;
+
+  pointer-events:none !important;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 48%,
+      rgba(0,0,0,.15) 72%,
+      rgba(0,0,0,.62) 100%
+    ) !important;
+}
+
+
+/* actual SVG */
+
+#${ROOT_ID} .rv5-svg{
+  position:absolute !important;
+
+  inset:0 !important;
+
+  z-index:2 !important;
+
+  width:
+    100% !important;
+
+  height:
+    100% !important;
+
+  display:block !important;
+
+  max-width:
+    100% !important;
+
+  max-height:
+    100% !important;
+}
+
+
+/* ============================================================
+   MAP CORNERS
+   ============================================================ */
+
+#${ROOT_ID} .rv5-corner{
+  position:absolute !important;
+
+  z-index:20 !important;
+
+  width:
+    32px !important;
+
+  height:
+    32px !important;
+
+  border-color:
+    rgba(213,181,83,.62) !important;
+
+  border-style:
+    solid !important;
+
+  pointer-events:
+    none !important;
+}
+
+
+#${ROOT_ID} .rv5-corner.tl{
+  top:12px;
+  left:12px;
+
+  border-width:
+    2px
+    0
+    0
+    2px;
+}
+
+
+#${ROOT_ID} .rv5-corner.tr{
+  top:12px;
+  right:12px;
+
+  border-width:
+    2px
+    2px
+    0
+    0;
+}
+
+
+#${ROOT_ID} .rv5-corner.bl{
+  bottom:12px;
+  left:12px;
+
+  border-width:
+    0
+    0
+    2px
+    2px;
+}
+
+
+#${ROOT_ID} .rv5-corner.br{
+  right:12px;
+  bottom:12px;
+
+  border-width:
+    0
+    2px
+    2px
+    0;
+}
+
+
+/* ============================================================
+   MAP OVERLAY LABELS
+   ============================================================ */
+
+#${ROOT_ID} .rv5-map-label{
+  position:absolute !important;
+
+  z-index:22 !important;
+
+  display:grid !important;
+
+  gap:5px !important;
+
+  min-width:0 !important;
+
+  padding:
+    9px
+    11px !important;
+
+  border-left:
+    3px solid
+    var(--wz-amber) !important;
+
+  background:
+    rgba(4,8,8,.78) !important;
+
+  box-shadow:
+    0 8px 25px
+      rgba(0,0,0,.34) !important;
+
+  backdrop-filter:
+    blur(8px) !important;
+
+  pointer-events:
+    none !important;
+}
+
+
+#${ROOT_ID} .rv5-map-label.top{
+  top:
+    20px !important;
+
+  left:
+    22px !important;
+}
+
+
+#${ROOT_ID} .rv5-map-label.bottom{
+  right:
+    22px !important;
+
+  bottom:
+    20px !important;
+
+  text-align:
+    right !important;
+
+  border-left:
+    0 !important;
+
+  border-right:
+    3px solid
+    var(--wz-amber) !important;
+}
+
+
+#${ROOT_ID} .rv5-map-label small{
+  color:
+    #889189 !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .16em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+
+#${ROOT_ID} .rv5-map-label strong{
+  color:
+    #edf0e7 !important;
+
+  font-size:
+    12px !important;
+
+  line-height:
+    1.1 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .07em !important;
+}
+
+
+/* live tag */
+
+#${ROOT_ID} .rv5-live-tag{
+  position:absolute !important;
+
+  left:
+    20px !important;
+
+  bottom:
+    20px !important;
+
+  z-index:
+    23 !important;
+
+  display:flex !important;
+
+  align-items:center !important;
+
+  gap:
+    8px !important;
+
+  padding:
+    9px
+    11px !important;
+
+  color:
+    var(--wz-green) !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .11em !important;
+
+  border:
+    1px solid
+    rgba(120,200,121,.22) !important;
+
+  background:
+    rgba(5,10,8,.82) !important;
+
+  box-shadow:
+    0 8px 25px
+      rgba(0,0,0,.28) !important;
+
+  backdrop-filter:
+    blur(7px) !important;
+}
+
+
+#${ROOT_ID} .rv5-live-tag i{
+  width:
+    7px !important;
+
+  height:
+    7px !important;
+
+  flex:
+    0 0 7px !important;
+
+  border-radius:
+    50% !important;
+
+  background:
+    var(--wz-green) !important;
+
+  box-shadow:
+    0 0 9px
+    rgba(120,200,121,.7) !important;
+}
+
+
+/* ============================================================
+   SVG MAP STYLING
+   ============================================================ */
+
+#${ROOT_ID} .grid{
+  stroke:
+    #47514a !important;
+
+  stroke-width:
+    1 !important;
+
+  opacity:
+    .31 !important;
+}
+
+
+#${ROOT_ID} .grid-major{
+  stroke:
+    #697263 !important;
+
+  stroke-width:
+    1.35 !important;
+
+  opacity:
+    .30 !important;
+}
+
+
+/* buildings */
+
+#${ROOT_ID} .platform{
+  fill:
+    #141a17 !important;
+
+  stroke:
+    #606a5f !important;
+
+  stroke-width:
+    1.35 !important;
+}
+
+#${ROOT_ID} .building-inner{
+  fill:#1b231f !important;
+  stroke:#303a33 !important;
+  stroke-width:1px !important;
+  opacity:.95 !important;
+}
+
+#${ROOT_ID} .building-edge-bottom{
+  stroke:#8e9a88 !important;
+  stroke-width:1 !important;
+  opacity:.18 !important;
+}
+
+#${ROOT_ID} .hostile-pulse{
+  fill:none !important;
+  stroke:var(--wz-red) !important;
+  stroke-width:1.5 !important;
+  opacity:.35 !important;
+  animation:rv5HostilePulse 1.4s ease-in-out infinite !important;
+}
+
+@keyframes rv5HostilePulse{
+  0%,100%{
+    opacity:.18;
+    transform:scale(.92);
+    transform-origin:center;
+  }
+
+  50%{
+    opacity:.48;
+    transform:scale(1.06);
+  }
+}
+
+#${ROOT_ID} .hostile-cross{
+  stroke:#ff9a9f !important;
+  stroke-width:1.4 !important;
+  opacity:.85 !important;
+}
+
+#${ROOT_ID} .gate-line{
+  stroke:#ff6877 !important;
+  stroke-width:1.5 !important;
+  opacity:.42 !important;
+}
+
+#${ROOT_ID} .checkpoint-zone{
+  fill:none !important;
+  stroke:var(--wz-cyan) !important;
+  stroke-width:1 !important;
+  stroke-dasharray:4 5 !important;
+  opacity:.28 !important;
+}
+
+#${ROOT_ID} .checkpoint-line{
+  stroke:var(--wz-cyan) !important;
+  stroke-width:1.5 !important;
+  opacity:.75 !important;
+}
+
+#${ROOT_ID} .signal-ring{
+  fill:none !important;
+  stroke:var(--wz-amber-bright) !important;
+  stroke-width:1 !important;
+  stroke-dasharray:3 4 !important;
+  opacity:.40 !important;
+  animation:rv5SignalRing 1.8s linear infinite !important;
+}
+
+@keyframes rv5SignalRing{
+  to{
+    transform:rotate(360deg);
+    transform-origin:center;
+  }
+}
+
+#${ROOT_ID} .enemy-radius{
+  fill:none !important;
+  stroke:var(--wz-red) !important;
+  stroke-width:1 !important;
+  stroke-dasharray:3 5 !important;
+  opacity:.30 !important;
+}
+
+#${ROOT_ID} .enemy-cross{
+  stroke:#ff8d95 !important;
+  stroke-width:1.2 !important;
+  opacity:.80 !important;
+}
+
+#${ROOT_ID} .guide-stem{
+  stroke:var(--wz-amber) !important;
+  stroke-width:1 !important;
+  opacity:.38 !important;
+}
+
+#${ROOT_ID} .start-radius{
+  fill:none !important;
+  stroke:var(--wz-green) !important;
+  stroke-width:1 !important;
+  stroke-dasharray:3 5 !important;
+  opacity:.25 !important;
+}
+
+#${ROOT_ID} .start-ring{
+  fill:none !important;
+  stroke:var(--wz-green) !important;
+  stroke-width:1.5 !important;
+  opacity:.70 !important;
+}
+
+#${ROOT_ID} .goal-radius{
+  fill:none !important;
+  stroke:var(--wz-amber-bright) !important;
+  stroke-width:1 !important;
+  stroke-dasharray:4 6 !important;
+  opacity:.30 !important;
+}
+
+#${ROOT_ID} .goal-ring{
+  fill:none !important;
+  stroke:var(--wz-amber-bright) !important;
+  stroke-width:1.5 !important;
+  opacity:.72 !important;
+}
+
+#${ROOT_ID} .player-radius{
+  fill:none !important;
+  stroke:var(--wz-cyan) !important;
+  stroke-width:1 !important;
+  stroke-dasharray:3 5 !important;
+  opacity:.30 !important;
+}
+
+#${ROOT_ID} .player-cross{
+  stroke:var(--wz-cyan) !important;
+  stroke-width:1.5 !important;
+  opacity:.90 !important;
+}
+
+
+#${ROOT_ID} .edge{
+  stroke:
+    #8e9a88 !important;
+
+  opacity:
+    .30 !important;
+}
+
+
+/* route halo */
+
+#${ROOT_ID} .route-halo{
+  fill:
+    none !important;
+
+  stroke:
+    var(--wz-amber) !important;
+
+  stroke-width:
+    20 !important;
+
+  opacity:
+    .08 !important;
+
+  filter:
+    drop-shadow(
+      0 0 8px
+      rgba(213,181,83,.25)
+    ) !important;
+}
+
+
+/* route */
+
+#${ROOT_ID} .route{
+  fill:
+    none !important;
+
+  stroke:
+    var(--wz-amber-bright) !important;
+
+  stroke-width:
+    4 !important;
+
+  stroke-linecap:
+    round !important;
+
+  stroke-linejoin:
+    round !important;
+
+  stroke-dasharray:
+    14
+    8 !important;
+
+  animation:
+    rv5wzRoute
+    1.35s
+    linear
+    infinite !important;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(240,207,105,.60)
+    ) !important;
+}
+
+
+@keyframes rv5wzRoute{
+
+  to{
+    stroke-dashoffset:-44;
+  }
+}
+
+
+/* route core */
+
+#${ROOT_ID} .route-core{
+  fill:
+    none !important;
+
+  stroke:
+    #fffbea !important;
+
+  stroke-width:
+    1.2 !important;
+
+  opacity:
+    .78 !important;
+}
+
+
+/* ============================================================
+   MARKERS
+   ============================================================ */
+
+#${ROOT_ID} .start{
+  fill:
+    var(--wz-green) !important;
+
+  stroke:
+    #edffe8 !important;
+
+  stroke-width:
+    2.5 !important;
+
+  filter:
+    drop-shadow(
+      0 0 7px
+      rgba(120,200,121,.75)
+    ) !important;
+}
+
+
+#${ROOT_ID} .goal{
+  fill:
+    var(--wz-amber-bright) !important;
+
+  stroke:
+    #fff4c9 !important;
+
+  stroke-width:
+    2.5 !important;
+
+  filter:
+    drop-shadow(
+      0 0 8px
+      rgba(240,207,105,.75)
+    ) !important;
+}
+
+
+#${ROOT_ID} .player{
+  fill:
+    #ffffff !important;
+
+  stroke:
+    var(--wz-cyan) !important;
+
+  stroke-width:
+    2.7 !important;
+
+  filter:
+    drop-shadow(
+      0 0 7px
+      rgba(116,220,229,.78)
+    ) !important;
+}
+
+
+#${ROOT_ID} .player-ring{
+  fill:
+    none !important;
+
+  stroke:
+    var(--wz-cyan) !important;
+
+  stroke-width:
+    2 !important;
+
+  stroke-dasharray:
+    7 5 !important;
+
+  opacity:
+    .95 !important;
+
+  animation:
+    rv5wzRing
+    1.6s
+    linear
+    infinite !important;
+
+  transform-origin:
+    center !important;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(116,220,229,.55)
+    ) !important;
+}
+
+
+@keyframes rv5wzRing{
+
+  to{
+    transform:
+      rotate(360deg);
+  }
+}
+
+
+/* checkpoints */
+
+#${ROOT_ID} .checkpoint{
+  fill:
+    rgba(116,220,229,.045) !important;
+
+  stroke:
+    var(--wz-cyan) !important;
+
+  stroke-width:
+    2 !important;
+
+  filter:
+    drop-shadow(
+      0 0 4px
+      rgba(116,220,229,.38)
+    ) !important;
+}
+
+
+#${ROOT_ID} .checkpoint-dot{
+  fill:
+    #eafcff !important;
+
+  filter:
+    drop-shadow(
+      0 0 6px
+      rgba(116,220,229,.85)
+    ) !important;
+}
+
+
+/* hostile */
+
+#${ROOT_ID} .danger-object{
+  fill:
+    #35191d !important;
+
+  stroke:
+    var(--wz-red) !important;
+
+  stroke-width:
+    1.8 !important;
+
+  filter:
+    drop-shadow(
+      0 0 6px
+      rgba(228,92,99,.35)
+    ) !important;
+}
+
+
+/* signals */
+
+#${ROOT_ID} .signal{
+  fill:
+    var(--wz-amber-bright) !important;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(240,207,105,.55)
+    ) !important;
+}
+
+
+/* ============================================================
+   MAP TEXT
+   ============================================================ */
+
+#${ROOT_ID} .label{
+  fill:
+    #f1f3ec !important;
+
+  font-family:
+    "Arial Narrow",
+    "Roboto Condensed",
+    Arial,
+    sans-serif !important;
+
+  font-size:
+    11px !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .035em !important;
+
+  paint-order:
+    stroke !important;
+
+  stroke:
+    #030606 !important;
+
+  stroke-width:
+    4px !important;
+
+  stroke-linejoin:
+    round !important;
+
+  text-shadow:
+    0 2px 9px
+    rgba(0,0,0,.96) !important;
+}
+
+
+/* YOU */
+
+#${ROOT_ID} #rv5-player text{
+  fill:
+    #ffffff !important;
+
+  font-size:
+    14px !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .08em !important;
+
+  paint-order:
+    stroke !important;
+
+  stroke:
+    #020607 !important;
+
+  stroke-width:
+    4px !important;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(116,220,229,.65)
+    ) !important;
+}
+
+
+/* instructional labels */
+
+#${ROOT_ID} .guide{
+  fill:
+    #d9dfd8 !important;
+
+  font-family:
+    "Arial Narrow",
+    "Roboto Condensed",
+    Arial,
+    sans-serif !important;
+
+  font-size:
+    10px !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .035em !important;
+
+  paint-order:
+    stroke !important;
+
+  stroke:
+    #020606 !important;
+
+  stroke-width:
+    3.5px !important;
+
+  stroke-linejoin:
+    round !important;
+}
+
+
+/* ============================================================
+   BOTTOM STATS
+   ============================================================ */
+
+#${ROOT_ID} .rv5-stats{
+  min-height:
+    48px !important;
+
+  display:grid !important;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0,1fr)
+    ) !important;
+
+  background:
+    rgba(4,7,7,.98) !important;
+
+  border-top:
+    1px solid
+    rgba(190,198,188,.10) !important;
+}
+
+
+#${ROOT_ID} .rv5-stats div{
+  min-width:
+    0 !important;
+
+  display:flex !important;
+
+  flex-direction:
+    column !important;
+
+  align-items:
+    center !important;
+
+  justify-content:
+    center !important;
+
+  gap:
+    4px !important;
+
+  border-right:
+    1px solid
+    rgba(190,198,188,.08) !important;
+}
+
+
+#${ROOT_ID} .rv5-stats div:last-child{
+  border-right:
+    0 !important;
+}
+
+
+#${ROOT_ID} .rv5-stats small{
+  color:
+    #737d75 !important;
+
+  font-size:
+    7px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  letter-spacing:
+    .13em !important;
+
+  text-transform:
+    uppercase !important;
+}
+
+
+#${ROOT_ID} .rv5-stats strong{
+  color:
+    #e4e9e2 !important;
+
+  font-size:
+    10px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .07em !important;
+}
+
+
+#${ROOT_ID} .rv5-stats .danger{
+  color:
+    var(--wz-red) !important;
+
+  text-shadow:
+    0 0 9px
+    rgba(228,92,99,.16) !important;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+#${ROOT_ID} .rv5-footer{
+  min-height:
+    78px !important;
+
+  display:flex !important;
+
+  align-items:center !important;
+
+  justify-content:space-between !important;
+
+  gap:
+    18px !important;
+
+  padding:
+    11px
+    20px !important;
+
+  border-top:
+    1px solid
+    rgba(190,198,188,.13) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(7,10,10,.96),
+      rgba(3,6,6,.995)
+    ) !important;
+}
+
+
+/* objective */
+
+#${ROOT_ID} .rv5-objective{
+  min-width:
+    0 !important;
+
+  display:flex !important;
+
+  align-items:center !important;
+
+  gap:
+    12px !important;
+
+  padding:
+    8px
+    12px !important;
+
+  border:
+    1px solid
+    rgba(190,198,188,.13) !important;
+
+  border-left:
+    3px solid
+    var(--wz-amber) !important;
+
+  background:
+    rgba(255,255,255,.018) !important;
+
+  box-shadow:
+    inset 0 0 18px
+    rgba(213,181,83,.02) !important;
+}
+
+
+#${ROOT_ID} .rv5-objective-icon{
+  width:
+    32px !important;
+
+  height:
+    32px !important;
+
+  flex:
+    0 0 32px !important;
+
+  display:grid !important;
+
+  place-items:center !important;
+
+  color:
+    var(--wz-amber-bright) !important;
+
+  border:
+    1px solid
+    rgba(213,181,83,.35) !important;
+
+  background:
+    rgba(213,181,83,.045) !important;
+
+  transform:
+    rotate(45deg) !important;
+}
+
+
+#${ROOT_ID} .rv5-objective-icon::first-letter{
+  transform:
+    rotate(-45deg) !important;
+}
+
+
+#${ROOT_ID} .rv5-objective small{
+  display:block !important;
+
+  margin-bottom:
+    5px !important;
+
+  color:
+    var(--wz-amber) !important;
+
+  font-size:
+    8px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .14em !important;
+}
+
+
+#${ROOT_ID} .objective-text{
+  display:block !important;
+
+  max-width:
+    min(
+      70vw,
+      760px
+    ) !important;
+
+  overflow:hidden !important;
+
+  text-overflow:ellipsis !important;
+
+  white-space:nowrap !important;
+
+  color:
+    #f0f2ec !important;
+
+  font-size:
+    14px !important;
+
+  line-height:
+    1.15 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .035em !important;
+}
+
+
+/* ready */
+
+#${ROOT_ID} .rv5-ready{
+  display:flex !important;
+
+  align-items:center !important;
+
+  gap:
+    8px !important;
+
+  flex:
+    0 0 auto !important;
+
+  color:
+    var(--wz-green) !important;
+
+  font-size:
+    9px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .13em !important;
+
+  white-space:
+    nowrap !important;
+}
+
+
+#${ROOT_ID} .rv5-ready i{
+  width:
+    7px !important;
+
+  height:
+    7px !important;
+
+  flex:
+    0 0 7px !important;
+
+  border-radius:
+    50% !important;
+
+  background:
+    var(--wz-green) !important;
+
+  box-shadow:
+    0 0 10px
+    rgba(120,200,121,.74) !important;
+}
+
+
+/* ============================================================
+   OPEN ANIMATION
+   ============================================================ */
+
+#${ROOT_ID}.opening .rv5-shell{
+  animation:
+    rv5wzOpen
+    .45s
+    cubic-bezier(
+      .16,
+      .84,
+      .22,
+      1
+    )
+    both !important;
+}
+
+
+@keyframes rv5wzOpen{
+
+  from{
+    opacity:0;
+
+    transform:
+      translateY(12px)
+      scale(.992);
+
+    filter:
+      brightness(.7)
+      blur(4px);
+  }
+
+  to{
+    opacity:1;
+
+    transform:
+      none;
+
+    filter:
+      none;
+  }
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media(max-width:900px){
+
+  #${ROOT_ID}{
+    padding:
+      5px !important;
+  }
+
+
+  #${ROOT_ID} .rv5-shell{
+    width:
+      99vw !important;
+
+    height:
+      98dvh !important;
+
+    border-radius:
+      3px !important;
+  }
+
+
+  #${ROOT_ID} .rv5-header{
+    padding:
+      15px
+      15px
+      12px !important;
+
+    gap:
+      15px !important;
+  }
+
+
+  #${ROOT_ID} .rv5-brand{
+    max-width:
+      calc(
+        100% - 105px
+      ) !important;
+  }
+
+
+  #${ROOT_ID} .rv5-status{
+    display:none !important;
+  }
+
+
+  #${ROOT_ID} .rv5-timer{
+    width:
+      88px !important;
+
+    height:
+      88px !important;
+
+    min-width:
+      88px !important;
+
+    min-height:
+      88px !important;
+
+    flex-basis:
+      88px !important;
+  }
+
+
+  #${ROOT_ID} .rv5-timer strong{
+    font-size:
+      41px !important;
+  }
+
+
+  #${ROOT_ID} .rv5-main{
+    grid-template-rows:
+      40px
+      minmax(0,1fr)
+      45px !important;
+  }
+
+
+  #${ROOT_ID} .rv5-footer{
+    min-height:
+      68px !important;
+  }
+
+
+  #${ROOT_ID} .objective-text{
+    max-width:
+      62vw !important;
+  }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media(max-width:600px){
+
+  #${ROOT_ID}{
+    padding:0 !important;
+  }
+
+  #${ROOT_ID} .rv5-shell{
+    width:100vw !important;
+    height:100dvh !important;
+    min-width:0 !important;
+    min-height:0 !important;
+    border:0 !important;
+    border-radius:0 !important;
+    display:grid !important;
+    grid-template-rows:auto minmax(0,1fr) auto !important;
+  }
+
+  #${ROOT_ID} .rv5-header{
+    padding:12px 12px 10px !important;
+    gap:10px !important;
+    align-items:flex-start !important;
+  }
+
+  #${ROOT_ID} .rv5-brand{
+    min-width:0 !important;
+    max-width:calc(100% - 92px) !important;
+    gap:4px !important;
+  }
+
+  #${ROOT_ID} .rv5-live{
+    font-size:8px !important;
+    line-height:1.05 !important;
+    letter-spacing:.12em !important;
+  }
+
+  #${ROOT_ID} .rv5-live b{
+    width:6px !important;
+    height:6px !important;
+    flex-basis:6px !important;
+  }
+
+  #${ROOT_ID} .rv5-kicker{
+    margin-top:2px !important;
+    font-size:7px !important;
+    line-height:1.15 !important;
+    letter-spacing:.10em !important;
+  }
+
+  #${ROOT_ID} h1{
+    margin-top:2px !important;
+    font-size:clamp(23px,7.3vw,32px) !important;
+    line-height:.92 !important;
+    letter-spacing:.035em !important;
+  }
+
+  #${ROOT_ID} .rv5-meta{
+    margin-top:5px !important;
+    max-width:100% !important;
+    font-size:8px !important;
+    line-height:1.2 !important;
+    letter-spacing:.07em !important;
+  }
+
+  /* MOBILE BIG COUNTER */
+
+  #${ROOT_ID} .rv5-timer{
+    width:82px !important;
+    height:82px !important;
+    min-width:82px !important;
+    min-height:82px !important;
+    flex:0 0 82px !important;
+    border-radius:2px !important;
+  }
+
+  #${ROOT_ID} .rv5-timer svg{
+    opacity:.22 !important;
+  }
+
+  #${ROOT_ID} .rv5-timer::before{
+    top:8px !important;
+    font-size:7px !important;
+    letter-spacing:.14em !important;
+  }
+
+  #${ROOT_ID} .rv5-timer strong{
+    margin-top:5px !important;
+    font-size:38px !important;
+    line-height:.82 !important;
+  }
+
+  #${ROOT_ID} .rv5-timer small{
+    margin-top:8px !important;
+    font-size:7px !important;
+    letter-spacing:.20em !important;
+  }
+
+  #${ROOT_ID} .rv5-main{
+    min-height:0 !important;
+    grid-template-rows:38px minmax(0,1fr) 44px !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar{
+    min-width:0 !important;
+    padding:0 8px !important;
+    gap:8px !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar > div{
+    min-width:0 !important;
+    gap:5px !important;
+    overflow:hidden !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar span{
+    min-height:26px !important;
+    padding:5px 7px !important;
+    font-size:7px !important;
+    letter-spacing:.08em !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar span:nth-child(3){
+    display:none !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar b{
+    flex:0 0 auto !important;
+    font-size:7px !important;
+    letter-spacing:.07em !important;
+  }
+
+  #${ROOT_ID} .rv5-map{
+    min-width:0 !important;
+    min-height:0 !important;
+    width:100% !important;
+    height:100% !important;
+  }
+
+  #${ROOT_ID} .rv5-svg{
+    width:100% !important;
+    height:100% !important;
+    display:block !important;
+    max-width:100% !important;
+    max-height:100% !important;
+  }
+
+  #${ROOT_ID} .rv5-corner{
+    width:24px !important;
+    height:24px !important;
+  }
+
+  #${ROOT_ID} .rv5-corner.tl{
+    top:7px !important;
+    left:7px !important;
+  }
+
+  #${ROOT_ID} .rv5-corner.tr{
+    top:7px !important;
+    right:7px !important;
+  }
+
+  #${ROOT_ID} .rv5-corner.bl{
+    bottom:7px !important;
+    left:7px !important;
+  }
+
+  #${ROOT_ID} .rv5-corner.br{
+    right:7px !important;
+    bottom:7px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-label{
+    padding:6px 8px !important;
+    gap:4px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-label.top{
+    top:10px !important;
+    left:10px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-label.bottom{
+    right:10px !important;
+    bottom:10px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-label small{
+    font-size:7px !important;
+    line-height:1.1 !important;
+  }
+
+  #${ROOT_ID} .rv5-map-label strong{
+    font-size:9px !important;
+    line-height:1.1 !important;
+  }
+
+  #${ROOT_ID} .rv5-live-tag{
+    left:9px !important;
+    bottom:9px !important;
+    padding:7px 9px !important;
+    gap:6px !important;
+    font-size:7px !important;
+    letter-spacing:.08em !important;
+  }
+
+  #${ROOT_ID} .rv5-live-tag i{
+    width:6px !important;
+    height:6px !important;
+    flex-basis:6px !important;
+  }
+
+  #${ROOT_ID} .rv5-stats{
+    min-height:44px !important;
+  }
+
+  #${ROOT_ID} .rv5-stats small{
+    font-size:6px !important;
+    letter-spacing:.10em !important;
+  }
+
+  #${ROOT_ID} .rv5-stats strong{
+    font-size:9px !important;
+    letter-spacing:.05em !important;
+  }
+
+  #${ROOT_ID} .rv5-footer{
+    min-height:62px !important;
+    padding:8px 10px !important;
+    gap:8px !important;
+  }
+
+  #${ROOT_ID} .rv5-objective{
+    min-width:0 !important;
+    gap:8px !important;
+    padding:6px 8px !important;
+    border-left-width:2px !important;
+  }
+
+  #${ROOT_ID} .rv5-objective-icon{
+    width:26px !important;
+    height:26px !important;
+    flex:0 0 26px !important;
+  }
+
+  #${ROOT_ID} .rv5-objective small{
+    margin-bottom:4px !important;
+    font-size:6px !important;
+    line-height:1 !important;
+  }
+
+  #${ROOT_ID} .objective-text{
+    max-width:69vw !important;
+    font-size:10px !important;
+    line-height:1.25 !important;
+    white-space:normal !important;
+    overflow:hidden !important;
+    text-overflow:clip !important;
+    display:-webkit-box !important;
+    -webkit-box-orient:vertical !important;
+    -webkit-line-clamp:2 !important;
+    overflow-wrap:anywhere !important;
+  }
+
+  #${ROOT_ID} .rv5-ready{
+    display:none !important;
+  }
+
+  #${ROOT_ID} .label{
+    font-size:10px !important;
+    font-weight:950 !important;
+    stroke-width:3px !important;
+  }
+
+  #${ROOT_ID} #rv5-player text{
+    font-size:12px !important;
+    font-weight:950 !important;
+  }
+
+  #${ROOT_ID} .guide{
+    font-size:8px !important;
+    font-weight:900 !important;
+    stroke-width:2.5px !important;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media(max-width:400px){
+
+  #${ROOT_ID} .rv5-header{
+    padding:8px 9px !important;
+  }
+
+  #${ROOT_ID} .rv5-brand{
+    max-width:calc(100% - 78px) !important;
+  }
+
+  #${ROOT_ID} .rv5-live{
+    font-size:7px !important;
+  }
+
+  #${ROOT_ID} .rv5-kicker{
+    font-size:6px !important;
+  }
+
+  #${ROOT_ID} h1{
+    font-size:19px !important;
+  }
+
+  #${ROOT_ID} .rv5-meta{
+    font-size:6px !important;
+  }
+
+  /* counter stays readable */
+
+  #${ROOT_ID} .rv5-timer{
+    width:72px !important;
+    height:72px !important;
+    min-width:72px !important;
+    min-height:72px !important;
+    flex-basis:72px !important;
+  }
+
+  #${ROOT_ID} .rv5-timer strong{
+    font-size:32px !important;
+  }
+
+  #${ROOT_ID} .rv5-timer small{
+    font-size:6px !important;
+    margin-top:6px !important;
+  }
+
+  #${ROOT_ID} .rv5-timer::before{
+    font-size:5px !important;
+    top:7px !important;
+  }
+
+  #${ROOT_ID} .rv5-main{
+    grid-template-rows:35px minmax(0,1fr) 41px !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar span{
+    font-size:6px !important;
+    padding:5px 6px !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar b{
+    display:none !important;
+  }
+
+  #${ROOT_ID} .rv5-map-label.bottom{
+    display:none !important;
+  }
+
+  #${ROOT_ID} .rv5-live-tag{
+    font-size:6px !important;
+  }
+
+  #${ROOT_ID} .rv5-stats small{
+    font-size:5px !important;
+  }
+
+  #${ROOT_ID} .rv5-stats strong{
+    font-size:8px !important;
+  }
+
+  #${ROOT_ID} .rv5-footer{
+    min-height:56px !important;
+    padding:7px 8px !important;
+  }
+
+  #${ROOT_ID} .rv5-objective-icon{
+    display:none !important;
+  }
+
+  #${ROOT_ID} .objective-text{
+    max-width:82vw !important;
+    font-size:9px !important;
+  }
+
+  #${ROOT_ID} .label{
+    font-size:9px !important;
+  }
+
+  #${ROOT_ID} .guide{
+    font-size:7px !important;
+  }
+}
+
+/* ============================================================
+   TOUCH / PORTRAIT SAFETY
+   ============================================================ */
+
+@media(orientation:portrait){
+
+  body.is-touch
+  #play
+  .rotate-prompt:not(.hidden){
+    display:flex !important;
+
+    visibility:visible !important;
+
+    opacity:1 !important;
+  }
+
+
+  body.is-touch
+  #play
+  .hud,
+
+  body.is-touch
+  #play
+  .input-guide,
+
+  body.is-touch
+  #play
+  .mobile-controls,
+
+  body.is-touch
+  #play
+  #phaser-game{
+    visibility:hidden !important;
+  }
+}
+
+
+@media(orientation:landscape){
+
+  body.is-touch
+  #play
+  .rotate-prompt{
+    display:none !important;
+
+    visibility:hidden !important;
+
+    opacity:0 !important;
+
+    pointer-events:none !important;
+  }
+
+
+  body.is-touch
+  #play
+  .hud,
+
+  body.is-touch
+  #play
+  .input-guide,
+
+  body.is-touch
+  #play
+  .mobile-controls,
+
+  body.is-touch
+  #play
+  #phaser-game{
+    visibility:visible !important;
+  }
+}
+
+
+@media(orientation:landscape) and (max-height:700px){
+
+  body.is-touch
+  #play
+  .hud{
+    padding-top:
+      max(
+        6px,
+        env(
+          safe-area-inset-top,
+          0px
+        )
+      ) !important;
+  }
+}
+
+`;
 
   document.head.appendChild(style);
 
@@ -2689,43 +3663,67 @@ const targetBottom = 490;
    * ============================================================
    */
 
-  function renderMap(scene) {
+ function renderMap(scene) {
 
-    const svg =
-      root.querySelector('.rv5-svg');
+  const svg =
+    root.querySelector('.rv5-svg');
 
-    if (!svg || !scene) return;
+  if (!svg || !scene) return;
 
-    const d = mapModel(scene);
+  const d = mapModel(scene);
 
-    const routePoints = [
-      d.points.start,
-      ...d.checkpoints.map(d.point),
-      d.points.goal
-    ];
 
-    const route =
-      routePoints
-        .map(
-          (p,i) =>
-            `${i ? 'L' : 'M'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`
-        )
-        .join(' ');
+  /*
+   * ============================================================
+   * ROUTE
+   * ============================================================
+   */
 
-    const platforms =
-      d.platforms
-        .map(item => {
+  const routePoints = [
+    d.points.start,
+    ...d.checkpoints.map(d.point),
+    d.points.goal
+  ];
 
-          const r = d.rect(item);
+  const route =
+    routePoints
+      .map(
+        (p, i) =>
+          `${i ? 'L' : 'M'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`
+      )
+      .join(' ');
 
-          return `
+
+  /*
+   * ============================================================
+   * TACTICAL BUILDINGS
+   * ============================================================
+   */
+
+  const platforms =
+    d.platforms
+      .map(item => {
+
+        const r = d.rect(item);
+
+        return `
+          <g class="tactical-building">
+
             <rect
               x="${r.x}"
               y="${r.y}"
               width="${r.w}"
               height="${r.h}"
-              rx="3"
+              rx="2"
               class="platform">
+            </rect>
+
+            <rect
+              x="${r.x + 3}"
+              y="${r.y + 3}"
+              width="${Math.max(3, r.w - 6)}"
+              height="${Math.max(3, r.h - 6)}"
+              class="building-inner">
             </rect>
 
             <line
@@ -2735,43 +3733,98 @@ const targetBottom = 490;
               y2="${r.y}"
               class="edge">
             </line>
-          `;
-        })
-        .join('');
 
-    const obstacles =
-      d.obstacles
-        .map(item => {
+            <line
+              x1="${r.x}"
+              y1="${r.y+r.h}"
+              x2="${r.x+r.w}"
+              y2="${r.y+r.h}"
+              class="building-edge-bottom">
+            </line>
 
-          const p = d.point(item);
+          </g>
+        `;
 
-          return `
+      })
+      .join('');
+
+
+  /*
+   * ============================================================
+   * HOSTILE OBJECTS
+   * ============================================================
+   */
+
+  const obstacles =
+    d.obstacles
+      .map(item => {
+
+        const p = d.point(item);
+
+        return `
+          <g class="hostile-marker">
+
+            <circle
+              cx="${p.x}"
+              cy="${p.y}"
+              r="14"
+              class="hostile-pulse">
+            </circle>
+
             <path
               d="
-                M ${p.x-9} ${p.y+8}
-                L ${p.x} ${p.y-9}
-                L ${p.x+9} ${p.y+8}
+                M ${p.x-10} ${p.y+9}
+                L ${p.x} ${p.y-10}
+                L ${p.x+10} ${p.y+9}
                 Z
               "
               class="danger-object">
             </path>
-          `;
-        })
-        .join('');
 
-    const gates =
-      d.movingGates
-        .map(item => {
+            <line
+              x1="${p.x-5}"
+              y1="${p.y}"
+              x2="${p.x+5}"
+              y2="${p.y}"
+              class="hostile-cross">
+            </line>
 
-          const r = d.rect(item);
+            <line
+              x1="${p.x}"
+              y1="${p.y-5}"
+              x2="${p.x}"
+              y2="${p.y+5}"
+              class="hostile-cross">
+            </line>
 
-          return `
+          </g>
+        `;
+
+      })
+      .join('');
+
+
+  /*
+   * ============================================================
+   * MOVING GATES
+   * ============================================================
+   */
+
+  const gates =
+    d.movingGates
+      .map(item => {
+
+        const r = d.rect(item);
+
+        return `
+          <g class="tactical-gate">
+
             <rect
               x="${r.x}"
               y="${r.y}"
               width="${r.w}"
               height="${r.h}"
-              rx="3"
+              rx="2"
               class="danger-object">
             </rect>
 
@@ -2780,8 +3833,7 @@ const targetBottom = 490;
               y1="${r.y}"
               x2="${r.x+r.w}"
               y2="${r.y+r.h}"
-              stroke="#ff6877"
-              opacity=".3">
+              class="gate-line">
             </line>
 
             <line
@@ -2789,268 +3841,517 @@ const targetBottom = 490;
               y1="${r.y}"
               x2="${r.x}"
               y2="${r.y+r.h}"
-              stroke="#ff6877"
-              opacity=".3">
+              class="gate-line">
             </line>
-          `;
-        })
-        .join('');
 
-    const checkpoints =
-      d.checkpoints
-        .map((item,i) => {
+          </g>
+        `;
 
-          const p = d.point(item);
+      })
+      .join('');
 
-          return `
-            <g>
 
-              <circle
-                cx="${p.x}"
-                cy="${p.y}"
-                r="17"
-                class="checkpoint">
-              </circle>
+  /*
+   * ============================================================
+   * CHECKPOINTS
+   * ============================================================
+   */
 
-              <circle
-                cx="${p.x}"
-                cy="${p.y}"
-                r="4"
-                class="checkpoint-dot">
-              </circle>
+  const checkpoints =
+    d.checkpoints
+      .map((item, i) => {
 
-              <text
-                x="${p.x}"
-                y="${p.y-21}"
-                text-anchor="middle"
-                class="label">
-                CP ${i+1}
-              </text>
+        const p = d.point(item);
 
-            </g>
-          `;
-        })
-        .join('');
+        return `
+          <g class="checkpoint-group">
 
-    const signals =
-      d.signals
-        .map(item => {
-
-          const p = d.point(item);
-
-          return `
             <circle
               cx="${p.x}"
               cy="${p.y}"
-              r="5"
-              class="signal">
+              r="20"
+              class="checkpoint-zone">
             </circle>
-          `;
-        })
-        .join('');
 
-    const enemies =
-      d.enemies
-        .map(item => {
+            <circle
+              cx="${p.x}"
+              cy="${p.y}"
+              r="13"
+              class="checkpoint">
+            </circle>
 
-          const p = d.point(item);
+            <circle
+              cx="${p.x}"
+              cy="${p.y}"
+              r="4"
+              class="checkpoint-dot">
+            </circle>
 
-          return `
-            <g>
+            <line
+              x1="${p.x-17}"
+              y1="${p.y}"
+              x2="${p.x-8}"
+              y2="${p.y}"
+              class="checkpoint-line">
+            </line>
 
-              <circle
-                cx="${p.x}"
-                cy="${p.y}"
-                r="11"
-                fill="none"
-                stroke="#ff6877"
-                opacity=".25">
-              </circle>
+            <line
+              x1="${p.x+8}"
+              y1="${p.y}"
+              x2="${p.x+17}"
+              y2="${p.y}"
+              class="checkpoint-line">
+            </line>
 
-              <circle
-                cx="${p.x}"
-                cy="${p.y}"
-                r="7"
-                class="danger-object">
-              </circle>
-
-              <text
-                x="${p.x+12}"
-                y="${p.y+3}"
-                class="label">
-                HOSTILE
-              </text>
-
-            </g>
-          `;
-        })
-        .join('');
-
-    const guides =
-      d.guides
-        .map(item => {
-
-          const p = d.point(item);
-
-          return `
             <text
               x="${p.x}"
-              y="${p.y-12}"
+              y="${p.y-25}"
+              text-anchor="middle"
+              class="label checkpoint-label">
+              CP ${i+1}
+            </text>
+
+          </g>
+        `;
+
+      })
+      .join('');
+
+
+  /*
+   * ============================================================
+   * SIGNALS
+   * ============================================================
+   */
+
+  const signals =
+    d.signals
+      .map(item => {
+
+        const p = d.point(item);
+
+        return `
+          <g class="signal-group">
+
+            <circle
+              cx="${p.x}"
+              cy="${p.y}"
+              r="10"
+              class="signal-ring">
+            </circle>
+
+            <circle
+              cx="${p.x}"
+              cy="${p.y}"
+              r="4"
+              class="signal">
+            </circle>
+
+          </g>
+        `;
+
+      })
+      .join('');
+
+
+  /*
+   * ============================================================
+   * ENEMIES
+   * ============================================================
+   */
+
+  const enemies =
+    d.enemies
+      .map(item => {
+
+        const p = d.point(item);
+
+        return `
+          <g class="enemy-group">
+
+            <circle
+              cx="${p.x}"
+              cy="${p.y}"
+              r="17"
+              class="enemy-radius">
+            </circle>
+
+            <circle
+              cx="${p.x}"
+              cy="${p.y}"
+              r="8"
+              class="danger-object">
+            </circle>
+
+            <line
+              x1="${p.x-13}"
+              y1="${p.y}"
+              x2="${p.x-7}"
+              y2="${p.y}"
+              class="enemy-cross">
+            </line>
+
+            <line
+              x1="${p.x+7}"
+              y1="${p.y}"
+              x2="${p.x+13}"
+              y2="${p.y}"
+              class="enemy-cross">
+            </line>
+
+            <line
+              x1="${p.x}"
+              y1="${p.y-13}"
+              x2="${p.x}"
+              y2="${p.y-7}"
+              class="enemy-cross">
+            </line>
+
+            <line
+              x1="${p.x}"
+              y1="${p.y+7}"
+              x2="${p.x}"
+              y2="${p.y+13}"
+              class="enemy-cross">
+            </line>
+
+            <text
+              x="${p.x+18}"
+              y="${p.y+4}"
+              class="label hostile-label">
+              HOSTILE
+            </text>
+
+          </g>
+        `;
+
+      })
+      .join('');
+
+
+  /*
+   * ============================================================
+   * GUIDES
+   * ============================================================
+   */
+
+  const guides =
+    d.guides
+      .map(item => {
+
+        const p = d.point(item);
+
+        return `
+          <g class="guide-group">
+
+            <line
+              x1="${p.x}"
+              y1="${p.y-5}"
+              x2="${p.x}"
+              y2="${p.y-16}"
+              class="guide-stem">
+            </line>
+
+            <text
+              x="${p.x}"
+              y="${p.y-21}"
+              text-anchor="middle"
               class="guide">
               ${esc(item?.text || '')}
             </text>
-          `;
-        })
-        .join('');
 
-    svg.innerHTML = `
+          </g>
+        `;
 
-      <defs>
+      })
+      .join('');
 
-        <linearGradient
-          id="rv5mapGradient"
-          x1="0"
-          y1="0"
-          x2="1"
-          y2="1">
 
-          <stop
-            offset="0%"
-            stop-color="#06131e">
-          </stop>
+  /*
+   * ============================================================
+   * SVG
+   * ============================================================
+   */
 
-          <stop
-            offset="55%"
-            stop-color="#020a11">
-          </stop>
+  svg.innerHTML = `
 
-          <stop
-            offset="100%"
-            stop-color="#010508">
-          </stop>
+    <defs>
 
-        </linearGradient>
+      <linearGradient
+        id="rv5mapGradient"
+        x1="0"
+        y1="0"
+        x2="1"
+        y2="1">
 
-      </defs>
+        <stop
+          offset="0%"
+          stop-color="#0c1512">
+        </stop>
 
-      <rect
-        width="1000"
-        height="560"
-        fill="url(#rv5mapGradient)">
-      </rect>
+        <stop
+          offset="45%"
+          stop-color="#07100d">
+        </stop>
 
-      ${grid()}
+        <stop
+          offset="100%"
+          stop-color="#020706">
+        </stop>
 
-      <path
-        d="${route}"
-        class="route-halo">
-      </path>
+      </linearGradient>
 
-      <path
-        d="${route}"
-        class="route">
-      </path>
 
-      <path
-        d="${route}"
-        class="route-core">
-      </path>
+      <radialGradient
+        id="rv5terrainGlow"
+        cx="50%"
+        cy="48%"
+        r="60%">
 
-      ${platforms}
-      ${gates}
-      ${obstacles}
-      ${signals}
-      ${checkpoints}
-      ${enemies}
-      ${guides}
+        <stop
+          offset="0%"
+          stop-color="#26352c"
+          stop-opacity=".24">
+        </stop>
 
-      <!-- START -->
+        <stop
+          offset="100%"
+          stop-color="#020706"
+          stop-opacity="0">
+        </stop>
 
-      <g>
+      </radialGradient>
 
-        <circle
-          cx="${d.points.start.x}"
-          cy="${d.points.start.y}"
-          r="15"
-          fill="none"
-          stroke="#8df59b"
-          opacity=".2">
-        </circle>
 
-        <circle
-          cx="${d.points.start.x}"
-          cy="${d.points.start.y}"
-          r="8"
-          class="start">
-        </circle>
+      <filter
+        id="rv5SoftGlow"
+        x="-100%"
+        y="-100%"
+        width="300%"
+        height="300%">
 
-        <text
-          x="${d.points.start.x+14}"
-          y="${d.points.start.y+4}"
-          class="label">
-          START
-        </text>
+        <feGaussianBlur
+          stdDeviation="3">
+        </feGaussianBlur>
 
-      </g>
+      </filter>
 
-      <!-- GOAL -->
 
-      <g>
+      <filter
+        id="rv5StrongGlow"
+        x="-100%"
+        y="-100%"
+        width="300%"
+        height="300%">
 
-        <circle
-          cx="${d.points.goal.x}"
-          cy="${d.points.goal.y}"
-          r="20"
-          fill="none"
-          stroke="#ffd76a"
-          opacity=".2">
-        </circle>
+        <feGaussianBlur
+          stdDeviation="5">
+        </feGaussianBlur>
 
-        <circle
-          cx="${d.points.goal.x}"
-          cy="${d.points.goal.y}"
-          r="10"
-          class="goal">
-        </circle>
+      </filter>
 
-        <text
-          x="${d.points.goal.x+18}"
-          y="${d.points.goal.y+4}"
-          class="label">
-          OBJECTIVE
-        </text>
+    </defs>
 
-      </g>
 
-      <!-- PLAYER -->
+    <!-- TACTICAL TERRAIN -->
 
-      <g id="rv5-player">
+    <rect
+      width="1000"
+      height="560"
+      fill="url(#rv5mapGradient)">
+    </rect>
 
-        <circle
-          cx="${d.points.player.x}"
-          cy="${d.points.player.y}"
-          r="16"
-          class="player-ring">
-        </circle>
+    <rect
+      width="1000"
+      height="560"
+      fill="url(#rv5terrainGlow)">
+    </rect>
 
-        <circle
-          cx="${d.points.player.x}"
-          cy="${d.points.player.y}"
-          r="7"
-          class="player">
-        </circle>
 
-        <text
-          x="${d.points.player.x+13}"
-          y="${d.points.player.y-12}"
-          class="label">
-          YOU
-        </text>
+    <!-- GRID -->
 
-      </g>
+    ${grid()}
 
-    `;
-  }
+
+    <!-- ROUTE UNDERGLOW -->
+
+    <path
+      d="${route}"
+      class="route-halo">
+    </path>
+
+
+    <!-- MAIN ROUTE -->
+
+    <path
+      d="${route}"
+      class="route">
+    </path>
+
+
+    <!-- ROUTE CORE -->
+
+    <path
+      d="${route}"
+      class="route-core">
+    </path>
+
+
+    <!-- LEVEL OBJECTS -->
+
+    ${platforms}
+
+    ${gates}
+
+    ${obstacles}
+
+    ${signals}
+
+    ${checkpoints}
+
+    ${enemies}
+
+    ${guides}
+
+
+    <!-- START -->
+
+    <g class="start-group">
+
+      <circle
+        cx="${d.points.start.x}"
+        cy="${d.points.start.y}"
+        r="23"
+        class="start-radius">
+      </circle>
+
+      <circle
+        cx="${d.points.start.x}"
+        cy="${d.points.start.y}"
+        r="15"
+        class="start-ring">
+      </circle>
+
+      <circle
+        cx="${d.points.start.x}"
+        cy="${d.points.start.y}"
+        r="8"
+        class="start">
+      </circle>
+
+      <text
+        x="${d.points.start.x+18}"
+        y="${d.points.start.y+4}"
+        class="label start-label">
+        START
+      </text>
+
+    </g>
+
+
+    <!-- GOAL -->
+
+    <g class="goal-group">
+
+      <circle
+        cx="${d.points.goal.x}"
+        cy="${d.points.goal.y}"
+        r="28"
+        class="goal-radius">
+      </circle>
+
+      <circle
+        cx="${d.points.goal.x}"
+        cy="${d.points.goal.y}"
+        r="20"
+        class="goal-ring">
+      </circle>
+
+      <circle
+        cx="${d.points.goal.x}"
+        cy="${d.points.goal.y}"
+        r="10"
+        class="goal">
+      </circle>
+
+      <text
+        x="${d.points.goal.x+22}"
+        y="${d.points.goal.y+4}"
+        class="label goal-label">
+        OBJECTIVE
+      </text>
+
+    </g>
+
+
+    <!-- PLAYER -->
+
+    <g id="rv5-player">
+
+      <circle
+        cx="${d.points.player.x}"
+        cy="${d.points.player.y}"
+        r="23"
+        class="player-radius">
+      </circle>
+
+      <circle
+        cx="${d.points.player.x}"
+        cy="${d.points.player.y}"
+        r="16"
+        class="player-ring">
+      </circle>
+
+      <circle
+        cx="${d.points.player.x}"
+        cy="${d.points.player.y}"
+        r="7"
+        class="player">
+      </circle>
+
+      <line
+        x1="${d.points.player.x-23}"
+        y1="${d.points.player.y}"
+        x2="${d.points.player.x-12}"
+        y2="${d.points.player.y}"
+        class="player-cross">
+      </line>
+
+      <line
+        x1="${d.points.player.x+12}"
+        y1="${d.points.player.y}"
+        x2="${d.points.player.x+23}"
+        y2="${d.points.player.y}"
+        class="player-cross">
+      </line>
+
+      <line
+        x1="${d.points.player.x}"
+        y1="${d.points.player.y-23}"
+        x2="${d.points.player.x}"
+        y2="${d.points.player.y-12}"
+        class="player-cross">
+      </line>
+
+      <line
+        x1="${d.points.player.x}"
+        y1="${d.points.player.y+12}"
+        x2="${d.points.player.x}"
+        y2="${d.points.player.y+23}"
+        class="player-cross">
+      </line>
+
+      <text
+        x="${d.points.player.x+16}"
+        y="${d.points.player.y-15}"
+        class="label player-label">
+        YOU
+      </text>
+
+    </g>
+
+  `;
+}
 
   /*
    * ============================================================
