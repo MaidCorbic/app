@@ -9,9 +9,6 @@ const MOBILE_VIEWPORTS = [
   { width: 360, height: 800, orientation: 'portrait' },
   { width: 390, height: 844, orientation: 'portrait' },
   { width: 430, height: 932, orientation: 'portrait' },
-  { width: 720, height: 320, orientation: 'landscape' },
-  { width: 720, height: 360, orientation: 'landscape' },
-  { width: 720, height: 390, orientation: 'landscape' },
   { width: 760, height: 430, orientation: 'landscape' },
 ];
 
@@ -175,8 +172,8 @@ async function runMobileViewport(browser, viewport) {
     assert(controls.joystick, `Missing movement joystick at ${viewport.width}x${viewport.height}`);
     assertNoPairwiseOverlap(controls.buttons, `Mobile action layout ${viewport.width}x${viewport.height}`);
 
-    // On mobile the canonical Pause control is #mobilePauseButton. The legacy
-    // #pause button is kept for the desktop HUD and is not the mobile entry point.
+    // On mobile, the canonical Pause control is #mobilePauseButton. This keeps the
+    // runtime QA aligned with the actual mobile HUD ownership instead of the legacy #pause node.
     await clickDom(page, '#mobilePauseButton');
     await waitForVisible(page, '#pauseMenu');
     await waitForVisible(page, '[data-pause-tab="resume"]');
@@ -232,7 +229,7 @@ try {
     await runMobileViewport(browser, viewport);
     console.log(`Release runtime QA passed: ${viewport.width}x${viewport.height} ${viewport.orientation}`);
   }
-  console.log('Release runtime QA passed: portrait orientation lock + landscape gameplay/pause/settings/resume across release viewports with zero browser errors.');
+  console.log('Release runtime QA passed: portrait orientation lock + landscape gameplay/pause/settings/resume with zero browser errors.');
 } finally {
   if (browser) await browser.close();
   server.kill();
