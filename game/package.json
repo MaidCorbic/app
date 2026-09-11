@@ -17,6 +17,7 @@
     "test:city-response": "node tests/city-response.mjs",
     "test:mobile-action-layout": "node tests/mobile-action-layout.mjs",
     "test:mobile-input-single-owner": "node tests/mobile-input-single-owner-v3.mjs",
+    "test:mobile-ui-ownership": "node tests/mobile-ui-ownership-contract.mjs",
     "test:settings-state": "node tests/settings-state-contract.mjs",
     "test:seasonal-progression": "node tests/seasonal-progression-contract.mjs",
     "test:state-unlock-reconciliation": "node tests/state-unlock-reconciliation-contract.mjs",
@@ -50,7 +51,7 @@
     "test:route-choice-duplicate-event-guard": "node tests/route-choice-duplicate-event-guard-v1.mjs",
     "test:route-mutation-choice-coordination": "node tests/route-mutation-choice-coordination-v1.mjs",
     "test:release-runtime-qa": "node tests/release-runtime-qa.mjs",
-    "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:gameplay-variety-safe-layer && npm run test:gameplay-route-choice-v2 && npm run test:gameplay-route-score-bonus && npm run test:route-choice-branching-v1 && npm run test:route-choice-duplicate-event-guard && npm run test:route-mutation-choice-coordination && npm run test:final-stability && npm run test:runner-runtime-stability && npm run build"
+    "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:mobile-ui-ownership && npm run test:release-ux-gameplay-polish && npm run test:gameplay-variety-safe-layer && npm run test:gameplay-route-choice-v2 && npm run test:gameplay-route-score-bonus && npm run test:route-choice-branching-v1 && npm run test:route-choice-duplicate-event-guard && npm run test:route-mutation-choice-coordination && npm run test:final-stability && npm run test:runner-runtime-stability && npm run build"
   },
   "engines": {"node": "24.x"},
   "dependencies": {"phaser": "^3.90.0", "vite": "^8.2.1"},
