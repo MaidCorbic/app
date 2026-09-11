@@ -3,28 +3,28 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const root = new URL('../', import.meta.url);
-const patch = await readFile(fileURLToPath(new URL('respawn-transient-state-patch.mjs', root)), 'utf8');
+const runtime = await readFile(fileURLToPath(new URL('src/systems/core-stability.js', root)), 'utf8');
 const vite = await readFile(fileURLToPath(new URL('vite.config.mjs', root)), 'utf8');
 
 for (const marker of [
-  "this.alarmTimer = 0;",
-  "this.empTimer = 0;",
-  "this.decoyTimer = 0;",
-  "this.boosterTimer = 0;",
-  "this.comboTimer = 0;",
-  "this.combatCombo = 0;",
-  "this.blasterCooldown = 0;",
-  "this.swordCooldown = 0;",
-  "this.gadgetCooldowns = [0, 0];",
-  "this.buildCooldowns = [0, 0];",
-  "this.chaseSection = -1;",
-  "this.turrets, this.shields, this.springPads",
-  "this.decoyBeacon?.destroy();",
-  "this.boosterAura?.destroy();",
-]) assert.match(patch, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  'scene.alarmTimer = 0;',
+  'scene.empTimer = 0;',
+  'scene.decoyTimer = 0;',
+  'scene.boosterTimer = 0;',
+  'scene.comboTimer = 0;',
+  'scene.combatCombo = 0;',
+  'scene.blasterCooldown = 0;',
+  'scene.swordCooldown = 0;',
+  'scene.gadgetCooldowns = [0, 0];',
+  'scene.buildCooldowns = [0, 0];',
+  'scene.chaseSection = -1;',
+  'scene.turrets, scene.shields, scene.springPads',
+  'scene.decoyBeacon?.destroy();',
+  'scene.boosterAura?.destroy();',
+]) assert.match(runtime, new RegExp(marker.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')));
 
-assert.match(patch, /this\.resetTransientRespawnState\(\);/);
-assert.match(vite, /patchRespawnTransientState/);
-assert.match(vite, /relay-respawn-transient-state-fix/);
+assert.match(runtime, /function resetTransientRespawnState\(scene\)/);
+assert.match(runtime, /resetTransientRespawnState\(this\);/);
+assert.doesNotMatch(vite, /patchRespawnTransientState|relay-respawn-transient-state-fix/);
 
 console.log('Respawn transient state: PASS');
