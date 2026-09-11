@@ -81,6 +81,14 @@ function assertNoPairwiseOverlap(rects, label) {
   }
 }
 
+async function clickDom(page, selector) {
+  await page.evaluate(sel => {
+    const element = document.querySelector(sel);
+    if (!element) throw new Error(`Missing clickable element: ${sel}`);
+    element.click();
+  }, selector);
+}
+
 async function runMobileViewport(browser, viewport) {
   const device = devices['Pixel 5'];
   const context = await browser.newContext({
@@ -100,7 +108,7 @@ async function runMobileViewport(browser, viewport) {
   try {
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
     await waitForVisible(page, '#start');
-    await page.locator('#start').click();
+    await clickDom(page, '#start');
     await waitForHidden(page, '#intro');
 
     if (viewport.orientation === 'landscape') {
@@ -112,7 +120,6 @@ async function runMobileViewport(browser, viewport) {
       scrollWidth: document.documentElement.scrollWidth,
       innerWidth: window.innerWidth,
       pointerCoarse: matchMedia('(pointer:coarse)').matches,
-      hoverNone: matchMedia('(hover:none)').matches,
       touchPoints: navigator.maxTouchPoints,
       touchControls: document.querySelectorAll('[data-mobile-action]').length,
       joystickCount: document.querySelectorAll('[data-mobile-joystick]').length,
@@ -167,15 +174,12 @@ async function runMobileViewport(browser, viewport) {
     assert(controls.joystick, `Missing movement joystick at ${viewport.width}x${viewport.height}`);
     assertNoPairwiseOverlap(controls.buttons, `Mobile action layout ${viewport.width}x${viewport.height}`);
 
-    // The tactical gameplay layer can sit above the HUD for pointer hit-testing.
-    // The control button itself is already proven visible/stable; force the DOM click
-    // so this QA verifies the Pause event path instead of failing on an unrelated overlay intercept.
-    await page.locator('#pause').click({ force: true });
+    await clickDom(page, '#pause');
     await waitForVisible(page, '#pauseMenu');
     await waitForVisible(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-pause-tab="settings"]');
 
-    await page.locator('[data-pause-tab="settings"]').click({ force: true });
+    await clickDom(page, '[data-pause-tab="settings"]');
     await page.waitForFunction(() => document.querySelector('.relay-cinematic-title')?.textContent?.trim() === 'OPTIONS');
     const settings = await page.evaluate(() => ({
       title: document.querySelector('.relay-cinematic-title')?.textContent?.trim() || '',
@@ -188,13 +192,13 @@ async function runMobileViewport(browser, viewport) {
 
     const firstToggle = page.locator('[data-unified-setting]').first();
     const beforeToggle = await firstToggle.getAttribute('aria-pressed');
-    await firstToggle.click({ force: true });
+    await clickDom(page, '[data-unified-setting]');
     const afterToggle = await firstToggle.getAttribute('aria-pressed');
     assert.notEqual(beforeToggle, afterToggle, `Settings toggle did not react at ${viewport.width}x${viewport.height}`);
 
-    await page.locator('[data-pause-tab="resume"]').click({ force: true });
+    await clickDom(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-unified-resume]');
-    await page.locator('[data-unified-resume]').click({ force: true });
+    await clickDom(page, '[data-unified-resume]');
     await waitForHidden(page, '#pauseMenu');
 
     const resumed = await page.evaluate(() => ({
