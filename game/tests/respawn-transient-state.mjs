@@ -21,7 +21,7 @@ for (const marker of [
   'scene.turrets, scene.shields, scene.springPads',
   'scene.decoyBeacon?.destroy();',
   'scene.boosterAura?.destroy();',
-]) assert.match(runtime, new RegExp(marker.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')));
+]) assert.ok(runtime.includes(marker), `Missing respawn transient-state reset marker: ${marker}`);
 
 assert.match(runtime, /function resetTransientRespawnState\(scene\)/);
 assert.match(runtime, /resetTransientRespawnState\(this\);/);
