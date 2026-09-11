@@ -32,6 +32,17 @@
   display: none !important;
 }
 
+/* Mobile gameplay: cargo telemetry is intentionally suppressed so it never
+   competes with or overlaps the touch joystick/action footprint. */
+@media (pointer: coarse) {
+  #play #cargoIntegrityV2 {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
 /* Keep the in-game pause/settings navigation compact and single-row where space allows. */
 @media (max-width: 760px) {
   #pauseMenu.relay-options-unified .menu-grid > aside nav {
