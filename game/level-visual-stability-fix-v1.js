@@ -14,35 +14,17 @@
     .home-tutorial-button .tutorial-menu-icon,
     .home-tutorial-button svg,
     .home-tutorial-button i { display:none !important; }
-
     #intro .title-lockup { width:min(610px,100%) !important; display:grid !important; justify-items:center !important; align-content:center !important; row-gap:0 !important; }
     #intro .title-lockup h1 { display:block !important; width:100% !important; margin:0 !important; line-height:.82 !important; letter-spacing:-.105em !important; }
     #intro .title-lockup .menu-tagline { position:relative !important; z-index:4 !important; max-width:390px !important; margin:28px auto 28px !important; line-height:1.55 !important; }
     #intro .title-lockup .menu-actions { position:relative !important; z-index:5 !important; margin-top:0 !important; }
     #intro .title-lockup .title-secondary { position:relative !important; z-index:5 !important; }
-
     .hud-route #district { display:block !important; margin-bottom:5px !important; line-height:1.2 !important; }
     #pauseMenu .campaign-v2-head { padding-top:10px !important; }
-
-    /* Keep the authored briefing SVG inside its viewport instead of clipping its
-       route labels or markers at the map wrapper edge. */
     #relayGameplayIntroFinalV3 .map-briefing-map,
-    #relayGameplayIntroFinalV5 .map-briefing-map {
-      width:100% !important;
-      height:100% !important;
-      max-width:100% !important;
-      max-height:100% !important;
-      object-fit:contain !important;
-      object-position:center !important;
-      overflow:visible !important;
-    }
+    #relayGameplayIntroFinalV5 .map-briefing-map { width:100% !important; height:100% !important; max-width:100% !important; max-height:100% !important; object-fit:contain !important; object-position:center !important; overflow:visible !important; }
     #relayGameplayIntroFinalV3 .map-briefing-map text,
     #relayGameplayIntroFinalV5 .map-briefing-map text { paint-order:stroke fill !important; }
-
-    /* First gameplay frame: hide any legacy weapon visual shells attached near the runner. */
-    #play .relay-legacy-weapon,
-    #play [data-weapon-visual="true"],
-    #play .player-weapon-visual { display:none !important; }
   `;
   document.head.appendChild(style);
 
@@ -53,9 +35,7 @@
     const body = barrier.body;
     if (!body || typeof body.setSize !== 'function') return;
     barrier.__relayStableBarrierBody = true;
-    const width = clamp(body.width, 34, 46);
-    const height = clamp(body.height, 38, 48);
-    body.setSize(width, height, true);
+    body.setSize(clamp(body.width, 34, 46), clamp(body.height, 38, 48), true);
     body.setAllowGravity?.(false);
     body.setImmovable?.(true);
   };
@@ -70,7 +50,6 @@
         platform.body.moves = false;
       } catch {}
     });
-
     scene?.children?.list?.forEach(object => {
       if (!object?.active || !object.body) return;
       const key = String(object.texture?.key || '').toLowerCase();
@@ -86,11 +65,7 @@
   const hidePlayerShieldVisual = scene => {
     const player = scene?.player;
     if (!player?.active || !scene?.children?.list) return;
-    scene.children.list.filter(child => {
-      if (!child?.active || child === player) return false;
-      if (child.texture?.key !== 'shield') return false;
-      return Math.hypot((child.x || 0) - player.x, (child.y || 0) - player.y) <= 90;
-    }).forEach(object => object.setVisible(false));
+    scene.children.list.filter(child => child?.active && child !== player && child.texture?.key === 'shield' && Math.hypot((child.x || 0) - player.x, (child.y || 0) - player.y) <= 90).forEach(object => object.setVisible(false));
   };
 
   const hideLegacyWeaponVisual = scene => {
@@ -101,29 +76,20 @@
       const key = String(child.texture?.key || '').toLowerCase();
       const name = String(child.name || '').toLowerCase();
       const tagged = child.getData?.('weaponVisual') === true || child.getData?.('weapon') === true;
-      const weaponKey = /weapon|gun|rifle|blaster|pistol|sidearm|scatter/.test(`${key} ${name}`);
-      if (!tagged && !weaponKey) return;
+      if ((!tagged && !/weapon|gun|rifle|blaster|pistol|sidearm|scatter/.test(`${key} ${name}`))) return;
       if (Math.hypot((child.x || 0) - player.x, (child.y || 0) - player.y) > 90) return;
       child.setVisible?.(false);
     });
   };
 
   const restoreGameplayBarrierVisuals = scene => {
-    if (!scene) return;
-    scene.barriers?.getChildren?.().forEach(barrier => {
+    scene?.barriers?.getChildren?.().forEach(barrier => {
       if (!barrier?.active) return;
-      if (barrier.texture?.key === 'barrier') {
-        barrier.setVisible(true);
-        tuneBarrierBody(barrier);
-      }
+      if (barrier.texture?.key === 'barrier') { barrier.setVisible(true); tuneBarrierBody(barrier); }
     });
-    scene.movingGates?.getChildren?.().forEach(gate => {
+    scene?.movingGates?.getChildren?.().forEach(gate => {
       if (!gate?.active) return;
-      if (gate.texture?.key === 'barrier') {
-        gate.setVisible(true);
-        gate.body?.setAllowGravity?.(false);
-        gate.body?.setImmovable?.(true);
-      }
+      if (gate.texture?.key === 'barrier') { gate.setVisible(true); gate.body?.setAllowGravity?.(false); gate.body?.setImmovable?.(true); }
     });
   };
 
@@ -140,7 +106,7 @@
 
   const extendRoute = scene => {
     if (!scene?.mission || scene.__relayRouteExtensionV1) return;
-    if (!scene.platforms?.create) return;
+    if (!scene.platforms?.add || !scene.physics?.add?.existing || !scene.add?.rectangle) return;
     const goal = Number(scene.mission.goal?.x);
     if (!Number.isFinite(goal) || goal < 5000) return;
 
@@ -159,14 +125,17 @@
 
     segments.forEach(([x, y, width, height]) => {
       try {
-        const platform = scene.platforms.create(x + width / 2, y + height / 2, 'platform');
-        platform.setDisplaySize?.(width, height);
-        platform.refreshBody?.();
+        const platform = scene.add.rectangle(x + width / 2, y + height / 2, width, height, 0x0b1726, .96)
+          .setStrokeStyle(2, 0x8df4ff, .72);
+        scene.physics.add.existing(platform, true);
+        platform.body?.setSize?.(width, height, true);
         platform.body?.setAllowGravity?.(false);
         platform.body?.setImmovable?.(true);
-        platform.body?.setSize?.(width, height, true);
+        scene.platforms.add(platform);
         platform.setData?.('relayExtended', true);
-      } catch {}
+      } catch (error) {
+        console.warn('[LevelStabilityV1] route extension segment skipped', error);
+      }
     });
 
     try {
@@ -178,9 +147,7 @@
   const nudgeInitialSpawn = scene => {
     if (!scene?.player || scene.__relayInitialSpawnNudgedV1) return;
     if (scene.finished || scene.respawning || scene.cinematicActive || window.__relayCinematicLock) return;
-
     const player = scene.player;
-    const body = player.body;
     const authored = scene.mission?.spawn;
     const authoredX = Number(authored?.x);
     const authoredY = Number(authored?.y);
@@ -190,16 +157,16 @@
     if (Number.isFinite(authoredX) && Math.abs(currentX - authoredX) > 180) return;
     if (Number.isFinite(authoredY) && Math.abs(currentY - authoredY) > 140) return;
 
-    const forward = Math.max(28, Math.min(56, Number(body?.width) || 36));
+    const forward = Math.max(28, Math.min(56, Number(player.body?.width) || 36));
     const safeX = Number.isFinite(authoredX) ? authoredX + forward : currentX + forward;
     const safeY = Number.isFinite(authoredY) ? authoredY : currentY;
     if (!Number.isFinite(safeX) || !Number.isFinite(safeY)) return;
 
     scene.__relayInitialSpawnNudgedV1 = true;
     player.setPosition?.(safeX, safeY);
-    body?.setVelocity?.(0, 0);
-    body?.setAcceleration?.(0, 0);
-    body?.setAllowGravity?.(true);
+    player.body?.setVelocity?.(0, 0);
+    player.body?.setAcceleration?.(0, 0);
+    player.body?.setAllowGravity?.(true);
   };
 
   const enhanceMissionRoute = scene => {
@@ -212,36 +179,26 @@
     const halo = scene.add.graphics().setScrollFactor(0).setDepth(9199);
     const trace = scene.add.graphics().setScrollFactor(0).setDepth(9201);
     const junctions = scene.add.graphics().setScrollFactor(0).setDepth(9202);
-    const draw = () => {
-      halo.clear();
-      trace.clear();
-      junctions.clear();
-      halo.lineStyle(8, 0x55e9ff, .08);
-      trace.lineStyle(2, 0x8df4ff, .42);
-      trace.beginPath();
-      trace.moveTo(linePoints[0], 94);
-      for (let i = 1; i < linePoints.length; i += 1) trace.lineTo(linePoints[i], 94);
-      trace.strokePath();
-      for (const x of linePoints.slice(1, -1)) {
-        junctions.fillStyle(0x8b65ff, .18);
-        junctions.fillCircle(x, 94, 8);
-        junctions.fillStyle(0xb9f8ff, .92);
-        junctions.fillCircle(x, 94, 2.4);
-      }
-    };
-    draw();
-    state.c.addAt?.(halo, 0);
-    state.c.addAt?.(trace, 1);
-    state.c.addAt?.(junctions, 2);
+    halo.lineStyle(8, 0x55e9ff, .08);
+    trace.lineStyle(2, 0x8df4ff, .42);
+    trace.beginPath();
+    trace.moveTo(linePoints[0], 94);
+    for (let i = 1; i < linePoints.length; i += 1) trace.lineTo(linePoints[i], 94);
+    trace.strokePath();
+    for (const x of linePoints.slice(1, -1)) {
+      junctions.fillStyle(0x8b65ff, .18);
+      junctions.fillCircle(x, 94, 8);
+      junctions.fillStyle(0xb9f8ff, .92);
+      junctions.fillCircle(x, 94, 2.4);
+    }
+    state.c.add([halo, trace, junctions]);
     state.__relayRouteTraceV1 = true;
     state.__relayRouteTraceGraphicsV1 = [halo, trace, junctions];
   };
 
-  const polishBriefingSvg = scene => {
-    const roots = ['relayGameplayIntroFinalV3','relayGameplayIntroFinalV5'];
-    roots.forEach(id => {
-      const root = document.getElementById(id);
-      const svg = root?.querySelector('.map-briefing-map');
+  const polishBriefingSvg = () => {
+    ['relayGameplayIntroFinalV3','relayGameplayIntroFinalV5'].forEach(id => {
+      const svg = document.getElementById(id)?.querySelector('.map-briefing-map');
       if (!svg) return;
       svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
       svg.style.overflow = 'visible';
@@ -257,15 +214,7 @@
     hideLegacyWeaponVisual(scene);
     nudgeInitialSpawn(scene);
     enhanceMissionRoute(scene);
-    polishBriefingSvg(scene);
-
-    scene.children.list.forEach(child => {
-      if (!child?.active || child.type !== 'Text') return;
-      if (String(child.text || '').trim().toUpperCase() !== 'OLD QUARTER') return;
-      if (child.__relayOldQuarterShifted) return;
-      child.__relayOldQuarterShifted = true;
-      child.y += 14;
-    });
+    polishBriefingSvg();
   };
 
   const ready = event => {
