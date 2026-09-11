@@ -21,7 +21,24 @@ const state = await read('src/state.js');
 assert.equal(packageJson.scripts['test:final-stability']?.length > 0, true, 'final stability suite must remain wired');
 assert.equal(packageJson.scripts['test:release-ux-gameplay-polish'], 'node tests/release-ux-gameplay-polish.mjs', 'release UX/gameplay polish suite must remain wired');
 assert.equal(packageJson.scripts['test:runner-runtime-stability'], 'node tests/runner-runtime-stability-contract.mjs', 'RunnerScene runtime stability suite must remain wired');
-assert.equal(packageJson.scripts['test:release-hardening'], 'node tests/release-hardening-contract.mjs && npm run test:release-ux-gameplay-polish && npm run test:final-stability && npm run test:runner-runtime-stability && npm run build', 'release hardening command must include all release gates');
+const hardening = packageJson.scripts['test:release-hardening'];
+assert.equal(typeof hardening, 'string', 'release hardening command must remain wired');
+for (const gate of [
+  'node tests/release-hardening-contract.mjs',
+  'npm run test:release-ux-gameplay-polish',
+  'npm run test:gameplay-variety-safe-layer',
+  'npm run test:gameplay-route-choice-v2',
+  'npm run test:gameplay-route-score-bonus',
+  'npm run test:route-choice-branching-v1',
+  'npm run test:route-choice-duplicate-event-guard',
+  'npm run test:route-mutation-choice-coordination',
+  'npm run test:final-stability',
+  'npm run test:runner-runtime-stability',
+  'npm run build'
+]) {
+  assert.equal(hardening.includes(gate), true, `release hardening gate must remain wired: ${gate}`);
+}
+assert.equal(hardening.endsWith('npm run build'), true, 'release hardening must finish with the production build');
 assert.equal(packageJson.engines?.node, '24.x', 'release Node runtime must stay pinned to Vercel runtime');
 assert.match(config, /export default defineConfig/);
 assert.doesNotMatch(config, /patch(DeathReason|InitialSpawnShield|CheckpointCollectibles|RespawnTransientState|SeasonalProgression|SpecialEventCreditReward)/);
@@ -48,7 +65,7 @@ assert.match(mobileOwner, /window\.addEventListener\('relay:runner-scene-ready'/
 assert.match(mobileOwner, /detachLegacyRunnerInput/);
 assert.match(mobileOwner, /events\.off\('mobile-action'/);
 assert.match(mobileOwner, /events\.off\('mobile-move'/);
-assert.match(mobileOwner, /window\.__relayMobileInputSingleOwnerV9/);
+assert.match(mobileOwner, /window\.\__relayMobileInputSingleOwnerV9/);
 
 // RunnerScene stability behavior is source-owned by the runtime authority.
 assert.match(core, /SPAWN_SHIELD_MS/);
