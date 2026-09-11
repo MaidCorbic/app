@@ -1,283 +1,141 @@
 /* =========================================================
-   RELAY RUNNER — AAA CYBER TACTICAL SPLASH
-   CSS ONLY
+   RELAY RUNNER — CINEMATIC TACTICAL SPLASH
+   Loading presentation only. Runtime logic stays in splash-loader-v2.js.
    ========================================================= */
 
 :root{
   --rr-bg:#010308;
   --rr-cyan:#00eaff;
-  --rr-cyan2:#75f7ff;
-  --rr-blue:#008cff;
+  --rr-cyan2:#8dfaff;
+  --rr-blue:#168cff;
   --rr-gold:#ffd23c;
   --rr-white:#f5fdff;
-  --rr-dim:rgba(210,245,255,.68);
+  --rr-dim:rgba(210,245,255,.72);
+  --rr-panel:rgba(1,8,16,.72);
 }
-
-
-/* =========================================================
-   CORE
-   ========================================================= */
 
 .relay-splash{
   position:fixed;
   inset:0;
-
   width:100vw!important;
   height:100vh!important;
   width:100dvw!important;
   height:100dvh!important;
-
   z-index:2147483647;
-
   display:grid;
   place-items:center;
-
   overflow:hidden;
   isolation:isolate;
-
   background:var(--rr-bg);
-
   opacity:1;
   visibility:visible;
-
-  transition:
-    opacity .75s cubic-bezier(.16,1,.3,1),
-    visibility .75s;
+  transition:opacity .75s cubic-bezier(.16,1,.3,1),visibility .75s;
 }
-
-
-/* =========================================================
-   CYBER ATMOSPHERE
-   ========================================================= */
 
 .relay-splash::before{
   content:"";
-
   position:absolute;
-  inset:-25%;
-
+  inset:-20%;
   z-index:1;
   pointer-events:none;
-
   background:
-
-    radial-gradient(
-      circle at 50% 48%,
-      rgba(0,234,255,.22) 0%,
-      rgba(0,140,255,.10) 22%,
-      transparent 48%
-    ),
-
-    radial-gradient(
-      circle at 8% 90%,
-      rgba(0,234,255,.12),
-      transparent 34%
-    ),
-
-    radial-gradient(
-      circle at 92% 10%,
-      rgba(0,140,255,.12),
-      transparent 32%
-    ),
-
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.2),
-      transparent 35%,
-      rgba(0,0,0,.78)
-    );
-
+    radial-gradient(circle at 50% 46%,rgba(0,234,255,.18),transparent 34%),
+    radial-gradient(circle at 7% 92%,rgba(0,234,255,.12),transparent 28%),
+    radial-gradient(circle at 94% 9%,rgba(22,140,255,.13),transparent 27%),
+    linear-gradient(180deg,rgba(0,0,0,.18),transparent 35%,rgba(0,0,0,.88));
   animation:rr-atmosphere 5s ease-in-out infinite alternate;
 }
 
-
-/* =========================================================
-   HUD / CRT OVERLAY
-   ========================================================= */
-
 .relay-splash::after{
   content:"";
-
   position:absolute;
   inset:0;
-
   z-index:5;
   pointer-events:none;
-
   background:
-
-    repeating-linear-gradient(
-      180deg,
-      rgba(255,255,255,.025) 0,
-      rgba(255,255,255,.025) 1px,
-      transparent 1px,
-      transparent 4px
-    ),
-
-    linear-gradient(
-      90deg,
-      rgba(0,0,0,.72),
-      transparent 18%,
-      transparent 82%,
-      rgba(0,0,0,.72)
-    ),
-
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.72),
-      transparent 20%,
-      transparent 68%,
-      rgba(0,0,0,.86)
-    );
-
-  opacity:.82;
-
+    repeating-linear-gradient(180deg,rgba(255,255,255,.022) 0 1px,transparent 1px 4px),
+    linear-gradient(90deg,rgba(0,0,0,.78),transparent 17%,transparent 83%,rgba(0,0,0,.78)),
+    linear-gradient(180deg,rgba(0,0,0,.64),transparent 20%,transparent 66%,rgba(0,0,0,.9));
+  opacity:.76;
   mix-blend-mode:screen;
 }
-
-
-/* =========================================================
-   IMAGE
-   ========================================================= */
 
 .relay-splash-art{
   position:absolute;
   inset:0;
-
   z-index:0;
-
   display:block!important;
-
   width:100vw!important;
   height:100vh!important;
-
   width:100dvw!important;
   height:100dvh!important;
-
   min-width:100%!important;
   min-height:100%!important;
-
   max-width:none!important;
   max-height:none!important;
-
   object-fit:cover!important;
   object-position:center!important;
-
   background:#010308;
-
-  filter:
-    saturate(.92)
-    contrast(1.16)
-    brightness(.72);
-
+  filter:saturate(.92) contrast(1.16) brightness(.7);
   transform:none!important;
   animation:none!important;
 }
 
-
 /* =========================================================
-   CORNER HUD FRAME
+   BRAND / CORNER HUD
    ========================================================= */
 
 .relay-splash-brand{
   position:absolute;
-
   z-index:8;
-
   left:max(24px,env(safe-area-inset-left));
   top:max(24px,env(safe-area-inset-top));
-
   display:flex;
   align-items:center;
-
   gap:12px;
-
   color:var(--rr-white);
-
-  font:
-    900 11px/1
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    monospace;
-
+  font:900 11px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
   letter-spacing:.24em;
-
   text-transform:uppercase;
-
-  text-shadow:
-    0 2px 12px #000,
-    0 0 16px rgba(0,234,255,.45);
+  text-shadow:0 2px 12px #000,0 0 16px rgba(0,234,255,.45);
 }
 
-
-/* =========================================================
-   LOGO CORE
-   ========================================================= */
+.relay-splash-brand::after{
+  content:"BOOT SEQUENCE";
+  margin-left:4px;
+  padding:5px 8px;
+  border:1px solid rgba(0,234,255,.2);
+  background:rgba(0,20,32,.42);
+  color:rgba(141,250,255,.52);
+  font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.16em;
+}
 
 .relay-splash-brand b{
   position:relative;
-
   display:grid;
   place-items:center;
-
   width:38px;
   height:38px;
-
   color:var(--rr-cyan2);
-
-  border:1px solid rgba(0,234,255,.9);
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(0,234,255,.18),
-      rgba(0,20,35,.86)
-    );
-
-  box-shadow:
-    0 0 7px rgba(0,234,255,.85),
-    0 0 22px rgba(0,234,255,.42),
-    0 0 48px rgba(0,140,255,.2),
-    inset 0 0 18px rgba(0,234,255,.18);
-
+  border:1px solid rgba(0,234,255,.92);
+  background:linear-gradient(135deg,rgba(0,234,255,.16),rgba(0,20,35,.92));
+  box-shadow:0 0 8px rgba(0,234,255,.82),0 0 24px rgba(0,234,255,.4),0 0 55px rgba(0,140,255,.18),inset 0 0 18px rgba(0,234,255,.16);
   font-size:14px;
-
   animation:rr-logo 2s ease-in-out infinite;
 }
-
-
-/* corner brackets */
 
 .relay-splash-brand b::before,
 .relay-splash-brand b::after{
   content:"";
-
   position:absolute;
-
   width:8px;
   height:8px;
-
   border-color:var(--rr-cyan);
   border-style:solid;
 }
-
-.relay-splash-brand b::before{
-  left:-3px;
-  top:-3px;
-
-  border-width:2px 0 0 2px;
-}
-
-.relay-splash-brand b::after{
-  right:-3px;
-  bottom:-3px;
-
-  border-width:0 2px 2px 0;
-}
-
+.relay-splash-brand b::before{left:-3px;top:-3px;border-width:2px 0 0 2px}
+.relay-splash-brand b::after{right:-3px;bottom:-3px;border-width:0 2px 2px 0}
 
 /* =========================================================
    LOADING HUD
@@ -285,114 +143,75 @@
 
 .relay-splash-ui{
   position:absolute;
-
   z-index:9;
-
   left:max(24px,env(safe-area-inset-left));
   right:max(24px,env(safe-area-inset-right));
-
-  bottom:max(
-    30px,
-    calc(env(safe-area-inset-bottom) + 22px)
-  );
-
-  width:min(
-    860px,
-    calc(100vw - 48px)
-  );
-
+  bottom:max(30px,calc(env(safe-area-inset-bottom) + 22px));
+  width:min(860px,calc(100vw - 48px));
   margin:auto;
-
   display:grid;
-
-  gap:11px;
+  gap:10px;
 }
 
-
-/* =========================================================
-   STATUS
-   ========================================================= */
+.relay-splash-ui::before{
+  content:"SYSTEM LINK  //  SECURE CHANNEL";
+  justify-self:start;
+  padding:4px 8px;
+  border-left:2px solid var(--rr-cyan);
+  background:linear-gradient(90deg,rgba(0,234,255,.09),transparent);
+  color:rgba(141,250,255,.55);
+  font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.18em;
+}
 
 .relay-splash-meta{
-  display:flex;
-
-  align-items:center;
-  justify-content:space-between;
-
-  gap:20px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  gap:18px;
+  padding:10px 12px 9px;
+  border:1px solid rgba(117,247,255,.17);
+  border-bottom-color:rgba(117,247,255,.32);
+  background:linear-gradient(180deg,rgba(1,10,18,.78),rgba(1,7,13,.46));
+  box-shadow:0 10px 34px rgba(0,0,0,.36),inset 0 0 22px rgba(0,234,255,.035);
 }
-
 
 .relay-splash-status{
+  min-width:0;
   display:flex;
   align-items:center;
-
+  gap:0;
   color:var(--rr-dim);
-
-  font:
-    800 10px/1.2
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace;
-
+  font:800 10px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;
   letter-spacing:.2em;
-
   text-transform:uppercase;
-
-  text-shadow:
-    0 2px 10px #000,
-    0 0 14px rgba(0,234,255,.2);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-shadow:0 2px 10px #000,0 0 14px rgba(0,234,255,.2);
 }
-
-
-/* LIVE DOT */
 
 .relay-splash-status::before{
   content:"";
-
+  flex:0 0 6px;
   width:6px;
   height:6px;
-
   margin-right:10px;
-
   border-radius:50%;
-
   background:var(--rr-cyan);
-
-  box-shadow:
-    0 0 6px var(--rr-cyan),
-    0 0 14px var(--rr-cyan),
-    0 0 28px rgba(0,234,255,.75);
-
+  box-shadow:0 0 6px var(--rr-cyan),0 0 14px var(--rr-cyan),0 0 28px rgba(0,234,255,.72);
   animation:rr-live .85s ease-in-out infinite;
 }
 
-
-/* =========================================================
-   PERCENT
-   ========================================================= */
-
 .relay-splash-percent{
+  min-width:58px;
   color:var(--rr-cyan2);
-
-  font:
-    900 15px/1
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace;
-
+  font:900 18px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
   font-variant-numeric:tabular-nums;
-
-  letter-spacing:.1em;
-
-  text-shadow:
-    0 0 8px rgba(0,234,255,1),
-    0 0 20px rgba(0,234,255,.75),
-    0 0 38px rgba(0,140,255,.35);
+  letter-spacing:.06em;
+  text-align:right;
+  text-shadow:0 0 8px rgba(0,234,255,1),0 0 20px rgba(0,234,255,.7),0 0 38px rgba(0,140,255,.32);
 }
-
 
 /* =========================================================
    PROGRESS TRACK
@@ -400,330 +219,132 @@
 
 .relay-splash-track{
   position:relative;
-
-  height:8px;
-
-  border:1px solid rgba(117,247,255,.42);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,20,32,.96),
-      rgba(0,4,10,.98)
-    );
-
-  box-shadow:
-    0 0 8px rgba(0,234,255,.35),
-    0 0 30px rgba(0,140,255,.18),
-    inset 0 0 16px #000;
-
+  height:10px;
+  border:1px solid rgba(117,247,255,.48);
+  background:linear-gradient(180deg,rgba(0,20,32,.98),rgba(0,4,10,.99));
+  box-shadow:0 0 8px rgba(0,234,255,.34),0 0 30px rgba(0,140,255,.16),inset 0 0 16px #000;
   overflow:hidden;
 }
 
-
-/* technical inner line */
-
 .relay-splash-track::before{
   content:"";
-
   position:absolute;
   inset:1px;
-
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(117,247,255,.08) 0 1px,
-      transparent 1px 18px
-    );
-
+  background:repeating-linear-gradient(90deg,rgba(141,250,255,.1) 0 1px,transparent 1px 24px);
   pointer-events:none;
 }
 
-
-/* =========================================================
-   ENERGY BAR
-   ========================================================= */
+.relay-splash-track::after{
+  content:"";
+  position:absolute;
+  inset:-1px 0;
+  background:linear-gradient(90deg,transparent 0 4%,rgba(0,234,255,.1) 4.5%,transparent 5% 95%,rgba(255,210,60,.2) 95.5%,transparent 96%);
+  pointer-events:none;
+}
 
 .relay-splash-progress{
   position:relative;
-
   display:block;
-
   width:0;
   height:100%;
-
-  background:
-    linear-gradient(
-      90deg,
-      #006d8a 0%,
-      var(--rr-blue) 28%,
-      var(--rr-cyan) 65%,
-      var(--rr-cyan2) 88%,
-      #ffffff 100%
-    );
-
-  box-shadow:
-    0 0 7px rgba(0,234,255,1),
-    0 0 18px rgba(0,234,255,.85),
-    0 0 42px rgba(0,140,255,.55);
-
-  transition:
-    width .16s cubic-bezier(.16,1,.3,1);
+  background:linear-gradient(90deg,#006d8a 0%,var(--rr-blue) 24%,var(--rr-cyan) 62%,var(--rr-cyan2) 86%,#fff 100%);
+  box-shadow:0 0 8px rgba(0,234,255,1),0 0 18px rgba(0,234,255,.82),0 0 42px rgba(0,140,255,.48);
+  transition:width .16s cubic-bezier(.16,1,.3,1);
 }
 
-
-/* =========================================================
-   ENERGY SCANNER
-   ========================================================= */
+.relay-splash-progress::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),transparent 42%,rgba(0,0,0,.12));
+  opacity:.55;
+}
 
 .relay-splash-progress::after{
   content:"";
-
   position:absolute;
-
-  top:-4px;
-  bottom:-4px;
-
-  left:-150px;
-
-  width:150px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255,255,255,.15),
-      rgba(255,255,255,1),
-      rgba(117,247,255,.75),
-      transparent
-    );
-
-  filter:
-    blur(.3px)
-    drop-shadow(
-      0 0 10px rgba(255,255,255,1)
-    );
-
-  animation:
-    rr-energy-scan 1s linear infinite;
+  top:-5px;
+  bottom:-5px;
+  left:-140px;
+  width:140px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),#fff,rgba(117,247,255,.72),transparent);
+  filter:blur(.25px) drop-shadow(0 0 10px rgba(255,255,255,1));
+  animation:rr-energy-scan 1s linear infinite;
 }
 
-
-/* =========================================================
-   FINISHED / READY STATE
-   ========================================================= */
-
-.relay-splash[aria-busy="false"]
-.relay-splash-progress{
-
-  background:
-    linear-gradient(
-      90deg,
-      var(--rr-cyan),
-      var(--rr-cyan2),
-      var(--rr-gold),
-      #ffffff
-    );
-
-  box-shadow:
-    0 0 10px rgba(0,234,255,1),
-    0 0 25px rgba(255,210,60,.85),
-    0 0 55px rgba(255,210,60,.35);
+.relay-splash[aria-busy="false"] .relay-splash-progress{
+  background:linear-gradient(90deg,var(--rr-cyan),var(--rr-cyan2),var(--rr-gold),#fff);
+  box-shadow:0 0 10px rgba(0,234,255,1),0 0 25px rgba(255,210,60,.82),0 0 55px rgba(255,210,60,.3);
 }
 
-
 /* =========================================================
-   MOBILE
+   RESPONSIVE
    ========================================================= */
 
 @media(max-width:700px){
-
-  .relay-splash-art{
-    object-position:center!important;
-
-    filter:
-      saturate(.94)
-      contrast(1.13)
-      brightness(.7);
-  }
-
   .relay-splash-brand{
-    left:max(16px,env(safe-area-inset-left));
-    top:max(16px,env(safe-area-inset-top));
-
-    gap:9px;
-
-    font-size:9px;
-
-    letter-spacing:.15em;
-  }
-
-  .relay-splash-brand b{
-    width:29px;
-    height:29px;
-
-    font-size:11px;
-  }
-
-  .relay-splash-ui{
     left:max(14px,env(safe-area-inset-left));
-    right:max(14px,env(safe-area-inset-right));
-
-    bottom:max(
-      18px,
-      calc(env(safe-area-inset-bottom) + 13px)
-    );
-
-    width:calc(100vw - 28px);
-
-    gap:9px;
-  }
-
-  .relay-splash-status{
+    top:max(14px,env(safe-area-inset-top));
+    gap:8px;
     font-size:8px;
-    letter-spacing:.14em;
+    letter-spacing:.13em;
   }
-
-  .relay-splash-percent{
-    font-size:12px;
-  }
-
-  .relay-splash-track{
-    height:6px;
-  }
-}
-
-
-/* =========================================================
-   PORTRAIT
-   ========================================================= */
-
-@media(
-  max-width:700px
-) and (
-  orientation:portrait
-){
-
-  .relay-splash-art{
-    object-fit:cover!important;
-    object-position:center!important;
-  }
-
+  .relay-splash-brand::after{display:none}
+  .relay-splash-brand b{width:29px;height:29px;font-size:11px}
   .relay-splash-ui{
-    width:calc(100vw - 24px);
+    left:max(10px,env(safe-area-inset-left));
+    right:max(10px,env(safe-area-inset-right));
+    bottom:max(16px,calc(env(safe-area-inset-bottom) + 10px));
+    width:calc(100vw - 20px);
+    gap:8px;
   }
+  .relay-splash-ui::before{font-size:6px;letter-spacing:.13em;padding:4px 6px}
+  .relay-splash-meta{gap:12px;padding:8px 9px 7px}
+  .relay-splash-status{font-size:7px;letter-spacing:.11em}
+  .relay-splash-status::before{width:5px;height:5px;flex-basis:5px;margin-right:7px}
+  .relay-splash-percent{min-width:46px;font-size:13px}
+  .relay-splash-track{height:7px}
 }
 
-
-/* =========================================================
-   LANDSCAPE / SHORT DISPLAY
-   ========================================================= */
-
-@media(
-  orientation:landscape
-) and (
-  max-height:520px
-){
-
-  .relay-splash-brand{
-    top:max(
-      10px,
-      calc(env(safe-area-inset-top) + 6px)
-    );
-  }
-
-  .relay-splash-ui{
-    bottom:max(
-      10px,
-      calc(env(safe-area-inset-bottom) + 7px)
-    );
-  }
+@media(max-width:700px) and (orientation:portrait){
+  .relay-splash-art{object-fit:cover!important;object-position:center!important}
+  .relay-splash-ui{width:calc(100vw - 20px)}
 }
 
-
-/* =========================================================
-   REDUCED MOTION
-   ========================================================= */
+@media(orientation:landscape) and (max-height:520px){
+  .relay-splash-brand{top:max(9px,calc(env(safe-area-inset-top) + 5px))}
+  .relay-splash-ui{bottom:max(8px,calc(env(safe-area-inset-bottom) + 6px));gap:6px}
+  .relay-splash-ui::before{display:none}
+  .relay-splash-meta{padding:7px 9px 6px}
+  .relay-splash-track{height:6px}
+}
 
 @media(prefers-reduced-motion:reduce){
-
   .relay-splash::before,
   .relay-splash-brand b,
   .relay-splash-status::before,
-  .relay-splash-progress::after{
-    animation:none!important;
-  }
-
+  .relay-splash-progress::after{animation:none!important}
   .relay-splash,
-  .relay-splash-progress{
-    transition:none!important;
-  }
+  .relay-splash-progress{transition:none!important}
 }
-
-
-/* =========================================================
-   ANIMATIONS
-   ========================================================= */
 
 @keyframes rr-atmosphere{
-
-  0%{
-    transform:scale(1);
-    opacity:.7;
-  }
-
-  50%{
-    opacity:1;
-  }
-
-  100%{
-    transform:scale(1.055);
-    opacity:.82;
-  }
+  0%{transform:scale(1);opacity:.7}
+  50%{opacity:1}
+  100%{transform:scale(1.045);opacity:.82}
 }
-
 
 @keyframes rr-logo{
-
-  0%,100%{
-    box-shadow:
-      0 0 7px rgba(0,234,255,.55),
-      0 0 22px rgba(0,234,255,.22),
-      0 0 42px rgba(0,140,255,.12),
-      inset 0 0 15px rgba(0,234,255,.1);
-  }
-
-  50%{
-    box-shadow:
-      0 0 12px rgba(0,234,255,1),
-      0 0 30px rgba(0,234,255,.55),
-      0 0 60px rgba(0,140,255,.25),
-      inset 0 0 22px rgba(0,234,255,.2);
-  }
+  0%,100%{box-shadow:0 0 7px rgba(0,234,255,.55),0 0 22px rgba(0,234,255,.22),0 0 42px rgba(0,140,255,.12),inset 0 0 15px rgba(0,234,255,.1)}
+  50%{box-shadow:0 0 12px rgba(0,234,255,1),0 0 30px rgba(0,234,255,.55),0 0 60px rgba(0,140,255,.25),inset 0 0 22px rgba(0,234,255,.2)}
 }
-
 
 @keyframes rr-live{
-
-  0%,100%{
-    opacity:.3;
-    transform:scale(.7);
-  }
-
-  50%{
-    opacity:1;
-    transform:scale(1.25);
-  }
+  0%,100%{opacity:.3;transform:scale(.7)}
+  50%{opacity:1;transform:scale(1.25)}
 }
 
-
 @keyframes rr-energy-scan{
-
-  from{
-    transform:translateX(0);
-  }
-
-  to{
-    transform:translateX(1050px);
-  }
-  }
+  from{transform:translateX(0)}
+  to{transform:translateX(1100px)}
+}
