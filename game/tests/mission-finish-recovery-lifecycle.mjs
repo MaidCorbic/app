@@ -9,6 +9,8 @@ assert.match(source, /clearTimeout\(timer\)/);
 assert.match(source, /MutationObserver/);
 assert.match(source, /attributeFilter: \['class'\]/);
 assert.match(source, /beforeunload/);
-assert.match(source, /Once the finish UI is visible/);
+assert.match(source, /finish\.classList\.remove\('hidden'\)/, 'recovery must reveal the finish UI');
+assert.match(source, /showRecoveredFinish\(scene\)/, 'recovery tick must invoke the finish handoff');
+assert.match(source, /relay:mission-complete/, 'recovered completion must emit the canonical mission-complete event');
 
 console.log('Mission finish recovery lifecycle contract: PASS');
