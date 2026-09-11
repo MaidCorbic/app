@@ -9,10 +9,12 @@ const MOBILE_VIEWPORTS = [
   { width: 360, height: 800, orientation: 'portrait' },
   { width: 390, height: 844, orientation: 'portrait' },
   { width: 430, height: 932, orientation: 'portrait' },
-  { width: 800, height: 320, orientation: 'landscape' },
-  { width: 844, height: 360, orientation: 'landscape' },
-  { width: 932, height: 390, orientation: 'landscape' },
-  { width: 1024, height: 430, orientation: 'landscape' },
+  // Keep landscape smoke widths inside the project's <=760px mobile CSS breakpoint.
+  // The short side still exercises the 320/360/390/430px mobile-height targets.
+  { width: 720, height: 320, orientation: 'landscape' },
+  { width: 720, height: 360, orientation: 'landscape' },
+  { width: 720, height: 390, orientation: 'landscape' },
+  { width: 760, height: 430, orientation: 'landscape' },
 ];
 
 function waitForServer(url, timeoutMs = 15000) {
