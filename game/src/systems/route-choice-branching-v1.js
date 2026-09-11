@@ -1,13 +1,39 @@
-// RUNNER RELAY — ROUTE CHOICE BRANCHING V1
-// Turns SAFE/HOT selection into a real mid-route branch using existing barriers.
+// RUNNER RELAY — ROUTE CHOICE BRANCHING V2
+// Mission-specific branch profiles using existing barrier geometry.
 // Additive only: no new mission, physics, input, or progression owner.
 
 import { RunnerScene } from '../scenes/RunnerScene.js';
 
 const states = new WeakMap();
-const ACTIVATION_PROGRESS = 0.50;
+const DEFAULT_ACTIVATION_PROGRESS = 0.5;
 const BRANCH_WINDOW_MS = 900;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, Number(value) || 0));
+
+// Barrier indices are based on each shipped mission's ordered obstacle list.
+// The two selected barriers form the route decision window: SAFE clears the
+// stable-line gate, HOT clears the alternate-line gate. A small mission-specific
+// activation point keeps the choice aligned with the physical obstacle segment.
+const BRANCH_PROFILES = Object.freeze({
+  'first-delivery': { safeIndex: 1, hotIndex: 2, activationProgress: 0.40, label: 'OLD QUARTER // MID-ROUTE SPLIT' },
+  'dead-drop': { safeIndex: 3, hotIndex: 4, activationProgress: 0.48, label: 'SALT DOCKS // LOW-HIGH SPLIT' },
+  blackout: { safeIndex: 3, hotIndex: 4, activationProgress: 0.46, label: 'GRID NINE // LIT-DARK SPLIT' },
+  pursuit: { safeIndex: 1, hotIndex: 2, activationProgress: 0.42, label: 'RAIL SPINE // ESCAPE-INTERCEPT SPLIT' },
+  'signal-storm': { safeIndex: 2, hotIndex: 3, activationProgress: 0.46, label: 'CROWN ARRAY // CLEAN-STORM SPLIT' },
+  'corporate-lockdown': { safeIndex: 2, hotIndex: 3, activationProgress: 0.45, label: 'HELIX TOWER // SECURITY SPLIT' },
+  'final-relay': { safeIndex: 2, hotIndex: 3, activationProgress: 0.48, label: 'APEX SPINE // FINAL SPLIT' }
+});
+
+function missionId(scene) {
+  const candidates = [
+    scene?.mission?.id,
+    scene?.sys?.settings?.data?.missionId,
+    scene?.sys?.settings?.data?.mission,
+    scene?.registry?.get?.('missionId'),
+    document?.documentElement?.dataset?.missionId,
+    document?.body?.dataset?.missionId
+  ];
+  return candidates.find(value => typeof value === 'string' && value.length > 0) || null;
+}
 
 function progressOf(scene) {
   const mission = scene?.mission;
@@ -20,25 +46,46 @@ function progressOf(scene) {
 
 function getBarriers(scene) {
   const children = scene?.barriers?.getChildren?.() || [];
-  return children.filter(item => item?.active).filter(item => item?.body || item?.enableBody).sort((a, b) => Number(a.x) - Number(b.x));
+  return children
+    .filter(item => item?.active)
+    .filter(item => item?.body || item?.enableBody)
+    .sort((a, b) => Number(a.x) - Number(b.x));
 }
 
 function pickBranch(scene) {
+  const id = missionId(scene);
+  const profile = BRANCH_PROFILES[id];
   const ordered = getBarriers(scene);
+  if (!ordered.length) return null;
+
+  if (profile) {
+    const left = ordered[profile.safeIndex];
+    const right = ordered[profile.hotIndex];
+    if (left && right && left !== right) return { left, right, profile, source: 'mission-profile' };
+  }
+
   if (ordered.length < 2) return null;
-  return { left: ordered[Math.max(0, Math.floor(ordered.length * 0.42))], right: ordered[Math.max(0, Math.floor(ordered.length * 0.64))] };
+  const left = ordered[Math.max(0, Math.floor(ordered.length * 0.42))];
+  const right = ordered[Math.max(0, Math.floor(ordered.length * 0.64))];
+  if (!left || !right || left === right) return null;
+  return { left, right, profile: profile || null, source: 'fallback' };
 }
 
 function setBarrierOpen(barrier, open) {
   if (!barrier?.active) return false;
   try {
-    if (open) { barrier.disableBody?.(true, true); return true; }
+    if (open) {
+      barrier.disableBody?.(true, true);
+      barrier.setData?.('relayRouteGate', 'open');
+      return true;
+    }
     if (!barrier.body) return false;
     barrier.enableBody?.(false, barrier.x, barrier.y, true, true);
     barrier.setImmovable?.(true);
+    barrier.setData?.('relayRouteGate', 'closed');
     return true;
   } catch (error) {
-    console.warn('[RouteChoiceBranchingV1] barrier state skipped', error);
+    console.warn('[RouteChoiceBranchingV2] barrier state skipped', error);
     return false;
   }
 }
@@ -52,24 +99,46 @@ function pulse(scene, barrier, color = 0x8df4ff) {
 }
 
 function applyBranch(scene, state) {
-  if (state.branchApplied || !['safe', 'hot'].includes(state.route) || progressOf(scene) < ACTIVATION_PROGRESS) return;
+  if (state.branchApplied || !['safe', 'hot'].includes(state.route)) return;
+  const profile = state.branch?.profile;
+  const activationProgress = Number(profile?.activationProgress) || DEFAULT_ACTIVATION_PROGRESS;
+  if (progressOf(scene) < activationProgress) return;
+
   const branch = state.branch || pickBranch(scene);
-  if (!branch?.left || !branch?.right || branch.left === branch.right) { state.branchApplied = true; return; }
+  if (!branch?.left || !branch?.right || branch.left === branch.right) {
+    state.branchApplied = true;
+    return;
+  }
   state.branch = branch;
   state.branchApplied = true;
+
+  const mission = missionId(scene) || 'unknown-mission';
+  const branchName = state.route === 'safe' ? 'stable' : 'alternate';
+  const color = state.route === 'safe' ? 0x8df4ff : 0xff6b6b;
+  const cue = state.route === 'safe'
+    ? `SAFE ROUTE // ${profile?.label || 'STABLE LINE OPEN'}`
+    : `HOT ROUTE // ${profile?.label || 'ALTERNATE LINE OPEN'}`;
+
   if (state.route === 'safe') {
     setBarrierOpen(branch.left, true);
     setBarrierOpen(branch.right, false);
-    pulse(scene, branch.left, 0x8df4ff);
-    scene.playerCue?.('SAFE ROUTE // STABLE LINE OPEN', '#8df4ff');
-    try { scene.game?.events?.emit?.('relay:route-branch-applied', { route: 'safe', branch: 'stable' }); } catch {}
+    pulse(scene, branch.left, color);
   } else {
     setBarrierOpen(branch.right, true);
     setBarrierOpen(branch.left, false);
-    pulse(scene, branch.right, 0xff6b6b);
-    scene.playerCue?.('HOT ROUTE // ALTERNATE LINE OPEN', '#ff6b6b');
-    try { scene.game?.events?.emit?.('relay:route-branch-applied', { route: 'hot', branch: 'alternate' }); } catch {}
+    pulse(scene, branch.right, color);
   }
+
+  scene.playerCue?.(cue, state.route === 'safe' ? '#8df4ff' : '#ff6b6b');
+  try {
+    scene.game?.events?.emit?.('relay:route-branch-applied', {
+      route: state.route,
+      branch: branchName,
+      mission,
+      profile: profile?.label || null,
+      source: branch.source
+    });
+  } catch {}
 }
 
 function cleanup(scene, state) {
@@ -83,9 +152,16 @@ function cleanup(scene, state) {
 
 function init(scene) {
   if (!scene || states.has(scene)) return;
-  const state = { route: null, branch: null, branchApplied: false, choiceHandler: null, raf: 0 };
+  const state = {
+    route: null,
+    branch: null,
+    branchApplied: false,
+    choiceHandler: null,
+    raf: 0
+  };
   states.set(scene, state);
   scene.__relayRouteChoiceBranchingV1 = state;
+
   const events = scene.game?.events;
   if (events) {
     state.choiceHandler = payload => {
@@ -94,16 +170,24 @@ function init(scene) {
       state.route = route;
       state.branchApplied = false;
       state.branch = state.branch || pickBranch(scene);
+      const profile = state.branch?.profile;
+      if (profile?.label) {
+        try { scene.playerCue?.(`ROUTE LOCK // ${profile.label}`, '#b9f5ff'); } catch {}
+      }
     };
     events.on('relay:variety-route', state.choiceHandler);
   }
+
   const loop = () => {
     if (!states.has(scene)) return;
     try {
-      if (scene.finished || scene.sys?.isActive?.() === false) { cleanup(scene, state); return; }
+      if (scene.finished || scene.sys?.isActive?.() === false) {
+        cleanup(scene, state);
+        return;
+      }
       applyBranch(scene, state);
     } catch (error) {
-      console.warn('[RouteChoiceBranchingV1] update skipped', error);
+      console.warn('[RouteChoiceBranchingV2] update skipped', error);
     }
     state.raf = requestAnimationFrame(loop);
   };
@@ -115,7 +199,7 @@ if (!RunnerScene.prototype.__relayRouteChoiceBranchingV1) {
   const originalCreate = RunnerScene.prototype.create;
   RunnerScene.prototype.create = function routeChoiceBranchingCreate(...args) {
     const result = originalCreate.apply(this, args);
-    try { init(this); } catch (error) { console.warn('[RouteChoiceBranchingV1] create failed', error); }
+    try { init(this); } catch (error) { console.warn('[RouteChoiceBranchingV2] create failed', error); }
     return result;
   };
   RunnerScene.prototype.__relayRouteChoiceBranchingV1 = true;
