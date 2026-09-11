@@ -10,7 +10,8 @@ const owner = await read('src/systems/mobile-input-single-owner-v1.js');
 
 assert.equal((index.match(/src\/systems\/mobile-input-single-owner-v1\.js/g) || []).length, 1, 'single-owner module must be loaded exactly once');
 assert.ok(index.indexOf('src="/src/main.js"') < index.indexOf('src="/src/systems/mobile-input-single-owner-v1.js"'), 'single-owner must load after main boot');
-assert.match(main, /data-mobile-action/);
+assert.doesNotMatch(main, /data-mobile-action/, 'main boot must not own mobile action markup');
+assert.match(owner, /data-mobile-action/, 'single-owner module must own mobile action markup contract');
 assert.match(owner, /MOBILE INPUT SINGLE OWNER V9/);
 assert.match(owner, /cloneNode\(true\)/);
 assert.match(owner, /replaceWith\(clone\)/);
