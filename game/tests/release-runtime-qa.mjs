@@ -227,9 +227,8 @@ async function runMobileViewport(browser, viewport) {
       briefingLock: document.querySelector('#play')?.classList.contains('relay-map-briefing-lock'),
       mobileControls: Boolean(document.querySelector('.mobile-controls')),
       mobilePause: Boolean(document.querySelector('#mobilePauseButton')),
-      errors,
-    })).catch(() => ({ errors }));
-    throw new Error(`${error.message}; diagnostics=${JSON.stringify(diagnostics)}`);
+    })).catch(() => ({}));
+    throw new Error(`${error.message}; diagnostics=${JSON.stringify(diagnostics)}; browserErrors=${errors.join(' | ')}`);
   } finally {
     await context.close();
   }
