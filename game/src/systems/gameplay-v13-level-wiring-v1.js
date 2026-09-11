@@ -1,6 +1,7 @@
 import { missions } from '../missions.js';
 import { SYSTEMS } from './gameplay-expansion-v13-34-systems.js';
 
+// P1 release-gate ownership: keep this wiring module explicitly versioned in the PR tree.
 const LEVELS = Object.freeze([
   { id:'first-delivery', active:['LOS','WITNESS','OWNER','INVENTORY','CROWD','VERIFY','RELATIONS','OBJECTIVES'] },
   { id:'dead-drop', active:['LOS','DISGUISE','WITNESS','OWNER','ACCESS','SPOOF','INVENTORY','MOD','TEMP','CROWD','TERRITORY','FAVORS','VERIFY','FALSEINFO','CONTRACTS','NEGOTIATE','OBJECTIVES'] },
