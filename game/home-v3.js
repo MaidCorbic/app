@@ -50,60 +50,53 @@
     return clickExisting('[data-relay-info="faq"]');
   };
 
-const openUpdate = () => {
-  console.log('[RelayRunner] UPDATE CLICKED');
+  const openUpdate = () => {
+    console.log('[RelayRunner] UPDATE CLICKED');
 
-  const panel = document.getElementById('relayInfoPanel');
-  const eyebrow = document.getElementById('relayInfoEyebrow');
-  const heading = document.getElementById('relayInfoHeading');
-  const content = document.getElementById('relayInfoContent');
+    const panel = document.getElementById('relayInfoPanel');
+    const eyebrow = document.getElementById('relayInfoEyebrow');
+    const heading = document.getElementById('relayInfoHeading');
+    const content = document.getElementById('relayInfoContent');
 
-  try {
-    if (typeof window.relayOpenInfo === 'function') {
-      window.relayOpenInfo('update');
+    try {
+      if (typeof window.relayOpenInfo === 'function') {
+        window.relayOpenInfo('update');
+      }
+    } catch (error) {
+      console.error('[RelayRunner] UPDATE open failed:', error);
     }
-  } catch (error) {
-    console.error('[RelayRunner] UPDATE open failed:', error);
-  }
 
-  if (!(panel instanceof HTMLElement)) {
-    console.error('[RelayRunner] relayInfoPanel NOT FOUND');
-    return false;
-  }
+    if (!(panel instanceof HTMLElement)) {
+      console.error('[RelayRunner] relayInfoPanel NOT FOUND');
+      return false;
+    }
 
-  panel.classList.remove('hidden');
-  panel.classList.add('relay-update-mode');
+    panel.classList.remove('hidden');
+    panel.classList.add('relay-update-mode');
 
-  if (
-    eyebrow instanceof HTMLElement &&
-    !eyebrow.textContent.trim()
-  ) {
-    eyebrow.textContent = 'LATEST UPDATE';
-  }
+    if (eyebrow instanceof HTMLElement) {
+      eyebrow.textContent = 'LATEST UPDATE';
+    }
 
-  if (
-    heading instanceof HTMLElement &&
-    !heading.textContent.trim()
-  ) {
-    heading.textContent = 'UPDATE';
-  }
+    if (heading instanceof HTMLElement) {
+      heading.textContent = 'UPDATE';
+    }
 
-  if (
-    content instanceof HTMLElement &&
-    !content.innerHTML.trim()
-  ) {
-    content.innerHTML = `
-      <p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT</p>
-      <div class="relay-update-list">
-        <div class="relay-update-item">LIVE UPDATE CHANNEL ONLINE</div>
-        <div class="relay-update-item">LATEST PATCH DATA AVAILABLE</div>
-        <div class="relay-update-item">GAMEPLAY SYSTEMS SYNCHRONIZED</div>
-      </div>
-    `;
-  }
+    if (content instanceof HTMLElement) {
+      content.innerHTML = `
+        <p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT · PATCH 01.08 · DEPLOYMENT READY</p>
+        <div class="relay-update-list">
+          <div class="relay-update-item">SYSTEM STATUS // ONLINE</div>
+          <div class="relay-update-item">GAMEPLAY CORE // SYNCHRONIZED</div>
+          <div class="relay-update-item">NEW // IMPROVED ROOFTOP MOVEMENT</div>
+          <div class="relay-update-item">NEW // REFINED MOBILE CONTROLS</div>
+          <div class="relay-update-item">PATCH // HUD STABILITY IMPROVEMENTS</div>
+        </div>
+      `;
+    }
 
-  return true;
-};
+    return true;
+  };
 
   const setHomeState = () => {
     const visible = introVisible();
@@ -120,15 +113,15 @@ const openUpdate = () => {
   };
 
   const buildHome = () => {
-   const intro = $('intro');
-if (!intro || intro.dataset.homeV4Built === '1') return;
+    const intro = $('intro');
+    if (!intro || intro.dataset.homeV4Built === '1') return;
 
-const sourceStart = $('start');
-const sourceContinue = $('continue');
+    const sourceStart = $('start');
+    const sourceContinue = $('continue');
 
-intro.dataset.homeV4Built = '1';
-intro.classList.add('home-v3');
-intro.replaceChildren();
+    intro.dataset.homeV4Built = '1';
+    intro.classList.add('home-v3');
+    intro.replaceChildren();
 
     const scene = document.createElement('div');
     scene.className = 'home-v4-scene';
@@ -141,7 +134,7 @@ intro.replaceChildren();
       <div class="home-v4-scan"></div>
       <div class="home-v4-signal"></div>
       <div class="home-v4-float-line"></div>
-      `;
+    `;
 
     const shell = document.createElement('div');
     shell.className = 'home-v4-shell';
@@ -203,11 +196,10 @@ intro.replaceChildren();
               <div class="home-v4-stat"><small>MISSION XP</small><b>+120</b></div>
               <div class="home-v4-stat"><small>BEST RATING</small><b>A</b></div>
             </div>
-                   </article>
+          </article>
 
           <div class="home-v4-badge">LIVE RELAY CHANNEL // 01</div>
         </section>
-    
       </main>
 
       <footer class="home-v4-bottom">
@@ -219,7 +211,6 @@ intro.replaceChildren();
         <div class="home-v4-bottom-meta">RELAY NETWORK <b>ONLINE</b> · V1.1.0</div>
       </footer>
 
-      <!-- Compatibility anchor retained for systems that still query #exitTitle. -->
       <button id="exitTitle" type="button" aria-hidden="true" tabindex="-1" class="home-v4-compat-anchor">EXIT</button>
     `;
 
@@ -238,17 +229,17 @@ intro.replaceChildren();
       openOptions();
     });
 
- const start = shell.querySelector('#start');
+    const start = shell.querySelector('#start');
 
-bindOnce(start, 'click', event => {
-  event.preventDefault();
+    bindOnce(start, 'click', event => {
+      event.preventDefault();
 
-  if (!(sourceStart instanceof HTMLElement)) return;
+      if (!(sourceStart instanceof HTMLElement)) return;
 
-  try {
-    HTMLElement.prototype.click.call(sourceStart);
-  } catch {}
-});
+      try {
+        HTMLElement.prototype.click.call(sourceStart);
+      } catch {}
+    });
 
     const continueButton = shell.querySelector('#continue');
 

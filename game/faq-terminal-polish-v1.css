@@ -1,0 +1,238 @@
+/* Relay Runner — FAQ terminal polish. Presentation only. */
+
+#relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid){
+  width:min(980px,94vw)!important;
+  height:min(760px,90dvh)!important;
+  border-color:rgba(56,189,248,.34)!important;
+  background:
+    radial-gradient(circle at 88% 8%,rgba(255,208,110,.065),transparent 28%),
+    radial-gradient(circle at 7% 92%,rgba(56,189,248,.045),transparent 32%),
+    linear-gradient(145deg,rgba(7,17,25,.99),rgba(2,6,10,.995))!important;
+  box-shadow:0 34px 110px rgba(0,0,0,.8),0 0 56px rgba(56,189,248,.07),inset 0 1px 0 rgba(255,255,255,.055)!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid)::after{
+  content:"FAQ // FIELD MANUAL";
+  position:absolute;
+  left:24px;
+  bottom:12px;
+  z-index:3;
+  color:rgba(255,208,110,.48);
+  font:800 6px/1 "DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.18em;
+  pointer-events:none;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-head{
+  padding:18px 58px 14px 22px!important;
+  border-bottom-color:rgba(255,255,255,.065)!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-kicker{
+  margin:0 0 6px!important;
+  color:#38bdf8!important;
+  font-size:7px!important;
+  line-height:1.2!important;
+  letter-spacing:.16em!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-title{
+  margin:0!important;
+  color:#f2f7fa!important;
+  font-size:clamp(24px,3.4vw,38px)!important;
+  line-height:.94!important;
+  letter-spacing:-.04em!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-subtitle{
+  max-width:620px!important;
+  margin:7px 0 0!important;
+  font-size:8px!important;
+  line-height:1.45!important;
+  letter-spacing:.03em!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-status{
+  margin-top:0!important;
+  padding:7px 9px!important;
+  font-size:6.5px!important;
+  border-color:rgba(255,208,110,.22)!important;
+  color:#ffe7a6!important;
+  background:rgba(255,208,110,.035)!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-status i{
+  width:5px!important;
+  height:5px!important;
+  background:#ffd06e!important;
+  box-shadow:0 0 14px rgba(255,208,110,.78)!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-body{
+  padding:14px 18px 28px!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-grid{
+  counter-reset:faq-row;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-item{
+  counter-increment:faq-row;
+  position:relative!important;
+  border:1px solid rgba(255,255,255,.065)!important;
+  border-radius:8px!important;
+  background:
+    linear-gradient(145deg,rgba(9,20,28,.96),rgba(3,9,14,.99))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 8px 22px rgba(0,0,0,.18)!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-item::before{
+  content:counter(faq-row,decimal-leading-zero);
+  position:absolute;
+  left:10px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:2;
+  width:20px;
+  height:20px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,208,110,.34);
+  border-radius:5px;
+  color:#ffd06e;
+  background:rgba(255,208,110,.035);
+  box-shadow:0 0 12px rgba(255,208,110,.035);
+  font:900 7px/1 "DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.04em;
+  pointer-events:none;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-question{
+  min-height:46px!important;
+  padding:10px 12px 10px 38px!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:8px!important;
+  color:#dbeaf1!important;
+  font:900 7.5px/1.2 "DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace!important;
+  letter-spacing:.08em!important;
+  text-transform:uppercase;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-question span{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-question b{
+  width:20px!important;
+  height:20px!important;
+  display:grid!important;
+  place-items:center!important;
+  border:1px solid rgba(56,189,248,.28)!important;
+  border-radius:5px!important;
+  color:#9be7ff!important;
+  background:rgba(56,189,248,.035)!important;
+  font:900 11px/1 Arial,sans-serif!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-question:hover,
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-question:focus-visible{
+  color:#f2fbff!important;
+  background:linear-gradient(90deg,rgba(56,189,248,.045),rgba(255,208,110,.025))!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-item.is-open{
+  border-color:rgba(56,189,248,.42)!important;
+  box-shadow:
+    inset 2px 0 0 rgba(56,189,248,.78),
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 12px 28px rgba(0,0,0,.25),
+    0 0 22px rgba(56,189,248,.05)!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-item.is-open::before{
+  border-color:rgba(255,208,110,.68)!important;
+  color:#ffe7a6!important;
+  background:rgba(255,208,110,.06)!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-item.is-open .relay-faq-question b{
+  border-color:rgba(255,208,110,.56)!important;
+  color:#ffe7a6!important;
+  background:rgba(255,208,110,.05)!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-answer{
+  margin:0!important;
+  padding:0 14px 13px 38px!important;
+  color:#8399a6!important;
+  font:600 7.5px/1.55 "DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace!important;
+  letter-spacing:.015em!important;
+}
+
+#relayInfoPanel.relay-cinematic-overlay .relay-faq-answer::before{
+  content:"INTEL // ";
+  color:rgba(56,189,248,.68);
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+@media(max-width:760px){
+  #relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid){
+    width:min(94vw,560px)!important;
+    height:min(88dvh,720px)!important;
+  }
+
+  #relayInfoPanel.relay-cinematic-overlay .relay-faq-grid{
+    grid-template-columns:1fr!important;
+    gap:7px!important;
+  }
+
+  #relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-head{
+    padding:16px 52px 12px 16px!important;
+  }
+
+  #relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-title{
+    font-size:28px!important;
+  }
+
+  #relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-subtitle{
+    font-size:7px!important;
+  }
+}
+
+@media(max-width:380px){
+  #relayInfoPanel.relay-cinematic-overlay .relay-cinematic-panel:has(.relay-faq-grid) .relay-cinematic-title{
+    font-size:25px!important;
+  }
+
+  #relayInfoPanel.relay-cinematic-overlay .relay-faq-question{
+    min-height:43px!important;
+    padding-left:35px!important;
+    font-size:7px!important;
+  }
+
+  #relayInfoPanel.relay-cinematic-overlay .relay-faq-item::before{
+    left:9px;
+    width:18px;
+    height:18px;
+    font-size:6.5px;
+  }
+
+  #relayInfoPanel.relay-cinematic-overlay .relay-faq-answer{
+    padding-left:35px!important;
+    font-size:7px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  #relayInfoPanel.relay-cinematic-overlay .relay-faq-item,
+  #relayInfoPanel.relay-cinematic-overlay .relay-faq-question,
+  #relayInfoPanel.relay-cinematic-overlay .relay-faq-question b{
+    transition:none!important;
+  }
+}
