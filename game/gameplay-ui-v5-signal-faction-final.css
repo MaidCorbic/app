@@ -3,84 +3,148 @@
  */
 
 /* =========================================================
-   SIGNALS HUD — CLEAR, CENTERED, SIGNAL-COLLECTION PROGRESS
+   SIGNALS HUD — COMPACT / FUNCTIONAL / MOBILE FRIENDLY
    ========================================================= */
 
 #play .hud-progress.hud-run {
-  min-width:146px !important;
-  min-height:58px !important;
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  justify-content:center !important;
-  text-align:center !important;
-  gap:5px !important;
-  padding:8px 12px !important;
   box-sizing:border-box !important;
+  width:clamp(112px,13vw,148px) !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  padding:7px 9px 8px !important;
+  display:grid !important;
+  grid-template-columns:auto 1fr !important;
+  grid-template-rows:auto 5px !important;
+  column-gap:8px !important;
+  row-gap:5px !important;
+  align-items:center !important;
+  text-align:left !important;
+  border-radius:9px !important;
 }
 
 #play .hud-progress.hud-run > span#signalCount {
+  grid-column:1 !important;
+  grid-row:1 !important;
   display:block !important;
-  width:100% !important;
+  width:auto !important;
   margin:0 !important;
-  text-align:center !important;
-  font-size:clamp(21px,2.1vw,28px) !important;
-  font-weight:950 !important;
+  text-align:left !important;
+  font-size:17px !important;
   line-height:1 !important;
-  letter-spacing:.09em !important;
+  font-weight:950 !important;
+  letter-spacing:.08em !important;
   font-variant-numeric:tabular-nums !important;
 }
 
 #play .hud-progress.hud-run > small {
+  grid-column:2 !important;
+  grid-row:1 !important;
   display:block !important;
-  width:100% !important;
+  width:auto !important;
   margin:0 !important;
-  text-align:center !important;
-  font-size:11px !important;
+  text-align:left !important;
+  font-size:8px !important;
   line-height:1 !important;
   font-weight:900 !important;
-  letter-spacing:.2em !important;
+  letter-spacing:.16em !important;
+  white-space:nowrap !important;
+  opacity:.72 !important;
 }
 
-#play .hud-progress.hud-run > div {
-  width:min(170px,100%) !important;
-  height:7px !important;
-  margin:3px auto 0 !important;
+#play .hud-progress.hud-run > div:not(.hud-vital) {
+  grid-column:1 / -1 !important;
+  grid-row:2 !important;
+  width:100% !important;
+  height:5px !important;
+  margin:0 !important;
   overflow:hidden !important;
+  border-radius:999px !important;
 }
 
-#play .hud-progress.hud-run > div > i#progress {
+#play .hud-progress.hud-run > div:not(.hud-vital) > i#progress {
   display:block !important;
-  width:0 !important;
   max-width:100% !important;
   height:100% !important;
+  margin:0 !important;
+  border-radius:inherit !important;
   transform:none !important;
   transition:width 220ms cubic-bezier(.22,.61,.36,1) !important;
 }
 
+/* Energy may be hidden by the gameplay runtime; when enabled it gets its own
+   compact row without affecting Signals layout. */
+#play .hud-progress.hud-run > .hud-vital.energy {
+  grid-column:1 / -1 !important;
+  grid-row:3 !important;
+  width:100% !important;
+  margin:1px 0 0 !important;
+}
+
+#play .hud-progress.hud-run > .hud-vital.energy[hidden] {
+  display:none !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy > span {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:8px !important;
+  margin:0 0 3px !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy small {
+  font-size:7px !important;
+  line-height:1 !important;
+  letter-spacing:.14em !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy b {
+  font-size:8px !important;
+  line-height:1 !important;
+  font-variant-numeric:tabular-nums !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy > div {
+  width:100% !important;
+  height:4px !important;
+  margin:0 !important;
+  overflow:hidden !important;
+  border-radius:999px !important;
+}
+
+#play .hud-progress.hud-run .hud-vital.energy #energyBar {
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  border-radius:inherit !important;
+  transform:none !important;
+  transition:width 180ms ease !important;
+}
+
 @media (max-width:760px){
   #play .hud-progress.hud-run {
-    min-width:118px !important;
-    min-height:55px !important;
-    gap:4px !important;
-    padding:7px 9px !important;
+    width:112px !important;
+    padding:6px 8px 7px !important;
+    grid-template-rows:auto 4px !important;
+    column-gap:7px !important;
+    row-gap:4px !important;
+    border-radius:8px !important;
   }
 
-  #play .hud-progress.hud-run > span#signalCount {
-    font-size:21px !important;
-    letter-spacing:.1em !important;
+  #play .hud-progress.hud-run > span#signalCount { font-size:15px !important; }
+  #play .hud-progress.hud-run > small { font-size:7px !important; letter-spacing:.13em !important; }
+  #play .hud-progress.hud-run > div:not(.hud-vital) { height:4px !important; }
+  #play .hud-progress.hud-run .hud-vital.energy b { font-size:7px !important; }
+}
+
+@media (max-width:390px){
+  #play .hud-progress.hud-run {
+    width:104px !important;
+    padding:5px 7px 6px !important;
   }
 
-  #play .hud-progress.hud-run > small {
-    font-size:10px !important;
-    letter-spacing:.17em !important;
-  }
-
-  #play .hud-progress.hud-run > div {
-    width:102px !important;
-    height:6px !important;
-    margin-top:2px !important;
-  }
+  #play .hud-progress.hud-run > span#signalCount { font-size:14px !important; }
+  #play .hud-progress.hud-run > small { font-size:6px !important; }
 }
 
 /* =========================================================
@@ -100,9 +164,7 @@
   display:none !important;
 }
 
-#play .relay-faction-dialogue::after {
-  display:none !important;
-}
+#play .relay-faction-dialogue::after { display:none !important; }
 
 #play .relay-faction-dialogue .relay-faction-footer {
   border-top:0 !important;
@@ -132,33 +194,11 @@
     border-radius:6px !important;
   }
 
-  #play .relay-faction-dialogue .relay-faction-kicker {
-    margin-bottom:3px !important;
-    font-size:8px !important;
-  }
-
-  #play .relay-faction-dialogue .relay-faction-name {
-    margin-bottom:5px !important;
-    font-size:9px !important;
-  }
-
-  #play .relay-faction-dialogue .relay-faction-text {
-    max-width:50ch !important;
-    min-height:0 !important;
-    font-size:13px !important;
-    line-height:1.3 !important;
-  }
-
-  #play .relay-faction-dialogue .relay-faction-footer {
-    gap:7px !important;
-  }
-
-  #play .relay-faction-dialogue button {
-    min-width:92px !important;
-    min-height:32px !important;
-    padding:6px 10px !important;
-    font-size:8px !important;
-  }
+  #play .relay-faction-dialogue .relay-faction-kicker { margin-bottom:3px !important; font-size:8px !important; }
+  #play .relay-faction-dialogue .relay-faction-name { margin-bottom:5px !important; font-size:9px !important; }
+  #play .relay-faction-dialogue .relay-faction-text { max-width:50ch !important; min-height:0 !important; font-size:13px !important; line-height:1.3 !important; }
+  #play .relay-faction-dialogue .relay-faction-footer { gap:7px !important; }
+  #play .relay-faction-dialogue button { min-width:92px !important; min-height:32px !important; padding:6px 10px !important; font-size:8px !important; }
 }
 
 @media (max-width:760px){
@@ -170,35 +210,11 @@
     border-radius:6px !important;
   }
 
-  #play .relay-faction-dialogue .relay-faction-kicker {
-    margin-bottom:3px !important;
-    font-size:8px !important;
-    letter-spacing:.12em !important;
-  }
-
-  #play .relay-faction-dialogue .relay-faction-name {
-    margin-bottom:4px !important;
-    font-size:8px !important;
-  }
-
-  #play .relay-faction-dialogue .relay-faction-text {
-    min-height:0 !important;
-    max-width:none !important;
-    font-size:12px !important;
-    line-height:1.3 !important;
-  }
-
-  #play .relay-faction-dialogue .relay-faction-footer {
-    gap:5px !important;
-    margin-top:4px !important;
-    padding-top:1px !important;
-  }
-
-  #play .relay-faction-dialogue button {
-    min-height:32px !important;
-    padding:6px 9px !important;
-    font-size:8px !important;
-  }
+  #play .relay-faction-dialogue .relay-faction-kicker { margin-bottom:3px !important; font-size:8px !important; letter-spacing:.12em !important; }
+  #play .relay-faction-dialogue .relay-faction-name { margin-bottom:4px !important; font-size:8px !important; }
+  #play .relay-faction-dialogue .relay-faction-text { min-height:0 !important; max-width:none !important; font-size:12px !important; line-height:1.3 !important; }
+  #play .relay-faction-dialogue .relay-faction-footer { gap:5px !important; margin-top:4px !important; padding-top:1px !important; }
+  #play .relay-faction-dialogue button { min-height:32px !important; padding:6px 9px !important; font-size:8px !important; }
 }
 
 @media (max-width:390px){
