@@ -21,19 +21,11 @@ export const RESPONSE_PROFILES = {
     detail: 'Your last delivery left the district on alert.',
     event: 'SECURITY RESPONSE',
   },
-  NETWORKED: {
-    label: 'CITY LINKED',
-    accent: '#c8b5ff',
-    line: 'RELAY RESPONSE PROPAGATED',
-    detail: 'The network remembers your last intervention.',
-    event: 'NETWORK SURGE',
-  },
 };
 
 const safeNumber = value => Number.isFinite(Number(value)) ? Number(value) : 0;
 
-export function classifyResponse({ packageCondition = 100, networkLinked = false, collisions = 0, alarms = 0 } = {}) {
-  if (networkLinked) return 'NETWORKED';
+export function classifyResponse({ packageCondition = 100, collisions = 0, alarms = 0 } = {}) {
   if (safeNumber(packageCondition) < 70 || safeNumber(collisions) >= 4 || safeNumber(alarms) >= 3) return 'DAMAGED';
   return 'CLEAN';
 }
@@ -170,7 +162,6 @@ function applyGameplayResponse(scene, record) {
 
   scene.__cityResponseApplied = true;
   scene.__cityResponseActive = record.response;
-  scene.__cityResponseVisuals = [];
 
   const response = record.response;
   const profile = RESPONSE_PROFILES[response];
@@ -181,16 +172,11 @@ function applyGameplayResponse(scene, record) {
     spawnRelayPulse(scene, 0x8df4ff, 12, 2);
     spawnRelayBars(scene, 0x8df4ff);
     scene.events?.emit?.('feedback', 'signal');
-  } else if (response === 'DAMAGED') {
+  } else {
     pulseOverlay(scene, 0xff6a4e, 900, .1);
     spawnRelayPulse(scene, 0xff9d6e, 16, 3);
     spawnRelayBars(scene, 0xff9d6e);
     scene.events?.emit?.('feedback', 'warning');
-  } else {
-    pulseOverlay(scene, 0xc8b5ff, 1000, .09);
-    spawnRelayPulse(scene, 0xc8b5ff, 18, 4);
-    spawnRelayBars(scene, 0xc8b5ff);
-    scene.events?.emit?.('feedback', 'signal');
   }
 
   window.setTimeout(() => {
@@ -219,11 +205,9 @@ function handleMissionComplete(event) {
   if (!scene || !mission?.id || !district || scene.__cityResponseRecorded) return;
 
   scene.__cityResponseRecorded = true;
-  const networkLinked = Boolean(scene.__signalNetworkStable || event.detail?.networkLinked);
   const packageCondition = getPackageCondition(scene);
   const response = classifyResponse({
     packageCondition,
-    networkLinked,
     collisions: safeNumber(scene.collisions),
     alarms: safeNumber(scene.alarms),
   });
@@ -281,9 +265,5 @@ function tick() {
 if (typeof window !== 'undefined' && !window.__relayCityResponseV1) {
   window.__relayCityResponseV1 = true;
   window.addEventListener('relay:mission-complete', handleMissionComplete, { passive: true });
-  window.addEventListener('relay:signal-network-complete', () => {
-    const scene = window.__relayRunnerScene;
-    if (scene) scene.__signalNetworkStable = true;
-  }, { passive: true });
   window.setInterval(tick, 300);
 }

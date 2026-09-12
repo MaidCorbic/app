@@ -4,7 +4,7 @@ import { SYSTEMS } from './gameplay-expansion-v13-34-systems.js';
 const LEVELS = Object.freeze([
   { id:'first-delivery', active:['LOS','WITNESS','OWNER','INVENTORY','CROWD','VERIFY','RELATIONS','OBJECTIVES'] },
   { id:'dead-drop', active:['LOS','DISGUISE','WITNESS','OWNER','ACCESS','SPOOF','INVENTORY','MOD','TEMP','CROWD','TERRITORY','FAVORS','VERIFY','FALSEINFO','CONTRACTS','NEGOTIATE','OBJECTIVES'] },
-  { id:'blackout', active:['LOS','DISGUISE','WITNESS','OWNER','ACCESS','POWER','BLACKOUT','CAMERA','SPOOF','INVENTORY','MOD','TEMP','CROWD','PANIC','LOCKDOWN','TERRITORY','TOLL','PATROLS','NPCSKILL','FATIGUE','INJURY','RELATIONS','FAVORS','VERIFY','FALSEINFO','CONTRACTS','NEGOTIATE','MISSIONGRAPH','OWNERSHIP','OBJECTIVES'] },
+  { id:'blackout', active:['LOS','DISGUISE','WITNESS','OWNER','ACCESS','POWER','BLACKOUT','CAMERA','SPOOF','INVENTORY','MOD','TEMP','CROWD','PANIC','LOCKDOWN','TERRITORY','TOLL','PATROLS','NPCSKILL','FATIGUE','INJURY','RELATIONS','FAVORS','VERIFY','FALSEINFO','CONTRACTS','NEGOTIATE','OBJECTIVES'] },
   { id:'pursuit', active:['LOS','DISGUISE','WITNESS','OWNER','ACCESS','POWER','BLACKOUT','CAMERA','SPOOF','INVENTORY','MOD','TEMP','CROWD','PANIC','LOCKDOWN','TERRITORY','TOLL','PATROLS','NPCSKILL','FATIGUE','INJURY','RELATIONS','FAVORS','VERIFY','FALSEINFO','CONTRACTS','NEGOTIATE','BETRAYAL','MISSIONGRAPH','OWNERSHIP','OBJECTIVES'] },
   { id:'signal-storm', active:['LOS','DISGUISE','WITNESS','OWNER','ACCESS','POWER','BLACKOUT','CAMERA','SPOOF','INVENTORY','MOD','TEMP','CROWD','PANIC','LOCKDOWN','TERRITORY','TOLL','PATROLS','NPCSKILL','FATIGUE','INJURY','RELATIONS','FAVORS','VERIFY','FALSEINFO','MARKET','SUPPLY','PRODUCTION','CONTRACTS','NEGOTIATE','BETRAYAL','MISSIONGRAPH','OWNERSHIP','OBJECTIVES'] },
   { id:'corporate-lockdown', active:['LOS','DISGUISE','WITNESS','OWNER','ACCESS','POWER','BLACKOUT','CAMERA','SPOOF','INVENTORY','MOD','TEMP','CROWD','PANIC','LOCKDOWN','TERRITORY','TOLL','PATROLS','NPCSKILL','FATIGUE','INJURY','RELATIONS','FAVORS','VERIFY','FALSEINFO','MARKET','SUPPLY','PRODUCTION','CONTRACTS','NEGOTIATE','BETRAYAL','MISSIONGRAPH','OWNERSHIP','OBJECTIVES'] },
@@ -77,7 +77,7 @@ export function installGameplayV13LevelWiring(RunnerScene) {
     scene.__gameplaySystemState={level:level.id,active:[...state.active],last:null,systems:[]};
     installVisibleStatus(scene,state);
     const on=(event,fn)=>{scene.game?.events?.on?.(event,fn);state.listeners.push(()=>scene.game?.events?.off?.(event,fn));};
-    ['feedback','dash-start','dash-end','slide-jump','breakable-destroyed','game-over','complete','energy','ammo','signal-network','signal-network-node','signal-network-complete','relay:gameplay:v11','relay:gameplay:v12','relay:gameplay:deep'].forEach(event=>on(event,detail=>react(scene,state,event,detail)));
+    ['feedback','dash-start','dash-end','slide-jump','breakable-destroyed','game-over','complete','energy','ammo','relay:gameplay:v11','relay:gameplay:v12','relay:gameplay:deep'].forEach(event=>on(event,detail=>react(scene,state,event,detail)));
     scene.events?.once?.('shutdown',()=>{state.listeners.forEach(off=>off());clearTimeout(state.ui?.hide);state.ui?.ui?.destroy?.();scene.__gameplayV13LevelWiring=null;scene.__gameplaySystemState=null;});
     return result;
   };

@@ -5,12 +5,11 @@ assert.equal(classifyResponse({ packageCondition: 100, collisions: 0, alarms: 0 
 assert.equal(classifyResponse({ packageCondition: 69, collisions: 0, alarms: 0 }), 'DAMAGED');
 assert.equal(classifyResponse({ packageCondition: 100, collisions: 4, alarms: 0 }), 'DAMAGED');
 assert.equal(classifyResponse({ packageCondition: 100, collisions: 0, alarms: 3 }), 'DAMAGED');
-assert.equal(classifyResponse({ packageCondition: 10, networkLinked: true, collisions: 8, alarms: 8 }), 'NETWORKED');
 
 const record = buildDistrictRecord({
   missionId: 'corporate-lockdown',
   district: 'Cityspine',
-  response: 'NETWORKED',
+  response: 'CLEAN',
   signals: 8,
   packageCondition: 96,
   score: 1250,
@@ -18,12 +17,14 @@ const record = buildDistrictRecord({
 
 assert.equal(record.missionId, 'corporate-lockdown');
 assert.equal(record.district, 'Cityspine');
-assert.equal(record.response, 'NETWORKED');
+assert.equal(record.response, 'CLEAN');
 assert.equal(record.signals, 8);
 assert.equal(record.packageCondition, 96);
 assert.equal(record.score, 1250);
 assert.ok(record.updatedAt > 0);
-assert.ok(RESPONSE_PROFILES.NETWORKED);
+assert.ok(RESPONSE_PROFILES.CLEAN);
+assert.ok(RESPONSE_PROFILES.DAMAGED);
+assert.equal(RESPONSE_PROFILES.NETWORKED, undefined);
 assert.equal(loadDistrictRecord(''), null);
 
 console.log('City Response tests passed.');
