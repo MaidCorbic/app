@@ -1,3 +1,4 @@
+
 import { enemyIntel } from '../enemy-intel.js';
 import {
   getFactionForEnemyType,
@@ -103,14 +104,17 @@ const FALLBACK_DIALOGUE = Object.freeze({
     ['security', 'Visual confirmed.'],
     ['guard', 'Stop the courier.'],
   ],
+
   FERAL_THREATS: [
     ['dino', 'Something is entering the lane.'],
     ['chicken', 'It should not be here.'],
   ],
+
   SKY_RAIDERS: [
     ['invader', 'Target acquired.'],
     ['invader', 'Keep the courier inside the kill zone.'],
   ],
+
   GRID_GHOSTS: [
     ['alien-ground', 'Relay signal detected.'],
     ['storm-boss', 'The network is listening.'],
@@ -118,18 +122,26 @@ const FALLBACK_DIALOGUE = Object.freeze({
 });
 
 function enemyKeyFromObject(object) {
-  const key = object?.getData?.('route')?.type || object?.texture?.key;
-  return Object.prototype.hasOwnProperty.call(enemyIntel, key)
+  const key =
+    object?.getData?.('route')?.type ||
+    object?.texture?.key;
+
+  return Object.prototype.hasOwnProperty.call(
+    enemyIntel,
+    key,
+  )
     ? key
     : null;
 }
 
 function speakerName(enemyType) {
-  return enemyIntel[enemyType]?.name || String(enemyType).toUpperCase();
+  return enemyIntel[enemyType]?.name ||
+    String(enemyType || 'UNKNOWN').toUpperCase();
 }
 
 function getNearbyEnemies(scene) {
   const player = scene?.player;
+
   if (!player?.active) return [];
 
   const objects = scene.children?.list || [];
@@ -142,11 +154,17 @@ function getNearbyEnemies(scene) {
     const enemyType = enemyKeyFromObject(object);
     if (!enemyType) continue;
 
-    if (BOSS_TYPES.has(enemyType) && object.getData?.('defeated')) {
+    if (
+      BOSS_TYPES.has(enemyType) &&
+      object.getData?.('defeated')
+    ) {
       continue;
     }
 
-    if (!Number.isFinite(object.x) || !Number.isFinite(object.y)) {
+    if (
+      !Number.isFinite(object.x) ||
+      !Number.isFinite(object.y)
+    ) {
       continue;
     }
 
@@ -157,197 +175,718 @@ function getNearbyEnemies(scene) {
       object.y,
     );
 
-    if (distance > DIALOGUE_TRIGGER_DISTANCE) continue;
+    if (
+      !Number.isFinite(distance) ||
+      distance > DIALOGUE_TRIGGER_DISTANCE
+    ) {
+      continue;
+    }
 
-    const id = object.getData?.('factionDialogueId');
-    const stableId = id || `${enemyType}:${Math.round(object.x)}:${Math.round(object.y)}`;
+    const explicitId =
+      object.getData?.('factionDialogueId');
+
+    const stableId =
+      explicitId ||
+      `${enemyType}:${Math.round(object.x)}:${Math.round(object.y)}`;
 
     if (seen.has(stableId)) continue;
+
     seen.add(stableId);
 
     nearby.push({
       object,
       enemyType,
-      factionId: getFactionIdForEnemyType(enemyType),
+      factionId:
+        getFactionIdForEnemyType(enemyType),
       distance,
     });
   }
 
-  nearby.sort((a, b) => a.distance - b.distance);
+  nearby.sort(
+    (a, b) => a.distance - b.distance,
+  );
 
   return nearby;
 }
 
-function getDialogueLines(scene, primary, nearby) {
+function getDialogueLines(
+  scene,
+  primary,
+  nearby,
+) {
   const missionId = scene?.mission?.id;
+
   const factionId =
     primary?.factionId ||
-    getFactionIdForEnemyType(primary?.enemyType);
+    getFactionIdForEnemyType(
+      primary?.enemyType,
+    );
 
   const missionLines =
     MISSION_DIALOGUE[missionId]?.[factionId];
 
   if (missionLines?.length) {
-    return missionLines.map(([enemyType, text]) => ({
-      speakerType: enemyType,
-      speaker: speakerName(enemyType),
-      text,
-    }));
+    return missionLines.map(
+      ([enemyType, text]) => ({
+        speakerType: enemyType,
+        speaker: speakerName(enemyType),
+        text,
+      }),
+    );
   }
 
-  const fallback = FALLBACK_DIALOGUE[factionId];
+  const fallback =
+    FALLBACK_DIALOGUE[factionId];
 
   if (fallback?.length) {
     const availableTypes = [
       ...new Set(
         [
           primary?.enemyType,
-          ...nearby.map((entry) => entry.enemyType),
+          ...nearby.map(
+            (entry) => entry.enemyType,
+          ),
         ].filter(Boolean),
       ),
     ];
 
-    return fallback.map(([enemyType, text], index) => ({
-      speakerType:
-        availableTypes[index % Math.max(1, availableTypes.length)] ||
-        enemyType,
-      speaker:
-        speakerName(
-          availableTypes[index % Math.max(1, availableTypes.length)] ||
-            enemyType,
-        ),
-      text,
-    }));
+    return fallback.map(
+      ([enemyType, text], index) => {
+        const resolvedType =
+          availableTypes[
+            index %
+              Math.max(
+                1,
+                availableTypes.length,
+              )
+          ] || enemyType;
+
+        return {
+          speakerType: resolvedType,
+          speaker: speakerName(resolvedType),
+          text,
+        };
+      },
+    );
   }
 
-  const faction = getFactionForEnemyType(primary?.enemyType);
+  const faction =
+    getFactionForEnemyType(
+      primary?.enemyType,
+    );
 
   return [
     {
-      speakerType: primary?.enemyType,
-      speaker: speakerName(primary?.enemyType),
-      text: `${faction?.name || 'HOSTILE'} contact detected.`,
+      speakerType:
+        primary?.enemyType || 'unknown',
+      speaker:
+        speakerName(
+          primary?.enemyType,
+        ),
+      text:
+        `${faction?.name || 'HOSTILE'} contact detected.`,
     },
   ];
 }
 
 function installStyles() {
-  if (document.getElementById('relay-faction-dialogue-styles')) return;
+  if (
+    document.getElementById(
+      'relay-faction-dialogue-styles',
+    )
+  ) {
+    return;
+  }
 
-  const style = document.createElement('style');
-  style.id = 'relay-faction-dialogue-styles';
+  const style =
+    document.createElement('style');
+
+  style.id =
+    'relay-faction-dialogue-styles';
 
   style.textContent = `
     .relay-faction-dialogue{
       position:fixed;
       left:50%;
-      bottom:max(24px,env(safe-area-inset-bottom) + 14px);
-      transform:translateX(-50%);
+      bottom:max(
+        20px,
+        env(safe-area-inset-bottom) + 12px
+      );
+      transform:
+        translate3d(-50%,12px,0)
+        scale(.985);
+
       z-index:1190;
-      width:min(620px,calc(100vw - 28px));
+
+      width:min(
+        680px,
+        calc(100vw - 24px)
+      );
+
       box-sizing:border-box;
-      padding:16px 18px 14px;
-      border:1px solid rgba(141,244,255,.48);
+
+      padding:16px 17px 15px;
+
+      border:1px solid
+        rgba(141,244,255,.34);
+
       border-radius:12px;
-      background:linear-gradient(145deg,rgba(4,10,20,.985),rgba(10,24,39,.985));
+
+      background:
+        radial-gradient(
+          circle at 92% 0%,
+          rgba(57,185,255,.15),
+          transparent 34%
+        ),
+        radial-gradient(
+          circle at 0% 100%,
+          rgba(141,244,255,.04),
+          transparent 40%
+        ),
+        linear-gradient(
+          145deg,
+          rgba(2,8,16,.985),
+          rgba(7,22,36,.98)
+        );
+
       box-shadow:
-        inset 0 1px rgba(255,255,255,.06),
-        0 18px 50px rgba(0,0,0,.48),
-        0 0 28px rgba(25,200,245,.12);
-      color:#edf7ff;
-      font:500 14px/1.45 system-ui,sans-serif;
+        inset 0 1px 0
+          rgba(255,255,255,.065),
+        inset 0 -1px 0
+          rgba(57,185,255,.04),
+        0 18px 55px
+          rgba(0,0,0,.50),
+        0 0 30px
+          rgba(57,185,255,.10);
+
+      color:#f5fbff;
+
+      font:
+        500 14px/1.45
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
       pointer-events:auto;
+
+      opacity:0;
+
+      transition:
+        opacity 170ms ease,
+        transform 190ms
+          cubic-bezier(.22,.61,.36,1),
+        box-shadow 170ms ease;
     }
 
     .relay-faction-dialogue[hidden]{
-      display:none;
+      display:none !important;
+    }
+
+    .relay-faction-dialogue:not([hidden]){
+      opacity:1;
+      transform:
+        translate3d(-50%,0,0)
+        scale(1);
+    }
+
+    .relay-faction-dialogue::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-2;
+
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,.012) 0,
+          rgba(255,255,255,.012) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+
+      opacity:.45;
+      pointer-events:none;
+    }
+
+    .relay-faction-dialogue::after{
+      content:"";
+      position:absolute;
+
+      left:14px;
+      right:14px;
+      top:0;
+
+      height:1px;
+
+      background:
+        linear-gradient(
+          90deg,
+          transparent,
+          rgba(141,244,255,.3),
+          rgba(141,244,255,.9),
+          rgba(57,185,255,.5),
+          transparent
+        );
+
+      box-shadow:
+        0 0 10px
+          rgba(141,244,255,.25);
+
+      pointer-events:none;
     }
 
     .relay-faction-dialogue .relay-faction-kicker{
+      display:flex;
+      align-items:center;
+      gap:8px;
+
       margin:0 0 5px;
+
       color:#8df4ff;
-      font:800 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
-      letter-spacing:.16em;
+
+      font:
+        900 8px/1.2
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+      letter-spacing:.18em;
       text-transform:uppercase;
+
+      text-shadow:
+        0 0 10px
+          rgba(141,244,255,.28);
+    }
+
+    .relay-faction-dialogue
+    .relay-faction-kicker::before{
+      content:"◆";
+
+      color:#8df4ff;
+
+      font-size:7px;
+      line-height:1;
+
+      text-shadow:
+        0 0 8px
+          rgba(141,244,255,.65);
     }
 
     .relay-faction-dialogue .relay-faction-name{
-      margin:0 0 9px;
+      margin:0 0 8px;
+
+      max-width:100%;
+
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+
       color:#ffd06e;
-      font:800 11px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
-      letter-spacing:.12em;
+
+      font:
+        900 10px/1.25
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+      letter-spacing:.10em;
       text-transform:uppercase;
+
+      text-shadow:
+        0 0 12px
+          rgba(255,208,110,.12);
     }
 
     .relay-faction-dialogue .relay-faction-text{
-      min-height:44px;
       margin:0;
+
+      min-height:0;
+
+      max-width:62ch;
+
       color:#ffffff;
-      font-size:16px;
-      line-height:1.48;
+
+      font:
+        600 clamp(
+          14px,
+          1.8vw,
+          16px
+        )/1.48
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      letter-spacing:.002em;
+
+      overflow-wrap:anywhere;
+      text-wrap:pretty;
     }
 
-    .relay-faction-dialogue .relay-faction-footer{
+    .relay-faction-dialogue
+    .relay-faction-footer{
+      display:grid;
+
+      grid-template-columns:
+        1fr auto;
+
+      align-items:center;
+
+      gap:12px;
+
+      margin-top:12px;
+
+      padding-top:0;
+
+      border-top:0;
+    }
+
+    .relay-faction-dialogue
+    .relay-faction-meta{
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-top:12px;
-    }
+      gap:7px;
 
-    .relay-faction-dialogue .relay-faction-hint{
-      margin:0;
-      color:rgba(224,238,248,.68);
-      font:700 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
-      letter-spacing:.1em;
+      min-width:0;
+
+      margin-top:7px;
+
+      color:
+        rgba(220,238,248,.55);
+
+      font:
+        800 7px/1.2
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+      letter-spacing:.11em;
       text-transform:uppercase;
     }
 
-    .relay-faction-dialogue button{
-      min-width:112px;
-      min-height:40px;
-      padding:8px 13px;
-      border:1px solid rgba(141,244,255,.52);
-      border-radius:8px;
-      background:linear-gradient(145deg,#0d2940,#081521);
-      color:#e9fcff;
-      font:800 11px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;
-      letter-spacing:.1em;
-      cursor:pointer;
+    .relay-faction-dialogue
+    .relay-faction-hint{
+      margin:0;
+
+      color:
+        rgba(220,238,248,.66);
+
+      font:
+        800 8px/1.25
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+      letter-spacing:.085em;
+
+      text-transform:uppercase;
     }
 
-    .relay-faction-dialogue button:hover,
-    .relay-faction-dialogue button:focus-visible{
-      border-color:rgba(141,244,255,.85);
-      box-shadow:0 0 18px rgba(141,244,255,.16);
+    .relay-faction-dialogue
+    .relay-faction-progress{
+      position:relative;
+
+      width:56px;
+      height:3px;
+
+      overflow:hidden;
+
+      border-radius:999px;
+
+      background:
+        rgba(141,244,255,.10);
+    }
+
+    .relay-faction-dialogue
+    .relay-faction-progress > i{
+      display:block;
+
+      width:0;
+      height:100%;
+
+      border-radius:inherit;
+
+      background:
+        linear-gradient(
+          90deg,
+          #39b9ff,
+          #8df4ff
+        );
+
+      box-shadow:
+        0 0 10px
+          rgba(141,244,255,.35);
+
+      transition:
+        width 180ms ease;
+    }
+
+    .relay-faction-dialogue button{
+      position:relative;
+
+      display:inline-flex;
+
+      align-items:center;
+      justify-content:center;
+
+      min-width:108px;
+      min-height:38px;
+
+      padding:9px 15px;
+
+      overflow:hidden;
+
+      border:
+        1px solid
+        rgba(141,244,255,.44);
+
+      border-radius:8px;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(19,55,77,.98),
+          rgba(5,18,30,.98)
+        );
+
+      color:#efffff;
+
+      font:
+        900 9px/1
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+      letter-spacing:.13em;
+      text-transform:uppercase;
+
+      cursor:pointer;
+
+      box-shadow:
+        inset 0 1px 0
+          rgba(255,255,255,.07),
+        0 5px 16px
+          rgba(0,0,0,.24),
+        0 0 15px
+          rgba(57,185,255,.06);
+
+      transition:
+        transform 120ms ease,
+        border-color 120ms ease,
+        box-shadow 120ms ease,
+        background 120ms ease;
+    }
+
+    .relay-faction-dialogue
+    button::before{
+      content:"";
+
+      position:absolute;
+      inset:0;
+
+      background:
+        linear-gradient(
+          105deg,
+          transparent 20%,
+          rgba(255,255,255,.11) 50%,
+          transparent 80%
+        );
+
+      transform:translateX(-120%);
+
+      pointer-events:none;
+    }
+
+    .relay-faction-dialogue
+    button:hover,
+    .relay-faction-dialogue
+    button:focus-visible{
+      border-color:
+        rgba(141,244,255,.86);
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(28,77,104,.99),
+          rgba(7,27,43,.99)
+        );
+
+      box-shadow:
+        inset 0 1px 0
+          rgba(255,255,255,.10),
+        0 7px 20px
+          rgba(0,0,0,.30),
+        0 0 21px
+          rgba(57,185,255,.16);
+
+      transform:
+        translateY(-1px);
+
       outline:none;
+    }
+
+    .relay-faction-dialogue
+    button:hover::before,
+    .relay-faction-dialogue
+    button:focus-visible::before{
+      animation:
+        relay-faction-button-sweep
+        560ms ease-out forwards;
+    }
+
+    .relay-faction-dialogue
+    button:active{
+      transform:
+        translateY(0)
+        scale(.985);
+    }
+
+    .relay-faction-dialogue
+    button:disabled{
+      opacity:.55;
+      cursor:default;
+      transform:none;
+    }
+
+    .relay-faction-keyword{
+      color:#ffd06e;
+      font-weight:900;
+      text-shadow:
+        0 0 9px
+          rgba(255,208,110,.20);
+    }
+
+    @keyframes
+    relay-faction-button-sweep{
+      from{
+        transform:
+          translateX(-120%);
+      }
+
+      to{
+        transform:
+          translateX(120%);
+      }
     }
 
     @media(max-width:700px){
       .relay-faction-dialogue{
-        bottom:max(14px,env(safe-area-inset-bottom) + 8px);
-        padding:14px;
+        width:
+          calc(100vw - 14px);
+
+        bottom:
+          max(
+            10px,
+            env(safe-area-inset-bottom) + 7px
+          );
+
+        padding:
+          13px 12px 12px;
+
+        border-radius:10px;
       }
 
-      .relay-faction-dialogue .relay-faction-text{
-        font-size:15px;
-        min-height:50px;
+      .relay-faction-dialogue::after{
+        left:10px;
+        right:10px;
       }
 
-      .relay-faction-dialogue .relay-faction-footer{
-        align-items:stretch;
-        flex-direction:column;
-        gap:8px;
+      .relay-faction-dialogue
+      .relay-faction-name{
+        font-size:9px;
       }
 
-      .relay-faction-dialogue button{
+      .relay-faction-dialogue
+      .relay-faction-text{
+        font-size:13px;
+        line-height:1.42;
+      }
+
+      .relay-faction-dialogue
+      .relay-faction-footer{
+        grid-template-columns:1fr;
+        gap:7px;
+        margin-top:10px;
+      }
+
+      .relay-faction-dialogue
+      .relay-faction-hint{
+        order:2;
+        text-align:center;
+        font-size:7px;
+      }
+
+      .relay-faction-dialogue
+      button{
         width:100%;
+        min-height:40px;
+      }
+    }
+
+    @media(max-width:390px){
+      .relay-faction-dialogue{
+        width:
+          calc(100vw - 10px);
+
+        padding:
+          11px 10px 10px;
+      }
+
+      .relay-faction-dialogue
+      .relay-faction-text{
+        font-size:12px;
+      }
+
+      .relay-faction-dialogue
+      .relay-faction-kicker{
+        font-size:7px;
+      }
+
+      .relay-faction-dialogue
+      .relay-faction-name{
+        font-size:8px;
+        letter-spacing:.07em;
+      }
+
+      .relay-faction-dialogue
+      .relay-faction-hint{
+        font-size:6px;
+      }
+
+      .relay-faction-dialogue
+      button{
+        min-height:38px;
+        font-size:8px;
       }
     }
 
     @media(prefers-reduced-motion:reduce){
-      .relay-faction-dialogue{
-        scroll-behavior:auto;
+      .relay-faction-dialogue,
+      .relay-faction-dialogue button{
+        transition:none;
+      }
+
+      .relay-faction-dialogue
+      button::before{
+        animation:none !important;
       }
     }
   `;
@@ -356,26 +895,43 @@ function installStyles() {
 }
 
 function installKeyboard(scene) {
-  if (scene.__factionDialogueKeyboardInstalled) return;
+  if (
+    scene.__factionDialogueKeyboardInstalled
+  ) {
+    return;
+  }
 
-  scene.__factionDialogueKeyboardInstalled = true;
+  scene.__factionDialogueKeyboardInstalled =
+    true;
 
-  scene.__factionDialogueKeyHandler = (event) => {
-    if (!scene.__factionDialogueActive) return;
+  scene.__factionDialogueKeyHandler =
+    (event) => {
+      if (!scene.__factionDialogueActive) {
+        return;
+      }
 
-    if (event.key === 'Enter' || event.code === 'Enter') {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      scene.advanceFactionDialogue?.();
-      return;
-    }
+      if (
+        event.key === 'Enter' ||
+        event.code === 'Enter'
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
 
-    if (event.key === 'Escape' || event.code === 'Escape') {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      scene.skipFactionDialogue?.();
-    }
-  };
+        scene.advanceFactionDialogue?.();
+
+        return;
+      }
+
+      if (
+        event.key === 'Escape' ||
+        event.code === 'Escape'
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        scene.skipFactionDialogue?.();
+      }
+    };
 
   document.addEventListener(
     'keydown',
@@ -398,43 +954,158 @@ function removeKeyboard(scene) {
     true,
   );
 
-  scene.__factionDialogueKeyboardInstalled = false;
-  scene.__factionDialogueKeyHandler = null;
+  scene.__factionDialogueKeyboardInstalled =
+    false;
+
+  scene.__factionDialogueKeyHandler =
+    null;
+}
+
+function clearTypeTimer(scene) {
+  if (
+    scene?.__factionDialogueTypeTimer
+  ) {
+    window.clearInterval(
+      scene.__factionDialogueTypeTimer,
+    );
+
+    scene.__factionDialogueTypeTimer =
+      null;
+  }
 }
 
 function cleanupDialoguePanel(scene) {
-  const panel = scene?.__factionDialoguePanel;
+  const panel =
+    scene?.__factionDialoguePanel;
 
   if (!panel) return;
 
+  clearTypeTimer(scene);
+
   panel.remove();
-  scene.__factionDialoguePanel = null;
+
+  scene.__factionDialoguePanel =
+    null;
+}
+
+function updateProgress(scene) {
+  const panel =
+    scene.__factionDialoguePanel;
+
+  if (!panel) return;
+
+  const progress =
+    panel.querySelector(
+      '[data-faction-progress]',
+    );
+
+  const counter =
+    panel.querySelector(
+      '[data-faction-counter]',
+    );
+
+  const total =
+    scene.__factionDialogueLines?.length ||
+    0;
+
+  const index =
+    scene.__factionDialogueIndex || 0;
+
+  const percent =
+    total > 0
+      ? ((index + 1) / total) * 100
+      : 0;
+
+  if (progress) {
+    progress.style.width =
+      `${percent}%`;
+  }
+
+  if (counter) {
+    counter.textContent =
+      `${Math.min(index + 1, total)} / ${total}`;
+  }
 }
 
 function installPanel(scene) {
   installStyles();
-
   cleanupDialoguePanel(scene);
 
-  const panel = document.createElement('section');
+  const panel =
+    document.createElement('section');
 
-  panel.className = 'relay-faction-dialogue';
+  panel.className =
+    'relay-faction-dialogue';
+
   panel.hidden = true;
-  panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-modal', 'true');
-  panel.setAttribute('aria-live', 'polite');
+
+  panel.setAttribute(
+    'role',
+    'dialog',
+  );
+
+  panel.setAttribute(
+    'aria-modal',
+    'true',
+  );
+
+  panel.setAttribute(
+    'aria-live',
+    'polite',
+  );
+
+  panel.setAttribute(
+    'aria-label',
+    'Faction encounter',
+  );
 
   panel.innerHTML = `
-    <p class="relay-faction-kicker">FACTION ENCOUNTER</p>
-    <p class="relay-faction-name" data-faction-name></p>
-    <p class="relay-faction-text" data-faction-text></p>
+    <p class="relay-faction-kicker">
+      FACTION ENCOUNTER
+    </p>
+
+    <p
+      class="relay-faction-name"
+      data-faction-name
+    ></p>
+
+    <p
+      class="relay-faction-text"
+      data-faction-text
+    ></p>
+
+    <div
+      class="relay-faction-meta"
+      aria-hidden="true"
+    >
+      <span data-faction-counter>
+        1 / 1
+      </span>
+
+      <span
+        class="relay-faction-progress"
+      >
+        <i
+          data-faction-progress
+        ></i>
+      </span>
+    </div>
 
     <div class="relay-faction-footer">
-      <p class="relay-faction-hint" data-faction-hint>
-        ENTER · NEXT &nbsp;&nbsp; ESC · SKIP
+      <p
+        class="relay-faction-hint"
+        data-faction-hint
+      >
+        [ ENTER ] NEXT
+        &nbsp;&nbsp;
+        [ ESC ] SKIP
       </p>
 
-      <button type="button" data-faction-next>
+      <button
+        type="button"
+        data-faction-next
+        aria-label="Next faction dialogue"
+      >
         NEXT
       </button>
     </div>
@@ -442,94 +1113,142 @@ function installPanel(scene) {
 
   document.body.appendChild(panel);
 
-  scene.__factionDialoguePanel = panel;
+  scene.__factionDialoguePanel =
+    panel;
 
   panel
-    .querySelector('[data-faction-next]')
+    .querySelector(
+      '[data-faction-next]',
+    )
     ?.addEventListener(
       'click',
       (event) => {
         event.preventDefault();
+        event.stopPropagation();
+
         scene.advanceFactionDialogue?.();
       },
     );
 }
 
-function setPanelLine(scene, line, factionName, instant = false) {
-  const panel = scene.__factionDialoguePanel;
+function setPanelLine(
+  scene,
+  line,
+  factionName,
+  instant = false,
+) {
+  const panel =
+    scene.__factionDialoguePanel;
+
   if (!panel) return;
 
   const speakerElement =
-    panel.querySelector('[data-faction-name]');
+    panel.querySelector(
+      '[data-faction-name]',
+    );
 
   const textElement =
-    panel.querySelector('[data-faction-text]');
+    panel.querySelector(
+      '[data-faction-text]',
+    );
 
   const nextButton =
-    panel.querySelector('[data-faction-next]');
+    panel.querySelector(
+      '[data-faction-next]',
+    );
 
-  if (!speakerElement || !textElement) return;
+  if (
+    !speakerElement ||
+    !textElement
+  ) {
+    return;
+  }
 
   speakerElement.textContent =
     `${line.speaker} · ${factionName}`;
 
-  if (scene.__factionDialogueTypeTimer) {
-    window.clearInterval(
-      scene.__factionDialogueTypeTimer,
-    );
-    scene.__factionDialogueTypeTimer = null;
-  }
+  textElement.textContent = '';
 
-  scene.__factionDialogueTyping = !instant;
+  clearTypeTimer(scene);
 
   if (instant) {
-    textElement.textContent = line.text;
-    scene.__factionDialogueTyping = false;
-  } else {
-    textElement.textContent = '';
+    textElement.textContent =
+      line.text;
 
-    let index = 0;
+    scene.__factionDialogueTyping =
+      false;
 
-    scene.__factionDialogueTypeTimer =
-      window.setInterval(() => {
-        index += 1;
-        textElement.textContent =
-          line.text.slice(0, index);
+    updateProgress(scene);
 
-        if (index >= line.text.length) {
-          window.clearInterval(
-            scene.__factionDialogueTypeTimer,
-          );
-
-          scene.__factionDialogueTypeTimer = null;
-          scene.__factionDialogueTyping = false;
-        }
-      }, TYPE_SPEED_MS);
+    return;
   }
 
+  scene.__factionDialogueTyping =
+    true;
+
+  let index = 0;
+
+  const tick = () => {
+    index += 1;
+
+    textElement.textContent =
+      line.text.slice(
+        0,
+        index,
+      );
+
+    if (
+      index >= line.text.length
+    ) {
+      clearTypeTimer(scene);
+
+      scene.__factionDialogueTyping =
+        false;
+    }
+  };
+
+  scene.__factionDialogueTypeTimer =
+    window.setInterval(
+      tick,
+      TYPE_SPEED_MS,
+    );
+
+  updateProgress(scene);
+
   if (nextButton) {
-    nextButton.textContent = 'NEXT';
+    nextButton.textContent =
+      'NEXT';
   }
 }
 
-function showDialogue(scene, trigger) {
-  if (scene.__factionDialogueActive) return false;
+function showDialogue(
+  scene,
+  trigger,
+) {
+  if (
+    scene.__factionDialogueActive
+  ) {
+    return false;
+  }
 
   const nearby =
     getNearbyEnemies(scene);
 
-  if (!nearby.length) return false;
+  if (!nearby.length) {
+    return false;
+  }
 
   const primary =
-    trigger ||
-    nearby[0];
+    trigger || nearby[0];
 
   const faction =
     getFactionForEnemyType(
       primary.enemyType,
     );
 
-  if (!faction) return false;
+  if (!faction) {
+    return false;
+  }
 
   const lines =
     getDialogueLines(
@@ -541,15 +1260,25 @@ function showDialogue(scene, trigger) {
       ),
     );
 
-  if (!lines.length) return false;
+  if (!lines.length) {
+    return false;
+  }
 
-  scene.__factionDialogueActive = true;
-  scene.__factionDialogueLines = lines;
-  scene.__factionDialogueIndex = 0;
+  scene.__factionDialogueActive =
+    true;
+
+  scene.__factionDialogueLines =
+    lines;
+
+  scene.__factionDialogueIndex =
+    0;
+
   scene.__factionDialogueTriggerType =
     primary.enemyType;
+
   scene.__factionDialogueFactionId =
     faction.id;
+
   scene.__factionDialogueLast =
     scene.time?.now || 0;
 
@@ -557,18 +1286,21 @@ function showDialogue(scene, trigger) {
     scene.__factionDialogueSeen ||
     new Set();
 
-  scene.__factionDialogueSeen = seen;
+  scene.__factionDialogueSeen =
+    seen;
+
   seen.add(
     `${scene.mission?.id || 'unknown'}:${faction.id}`,
   );
 
-  // Freeze the Arcade physics world while the dialogue is shown.
-  // RunnerScene.update itself also stops below, so gameplay resumes
-  // exactly from the same position when the encounter ends.
   if (scene.physics?.world) {
     scene.__factionDialoguePhysicsPaused =
-      Boolean(scene.physics.world.isPaused);
-    scene.physics.world.isPaused = true;
+      Boolean(
+        scene.physics.world.isPaused,
+      );
+
+    scene.physics.world.isPaused =
+      true;
   }
 
   const line =
@@ -580,37 +1312,65 @@ function showDialogue(scene, trigger) {
     faction.name,
   );
 
-  if (scene.__factionDialoguePanel) {
-    scene.__factionDialoguePanel.hidden = false;
+  const panel =
+    scene.__factionDialoguePanel;
+
+  if (panel) {
+    panel.hidden = false;
+
+    panel.setAttribute(
+      'aria-label',
+      `Faction encounter: ${faction.name}`,
+    );
+
+    requestAnimationFrame(() => {
+      panel
+        .querySelector(
+          '[data-faction-next]',
+        )
+        ?.focus({
+          preventScroll: true,
+        });
+    });
   }
+
+  updateProgress(scene);
 
   return true;
 }
 
-function dismissDialogue(scene, skipAll = false) {
-  if (!scene.__factionDialogueActive) return;
-
-  if (scene.__factionDialogueTypeTimer) {
-    window.clearInterval(
-      scene.__factionDialogueTypeTimer,
-    );
-
-    scene.__factionDialogueTypeTimer = null;
+function dismissDialogue(
+  scene,
+  skipAll = false,
+) {
+  if (
+    !scene.__factionDialogueActive
+  ) {
+    return;
   }
 
-  scene.__factionDialogueTyping = false;
+  clearTypeTimer(scene);
+
+  scene.__factionDialogueTyping =
+    false;
 
   if (scene.__factionDialoguePanel) {
     scene.__factionDialoguePanel.hidden =
       true;
   }
 
-  scene.__factionDialogueActive = false;
-  scene.__factionDialogueLines = [];
-  scene.__factionDialogueIndex = 0;
+  scene.__factionDialogueActive =
+    false;
+
+  scene.__factionDialogueLines =
+    [];
+
+  scene.__factionDialogueIndex =
+    0;
 
   if (skipAll) {
-    scene.__factionDialogueSkipped = true;
+    scene.__factionDialogueSkipped =
+      true;
   }
 
   if (scene.physics?.world) {
@@ -620,18 +1380,24 @@ function dismissDialogue(scene, skipAll = false) {
       );
   }
 
-  scene.__factionDialoguePhysicsPaused = false;
+  scene.__factionDialoguePhysicsPaused =
+    false;
 }
 
-export function installEnemyDialogue(RunnerScene) {
+export function installEnemyDialogue(
+  RunnerScene,
+) {
   if (
     !RunnerScene?.prototype ||
-    RunnerScene.prototype.__factionEnemyDialogueV2
+    RunnerScene.prototype
+      .__factionEnemyDialogueV2
   ) {
     return;
   }
 
-  RunnerScene.prototype.__factionEnemyDialogueV2 = true;
+  RunnerScene.prototype
+    .__factionEnemyDialogueV2 =
+    true;
 
   const originalCreate =
     RunnerScene.prototype.create;
@@ -646,30 +1412,48 @@ export function installEnemyDialogue(RunnerScene) {
         args,
       );
 
-      this.__factionDialogueLast = 0;
-      this.__factionDialogueActive = false;
-      this.__factionDialogueLines = [];
-      this.__factionDialogueIndex = 0;
+      this.__factionDialogueLast =
+        0;
+
+      this.__factionDialogueActive =
+        false;
+
+      this.__factionDialogueLines =
+        [];
+
+      this.__factionDialogueIndex =
+        0;
+
       this.__factionDialogueSeen =
         new Set();
+
       this.__factionDialogueTyping =
         false;
+
       this.__factionDialogueSkipped =
         false;
+
       this.__factionDialogueTriggerType =
         null;
+
       this.__factionDialogueFactionId =
         null;
+
       this.__factionDialoguePhysicsPaused =
         false;
+
       this.__factionDialogueTypeTimer =
+        null;
+
+      this.__factionDialoguePanel =
         null;
 
       installPanel(this);
       installKeyboard(this);
     };
 
-  RunnerScene.prototype.advanceFactionDialogue =
+  RunnerScene.prototype
+    .advanceFactionDialogue =
     function () {
       if (
         !this.__factionDialogueActive ||
@@ -678,19 +1462,24 @@ export function installEnemyDialogue(RunnerScene) {
         return;
       }
 
-      if (this.__factionDialogueTyping) {
+      if (
+        this.__factionDialogueTyping
+      ) {
         const line =
           this.__factionDialogueLines[
             this.__factionDialogueIndex
           ];
 
-        setPanelLine(
-          this,
-          line,
+        const factionName =
           getFactionForEnemyType(
             this.__factionDialogueTriggerType,
           )?.name ||
-            'FACTION',
+          'FACTION';
+
+        setPanelLine(
+          this,
+          line,
+          factionName,
           true,
         );
 
@@ -735,9 +1524,12 @@ export function installEnemyDialogue(RunnerScene) {
         line,
         lineFaction,
       );
+
+      updateProgress(this);
     };
 
-  RunnerScene.prototype.skipFactionDialogue =
+  RunnerScene.prototype
+    .skipFactionDialogue =
     function () {
       dismissDialogue(
         this,
@@ -747,8 +1539,9 @@ export function installEnemyDialogue(RunnerScene) {
 
   RunnerScene.prototype.update =
     function (...args) {
-      // While the faction conversation is open, keep RunnerScene frozen.
-      if (this.__factionDialogueActive) {
+      if (
+        this.__factionDialogueActive
+      ) {
         return;
       }
 
@@ -843,6 +1636,7 @@ export function installEnemyDialogue(RunnerScene) {
     };
 }
 
-// Backward-compatible alias for any future system using the faction-specific name.
+/* Backward-compatible alias. */
 export const installFactionDialogue =
   installEnemyDialogue;
+
