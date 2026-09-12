@@ -67,9 +67,7 @@ const txt = (
     )
     .setOrigin(0.5);
 
-
 export function installGameplayExpansionV10(RunnerScene) {
-
   if (
     !RunnerScene?.prototype ||
     RunnerScene.prototype.__v10Installed
@@ -82,26 +80,21 @@ export function installGameplayExpansionV10(RunnerScene) {
   const originalCreate =
     RunnerScene.prototype.create;
 
-
   RunnerScene.prototype.create =
     function (...args) {
-
       const result =
         originalCreate.apply(this, args);
 
       const scene = this;
       const state = load();
 
-
       scene.__v10 = {
         state,
         destroyed: false
       };
 
-
       const w = scene.scale.width;
       const h = scene.scale.height;
-
 
       /* =====================================================
          V10 TOP HUD
@@ -113,7 +106,6 @@ export function installGameplayExpansionV10(RunnerScene) {
           .setScrollFactor(0)
           .setDepth(900);
 
-
       const pw =
         Math.min(w - 20, 430);
 
@@ -121,7 +113,6 @@ export function installGameplayExpansionV10(RunnerScene) {
         w - pw - 10;
 
       const py = 12;
-
 
       ui.add(
         scene.add
@@ -140,7 +131,6 @@ export function installGameplayExpansionV10(RunnerScene) {
           )
       );
 
-
       ui.add(
         txt(
           scene,
@@ -152,7 +142,6 @@ export function installGameplayExpansionV10(RunnerScene) {
         ).setOrigin(0)
       );
 
-
       ui.add(
         txt(
           scene,
@@ -163,7 +152,6 @@ export function installGameplayExpansionV10(RunnerScene) {
           '#7896a4'
         ).setOrigin(0)
       );
-
 
       const status =
         txt(
@@ -177,7 +165,6 @@ export function installGameplayExpansionV10(RunnerScene) {
 
       ui.add(status);
 
-
       /* =====================================================
          HIDE ONLY THE V10 TOP HUD
          ===================================================== */
@@ -185,10 +172,8 @@ export function installGameplayExpansionV10(RunnerScene) {
       ui.setVisible(false);
       ui.setAlpha(0);
 
-
       const setStatus =
         t => status.setText(t);
-
 
       const world = [];
 
@@ -196,7 +181,6 @@ export function installGameplayExpansionV10(RunnerScene) {
         world.push(o);
         return o;
       };
-
 
       /* =====================================================
          WORLD / MIRROR
@@ -213,7 +197,6 @@ export function installGameplayExpansionV10(RunnerScene) {
           220,
           h * 0.45
         );
-
 
       const mirror =
         add(
@@ -236,7 +219,6 @@ export function installGameplayExpansionV10(RunnerScene) {
             })
         );
 
-
       const receiver =
         add(
           scene.add
@@ -253,7 +235,6 @@ export function installGameplayExpansionV10(RunnerScene) {
               0.8
             )
         );
-
 
       const gate =
         add(
@@ -273,39 +254,12 @@ export function installGameplayExpansionV10(RunnerScene) {
             )
         );
 
-
       const beam =
         add(
           scene.add.graphics()
         );
 
-
-      add(
-        txt(
-          scene,
-          baseX,
-          baseY - 30,
-          'MIRROR // ROTATE',
-          '8px',
-          '#bfefff'
-        )
-      );
-
-
-      add(
-        txt(
-          scene,
-          baseX + 170,
-          baseY + 32,
-          'RECEIVER',
-          '7px',
-          '#9ec6d6'
-        )
-      );
-
-
       const renderMirror = () => {
-
         beam.clear();
 
         beam.lineStyle(
@@ -332,7 +286,6 @@ export function installGameplayExpansionV10(RunnerScene) {
 
         beam.strokePath();
 
-
         receiver.setFillStyle(
           state.mirror.solved
             ? 0x2b6a78
@@ -340,21 +293,17 @@ export function installGameplayExpansionV10(RunnerScene) {
           1
         );
 
-
         gate.setAlpha(
           state.mirror.solved
             ? 0.18
             : 0.65
         );
 
-
         mirror.angle =
           state.mirror.angle;
       };
 
-
       const rotateMirror = () => {
-
         state.mirror.angle =
           (state.mirror.angle + 90) % 360;
 
@@ -374,15 +323,14 @@ export function installGameplayExpansionV10(RunnerScene) {
         );
       };
 
-
       mirror.on(
         'pointerdown',
         rotateMirror
       );
 
-
       /* =====================================================
          SYMBOLS
+         No text label — symbols themselves remain functional.
          ===================================================== */
 
       const glyphs = [
@@ -391,17 +339,13 @@ export function installGameplayExpansionV10(RunnerScene) {
         '□'
       ];
 
-
       let solveSymbol;
-
 
       const symbols =
         [2, 0, 1].map(
           (id, i) => {
-
             const x =
               baseX + i * 62;
-
 
             const c =
               add(
@@ -423,7 +367,6 @@ export function installGameplayExpansionV10(RunnerScene) {
                   })
               );
 
-
             add(
               txt(
                 scene,
@@ -435,47 +378,27 @@ export function installGameplayExpansionV10(RunnerScene) {
               )
             );
 
-
             c.on(
               'pointerdown',
               () => solveSymbol(id)
             );
 
-
             return c;
           }
         );
 
-
-      add(
-        txt(
-          scene,
-          baseX + 62,
-          baseY + 156,
-          'SYMBOL SEQUENCE',
-          '7px',
-          '#c8b8e8'
-        )
-      );
-
-
       solveSymbol = id => {
-
         if (state.symbols.solved) {
           return;
         }
-
 
         const expected =
           state.symbols.sequence[
             state.symbols.progress
           ];
 
-
         if (id === expected) {
-
           state.symbols.progress++;
-
 
           if (
             state.symbols.progress === 3
@@ -483,18 +406,14 @@ export function installGameplayExpansionV10(RunnerScene) {
             state.symbols.solved = true;
           }
 
-
           save(state);
-
 
           setStatus(
             state.symbols.solved
               ? 'SYMBOLS VERIFIED — ROUTE UNLOCKED'
               : `SYMBOL ${state.symbols.progress}/3 VERIFIED`
           );
-
         } else {
-
           state.symbols.progress = 0;
 
           save(state);
@@ -502,13 +421,12 @@ export function installGameplayExpansionV10(RunnerScene) {
           setStatus(
             'WRONG SYMBOL — SEQUENCE RESET'
           );
-
         }
       };
 
-
       /* =====================================================
          MEMORY LANDMARKS
+         No L1 / L2 / L3 text labels.
          ===================================================== */
 
       const landmarkDefs = [
@@ -529,11 +447,9 @@ export function installGameplayExpansionV10(RunnerScene) {
         ]
       ];
 
-
       const landmarks =
         landmarkDefs.map(
           ([id, x, y]) => {
-
             const c =
               add(
                 scene.add
@@ -554,60 +470,38 @@ export function installGameplayExpansionV10(RunnerScene) {
                   })
               );
 
-
-            add(
-              txt(
-                scene,
-                x,
-                y + 27,
-                id,
-                '7px',
-                '#9edcf0'
-              )
-            );
-
-
             c.on(
               'pointerdown',
               () => {
-
                 if (
                   !state.memory.marks.includes(id)
                 ) {
                   state.memory.marks.push(id);
                 }
 
-
                 save(state);
-
 
                 c.setFillStyle(
                   0x1e5062,
                   1
                 );
 
-
                 setStatus(
-                  `MEMORY MARK ${id} SAVED — ${state.memory.marks.length}/3`
+                  `MEMORY MARK SAVED — ${state.memory.marks.length}/3`
                 );
-
               }
             );
-
 
             return c;
           }
         );
-
 
       const memoryLine =
         add(
           scene.add.graphics()
         );
 
-
       const renderMemory = () => {
-
         memoryLine.clear();
 
         memoryLine.lineStyle(
@@ -616,15 +510,12 @@ export function installGameplayExpansionV10(RunnerScene) {
           0.55
         );
 
-
         state.memory.marks.forEach(
           id => {
-
             const d =
               landmarkDefs.find(
                 v => v[0] === id
               );
-
 
             if (d) {
               memoryLine.strokeCircle(
@@ -633,15 +524,13 @@ export function installGameplayExpansionV10(RunnerScene) {
                 18
               );
             }
-
           }
         );
-
       };
-
 
       /* =====================================================
          PHOTO TARGET
+         No PHOTO TARGET text label.
          ===================================================== */
 
       const target =
@@ -665,19 +554,6 @@ export function installGameplayExpansionV10(RunnerScene) {
             })
         );
 
-
-      add(
-        txt(
-          scene,
-          baseX + 360,
-          baseY + 220,
-          'PHOTO TARGET',
-          '7px',
-          '#f3d89d'
-        )
-      );
-
-
       const frame =
         add(
           scene.add
@@ -699,22 +575,17 @@ export function installGameplayExpansionV10(RunnerScene) {
             .setDepth(905)
         );
 
-
       const capture = () => {
-
         const p =
           scene.player;
 
-
         if (!p) {
-
           setStatus(
             'PHOTO: PLAYER UNAVAILABLE'
           );
 
           return;
         }
-
 
         const d =
           Phaser.Math.Distance.Between(
@@ -724,19 +595,14 @@ export function installGameplayExpansionV10(RunnerScene) {
             target.y
           );
 
-
         state.camera.captures++;
 
-
         if (d <= 115) {
-
           state.camera.valid++;
 
           save(state);
 
-
           frame.setVisible(true);
-
 
           scene.tweens.add({
             targets: frame,
@@ -748,64 +614,46 @@ export function installGameplayExpansionV10(RunnerScene) {
             yoyo: true
           });
 
-
           setStatus(
             `PHOTO VALID — ${state.camera.valid} CAPTURE${state.camera.valid === 1 ? '' : 'S'}`
           );
-
         } else {
-
           setStatus(
             `PHOTO INVALID — MOVE CLOSER (${Math.round(d)}px)`
           );
-
         }
-
       };
-
 
       target.on(
         'pointerdown',
         capture
       );
 
-
       /* =====================================================
          KEYBOARD CONTROLS
          ===================================================== */
 
       const key = e => {
-
         if (e.repeat) {
           return;
         }
 
-
         switch (e.code) {
-
           case 'KeyM':
-
             rotateMirror();
-
             break;
 
-
           case 'KeyY':
-
             solveSymbol(
               state.symbols.sequence[
                 state.symbols.progress
               ] ?? 0
             );
-
             break;
 
-
           case 'KeyU':
-
             state.memory.revealed =
               !state.memory.revealed;
-
 
             landmarks.forEach(
               c =>
@@ -816,9 +664,7 @@ export function installGameplayExpansionV10(RunnerScene) {
                 )
             );
 
-
             renderMemory();
-
 
             setStatus(
               state.memory.revealed
@@ -828,32 +674,23 @@ export function installGameplayExpansionV10(RunnerScene) {
 
             break;
 
-
           case 'KeyP':
-
             capture();
-
             break;
-
         }
-
       };
-
 
       scene.input.keyboard?.on(
         'keydown',
         key
       );
 
-
       /* =====================================================
          INITIAL RENDER
          ===================================================== */
 
       renderMirror();
-
       renderMemory();
-
 
       /* =====================================================
          CLEANUP
@@ -862,16 +699,13 @@ export function installGameplayExpansionV10(RunnerScene) {
       scene.events.once(
         Phaser.Scenes.Events.SHUTDOWN,
         () => {
-
           scene.__v10.destroyed =
             true;
-
 
           scene.input.keyboard?.off(
             'keydown',
             key
           );
-
 
           [
             ui,
@@ -880,13 +714,9 @@ export function installGameplayExpansionV10(RunnerScene) {
             o =>
               o?.destroy?.()
           );
-
         }
       );
 
-
       return result;
-
     };
-
 }
