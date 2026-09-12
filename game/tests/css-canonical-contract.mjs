@@ -8,6 +8,7 @@ const read = path => readFile(fileURLToPath(new URL(path, root)), 'utf8');
 const css = await read('../canonical-ui-v1.css');
 const releaseCss = await read('../release-final-ui-v1.css');
 const mobileCss = await read('../unified-gameplay-ui-v1-mobile.css');
+const cleanupCss = await read('../mobile-ui-cleanup-v1.css');
 const arrival = await read('../cinematic-arrival-v2.js');
 const uiInit = await read('../relay-ui-init.js');
 const index = await read('../index.html');
@@ -46,5 +47,8 @@ assert.doesNotMatch(releaseCss, /\.mobile-menu-button\s*\{/,'release-final-ui-v1
 assert.doesNotMatch(releaseCss, /\.mobile-menu-(pause|settings)\s*\{/,'release-final-ui-v1.css must not style mobile PAUSE / SETTINGS');
 assert.doesNotMatch(mobileCss, /\.mobile-menu-button\s*\{/,'unified-gameplay-ui-v1-mobile.css must not style mobile menu buttons');
 assert.doesNotMatch(mobileCss, /\.mobile-menu-(pause|settings)\s*\{/,'unified-gameplay-ui-v1-mobile.css must not style mobile PAUSE / SETTINGS');
+assert.doesNotMatch(cleanupCss, /\.mobile-menu-settings\s*\{[\s\S]*?display\s*:\s*none\s*!important/,'mobile-ui-cleanup-v1.css must not hide canonical mobile SETTINGS');
+assert.doesNotMatch(cleanupCss, /\.mobile-menu-settings\s*\{[\s\S]*?visibility\s*:\s*hidden\s*!important/,'mobile-ui-cleanup-v1.css must not hide canonical mobile SETTINGS');
+assert.doesNotMatch(cleanupCss, /\.mobile-menu-settings\s*\{[\s\S]*?opacity\s*:\s*0\s*!important/,'mobile-ui-cleanup-v1.css must not hide canonical mobile SETTINGS');
 
 console.log('Canonical CSS contract: PASS');
