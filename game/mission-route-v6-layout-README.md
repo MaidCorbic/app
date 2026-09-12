@@ -1,0 +1,1 @@
+Mission Route V6 command-center composition is mounted by relay-ui-init.js and reuses the existing Phaser/SVG map renderer.
