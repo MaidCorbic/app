@@ -1,0 +1,243 @@
+/*
+ * RUNNER RELAY — MISSION ROUTE V6
+ * Presentation-only layout refinement.
+ * Existing palette/tokens are preserved; no map or gameplay colors are changed.
+ */
+
+#relayGameplayIntroFinalV5 .rv5-main{
+  grid-template-rows:44px minmax(0,1fr) 48px !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-route-layout{
+  display:grid !important;
+  grid-template-columns:minmax(180px,.64fr) minmax(460px,2.30fr) minmax(190px,.72fr) !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-route-panel{
+  position:relative !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  padding:24px 18px 20px !important;
+  overflow:hidden !important;
+  background:linear-gradient(180deg,rgba(7,11,11,.90),rgba(3,6,6,.78)) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-route-panel-left{
+  border-right:1px solid rgba(190,198,188,.09) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-route-panel-right{
+  border-left:1px solid rgba(190,198,188,.09) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-route-map-frame{
+  position:relative !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+  background:rgba(2,5,5,.82) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-route-map-frame .rv5-map{
+  width:100% !important;
+  height:100% !important;
+  border:0 !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-route-map-frame .rv5-svg{
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  max-height:none !important;
+}
+
+/* Keep the real route markers/path; remove only tutorial prose duplicated outside the map. */
+#relayGameplayIntroFinalV5 .rv6-route-map-frame .guide,
+#relayGameplayIntroFinalV5 .rv6-route-map-frame .rv5-map-label,
+#relayGameplayIntroFinalV5 .rv6-route-map-frame .rv5-live-tag{
+  display:none !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-eyebrow{
+  color:var(--wz-amber) !important;
+  font-size:8px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  letter-spacing:.18em !important;
+  text-transform:uppercase !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-title{
+  margin-top:10px !important;
+  color:var(--wz-white) !important;
+  font-size:17px !important;
+  line-height:1.05 !important;
+  font-weight:950 !important;
+  letter-spacing:.045em !important;
+  text-transform:uppercase !important;
+  text-shadow:0 4px 15px rgba(0,0,0,.75) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-divider{
+  width:100% !important;
+  height:1px !important;
+  margin:16px 0 14px !important;
+  background:rgba(190,198,188,.10) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-row{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+  padding:10px 0 !important;
+  border-bottom:1px solid rgba(190,198,188,.055) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-row span{
+  min-width:0 !important;
+  color:var(--wz-muted) !important;
+  font-size:7px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+  letter-spacing:.14em !important;
+  text-transform:uppercase !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-row strong{
+  min-width:0 !important;
+  color:var(--wz-soft) !important;
+  font-size:9px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-row strong.danger{
+  color:var(--wz-red) !important;
+  text-shadow:0 0 8px rgba(228,92,99,.12) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-live{
+  margin-top:auto !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  width:100% !important;
+  padding:8px 10px !important;
+  border:1px solid rgba(120,200,121,.20) !important;
+  background:rgba(5,10,8,.72) !important;
+  color:var(--wz-green) !important;
+  font-size:7px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  letter-spacing:.10em !important;
+  white-space:nowrap !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-live i,
+#relayGameplayIntroFinalV5 .rv6-analysis-signal i{
+  width:6px !important;
+  height:6px !important;
+  flex:0 0 6px !important;
+  border-radius:50% !important;
+  background:var(--wz-green) !important;
+  box-shadow:0 0 8px rgba(120,200,121,.72) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-analysis-signal{
+  margin-top:auto !important;
+  display:grid !important;
+  grid-template-columns:auto 1fr auto !important;
+  align-items:center !important;
+  gap:7px !important;
+  padding-top:13px !important;
+  border-top:1px solid rgba(190,198,188,.08) !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-analysis-signal b{
+  color:var(--wz-muted) !important;
+  font-size:7px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+  letter-spacing:.12em !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-analysis-signal em{
+  color:var(--wz-green) !important;
+  font-size:7px !important;
+  line-height:1 !important;
+  font-style:normal !important;
+  font-weight:950 !important;
+  letter-spacing:.12em !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-corner{
+  position:absolute !important;
+  width:26px !important;
+  height:26px !important;
+  border-color:rgba(213,181,83,.58) !important;
+  border-style:solid !important;
+  pointer-events:none !important;
+}
+
+#relayGameplayIntroFinalV5 .rv6-panel-corner.tl{left:9px !important;top:9px !important;border-width:2px 0 0 2px !important;}
+#relayGameplayIntroFinalV5 .rv6-panel-corner.bl{left:9px !important;bottom:9px !important;border-width:0 0 2px 2px !important;}
+#relayGameplayIntroFinalV5 .rv6-panel-corner.tr{right:9px !important;top:9px !important;border-width:2px 2px 0 0 !important;}
+#relayGameplayIntroFinalV5 .rv6-panel-corner.br{right:9px !important;bottom:9px !important;border-width:0 2px 2px 0 !important;}
+
+#relayGameplayIntroFinalV5 .rv6-route-map-frame::before{
+  content:"TACTICAL MAP" !important;
+  position:absolute !important;
+  z-index:15 !important;
+  left:14px !important;
+  top:12px !important;
+  padding:6px 8px !important;
+  border:1px solid rgba(190,198,188,.12) !important;
+  background:rgba(4,8,8,.76) !important;
+  color:var(--wz-soft) !important;
+  font-size:7px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  letter-spacing:.15em !important;
+  pointer-events:none !important;
+}
+
+@media(max-width:1100px){
+  #relayGameplayIntroFinalV5 .rv6-route-layout{
+    grid-template-columns:minmax(150px,.58fr) minmax(360px,2.2fr) minmax(150px,.64fr) !important;
+  }
+  #relayGameplayIntroFinalV5 .rv6-route-panel{padding-left:13px !important;padding-right:13px !important;}
+  #relayGameplayIntroFinalV5 .rv6-panel-title{font-size:14px !important;}
+}
+
+@media(max-width:900px){
+  #relayGameplayIntroFinalV5 .rv6-route-layout{
+    grid-template-columns:1fr !important;
+    grid-template-rows:auto minmax(250px,1fr) auto !important;
+    overflow:auto !important;
+  }
+  #relayGameplayIntroFinalV5 .rv6-route-panel-left,
+  #relayGameplayIntroFinalV5 .rv6-route-panel-right{
+    border:0 !important;
+    border-bottom:1px solid rgba(190,198,188,.09) !important;
+  }
+  #relayGameplayIntroFinalV5 .rv6-route-map-frame{min-height:250px !important;}
+  #relayGameplayIntroFinalV5 .rv6-route-panel-right{order:3 !important;}
+  #relayGameplayIntroFinalV5 .rv6-route-map-frame{order:2 !important;}
+  #relayGameplayIntroFinalV5 .rv6-route-panel-left{order:1 !important;}
+}
+
+@media(max-width:620px){
+  #relayGameplayIntroFinalV5 .rv6-route-panel{padding:14px 12px !important;}
+  #relayGameplayIntroFinalV5 .rv6-panel-row{padding:8px 0 !important;}
+}

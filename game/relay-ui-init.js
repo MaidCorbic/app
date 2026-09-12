@@ -92,6 +92,8 @@ import './cargo-integrity-v2-visibility-v1.js';
 import './signal-network-v1.js';
 import './city-response-v1.js';
 import './gameplay-intro-final-v1.js';
+import './mission-route-v6-layout-v1.js';
+import './mission-route-v6-layout-v1.css';
 import './mobile-map-web-parity-all-levels-v1.js';
 import './gameplay-core-v1.js';
 import './player-death-animation-v1.js';
