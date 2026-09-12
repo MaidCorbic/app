@@ -4,310 +4,195 @@ import { loadState } from './src/state.js';
 
 (() => {
   'use strict';
-
   if (window.__relayCampaignRouteCinematicV1) return;
   window.__relayCampaignRouteCinematicV1 = true;
 
-  const ART = Object.freeze({
-    'first-delivery': 'homescreen.jpg',
-    'dead-drop': 'homescreen.jpg',
-    blackout: 'homescreen.jpg',
-    pursuit: 'homescreen.jpg',
-    'signal-storm': 'homescreen.jpg',
-    'corporate-lockdown': 'homescreen.jpg',
-    'final-relay': 'homescreen.jpg',
-  });
-
+  const ART = Object.freeze(['homescreen.jpg', 'loading-landscape.jpg', 'loading.jpg']);
   const ACCENTS = Object.freeze({
-    'first-delivery': '#8df4ff',
-    'dead-drop': '#ffb454',
-    blackout: '#66f4ff',
-    pursuit: '#ff5364',
-    'signal-storm': '#b8a0ff',
-    'corporate-lockdown': '#ff5a4f',
-    'final-relay': '#ffd06e',
+    'first-delivery': '#7feaff', 'dead-drop': '#ffb454', blackout: '#66f4ff',
+    pursuit: '#ff5364', 'signal-storm': '#b8a0ff', 'corporate-lockdown': '#ff5a4f', 'final-relay': '#ffd06e',
   });
 
-  const $id = id => document.getElementById(id);
+  const $ = id => document.getElementById(id);
   const wait = ms => new Promise(resolve => window.setTimeout(resolve, ms));
+  let artTimer = 0;
+  let countdownInFlight = false;
+  let selectedMissionId = null;
 
   const stateSnapshot = () => {
-    try {
-      return loadState();
-    } catch {
-      return { completed: [], unlockedMissions: ['first-delivery'], missionStats: {} };
-    }
+    try { return loadState(); }
+    catch { return { completed: [], unlockedMissions: ['first-delivery'], missionStats: {} }; }
   };
 
   const completedIds = state => new Set(Array.isArray(state?.completed) ? state.completed : []);
-
-  const isUnlocked = (mission, state) => {
-    if (!mission) return false;
-    if (state?.unlockedMissions?.includes?.(mission.id)) return true;
-    return !mission.unlockRequirement || completedIds(state).has(mission.unlockRequirement);
-  };
-
+  const isUnlocked = (mission, state) => !!mission && (state?.unlockedMissions?.includes?.(mission.id) || !mission.unlockRequirement || completedIds(state).has(mission.unlockRequirement));
   const statsFor = (mission, state) => {
     const raw = state?.missionStats?.[mission.id] || {};
-    return {
-      bestTime: Number.isFinite(Number(raw.bestTime)) ? Number(raw.bestTime) : null,
-      bestRating: Number.isFinite(Number(raw.bestRating)) ? Number(raw.bestRating) : 0,
-      runs: Number.isFinite(Number(raw.runs)) ? Number(raw.runs) : 0,
-    };
+    return { bestTime: Number.isFinite(Number(raw.bestTime)) ? Number(raw.bestTime) : null, bestRating: Number.isFinite(Number(raw.bestRating)) ? Number(raw.bestRating) : 0, runs: Number.isFinite(Number(raw.runs)) ? Number(raw.runs) : 0 };
   };
-
-  const formatBestTime = value => {
+  const formatTime = value => {
     if (!Number.isFinite(Number(value)) || Number(value) <= 0) return '--:--';
     const seconds = Math.floor(Number(value) / 1000);
-    return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+    return `${String(Math.floor(seconds / 60)).padStart(2,'0')}:${String(seconds % 60).padStart(2,'0')}`;
   };
 
-  const routePoints = mission => {
-    const raw = [
-      mission?.spawn || { x: 120, y: 520 },
-      ...(mission?.checkpoints || []).map(([x, y]) => ({ x, y })),
-      mission?.goal || { x: 6100, y: 500 },
-    ];
-    const maxX = Math.max(...raw.map(point => Number(point.x) || 0), 1);
-    const ys = raw.map(point => Number(point.y) || 0);
-    const minY = Math.min(...ys, 0);
-    const maxY = Math.max(...ys, 720);
-    const spanY = Math.max(maxY - minY, 1);
-    return raw.map(point => ({
-      x: 5 + ((Number(point.x) || 0) / maxX) * 90,
-      y: 18 + (1 - (((Number(point.y) || 0) - minY) / spanY)) * 62,
-    }));
+  const missionIdIndex = mission => missions.findIndex(item => item.id === mission?.id);
+
+  const normalizeMissionBounds = mission => {
+    const goalX = Math.max(Number(mission?.goal?.x) || 6100, 1);
+    const xs = [Number(mission?.spawn?.x) || 0, goalX];
+    (mission?.platforms || []).forEach(item => { if (Array.isArray(item)) { xs.push(Number(item[0]) || 0, (Number(item[0]) || 0) + (Number(item[2]) || 0)); } });
+    (mission?.signals || []).forEach(item => xs.push(Number(item?.[0]) || 0));
+    const minX = Math.min(...xs, 0);
+    const maxX = Math.max(...xs, goalX, 1);
+    const ys = [Number(mission?.spawn?.y) || 520, Number(mission?.goal?.y) || 500, 610];
+    (mission?.platforms || []).forEach(item => { if (Array.isArray(item)) { ys.push(Number(item[1]) || 0, (Number(item[1]) || 0) + (Number(item[3]) || 0)); } });
+    (mission?.signals || []).forEach(item => ys.push(Number(item?.[1]) || 0));
+    const minY = Math.min(...ys, 230);
+    const maxY = Math.max(...ys, 650);
+    return { minX, maxX, minY, maxY };
   };
 
-  const svgPath = points => points.map((point, index) => `${index ? 'L' : 'M'} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(' ');
+  const point = (mission, x, y, bounds) => ({
+    x: 4 + ((Number(x) - bounds.minX) / Math.max(bounds.maxX - bounds.minX, 1)) * 92,
+    y: 12 + (1 - ((Number(y) - bounds.minY) / Math.max(bounds.maxY - bounds.minY, 1))) * 76,
+  });
 
-  const routeBranches = mission => {
-    const secrets = Array.isArray(mission?.secrets) ? mission.secrets : [];
-    const checkpoints = Array.isArray(mission?.checkpoints) ? mission.checkpoints : [];
-    if (!secrets.length) return '';
-    const maxX = Math.max(Number(mission?.goal?.x) || 6100, 1);
-    return secrets.slice(0, 3).map(([x, y], index) => {
-      const anchor = checkpoints[Math.min(index, Math.max(checkpoints.length - 1, 0))] || [mission?.spawn?.x || 120, mission?.spawn?.y || 520];
-      const ax = 5 + (Number(anchor[0]) / maxX) * 90;
-      const ay = 18 + (1 - (Number(anchor[1]) / 720)) * 62;
-      const sx = 5 + (Number(x) / maxX) * 90;
-      const sy = 18 + (1 - (Number(y) / 720)) * 62;
-      const cx = (ax + sx) / 2;
-      const cy = (ay + sy) / 2 - 7;
-      return `<path class="route-branch" d="M ${ax.toFixed(2)} ${ay.toFixed(2)} Q ${cx.toFixed(2)} ${cy.toFixed(2)} ${sx.toFixed(2)} ${sy.toFixed(2)}"/>`;
+  const routeData = mission => {
+    const bounds = normalizeMissionBounds(mission);
+    const start = point(mission, mission?.spawn?.x ?? 120, mission?.spawn?.y ?? 520, bounds);
+    const guides = [...(mission?.guides || [])].sort((a,b) => (Number(a?.x)||0) - (Number(b?.x)||0));
+    const cps = [...(mission?.checkpoints || [])].sort((a,b) => (Number(a?.[0])||0) - (Number(b?.[0])||0));
+    const goals = point(mission, mission?.goal?.x ?? 6100, mission?.goal?.y ?? 500, bounds);
+    const route = [start, ...guides.map(g => point(mission,g.x,g.y,bounds)), ...cps.map(([x,y]) => point(mission,x,y,bounds)), goals]
+      .sort((a,b) => a.rawX - b.rawX)
+      .filter((item,index,array) => index === 0 || Math.abs(item.x-array[index-1].x) > .35 || Math.abs(item.y-array[index-1].y) > .35);
+    return { bounds, start, goals, route };
+  };
+
+  const pathFrom = route => route.map((p,i) => `${i ? 'L' : 'M'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ');
+
+  const buildMapSvg = mission => {
+    const data = routeData(mission);
+    const { bounds } = data;
+    const platformMarkup = (mission?.platforms || []).map((item,index) => {
+      if (!Array.isArray(item)) return '';
+      const p1 = point(mission,item[0],item[1],bounds);
+      const p2 = point(mission,(Number(item[0])+Number(item[2])),(Number(item[1])+Number(item[3])),bounds);
+      const x = Math.min(p1.x,p2.x), y = Math.min(p1.y,p2.y), w = Math.max(.7,Math.abs(p2.x-p1.x)), h = Math.max(.9,Math.abs(p2.y-p1.y));
+      return `<rect class="map-platform ${item[4] === 'roof' ? 'roof' : ''}" x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx=".5" data-idx="${index}"/>`;
     }).join('');
+    const hazardMarkup = (mission?.obstacles || []).map(item => { if (!Array.isArray(item)) return ''; const p=point(mission,item[0],item[1],bounds); return `<rect class="map-hazard" x="${(p.x-1.5).toFixed(2)}" y="${(p.y-1.1).toFixed(2)}" width="3" height="2.2" rx=".3"/>`; }).join('');
+    const signalMarkup = (mission?.signals || []).map(item => { const p=point(mission,item[0],item[1],bounds); return `<circle class="map-signal" cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r=".8"/>`; }).join('');
+    const secretMarkup = (mission?.secrets || []).slice(0,8).map(item => { const p=point(mission,item[0],item[1],bounds); return `<rect class="map-secret" x="${(p.x-.8).toFixed(2)}" y="${(p.y-.8).toFixed(2)}" width="1.6" height="1.6" transform="rotate(45 ${p.x.toFixed(2)} ${p.y.toFixed(2)})"/>`; }).join('');
+    const checkpointMarkup = (mission?.checkpoints || []).map((item,index) => { const p=point(mission,item[0],item[1],bounds); return `<circle class="map-checkpoint" cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="1.5"/><text class="map-point-label" x="${(p.x+2).toFixed(2)}" y="${(p.y-2).toFixed(2)}">CP${index+1}</text>`; }).join('');
+    const guideDots = (mission?.guides || []).slice(0,14).map(g => { const p=point(mission,g.x,g.y,bounds); return `<circle class="map-guide-dot" cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r=".55"/>`; }).join('');
+    const start=data.start, goal=data.goals;
+    const arrowMarkup = data.route.slice(1).map((p,index) => { const prev=data.route[index]; const angle=Math.atan2(p.y-prev.y,p.x-prev.x)*180/Math.PI; return `<path class="map-route-arrow" d="M ${p.x.toFixed(2)} ${p.y.toFixed(2)} l -2.2 -1.1 l .5 1.1 l -.5 1.1 Z" transform="rotate(${angle.toFixed(2)} ${p.x.toFixed(2)} ${p.y.toFixed(2)})"/>`; }).join('');
+    return `<svg class="relay-map-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <g>${[18,39,60,81].map(y=>`<line class="map-grid-line" x1="4" x2="96" y1="${y}" y2="${y}"/>`).join('')}${[20,40,60,80].map(x=>`<line class="map-grid-line" x1="${x}" x2="${x}" y1="10" y2="90"/>`).join('')}</g>
+      <path class="map-sector" d="M4 10 H35 V40 H4 Z"/><path class="map-sector" d="M36 10 H67 V40 H36 Z"/><path class="map-sector" d="M68 10 H96 V40 H68 Z"/><path class="map-sector" d="M4 41 H47 V90 H4 Z"/><path class="map-sector" d="M48 41 H96 V90 H48 Z"/>
+      <text class="map-sector-text" x="6" y="16">SECTOR A</text><text class="map-sector-text" x="38" y="16">SECTOR B</text><text class="map-sector-text" x="70" y="16">SECTOR C</text><text class="map-sector-text" x="6" y="47">SECTOR D</text><text class="map-sector-text" x="50" y="47">SECTOR E</text>
+      ${platformMarkup}${hazardMarkup}${signalMarkup}${secretMarkup}${checkpointMarkup}${guideDots}
+      <path class="map-route-glow" d="${pathFrom(data.route)}"/><path class="map-route-line" d="${pathFrom(data.route)}"/>${arrowMarkup}
+      <circle class="map-origin" cx="${start.x.toFixed(2)}" cy="${start.y.toFixed(2)}" r="2.2"/><circle class="map-goal" cx="${goal.x.toFixed(2)}" cy="${goal.y.toFixed(2)}" r="2.5"/>
+      <text class="map-point-label" x="${(start.x+2).toFixed(2)}" y="${(start.y-2).toFixed(2)}">START</text><text class="map-point-label goal-label" x="${(goal.x-2).toFixed(2)}" y="${(goal.y-3).toFixed(2)}">GOAL</text>
+    </svg>`;
   };
 
-  const ensureShell = () => {
-    const existing = $id('worldMap');
-    if (existing) {
-      existing.classList.add('relay-route-map');
-      return existing;
-    }
-    const host = document.createElement('section');
-    host.id = 'worldMap';
-    host.className = 'world-map relay-route-map hidden';
-    host.setAttribute('aria-label', 'City relay campaign map');
-    $id('game')?.appendChild(host);
-    return host;
+  const rotateArt = host => {
+    const art = host.querySelector('.relay-tactical-art');
+    if (!art) return;
+    window.clearInterval(artTimer);
+    let index = Math.floor(Math.random() * ART.length);
+    const apply = () => { art.style.backgroundImage = `url('./assets/${ART[index]}')`; index = (index + 1) % ART.length; };
+    apply(); artTimer = window.setInterval(apply, 6500);
   };
 
-  const closeLegacyPanels = () => {
-    ['preflight', 'titlePanel', 'relayInfoPanel'].forEach(id => $id(id)?.classList.add('hidden'));
-  };
+  const closeMap = host => { window.clearInterval(artTimer); host?.classList.add('hidden'); document.body.classList.remove('relay-route-active','relay-mission-launching'); $('intro')?.classList.remove('hidden'); };
 
-  const backToBriefing = host => {
-    host?.classList.add('hidden');
-    $id('intro')?.classList.remove('hidden');
-    document.body.classList.remove('relay-route-active');
-    document.body.classList.remove('relay-mission-launching');
-  };
-
-  const renderMission = mission => {
-    const host = ensureShell();
-    const state = stateSnapshot();
-    if (!isUnlocked(mission, state)) return;
-
-    const completed = completedIds(state).has(mission.id);
-    const stats = statsFor(mission, state);
-    const points = routePoints(mission);
-    const path = svgPath(points);
-    const accent = ACCENTS[mission.id] || '#8df4ff';
-    const art = ART[mission.id] || 'homescreen.jpg';
-    const index = missions.findIndex(item => item.id === mission.id);
-
-    host.innerHTML = `
-      <div class="relay-mission-bg" style="--mission-accent:${accent};background-image:linear-gradient(90deg,rgba(3,8,16,.97) 0%,rgba(3,8,16,.72) 50%,rgba(3,8,16,.28) 100%),url('./assets/${art}')"></div>
-      <div class="relay-mission-noise"></div>
-      <button class="relay-mission-close" id="relayMissionClose" type="button">← <span>ROUTE MAP</span></button>
-      <div class="relay-mission-shell">
-        <div class="relay-mission-copy">
-          <p class="relay-route-kicker">${mission.story?.chapter || 'CITY RELAY NETWORK'}</p>
-          <p class="relay-mission-number">MISSION ${String(index + 1).padStart(2, '0')} / ${String(missions.length).padStart(2, '0')}</p>
-          <h2>${String(mission.title || '').toUpperCase()}</h2>
-          <p class="relay-mission-district">${String(mission.district || '').toUpperCase()}</p>
-          <p class="relay-mission-description">${mission.description || ''}</p>
-          <div class="relay-mission-objective"><span>OBJECTIVE</span><b>${mission.objective || ''}</b></div>
-          <div class="relay-mission-stats">
-            <div><span>DIFFICULTY</span><b>${mission.difficulty || '--'}</b></div>
-            <div><span>SIGNALS</span><b>${mission.signals?.length || 0}</b></div>
-            <div><span>REWARD</span><b>+${mission.reward || 0} XP</b></div>
-            <div><span>BEST</span><b>${formatBestTime(stats.bestTime)}</b></div>
-          </div>
-          <div class="relay-mission-actions">
-            <button class="relay-route-primary" id="relayMissionStart" type="button">${completed ? 'REPLAY MISSION' : 'START MISSION'} <b>→</b></button>
-            <span>${completed ? `SECURED · ${stats.bestRating ? '★'.repeat(stats.bestRating) : 'ROUTE COMPLETE'}` : 'ROUTE READY · LIVE DATA LINKED'}</span>
-          </div>
-        </div>
-        <div class="relay-mission-route-panel">
-          <div class="relay-mission-route-head"><span>LIVE ROUTE TRACE</span><b>${String(mission.district || '').toUpperCase()}</b></div>
-          <div class="relay-mission-route-map">
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path class="mission-route-grid" d="M 5 18 H 95 M 5 39 H 95 M 5 60 H 95 M 5 81 H 95 M 5 18 V 81 M 28 18 V 81 M 50 18 V 81 M 72 18 V 81 M 95 18 V 81"/>
-              ${routeBranches(mission)}
-              <path class="mission-route-glow" d="${path}"/>
-              <path class="mission-route-line" d="${path}"/>
-              ${points.map((point, pointIndex) => `<circle class="mission-route-point ${pointIndex === 0 ? 'origin' : pointIndex === points.length - 1 ? 'goal' : ''}" cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="${pointIndex === 0 || pointIndex === points.length - 1 ? '2.8' : '2.2'}"/>`).join('')}
-            </svg>
-            <span class="route-panel-label start">START</span><span class="route-panel-label finish">GOAL</span>
-          </div>
-          <div class="relay-route-profile"><span>SAFE LINE</span><p>${mission.routeProfile?.normal || 'Follow the marked route and preserve momentum.'}</p><span>SKILL LINE</span><p>${mission.routeProfile?.skill || 'Use elevated routes for faster clears and secrets.'}</p></div>
-        </div>
-      </div>`;
-
-    $id('relayMissionClose')?.addEventListener('click', renderMap);
-    $id('relayMissionStart')?.addEventListener('click', () => void launchMission(mission));
-    host.classList.remove('hidden');
-    host.removeAttribute('aria-hidden');
-  };
-
-  const renderMap = () => {
-    const host = ensureShell();
-    const state = stateSnapshot();
-    const completed = completedIds(state);
-    const firstPlayable = missions.find(mission => isUnlocked(mission, state) && !completed.has(mission.id)) || missions.find(mission => isUnlocked(mission, state)) || missions[0];
-
-    host.innerHTML = `
-      <div class="relay-route-map-bg"></div>
-      <div class="relay-route-map-grid"></div>
-      <header class="relay-route-map-header">
-        <div>
-          <p class="relay-route-kicker">CITY RELAY NETWORK // LIVE CAMPAIGN</p>
-          <h2>TRACE THE <em>LINE.</em></h2>
-          <p class="relay-route-sub">Every node is tied to a playable route. The trace follows the level's real spawn, checkpoint and goal coordinates.</p>
-        </div>
-        <button id="relayRouteMapBack" class="relay-route-back" type="button">ESC <span>BRIEFING</span></button>
-      </header>
-      <section class="relay-route-layout">
-        <div class="relay-route-canvas" aria-label="Playable route network">
-          <div class="relay-route-cityline cityline-a"></div>
-          <div class="relay-route-cityline cityline-b"></div>
-          <div class="relay-route-cityline cityline-c"></div>
-          <svg class="relay-route-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <defs><linearGradient id="routeTraceGradient" x1="0" x2="1"><stop offset="0" stop-color="#8df4ff"/><stop offset="1" stop-color="#ffd06e"/></linearGradient></defs>
-            <path class="relay-route-glow" d="M 4 82 L 18 72 L 31 62 L 45 52 L 58 43 L 72 31 L 90 20" />
-            <path class="relay-route-trunk" d="M 4 82 L 18 72 L 31 62 L 45 52 L 58 43 L 72 31 L 90 20" />
-          </svg>
-          ${missions.map((mission, missionIndex) => {
-            const available = isUnlocked(mission, state);
-            const done = completed.has(mission.id);
-            const selected = mission.id === firstPlayable?.id;
-            const x = 4 + (missionIndex / Math.max(missions.length - 1, 1)) * 86;
-            const y = 82 - missionIndex * 10.2 + (missionIndex % 2 ? 2 : 0);
-            return `<button class="relay-route-node ${done ? 'is-complete' : ''} ${available ? 'is-unlocked' : 'is-locked'} ${selected ? 'is-current' : ''}" type="button" data-route-mission="${mission.id}" style="left:${x.toFixed(2)}%;top:${y.toFixed(2)}%;--mission-accent:${ACCENTS[mission.id] || '#8df4ff'}" ${available ? '' : 'disabled'} aria-label="${mission.title} — ${available ? 'available' : 'locked'}">
-              <span class="relay-node-ring"></span><span class="relay-node-core">${done ? '✓' : String(missionIndex + 1).padStart(2, '0')}</span>
-              <span class="relay-node-label"><small>${mission.district}</small><b>${mission.title}</b></span>
-              ${available ? '<span class="relay-node-pulse"></span>' : ''}
-            </button>`;
-          }).join('')}
-          <div class="relay-route-start"><i></i><span>ORIGIN<br><b>COURIER HUB</b></span></div>
-          <div class="relay-route-finish"><i></i><span>DESTINATION<br><b>APEX RELAY</b></span></div>
-          <div class="relay-route-compass"><b>N</b><span></span><small>GRID</small></div>
-        </div>
-
-        <aside class="relay-route-intel">
-          <div class="relay-route-intel-top"><span>ROUTE INTELLIGENCE</span><i></i></div>
-          <div id="relayRouteMissionList" class="relay-route-mission-list"></div>
-          <footer><span><i class="legend-dot live"></i>ONLINE</span><span><i class="legend-dot done"></i>SECURED</span><span><i class="legend-dot locked"></i>LOCKED</span></footer>
-        </aside>
-      </section>`;
-
-    $id('relayRouteMapBack')?.addEventListener('click', () => backToBriefing(host));
-
-    const list = $id('relayRouteMissionList');
-    if (list) {
-      list.innerHTML = missions.map((mission, missionIndex) => {
-        const available = isUnlocked(mission, state);
-        const done = completed.has(mission.id);
-        const stats = statsFor(mission, state);
-        return `<button type="button" class="relay-route-list-row ${available ? '' : 'is-locked'} ${done ? 'is-complete' : ''}" data-route-mission="${mission.id}" ${available ? '' : 'disabled'}>
-          <span class="route-list-index">${String(missionIndex + 1).padStart(2, '0')}</span>
-          <span class="route-list-copy"><b>${mission.title}</b><small>${mission.district} · ${mission.difficulty}</small></span>
-          <span class="route-list-status">${done ? '✓' : available ? (stats.bestRating ? '★'.repeat(stats.bestRating) : 'LIVE') : 'LOCK'}</span>
-        </button>`;
-      }).join('');
-    }
-
-    host.querySelectorAll('[data-route-mission]').forEach(button => button.addEventListener('click', () => {
-      const mission = missions.find(item => item.id === button.dataset.routeMission);
-      if (mission && isUnlocked(mission, state)) renderMission(mission);
-    }));
-
-    closeLegacyPanels();
-    host.classList.remove('hidden');
-    document.body.classList.add('relay-route-active');
-    document.body.classList.remove('relay-mission-launching');
-  };
-
-  const launchMission = async mission => {
-    const index = missions.findIndex(item => item.id === mission?.id);
-    if (index < 0 || !isUnlocked(mission, stateSnapshot())) return false;
-
-    const button = $id('relayMissionStart');
-    button?.classList.add('is-loading');
-    button?.setAttribute('disabled', 'disabled');
+  const deploy = async mission => {
+    if (countdownInFlight) return;
+    countdownInFlight = true;
+    const button = $('relayDeploy');
+    const overlay = $('relayDeployCountdown');
+    const number = $('relayCountdownNumber');
+    const stateText = $('relayCountdownState');
+    button?.setAttribute('disabled','disabled');
+    overlay?.classList.add('is-visible');
     document.body.classList.add('relay-mission-launching');
-    await wait(110);
-
+    const steps = [ ['3','ROUTE LOCKED'], ['2','CHECKPOINTS SYNCED'], ['1','LINK ESTABLISHED'] ];
     try {
-      if (typeof window.relayLaunchRun !== 'function') throw new Error('Canonical run launcher is unavailable');
+      for (const [value,label] of steps) {
+        if (!overlay || !number || !stateText) throw new Error('Countdown UI missing');
+        number.textContent = value; number.classList.toggle('is-final', value === '1'); stateText.textContent = label; await wait(760);
+      }
+      stateText.textContent = 'DEPLOYING'; await wait(230);
+      const index = missionIdIndex(mission);
+      if (index < 0 || typeof window.relayLaunchRun !== 'function') throw new Error('Canonical run launcher is unavailable');
       const result = await window.relayLaunchRun(index);
       if (result === false) throw new Error('Canonical run launcher reported failure');
-      $id('worldMap')?.classList.add('hidden');
-      $id('intro')?.classList.add('hidden');
-      ['preflight', 'titlePanel', 'relayInfoPanel', 'finish', 'gameOver', 'levelUp', 'abilityUnlock'].forEach(id => $id(id)?.classList.add('hidden'));
-      document.body.classList.add('relay-run-active');
-      document.body.classList.remove('relay-route-active', 'relay-mission-launching');
-      window.dispatchEvent(new CustomEvent('relay:campaign-mission-launched', { detail: { mission, index } }));
-      return true;
-    } catch (error) {
-      button?.classList.remove('is-loading');
-      button?.removeAttribute('disabled');
-      document.body.classList.remove('relay-mission-launching');
-      console.error('[RelayRunner] campaign mission launch failed', error);
-      return false;
-    }
+      overlay.classList.remove('is-visible'); $('worldMap')?.classList.add('hidden'); $('intro')?.classList.add('hidden');
+      ['preflight','titlePanel','relayInfoPanel','finish','gameOver','levelUp','abilityUnlock'].forEach(id => $(id)?.classList.add('hidden'));
+      document.body.classList.add('relay-run-active'); document.body.classList.remove('relay-route-active','relay-mission-launching');
+      window.dispatchEvent(new CustomEvent('relay:campaign-mission-launched',{detail:{mission,index}}));
+    } catch(error) {
+      console.error('[RelayRunner] tactical deploy failed', error);
+      overlay?.classList.remove('is-visible'); button?.removeAttribute('disabled'); document.body.classList.remove('relay-mission-launching');
+    } finally { countdownInFlight = false; }
   };
 
-  const open = () => {
-    renderMap();
-    $id('intro')?.classList.add('hidden');
+  const renderMap = missionId => {
+    const host = $('worldMap');
+    if (!host) return false;
+    const state = stateSnapshot();
+    const playable = missions.filter(mission => isUnlocked(mission,state));
+    const fallback = playable.find(mission => !completedIds(state).has(mission.id)) || playable[0] || missions[0];
+    const mission = missions.find(item => item.id === missionId && isUnlocked(item,state)) || fallback;
+    selectedMissionId = mission?.id || null;
+    if (!mission) return false;
+    const stats=statsFor(mission,state); const accent=ACCENTS[mission.id]||'#7feaff'; const index=missionIdIndex(mission);
+    const completed=completedIds(state).has(mission.id);
+    host.innerHTML=`
+      <div class="relay-tactical-art"></div><div class="relay-tactical-overlay"></div><div class="relay-tactical-grid"></div>
+      <header class="relay-tactical-top">
+        <div class="relay-tactical-brand"><p class="relay-tactical-kicker">R/ // TACTICAL OPERATIONS</p><h1 class="relay-tactical-title">MISSION <em>${String(index+1).padStart(2,'0')}</em> · ${String(mission.district||'').toUpperCase()}</h1></div>
+        <div class="relay-tactical-status"><i class="relay-live-dot"></i>MAP DATA LINKED · LIVE</div>
+        <div class="relay-tactical-actions"><button id="relayRouteMapBack" class="relay-tactical-btn" type="button">ESC · BRIEFING</button></div>
+      </header>
+      <section class="relay-tactical-layout">
+        <section class="relay-tactical-map" style="--route-accent:${accent}" aria-label="Tactical mission map">
+          <div class="scanline"></div><div class="relay-map-meta"><span>AREA OF OPERATION · ${String(mission.district||'').toUpperCase()}</span><b>COORD 00${index+1} / ROUTE MASTER</b></div><div class="relay-compass">N</div>
+          ${buildMapSvg(mission)}
+          <div class="relay-map-legend"><span class="relay-legend-item"><i class="relay-legend-dot route"></i>ROUTE</span><span class="relay-legend-item"><i class="relay-legend-dot cp"></i>CHECKPOINT</span><span class="relay-legend-item"><i class="relay-legend-dot signal"></i>SIGNAL</span><span class="relay-legend-item"><i class="relay-legend-dot hazard"></i>HAZARD</span><span class="relay-legend-item"><i class="relay-legend-dot secret"></i>SECRET</span></div>
+          <div class="relay-coordinates">X 000—${Math.round(Number(mission.goal?.x)||6100)}<br>Y ${Math.round(Number(mission.spawn?.y)||520)}—${Math.round(Number(mission.goal?.y)||500)}</div>
+        </section>
+        <aside class="relay-side">
+          <div class="relay-side-head"><small>ROUTE INTELLIGENCE</small><b id="relaySelectedMission">${mission.title}</b><span>${mission.objective || ''}</span></div>
+          <div id="relayMissionList" class="relay-mission-list"></div>
+          <div class="relay-side-detail" style="--route-accent:${accent}"><div class="relay-detail-kicker">MISSION STATUS</div><div class="relay-detail-title">${completed ? 'ROUTE SECURED' : 'ROUTE READY'}</div><div class="relay-detail-sub">${mission.routeProfile?.normal || 'Follow the marked route.'}</div><div class="relay-detail-stats"><div class="relay-detail-stat"><span>DIFFICULTY</span><b>${mission.difficulty||'--'}</b></div><div class="relay-detail-stat"><span>SIGNALS</span><b>${mission.signals?.length||0}</b></div><div class="relay-detail-stat"><span>BEST</span><b>${formatTime(stats.bestTime)}</b></div></div><button id="relayDeploy" class="relay-deploy" type="button">${completed ? 'REDEPLOY ROUTE' : 'DEPLOY MISSION'} · ${String(index+1).padStart(2,'0')}</button></div>
+        </aside>
+      </section>
+      <div id="relayDeployCountdown" class="relay-deploy-countdown" aria-live="assertive"><div class="relay-countdown-card"><small>TACTICAL DEPLOY</small><strong id="relayCountdownNumber" class="relay-countdown-number">3</strong><div id="relayCountdownState" class="relay-countdown-state">ROUTE LOCKED</div></div></div>`;
+
+    const list=$('relayMissionList');
+    if(list) list.innerHTML=missions.map((item,itemIndex)=>{const available=isUnlocked(item,state),done=completedIds(state).has(item.id),selected=item.id===mission.id;const s=statsFor(item,state);return `<button type="button" class="relay-mission-row ${selected?'is-selected':''} ${done?'is-done':''} ${available?'':'is-locked'}" style="--route-accent:${ACCENTS[item.id]||'#7feaff'}" data-route-mission="${item.id}" ${available?'':'disabled'}><span class="relay-row-index">${String(itemIndex+1).padStart(2,'0')}</span><span class="relay-row-copy"><b>${item.title}</b><small>${item.district} · ${item.difficulty||''}</small></span><span class="relay-row-status">${done?'✓':available?(s.bestRating?'★'.repeat(s.bestRating):'LIVE'):'LOCK'}</span></button>`;}).join('');
+    host.querySelectorAll('[data-route-mission]').forEach(button=>button.addEventListener('click',()=>renderMap(button.dataset.routeMission)));
+    $('relayRouteMapBack')?.addEventListener('click',()=>closeMap(host));
+    $('relayDeploy')?.addEventListener('click',()=>void deploy(mission));
+    rotateArt(host); closeLegacyPanels(); host.classList.remove('hidden'); document.body.classList.add('relay-route-active'); document.body.classList.remove('relay-mission-launching');
+    return true;
   };
 
-  window.relayOpenCampaignMap = open;
-  window.relayCampaignLaunchMission = launchMission;
+  const closeLegacyPanels = () => ['preflight','titlePanel','relayInfoPanel'].forEach(id => $(id)?.classList.add('hidden'));
+  window.relayOpenCampaignMap = () => renderMap(selectedMissionId);
+  window.relayCampaignLaunchMission = deploy;
 
-  document.addEventListener('keydown', event => {
-    if (event.key !== 'Escape') return;
-    const map = $id('worldMap');
-    if (!map || map.classList.contains('hidden')) return;
-    const missionClose = $id('relayMissionClose');
-    if (missionClose) {
-      event.preventDefault();
-      renderMap();
-      return;
-    }
+  document.addEventListener('keydown',event=>{
+    if(event.key !== 'Escape') return;
+    const host=$('worldMap'); if(!host || host.classList.contains('hidden')) return;
     event.preventDefault();
-    backToBriefing(map);
-  }, true);
+    if($('relayDeployCountdown')?.classList.contains('is-visible')) return;
+    if($('relaySelectedMission')) renderMap(); else closeMap(host);
+  },true);
 })();
