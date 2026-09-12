@@ -70,14 +70,15 @@ assert.match(mobileOwner, /events\.off\('mobile-action'/);
 assert.match(mobileOwner, /events\.off\('mobile-move'/);
 assert.match(mobileOwner, /window\.\__relayMobileInputSingleOwnerV9/);
 
-// Mobile PAUSE / SETTINGS have exactly one CSS presentation owner.
+// Mobile PAUSE / SETTINGS have exactly one visual button-styling owner.
 assert.match(canonicalCss, /MOBILE PAUSE \/ SETTINGS — CANONICAL OWNER/);
-assert.equal((canonicalCss.match(/#mobileBottomHud\s*\{/g) || []).length, 1);
-assert.equal((canonicalCss.match(/#mobileBottomHud\.is-active\s*\{/g) || []).length, 1);
-assert.doesNotMatch(releaseCss, /#mobileBottomHud\s*\{/);
-assert.doesNotMatch(releaseCss, /#mobileBottomHud[^\{]*\.mobile-menu-(pause|settings)/);
-assert.doesNotMatch(mobileGameplayCss, /#mobileBottomHud\s*\{/);
-assert.doesNotMatch(mobileGameplayCss, /#mobileBottomHud[^\{]*\.mobile-menu-(pause|settings)/);
+assert.match(canonicalCss, /\.mobile-menu-pause\{[\s\S]*bottom:/);
+assert.match(canonicalCss, /\.mobile-menu-settings\{[\s\S]*bottom:/);
+assert.match(canonicalCss, /#mobileBottomHud\.is-active\s*\{/);
+assert.doesNotMatch(releaseCss, /\.mobile-menu-button\s*\{/);
+assert.doesNotMatch(releaseCss, /\.mobile-menu-(pause|settings)\s*\{/);
+assert.doesNotMatch(mobileGameplayCss, /\.mobile-menu-button\s*\{/);
+assert.doesNotMatch(mobileGameplayCss, /\.mobile-menu-(pause|settings)\s*\{/);
 
 // RunnerScene stability behavior is source-owned by the runtime authority.
 assert.match(core, /SPAWN_SHIELD_MS/);
