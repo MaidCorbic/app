@@ -72,8 +72,8 @@ assert.match(mobileOwner, /window\.\__relayMobileInputSingleOwnerV9/);
 
 // Mobile PAUSE / SETTINGS have exactly one visual button-styling owner.
 assert.match(canonicalCss, /MOBILE PAUSE \/ SETTINGS — CANONICAL OWNER/);
-assert.match(canonicalCss, /\.mobile-menu-pause\{[\s\S]*bottom:/);
-assert.match(canonicalCss, /\.mobile-menu-settings\{[\s\S]*bottom:/);
+assert.match(canonicalCss, /\.mobile-menu-pause\s*\{[\s\S]*?bottom\s*:/);
+assert.match(canonicalCss, /\.mobile-menu-settings\s*\{[\s\S]*?bottom\s*:/);
 assert.match(canonicalCss, /#mobileBottomHud\.is-active\s*\{/);
 assert.doesNotMatch(releaseCss, /\.mobile-menu-button\s*\{/);
 assert.doesNotMatch(releaseCss, /\.mobile-menu-(pause|settings)\s*\{/);
