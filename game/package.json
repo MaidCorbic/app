@@ -9,6 +9,7 @@
     "test:progression": "node tests/progression.mjs",
     "test:missions": "node tests/missions.mjs",
     "test:start-flow": "node tests/start-flow.mjs",
+    "test:run-flow-contract": "node tests/run-flow-contract.mjs",
     "test:upgrades": "node tests/upgrades.mjs",
     "test:build-system": "node tests/build-system.mjs",
     "test:enemy-intel": "node tests/enemy-intel.mjs",
