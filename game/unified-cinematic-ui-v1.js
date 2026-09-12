@@ -3,8 +3,8 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
 
 (() => {
   'use strict';
-  if (window.__relayUnifiedCinematicUiV2) return;
-  window.__relayUnifiedCinematicUiV2 = true;
+  if (window.__relayUnifiedCinematicUiV1) return;
+  window.__relayUnifiedCinematicUiV1 = true;
 
   const PRESENTATION_KEY = 'relay.runner.ui.preferences.v1';
   const defaults = Object.freeze({ intelCards:true, allyIntel:true, eventPopups:true, tutorialHints:true });
@@ -29,8 +29,8 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
   };
 
   const resumeRunner = () => {
-    try { window.relayRunnerGame?.scene?.resume?.('runner'); } catch {}
-    try { window.__relayRunnerScene?.scene?.resume?.(); } catch {}
+    const scene = window.__relayRunnerScene;
+    try { scene?.scene?.resume?.(); } catch {}
   };
 
   const hidePause = (resume = false) => {
@@ -161,10 +161,9 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
       const rank = getCourierRank(state.xp || 0);
       const level = getLevelProgress(state.xp || 0);
       const mastery = Object.values(state.mastery || {}).reduce((n,b) => n + (Array.isArray(b) ? b.length : 0), 0);
-      content.innerHTML = `<div class="relay-cinematic-panel"><div class="relay-cinematic-body"><div class="relay-section-grid three"><section class="relay-ui-section"><div class="relay-ui-section-title">LEVEL</div><article class="relay-ui-card"><div class="relay-ui-copy"><strong>LEVEL ${level.level} / 100</strong><small>${level.level === 100 ? 'MAXIMUM LEVEL' : `${Math.max(0, level.next - state.xp)} XP TO NEXT LEVEL`}</small></div><b class="relay-cinematic-status">${Math.round(level.progress * 100)}%</b></article></section><section class="relay-ui-section"><div class="relay-ui-section-title">RANK</div><article class="relay-ui-card"><div class="relay-ui-copy"><strong>${rank.name}</strong><small>${state.xp || 0} XP · ${rank.next ? `${Math.max(0, rank.next.threshold - (state.xp || 0))} XP TO ${rank.next.name}` : 'MAXIMUM RANK'}</small></div></article></section><section class="relay-ui-section"><div class="relay-ui-section-title">RUNS</div><article class="relay-ui-card"><div class="relay-ui-copy"><strong>${state.totalRuns || 0} RUNS</strong><small>${state.completed?.length || 0}/${missions.length} ROUTES COMPLETE · ${state.bestRun || 0} BEST SCORE · ${state.signals || 0} SIGNALS</small></div><b class="relay-cinematic-status">${mastery} BADGES</b></article></section></div></div></div>`;
+      content.innerHTML = `<div class="relay-cinematic-panel"><div class="relay-cinematic-body"><div class="relay-section-grid three"><section class="relay-ui-section"><div class="relay-ui-section-title">LEVEL</div><article class="relay-ui-card"><div class="relay-ui-copy"><strong>LEVEL ${level.level} / 100</strong><small>${level.level === 100 ? 'MAXIMUM LEVEL' : `${Math.max(0, level.next - state.xp)} XP TO NEXT LEVEL`}</small></div><b class="relay-cinematic-status">${Math.round(level.progress * 100)}%</b></article></section><section class="relay-ui-section"><div class="relay-ui-section-title">RANK</div><article class="relay-ui-card"><div class="relay-ui-copy"><strong>${rank.name}</strong><small>${state.xp || 0} XP · ${rank.next ? `${Math.max(0, rank.next.threshold - (state.xp || 0))} XP TO ${rank.next.name}` : 'MAXIMUM RANK'}</small></div></article></section><section class="relay-ui-section"><div class="relay-ui-section-title">RUNS</div><article class="relay-ui-card"><div class="relay-ui-copy"><strong>${state.totalRuns || 0} RUNS</strong><small>${state.completed?.length || 0}/${missions.length} ROUTES COMPLETE · ${state.signals || 0} SIGNALS</small></div></article></section></div><div class="relay-ui-section wide"><div class="relay-ui-section-title">ACHIEVEMENTS</div><div class="relay-section-grid">${achievementDefinitions.map(a=>`<article class="relay-ui-card"><div class="relay-ui-copy"><strong>${(state.achievements||[]).includes(a.id) ? '★ ' : '○ '}${a.label}</strong><small>${a.detail}</small></div></article>`).join('')}</div></div><div class="relay-ui-section wide"><div class="relay-ui-section-title">MASTERY</div><article class="relay-ui-card"><div class="relay-ui-copy"><strong>${mastery} BADGES EARNED</strong><small>${missions.map(m=>`${m.title}: ${(state.mastery?.[m.id] || []).join(' · ') || 'UNCLAIMED'}`).join(' · ')}</small></div></article></div></div></div>`;
     } else if (tab === 'settings') {
-      const html = renderOptionsBody();
-      content.innerHTML = `<div class="relay-cinematic-panel"><div class="relay-cinematic-body">${html}</div></div>`;
+      renderOptions(content, 'embedded');
     } else if (tab === 'faq') {
       renderFaq(content);
     }
@@ -174,20 +173,19 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
     closeAllOverlays();
     ensurePauseShell();
     const pause = $('pauseMenu');
-    if (!pause) return false;
+    if (!pause) return;
     pause.classList.remove('hidden');
-    pause.removeAttribute('hidden');
+    pause.classList.add('relay-cinematic-overlay');
     pause.setAttribute('aria-hidden','false');
     try { window.__relayRunnerScene?.scene?.pause?.(); } catch {}
-    try { window.relayRunnerGame?.scene?.pause?.('runner'); } catch {}
     renderPause(tab || 'resume');
-    return true;
   };
 
   const openTitleOptions = () => {
     closeAllOverlays();
     const panel = $('titlePanel');
-    if (!panel) return false;
+    const content = $('titlePanelContent');
+    if (!panel || !content) return false;
     renderOptions(panel);
     panel.classList.remove('hidden');
     panel.removeAttribute('hidden');
@@ -199,6 +197,18 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
     closeAllOverlays();
     renderFaq($('relayInfoPanel'));
     return true;
+  };
+
+  const launchMissionViaLegacy = index => {
+    const pause = $('pauseMenu');
+    const oldTab = pause?.querySelector('.menu .tab[data-tab="missions"]');
+    if (!oldTab) return false;
+    try {
+      HTMLElement.prototype.click.call(oldTab);
+      const button = pause.querySelector(`.menu #panelContent [data-mission="${index}"]`);
+      if (button && !button.disabled) HTMLElement.prototype.click.call(button);
+      return true;
+    } catch { return false; }
   };
 
   const updateToggleDom = (button, enabled) => {
@@ -218,7 +228,7 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
       event.stopImmediatePropagation();
       const action = homeAction.dataset.homeV4Action;
       if (action === 'options') openTitleOptions();
-      else if (action === 'faq') openFaq();
+      else if (action === 'faq') window.relayHomeInfoV1?.open?.('faq') || openFaq();
       else if (action === 'update') window.relayHomeInfoV1?.open?.('update');
       return;
     }
@@ -239,6 +249,9 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
     const pauseTab = target.closest('[data-pause-tab]');
     if (pauseTab) { event.preventDefault(); renderPause(pauseTab.dataset.pauseTab); return; }
     if (target.closest('[data-unified-resume]')) { event.preventDefault(); hidePause(true); return; }
+
+    const launch = target.closest('[data-pause-launch]');
+    if (launch && !launch.disabled) { event.preventDefault(); launchMissionViaLegacy(Number(launch.dataset.pauseLaunch)); return; }
 
     const faqQuestion = target.closest('[data-faq-question]');
     if (faqQuestion) {
@@ -269,7 +282,7 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
       } else {
         const current = key === 'muted' ? !Boolean(state.muted) : Boolean(state[key]);
         const next = !current;
-        setCoreSetting(key, key === 'muted' ? !next : next);
+        setCoreSetting(key === 'muted' ? 'muted' : key, key === 'muted' ? !next : next);
         updateToggleDom(setting, next);
       }
       return;

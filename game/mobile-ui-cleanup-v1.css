@@ -8,8 +8,15 @@
   pointer-events: none !important;
 }
 
-/* Portrait mobile keeps both canonical in-game PAUSE and SETTINGS available. */
+/* Portrait mobile keeps PAUSE only; SETTINGS remains available elsewhere when needed. */
 @media (max-width: 768px) and (orientation: portrait) {
+  body.is-touch .mobile-bottom-hud .mobile-menu-settings {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
   /* Keyboard-only ESC/controls hint has no purpose on touch devices. */
   .relay-faction-dialogue .relay-faction-hint,
   .relay-faction-dialogue .relay-faction-hint * {
