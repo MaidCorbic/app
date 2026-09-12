@@ -3,6 +3,7 @@ import './unified-cinematic-ui-bridge-v1.js';
 import './unified-options-ui-v1.js';
 import './unified-gameplay-ui-v1.js';
 import './presentation-final-v1.js';
+import './campaign-route-cinematic-v1.js';
 
 (() => {
   'use strict';
@@ -18,7 +19,7 @@ import './presentation-final-v1.js';
 
   const wait = ms => new Promise(resolve => window.setTimeout(resolve, ms));
 
-  const startRunnerDirect = async () => {
+  const startRunnerDirect = async (index = 0) => {
     if (window.__relayRunStartInFlight) return Boolean(await window.__relayRunStartInFlight.promise);
 
     const run = async () => {
@@ -30,12 +31,12 @@ import './presentation-final-v1.js';
 
       const scene = getRunner();
       try {
-        if (scene?.scene?.isPaused?.()) {
+        if (scene?.scene?.isPaused?.() && index === 0) {
           game.scene.resume('runner');
-        } else if (scene?.scene?.isActive?.()) {
+        } else if (scene?.scene?.isActive?.() && index === 0) {
           game.scene.resume('runner');
         } else if (typeof window.relayLaunchRun === 'function') {
-          await window.relayLaunchRun(0);
+          await window.relayLaunchRun(index);
         } else {
           return false;
         }
@@ -50,7 +51,7 @@ import './presentation-final-v1.js';
       for (let attempt = 0; attempt < 40; attempt += 1) {
         const active = getRunner();
         if (active?.scene?.isActive?.() && !active?.scene?.isPaused?.()) {
-          window.dispatchEvent(new CustomEvent('relay:run-started', { detail: { scene: active } }));
+          window.dispatchEvent(new CustomEvent('relay:run-started', { detail: { scene: active, index } }));
           return true;
         }
         await wait(50);
@@ -108,7 +109,8 @@ import './presentation-final-v1.js';
       if (start) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        void startRunnerDirect();
+        if (typeof window.relayOpenCampaignMap === 'function') window.relayOpenCampaignMap();
+        else void startRunnerDirect();
         return;
       }
 
