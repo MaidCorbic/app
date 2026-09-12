@@ -8,6 +8,9 @@ const read = path => readFile(fileURLToPath(new URL(path, gameRoot)), 'utf8');
 const index = await read('index.html');
 const arrival = await read('cinematic-arrival-v2.js');
 const arrivalCss = await read('cinematic-arrival-v2.css');
+const canonicalCss = await read('canonical-ui-v1.css');
+const releaseCss = await read('release-final-ui-v1.css');
+const mobileGameplayCss = await read('unified-gameplay-ui-v1-mobile.css');
 const config = await read('vite.config.mjs');
 const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
@@ -66,6 +69,15 @@ assert.match(mobileOwner, /detachLegacyRunnerInput/);
 assert.match(mobileOwner, /events\.off\('mobile-action'/);
 assert.match(mobileOwner, /events\.off\('mobile-move'/);
 assert.match(mobileOwner, /window\.\__relayMobileInputSingleOwnerV9/);
+
+// Mobile PAUSE / SETTINGS have exactly one CSS presentation owner.
+assert.match(canonicalCss, /MOBILE PAUSE \/ SETTINGS — CANONICAL OWNER/);
+assert.equal((canonicalCss.match(/#mobileBottomHud\s*\{/g) || []).length, 1);
+assert.equal((canonicalCss.match(/#mobileBottomHud\.is-active\s*\{/g) || []).length, 1);
+assert.doesNotMatch(releaseCss, /#mobileBottomHud\s*\{/);
+assert.doesNotMatch(releaseCss, /#mobileBottomHud[^\{]*\.mobile-menu-(pause|settings)/);
+assert.doesNotMatch(mobileGameplayCss, /#mobileBottomHud\s*\{/);
+assert.doesNotMatch(mobileGameplayCss, /#mobileBottomHud[^\{]*\.mobile-menu-(pause|settings)/);
 
 // RunnerScene stability behavior is source-owned by the runtime authority.
 assert.match(core, /SPAWN_SHIELD_MS/);
