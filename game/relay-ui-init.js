@@ -1,9 +1,9 @@
 import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 
 // CSS bootstrap ownership: feature styles are loaded here so runtime UI has one
-// predictable entry point. canonical-ui-v1.css is loaded after shared feature
-// layers and before the narrow release HUD layer, making it the shared UI
-// authority without changing feature-specific presentation.
+// predictable entry point. Canonical UI is loaded after shared feature and
+// gameplay presentation layers; the narrow release layer follows only for
+// components not owned by canonical-ui-v1.css.
 import './splash-progress-visibility.css';
 import './cinematic-splash.css';
 import './mobile-final-polish.css';
@@ -30,7 +30,20 @@ import './mobile-map-web-parity-all-levels-v1.css';
 import './mobile-top-card-map-legend-fix-v1.css';
 import './mobile-ui-cleanup-v1.css';
 import './release-ux-gameplay-polish-v1.css';
+
+// Gameplay presentation CSS is bootstrapped here rather than from the Home
+// interaction module so stylesheet ownership is centralized and deterministic.
+import './unified-cinematic-ui-v1.css';
+import './unified-gameplay-ui-v1.css';
+import './unified-gameplay-ui-v1-polish.css';
+import './unified-gameplay-ui-v1-mobile.css';
+import './presentation-final-v1.css';
+
+// Canonical UI owns shared Home, gameplay HUD, pause-menu and touch geometry.
 import './canonical-ui-v1.css';
+
+// Narrow release-only presentation layer. It intentionally contains only
+// specialised components not owned by canonical-ui-v1.css.
 import './release-final-ui-v1.css';
 
 import './gameplay-ui-visibility-v3.js';
