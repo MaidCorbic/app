@@ -5,11 +5,12 @@ const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'ut
 
 const loader = read('play-deployment-loader-v1.js');
 const runtime = read('relay-ui-init.js');
+const splashCss = read('cinematic-splash.css');
 
 assert.match(loader, /loadplay\.jpg/);
 assert.match(loader, /relayPlayDeployment/);
 assert.match(loader, /DEPLOYMENT SEQUENCE/);
-assert.match(loader, /SYSTEM LINK  \/\/  SECURE CHANNEL/);
+assert.match(splashCss, /SYSTEM LINK  \/\/  SECURE CHANNEL/);
 assert.match(loader, /NODE/);
 assert.match(loader, /SIGNAL/);
 assert.match(loader, /RELAY/);
