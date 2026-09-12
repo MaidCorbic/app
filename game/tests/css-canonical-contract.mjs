@@ -35,11 +35,11 @@ assert.match(base, /body\.is-touch \.mobile-controls small/);
 assert.match(css, /body\.is-touch #play \.mobile-actions small\{display:none !important\}/);
 
 // Mobile PAUSE / SETTINGS have one visual CSS owner. The canonical file may also
-// contain a small helper/contract rule for the surface; gameplay CSS may likewise
-// keep visibility coordination, but neither may style the actual menu buttons.
+// contain helper/contract rules for the surface; gameplay CSS may keep visibility
+// coordination, but neither may style the actual menu buttons.
 assert.match(css, /#mobileBottomHud[^{]*\{[\s\S]*\.mobile-menu-button/);
-assert.match(css, /\.mobile-menu-pause\{[\s\S]*bottom:/);
-assert.match(css, /\.mobile-menu-settings\{[\s\S]*bottom:/);
+assert.match(css, /\.mobile-menu-pause\s*\{[\s\S]*?bottom\s*:/);
+assert.match(css, /\.mobile-menu-settings\s*\{[\s\S]*?bottom\s*:/);
 assert.equal((css.match(/#mobileBottomHud\.is-active\s*\{/g) || []).length, 1, 'canonical mobile HUD active-state rule must be unique');
 assert.doesNotMatch(releaseCss, /\.mobile-menu-button\s*\{/,'release-final-ui-v1.css must not style mobile menu buttons');
 assert.doesNotMatch(releaseCss, /\.mobile-menu-(pause|settings)\s*\{/,'release-final-ui-v1.css must not style mobile PAUSE / SETTINGS');
