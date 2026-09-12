@@ -932,23 +932,31 @@ body.is-touch #play .hud-actions>button{
     pointer-events:none !important;
   }
 
-  html body.is-touch #mobileBottomHud{
-    position:fixed !important;
-    inset:0 !important;
-    z-index:2000 !important;
-    display:none !important;
-    width:100vw !important;
-    height:100dvh !important;
-    margin:0 !important;
-    padding:0 !important;
-    pointer-events:none !important;
-    align-items:initial !important;
-    justify-content:initial !important;
-  }
+html body.is-touch #mobileBottomHud{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:2000 !important;
+  display:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  pointer-events:none !important;
+}
 
   html body.is-touch #mobileBottomHud.is-active{
     display:block !important;
   }
+
+  html body.is-touch #mobileBottomHud.is-active{
+  display:block !important;
+}
+
+html body.is-touch #mobileBottomHud{
+  overflow:visible !important;
+}
+
+html body.is-touch #mobileBottomHud .mobile-menu-button{
+  box-sizing:border-box !important;
+}
 
   html body.is-touch #mobileBottomHud .mobile-menu-button{
     position:fixed !important;
