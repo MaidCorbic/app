@@ -9,12 +9,6 @@ on:
     branches:
       - main
 
-# Keep only the newest validation run for a PR/branch. This prevents stale
-# queued runs from piling up while preserving the required check itself.
-concurrency:
-  group: gameplay-hardening-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   gameplay-hardening:
     name: Gameplay Hardening Suite
@@ -31,10 +25,10 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: game/package-lock.json
+          cache-dependency-path: game/package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Prepare APT for Playwright
         run: |

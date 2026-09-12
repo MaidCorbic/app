@@ -26,7 +26,7 @@ export function installGameplayExpansionV11Twenty(RunnerScene){
     const onGame=(event,handler)=>on(scene.game?.events,event,handler);
     const emit=(index,source,detail={})=>scene.events?.emit?.('relay:gameplay:v11',{type:'react',index,detail:{...detail,source},state});
     const react=(type,detail)=>{const before=state.values.slice();bridge(state,type,detail);if(!before.every((v,i)=>v===state.values[i])){saveState(state);emit(indexFor(type), 'GAMEPLAY EVENT', {type,detail});}};
-    ['feedback','dash-start','dash-end','slide-jump','breakable-destroyed','game-over','complete','energy','ammo'].forEach(event=>onGame(event,(detail)=>react(event,detail)));
+    ['feedback','dash-start','dash-end','slide-jump','breakable-destroyed','game-over','complete','energy','ammo','signal-network','signal-network-node','signal-network-complete'].forEach(event=>onGame(event,(detail)=>react(event,detail)));
     on(scene.events,'relay:gameplay:deep',payload=>react(payload?.name,payload?.detail));
     on(scene.events,'shutdown',()=>listeners.forEach(off=>off()));
     scene.__relayV11={state,emit,react};

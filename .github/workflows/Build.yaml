@@ -4,29 +4,22 @@
 name: Build Components
 
 on:
-  # Image builds are deployment work, not PR validation. Keeping this on main
-  # prevents every feature-branch push from creating an extra queued runner job.
   push:
     branches:
-      - main
-
-concurrency:
-  group: build-components-${{ github.ref }}
-  cancel-in-progress: true
+      - '**'
 
 jobs:
   define-components:
     name: Define Components
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       components: ${{ steps.diploi-meta.outputs.components }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       - id: diploi-meta
         name: Diploi meta
         uses: diploi/action-components@v1.8
-
   run-builds:
     name: Build ${{ matrix.name }} ${{ matrix.stage }}
     runs-on: ubuntu-24.04-arm
@@ -37,7 +30,7 @@ jobs:
         include: ${{ fromJSON(needs.define-components.outputs.components) }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       - name: Diploi build
         uses: diploi/action-build@v1.12
         with: ${{ matrix }}
