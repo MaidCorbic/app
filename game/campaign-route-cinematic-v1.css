@@ -1,0 +1,290 @@
+/* Relay Runner — Campaign Route Cinematic V1 */
+
+.relay-route-map{
+  position:fixed!important;
+  inset:0!important;
+  z-index:1000!important;
+  display:flex!important;
+  flex-direction:column;
+  min-height:100dvh;
+  overflow:hidden;
+  isolation:isolate;
+  color:#f3f7fa;
+  background:#040811;
+  font-family:"Manrope",system-ui,sans-serif;
+}
+
+.relay-route-map.hidden{display:none!important}
+
+.relay-route-map-bg,
+.relay-route-map-grid,
+.relay-route-map::after{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.relay-route-map-bg{
+  z-index:-4;
+  background:
+    radial-gradient(circle at 74% 22%,rgba(141,244,255,.12),transparent 28%),
+    radial-gradient(circle at 18% 82%,rgba(255,208,110,.08),transparent 30%),
+    linear-gradient(180deg,#08111e 0%,#050914 48%,#02050a 100%);
+}
+
+.relay-route-map-grid{
+  z-index:-3;
+  opacity:.42;
+  background-image:
+    linear-gradient(rgba(141,244,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(141,244,255,.045) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.9),rgba(0,0,0,.15));
+}
+
+.relay-route-map::after{
+  content:"";
+  z-index:-2;
+  background:radial-gradient(circle at center,transparent 30%,rgba(0,0,0,.48) 100%);
+}
+
+.relay-route-map-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:24px;
+  padding:clamp(22px,3.2vw,46px) clamp(18px,4vw,68px) 12px;
+}
+
+.relay-route-kicker{
+  margin:0;
+  color:#ffd06e;
+  font:900 10px/1.2 "DM Mono",monospace;
+  letter-spacing:.19em;
+  text-transform:uppercase;
+}
+
+.relay-route-map-header h2{
+  margin:8px 0 8px;
+  font:950 clamp(38px,5vw,74px)/.92 "DM Mono",monospace;
+  letter-spacing:-.045em;
+  text-transform:uppercase;
+}
+
+.relay-route-map-header h2 em{color:#8df4ff;font-style:normal}
+
+.relay-route-sub{
+  width:min(690px,80vw);
+  margin:0;
+  color:#8ba0b8;
+  font:500 12px/1.55 system-ui,sans-serif;
+}
+
+.relay-route-back{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  min-height:40px;
+  padding:0 14px;
+  border:1px solid rgba(141,244,255,.25);
+  border-radius:10px;
+  color:#f3f7fa;
+  background:rgba(7,15,27,.72);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 12px 30px rgba(0,0,0,.25);
+  backdrop-filter:blur(12px);
+  cursor:pointer;
+}
+
+.relay-route-back:hover,
+.relay-route-back:focus-visible{border-color:rgba(141,244,255,.58);outline:none}
+.relay-route-back span{color:#8ba0b8;font:800 8px/1 "DM Mono",monospace;letter-spacing:.14em}
+
+.relay-route-layout{
+  flex:1;
+  min-height:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(290px,360px);
+  gap:18px;
+  padding:12px clamp(18px,4vw,68px) clamp(20px,3vw,42px);
+}
+
+.relay-route-canvas{
+  position:relative;
+  min-height:420px;
+  overflow:hidden;
+  border:1px solid rgba(141,244,255,.16);
+  border-radius:18px;
+  background:
+    linear-gradient(180deg,rgba(7,16,29,.72),rgba(3,7,13,.9)),
+    radial-gradient(circle at 20% 80%,rgba(141,244,255,.07),transparent 32%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 24px 70px rgba(0,0,0,.38),0 0 42px rgba(141,244,255,.035);
+}
+
+.relay-route-canvas::before{
+  content:"";
+  position:absolute;
+  inset:8% 6%;
+  border:1px dashed rgba(141,244,255,.08);
+  border-radius:14px;
+}
+
+.relay-route-cityline{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  opacity:.24;
+  background:linear-gradient(to top,rgba(141,244,255,.12),transparent);
+}
+
+.cityline-a{height:20%;clip-path:polygon(0 72%,7% 52%,13% 68%,18% 40%,26% 61%,31% 31%,37% 58%,44% 38%,50% 66%,57% 43%,64% 58%,71% 30%,78% 54%,84% 36%,91% 61%,100% 42%,100% 100%,0 100%)}
+.cityline-b{height:31%;opacity:.10;clip-path:polygon(0 73%,6% 48%,14% 62%,20% 23%,28% 55%,35% 33%,42% 61%,50% 19%,58% 52%,67% 32%,75% 60%,84% 25%,91% 48%,100% 29%,100% 100%,0 100%)}
+.cityline-c{height:42%;opacity:.06;clip-path:polygon(0 72%,8% 35%,18% 57%,28% 17%,38% 55%,47% 31%,57% 48%,65% 14%,74% 46%,83% 23%,92% 51%,100% 33%,100% 100%,0 100%)}
+
+.relay-route-svg{
+  position:absolute;
+  inset:12% 7%;
+  width:86%;
+  height:76%;
+  overflow:visible;
+}
+
+.relay-route-glow,
+.relay-route-trunk{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.relay-route-glow{stroke:#8df4ff;stroke-width:3.2;opacity:.14;filter:blur(3px)}
+.relay-route-trunk{stroke:url(#routeTraceGradient);stroke-width:1.25;stroke-dasharray:2 1;opacity:.86}
+
+.relay-route-node{
+  position:absolute;
+  z-index:4;
+  width:38px;
+  height:38px;
+  padding:0;
+  transform:translate(-50%,-50%);
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  color:#fff;
+}
+
+.relay-node-ring,
+.relay-node-core,
+.relay-node-pulse{position:absolute;inset:0;border-radius:50%}
+.relay-node-ring{border:1px solid color-mix(in srgb,var(--mission-accent) 70%,transparent);background:rgba(4,9,17,.75);box-shadow:0 0 20px color-mix(in srgb,var(--mission-accent) 30%,transparent);transition:transform .18s ease,box-shadow .18s ease}
+.relay-node-core{inset:7px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.14);color:#f3f7fa;font:950 8px/1 "DM Mono",monospace;background:color-mix(in srgb,var(--mission-accent) 18%,#07101a)}
+.relay-node-label{position:absolute;top:44px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap;text-shadow:0 3px 12px #000}
+.relay-node-label small{color:#8ba0b8;font:800 7px/1 "DM Mono",monospace;letter-spacing:.11em;text-transform:uppercase}
+.relay-node-label b{color:#f3f7fa;font:900 9px/1 "DM Mono",monospace;letter-spacing:.05em;text-transform:uppercase}
+
+.relay-route-node:hover .relay-node-ring,
+.relay-route-node:focus-visible .relay-node-ring{transform:scale(1.17);box-shadow:0 0 24px color-mix(in srgb,var(--mission-accent) 48%,transparent)}
+.relay-route-node:focus-visible{outline:none}
+.relay-route-node.is-current .relay-node-ring{animation:relayRoutePulse 1.5s ease-in-out infinite}
+.relay-route-node.is-complete .relay-node-core{background:rgba(174,227,127,.17);color:#aee37f}
+.relay-route-node.is-locked{opacity:.30;cursor:not-allowed}
+.relay-route-node.is-unlocked .relay-node-core{box-shadow:inset 0 0 12px color-mix(in srgb,var(--mission-accent) 10%,transparent)}
+.relay-node-pulse{inset:-4px;border:1px solid color-mix(in srgb,var(--mission-accent) 28%,transparent);animation:relayPulseOuter 1.9s ease-out infinite}
+
+.relay-route-start,
+.relay-route-finish{
+  position:absolute;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#8ba0b8;
+  font:800 7px/1.35 "DM Mono",monospace;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.relay-route-start{left:3.5%;bottom:4.5%}
+.relay-route-finish{right:2.8%;top:3.8%}
+.relay-route-start i,
+.relay-route-finish i{width:7px;height:7px;border-radius:50%;background:#ffd06e;box-shadow:0 0 14px rgba(255,208,110,.75)}
+.relay-route-finish i{background:#8df4ff;box-shadow:0 0 14px rgba(141,244,255,.75)}
+.relay-route-start b,.relay-route-finish b{color:#f3f7fa}
+
+.relay-route-compass{position:absolute;right:18px;bottom:18px;display:grid;gap:4px;place-items:center;color:#8ba0b8;font:800 7px/1 "DM Mono",monospace;letter-spacing:.15em}
+.relay-route-compass span{display:block;width:18px;height:18px;border:1px solid rgba(141,244,255,.28);border-radius:50%;position:relative}
+.relay-route-compass span::after{content:"";position:absolute;left:50%;top:2px;width:1px;height:13px;background:#8df4ff;transform:rotate(32deg);transform-origin:center}
+.relay-route-compass small{font:700 6px/1 "DM Mono",monospace}
+
+.relay-route-intel{
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  border:1px solid rgba(141,244,255,.14);
+  border-radius:16px;
+  background:rgba(5,11,20,.86);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 20px 60px rgba(0,0,0,.30);
+  backdrop-filter:blur(16px);
+}
+
+.relay-route-intel-top{display:flex;align-items:center;justify-content:space-between;padding:14px 15px;border-bottom:1px solid rgba(141,244,255,.10);color:#ffd06e;font:900 8px/1 "DM Mono",monospace;letter-spacing:.14em}
+.relay-route-intel-top i{width:6px;height:6px;border-radius:50%;background:#aee37f;box-shadow:0 0 12px rgba(174,227,127,.7)}
+.relay-route-mission-list{flex:1;min-height:0;overflow:auto;padding:8px}
+.relay-route-mission-list::-webkit-scrollbar{width:6px}.relay-route-mission-list::-webkit-scrollbar-thumb{background:rgba(141,244,255,.14);border-radius:99px}
+
+.relay-route-list-row{width:100%;display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:9px;padding:11px 9px;border:1px solid transparent;border-radius:10px;background:transparent;color:#f3f7fa;text-align:left;cursor:pointer}
+.relay-route-list-row:hover,.relay-route-list-row:focus-visible{border-color:rgba(141,244,255,.20);background:rgba(141,244,255,.045);outline:none}
+.relay-route-list-row.is-complete{background:rgba(174,227,127,.04)}
+.relay-route-list-row.is-locked{opacity:.34;cursor:not-allowed}
+.route-list-index{color:#667b94;font:900 8px/1 "DM Mono",monospace}
+.route-list-copy{min-width:0;display:flex;flex-direction:column;gap:4px}
+.route-list-copy b{font:900 10px/1.1 "DM Mono",monospace;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route-list-copy small{color:#7f93aa;font:700 7px/1.1 "DM Mono",monospace;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route-list-status{color:#8df4ff;font:900 8px/1 "DM Mono",monospace;letter-spacing:.08em;white-space:nowrap}
+.relay-route-list-row.is-complete .route-list-status{color:#aee37f}
+
+.relay-route-intel footer{display:flex;flex-wrap:wrap;gap:11px;padding:12px 14px;border-top:1px solid rgba(141,244,255,.10);color:#6f849d;font:800 6px/1 "DM Mono",monospace;letter-spacing:.09em}
+.legend-dot{display:inline-block;width:5px;height:5px;margin-right:4px;border-radius:50%;vertical-align:middle}.legend-dot.live{background:#8df4ff;box-shadow:0 0 8px rgba(141,244,255,.7)}.legend-dot.done{background:#aee37f}.legend-dot.locked{background:#59677a}
+
+.relay-mission-bg{position:absolute;inset:0;z-index:-3;background-position:center;background-size:cover;background-repeat:no-repeat;filter:saturate(.86) contrast(1.05);transform:scale(1.02)}
+.relay-mission-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 72% 28%,color-mix(in srgb,var(--mission-accent) 24%,transparent),transparent 28%),linear-gradient(180deg,rgba(3,8,16,.12),rgba(3,8,16,.60))}
+.relay-mission-noise{position:absolute;inset:0;z-index:-2;opacity:.08;pointer-events:none;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.10) 0 1px,transparent 1px 4px);mix-blend-mode:overlay}
+.relay-mission-shell{position:relative;flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);align-items:center;gap:clamp(24px,5vw,80px);padding:clamp(60px,8vw,110px) clamp(18px,6vw,100px) clamp(26px,4vw,60px)}
+.relay-mission-copy{max-width:720px}
+.relay-mission-number{margin:12px 0 6px;color:#8ba0b8;font:900 8px/1 "DM Mono",monospace;letter-spacing:.16em}
+.relay-mission-copy h2{margin:0;color:#f3f7fa;font:950 clamp(48px,7vw,104px)/.84 "DM Mono",monospace;letter-spacing:-.06em;text-transform:uppercase;text-shadow:0 12px 40px rgba(0,0,0,.32)}
+.relay-mission-district{margin:11px 0 15px;color:var(--mission-accent);font:950 11px/1 "DM Mono",monospace;letter-spacing:.19em}
+.relay-mission-description{max-width:620px;margin:0;color:#c5d2de;font:500 14px/1.55 system-ui,sans-serif;text-shadow:0 3px 15px rgba(0,0,0,.6)}
+.relay-mission-objective{display:grid;gap:6px;max-width:560px;margin-top:22px;padding:12px 14px;border-left:2px solid var(--mission-accent);background:rgba(3,9,17,.56);backdrop-filter:blur(8px)}
+.relay-mission-objective span,.relay-mission-stats span{color:#8095ad;font:900 7px/1 "DM Mono",monospace;letter-spacing:.15em}
+.relay-mission-objective b{color:#f3f7fa;font:900 11px/1.25 "DM Mono",monospace;letter-spacing:.04em}
+.relay-mission-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:620px;margin-top:14px}
+.relay-mission-stats>div{padding:10px 9px;border:1px solid rgba(141,244,255,.12);border-radius:9px;background:rgba(4,10,18,.54)}
+.relay-mission-stats b{display:block;margin-top:5px;color:#f3f7fa;font:900 9px/1.15 "DM Mono",monospace}
+.relay-mission-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
+.relay-route-primary{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-height:50px;padding:0 20px;border:1px solid color-mix(in srgb,var(--mission-accent) 64%,transparent);border-radius:10px;color:#061019;background:var(--mission-accent);box-shadow:0 14px 34px color-mix(in srgb,var(--mission-accent) 18%,transparent);font:950 10px/1 "DM Mono",monospace;letter-spacing:.10em;cursor:pointer}
+.relay-route-primary:hover,.relay-route-primary:focus-visible{filter:brightness(1.07);transform:translateY(-1px);outline:none}
+.relay-route-primary:disabled{opacity:.75;cursor:wait;transform:none}
+.relay-route-primary.is-loading::after{content:"";width:10px;height:10px;border:2px solid rgba(6,16,25,.35);border-top-color:#061019;border-radius:50%;animation:relaySpin .7s linear infinite}
+.relay-mission-actions>span{color:#8ba0b8;font:800 7px/1.3 "DM Mono",monospace;letter-spacing:.10em}
+.relay-mission-close{position:absolute;top:24px;left:clamp(18px,4vw,68px);z-index:4;min-height:38px;padding:0 13px;border:1px solid rgba(141,244,255,.18);border-radius:9px;color:#f3f7fa;background:rgba(4,10,18,.62);backdrop-filter:blur(10px);font:900 8px/1 "DM Mono",monospace;letter-spacing:.12em;cursor:pointer}.relay-mission-close:hover,.relay-mission-close:focus-visible{border-color:rgba(141,244,255,.48);outline:none}.relay-mission-close span{color:#8ba0b8}
+
+.relay-mission-route-panel{align-self:center;padding:15px;border:1px solid rgba(141,244,255,.16);border-radius:15px;background:rgba(4,10,18,.64);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 24px 70px rgba(0,0,0,.30);backdrop-filter:blur(14px)}
+.relay-mission-route-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:11px;color:#8ba0b8;font:900 7px/1 "DM Mono",monospace;letter-spacing:.13em}.relay-mission-route-head b{color:var(--mission-accent)}
+.relay-mission-route-map{position:relative;aspect-ratio:1.45;border:1px solid rgba(141,244,255,.10);border-radius:10px;overflow:hidden;background:rgba(1,5,10,.66)}
+.relay-mission-route-map svg{position:absolute;inset:7%;width:86%;height:86%}
+.mission-route-grid{fill:none;stroke:rgba(141,244,255,.055);stroke-width:.45}.route-branch{fill:none;stroke:#ffb454;stroke-width:1.1;stroke-dasharray:1.5 1.5;opacity:.6}.mission-route-glow{fill:none;stroke:var(--mission-accent);stroke-width:3.2;opacity:.13;filter:blur(2.3px);stroke-linecap:round;stroke-linejoin:round}.mission-route-line{fill:none;stroke:var(--mission-accent);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:2 1}.mission-route-point{fill:#061019;stroke:var(--mission-accent);stroke-width:1}.mission-route-point.origin,.mission-route-point.goal{fill:var(--mission-accent)}
+.route-panel-label{position:absolute;bottom:8px;color:#71879f;font:900 6px/1 "DM Mono",monospace;letter-spacing:.12em}.route-panel-label.start{left:9px}.route-panel-label.finish{right:9px}
+.relay-route-profile{display:grid;grid-template-columns:74px minmax(0,1fr);gap:5px 10px;margin-top:10px}.relay-route-profile span{color:var(--mission-accent);font:900 6px/1.2 "DM Mono",monospace;letter-spacing:.10em}.relay-route-profile p{margin:0;color:#879bb0;font:500 8px/1.4 system-ui,sans-serif}
+
+@keyframes relayRoutePulse{0%,100%{box-shadow:0 0 20px color-mix(in srgb,var(--mission-accent) 30%,transparent)}50%{box-shadow:0 0 34px color-mix(in srgb,var(--mission-accent) 66%,transparent)}}
+@keyframes relayPulseOuter{0%{transform:scale(.72);opacity:.9}80%,100%{transform:scale(1.6);opacity:0}}
+@keyframes relaySpin{to{transform:rotate(360deg)}}
+
+body.relay-route-active #play{visibility:hidden;pointer-events:none}
+body.relay-route-active #intro{visibility:hidden;pointer-events:none}
+body.relay-mission-launching .relay-route-map{cursor:progress}
+
+@media (max-width:900px){
+  .relay-route-map-header{padding-bottom:8px}.relay-route-sub{max-width:620px}.relay-route-layout{grid-template-columns:1fr;overflow:auto}.relay-route-canvas{min-height:52vh}.relay-route-intel{min-height:270px}.relay-mission-shell{grid-template-columns:1fr;overflow:auto;align-items:start;padding-top:88px}.relay-mission-route-panel{max-width:620px}
+}
+
+@media (max-width:640px){
+  .relay-route-map-header{align-items:flex-end;padding:16px 14px 8px}.relay-route-map-header h2{font-size:34px}.relay-route-sub{font-size:10px}.relay-route-back span{display:none}.relay-route-layout{padding:8px 14px 16px}.relay-route-canvas{min-height:48vh}.relay-node-label{display:none}.relay-route-start,.relay-route-finish{font-size:6px}.relay-mission-copy h2{font-size:54px}.relay-mission-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.relay-mission-description{font-size:12px}.relay-mission-shell{padding:82px 14px 20px}.relay-mission-route-panel{margin-bottom:12px}.relay-mission-close{top:14px;left:14px}
+}
+
+@media (prefers-reduced-motion:reduce){.relay-node-pulse,.relay-route-node.is-current .relay-node-ring{animation:none!important}.relay-route-primary{transition:none}}
