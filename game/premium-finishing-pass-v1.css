@@ -1,0 +1,521 @@
+/* ============================================================
+   RUNNER RELAY — PREMIUM FINISHING PASS V1
+   Visual-only final layer. Gameplay, input, progression and
+   mission state are intentionally untouched.
+   ============================================================ */
+
+#intro.home-v3,
+#play,
+#pauseMenu,
+#titlePanel,
+#finish,
+#gameOver,
+#levelUp,
+#abilityUnlock{
+  --rr-cyan:#78e9ff;
+  --rr-cyan-strong:#39c6ff;
+  --rr-violet:#8f6bff;
+  --rr-gold:#ffd66f;
+  --rr-white:#f4fbff;
+  --rr-text:#c9d9e3;
+  --rr-muted:#8fa7b7;
+}
+
+/* ============================================================
+   HOME — CINEMATIC DEPTH
+   ============================================================ */
+
+#intro.home-v3 .home-v4-art{
+  opacity:.62 !important;
+  filter:saturate(.82) contrast(1.12) brightness(.62) !important;
+  transform:scale(1.035) !important;
+  animation:rrHomeArtDrift 24s ease-in-out infinite alternate !important;
+  will-change:transform,filter !important;
+}
+
+#intro.home-v3 .home-v4-art::after{
+  content:"";
+  position:absolute;
+  inset:-8%;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 68% 30%,rgba(120,233,255,.075),transparent 24%),
+    radial-gradient(circle at 30% 70%,rgba(143,107,255,.055),transparent 22%),
+    repeating-linear-gradient(108deg,transparent 0 8%,rgba(223,247,255,.018) 8.08% 8.14%,transparent 8.2% 16%);
+  mix-blend-mode:screen;
+  opacity:.65;
+}
+
+#intro.home-v3 .home-v4-vignette{
+  background:
+    linear-gradient(90deg,rgba(1,4,8,.96) 0%,rgba(1,4,8,.68) 25%,rgba(1,4,8,.16) 52%,rgba(1,4,8,.42) 76%,rgba(1,4,8,.94) 100%),
+    linear-gradient(180deg,rgba(1,4,8,.12) 0%,transparent 36%,rgba(1,4,8,.92) 100%),
+    radial-gradient(circle at 55% 45%,transparent 26%,rgba(1,4,8,.38) 100%) !important;
+}
+
+#intro.home-v3 .home-v4-grid{
+  opacity:.16 !important;
+  background-size:58px 58px !important;
+  animation:rrHomeGridFlow 17s linear infinite !important;
+}
+
+#intro.home-v3 .home-v4-scan{
+  opacity:.24 !important;
+  background:repeating-linear-gradient(180deg,transparent 0 5px,rgba(174,238,255,.022) 6px,transparent 7px) !important;
+}
+
+#intro.home-v3 .home-v4-signal{
+  border-color:rgba(120,233,255,.115) !important;
+  box-shadow:0 0 0 34px rgba(120,233,255,.014),0 0 0 78px rgba(143,107,255,.012),0 0 90px rgba(120,233,255,.055) !important;
+}
+
+/* ============================================================
+   HOME — TOP STATUS
+   ============================================================ */
+
+#intro.home-v3 .home-v4-status{
+  min-height:34px !important;
+  padding:9px 12px !important;
+  border-color:rgba(120,233,255,.22) !important;
+  background:linear-gradient(135deg,rgba(7,18,30,.84),rgba(3,9,16,.68)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 30px rgba(0,0,0,.24),0 0 20px rgba(120,233,255,.035) !important;
+}
+
+#intro.home-v3 .home-v4-status b{color:#dffaff !important;}
+#intro.home-v3 .home-v4-status-dot{background:#67e8b0 !important;box-shadow:0 0 13px rgba(103,232,176,.75) !important;}
+
+/* ============================================================
+   HOME — TITLE / COPY
+   ============================================================ */
+
+#intro.home-v3 .home-v4-kicker{
+  color:var(--rr-cyan) !important;
+  text-shadow:0 0 18px rgba(120,233,255,.10) !important;
+}
+
+#intro.home-v3 .home-v4-title{
+  text-shadow:0 18px 65px rgba(0,0,0,.72),0 0 32px rgba(120,233,255,.08),0 0 90px rgba(143,107,255,.05) !important;
+}
+
+#intro.home-v3 .home-v4-title span{
+  color:var(--rr-cyan) !important;
+  text-shadow:0 0 22px rgba(120,233,255,.24),0 0 55px rgba(75,141,255,.10) !important;
+}
+
+#intro.home-v3 .home-v4-subline{
+  border-color:rgba(120,233,255,.25) !important;
+  background:linear-gradient(135deg,rgba(10,29,43,.84),rgba(4,12,20,.68)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 12px 28px rgba(0,0,0,.24),0 0 24px rgba(120,233,255,.05) !important;
+}
+
+#intro.home-v3 .home-v4-description{
+  max-width:590px !important;
+  color:#c8d9e3 !important;
+  line-height:1.78 !important;
+  text-shadow:0 4px 18px rgba(0,0,0,.38) !important;
+}
+
+/* ============================================================
+   HOME — PRIMARY BUTTON
+   ============================================================ */
+
+#intro.home-v3 .home-v4-primary{
+  min-height:56px !important;
+  border:1px solid rgba(217,208,255,.94) !important;
+  background:linear-gradient(135deg,#f7f3ff 0%,#d6cbff 28%,#9d82ff 62%,#6a42df 100%) !important;
+  box-shadow:0 20px 60px rgba(102,66,223,.22),0 0 32px rgba(143,107,255,.13),inset 0 1px 0 rgba(255,255,255,.94) !important;
+  transition:transform .18s ease,box-shadow .18s ease,filter .18s ease !important;
+}
+
+#intro.home-v3 .home-v4-primary::after{
+  content:"" !important;
+  position:absolute !important;
+  inset:0 !important;
+  background:linear-gradient(110deg,transparent 28%,rgba(255,255,255,.26) 48%,transparent 68%) !important;
+  transform:translateX(-130%) !important;
+  transition:transform .65s cubic-bezier(.2,.7,.2,1) !important;
+  pointer-events:none !important;
+}
+
+#intro.home-v3 .home-v4-primary:hover{
+  transform:translateY(-2px) !important;
+  filter:brightness(1.045) !important;
+  box-shadow:0 24px 66px rgba(102,66,223,.28),0 0 42px rgba(143,107,255,.20),inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
+
+#intro.home-v3 .home-v4-primary:hover::after{transform:translateX(130%) !important;}
+#intro.home-v3 .home-v4-primary:active{transform:translateY(1px) scale(.985) !important;}
+
+/* ============================================================
+   HOME — MISSION CARD
+   ============================================================ */
+
+#intro.home-v3 .home-v4-mission{
+  position:relative !important;
+  border-color:rgba(120,233,255,.20) !important;
+  background:linear-gradient(145deg,rgba(8,20,32,.84),rgba(3,9,16,.80)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 24px 60px rgba(0,0,0,.36),0 0 35px rgba(120,233,255,.04) !important;
+  backdrop-filter:blur(16px) !important;
+  -webkit-backdrop-filter:blur(16px) !important;
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease !important;
+}
+
+#intro.home-v3 .home-v4-mission::before,
+#intro.home-v3 .home-v4-mission::after{
+  content:"" !important;
+  position:absolute !important;
+  width:24px !important;
+  height:24px !important;
+  pointer-events:none !important;
+}
+
+#intro.home-v3 .home-v4-mission::before{top:-1px;left:-1px;border-top:1px solid var(--rr-cyan);border-left:1px solid var(--rr-cyan);opacity:.62;}
+#intro.home-v3 .home-v4-mission::after{right:-1px;bottom:-1px;border-right:1px solid rgba(143,107,255,.72);border-bottom:1px solid rgba(143,107,255,.72);opacity:.62;}
+
+#intro.home-v3 .home-v4-mission:hover{
+  transform:translateY(-2px) !important;
+  border-color:rgba(120,233,255,.30) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 28px 70px rgba(0,0,0,.42),0 0 42px rgba(120,233,255,.06) !important;
+}
+
+#intro.home-v3 .home-v4-progress-bar{height:5px !important;background:rgba(255,255,255,.075) !important;}
+#intro.home-v3 .home-v4-progress-fill{background:linear-gradient(90deg,var(--rr-cyan),#94f2ff,#b9a5ff) !important;box-shadow:0 0 14px rgba(120,233,255,.34) !important;}
+
+/* ============================================================
+   HOME — UTILITY NAV
+   ============================================================ */
+
+#intro.home-v3 .home-v4-utility{
+  position:relative !important;
+  min-height:34px !important;
+  padding:9px 11px !important;
+  border:1px solid rgba(120,233,255,.10) !important;
+  background:rgba(3,10,17,.42) !important;
+  color:#89a7b6 !important;
+  transition:color .16s ease,border-color .16s ease,background .16s ease,transform .16s ease !important;
+}
+
+#intro.home-v3 .home-v4-utility:hover{
+  color:var(--rr-cyan) !important;
+  border-color:rgba(120,233,255,.28) !important;
+  background:rgba(8,23,36,.62) !important;
+  transform:translateY(-1px) !important;
+}
+
+#intro.home-v3 .home-v4-bottom-meta{opacity:.72 !important;}
+
+/* ============================================================
+   GAMEPLAY HUD — PREMIUM RAIL
+   ============================================================ */
+
+#play .hud-route,
+#play .hud-progress,
+#play .hud-xp,
+#play .hud-actions>button{
+  border-color:rgba(141,244,255,.16) !important;
+  background:linear-gradient(145deg,rgba(7,16,28,.90),rgba(2,7,14,.95)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 12px 28px rgba(0,0,0,.34),0 0 18px rgba(141,244,255,.025) !important;
+}
+
+#play .hud-route,
+#play .hud-progress{min-height:44px !important;}
+#play .hud-progress>div{height:5px !important;}
+
+#play .hud-progress>div i{
+  background:linear-gradient(90deg,var(--ui-gold),#fff1b5,var(--ui-cyan)) !important;
+  box-shadow:0 0 14px rgba(255,208,110,.30),0 0 18px rgba(141,244,255,.14) !important;
+}
+
+#play .hud-actions>#pause{
+  border-color:rgba(255,208,110,.42) !important;
+  color:#ffe7a6 !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 10px 28px rgba(0,0,0,.36),0 0 22px rgba(255,208,110,.08) !important;
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease !important;
+}
+
+#play .hud-actions>#pause:hover{
+  border-color:rgba(255,208,110,.74) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 14px 32px rgba(0,0,0,.42),0 0 28px rgba(255,208,110,.15) !important;
+  transform:translateY(-1px) !important;
+}
+
+/* subtle HUD separators */
+#play .hud-route::after,
+#play .hud-progress::after,
+#play .hud-xp::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.025),transparent);
+  opacity:.5;
+}
+
+/* ============================================================
+   PAUSE / SETTINGS — COMMAND TERMINAL
+   ============================================================ */
+
+#pauseMenu.relay-options-unified .menu,
+#titlePanel.relay-options-unified .title-panel-card{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(141,244,255,.025),0 30px 90px rgba(0,0,0,.72),0 0 60px rgba(57,185,255,.07) !important;
+}
+
+#pauseMenu.relay-options-unified .tab{
+  min-height:52px !important;
+  border-color:rgba(141,244,255,.065) !important;
+}
+
+#pauseMenu.relay-options-unified .tab:hover{transform:translateX(3px) !important;}
+
+#pauseMenu.relay-options-unified .tab.active{
+  box-shadow:inset 4px 0 var(--relay-cyan),0 0 30px rgba(57,185,255,.10),inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+#pauseMenu.relay-options-unified .tab:hover::before{opacity:1 !important;}
+
+#pauseMenu.relay-options-unified .relay-options-head,
+#titlePanel.relay-options-unified .relay-options-head{
+  background:linear-gradient(90deg,rgba(57,185,255,.035),transparent 55%) !important;
+}
+
+/* ============================================================
+   FINISH / GAME OVER — CINEMATIC CARD
+   ============================================================ */
+
+#finish.overlay,
+#gameOver.overlay,
+#levelUp.overlay,
+#abilityUnlock.overlay{
+  background:rgba(1,4,8,.66) !important;
+  backdrop-filter:blur(5px) !important;
+  -webkit-backdrop-filter:blur(5px) !important;
+}
+
+#finish .outcome,
+#gameOver .outcome,
+#levelUp .system-card,
+#abilityUnlock .system-card{
+  position:relative !important;
+  overflow:hidden !important;
+  border:1px solid rgba(141,244,255,.20) !important;
+  background:
+    radial-gradient(circle at 100% 0,rgba(120,233,255,.08),transparent 30%),
+    linear-gradient(145deg,rgba(8,20,32,.96),rgba(2,7,14,.98)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 35px 90px rgba(0,0,0,.70),0 0 55px rgba(120,233,255,.07) !important;
+}
+
+#finish .outcome::before,
+#gameOver .outcome::before,
+#levelUp .system-card::before,
+#abilityUnlock .system-card::before{
+  content:"" !important;
+  position:absolute !important;
+  left:0 !important;
+  top:0 !important;
+  width:100% !important;
+  height:2px !important;
+  background:linear-gradient(90deg,transparent,var(--rr-cyan),var(--rr-violet),transparent) !important;
+  box-shadow:0 0 18px rgba(120,233,255,.28) !important;
+  pointer-events:none !important;
+}
+
+#finish .outcome-mark{
+  text-shadow:0 0 28px rgba(120,233,255,.32) !important;
+  box-shadow:0 0 30px rgba(120,233,255,.09) !important;
+}
+
+#finish .reward,
+#gameOver .primary,
+#finish .primary{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 16px 38px rgba(0,0,0,.34),0 0 26px rgba(120,233,255,.045) !important;
+}
+
+#finish .primary,
+#gameOver .primary{
+  transition:transform .16s ease,filter .16s ease,box-shadow .16s ease !important;
+}
+
+#finish .primary:hover,
+#gameOver .primary:hover{
+  transform:translateY(-2px) !important;
+  filter:brightness(1.05) !important;
+}
+
+/* ============================================================
+   MOBILE — CLEANER GAME HUD / TOUCH
+   ============================================================ */
+
+@media (max-width:760px){
+
+  #intro.home-v3 .home-v4-shell{
+    width:100% !important;
+    padding:18px 16px 14px !important;
+  }
+
+  #intro.home-v3 .home-v4-main{
+    grid-template-columns:1fr !important;
+    gap:20px !important;
+    padding:26px 0 12px !important;
+    align-content:center !important;
+  }
+
+  #intro.home-v3 .home-v4-copy{max-width:none !important;}
+
+  #intro.home-v3 .home-v4-title{
+    font-size:clamp(54px,16vw,82px) !important;
+    line-height:.80 !important;
+    letter-spacing:-.075em !important;
+  }
+
+  #intro.home-v3 .home-v4-description{
+    max-width:92vw !important;
+    font-size:11px !important;
+    line-height:1.65 !important;
+  }
+
+  #intro.home-v3 .home-v4-actions{
+    width:100% !important;
+    max-width:none !important;
+    margin-top:20px !important;
+  }
+
+  #intro.home-v3 .home-v4-primary{
+    flex:1 1 auto !important;
+    min-width:0 !important;
+  }
+
+  #intro.home-v3 .home-v4-mission-wrap{
+    width:100% !important;
+  }
+
+  #intro.home-v3 .home-v4-mission{
+    width:100% !important;
+  }
+
+  #intro.home-v3 .home-v4-bottom{
+    gap:8px !important;
+  }
+
+  #intro.home-v3 .home-v4-bottom-left{
+    gap:6px !important;
+  }
+
+  #intro.home-v3 .home-v4-utility{
+    min-height:32px !important;
+    padding:8px 9px !important;
+    font-size:9px !important;
+  }
+
+  #intro.home-v3 .home-v4-bottom-meta{
+    display:none !important;
+  }
+
+  #play .hud{
+    gap:6px !important;
+    padding:calc(8px + env(safe-area-inset-top)) 10px 8px !important;
+  }
+
+  #play .hud-route{
+    min-width:0 !important;
+    flex:1 1 auto !important;
+    max-width:46vw !important;
+  }
+
+  #play .hud-progress{
+    min-width:86px !important;
+    flex:1 1 auto !important;
+  }
+
+  #play .hud-xp{
+    width:58px !important;
+    min-width:58px !important;
+  }
+
+  #play .hud-actions>button{
+    width:40px !important;
+    min-width:40px !important;
+    height:40px !important;
+  }
+
+  #play .world-marker{
+    max-width:58vw !important;
+  }
+
+  #play .input-guide{display:none !important;}
+
+  #play .mobile-actions button{
+    border-color:rgba(141,244,255,.16) !important;
+    background:linear-gradient(145deg,rgba(8,18,31,.90),rgba(2,7,14,.94)) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 10px 24px rgba(0,0,0,.30),0 0 18px rgba(141,244,255,.035) !important;
+    transition:transform .12s ease,border-color .12s ease,filter .12s ease !important;
+  }
+
+  #play .mobile-actions button:active{
+    transform:translateY(1px) scale(.97) !important;
+    filter:brightness(1.08) !important;
+  }
+
+  #play .mobile-joystick{
+    filter:drop-shadow(0 0 18px rgba(120,233,255,.10)) !important;
+  }
+
+  #pauseMenu.relay-options-unified .menu-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  #pauseMenu.relay-options-unified .menu-grid > aside{
+    border-right:0 !important;
+    border-bottom:1px solid rgba(141,244,255,.10) !important;
+    padding:18px 14px 14px !important;
+  }
+
+  #pauseMenu.relay-options-unified .menu-grid > aside h2{
+    font-size:24px !important;
+    margin-bottom:14px !important;
+  }
+
+  #pauseMenu.relay-options-unified .menu-grid > aside nav{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+
+  #pauseMenu.relay-options-unified .tab{
+    min-height:44px !important;
+  }
+
+  #finish .outcome,
+  #gameOver .outcome{
+    width:min(92vw,520px) !important;
+    max-height:88svh !important;
+    overflow:auto !important;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY / REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion:reduce){
+  #intro.home-v3 .home-v4-art,
+  #intro.home-v3 .home-v4-grid,
+  #intro.home-v3 .home-v4-signal,
+  #intro.home-v3 .home-v4-status-dot,
+  #intro.home-v3 .home-v4-primary::after{
+    animation:none !important;
+    transition:none !important;
+  }
+}
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+@keyframes rrHomeArtDrift{
+  0%{transform:scale(1.035) translate3d(-.25%,0,0);}
+  50%{transform:scale(1.05) translate3d(.30%,-.20%,0);}
+  100%{transform:scale(1.04) translate3d(.55%,.15%,0);}
+}
+
+@keyframes rrHomeGridFlow{
+  from{background-position:0 0,0 0;}
+  to{background-position:58px 58px,58px 58px;}
+}
