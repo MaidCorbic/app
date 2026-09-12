@@ -12,19 +12,24 @@ const index = await read('../index.html');
 const base = await read('../styles.css');
 
 assert.match(css, /STACKING CONTRACT/);
-assert.match(css, /TOUCH LAYOUT/);
+assert.match(css, /TOUCH GAMEPLAY CONTROLS/);
+assert.match(css, /MOBILE PAUSE \/ SETTINGS — CANONICAL OWNER/);
 assert.match(css, /prefers-reduced-motion/);
 assert.match(css, /safe-area-inset-bottom/);
 assert.match(css, /#play \.hud-actions>button/);
 assert.match(css, /#pauseMenu \.menu-grid/);
 assert.match(css, /#worldMap/);
 assert.match(css, /#preflight/);
+assert.match(css, /#mobileBottomHud/);
+assert.match(css, /#mobilePauseButton|\.mobile-menu-pause/);
+assert.match(css, /#mobileSettingsButton|\.mobile-menu-settings/);
+assert.match(css, /body\.is-touch #play #pause[\s\S]*display:none/);
 assert.doesNotMatch(arrival, /^import ['"]\.\/canonical-ui-v1\.css['"];?$/m);
 assert.match(arrival, /^import ['"]\.\/cinematic-arrival-v2\.css['"];?$/m);
 assert.match(uiInit, /^import ['"]\.\/canonical-ui-v1\.css['"];?$/m);
 assert.match(uiInit, /CSS bootstrap ownership/);
 assert.equal((index.match(/data-mobile-action=/g) || []).length, 6);
 assert.match(base, /body\.is-touch \.mobile-controls small/);
-assert.match(css, /body\.is-touch #play \.mobile-actions small\{display:none!important\}/);
+assert.match(css, /body\.is-touch #play \.mobile-actions small\{display:none !important\}/);
 
 console.log('Canonical CSS contract: PASS');
