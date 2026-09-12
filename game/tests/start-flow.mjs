@@ -16,11 +16,21 @@ assert.match(homeRouter, /relayOpenCampaignMap/, 'PLAY NOW must open the campaig
 assert.match(homeRouter, /import '\.\/campaign-route-cinematic-v1\.js';/, 'Home router must load the campaign route layer');
 assert.doesNotMatch(homeRouter, /HTMLElement\.prototype\.click\.call\(sourceStart\)/, 'Home router must not proxy to stale detached Start button');
 assert.doesNotMatch(homeRouter, /HTMLElement\.prototype\.click\.call\(sourceContinue\)/, 'Home router must not proxy to stale detached Continue button');
-assert.match(campaignMap, /spawn/, 'Campaign map must derive the route from mission spawn data');
-assert.match(campaignMap, /checkpoints/, 'Campaign map must derive the route from mission checkpoint data');
-assert.match(campaignMap, /goal/, 'Campaign map must derive the route from mission goal data');
-assert.match(campaignMap, /relayLaunchRun/, 'Campaign map must launch through the canonical runtime launcher');
-assert.match(campaignMap, /homescreen\.jpg/, 'Mission launch presentation must use an actual image background');
+assert.match(campaignMap, /platforms/, 'Tactical map must render real mission platform geometry');
+assert.match(campaignMap, /spawn/, 'Tactical map must derive the route from mission spawn data');
+assert.match(campaignMap, /guides/, 'Tactical map must derive route breadcrumbs from mission guide data');
+assert.match(campaignMap, /checkpoints/, 'Tactical map must derive checkpoint data');
+assert.match(campaignMap, /signals/, 'Tactical map must render Signal markers');
+assert.match(campaignMap, /obstacles/, 'Tactical map must render hazard markers');
+assert.match(campaignMap, /secrets/, 'Tactical map must render secret markers');
+assert.match(campaignMap, /goal/, 'Tactical map must derive the destination from mission goal data');
+assert.match(campaignMap, /homescreen\.jpg/, 'Tactical presentation must use an actual background image');
+assert.match(campaignMap, /loading-landscape\.jpg/, 'Tactical presentation must rotate to another existing image');
+assert.match(campaignMap, /loading\.jpg/, 'Tactical presentation must have a third existing image fallback');
+assert.match(campaignMap, /relayDeployCountdown/, 'Mission deployment must use a dedicated countdown overlay');
+assert.match(campaignMap, /\['3','ROUTE LOCKED'\]/, 'Deployment countdown must begin at 3');
+assert.match(campaignMap, /countdownInFlight/, 'Deployment must have a single-flight guard against double launch');
+assert.match(campaignMap, /relayLaunchRun/, 'Tactical map must launch through the canonical runtime launcher');
 assert.doesNotMatch(unified, /launchMissionViaLegacy\(/, 'Unified cinematic UI must not use the legacy mission launcher');
 
-console.log('Campaign map start flow regression checks passed.');
+console.log('Tactical campaign map start-flow regression checks passed.');
