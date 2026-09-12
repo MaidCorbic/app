@@ -6,6 +6,9 @@ const root = new URL('../', import.meta.url);
 const read = path => readFile(fileURLToPath(new URL(path, root)), 'utf8');
 
 const css = await read('../canonical-ui-v1.css');
+const releaseCss = await read('../release-final-ui-v1.css');
+const mobileCss = await read('../unified-gameplay-ui-v1-mobile.css');
+const cleanupCss = await read('../mobile-ui-cleanup-v1.css');
 const arrival = await read('../cinematic-arrival-v2.js');
 const uiInit = await read('../relay-ui-init.js');
 const index = await read('../index.html');
@@ -31,5 +34,21 @@ assert.match(uiInit, /CSS bootstrap ownership/);
 assert.equal((index.match(/data-mobile-action=/g) || []).length, 6);
 assert.match(base, /body\.is-touch \.mobile-controls small/);
 assert.match(css, /body\.is-touch #play \.mobile-actions small\{display:none !important\}/);
+
+// Mobile PAUSE / SETTINGS have one visual CSS owner. Canonical CSS may also
+// contain helper/contract rules for the surface; what matters here is that the
+// actual mobile menu geometry is defined only in canonical-ui-v1.css.
+assert.match(css, /#mobileBottomHud\s+\.mobile-menu-button\s*\{/);
+assert.match(css, /#mobileBottomHud\s+\.mobile-menu-pause\s*\{/);
+assert.match(css, /#mobileBottomHud\s+\.mobile-menu-settings\s*\{/);
+assert.match(css, /#mobileBottomHud\s+\.mobile-menu-button\s*\{[\s\S]*?bottom\s*:/);
+assert.equal((css.match(/#mobileBottomHud\.is-active\s*\{/g) || []).length, 1, 'canonical mobile HUD active-state rule must be unique');
+assert.doesNotMatch(releaseCss, /\.mobile-menu-button\s*\{/,'release-final-ui-v1.css must not style mobile menu buttons');
+assert.doesNotMatch(releaseCss, /\.mobile-menu-(pause|settings)\s*\{/,'release-final-ui-v1.css must not style mobile PAUSE / SETTINGS');
+assert.doesNotMatch(mobileCss, /\.mobile-menu-button\s*\{/,'unified-gameplay-ui-v1-mobile.css must not style mobile menu buttons');
+assert.doesNotMatch(mobileCss, /\.mobile-menu-(pause|settings)\s*\{/,'unified-gameplay-ui-v1-mobile.css must not style mobile PAUSE / SETTINGS');
+assert.doesNotMatch(cleanupCss, /\.mobile-menu-settings\s*\{[\s\S]*?display\s*:\s*none\s*!important/,'mobile-ui-cleanup-v1.css must not hide canonical mobile SETTINGS');
+assert.doesNotMatch(cleanupCss, /\.mobile-menu-settings\s*\{[\s\S]*?visibility\s*:\s*hidden\s*!important/,'mobile-ui-cleanup-v1.css must not hide canonical mobile SETTINGS');
+assert.doesNotMatch(cleanupCss, /\.mobile-menu-settings\s*\{[\s\S]*?opacity\s*:\s*0\s*!important/,'mobile-ui-cleanup-v1.css must not hide canonical mobile SETTINGS');
 
 console.log('Canonical CSS contract: PASS');

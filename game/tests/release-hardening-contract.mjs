@@ -8,6 +8,9 @@ const read = path => readFile(fileURLToPath(new URL(path, gameRoot)), 'utf8');
 const index = await read('index.html');
 const arrival = await read('cinematic-arrival-v2.js');
 const arrivalCss = await read('cinematic-arrival-v2.css');
+const canonicalCss = await read('canonical-ui-v1.css');
+const releaseCss = await read('release-final-ui-v1.css');
+const mobileGameplayCss = await read('unified-gameplay-ui-v1-mobile.css');
 const config = await read('vite.config.mjs');
 const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
@@ -66,6 +69,20 @@ assert.match(mobileOwner, /detachLegacyRunnerInput/);
 assert.match(mobileOwner, /events\.off\('mobile-action'/);
 assert.match(mobileOwner, /events\.off\('mobile-move'/);
 assert.match(mobileOwner, /window\.\__relayMobileInputSingleOwnerV9/);
+
+// Mobile PAUSE / SETTINGS have exactly one visual button-styling owner. Canonical
+// CSS may also contain helper/contract rules for the surface; what matters is that
+// the actual mobile menu geometry is defined only in canonical-ui-v1.css.
+assert.match(canonicalCss, /MOBILE PAUSE \/ SETTINGS — CANONICAL OWNER/);
+assert.match(canonicalCss, /#mobileBottomHud\s+\.mobile-menu-button\s*\{/);
+assert.match(canonicalCss, /#mobileBottomHud\s+\.mobile-menu-pause\s*\{/);
+assert.match(canonicalCss, /#mobileBottomHud\s+\.mobile-menu-settings\s*\{/);
+assert.match(canonicalCss, /#mobileBottomHud\s+\.mobile-menu-button\s*\{[\s\S]*?bottom\s*:/);
+assert.match(canonicalCss, /#mobileBottomHud\.is-active\s*\{/);
+assert.doesNotMatch(releaseCss, /\.mobile-menu-button\s*\{/);
+assert.doesNotMatch(releaseCss, /\.mobile-menu-(pause|settings)\s*\{/);
+assert.doesNotMatch(mobileGameplayCss, /\.mobile-menu-button\s*\{/);
+assert.doesNotMatch(mobileGameplayCss, /\.mobile-menu-(pause|settings)\s*\{/);
 
 // RunnerScene stability behavior is source-owned by the runtime authority.
 assert.match(core, /SPAWN_SHIELD_MS/);
