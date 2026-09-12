@@ -4,7 +4,7 @@
  * Purpose:
  * - Reuse the existing cinematic splash visual language.
  * - Show a second loading/deployment screen after PLAY NOW.
- * - Use game/assets/loadplay.jpg as the dedicated mission background.
+ * - Use loadplay.jpg on web/desktop and loadplaymobile.jpg on mobile.
  * - Keep gameplay and Mission Route V6 ownership unchanged.
  *
  * This layer is presentation-only. The existing START handler still owns
@@ -35,13 +35,19 @@
     overlay.setAttribute('aria-busy', 'true');
 
     overlay.innerHTML = `
-      <img
-        class="relay-splash-art"
-        src="/game/assets/loadplay.jpg"
-        alt=""
-        decoding="async"
-        fetchpriority="high"
-      >
+      <picture class="relay-splash-picture">
+        <source
+          media="(max-width:700px)"
+          srcset="/game/assets/loadplaymobile.jpg"
+        >
+        <img
+          class="relay-splash-art"
+          src="/game/assets/loadplay.jpg"
+          alt=""
+          decoding="async"
+          fetchpriority="high"
+        >
+      </picture>
 
       <div class="relay-splash-brand relay-play-deployment-brand">
         <b>R/</b>
@@ -96,6 +102,12 @@
       .relay-play-deployment{
         z-index:2147483647 !important;
         pointer-events:none !important;
+      }
+
+      .relay-play-deployment .relay-splash-picture{
+        position:absolute;
+        inset:0;
+        display:block;
       }
 
       .relay-play-deployment .relay-splash-art{
