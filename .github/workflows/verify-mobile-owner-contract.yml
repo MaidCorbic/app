@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+# A PR only needs the newest owner-contract validation. Cancel stale queued
+# attempts instead of letting every commit consume another runner slot.
+concurrency:
+  group: verify-mobile-owner-contract-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
