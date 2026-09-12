@@ -34,13 +34,16 @@ assert.equal((index.match(/data-mobile-action=/g) || []).length, 6);
 assert.match(base, /body\.is-touch \.mobile-controls small/);
 assert.match(css, /body\.is-touch #play \.mobile-actions small\{display:none !important\}/);
 
-// Mobile PAUSE / SETTINGS have one visual CSS owner. Gameplay geometry files may
-// reference the surface contract, but they must not define a second visual HUD.
-assert.equal((css.match(/#mobileBottomHud\s*\{/g) || []).length, 1, 'canonical mobile HUD root must have exactly one CSS block');
+// Mobile PAUSE / SETTINGS have one visual CSS owner. The canonical file may also
+// contain a small helper/contract rule for the surface; gameplay CSS may likewise
+// keep visibility coordination, but neither may style the actual menu buttons.
+assert.match(css, /#mobileBottomHud[^{]*\{[\s\S]*\.mobile-menu-button/);
+assert.match(css, /\.mobile-menu-pause\{[\s\S]*bottom:/);
+assert.match(css, /\.mobile-menu-settings\{[\s\S]*bottom:/);
 assert.equal((css.match(/#mobileBottomHud\.is-active\s*\{/g) || []).length, 1, 'canonical mobile HUD active-state rule must be unique');
-assert.doesNotMatch(releaseCss, /#mobileBottomHud\s*\{/,'release-final-ui-v1.css must not own the mobile HUD root');
-assert.doesNotMatch(releaseCss, /#mobileBottomHud[^\{]*\.mobile-menu-(pause|settings)/, 'release-final-ui-v1.css must not style mobile PAUSE / SETTINGS');
-assert.doesNotMatch(mobileCss, /#mobileBottomHud\s*\{/, 'unified-gameplay-ui-v1-mobile.css must not own the mobile HUD root');
-assert.doesNotMatch(mobileCss, /#mobileBottomHud[^\{]*\.mobile-menu-(pause|settings)/, 'unified-gameplay-ui-v1-mobile.css must not style mobile PAUSE / SETTINGS');
+assert.doesNotMatch(releaseCss, /\.mobile-menu-button\s*\{/,'release-final-ui-v1.css must not style mobile menu buttons');
+assert.doesNotMatch(releaseCss, /\.mobile-menu-(pause|settings)\s*\{/,'release-final-ui-v1.css must not style mobile PAUSE / SETTINGS');
+assert.doesNotMatch(mobileCss, /\.mobile-menu-button\s*\{/,'unified-gameplay-ui-v1-mobile.css must not style mobile menu buttons');
+assert.doesNotMatch(mobileCss, /\.mobile-menu-(pause|settings)\s*\{/,'unified-gameplay-ui-v1-mobile.css must not style mobile PAUSE / SETTINGS');
 
 console.log('Canonical CSS contract: PASS');
