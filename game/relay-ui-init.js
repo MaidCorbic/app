@@ -19,7 +19,6 @@ import './update-ui.css';
 import './gameplay-event-hud-v2.css';
 import './dynamic-environment-reactions-v1.css';
 import './cargo-integrity-v2-polish.css';
-import './signal-network-v1.css';
 import './city-response-v1.css';
 import './gameplay-ui-v8-settings-polish.css';
 import './gameplay-hud-polish-v1.css';
@@ -101,7 +100,6 @@ document.addEventListener('keydown', event => {
 
 import './cargo-integrity-v2.js';
 import './cargo-integrity-v2-visibility-v1.js';
-import './signal-network-v1.js';
 import './city-response-v1.js';
 import './gameplay-intro-final-v1.js';
 import './mobile-map-web-parity-all-levels-v1.js';
