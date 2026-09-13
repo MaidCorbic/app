@@ -44,6 +44,9 @@ function relayLegacyAssetAliases() {
       }
       for (const relativePath of LEGACY_BINARY_ASSETS) {
         const source = path.join(root, relativePath);
+        if (!fs.existsSync(source)) {
+          throw new Error(`relay-legacy-asset-aliases: missing required asset ${relativePath}`);
+        }
         const destination = path.join(legacyDir, relativePath);
         fs.mkdirSync(path.dirname(destination), { recursive: true });
         fs.copyFileSync(source, destination);
