@@ -225,8 +225,6 @@
       continueOriginalClick();
     }
 
-    // Preserve the existing Mission Route V5 briefing that used to appear
-    // after NEXT MISSION without creating a second briefing system.
     await WAIT(180);
     window.relayGameplayIntroV5?.show?.();
 
