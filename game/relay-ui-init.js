@@ -91,8 +91,11 @@ import './cargo-integrity-v2.js';
 import './cargo-integrity-v2-visibility-v1.js';
 import './signal-network-v1.js';
 import './city-response-v1.js';
-import './gameplay-intro-final-v1.js';
+// Mission transition must register before gameplay-intro-final-v1 so its capture
+// handler can own NEXT MISSION before the generic briefing listener sees the click.
 import './play-deployment-loader-v1.js';
+import './mission-transition-loader-v1.js';
+import './gameplay-intro-final-v1.js';
 import './mission-route-v6-layout-v1.js';
 import './mission-route-v6-layout-v1.css';
 import './mobile-map-web-parity-all-levels-v1.js';
@@ -130,7 +133,6 @@ import './gameplay-new-layer-v2.js';
 import './crouch-gameplay-v1.js';
 import './slide-jump-momentum-v1.js';
 import './dash-dodge-v1.js';
-import './wall-slide-v1.js';
 import './dynamic-environment-reactions-v1.js';
 import './production-unfreeze-v1.js';
 import './src/systems/mobile-input-single-owner-v1.js';
