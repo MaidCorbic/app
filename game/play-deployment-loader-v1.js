@@ -1,14 +1,11 @@
 /*
- * Runner Relay — PLAY NOW deployment sequence.
+ * Runner Relay — PLAY NOW / MISSION deployment sequence.
  *
  * Purpose:
- * - Reuse the existing cinematic splash visual language.
- * - Show a second loading/deployment screen after PLAY NOW.
- * - Use loadplay.jpg on web/desktop and loadplaymobile.jpg on mobile.
- * - Keep gameplay and Mission Route V6 ownership unchanged.
- *
- * This layer is presentation-only. The existing START handler still owns
- * actual gameplay launch; this overlay simply bridges Home -> Mission Route.
+ * - Reuse one cinematic deployment loader for Home and mission-to-mission flow.
+ * - Select the supplied desktop/mobile artwork for the requested mission.
+ * - Keep actual mission launching owned by the existing UI handlers.
+ * - Keep Mission Route V5/V6 briefing ownership unchanged.
  */
 (() => {
   'use strict';
@@ -17,7 +14,6 @@
   window.__relayPlayDeploymentV1 = true;
 
   const WAIT = ms => new Promise(resolve => setTimeout(resolve, ms));
-  const $ = selector => document.querySelector(selector);
   const introVisible = () => {
     const intro = document.getElementById('intro');
     return !!intro && !intro.classList.contains('hidden');
@@ -26,7 +22,19 @@
   let active = false;
   let serial = 0;
 
-  const makeOverlay = () => {
+  const DEFAULT_ASSETS = Object.freeze({
+    desktop: '/game/assets/loadplay.jpg',
+    mobile: '/game/assets/loadplaymobile.jpg',
+  });
+
+  const normalizeConfig = config => ({
+    missionNumber: Math.max(1, Number(config?.missionNumber) || 1),
+    desktop: config?.desktop || DEFAULT_ASSETS.desktop,
+    mobile: config?.mobile || DEFAULT_ASSETS.mobile,
+    beforeRoute: typeof config?.beforeRoute === 'function' ? config.beforeRoute : null,
+  });
+
+  const makeOverlay = ({ missionNumber, desktop, mobile }) => {
     const overlay = document.createElement('section');
     overlay.id = 'relayPlayDeployment';
     overlay.className = 'relay-splash relay-play-deployment';
@@ -38,11 +46,11 @@
       <picture class="relay-splash-picture">
         <source
           media="(max-width:700px)"
-          srcset="/game/assets/loadplaymobile.jpg"
+          srcset="${mobile}"
         >
         <img
           class="relay-splash-art"
-          src="/game/assets/loadplay.jpg"
+          src="${desktop}"
           alt=""
           decoding="async"
           fetchpriority="high"
@@ -61,7 +69,7 @@
 
       <div class="relay-splash-ui relay-play-deployment-ui">
         <div class="relay-splash-meta">
-          <span class="relay-splash-status">PREPARING DEPLOYMENT</span>
+          <span class="relay-splash-status">PREPARING MISSION ${missionNumber}</span>
           <span class="relay-splash-percent">0%</span>
         </div>
 
@@ -84,7 +92,7 @@
           <b aria-hidden="true"></b>
           <div>
             <strong>DEPLOYMENT READY</strong>
-            <small>MISSION RR-01 // OLD QUARTER</small>
+            <small>MISSION ${String(missionNumber).padStart(2, '0')} // ROUTE LOCKED</small>
           </div>
         </div>
       </div>
@@ -151,6 +159,10 @@
         .relay-play-deployment .relay-play-deployment-network{
           display:none !important;
         }
+
+        .relay-play-deployment .relay-splash-ui{
+          width:min(92vw,620px);
+        }
       }
     `;
     document.head.appendChild(style);
@@ -179,14 +191,8 @@
     const api = window.relayGameplayIntroV5;
 
     if (api && typeof api.close === 'function' && typeof api.show === 'function') {
-      if (typeof api.isVisible === 'function' && api.isVisible()) {
-        api.close();
-      }
-
-      // The existing gameplay-intro show() already owns Mission Route V6.
-      // Re-open it so its full 10-second route briefing starts after deployment.
+      if (typeof api.isVisible === 'function' && api.isVisible()) api.close();
       api.show();
-
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     }
 
@@ -196,102 +202,78 @@
     active = false;
   };
 
-  const runDeployment = async () => {
-    if (active) return;
+  const runDeployment = async rawConfig => {
+    if (active) return false;
+
+    const config = normalizeConfig(rawConfig);
     active = true;
     const token = ++serial;
+    let overlay;
 
-    installStyle();
+    try {
+      installStyle();
+      overlay = makeOverlay(config);
+      document.body.appendChild(overlay);
 
-    const overlay = makeOverlay();
-    document.body.appendChild(overlay);
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      if (!active || token !== serial) return false;
 
-    // Give the browser one paint so the dedicated background appears before telemetry advances.
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    if (!active || token !== serial) return;
+      const started = performance.now();
+      const minimumMs = 1550;
 
-    const started = performance.now();
-    const minimumMs = 1550;
+      setStage(overlay, 8, `INITIALIZING MISSION ${config.missionNumber}`, '→ RELAY CORE READY', '→ WORLD NODE CONNECTING');
+      await WAIT(220);
+      if (!active || token !== serial) return false;
 
-    setStage(
-      overlay,
-      8,
-      'INITIALIZING MISSION',
-      '→ RELAY CORE READY',
-      '→ WORLD NODE CONNECTING'
-    );
+      setStage(overlay, 27, 'LOADING ROUTE DATA', '→ ROUTE DATA RECEIVED', '→ CHECKPOINT MATRIX ONLINE');
+      await WAIT(230);
+      if (!active || token !== serial) return false;
 
-    await WAIT(220);
-    if (!active || token !== serial) return;
+      setStage(overlay, 49, 'SYNCING WORLD', '→ WORLD NODE SYNCING', '→ SIGNAL CHANNEL STABLE');
+      await WAIT(250);
+      if (!active || token !== serial) return false;
 
-    setStage(
-      overlay,
-      27,
-      'LOADING ROUTE DATA',
-      '→ ROUTE DATA RECEIVED',
-      '→ CHECKPOINT MATRIX ONLINE'
-    );
+      setStage(overlay, 72, 'INITIALIZING PHASER', '→ PHASER CORE ONLINE', '→ MISSION SCENE PREPARING');
+      await WAIT(250);
+      if (!active || token !== serial) return false;
 
-    await WAIT(230);
-    if (!active || token !== serial) return;
+      setStage(overlay, 91, 'FINALIZING DEPLOYMENT', '→ ROUTE LOCK CONFIRMED', '→ WORLD NODE ONLINE');
 
-    setStage(
-      overlay,
-      49,
-      'SYNCING WORLD',
-      '→ WORLD NODE SYNCING',
-      '→ SIGNAL CHANNEL STABLE'
-    );
+      while (performance.now() - started < minimumMs || !getMissionReady()) {
+        await WAIT(50);
+        if (!active || token !== serial) return false;
+      }
 
-    await WAIT(250);
-    if (!active || token !== serial) return;
+      setStage(overlay, 100, 'DEPLOYMENT READY', '→ MISSION DATA LOADED', '→ RELAY CHANNEL STABLE');
+      overlay.querySelector('.relay-boot-complete')?.classList.add('is-visible');
+      overlay.setAttribute('aria-busy', 'false');
 
-    setStage(
-      overlay,
-      72,
-      'INITIALIZING PHASER',
-      '→ PHASER CORE ONLINE',
-      '→ MISSION SCENE PREPARING'
-    );
+      await WAIT(240);
+      if (!active || token !== serial) return false;
 
-    await WAIT(250);
-    if (!active || token !== serial) return;
+      await config.beforeRoute?.();
+      if (!active || token !== serial) return false;
 
-    setStage(
-      overlay,
-      91,
-      'FINALIZING DEPLOYMENT',
-      '→ ROUTE LOCK CONFIRMED',
-      '→ WORLD NODE ONLINE'
-    );
-
-    while (performance.now() - started < minimumMs || !getMissionReady()) {
-      await WAIT(50);
-      if (!active || token !== serial) return;
+      await revealMissionRoute(overlay);
+      return true;
+    } catch (error) {
+      console.error('[RelayRunner] deployment loader failed', error);
+      overlay?.remove();
+      active = false;
+      return false;
     }
-
-    setStage(
-      overlay,
-      100,
-      'DEPLOYMENT READY',
-      '→ MISSION DATA LOADED',
-      '→ RELAY CHANNEL STABLE'
-    );
-
-    const complete = overlay.querySelector('.relay-boot-complete');
-    complete?.classList.add('is-visible');
-    overlay.setAttribute('aria-busy', 'false');
-
-    await WAIT(240);
-    if (!active || token !== serial) return;
-
-    await revealMissionRoute(overlay);
   };
+
+  window.relayPlayDeploymentV1 = Object.freeze({
+    show: runDeployment,
+    isActive: () => active,
+    defaultAssets: DEFAULT_ASSETS,
+  });
 
   document.addEventListener('click', event => {
     if (!introVisible() || active) return;
     const button = event.target.closest('#start');
     if (!button) return;
-    runDeployment();
+    void runDeployment({ missionNumber: 1 });
   }, true);
 })();
