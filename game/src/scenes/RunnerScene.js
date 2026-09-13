@@ -97,154 +97,462 @@ draw(graphics); graphics.generateTexture(key, width, height); graphics.destroy()
 
 const runner = (key, leftLeg, rightLeg, arm) =>
   make(key, 48, 64, g => {
-    // ============================================================
-    // OUTER RUNNER ENERGY
-    // ============================================================
-    g.fillStyle(0x8df4ff, 0.07)
-      .fillCircle(24, 30, 27);
 
     // ============================================================
+    // RUNNER // PREMIUM CYBER COURIER
+    // Fixed 48x64 texture footprint.
+    // Existing animation keys remain unchanged.
+    // ============================================================
+
+    // ------------------------------------------------------------
+    // PALETTE
+    // ------------------------------------------------------------
+    const C = {
+      void: 0x07111d,
+      armor: 0x131f30,
+      armor2: 0x1d3148,
+      armor3: 0x29425e,
+      metal: 0x8095a8,
+      white: 0xf4fbff,
+      glass: 0x06101b,
+      cyan: 0x7eefff,
+      cyanHot: 0xe9fdff,
+      blue: 0x2aa9d6,
+      gold: 0xffd06e,
+      amber: 0xff9b57,
+      red: 0xff5b6e,
+    };
+
+    // ------------------------------------------------------------
+    // OUTER MOTION FIELD
+    // ------------------------------------------------------------
+    g.fillStyle(C.cyan, 0.035)
+      .fillCircle(24, 31, 27);
+
+    g.fillStyle(C.cyan, 0.055)
+      .fillCircle(24, 29, 22);
+
+    // ------------------------------------------------------------
+    // REAR SILHOUETTE / BACKPACK / POWER UNIT
+    // ------------------------------------------------------------
+    g.fillStyle(C.void)
+      .fillRoundedRect(8, 24, 10, 22, 4);
+
+    g.fillStyle(C.armor2)
+      .fillRoundedRect(9, 26, 8, 18, 3);
+
+    g.lineStyle(1.2, C.cyan, 0.55)
+      .strokeRoundedRect(9, 26, 8, 18, 3);
+
+    g.fillStyle(C.cyan, 0.18)
+      .fillRoundedRect(10, 30, 5, 9, 2);
+
+    g.fillStyle(C.cyanHot, 0.8)
+      .fillRect(11, 32, 3, 5);
+
+    // ------------------------------------------------------------
+    // NECK / REAR COLLAR
+    // ------------------------------------------------------------
+    g.fillStyle(C.void)
+      .fillRoundedRect(19, 17, 10, 9, 3);
+
+    g.fillStyle(C.armor3)
+      .fillRoundedRect(20, 18, 8, 7, 2);
+
+    g.fillStyle(C.cyan, 0.45)
+      .fillRect(21, 19, 6, 1.5);
+
+    // ------------------------------------------------------------
     // HEAD AURA
-    // ============================================================
-    g.fillStyle(0xdffcff, 0.10)
-      .fillCircle(24, 12, 13);
+    // ------------------------------------------------------------
+    g.fillStyle(C.cyan, 0.08)
+      .fillCircle(24, 11, 13);
 
-    // HEAD
-    g.fillStyle(0xf3eee4)
-      .fillCircle(24, 12, 10);
+    g.fillStyle(C.cyan, 0.045)
+      .fillCircle(24, 11, 16);
 
-    // HEAD HIGHLIGHT
-    g.fillStyle(0xffffff, 0.45)
-      .fillCircle(21, 9, 3);
+    // ------------------------------------------------------------
+    // HELMET // stronger silhouette than simple circle
+    // ------------------------------------------------------------
+    g.fillStyle(C.void)
+      .fillRoundedRect(14, 3, 20, 16, 6);
 
-    // ============================================================
-    // VISOR
-    // ============================================================
-    g.fillStyle(0x0b1220)
-      .fillRoundedRect(14, 19, 20, 7, 3);
+    g.fillStyle(C.armor)
+      .fillRoundedRect(15, 4, 18, 13, 5);
 
-    g.lineStyle(1, 0x8df4ff, 0.75)
-      .strokeRoundedRect(14, 19, 20, 7, 3);
+    g.fillStyle(C.armor3)
+      .fillRoundedRect(17, 5, 14, 7, 4);
 
-    g.fillStyle(0x8df4ff)
-      .fillRect(17, 21, 14, 2);
+    // Helmet top ridge
+    g.fillStyle(C.metal, 0.72)
+      .fillRoundedRect(19, 4, 10, 2.5, 1.2);
 
-    // VISOR HOT CORE
-    g.fillStyle(0xe8fdff, 0.9)
-      .fillRect(20, 21, 8, 1);
+    g.fillStyle(C.white, 0.18)
+      .fillRect(20, 5, 6, 1);
 
-    // ============================================================
-    // BODY AURA
-    // ============================================================
-    g.fillStyle(0xff756d, 0.08)
-      .fillRoundedRect(10, 21, 28, 29, 7);
+    // Side helmet modules
+    g.fillStyle(C.armor2)
+      .fillRoundedRect(12, 9, 5, 7, 2)
+      .fillRoundedRect(31, 9, 5, 7, 2);
 
-    // MAIN SUIT
-    g.fillStyle(0x202a3d)
-      .fillRoundedRect(13, 22, 22, 25, 6);
+    g.lineStyle(1, C.cyan, 0.55)
+      .strokeRoundedRect(12, 9, 5, 7, 2)
+      .strokeRoundedRect(31, 9, 5, 7, 2);
 
-    // INNER SUIT PANEL
-    g.fillStyle(0x2c3c55)
-      .fillRoundedRect(16, 25, 16, 19, 4);
+    g.fillStyle(C.cyanHot, 0.82)
+      .fillRect(13, 11, 2, 1)
+      .fillRect(33, 11, 2, 1);
 
-    // ============================================================
-    // CHEST ARMOR
-    // ============================================================
-    g.fillStyle(0xff756d, 0.16)
-      .fillRoundedRect(15, 28, 18, 8, 3);
+    // ------------------------------------------------------------
+    // VISOR // dark glass + layered emissive strip
+    // ------------------------------------------------------------
+    g.fillStyle(C.glass)
+      .fillRoundedRect(13, 11, 22, 7, 3);
 
-    g.fillStyle(0xff756d, 0.85)
-      .fillRect(17, 30, 14, 3);
+    g.fillStyle(C.armor2, 0.7)
+      .fillRoundedRect(14, 12, 20, 4, 2);
 
-    // ============================================================
-    // CHEST ENERGY CORE
-    // ============================================================
-    g.fillStyle(0x8df4ff, 0.18)
-      .fillCircle(24, 39, 7);
+    g.lineStyle(1.2, C.cyan, 0.88)
+      .strokeRoundedRect(13, 11, 22, 7, 3);
 
-    g.lineStyle(1, 0x8df4ff, 0.8)
-      .strokeCircle(24, 39, 5);
+    g.fillStyle(C.cyan, 0.48)
+      .fillRoundedRect(16, 13, 16, 2.5, 1.2);
 
-    g.fillStyle(0xe8fdff)
-      .fillCircle(24, 39, 2.5);
+    g.fillStyle(C.cyanHot, 0.92)
+      .fillRoundedRect(18, 13.5, 11, 1.2, 0.6);
 
-    // ============================================================
-    // ARMOR BELT
-    // ============================================================
-    g.fillStyle(0xffd06e, 0.90)
-      .fillRect(15, 44, 18, 3);
+    // Visor reflection
+    g.lineStyle(1, C.white, 0.22)
+      .lineBetween(16, 12.3, 23, 12.3);
 
-    // ============================================================
+    // ------------------------------------------------------------
+    // SHOULDER MASS
+    // ------------------------------------------------------------
+    g.fillStyle(C.void)
+      .fillRoundedRect(9, 23, 11, 10, 3)
+      .fillRoundedRect(28, 23, 11, 10, 3);
+
+    g.fillStyle(C.armor2)
+      .fillRoundedRect(10, 23, 10, 8, 3)
+      .fillRoundedRect(28, 23, 10, 8, 3);
+
+    g.lineStyle(1.4, C.metal, 0.5)
+      .strokeRoundedRect(10, 23, 10, 8, 3)
+      .strokeRoundedRect(28, 23, 10, 8, 3);
+
+    g.fillStyle(C.cyan, 0.65)
+      .fillRect(12, 25, 6, 1.5)
+      .fillRect(30, 25, 6, 1.5);
+
+    // Shoulder warning detail
+    g.fillStyle(C.gold, 0.78)
+      .fillRect(12, 28, 4, 1)
+      .fillRect(32, 28, 4, 1);
+
+    // ------------------------------------------------------------
+    // MAIN CHEST SILHOUETTE
+    // ------------------------------------------------------------
+    g.fillStyle(C.void)
+      .fillRoundedRect(12, 21, 24, 27, 6);
+
+    g.fillStyle(C.armor)
+      .fillRoundedRect(13, 22, 22, 24, 5);
+
+    // Chest upper shell
+    g.fillStyle(C.armor3)
+      .fillRoundedRect(16, 24, 16, 10, 4);
+
+    // Chest center plate
+    g.fillStyle(C.armor2)
+      .fillRoundedRect(17, 31, 14, 13, 3);
+
+    g.lineStyle(1, C.metal, 0.35)
+      .strokeRoundedRect(17, 31, 14, 13, 3);
+
+    // Chest side plates
+    g.fillStyle(C.armor2)
+      .fillRoundedRect(14, 33, 3, 9, 1.5)
+      .fillRoundedRect(31, 33, 3, 9, 1.5);
+
+    // ------------------------------------------------------------
+    // CHEST CORE // signature identity
+    // ------------------------------------------------------------
+    g.fillStyle(C.cyan, 0.12)
+      .fillCircle(24, 37, 8);
+
+    g.fillStyle(C.cyan, 0.18)
+      .fillCircle(24, 37, 6);
+
+    g.lineStyle(1.2, C.cyan, 0.82)
+      .strokeCircle(24, 37, 5);
+
+    g.lineStyle(1, C.white, 0.5)
+      .strokeCircle(24, 37, 3.5);
+
+    g.fillStyle(C.cyanHot, 0.95)
+      .fillCircle(24, 37, 2.3);
+
+    g.fillStyle(C.white, 0.9)
+      .fillCircle(23.2, 36.1, 0.9);
+
+    // Core radial emitters
+    g.lineStyle(1, C.cyan, 0.45)
+      .lineBetween(24, 29, 24, 32)
+      .lineBetween(24, 42, 24, 45)
+      .lineBetween(16, 37, 19, 37)
+      .lineBetween(29, 37, 32, 37);
+
+    // ------------------------------------------------------------
+    // ABDOMINAL ARMOR
+    // ------------------------------------------------------------
+    g.fillStyle(C.void)
+      .fillRoundedRect(18, 42, 12, 8, 2.5);
+
+    g.fillStyle(C.armor3)
+      .fillRoundedRect(19, 43, 10, 5, 2);
+
+    g.fillStyle(C.cyan, 0.5)
+      .fillRect(21, 44, 6, 1);
+
+    // ------------------------------------------------------------
+    // BELT / UTILITY RIG
+    // ------------------------------------------------------------
+    g.fillStyle(C.void)
+      .fillRoundedRect(14, 46, 20, 5, 2);
+
+    g.fillStyle(C.armor2)
+      .fillRoundedRect(15, 46, 18, 3, 1.2);
+
+    g.fillStyle(C.gold, 0.9)
+      .fillRoundedRect(20, 46, 8, 2, 0.8);
+
+    g.fillStyle(C.cyanHot, 0.85)
+      .fillRect(23, 46.4, 3, 1);
+
+    // Side utility cells
+    g.fillStyle(C.red, 0.72)
+      .fillRoundedRect(15, 45, 3, 3, 1);
+
+    g.fillStyle(C.cyan, 0.72)
+      .fillRoundedRect(30, 45, 3, 3, 1);
+
+    // ------------------------------------------------------------
     // ARMS
-    // ============================================================
-    g.lineStyle(5, 0xf3eee4, 0.95)
+    // Dynamic endpoints preserve existing per-state pose system.
+    // ------------------------------------------------------------
+    const leftShoulder = { x: 14, y: 29 };
+    const leftElbow = { x: 9, y: arm };
+    const rightShoulder = { x: 34, y: 29 };
+    const rightElbow = { x: 39, y: 42 - arm / 5 };
+
+    // Left upper arm
+    g.lineStyle(7, C.void, 0.98)
+      .lineBetween(leftShoulder.x, leftShoulder.y, leftElbow.x, leftElbow.y);
+
+    g.lineStyle(4.6, C.armor3, 0.98)
+      .lineBetween(leftShoulder.x, leftShoulder.y, leftElbow.x, leftElbow.y);
+
+    // Right upper arm
+    g.lineStyle(7, C.void, 0.98)
+      .lineBetween(rightShoulder.x, rightShoulder.y, rightElbow.x, rightElbow.y);
+
+    g.lineStyle(4.6, C.armor3, 0.98)
+      .lineBetween(rightShoulder.x, rightShoulder.y, rightElbow.x, rightElbow.y);
+
+    // Elbow caps
+    g.fillStyle(C.armor2)
+      .fillCircle(leftElbow.x, leftElbow.y, 3)
+      .fillCircle(rightElbow.x, rightElbow.y, 3);
+
+    g.lineStyle(1, C.metal, 0.55)
+      .strokeCircle(leftElbow.x, leftElbow.y, 2.6)
+      .strokeCircle(rightElbow.x, rightElbow.y, 2.6);
+
+    // Forearm energy rails
+    g.lineStyle(1.5, C.cyan, 0.75)
       .lineBetween(
-        15, 30,
-        8, arm
+        leftElbow.x + 1,
+        leftElbow.y,
+        leftElbow.x - 2,
+        leftElbow.y + 5
       )
       .lineBetween(
-        33, 30,
-        40, 42 - arm / 5
+        rightElbow.x - 1,
+        rightElbow.y,
+        rightElbow.x + 2,
+        rightElbow.y + 4
       );
 
-    // ARM ENERGY MARKERS
-    g.lineStyle(1.5, 0x8df4ff, 0.65)
-      .lineBetween(
-        9, arm - 2,
-        7, arm
+    // Gloves
+    g.fillStyle(C.void)
+      .fillRoundedRect(
+        leftElbow.x - 4,
+        leftElbow.y + 3,
+        7,
+        5,
+        2
       )
-      .lineBetween(
-        39, 42 - arm / 5 - 1,
-        41, 42 - arm / 5
+      .fillRoundedRect(
+        rightElbow.x - 3,
+        rightElbow.y + 3,
+        7,
+        5,
+        2
       );
 
-    // ============================================================
+    g.fillStyle(C.cyan, 0.8)
+      .fillRect(leftElbow.x - 2, leftElbow.y + 4, 3, 1)
+      .fillRect(rightElbow.x - 1, rightElbow.y + 4, 3, 1);
+
+    // ------------------------------------------------------------
     // LEGS
-    // ============================================================
-    g.lineStyle(7, 0xaee37f, 0.95)
-      .lineBetween(
-        19, 45,
-        16, leftLeg
-      )
-      .lineBetween(
-        29, 45,
-        33, rightLeg
+    // Dynamic endpoints preserve existing run/jump/dash poses.
+    // ------------------------------------------------------------
+    const leftHip = { x: 19, y: 47 };
+    const rightHip = { x: 29, y: 47 };
+
+    // Keep every leg pose inside the fixed 48x64 texture footprint.
+    // This preserves the existing animation parameters while preventing
+    // knees, shin rails and boots from being clipped at the bottom.
+    const leftKneeY =
+      Phaser.Math.Clamp(
+        leftLeg - 8,
+        45,
+        55
       );
 
-    // LEG ARMOR
-    g.lineStyle(2, 0x8df4ff, 0.65)
-      .lineBetween(
-        19, 49,
-        17, leftLeg - 3
-      )
-      .lineBetween(
-        29, 49,
-        32, rightLeg - 3
+    const rightKneeY =
+      Phaser.Math.Clamp(
+        rightLeg - 8,
+        45,
+        55
       );
 
-    // ============================================================
-    // RUNNER BOOTS
-    // ============================================================
-    g.fillStyle(0x172238)
-      .fillRoundedRect(
-        11,
-        leftLeg - 2,
-        9,
-        4,
-        2
+    const leftKnee = {
+      x: 17,
+      y: leftKneeY
+    };
+
+    const rightKnee = {
+      x: 33,
+      y: rightKneeY
+    };
+
+    // Upper leg masses
+    g.lineStyle(9, C.void, 0.98)
+      .lineBetween(leftHip.x, leftHip.y, leftKnee.x, leftKnee.y)
+      .lineBetween(rightHip.x, rightHip.y, rightKnee.x, rightKnee.y);
+
+    g.lineStyle(6, C.armor3, 0.98)
+      .lineBetween(leftHip.x, leftHip.y, leftKnee.x, leftKnee.y)
+      .lineBetween(rightHip.x, rightHip.y, rightKnee.x, rightKnee.y);
+
+    // Knee armor
+    g.fillStyle(C.armor2)
+      .fillCircle(leftKnee.x, leftKnee.y, 4)
+      .fillCircle(rightKnee.x, rightKnee.y, 4);
+
+    g.lineStyle(1, C.cyan, 0.62)
+      .strokeCircle(leftKnee.x, leftKnee.y, 3.4)
+      .strokeCircle(rightKnee.x, rightKnee.y, 3.4);
+
+    // Shin rails
+    g.lineStyle(2, C.cyan, 0.68)
+      .lineBetween(
+        leftKnee.x,
+        leftKnee.y + 2,
+        leftKnee.x - 1,
+        leftKnee.y + 7
       )
-      .fillRoundedRect(
-        28,
-        rightLeg - 2,
-        9,
-        4,
-        2
+      .lineBetween(
+        rightKnee.x,
+        rightKnee.y + 2,
+        rightKnee.x + 1,
+        rightKnee.y + 7
       );
 
-    // BOOT ENERGY EDGES
-    g.fillStyle(0x8df4ff)
-      .fillRect(13, leftLeg - 1, 5, 1)
-      .fillRect(30, rightLeg - 1, 5, 1);
+    // ------------------------------------------------------------
+    // BOOTS // stronger silhouette + energy sole
+    // ------------------------------------------------------------
+ const leftBootY =
+  Phaser.Math.Clamp(
+    leftKneeY + 8,
+    51,
+    57
+  );
+
+const rightBootY =
+  Phaser.Math.Clamp(
+    rightKneeY + 8,
+    51,
+    57
+  );
+
+    g.fillStyle(C.void)
+      .fillRoundedRect(11, leftBootY - 2, 11, 6, 2)
+      .fillRoundedRect(27, rightBootY - 2, 11, 6, 2);
+
+    g.fillStyle(C.armor)
+      .fillRoundedRect(12, leftBootY - 1, 9, 4, 1.5)
+      .fillRoundedRect(28, rightBootY - 1, 9, 4, 1.5);
+
+    // Boot toe armor
+    g.fillStyle(C.armor3)
+      .fillRoundedRect(12, leftBootY, 7, 2, 1)
+      .fillRoundedRect(28, rightBootY, 7, 2, 1);
+
+    // Energy sole
+    g.fillStyle(C.cyan, 0.85)
+      .fillRoundedRect(13, leftBootY + 2, 6, 1, 0.5)
+      .fillRoundedRect(29, rightBootY + 2, 6, 1, 0.5);
+
+    // ------------------------------------------------------------
+    // ARMOR SEAMS / MICRO DETAILS
+    // ------------------------------------------------------------
+    g.lineStyle(1, C.metal, 0.3)
+      .lineBetween(16, 26, 16, 29)
+      .lineBetween(32, 26, 32, 29)
+      .lineBetween(15, 39, 18, 39)
+      .lineBetween(30, 39, 33, 39);
+
+    g.fillStyle(C.gold, 0.65)
+      .fillRect(18, 27, 3, 1)
+      .fillRect(27, 27, 3, 1);
+
+    // ------------------------------------------------------------
+    // STATE-DEPENDENT ENERGY ACCENTS
+    // Uses the existing arm/leg pose values to subtly vary energy.
+    // ------------------------------------------------------------
+    const poseIntensity =
+      Math.min(
+        1,
+        Math.abs(leftLeg - rightLeg) / 12 +
+        Math.abs(arm - 40) / 30
+      );
+
+    g.fillStyle(C.cyan, 0.16 + poseIntensity * 0.10)
+      .fillCircle(24, 37, 9);
+
+    g.fillStyle(C.cyanHot, 0.35 + poseIntensity * 0.2)
+      .fillCircle(24, 37, 1.5);
+
+    // ------------------------------------------------------------
+    // TOP / CHEST HOT PIXELS
+    // ------------------------------------------------------------
+    g.fillStyle(C.white, 0.65)
+      .fillRect(28, 6, 2, 1)
+      .fillRect(18, 20, 2, 1)
+      .fillRect(29, 41, 2, 1);
+
+    // ------------------------------------------------------------
+    // FINAL SILHOUETTE EDGE HIGHLIGHTS
+    // ------------------------------------------------------------
+    g.lineStyle(1, C.cyan, 0.28)
+      .lineBetween(16, 18, 13, 23)
+      .lineBetween(32, 18, 35, 23)
+      .lineBetween(14, 43, 18, 47)
+      .lineBetween(34, 43, 30, 47);
+
   });
 
 // Generated textures are isolated here so authored sprite sheets can replace them later.
@@ -268,6 +576,130 @@ make('signal', 56, 56, g => {
     .lineBetween(28, 41, 28, 50);
   g.fillStyle(0xffe7a6).fillCircle(28, 28, 8);
   g.fillStyle(0xff826e).fillCircle(28, 28, 3);
+});
+
+  make('shark', 96, 42, g => {
+  // Shark aura
+  g.fillStyle(
+    0x58e7ff,
+    0.08
+  )
+    .fillEllipse(
+      48,
+      22,
+      92,
+      34
+    );
+
+  // Body
+  g.fillStyle(
+    0x18374b
+  )
+    .fillEllipse(
+      48,
+      23,
+      78,
+      22
+    );
+
+  // Belly
+  g.fillStyle(
+    0x8eb8c8
+  )
+    .fillEllipse(
+      53,
+      27,
+      48,
+      10
+    );
+
+  // Dorsal fin
+  g.fillStyle(
+    0x18374b
+  )
+    .fillTriangle(
+      42,
+      14,
+      51,
+      2,
+      58,
+      15
+    );
+
+  // Tail
+  g.fillStyle(
+    0x18374b
+  )
+    .fillTriangle(
+      10,
+      22,
+      0,
+      10,
+      12,
+      29
+    )
+    .fillTriangle(
+      10,
+      23,
+      0,
+      36,
+      16,
+      28
+    );
+
+  // Eye
+  g.fillStyle(
+    0xffd06e
+  )
+    .fillCircle(
+      78,
+      20,
+      3
+    );
+
+  g.fillStyle(
+    0xffffff
+  )
+    .fillCircle(
+      79,
+      19,
+      1
+    );
+
+  // Jaw
+  g.lineStyle(
+    1.5,
+    0xdffcff,
+    0.8
+  )
+    .lineBetween(
+      61,
+      29,
+      84,
+      29
+    );
+
+  // Teeth
+  g.fillStyle(
+    0xffffff,
+    0.88
+  )
+    .fillTriangle(
+      66,
+      29,
+      69,
+      34,
+      72,
+      29
+    )
+    .fillTriangle(
+      73,
+      29,
+      76,
+      34,
+      79,
+      29
+    );
 });
 
 make('barrier', 48, 64, g => {
@@ -1800,80 +2232,128 @@ make('alien-guide', 56, 64, g => {
 }
 
 createAnimations() {
-if (this.anims.exists('runner-run')) return;
+  if (this.anims.exists('runner-idle') &&
+      this.anims.exists('runner-run') &&
+      this.anims.exists('runner-jump') &&
+      this.anims.exists('runner-fall') &&
+      this.anims.exists('runner-land') &&
+      this.anims.exists('runner-dash') &&
+      this.anims.exists('runner-wall') &&
+      this.anims.exists('runner-hit') &&
+      this.anims.exists('runner-finish')) {
+    return;
+  }
 
-this.anims.create({
-  key: 'runner-idle',
-  frames: [{ key: 'runner-idle' }],
-  frameRate: 1
-});
+  // ------------------------------------------------------------
+  // IDLE
+  // ------------------------------------------------------------
+  this.anims.create({
+    key: 'runner-idle',
+    frames: [{ key: 'runner-idle' }],
+    frameRate: 1,
+    repeat: -1
+  });
 
-this.anims.create({
-  key: 'runner-run',
-  frames: [{ key: 'runner-run-a' }, { key: 'runner-run-b' }],
-  frameRate: 11,
-  repeat: -1
-});
+  // ------------------------------------------------------------
+  // RUN
+  // Base animation remains compatible with existing runtime.
+  // Speed is still dynamically adjusted later in the file.
+  // ------------------------------------------------------------
+  this.anims.create({
+    key: 'runner-run',
+    frames: [
+      { key: 'runner-run-a' },
+      { key: 'runner-run-b' }
+    ],
+    frameRate: 11,
+    repeat: -1
+  });
 
-this.anims.create({
-  key: 'runner-jump',
-  frames: [{ key: 'runner-jump' }],
-  frameRate: 1
-});
+  // ------------------------------------------------------------
+  // JUMP
+  // ------------------------------------------------------------
+  this.anims.create({
+    key: 'runner-jump',
+    frames: [{ key: 'runner-jump' }],
+    frameRate: 1,
+    repeat: -1
+  });
 
-this.anims.create({
-  key: 'runner-fall',
-  frames: [{ key: 'runner-fall' }],
-  frameRate: 1
-});
+  // ------------------------------------------------------------
+  // FALL
+  // ------------------------------------------------------------
+  this.anims.create({
+    key: 'runner-fall',
+    frames: [{ key: 'runner-fall' }],
+    frameRate: 1,
+    repeat: -1
+  });
 
-this.anims.create({
-  key: 'runner-land',
-  frames: [{ key: 'runner-land' }],
-  frameRate: 1
-});
+  // ------------------------------------------------------------
+  // LAND
+  // ------------------------------------------------------------
+  this.anims.create({
+    key: 'runner-land',
+    frames: [{ key: 'runner-land' }],
+    frameRate: 1,
+    repeat: -1
+  });
 
-this.anims.create({
-  key: 'runner-dash',
-  frames: [{ key: 'runner-dash' }],
-  frameRate: 1
-});
+  // ------------------------------------------------------------
+  // DASH
+  // ------------------------------------------------------------
+  this.anims.create({
+    key: 'runner-dash',
+    frames: [{ key: 'runner-dash' }],
+    frameRate: 1,
+    repeat: -1
+  });
 
-this.anims.create({
-  key: 'runner-wall',
-  frames: [{ key: 'runner-wall' }],
-  frameRate: 1
-});
+  // ------------------------------------------------------------
+  // WALL
+  // ------------------------------------------------------------
+  this.anims.create({
+    key: 'runner-wall',
+    frames: [{ key: 'runner-wall' }],
+    frameRate: 1,
+    repeat: -1
+  });
 
-this.anims.create({
-  key: 'runner-hit',
-  frames: [{ key: 'runner-hit' }],
-  frameRate: 1
-});
+  // ------------------------------------------------------------
+  // HIT
+  // ------------------------------------------------------------
+  this.anims.create({
+    key: 'runner-hit',
+    frames: [{ key: 'runner-hit' }],
+    frameRate: 1,
+    repeat: -1
+  });
 
-this.anims.create({
-  key: 'runner-finish',
-  frames: [{ key: 'runner-finish' }],
-  frameRate: 1
-});
-
+  // ------------------------------------------------------------
+  // FINISH
+  // ------------------------------------------------------------
+  this.anims.create({
+    key: 'runner-finish',
+    frames: [{ key: 'runner-finish' }],
+    frameRate: 1,
+    repeat: -1
+  });
 }
 
 init({
-mission,
-runId,
-abilities = [],
-rain,
-screenShake = true,
-reducedMotion = false,
-firstTimeTutorial = false
-}) {
+  mission,
+  runId,
+  abilities = [],
+  rain,
+  screenShake = true,
+  reducedMotion = false,
+  firstTimeTutorial = false
+} = {}) {
 this.mission = mission || {};
 this.mission.spawn ??= { x: 0, y: 0 };
 this.mission.goal ??= { x: this.mission.spawn.x + 1200, y: this.mission.spawn.y };
-for (const key of ['platforms','obstacles','movingGates','enemies','signals','secrets','checkpoints','boostPads','guides','safeZones','events']) if (!Array.isArray(this.mission[key])) this.mission[key] = [];
 this.runId = runId;
-this.abilities = new Set(abilities);
+this.abilities = new Set(abilities || []);
 this.rainEnabled = rain;
 this.screenShake = screenShake;
 this.motionReduced = reducedMotion;
@@ -1881,11 +2361,28 @@ this.firstTimeTutorial = firstTimeTutorial;
 
 this.collected = 0;
 this.secretsCollected = 0;
+this.playerBaseAngle = 0;
+this.enemyDefeats = 0;
 this.elapsedMs = 0;
 this.timeEmitTimer = 0;
+
+// ============================================================
+// SIGNAL INTERFERENCE SYSTEM
+// 0.00 = clean signal
+// 1.00 = critical interference / full override
+// ============================================================
+this.signalInterference = 0;
+this.signalInterferenceTier = -1;
+this.signalOverrideTriggered = false;
+this.signalInterferencePulse = 0;
+this.signalInterferenceObjects = null;
+this.signalInterferenceJitter = 0;
+this.signalGhostTimer = 0;
+  
 // ============================================================
 // MISSION MEDALS / RUN RATING
 // ============================================================
+  
 this.runRating = {
   speed: 0,
   combat: 0,
@@ -1898,6 +2395,8 @@ this.medalResult = null;
 this.boostCooldown = 0;
 this.dashCooldown = 0;
 this.dashTimer = 0;
+this.dashFxTimer = 0;
+this.runnerAnimRate = 11;
 this.wallJumpCooldown = 0;
 this.wallJumpTimer = 0;
 this.lowEnergyCueTimer = 0;
@@ -1928,7 +2427,7 @@ this.deaths = 0;
 this.perfectDodgeWindow = 0;
 this.perfectDodgeCooldown = 0;
 this.perfectDodges = 0;
-this.deathLimit = mission.id === 'first-delivery' ? Infinity : 3;
+this.deathLimit = this.mission.id === 'first-delivery' ? Infinity : 3;
 this.jumpsUsed = 0;
 this.finished = false;
 this.gameOverUI = null;
@@ -1941,19 +2440,65 @@ this.respawnGrace = 0;
 this.cinematicActive = this.mission.id === 'first-delivery' && firstTimeTutorial;
 this.eventState = new Map();
 this.mobileDirection = null;
-this.mobileActions = { jump:false, dash:false, fire:false, sword:false, build1:false, build2:false, gadget1:false, gadget2:false };
+this.slideCrouchLocked = false;
+this.mobileActions = {
+  jump: false,
+  fire: false,
+  sword: false,
+  dash: false,
+  crouch: false,
+  interact: false,
+  build1: false,
+  build2: false,
+  gadget1: false,
+  gadget2: false
+};
 this.empTimer = 0; this.decoyTimer = 0; this.boosterTimer = 0;
 this.boosterAura = null; this.decoyBeacon = null; this.infoCard = null; this.landingTimer = 0;
 this.bossDefeated = false;
 this.bossPhaseTwo = false;
 this.bossVictorySequence = false;
 this.bossVictoryLock = false;
+this.bossSecondShotPending = false;
 this.goalTouched = false;
 
+this.waterZones = null;
+this.waterAttackActive = false;
+this.waterDeathTimer = 0;
+this.waterAttackToken = 0;
+
+// ============================================================
+// WET TERRAIN / SLIPPERY SURFACE
+// ============================================================
+  
+this.wetSurfaceActive = false;
+this.wetSurfaceGrip = 1;
+this.activeShark = null;
+
+// ============================================================
+// RELAY GATE / PUZZLE SYSTEM
+// ============================================================
+  
+this.relayGates = null;
+this.relayPuzzleActive = false;
+this.relayPuzzleGate = null;
+this.relayPuzzleType = null;
+this.relayPuzzleData = null;
+this.relayPuzzleAttempts = 0;
+this.relayPuzzleStartedAt = 0;
+this.relayPuzzleSession = 0;
+this.relayPuzzleTimerBand = 0;
+this.relayPuzzleUI = null;
+this.relayNearbyGate = null;
+this.relayInteractHint = null;
 this.coyote = 0;
 this.jumpBuffer = 0;
 this.dustTimer = 0;
 this.speedTimer = 0;
+this.kineticTrailTimer = 0;
+this.groundFxTimer = 0;
+this.footstepFxTimer = 0;
+this.lastRunFrame = -1;
 this.fastFallFxTimer = 0;
 this.lastProgress = -1;
 this.wasGrounded = false;
@@ -1992,7 +2537,25 @@ validateMission() {
   const mission = this.mission || {};
   mission.spawn ??= { x: 0, y: 0 };
   mission.goal ??= { x: mission.spawn.x + 1200, y: mission.spawn.y };
-  for (const key of ['platforms','obstacles','movingGates','enemies','signals','secrets','checkpoints','boostPads','guides','safeZones','events']) if (!Array.isArray(mission[key])) mission[key] = [];
+for (const key of [
+  'platforms',
+  'obstacles',
+  'movingGates',
+  'enemies',
+  'signals',
+  'secrets',
+  'checkpoints',
+  'boostPads',
+  'guides',
+  'safeZones',
+  'events',
+  'waterZones',
+'relayGates'
+]) {
+  if (!Array.isArray(this.mission[key])) {
+    this.mission[key] = [];
+  }
+}
   mission.enemies = mission.enemies.map(enemy => ({
     ...enemy,
     min: Number.isFinite(enemy?.min) ? enemy.min : (Number(enemy?.x) || mission.spawn.x) - 90,
@@ -2001,10 +2564,89 @@ validateMission() {
   this.mission = mission;
 }
 
-shake(duration, intensity) {
-if (this.screenShake && !this.motionReduced) {
-this.cameras.main.shake(duration, intensity);
+/*
+ * ============================================================
+ * REACTIVE WORLD LIGHTING
+ * Purely visual. No physics / input / mission mutations.
+ * ============================================================
+ */
+  
+worldLightPulse(
+  color = 0x8df4ff,
+  strength = 0.16,
+  duration = 220,
+  radius = 90
+) {
+  if (
+    this.motionReduced ||
+    !this.player?.active
+  ) {
+    return;
+  }
+
+  const pulse = this.add
+    .circle(
+      this.player.x,
+      this.player.y,
+      radius,
+      color,
+      strength
+    )
+    .setDepth(11);
+
+  pulse.setStrokeStyle(
+    2,
+    color,
+    Math.min(0.9, strength + 0.45)
+  );
+
+  this.tweens.add({
+    targets: pulse,
+    scale: 2.8,
+    alpha: 0,
+    duration,
+    ease: 'Quad.out',
+    onComplete: () => pulse.destroy()
+  });
 }
+
+worldLightFlash(
+  color = 0x8df4ff,
+  alpha = 0.08,
+  duration = 120
+) {
+  if (
+    this.motionReduced ||
+    !this.player?.active
+  ) {
+    return;
+  }
+
+  const flash = this.add
+    .rectangle(
+      this.player.x,
+      this.player.y,
+      260,
+      90,
+      color,
+      alpha
+    )
+    .setDepth(5);
+
+  this.tweens.add({
+    targets: flash,
+    scaleX: 1.7,
+    alpha: 0,
+    duration,
+    ease: 'Quad.out',
+    onComplete: () => flash.destroy()
+  });
+}
+
+shake(duration, intensity) {
+  if (this.screenShake && !this.motionReduced) {
+    this.cameras.main.shake(duration, intensity);
+  }
 }
 
 registerPerfectDodge() {
@@ -2042,6 +2684,7 @@ this.comboTimer = 3000;
  * PERFECT DODGE · COMBAT FEEDBACK
  * ============================================================
  */
+  
 if (!this.motionReduced) {
   const dodgeRing =
     this.add
@@ -2393,8 +3036,44 @@ this.loadout.upgrades?.includes('escape') ? .85 : 1
 
 create() {
 this.validateMission();
-if (!this.textures.exists('runner-idle')) {
-this.createTextures();
+const requiredTextures = [
+  'runner-idle',
+  'runner-run-a',
+  'runner-run-b',
+  'runner-jump',
+  'runner-fall',
+  'runner-land',
+  'runner-dash',
+  'runner-wall',
+  'runner-hit',
+  'runner-finish',
+  'signal',
+  'shark',
+  'barrier',
+  'goal',
+  'rain',
+  'dust',
+  'speed-line',
+  'boost-pad',
+  'chaser',
+  'checkpoint',
+  'security',
+  'guard',
+  'enemy-runner',
+  'invader',
+  'chicken',
+  'dino',
+  'dino-boss',
+  'sentinel-boss',
+  'storm-boss'
+];
+
+if (
+  requiredTextures.some(
+    key => !this.textures.exists(key)
+  )
+) {
+  this.createTextures();
 }
 
 this.createAnimations();
@@ -2459,7 +3138,10 @@ this.createSignals();
 this.createSecrets();
 this.createCheckpoints();
 this.createHazards();
+this.createWaterHazards();
+this.createWaterWaves();
 this.createMovingGates();
+this.createRelayGates();
 this.createEnemies();
 this.createSciFiThreats();
 this.createBuildSystems();
@@ -2475,6 +3157,8 @@ this.events.once(
   () => {
     this.tweens.killAll();
     this.time.removeAllEvents();
+    this.activeShark?.destroy();
+this.activeShark = null;
     this.input.keyboard.off(
       'keydown-SPACE',
       this.cinematicSkipHandler
@@ -2516,7 +3200,9 @@ if (this.package?.condition) {
 }
 
 createEnvironment() {
-const visual = DISTRICT_VISUALS[this.mission.id];
+const visual =
+  DISTRICT_VISUALS[this.mission.id] ||
+  DISTRICT_VISUALS['first-delivery'];
 const sky = this.add.graphics().setScrollFactor(0);
 
 const skyBottom = this.mission.blackout
@@ -2535,6 +3221,87 @@ sky.fillGradientStyle(
   1500,
   720
 );
+
+/* -------------------------------------------------
+   DISTRICT ATMOSPHERE
+   Visual only — no gameplay / physics mutation.
+   ------------------------------------------------- */
+
+const districtAtmosphere =
+  this.add.graphics()
+    .setScrollFactor(0)
+    .setDepth(0.5);
+
+const atmosphereColor =
+  visual.accent;
+
+districtAtmosphere.fillStyle(
+  atmosphereColor,
+  this.mission.blackout
+    ? 0.045
+    : 0.075
+);
+
+districtAtmosphere.fillRect(
+  0,
+  390,
+  1500,
+  180
+);
+
+districtAtmosphere.fillStyle(
+  atmosphereColor,
+  this.mission.blackout
+    ? 0.025
+    : 0.045
+);
+
+districtAtmosphere.fillRect(
+  0,
+  500,
+  1500,
+  120
+);
+
+/* Horizon energy line */
+districtAtmosphere.lineStyle(
+  2,
+  atmosphereColor,
+  this.mission.blackout
+    ? 0.18
+    : 0.28
+);
+
+districtAtmosphere.lineBetween(
+  0,
+  505,
+  1500,
+  505
+);
+
+/* Soft district pulse */
+const atmospherePulse =
+  this.add.rectangle(
+    750,
+    500,
+    1500,
+    110,
+    atmosphereColor,
+    0
+  )
+  .setScrollFactor(0)
+  .setDepth(0.55);
+
+this.tweens.add({
+  targets: atmospherePulse,
+  alpha: this.mission.blackout
+    ? 0.035
+    : 0.065,
+  duration: 1700,
+  yoyo: true,
+  repeat: -1,
+  ease: 'Sine.inOut'
+});
 
 if (this.mission.gravityMode === 'low') {
   for (let index = 0; index < 86; index++) {
@@ -2739,6 +3506,117 @@ this.add.text(
 )
   .setScrollFactor(0)
   .setAlpha(.45);
+
+/* -------------------------------------------------
+   DISTRICT REVEAL
+   Short cinematic zone identifier.
+   Purely visual.
+   ------------------------------------------------- */
+
+const districtIndex = {
+  'first-delivery': '01',
+  'dead-drop': '02',
+  blackout: '03',
+  pursuit: '04',
+  'signal-storm': '05',
+  'corporate-lockdown': '06',
+  'final-relay': '07'
+}[this.mission.id] || '00';
+
+const revealGroup =
+  this.add.container(
+    this.scale.width / 2,
+    132
+  )
+  .setScrollFactor(0)
+  .setDepth(30)
+  .setAlpha(0);
+
+const revealLine =
+  this.add.rectangle(
+    0,
+    -26,
+    260,
+    2,
+    visual.accent,
+    0.85
+  );
+
+const revealGlow =
+  this.add.rectangle(
+    0,
+    -26,
+    90,
+    6,
+    visual.accent,
+    0.18
+  );
+
+const revealTitle =
+  this.add.text(
+    0,
+    0,
+    visual.label,
+    {
+      fontFamily: 'DM Mono',
+      fontSize: '30px',
+      fontStyle: 'bold',
+      color: '#f4fbff',
+      stroke: '#07111d',
+      strokeThickness: 6,
+      align: 'center'
+    }
+  )
+  .setOrigin(0.5);
+
+const revealSub =
+  this.add.text(
+    0,
+    34,
+    `DISTRICT // ${districtIndex}`,
+    {
+      fontFamily: 'DM Mono',
+      fontSize: '10px',
+      color: '#b9f5ff',
+      letterSpacing: 3,
+      align: 'center'
+    }
+  )
+  .setOrigin(0.5);
+
+revealGroup.add([
+  revealGlow,
+  revealLine,
+  revealTitle,
+  revealSub
+]);
+
+this.tweens.add({
+  targets: revealGroup,
+  alpha: 1,
+  y: 148,
+  duration: 260,
+  ease: 'Quad.out'
+});
+
+this.tweens.add({
+  targets: revealGlow,
+  scaleX: 2.8,
+  alpha: 0.05,
+  duration: 720,
+  ease: 'Sine.out'
+});
+
+this.tweens.add({
+  targets: revealGroup,
+  alpha: 0,
+  y: 126,
+  delay: 1500,
+  duration: 420,
+  ease: 'Quad.in',
+  onComplete: () =>
+    revealGroup.destroy()
+});
 
 const backdrop = {
   'first-delivery': () => {
@@ -3244,80 +4122,249 @@ const windowAlpha = this.mission.blackout
   ? .12
   : .25;
 
-for (
-  let x = -200;
-  x < this.worldWidth + 300;
-  x += 120
-) {
-  const h =
-    105 +
-    ((x / 120 + 7) % 5) * 27;
+const distantBuildings = [
+  [20, 150],
+  [210, 220],
+  [470, 175],
+  [700, 245],
+  [980, 165],
+  [1190, 225],
+  [1460, 190],
+  [1710, 260],
+  [2020, 175],
+  [2260, 235],
+  [2540, 185],
+  [2790, 250],
+  [3080, 180],
+  [3330, 230],
+  [3610, 190],
+  [3880, 245]
+];
 
-  distant
-    .fillStyle(distantColor)
-    .fillRect(x, 570 - h, 88, h)
-    .fillStyle(visual.window, windowAlpha)
-    .fillRect(
-      x + 17,
-      490 - h / 4,
-      7,
-      5
-    );
-}
+distantBuildings.forEach(
+  ([x, h]) => {
+    distant
+      .fillStyle(
+        distantColor,
+        1
+      )
+      .fillRect(
+        x,
+        570 - h,
+        118,
+        h
+      );
+
+    distant
+      .fillStyle(
+        visual.window,
+        windowAlpha
+      )
+      .fillRect(
+        x + 22,
+        500 - h * .22,
+        10,
+        5
+      )
+      .fillRect(
+        x + 68,
+        520 - h * .18,
+        10,
+        5
+      );
+  }
+);
 
 const middle = this.add.graphics().setScrollFactor(.38);
 
-for (
-  let x = -120;
-  x < this.worldWidth + 300;
-  x += 280
-) {
+// ART-DIRECTED CITY BLOCKS
+// Fixed positions and profiles. No procedural building generation.
+const buildingProfiles = [
+  {
+    x: -120,
+    width: 170,
+    height: 250,
+    offsetY: 360,
+    windowCols: [32, 92],
+    windowGap: 34,
+    accent: true
+  },
+  {
+    x: 170,
+    width: 230,
+    height: 300,
+    offsetY: 310,
+    windowCols: [34, 100, 166],
+    windowGap: 30,
+    accent: false
+  },
+  {
+    x: 520,
+    width: 145,
+    height: 350,
+    offsetY: 260,
+    windowCols: [28, 78],
+    windowGap: 32,
+    accent: true
+  },
+  {
+    x: 760,
+    width: 255,
+    height: 270,
+    offsetY: 340,
+    windowCols: [36, 106, 176],
+    windowGap: 32,
+    accent: false
+  },
+  {
+    x: 1110,
+    width: 180,
+    height: 325,
+    offsetY: 285,
+    windowCols: [32, 96],
+    windowGap: 34,
+    accent: true
+  }
+];
+
+buildingProfiles.forEach(building => {
+  const baseColor =
+    this.mission.blackout
+      ? 0x10192a
+      : visual.skyline;
+
+  const bodyColor =
+    this.mission.blackout
+      ? 0x15233a
+      : visual.building;
+
+  const roofY =
+    building.offsetY;
+
+  const bottomY = 610;
+
+  // Main silhouette
+  middle
+    .fillStyle(baseColor, 1)
+    .fillRect(
+      building.x,
+      roofY + 48,
+      building.width,
+      bottomY - (roofY + 48)
+    );
+
+  // Main building body
+  middle
+    .fillStyle(bodyColor, 1)
+    .fillRect(
+      building.x + 12,
+      roofY,
+      building.width - 24,
+      bottomY - roofY
+    );
+
+  // Rooftop cap
   middle
     .fillStyle(
       this.mission.blackout
-        ? 0x10192a
-        : visual.skyline
+        ? 0x1a2940
+        : 0x22374f,
+      1
     )
     .fillRect(
-      x,
-      395,
-      210,
-      215
-    )
-    .fillStyle(
-      this.mission.blackout
-        ? 0x15233a
-        : visual.building
-    )
-    .fillRect(
-      x + 24,
-      320,
-      132,
-      290
+      building.x + 8,
+      roofY - 8,
+      building.width - 16,
+      8
     );
 
-  for (let y = 348; y < 570; y += 28) {
-    middle
-      .fillStyle(visual.window, .28)
-      .fillRect(x + 48, y, 12, 7)
-      .fillRect(x + 104, y, 12, 7);
+  // Vertical architectural frame
+  middle
+    .lineStyle(
+      2,
+      0x657b92,
+      0.38
+    )
+    .lineBetween(
+      building.x + building.width - 18,
+      roofY + 12,
+      building.x + building.width - 18,
+      bottomY
+    );
+
+  // Windows
+  for (
+    let y = roofY + 28;
+    y < bottomY - 22;
+    y += building.windowGap
+  ) {
+    building.windowCols.forEach(column => {
+      if (
+        column + 12 >
+        building.width - 24
+      ) {
+        return;
+      }
+
+      middle
+        .fillStyle(
+          visual.window,
+          this.mission.blackout
+            ? 0.16
+            : 0.26
+        )
+        .fillRect(
+          building.x + 14 + column,
+          y,
+          10,
+          6
+        );
+    });
   }
 
+  // Neon vertical identity strip
+  if (building.accent) {
+    middle
+      .fillStyle(
+        visual.accent,
+        this.mission.blackout
+          ? 0.18
+          : 0.34
+      )
+      .fillRect(
+        building.x + 18,
+        roofY + 18,
+        3,
+        bottomY - roofY - 32
+      );
+  }
+
+  // Rooftop antenna / structure
   middle
-    .lineStyle(2, 0x657b92, .45)
-    .lineBetween(
-      x + 167,
-      390,
-      x + 167,
-      590
+    .lineStyle(
+      2,
+      visual.accent,
+      0.42
     )
     .lineBetween(
-      x + 167,
-      430,
-      x + 205,
-      430
+      building.x +
+        building.width / 2,
+      roofY,
+      building.x +
+        building.width / 2,
+      roofY - 26
+    )
+    .fillStyle(
+      visual.accent,
+      0.55
+    )
+    .fillCircle(
+      building.x +
+        building.width / 2,
+      roofY - 26,
+      3
     );
-}
+});
 
 const foreground = this.add.graphics().setScrollFactor(.72);
 
@@ -3357,6 +4404,312 @@ for (
       x + 44,
       580
     );
+}
+
+  // ============================================================
+// NEON AIR TRAFFIC / CITY LIGHT STREAMS
+// Purely visual — no physics, no gameplay state.
+// ============================================================
+
+const trafficFx = this.add
+  .graphics()
+  .setScrollFactor(.22)
+  .setDepth(2);
+
+const trafficBursts = [
+  { x: 280, y: 248, w: 150, a: .18 },
+  { x: 760, y: 302, w: 210, a: .14 },
+  { x: 1320, y: 220, w: 120, a: .20 },
+  { x: 1880, y: 278, w: 190, a: .16 },
+  { x: 2460, y: 235, w: 150, a: .18 },
+  { x: 3120, y: 292, w: 230, a: .13 },
+  { x: 3660, y: 214, w: 170, a: .17 }
+];
+
+trafficBursts.forEach(
+  ({ x, y, w, a }, index) => {
+    trafficFx
+      .fillStyle(
+        visual.accent,
+        a * .28
+      )
+      .fillRoundedRect(
+        x,
+        y,
+        w,
+        8,
+        4
+      );
+
+    trafficFx
+      .fillStyle(
+        visual.accent,
+        a
+      )
+      .fillRoundedRect(
+        x + 12,
+        y + 2,
+        w * .42,
+        3,
+        2
+      );
+
+    trafficFx
+      .fillStyle(
+        0xdffcff,
+        a * .85
+      )
+      .fillRoundedRect(
+        x + 20,
+        y + 2,
+        Math.min(44, w * .16),
+        2,
+        1
+      );
+  }
+);
+
+// Slow atmospheric scan line
+const cityScan = this.add
+  .rectangle(
+    -180,
+    335,
+    220,
+    2,
+    visual.accent,
+    0.10
+  )
+  .setOrigin(0, 0.5)
+  .setScrollFactor(.18)
+  .setDepth(2);
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: cityScan,
+    x: this.worldWidth + 300,
+    duration: 18000,
+    ease: 'Linear',
+    repeat: -1
+  });
+
+  this.tweens.add({
+    targets: trafficFx,
+    alpha: {
+      from: .72,
+      to: 1
+    },
+    duration: 2600,
+    ease: 'Sine.inOut',
+    yoyo: true,
+    repeat: -1
+  });
+}
+
+  // ============================================================
+// HOLOGRAM BILLBOARDS / NEON DISTRICT SIGNS
+// Purely visual — no gameplay / physics changes.
+// ============================================================
+
+const billboardFx = this.add
+  .graphics()
+  .setScrollFactor(.30)
+  .setDepth(3);
+
+const billboardData = [
+  {
+    x: 420,
+    y: 330,
+    w: 150,
+    h: 62
+  },
+  {
+    x: 1160,
+    y: 285,
+    w: 190,
+    h: 72
+  },
+  {
+    x: 1980,
+    y: 320,
+    w: 155,
+    h: 64
+  },
+  {
+    x: 2780,
+    y: 275,
+    w: 210,
+    h: 78
+  },
+  {
+    x: 3520,
+    y: 315,
+    w: 165,
+    h: 66
+  }
+];
+
+billboardData.forEach(
+  ({ x, y, w, h }, index) => {
+
+    // Outer glow field
+    billboardFx
+      .fillStyle(
+        visual.accent,
+        0.045
+      )
+      .fillRoundedRect(
+        x - 8,
+        y - 8,
+        w + 16,
+        h + 16,
+        8
+      );
+
+    // Dark hologram body
+    billboardFx
+      .fillStyle(
+        0x07111d,
+        0.88
+      )
+      .fillRoundedRect(
+        x,
+        y,
+        w,
+        h,
+        5
+      );
+
+    // Neon frame
+    billboardFx
+      .lineStyle(
+        2,
+        visual.accent,
+        0.72
+      )
+      .strokeRoundedRect(
+        x,
+        y,
+        w,
+        h,
+        5
+      );
+
+    // Inner frame
+    billboardFx
+      .lineStyle(
+        1,
+        0xdffcff,
+        0.20
+      )
+      .strokeRoundedRect(
+        x + 7,
+        y + 7,
+        w - 14,
+        h - 14,
+        3
+      );
+
+    // Horizontal hologram scan lines
+    for (
+      let line = y + 14;
+      line < y + h - 10;
+      line += 10
+    ) {
+      billboardFx
+        .fillStyle(
+          visual.accent,
+          0.10
+        )
+        .fillRect(
+          x + 10,
+          line,
+          w - 20,
+          2
+        );
+    }
+
+    // Central signal core
+    billboardFx
+      .fillStyle(
+        visual.accent,
+        0.18
+      )
+      .fillCircle(
+        x + w / 2,
+        y + h / 2,
+        16
+      );
+
+    billboardFx
+      .lineStyle(
+        2,
+        visual.accent,
+        0.68
+      )
+      .strokeCircle(
+        x + w / 2,
+        y + h / 2,
+        10
+      );
+
+    billboardFx
+      .fillStyle(
+        0xdffcff,
+        0.90
+      )
+      .fillCircle(
+        x + w / 2,
+        y + h / 2,
+        3
+      );
+
+    // Side signal nodes
+    billboardFx
+      .fillStyle(
+        visual.accent,
+        0.72
+      )
+      .fillCircle(
+        x + 12,
+        y + 12,
+        2
+      )
+      .fillCircle(
+        x + w - 12,
+        y + 12,
+        2
+      );
+
+    // Bottom signal bar
+    billboardFx
+      .fillStyle(
+        visual.accent,
+        0.42
+      )
+      .fillRect(
+        x + 14,
+        y + h - 9,
+        Math.max(
+          20,
+          w - 28
+        ),
+        2
+      );
+  }
+);
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: billboardFx,
+    alpha: {
+      from: 0.72,
+      to: 1
+    },
+    duration: 1400,
+    ease: 'Sine.inOut',
+    yoyo: true,
+    repeat: -1
+  });
 }
 
 this.parallaxLayers = [
@@ -3412,60 +4765,136 @@ this.mission.platforms.forEach(
     this.physics.add.existing(platform, true);
     this.platforms.add(platform);
 
-    const detail = this.add.graphics();
+  
+   const detail = this.add.graphics();
 
-    detail.fillStyle(0x111a29);
+// Platform inset
+detail
+  .fillStyle(
+    0x0b1422,
+    blackout ? .72 : .82
+  )
+  .fillRect(
+    x + 6,
+    y + 8,
+    Math.max(
+      0,
+      width - 12
+    ),
+    Math.max(
+      4,
+      height - 14
+    )
+  );
 
-    for (
-      let mark = x + 18;
-      mark < x + width;
-      mark += 34
-    ) {
-      detail.fillRect(mark, y + 18, 16, 6);
-    }
+// Structural panel marks
+detail
+  .fillStyle(
+    0x111a29,
+    blackout ? .7 : .9
+  );
 
-    detail
-      .fillStyle(
-        isRoof
-          ? 0x94f5ff
-          : 0x9eb6c8,
-        blackout
-          ? isRoof
-            ? .32
-            : .1
-          : isRoof
-            ? .55
-            : .18
-      )
-      .fillRect(
-        x,
-        y + 4,
-        width,
-        isRoof ? 4 : 3
-      );
+for (
+  let mark = x + 18;
+  mark < x + width - 10;
+  mark += 34
+) {
+  detail.fillRect(
+    mark,
+    y + 18,
+    Math.min(
+      16,
+      x + width - mark - 8
+    ),
+    5
+  );
+}
 
-    if (isRoof) {
-      detail
-        .lineStyle(2, 0xaabccc, .8)
-        .lineBetween(
-          x + 14,
-          y,
-          x + 14,
-          y - 18
-        )
-        .lineBetween(
-          x + 14,
-          y - 18,
-          x + width - 14,
-          y - 18
-        )
-        .lineBetween(
-          x + width - 14,
-          y - 18,
-          x + width - 14,
-          y
-        );
-    }
+// Neon top edge
+detail
+  .fillStyle(
+    isRoof
+      ? 0x94f5ff
+      : 0x9eb6c8,
+    blackout
+      ? isRoof
+        ? .38
+        : .12
+      : isRoof
+        ? .62
+        : .22
+  )
+  .fillRect(
+    x,
+    y + 3,
+    width,
+    isRoof ? 4 : 3
+  );
+
+// Lower energy strip
+detail
+  .fillStyle(
+    isRoof
+      ? 0x8df4ff
+      : 0x536d84,
+    blackout
+      ? .18
+      : .12
+  )
+  .fillRect(
+    x + 10,
+    y + height - 5,
+    Math.max(
+      0,
+      width - 20
+    ),
+    2
+  );
+
+if (isRoof) {
+  // Roof frame
+  detail
+    .lineStyle(
+      2,
+      0xaabccc,
+      .8
+    )
+    .lineBetween(
+      x + 14,
+      y,
+      x + 14,
+      y - 18
+    )
+    .lineBetween(
+      x + 14,
+      y - 18,
+      x + width - 14,
+      y - 18
+    )
+    .lineBetween(
+      x + width - 14,
+      y - 18,
+      x + width - 14,
+      y
+    );
+
+  // Roof signal nodes
+  detail
+    .fillStyle(
+      0x8df4ff,
+      blackout ? .35 : .55
+    )
+    .fillCircle(
+      x + 14,
+      y - 18,
+      2
+    )
+    .fillCircle(
+      x + width - 14,
+      y - 18,
+      2
+    );
+}
   }
 );
 
@@ -3596,8 +5025,14 @@ world
     315,
     3870,
     220
+  );
+
+world
+  .lineStyle(
+    3,
+    visual.accent,
+    .82
   )
-  .lineStyle(3, 0xffd06e, .8)
   .lineBetween(
     3870,
     225,
@@ -3606,18 +5041,136 @@ world
   );
 
 world
-  .fillStyle(0xffd06e, .15)
-  .fillCircle(
-    3870,
-    225,
-    65
+  .fillStyle(
+    visual.accent,
+    .14
   )
-  .fillStyle(0xffd06e)
   .fillCircle(
     3870,
     225,
-    9
+    72
   );
+
+world
+  .fillStyle(
+    visual.accent
+  )
+  .fillCircle(
+    3870,
+    225,
+    8
+  );
+
+/* -------------------------------------------------
+   WORLD DISTRICT SIGN
+   Purely visual landmark.
+   ------------------------------------------------- */
+
+const districtSign =
+  this.add.container(
+    3895,
+    245
+  )
+  .setDepth(8);
+
+const signBack =
+  this.add.rectangle(
+    0,
+    0,
+    170,
+    46,
+    0x07111d,
+    0.82
+  );
+
+signBack.setStrokeStyle(
+  2,
+  visual.accent,
+  0.78
+);
+
+const signGlow =
+  this.add.rectangle(
+    0,
+    0,
+    184,
+    58,
+    visual.accent,
+    0.055
+  );
+
+const signTitle =
+  this.add.text(
+    0,
+    -7,
+    visual.label,
+    {
+      fontFamily: 'DM Mono',
+      fontSize: '14px',
+      fontStyle: 'bold',
+      color: '#f4fbff',
+      stroke: '#07111d',
+      strokeThickness: 4,
+      align: 'center',
+      fixedWidth: 150
+    }
+  )
+  .setOrigin(0.5);
+
+const signCode =
+  this.add.text(
+    0,
+    12,
+    `// ${this.mission.id.toUpperCase()}`,
+    {
+      fontFamily: 'DM Mono',
+      fontSize: '7px',
+      color: '#b9d5ee',
+      align: 'center',
+      fixedWidth: 150
+    }
+  )
+  .setOrigin(0.5);
+
+const signScan =
+  this.add.rectangle(
+    -82,
+    0,
+    2,
+    34,
+    visual.accent,
+    0.65
+  );
+
+districtSign.add([
+  signGlow,
+  signBack,
+  signTitle,
+  signCode,
+  signScan
+]);
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: signScan,
+    x: 82,
+    duration: 1900,
+    ease: 'Linear',
+    repeat: -1
+  });
+
+  this.tweens.add({
+    targets: signGlow,
+    alpha: {
+      from: 0.035,
+      to: 0.10
+    },
+    duration: 1300,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
 
 if (visual.props === 'lanterns') {
   [720, 1650, 3000].forEach(x =>
@@ -3767,7 +5320,168 @@ if (visual.props === 'array') {
   });
 }
 
-// NIGHT RELAY WORLD LABEL DISABLED
+// ============================================================
+// DISTRICT HOLOGRAM / MEGA LANDMARK
+// Purely visual — no gameplay interaction.
+// ============================================================
+
+const hologramY = 300;
+const hologramX =
+  Phaser.Math.Clamp(
+    this.worldWidth * 0.62,
+    900,
+    this.worldWidth - 500
+  );
+
+const hologram = this.add.graphics()
+  .setDepth(2)
+  .setScrollFactor(.20);
+
+// Outer field
+hologram
+  .fillStyle(
+    visual.accent,
+    0.045
+  )
+  .fillCircle(
+    hologramX,
+    hologramY,
+    105
+  );
+
+// Main ring
+hologram
+  .lineStyle(
+    3,
+    visual.accent,
+    0.48
+  )
+  .strokeCircle(
+    hologramX,
+    hologramY,
+    72
+  );
+
+// Inner ring
+hologram
+  .lineStyle(
+    1.5,
+    0xdffcff,
+    0.42
+  )
+  .strokeCircle(
+    hologramX,
+    hologramY,
+    48
+  );
+
+// Vertical spine
+hologram
+  .lineStyle(
+    2,
+    visual.accent,
+    0.55
+  )
+  .lineBetween(
+    hologramX,
+    hologramY - 82,
+    hologramX,
+    hologramY + 82
+  );
+
+// Horizontal scan
+hologram
+  .lineStyle(
+    1,
+    0xdffcff,
+    0.28
+  )
+  .lineBetween(
+    hologramX - 82,
+    hologramY,
+    hologramX + 82,
+    hologramY
+  );
+
+// District core
+hologram
+  .fillStyle(
+    visual.accent,
+    0.18
+  )
+  .fillCircle(
+    hologramX,
+    hologramY,
+    18
+  );
+
+hologram
+  .fillStyle(
+    0xdffcff,
+    0.85
+  )
+  .fillCircle(
+    hologramX,
+    hologramY,
+    5
+  );
+
+// Signal ticks
+for (let i = 0; i < 8; i++) {
+  const angle =
+    (Math.PI * 2 * i) / 8;
+
+  const innerX =
+    hologramX +
+    Math.cos(angle) * 58;
+
+  const innerY =
+    hologramY +
+    Math.sin(angle) * 58;
+
+  const outerX =
+    hologramX +
+    Math.cos(angle) * 76;
+
+  const outerY =
+    hologramY +
+    Math.sin(angle) * 76;
+
+  hologram
+    .lineStyle(
+      2,
+      visual.accent,
+      0.42
+    )
+    .lineBetween(
+      innerX,
+      innerY,
+      outerX,
+      outerY
+    );
+}
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: hologram,
+    alpha: {
+      from: .68,
+      to: 1
+    },
+    duration: 1800,
+    ease: 'Sine.inOut',
+    yoyo: true,
+    repeat: -1
+  });
+
+  this.tweens.add({
+    targets: hologram,
+    angle: 360,
+    duration: 28000,
+    ease: 'Linear',
+    repeat: -1
+  });
+}
 }
   createBrutalMapDetails() {
   const mapFx = this.add.graphics();
@@ -3830,36 +5544,75 @@ if (visual.props === 'array') {
     x < this.worldWidth;
     x += 300
   ) {
-    const height =
-      70 +
-      (x % 4) * 28;
+const height =
+  70 +
+  (x % 4) * 28;
 
-    mapFx
-      .fillStyle(0x101c30, 0.9)
-      .fillRect(
-        x,
-        610 - height,
-        42,
-        height
-      );
+mapFx
+  .fillStyle(0x101c30, 0.9)
+  .fillRect(
+    x,
+    610 - height,
+    42,
+    height
+  );
 
-    mapFx
-      .fillStyle(0x8df4ff, 0.18)
-      .fillRect(
-        x + 8,
-        625 - height,
-        6,
-        height - 20
-      );
+const cyanLight =
+  this.add
+    .rectangle(
+      x + 11,
+      625 - height / 2,
+      6,
+      Math.max(18, height - 20),
+      0x8df4ff,
+      0.18
+    )
+    .setOrigin(0.5)
+    .setDepth(2);
 
-    mapFx
-      .fillStyle(0xffd06e, 0.28)
-      .fillRect(
-        x + 24,
-        625 - height,
-        5,
-        height - 30
-      );
+const amberLight =
+  this.add
+    .rectangle(
+      x + 26,
+      625 - height / 2,
+      5,
+      Math.max(16, height - 30),
+      0xffd06e,
+      0.28
+    )
+    .setOrigin(0.5)
+    .setDepth(2);
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: cyanLight,
+    alpha: {
+      from: 0.10,
+      to: 0.28
+    },
+    duration:
+      900 +
+      (x % 5) * 140,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+
+  this.tweens.add({
+    targets: amberLight,
+    alpha: {
+      from: 0.16,
+      to: 0.34
+    },
+    duration:
+      1200 +
+      (x % 4) * 180,
+    delay: 140,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
   }
 
   mapFx.setDepth(1);
@@ -3871,23 +5624,68 @@ const lights = this.add.graphics();
 
 this.mission.safeZones.forEach(
   ([x, y, width]) => {
+    // Soft safe-zone field
     lights
-      .fillStyle(0x8df4ff, .07)
+      .fillStyle(
+        0x8df4ff,
+        .055
+      )
       .fillRect(
         x,
         y,
         width,
-        45
+        48
+      );
+
+    // Main route edge
+    lights
+      .fillStyle(
+        0x8df4ff,
+        .32
       )
-      .fillStyle(0x8df4ff, .28)
       .fillRect(
         x,
         y,
         width,
         3
       );
+
+    // Secondary inner line
+    lights
+      .fillStyle(
+        0xdffcff,
+        .12
+      )
+      .fillRect(
+        x + 8,
+        y + 9,
+        Math.max(
+          0,
+          width - 16
+        ),
+        1
+      );
+
+    // End markers
+    lights
+      .fillStyle(
+        0x8df4ff,
+        .5
+      )
+      .fillCircle(
+        x + 8,
+        y + 2,
+        2
+      )
+      .fillCircle(
+        x + width - 8,
+        y + 2,
+        2
+      );
   }
 );
+
+lights.setDepth(4);
 
   /*
  * SAFE ZONE NEON PULSE
@@ -3939,8 +5737,36 @@ this.mission.spawn.y,
 .setDepth(10);
 
 this.player.body
-  .setSize(28, 55)
-  .setOffset(10, 5)
+// ============================================================
+// PLAYER PHYSICS BODY · STANDING / CROUCH
+// ============================================================
+this.playerBodyConfig = {
+  standing: {
+    width: 28,
+    height: 55,
+    offsetX: 10,
+    offsetY: 5
+  },
+
+  crouching: {
+    width: 28,
+    height: 34,
+    offsetX: 10,
+    offsetY: 26
+  }
+};
+
+this.playerCrouched = false;
+
+this.player.body
+  .setSize(
+    this.playerBodyConfig.standing.width,
+    this.playerBodyConfig.standing.height
+  )
+  .setOffset(
+    this.playerBodyConfig.standing.offsetX,
+    this.playerBodyConfig.standing.offsetY
+  )
   .setMaxVelocity(
     RUNNER_TUNING.maxRunSpeed,
     RUNNER_TUNING.maxFallSpeed
@@ -3964,15 +5790,18 @@ this.playerVisualBaseScaleY =
   this.player.scaleY;
 
 if (!this.motionReduced) {
-  this.tweens.add({
-    targets: this.player,
-    scaleX: 1.025,
-    scaleY: 0.985,
-    duration: 620,
-    yoyo: true,
-    repeat: -1,
-    ease: 'Sine.inOut'
-  });
+  this.playerBreathTween =
+    this.tweens.add({
+      targets: this.player,
+      alpha: {
+        from: 0.985,
+        to: 1
+      },
+      duration: 620,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.inOut'
+    });
 }
 
   /*
@@ -4081,7 +5910,7 @@ this.cursors =
 
 this.keys =
   this.input.keyboard.addKeys(
-    'A,D,W,S,E,Q,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
+    'A,D,F,W,S,E,Q,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
   );
 
 this.mobileActions = {
@@ -4089,6 +5918,8 @@ this.mobileActions = {
   fire: false,
   sword: false,
   dash: false,
+  crouch: false,
+  interact: false,
   build1: false,
   build2: false,
   gadget1: false,
@@ -4114,9 +5945,16 @@ this.mobileActionHandler = action => {
     return this.useGadget(1);
   }
 
-  if (action in this.mobileActions) {
-    this.mobileActions[action] = true;
-  }
+if (action === 'crouch') {
+  this.mobileActions.crouch =
+    !this.mobileActions.crouch;
+
+  return;
+}
+
+if (action in this.mobileActions) {
+  this.mobileActions[action] = true;
+}
 };
 
 this.mobileMoveHandler =
@@ -4353,6 +6191,15 @@ height
 })
 );
 
+  if (!platforms.length) {
+  return {
+    x,
+    y:
+      this.mission.spawn?.y ??
+      0
+  };
+}
+
 const containing =
   platforms
     .filter(
@@ -4390,13 +6237,22 @@ const platform =
     platforms[0]
   );
 
+const safeMargin =
+  Math.min(
+    30,
+    Math.max(
+      0,
+      (platform.width - 1) / 2
+    )
+  );
+
 return {
   x: Phaser.Math.Clamp(
     x,
-    platform.x + 30,
+    platform.x + safeMargin,
     platform.x +
       platform.width -
-      30
+      safeMargin
   ),
   y: platform.y - 46
 };
@@ -4597,6 +6453,8054 @@ undefined,
 this
 );
 }
+  triggerPlayerWaterRipple(player, water, intensity = 1) {
+  if (
+    this.motionReduced ||
+    !player?.active ||
+    !water?.active ||
+    this.finished ||
+    this.respawning
+  ) {
+    return;
+  }
+
+  if (!this.waterWaveObjects) {
+    this.waterWaveObjects = [];
+  }
+
+  const surfaceY =
+    water.y - water.height / 2;
+
+  const speed =
+    Math.abs(
+      player.body?.velocity?.x || 0
+    );
+
+  const speedRatio =
+    Phaser.Math.Clamp(
+      speed /
+        RUNNER_TUNING.maxRunSpeed,
+      0,
+      1
+    );
+
+  const strength =
+    Phaser.Math.Clamp(
+      intensity *
+        (0.45 + speedRatio * 0.55),
+      0.35,
+      1.25
+    );
+
+  const halfWidth =
+    water.width / 2;
+
+  const rippleX =
+    Phaser.Math.Clamp(
+      player.x,
+      water.x - halfWidth + 12,
+      water.x + halfWidth - 12
+    );
+
+  const ring =
+    this.add
+      .ellipse(
+        rippleX,
+        surfaceY + 2,
+        30 + 26 * strength,
+        5 + 3 * strength,
+        0xe8fdff,
+        0.34
+      )
+      .setDepth(9)
+      .setAlpha(
+        0.28 + 0.16 * strength
+      );
+
+  const foam =
+    this.add
+      .ellipse(
+        rippleX,
+        surfaceY,
+        18 + 24 * strength,
+        4 + 2 * strength,
+        0x8df4ff,
+        0.24
+      )
+      .setDepth(9)
+      .setAlpha(
+        0.22 + 0.14 * strength
+      );
+
+this.waterWaveObjects.push(
+  ring,
+  foam
+);
+
+this.tweens.add({
+  targets: ring,
+  scaleX:
+    2.1 + strength * 1.4,
+  scaleY:
+    1.5 + strength * 0.5,
+  alpha: 0,
+  duration:
+    260 + strength * 100,
+  ease: 'Quad.out'
+});
+
+this.tweens.add({
+  targets: foam,
+  scaleX:
+    2.4 + strength * 1.2,
+  alpha: 0,
+  duration:
+    220 + strength * 90,
+  ease: 'Sine.out',
+  onComplete: () => {
+    if (ring.active) {
+      ring.destroy();
+    }
+
+    if (foam.active) {
+      foam.destroy();
+    }
+
+    if (this.waterWaveObjects) {
+      this.waterWaveObjects =
+        this.waterWaveObjects.filter(
+          object =>
+            object?.active
+        );
+    }
+  }
+});
+}
+
+createWaterHazards() {
+    this.waterZones = this.physics.add.staticGroup();
+
+    this.mission.waterZones.forEach(
+      ([x, y, width, height], index) => {
+        const water =
+          this.add
+            .rectangle(
+              x + width / 2,
+              y + height / 2,
+              width,
+              height,
+              0x087ea4,
+              0.72
+            )
+            .setStrokeStyle(
+              2,
+              0x58e7ff,
+              0.72
+            )
+            .setDepth(2);
+
+        this.physics.add.existing(water, true);
+
+        water.setData('index', index);
+        water.setData('used', false);
+        this.waterZones.add(water);
+
+        // Water surface
+        const surface =
+          this.add
+            .rectangle(
+              x + width / 2,
+              y,
+              width,
+              4,
+              0x9df7ff,
+              0.82
+            )
+            .setDepth(6);
+
+        if (!this.motionReduced) {
+          this.tweens.add({
+            targets: surface,
+            scaleX: 1.03,
+            alpha: 0.55,
+            duration: 620,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.inOut'
+          });
+        }
+
+        // Surface waves
+        if (!this.motionReduced) {
+          for (
+            let waveX = x + 18;
+            waveX < x + width - 18;
+            waveX += 44
+          ) {
+            const wave =
+              this.add
+                .rectangle(
+                  waveX,
+                  y + 8,
+                  20,
+                  2,
+                  0xb9f5ff,
+                  0.28
+                )
+                .setDepth(6);
+
+            this.tweens.add({
+              targets: wave,
+              x: wave.x + 18,
+              alpha: 0,
+              duration: 700,
+              delay: index * 90,
+              repeat: -1,
+              ease: 'Sine.out',
+              onRepeat: () => {
+                if (wave.active) {
+                  wave.x = waveX;
+                  wave.alpha = 0.28;
+                }
+              }
+            });
+          }
+        }
+      }
+    );
+
+    this.physics.add.overlap(
+      this.player,
+      this.waterZones,
+      (player, water) => {
+        if (
+          !player?.active ||
+          !water?.active
+        ) {
+          return;
+        }
+
+     if (
+  this.finished ||
+  this.respawning ||
+  this.waterAttackActive ||
+  water.getData('used')
+) {
+  return;
+}
+
+this.triggerPlayerWaterRipple(
+  player,
+  water,
+  1
+);
+
+   water.setData('used', true);
+this.waterAttackActive = true;
+this.waterDeathTimer = 1120;
+
+const attackToken =
+  ++this.waterAttackToken;
+
+const surfaceY =
+          water.y - water.height / 2;
+
+        const originX = player.x;
+
+        player.body?.setVelocityY(
+          Math.min(
+            player.body.velocity.y,
+            140
+          )
+        );
+
+        player.body?.setVelocityX(
+          player.body.velocity.x * 0.22
+        );
+
+        this.playerCue(
+          'SHARK INCOMING',
+          '#b9f5ff'
+        );
+
+        this.game.events.emit(
+          'feedback',
+          'water_hazard'
+        );
+
+        // ------------------------------------------------------------
+        // SHARK 2.0 · TELEGRAPH
+        // ------------------------------------------------------------
+
+        const warning =
+          this.add
+            .text(
+              originX,
+              surfaceY - 52,
+              '⚠ SHARK INCOMING',
+              {
+                fontFamily: 'DM Mono',
+                fontSize: '11px',
+                color: '#b9f5ff',
+                stroke: '#06131f',
+                strokeThickness: 4,
+                fontStyle: 'bold',
+                align: 'center'
+              }
+            )
+            .setOrigin(0.5)
+            .setDepth(14);
+
+        const fin =
+          this.add
+            .triangle(
+              originX + 96,
+              surfaceY + 8,
+              0,
+              24,
+              18,
+              0,
+              36,
+              24,
+              0x18374b,
+              0.95
+            )
+            .setDepth(10)
+            .setAlpha(0);
+
+        const eyeLeft =
+          this.add
+            .circle(
+              originX + 86,
+              surfaceY + 20,
+              2,
+              0xffd06e,
+              0
+            )
+            .setDepth(10);
+
+        const eyeRight =
+          this.add
+            .circle(
+              originX + 96,
+              surfaceY + 20,
+              2,
+              0xffd06e,
+              0
+            )
+            .setDepth(10);
+
+        const wake =
+          this.add
+            .ellipse(
+              originX + 96,
+              surfaceY + 5,
+              74,
+              12,
+              0xb9f5ff,
+              0.16
+            )
+            .setDepth(7)
+            .setAlpha(0);
+
+   const splash =
+  this.add
+    .circle(
+      originX,
+      surfaceY,
+      10,
+      0xb9f5ff,
+      0.55
+    )
+    .setDepth(12);
+
+const splashWide =
+  this.add
+    .ellipse(
+      originX,
+      surfaceY + 2,
+      34,
+      8,
+      0x58e7ff,
+      0.34
+    )
+    .setDepth(11)
+    .setScale(0.55);
+
+const splashTrail =
+  this.add
+    .ellipse(
+      originX - (player.flipX ? -1 : 1) * 24,
+      surfaceY + 6,
+      54,
+      7,
+      0xb9f5ff,
+      0.24
+    )
+    .setDepth(9)
+    .setAlpha(0);
+
+this.tweens.add({
+  targets: splash,
+  scale: 4.6,
+  alpha: 0,
+  duration: 420,
+  ease: 'Cubic.out',
+  onComplete: () => {
+    if (splash.active) {
+      splash.destroy();
+    }
+  }
+});
+
+this.tweens.add({
+  targets: splashWide,
+  scaleX: 2.8,
+  scaleY: 1.45,
+  alpha: 0,
+  duration: 460,
+  ease: 'Sine.out',
+  onComplete: () => {
+    if (splashWide.active) {
+      splashWide.destroy();
+    }
+  }
+});
+
+this.tweens.add({
+  targets: splashTrail,
+  alpha: {
+    from: 0,
+    to: 0.5
+  },
+  scaleX: 1.8,
+  scaleY: 1.15,
+ x:
+  splashTrail.x -
+  (player.flipX ? -1 : 1) * 42,
+  duration: 260,
+  ease: 'Quad.out',
+  onComplete: () => {
+    if (splashTrail.active) {
+      splashTrail.destroy();
+    }
+  }
+});
+
+        if (this.motionReduced) {
+          warning.destroy();
+          fin.destroy();
+          eyeLeft.destroy();
+          eyeRight.destroy();
+          wake.destroy();
+        } else {
+          this.tweens.add({
+            targets: warning,
+            alpha: {
+              from: 1,
+              to: 0.22
+            },
+            yoyo: true,
+            repeat: 2,
+            duration: 120,
+            ease: 'Sine.inOut',
+            onComplete: () => {
+              if (warning.active) {
+                warning.destroy();
+              }
+            }
+          });
+
+          this.tweens.add({
+            targets: fin,
+            alpha: {
+              from: 0,
+              to: 0.95
+            },
+            x: originX + 72,
+            y: surfaceY + 4,
+            duration: 250,
+            ease: 'Quad.out'
+          });
+
+          this.tweens.add({
+            targets: [eyeLeft, eyeRight],
+            alpha: {
+              from: 0,
+              to: 0.95
+            },
+            duration: 180,
+            delay: 90
+          });
+
+      this.tweens.add({
+  targets: wake,
+  alpha: {
+    from: 0,
+    to:
+      this.mission.id === 'signal-storm'
+        ? 0.62
+        : 0.46
+  },
+  scaleX:
+    this.mission.id === 'signal-storm'
+      ? 1.75
+      : 1.45,
+  scaleY:
+    this.mission.id === 'signal-storm'
+      ? 1.18
+      : 1,
+  x:
+    wake.x -
+    (player.flipX ? -1 : 1) *
+    (
+      this.mission.id === 'signal-storm'
+        ? 54
+        : 38
+    ),
+  duration:
+    this.mission.id === 'signal-storm'
+      ? 320
+      : 270,
+  ease: 'Cubic.out'
+});
+        }
+
+     const beginAttack = () => {
+  if (
+    !this.scene.isActive() ||
+    !player.active ||
+    !water.active ||
+    this.finished ||
+    this.respawning ||
+    !this.waterAttackActive ||
+    this.waterAttackToken !== attackToken
+  ) {
+    return;
+  }
+
+          this.activeShark?.destroy();
+          this.activeShark = null;
+
+          fin.destroy();
+          eyeLeft.destroy();
+          eyeRight.destroy();
+          wake.destroy();
+
+const side =
+  player.flipX ? -1 : 1;
+
+const attackVariant =
+  index % 2;
+
+const approachDistance =
+  attackVariant === 0 ? 82 : 118;
+
+const revealDistance =
+  attackVariant === 0 ? 126 : 164;
+
+const approachX =
+  originX + side * approachDistance;
+
+const attackX =
+  originX;
+
+const revealX =
+  originX + side * revealDistance;
+
+const shark =
+  this.add
+    .image(
+      revealX + side * 70,
+      surfaceY + 34,
+      'shark'
+    )
+    .setDepth(11)
+    .setAlpha(0)
+    .setScale(0.76);
+
+this.activeShark = shark;
+
+          const burst =
+            this.add
+              .ellipse(
+                revealX,
+                surfaceY,
+                58,
+                10,
+                0xb9f5ff,
+                0.18
+              )
+              .setDepth(8)
+              .setAlpha(0);
+
+          const biteRing =
+            this.add
+              .circle(
+                attackX,
+                surfaceY - 2,
+                12,
+                0x58e7ff,
+                0.18
+              )
+              .setDepth(12)
+              .setAlpha(0);
+
+      const finishShark = () => {
+  if (
+    this.waterAttackToken !== attackToken
+  ) {
+    return;
+  }
+
+  this.waterAttackToken++;
+
+  this.tweens.killTweensOf([
+    shark,
+    burst,
+    biteRing,
+    warning,
+    fin,
+    eyeLeft,
+    eyeRight,
+    wake,
+    splash,
+    splashWide,
+    splashTrail
+  ]);
+
+  [
+    shark,
+    burst,
+    biteRing,
+    warning,
+    fin,
+    eyeLeft,
+    eyeRight,
+    wake,
+    splash,
+    splashWide,
+    splashTrail
+  ].forEach(object => {
+    if (object?.active) {
+      object.destroy();
+    }
+  });
+
+  if (this.activeShark === shark) {
+    this.activeShark = null;
+  }
+
+  this.waterAttackActive = false;
+  this.waterDeathTimer = 0;
+
+  this.fail(
+    'A shark took you under.'
+  );
+};
+          if (this.motionReduced) {
+            shark.setAlpha(1);
+            finishShark();
+            return;
+          }
+
+         this.tweens.add({
+  targets: shark,
+  alpha: 1,
+  x: revealX,
+  y: surfaceY + 16,
+  duration: 240,
+  ease: 'Sine.out'
+});
+
+this.time.delayedCall(
+  260,
+  () => {
+   if (
+  !shark.active ||
+  this.waterAttackToken !== attackToken
+) {
+  return;
+}
+
+    this.tweens.add({
+      targets: shark,
+      alpha: 0.14,
+      x: approachX,
+      y: surfaceY + 46,
+      scale: 0.72,
+      duration: 190,
+      ease: 'Quad.in'
+    });
+  }
+);
+
+this.time.delayedCall(
+  470,
+  () => {
+    if (
+      !shark.active ||
+      this.waterAttackToken !== attackToken
+    ) {
+      return;
+    }
+
+    this.tweens.add({
+      targets: shark,
+      alpha: 1,
+      x: approachX,
+      y: surfaceY - 2,
+      scale: 0.84,
+      duration: 220,
+      ease: 'Cubic.out'
+    });
+  }
+);
+
+this.time.delayedCall(
+  attackVariant === 0 ? 720 : 760,
+  () => {
+    if (
+      !shark.active ||
+      this.waterAttackToken !== attackToken
+    ) {
+      return;
+    }
+
+    this.tweens.add({
+      targets: shark,
+      x:
+        attackVariant === 0
+          ? attackX
+          : attackX + side * 18,
+      y:
+        attackVariant === 0
+          ? surfaceY - 8
+          : surfaceY - 22,
+      scale:
+        attackVariant === 0
+          ? 0.9
+          : 1.02,
+      duration:
+        attackVariant === 0
+          ? 210
+          : 170,
+      ease:
+        attackVariant === 0
+          ? 'Cubic.in'
+          : 'Cubic.in'
+    });
+
+    this.tweens.add({
+                targets: biteRing,
+                alpha: {
+                  from: 0,
+                  to: 0.85
+                },
+                scale: {
+                  from: 0.8,
+                  to: 3.2
+                },
+                duration: 210,
+                ease: 'Quad.out',
+                onComplete: () => {
+                  if (biteRing.active) {
+                    biteRing.destroy();
+                  }
+                }
+              });
+            }
+          );
+
+  this.time.delayedCall(
+  attackVariant === 0 ? 940 : 970,
+  () => {
+    if (
+      !shark.active ||
+      this.waterAttackToken !== attackToken
+    ) {
+      return;
+    }
+
+             this.shake(
+  130,
+  0.009
+);
+
+this.cameras.main.flash(
+  75,
+  88,
+  231,
+  255,
+  true
+);
+
+// ============================================================
+// SHARK → WATER INTERACTION
+// Shark physically breaks the water surface.
+// ============================================================
+this.triggerSharkWaterImpact(
+  shark.x,
+  surfaceY
+);
+
+if (attackVariant === 1) {
+  this.time.delayedCall(
+    90,
+    () => {
+      if (
+        shark.active &&
+        this.waterAttackToken === attackToken
+      ) {
+        this.triggerSharkWaterImpact(
+          shark.x,
+          surfaceY
+        );
+      }
+    }
+  );
+}
+
+          player.body?.setVelocityY(
+  attackVariant === 0
+    ? 420
+    : 500
+);
+
+player.body?.setVelocityX(
+  player.body.velocity.x *
+    (attackVariant === 0
+      ? 0.15
+      : 0.08)
+);
+
+if (attackVariant === 1) {
+  this.tweens.add({
+    targets: splashWide,
+    scaleX: 4.2,
+    scaleY: 1.8,
+    alpha: 0,
+    duration: 220,
+    ease: 'Cubic.out',
+    onComplete: () => {
+      if (splashWide.active) {
+        splashWide.destroy();
+      }
+    }
+  });
+}
+
+          this.tweens.add({
+  targets: shark,
+  y: surfaceY - 46,
+  duration: 260,
+  ease: 'Sine.easeOut',
+  onComplete: () => {
+    if (
+      !shark.active ||
+      this.waterAttackToken !== attackToken
+    ) {
+      return;
+    }
+
+    // BRUTALNI SKOK IZ VODE
+    this.tweens.add({
+      targets: shark,
+      y: surfaceY - 150,
+      duration: 260,
+      ease: 'Sine.easeOut',
+      onComplete: () => {
+        if (
+          !shark.active ||
+          this.waterAttackToken !== attackToken
+        ) {
+          return;
+        }
+
+          this.tweens.add({
+          targets: shark,
+          y: surfaceY - 18,
+          duration: 330,
+          ease: 'Sine.easeIn',
+          onComplete: finishShark
+        });
+      }
+    });
+
+    // Blagi nagib tokom skoka
+    this.tweens.add({
+      targets: shark,
+      angle: player.flipX ? -14 : 14,
+      duration: 260,
+      ease: 'Sine.easeOut'
+    });
+  }
+});
+            }
+          );
+        };
+
+        if (this.motionReduced) {
+          this.time.delayedCall(
+            120,
+            beginAttack
+          );
+        } else {
+          this.time.delayedCall(
+            520,
+            beginAttack
+          );
+        }
+      },
+      undefined,
+      this
+    );
+  }
+
+triggerSharkWaterImpact(x, y) {
+  if (
+    this.motionReduced ||
+    this.finished ||
+    this.respawning
+  ) {
+    return;
+  }
+
+  const impactObjects = [];
+
+  const ring =
+    this.add
+      .ellipse(
+        x,
+        y,
+        34,
+        8,
+        0xe8fdff,
+        0.72
+      )
+      .setDepth(12)
+      .setAlpha(0.72);
+
+  const splash =
+    this.add
+      .ellipse(
+        x,
+        y - 8,
+        18,
+        22,
+        0xdffcff,
+        0.62
+      )
+      .setDepth(12)
+      .setAlpha(0.58);
+
+  const splashWide =
+    this.add
+      .ellipse(
+        x,
+        y - 2,
+        54,
+        10,
+        0x8df4ff,
+        0.42
+      )
+      .setDepth(11)
+      .setAlpha(0.5);
+
+  impactObjects.push(
+    ring,
+    splash,
+    splashWide
+  );
+
+  this.waterWaveObjects.push(
+    ...impactObjects
+  );
+
+  for (let i = 0; i < 8; i++) {
+    const drop =
+      this.add
+        .circle(
+          x +
+            Phaser.Math.Between(-14, 14),
+          y -
+            Phaser.Math.Between(2, 9),
+          Phaser.Math.Between(1, 2),
+          0xe8fdff,
+          Phaser.Math.FloatBetween(
+            0.38,
+            0.72
+          )
+        )
+        .setDepth(12)
+        .setAlpha(0.8);
+
+    impactObjects.push(drop);
+    this.waterWaveObjects.push(drop);
+
+    this.tweens.add({
+      targets: drop,
+      x:
+        drop.x +
+        Phaser.Math.Between(-42, 42),
+      y:
+        y -
+        Phaser.Math.Between(24, 58),
+      alpha: 0,
+      scale:
+        Phaser.Math.FloatBetween(
+          0.65,
+          1.4
+        ),
+      duration:
+        Phaser.Math.Between(260, 420),
+      ease: 'Cubic.out',
+      onComplete: () => {
+        if (drop.active) {
+          drop.destroy();
+        }
+      }
+    });
+  }
+
+  this.tweens.add({
+    targets: ring,
+    scaleX: 3.8,
+    scaleY: 1.8,
+    alpha: 0,
+    duration: 360,
+    ease: 'Cubic.out'
+  });
+
+  this.tweens.add({
+    targets: splash,
+    y: y - 38,
+    scaleX: 1.8,
+    scaleY: 2.5,
+    alpha: 0,
+    duration: 390,
+    ease: 'Cubic.out'
+  });
+
+  this.tweens.add({
+    targets: splashWide,
+    scaleX: 3.2,
+    scaleY: 1.7,
+    alpha: 0,
+    duration: 330,
+    ease: 'Quad.out'
+  });
+
+  this.shake(
+    110,
+    0.007
+  );
+
+  this.time.delayedCall(
+    430,
+    () => {
+      impactObjects.forEach(
+        object => {
+          if (object?.active) {
+            object.destroy();
+          }
+        }
+      );
+    }
+  );
+}
+
+createWaterWaves() {
+  if (this.motionReduced) {
+    return;
+  }
+
+  this.waterWaveObjects = [];
+  this.waterWaveTimers = [];
+
+  const isStorm =
+    this.mission.id === 'signal-storm';
+
+const waveScale =
+  isStorm
+    ? 1.38
+    : 1;
+
+const waveSpeed =
+  isStorm
+    ? 0.72
+    : 1;
+
+const stormWaveEnergy =
+  isStorm
+    ? 1.18
+    : 1;
+
+  this.mission.waterZones.forEach(
+    ([x, y, width, height], index) => {
+      const surfaceY = y;
+      const edgeX = x + width - 8;
+
+// ============================================================
+// WIND / WAVE DIRECTION
+// Each water zone gets its own subtle flow direction.
+// ============================================================
+const windDirection =
+  index % 2 === 0 ? 1 : -1;
+
+const windStrength =
+  Phaser.Math.FloatBetween(10, 24);
+
+const windOffset =
+  windDirection * windStrength;
+
+      // ============================================================
+      // MAIN SWELL
+      // ============================================================
+  const mainWave =
+  this.add
+    .ellipse(
+      x + 8 + windOffset * 0.35,
+      surfaceY - 1,
+      92 * waveScale,
+      13 * waveScale,
+      0x9defff,
+      0.18
+    )
+    .setDepth(7)
+    .setAlpha(0);
+
+// MAIN WAVE BASE PULSE
+// Scale is controlled by the enhanced MAIN WAVE tween below.
+
+      // ============================================================
+      // SECONDARY SWELL
+      // ============================================================
+   const secondaryWave =
+  this.add
+    .ellipse(
+      x + 22,
+      surfaceY + 2,
+      72 * waveScale,
+      9 * waveScale,
+      0x58e7ff,
+      0.10
+    )
+    .setDepth(5)
+    .setAlpha(0);
+
+      // ============================================================
+// DISTANT ROLLING SWELLS
+// ============================================================
+
+const distantSwells = [];
+
+for (let i = 0; i < 2; i++) {
+  const swell =
+    this.add
+      .ellipse(
+        x +
+        26 +
+        i * 58 +
+        windOffset * 0.18,
+
+        surfaceY +
+        7 +
+        i * 2,
+
+        (108 - i * 18) *
+          waveScale,
+
+        (7 - i) *
+          waveScale,
+
+        0x3bcde8,
+
+        isStorm
+          ? 0.18
+          : 0.11
+      )
+      .setDepth(4)
+      .setAlpha(0);
+
+  distantSwells.push(swell);
+  this.waterWaveObjects.push(swell);
+
+  this.tweens.add({
+    targets: swell,
+
+    x:
+      x +
+      18 +
+      i * 72 +
+      windOffset * 0.30,
+
+    y:
+      surfaceY +
+      5 +
+      Phaser.Math.FloatBetween(
+        -1,
+        2
+      ),
+
+    scaleX:
+      Phaser.Math.FloatBetween(
+        1.10,
+        1.32
+      ),
+
+    scaleY:
+      Phaser.Math.FloatBetween(
+        0.72,
+        0.92
+      ),
+
+    alpha: {
+      from: 0,
+      to:
+        isStorm
+          ? 0.28
+          : 0.20
+    },
+
+    duration:
+      Phaser.Math.Between(
+        2200,
+        2900
+      ) / waveSpeed,
+
+    delay:
+      index * 240 +
+      i * 330,
+
+    yoyo: true,
+    repeat: -1,
+
+    ease: 'Sine.inOut'
+  });
+}
+
+// ============================================================
+// FOAM
+// ============================================================
+const foam =
+  this.add
+    .ellipse(
+      edgeX + windOffset * 0.25,
+      surfaceY - 4,
+      48 * waveScale,
+      8 * waveScale,
+      0xeaffff,
+      0.14
+    )
+    .setDepth(9)
+    .setAlpha(0);
+
+// FOAM BASE MOTION
+// Intentionally handled by the enhanced FOAM tween below.
+
+// ============================================================
+// BREAKER
+// ============================================================
+const breaker =
+  this.add
+    .ellipse(
+      edgeX - 12 + windOffset * 0.3,
+      surfaceY - 8,
+      34 * waveScale,
+      7 * waveScale,
+      0xffffff,
+      0.12
+    )
+    .setDepth(10)
+    .setAlpha(0);
+
+// BREAKER BASE MOTION
+// Intentionally handled by the enhanced BREAKER CURL tween below.
+      
+      // ============================================================
+      // SPLASH
+      // ============================================================
+      const splash =
+        this.add
+          .ellipse(
+            edgeX,
+            surfaceY - 12,
+            22 * waveScale,
+            20 * waveScale,
+            0xe8fdff,
+            0.10
+          )
+          .setDepth(10)
+          .setAlpha(0);
+
+      // ============================================================
+      // IMPACT
+      // ============================================================
+      const impact =
+        this.add
+          .ellipse(
+            edgeX,
+            surfaceY + 2,
+            34 * waveScale,
+            5 * waveScale,
+            0x58e7ff,
+            0.08
+          )
+          .setDepth(7)
+          .setAlpha(0);
+
+      // ============================================================
+      // BACKWASH
+      // ============================================================
+      const retreat =
+        this.add
+          .ellipse(
+            edgeX - 4,
+            surfaceY + 5,
+            30 * waveScale,
+            4 * waveScale,
+            0x8df4ff,
+            0.08
+          )
+          .setDepth(6)
+          .setAlpha(0);
+
+      this.waterWaveObjects.push(
+        mainWave,
+        secondaryWave,
+        foam,
+        breaker,
+        splash,
+        impact,
+        retreat
+      );
+
+      // ============================================================
+      // MICRO SPLASH PARTICLES
+      // ============================================================
+      const droplets = [];
+
+      for (let i = 0; i < 5; i++) {
+        const drop =
+          this.add
+            .circle(
+              edgeX + Phaser.Math.Between(-12, 12),
+              surfaceY - 4,
+              Phaser.Math.Between(1, 2),
+              0xe8fdff,
+              Phaser.Math.FloatBetween(0.20, 0.42)
+            )
+            .setDepth(10)
+            .setAlpha(0);
+
+        droplets.push(drop);
+        this.waterWaveObjects.push(drop);
+
+        const startX = drop.x;
+
+       this.tweens.add({
+  targets: drop,
+
+x:
+  startX +
+  Phaser.Math.Between(
+    -24,
+    24
+  ) +
+  windOffset *
+    Phaser.Math.FloatBetween(
+      0.45,
+      0.90
+    ),
+
+y:
+  surfaceY -
+  Phaser.Math.Between(
+    20,
+    38
+  ),
+  alpha: {
+    from: 0,
+    to:
+      Phaser.Math.FloatBetween(
+        0.35,
+        0.68
+      )
+  },
+
+  scale: {
+    from: 0.65,
+    to:
+      Phaser.Math.FloatBetween(
+        0.95,
+        1.15
+      )
+  },
+
+  angle:
+    Phaser.Math.Between(
+      -18,
+      18
+    ),
+
+  duration:
+    Phaser.Math.Between(
+      260,
+      380
+    ) /
+    waveSpeed,
+
+  delay:
+    index * 300 +
+    1120 +
+    i * 24,
+
+  yoyo: true,
+  repeat: -1,
+
+  ease: 'Cubic.out'
+});
+
+      // ============================================================
+      // MAIN WAVE
+      // ============================================================
+this.tweens.add({
+  targets: mainWave,
+
+  x:
+    edgeX -
+    24 +
+    windOffset,
+
+ scaleX:
+  1.5 *
+  stormWaveEnergy,
+
+scaleY:
+  1.18 *
+  stormWaveEnergy,
+
+  angle:
+    windOffset > 0
+      ? 3.5
+      : -3.5,
+
+  alpha: {
+    from: 0,
+    to: isStorm ? 0.82 : 0.68
+  },
+
+  duration:
+    1650 / waveSpeed,
+
+  delay:
+    index * 300,
+
+  yoyo: true,
+  repeat: -1,
+
+  ease: 'Sine.inOut',
+
+  onRepeat: () => {
+    if (!mainWave.active) {
+      return;
+    }
+
+    mainWave.scaleY =
+      Phaser.Math.FloatBetween(
+        1.08,
+        1.22
+      );
+
+    mainWave.angle =
+      windOffset > 0
+        ? Phaser.Math.FloatBetween(2.5, 4.5)
+        : Phaser.Math.FloatBetween(-4.5, -2.5);
+  }
+});
+
+      // ============================================================
+      // SECONDARY WAVE
+      // ============================================================
+
+        this.tweens.add({
+  targets: secondaryWave,
+
+  x:
+    x +
+    22 +
+    windOffset * 0.35,
+
+  y:
+    surfaceY +
+    Phaser.Math.FloatBetween(
+      1,
+      3
+    ),
+
+  scaleX:
+    Phaser.Math.FloatBetween(
+      1.35,
+      1.62
+    ),
+
+  scaleY:
+    Phaser.Math.FloatBetween(
+      0.68,
+      0.88
+    ),
+
+  angle:
+    windOffset > 0
+      ? Phaser.Math.FloatBetween(
+          1,
+          2.5
+        )
+      : Phaser.Math.FloatBetween(
+          -2.5,
+          -1
+        ),
+
+  alpha: {
+    from: 0,
+    to:
+      isStorm
+        ? 0.42
+        : 0.30
+  },
+
+  duration:
+    Phaser.Math.Between(
+      1700,
+      2200
+    ) / waveSpeed,
+
+  delay:
+    index * 300 +
+    260,
+
+  yoyo: true,
+  repeat: -1,
+
+  ease: 'Sine.inOut'
+});
+
+      // ============================================================
+      // FOAM
+      // ============================================================
+  this.tweens.add({
+  targets: foam,
+
+  x:
+    edgeX +
+    8 +
+    windOffset * 0.30,
+
+  y:
+    surfaceY -
+    (
+      isStorm
+        ? 9
+        : 7
+    ),
+
+  scaleX:
+    isStorm
+      ? 2.35
+      : 2.05,
+
+  scaleY:
+    isStorm
+      ? 0.78
+      : 0.68,
+
+alpha: {
+  from: 0,
+  to:
+    isStorm
+      ? 0.86
+      : 0.62
+},
+
+  duration:
+    Phaser.Math.Between(
+      300,
+      390
+    ) / waveSpeed,
+
+  delay:
+    index * 300 +
+    1120,
+
+  yoyo: true,
+  repeat: -1,
+
+  ease: 'Sine.out'
+});
+
+      // ============================================================
+      // BREAKER CURL
+      // ============================================================
+   this.tweens.add({
+  targets: breaker,
+
+  y:
+    surfaceY -
+    (
+      isStorm
+        ? 38
+        : 29
+    ),
+
+  x:
+    edgeX -
+    4 +
+    windOffset * 0.65,
+
+  scaleX:
+    isStorm
+      ? 2.08
+      : 1.78,
+
+  scaleY:
+    isStorm
+      ? 1.62
+      : 1.44,
+
+  angle:
+    windOffset > 0
+      ? Phaser.Math.FloatBetween(
+          4,
+          7
+        )
+      : Phaser.Math.FloatBetween(
+          -7,
+          -4
+        ),
+
+  alpha: {
+    from: 0,
+    to:
+      isStorm
+        ? 0.72
+        : 0.56
+  },
+
+  duration:
+    Phaser.Math.Between(
+      380,
+      470
+    ) / waveSpeed,
+
+  delay:
+    index * 300 +
+    1100,
+
+  yoyo: true,
+  repeat: -1,
+
+  ease: 'Cubic.out'
+});
+      // ============================================================
+      // SPLASH
+      // ============================================================
+   this.tweens.add({
+  targets: splash,
+
+  x:
+    edgeX +
+    windOffset * 0.7,
+
+  y:
+    surfaceY -
+    (
+      isStorm
+        ? 48
+        : 38
+    ),
+
+  scaleX:
+    isStorm
+      ? 2.15
+      : 1.85,
+
+  scaleY:
+    isStorm
+      ? 2.35
+      : 2.05,
+
+  angle:
+    windOffset > 0
+      ? 5
+      : -5,
+
+  alpha: {
+    from: 0,
+    to: isStorm ? 0.72 : 0.60
+  },
+
+  duration:
+    390 / waveSpeed,
+
+  delay:
+    index * 300 +
+    1140,
+
+  yoyo: true,
+  repeat: -1,
+
+  ease: 'Cubic.out'
+});
+
+      // ============================================================
+      // IMPACT RING
+      // ============================================================
+ this.tweens.add({
+  targets: impact,
+
+  x:
+    edgeX +
+    windOffset * 0.55,
+
+scaleX:
+  isStorm
+    ? 4.8
+    : 4.05,
+
+scaleY:
+  isStorm
+    ? 1.48
+    : 1.30,
+
+  alpha: {
+    from: 0,
+    to: isStorm ? 0.50 : 0.40
+  },
+
+duration:
+  Phaser.Math.Between(
+    430,
+    520
+  ) / waveSpeed,
+
+delay:
+  index * 300 +
+  1150 +
+  Phaser.Math.Between(
+    0,
+    60
+  ),
+
+  yoyo: true,
+  repeat: -1,
+
+  ease: 'Sine.inOut'
+});
+
+      // ============================================================
+      // BACKWASH
+      // ============================================================
+     this.tweens.add({
+  targets: retreat,
+
+x:
+  x +
+  10 +
+  windOffset * 0.48,
+
+y:
+  surfaceY +
+  Phaser.Math.FloatBetween(
+    4,
+    8
+  ),
+
+scaleX:
+  isStorm
+    ? 3.60
+    : 3.05,
+
+scaleY:
+  isStorm
+    ? 0.86
+    : 0.72,
+
+angle:
+  windOffset > 0
+    ? Phaser.Math.FloatBetween(
+        1.5,
+        3
+      )
+    : Phaser.Math.FloatBetween(
+        -3,
+        -1.5
+      ),
+  alpha: {
+    from: 0,
+    to: isStorm ? 0.40 : 0.30
+  },
+
+  duration:
+    Phaser.Math.Between(
+      1650,
+      2050
+    ) / waveSpeed,
+
+  delay:
+    index * 300 +
+    650,
+
+  yoyo: true,
+  repeat: -1,
+
+  ease: 'Sine.inOut'
+});
+
+      // ============================================================
+      // SURFACE BOB
+      // ============================================================
+        
+   this.tweens.add({
+  targets: mainWave,
+  y: '-=3',
+  duration: 420 / waveSpeed,
+  yoyo: true,
+  repeat: -1,
+  ease: 'Sine.inOut'
+});
+
+      // ============================================================
+      // BIG BREAKER EVENT
+      // Periodic stronger wave
+      // ============================================================
+      const bigBreaker =
+        this.add
+          .ellipse(
+            edgeX,
+            surfaceY - 4,
+            isStorm ? 70 : 58,
+            isStorm ? 24 : 20,
+            0xdffcff,
+            0.08
+          )
+          .setDepth(10)
+          .setAlpha(0);
+
+      this.waterWaveObjects.push(bigBreaker);
+
+      const breakerTimer =
+        this.time.addEvent({
+          delay: isStorm ? 6200 : 8200,
+          loop: true,
+          startAt:
+            index * 900 + 3400,
+
+          callback: () => {
+            if (
+              !bigBreaker.active ||
+              this.finished ||
+              this.respawning
+            ) {
+              return;
+            }
+
+            bigBreaker.setPosition(
+              edgeX,
+              surfaceY - 5
+            );
+
+       bigBreaker.setScale(
+  0.45,
+  0.55
+);
+
+bigBreaker.setAlpha(
+  0
+);
+
+this.tweens.add({
+  targets: bigBreaker,
+
+  x:
+    edgeX +
+    windOffset * 0.85,
+
+  y:
+    surfaceY -
+    (
+      isStorm
+        ? 46
+        : 34
+    ),
+
+  scaleX:
+    isStorm
+      ? 1.95
+      : 1.55,
+
+  scaleY:
+    isStorm
+      ? 1.72
+      : 1.42,
+
+  angle:
+    windOffset > 0
+      ? 4
+      : -4,
+
+  alpha: {
+    from: 0,
+    to: isStorm ? 0.78 : 0.58
+  },
+
+  duration:
+    isStorm
+      ? 560
+      : 480,
+
+  ease: 'Cubic.out',
+
+  onComplete: () => {
+    if (!bigBreaker.active) {
+      return;
+    }
+
+    this.tweens.add({
+      targets: bigBreaker,
+
+      scaleX:
+        isStorm
+          ? 2.45
+          : 2.10,
+
+      scaleY:
+        isStorm
+          ? 0.72
+          : 0.82,
+
+      alpha: 0,
+
+      duration: 430,
+
+      ease: 'Sine.inOut'
+    });
+  }
+});
+
+            this.tweens.add({
+              targets: impact,
+              scaleX: isStorm ? 5 : 4,
+              alpha: isStorm ? 0.6 : 0.46,
+              duration: 260,
+              yoyo: true,
+              ease: 'Quad.out'
+            });
+
+            this.shake(
+              isStorm ? 90 : 55,
+              isStorm ? 0.006 : 0.003
+            );
+          }
+        });
+
+            this.waterWaveTimers.push(
+        breakerTimer
+      );
+    }
+  }
+  );
+}
+
+shutdown() {
+  if (this.waterWaveTimers) {
+    this.waterWaveTimers.forEach(
+      timer => {
+        if (timer) {
+          timer.remove(false);
+        }
+      }
+    );
+
+    this.waterWaveTimers = [];
+  }
+
+  if (this.waterWaveObjects) {
+    this.tweens.killTweensOf(
+      this.waterWaveObjects
+    );
+
+    this.waterWaveObjects.forEach(
+      object => {
+        if (
+          object &&
+          object.active
+        ) {
+          object.destroy();
+        }
+      }
+    );
+
+    this.waterWaveObjects = [];
+  }
+
+  /*
+   * ============================================================
+   * RELAY PUZZLE · RESIZE LISTENER CLEANUP
+   * ============================================================
+   */
+  if (this._relayPuzzleResizeBound) {
+    this.scale.off(
+      Phaser.Scale.Events.RESIZE,
+      this.handleRelayPuzzleResize,
+      this
+    );
+
+    this._relayPuzzleResizeBound =
+      false;
+  }
+}
+
+/*
+ * ============================================================
+ * RELAY PUZZLE · RESPONSIVE RESIZE HANDLER
+ * Shared HUD only — puzzle state is NOT reset.
+ * ============================================================
+ */
+handleRelayPuzzleResize(gameSize) {
+  const ui =
+    this.relayPuzzleUI;
+
+  if (
+    !ui ||
+    !this.relayPuzzleActive ||
+    !gameSize
+  ) {
+    return;
+  }
+
+  const width =
+    Number(gameSize.width) ||
+    this.scale.width;
+
+  const height =
+    Number(gameSize.height) ||
+    this.scale.height;
+
+  const panelWidth =
+    Math.min(
+      620,
+      Math.max(
+        300,
+        width - 34
+      )
+    );
+
+  const panelHeight =
+    Math.min(
+      440,
+      Math.max(
+        240,
+        height - 40
+      )
+    );
+
+  /*
+   * ------------------------------------------------------------
+   * BACKDROP
+   * ------------------------------------------------------------
+   */
+  ui.overlay?.setPosition(
+    width / 2,
+    height / 2
+  );
+
+  ui.overlay?.setSize(
+    width,
+    height
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * MAIN PANEL
+   * ------------------------------------------------------------
+   */
+  ui.panel?.setPosition(
+    width / 2,
+    height / 2
+  );
+
+  ui.panel?.setSize(
+    panelWidth,
+    panelHeight
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * INNER PANEL
+   * ------------------------------------------------------------
+   */
+  ui.inner?.setPosition(
+    width / 2,
+    height / 2
+  );
+
+  ui.inner?.setSize(
+    panelWidth - 18,
+    panelHeight - 18
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * HEADER
+   * ------------------------------------------------------------
+   */
+  ui.title?.setPosition(
+    width / 2,
+    height / 2 -
+      panelHeight / 2 +
+      38
+  );
+
+  ui.subtitle?.setPosition(
+    width / 2,
+    height / 2 -
+      panelHeight / 2 +
+      68
+  );
+
+  ui.status?.setPosition(
+    width / 2,
+    height / 2 -
+      132
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * TIMER
+   * ------------------------------------------------------------
+   */
+  ui.timer?.setPosition(
+    width / 2,
+    height / 2 -
+      106
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * CLOSE BUTTON
+   * ------------------------------------------------------------
+   */
+  ui.close?.setPosition(
+    width / 2 +
+      panelWidth / 2 -
+      28,
+    height / 2 -
+      panelHeight / 2 +
+      24
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * RETRY
+   * ------------------------------------------------------------
+   */
+  ui.retry?.setPosition(
+    width / 2 -
+      panelWidth / 2 +
+      56,
+    height / 2 +
+      panelHeight / 2 -
+      25
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * DIFFICULTY
+   * ------------------------------------------------------------
+   */
+  ui.difficultyLabel?.setPosition(
+    width / 2,
+    height / 2 -
+      panelHeight / 2 +
+      92
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * INSTRUCTION
+   * ------------------------------------------------------------
+   */
+  ui.instruction?.setPosition(
+    width / 2,
+    height / 2 +
+      panelHeight / 2 -
+      48
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * KEEP HUD STATIC TO CAMERA
+   * ------------------------------------------------------------
+   */
+  [
+    ui.overlay,
+    ui.panel,
+    ui.inner,
+    ui.title,
+    ui.subtitle,
+    ui.status,
+    ui.timer,
+    ui.close,
+    ui.retry,
+    ui.difficultyLabel,
+    ui.instruction
+  ]
+    .filter(Boolean)
+    .forEach(
+      object => {
+        object.setScrollFactor?.(0);
+      }
+    );
+}
+
+  // ============================================================
+// RELAY GATE · PROXIMITY / INTERACT SYSTEM
+// ============================================================
+
+updateRelayGateInteraction() {
+  if (
+    !this.player?.active ||
+    !this.relayGates ||
+    this.relayPuzzleActive
+  ) {
+    this.clearRelayInteractHint();
+    return;
+  }
+
+  let nearestGate = null;
+  let nearestDistance = Infinity;
+
+  this.relayGates.children.iterate(
+    gate => {
+      if (!gate || !gate.active) {
+        return;
+      }
+
+      if (gate.getData('solved')) {
+        return;
+      }
+
+      const distance =
+        Phaser.Math.Distance.Between(
+          this.player.x,
+          this.player.y,
+          gate.x,
+          gate.y
+        );
+
+      if (
+        distance <= 145 &&
+        distance < nearestDistance
+      ) {
+        nearestDistance = distance;
+        nearestGate = gate;
+      }
+    }
+  );
+
+  if (!nearestGate) {
+    this.clearRelayInteractHint();
+    return;
+  }
+
+  this.relayNearbyGate =
+    nearestGate;
+
+  this.showRelayInteractHint(
+    nearestGate
+  );
+
+  const interactPressed =
+    Phaser.Input.Keyboard.JustDown(
+      this.keys.F
+    ) ||
+    this.mobileActions.interact;
+
+  this.mobileActions.interact = false;
+
+  if (interactPressed) {
+    this.openRelayPuzzle(
+      nearestGate
+    );
+  }
+}
+
+showRelayInteractHint(gate) {
+  if (!gate) {
+    return;
+  }
+
+  const hintX =
+    gate.x;
+
+  const hintY =
+    gate.y -
+    145;
+
+  if (!this.relayInteractHint) {
+    this.relayInteractHint =
+      this.add
+        .container(
+          hintX,
+          hintY
+        )
+        .setDepth(60);
+
+    const glow =
+      this.add
+        .rectangle(
+          0,
+          0,
+          118,
+          30,
+          0x071625,
+          0.94
+        )
+        .setStrokeStyle(
+          1.5,
+          0x8df4ff,
+          0.92
+        );
+
+    const key =
+      this.add
+        .rectangle(
+          -42,
+          0,
+          24,
+          21,
+          0x8df4ff,
+          0.16
+        )
+        .setStrokeStyle(
+          1,
+          0x8df4ff,
+          0.85
+        );
+
+    const keyText =
+      this.add
+        .text(
+          -42,
+          0,
+          'F',
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '12px',
+            color: '#8df4ff',
+            fontStyle: 'bold'
+          }
+        )
+        .setOrigin(0.5);
+
+    const label =
+      this.add
+        .text(
+          12,
+          0,
+          'INTERACT',
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '10px',
+            color: '#e8fdff',
+            fontStyle: 'bold',
+            letterSpacing: 1
+          }
+        )
+        .setOrigin(0.5);
+
+    this.relayInteractHint.add([
+      glow,
+      key,
+      keyText,
+      label
+    ]);
+
+    if (!this.motionReduced) {
+      this.tweens.add({
+        targets:
+          this.relayInteractHint,
+        alpha: {
+          from: 0.72,
+          to: 1
+        },
+        scale: {
+          from: 0.94,
+          to: 1
+        },
+        duration: 500,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.inOut'
+      });
+    }
+  }
+
+  this.relayInteractHint.setPosition(
+    hintX,
+    hintY
+  );
+
+  this.relayInteractHint.setVisible(
+    true
+  );
+}
+
+clearRelayInteractHint() {
+  this.relayNearbyGate =
+    null;
+
+  if (this.relayInteractHint) {
+    this.tweens.killTweensOf(
+      this.relayInteractHint
+    );
+
+    this.relayInteractHint.destroy();
+
+    this.relayInteractHint =
+      null;
+  }
+}
+  // ============================================================
+// RELAY GATE · PUZZLE OPEN
+// ============================================================
+
+openRelayPuzzle(gate) {
+  if (
+    !gate ||
+    gate.getData('solved') ||
+    this.relayPuzzleActive
+  ) {
+    return;
+  }
+
+  this.relayPuzzleActive =
+    true;
+
+  this.relayPuzzleGate =
+    gate;
+
+this.relayPuzzleType =
+  this.getMissionPuzzleType(gate);
+
+this.relayPuzzleAttempts =
+  0;
+
+this.relayPuzzleStartedAt =
+  this.time.now;
+
+this.relayPuzzleTimerBand =
+  0;
+
+this.clearRelayInteractHint();
+
+  this.player.body?.setVelocity(
+    0,
+    0
+  );
+
+  this.player.body?.setAcceleration(
+    0,
+    0
+  );
+
+this.player.setVelocity?.(
+  0,
+  0
+);
+
+this.mobileActions.jump =
+  false;
+
+this.mobileActions.fire =
+  false;
+
+this.mobileActions.sword =
+  false;
+
+this.mobileActions.dash =
+  false;
+
+this.mobileActions.interact =
+  false;
+
+this.mobileActions.build1 =
+  false;
+
+this.mobileActions.build2 =
+  false;
+
+this.mobileActions.gadget1 =
+  false;
+
+this.mobileActions.gadget2 =
+  false;
+
+this.physics.pause();
+
+this.createRelayPuzzleUI();
+}
+// ============================================================
+// MISSION PUZZLE DIRECTOR
+// Each mission gets its own puzzle identity.
+// ============================================================
+
+getMissionPuzzleType(gate = null) {
+
+  const missionId =
+    this.mission?.id;
+
+  const gateType =
+    gate?.getData?.('type');
+
+  // Explicit gate type has priority.
+  if (
+    gateType &&
+    gateType !== 'circuit'
+  ) {
+    return gateType;
+  }
+
+  const missionPuzzleMap = {
+    'first-delivery': 'code',
+    'dead-drop': 'circuit',
+    'blackout': 'sequence',
+    'pursuit': 'tiles',
+    'signal-storm': 'frequency',
+    'corporate-lockdown': 'grid',
+    'final-relay': 'final'
+  };
+
+  return (
+    missionPuzzleMap[missionId] ||
+    'circuit'
+  );
+}
+
+// ============================================================
+// PUZZLE TITLE / SUBTITLE
+// ============================================================
+
+getRelayPuzzleMeta(type) {
+
+  const meta = {
+
+    code: {
+      title: 'ACCESS CODE',
+      subtitle: 'ENCRYPTED // SECURITY BYPASS',
+      instruction: 'TAP DIGITS // MATCH THE SECURITY CODE'
+    },
+
+    circuit: {
+      title: 'RELAY ACCESS',
+      subtitle: 'CIRCUIT // SECURITY HANDSHAKE',
+      instruction: 'TAP NODE = ROTATE 90°  //  START → END'
+    },
+
+    sequence: {
+      title: 'GRID SEQUENCE',
+      subtitle: 'MEMORY // SIGNAL ORDER',
+      instruction: 'ACTIVATE NODES IN THE CORRECT ORDER'
+    },
+
+    tiles: {
+      title: 'ROUTE MATRIX',
+      subtitle: 'NAVIGATION // PATH RECONSTRUCTION',
+      instruction: 'BUILD THE SAFE ROUTE  //  START → END'
+    },
+
+    frequency: {
+      title: 'SIGNAL TUNER',
+      subtitle: 'FREQUENCY // ENCRYPTED CHANNEL',
+      instruction: 'TUNE THE SIGNAL INTO THE GREEN BAND'
+    },
+
+    grid: {
+      title: 'SECURITY GRID',
+      subtitle: 'CORPORATE // INTRUSION CONTROL',
+      instruction: 'FIND THE SAFE PATH WITHOUT TRIGGERING SECURITY'
+    },
+
+    final: {
+      title: 'APEX RELAY',
+      subtitle: 'FINAL PROTOCOL // MULTI-LAYER HANDSHAKE',
+      instruction: 'COMPLETE ALL SECURITY LAYERS'
+    }
+
+  };
+
+  return (
+    meta[type] ||
+    meta.circuit
+  );
+}
+
+// ============================================================
+// RELAY GATE · HOLOGRAPHIC PUZZLE UI
+// ============================================================
+
+createRelayPuzzleUI() {
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  /*
+   * ============================================================
+   * RELAY PUZZLE · RESPONSIVE RESIZE GUARD
+   * Re-centers the shared puzzle HUD elements when the
+   * Phaser canvas changes size.
+   * ============================================================
+   */
+  if (!this._relayPuzzleResizeBound) {
+    this._relayPuzzleResizeBound = true;
+
+    this.scale.on(
+      Phaser.Scale.Events.RESIZE,
+      this.handleRelayPuzzleResize,
+      this
+    );
+  }
+
+  const overlay =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        width,
+        height,
+        0x020812,
+        0.78
+      )
+      .setScrollFactor(0)
+      .setDepth(1000)
+      .setInteractive();
+
+  const panelWidth =
+    Math.min(
+      620,
+      width - 34
+    );
+
+  const panelHeight =
+    Math.min(
+      440,
+      height - 40
+    );
+
+  const panel =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        panelWidth,
+        panelHeight,
+        0x071625,
+        0.98
+      )
+      .setStrokeStyle(
+        2,
+        0x8df4ff,
+        0.92
+      )
+      .setScrollFactor(0)
+      .setDepth(1001);
+
+  const inner =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        panelWidth - 18,
+        panelHeight - 18,
+        0x04101d,
+        0.98
+      )
+      .setStrokeStyle(
+        1,
+        0x3a8ca8,
+        0.42
+      )
+      .setScrollFactor(0)
+      .setDepth(1001);
+
+  const title =
+    this.add
+      .text(
+        width / 2,
+        height / 2 -
+          panelHeight / 2 +
+          38,
+        this.getRelayPuzzleMeta(
+          this.relayPuzzleType
+        ).title,
+        {
+          fontFamily: 'DM Mono',
+          fontSize: '20px',
+          color: '#e8fdff',
+          fontStyle: 'bold',
+          letterSpacing: 2
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1002);
+
+  const subtitle =
+    this.add
+      .text(
+        width / 2,
+        height / 2 -
+          panelHeight / 2 +
+          68,
+       this.getRelayPuzzleMeta(
+  this.relayPuzzleType
+).subtitle,
+        {
+          fontFamily: 'DM Mono',
+          fontSize: '10px',
+          color: '#8df4ff',
+          letterSpacing: 1.3
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1002);
+
+  const status =
+    this.add
+      .text(
+        width / 2,
+        height / 2 -
+          132,
+        'LOCKED · WAITING FOR INPUT',
+        {
+          fontFamily: 'DM Mono',
+          fontSize: '11px',
+          color: '#ff826e',
+          fontStyle: 'bold'
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1002);
+
+  const instruction =
+  this.add
+    .text(
+      width / 2,
+      height / 2 +
+        panelHeight / 2 -
+        48,
+    this.getRelayPuzzleMeta(
+  this.relayPuzzleType
+).instruction,
+      {
+        fontFamily: 'DM Mono',
+        fontSize: width < 600 ? '8px' : '9px',
+        color: '#91a9b7',
+        align: 'center'
+      }
+    )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(1002);
+
+const timer =
+  this.add
+    .text(
+      width / 2,
+      height / 2 -
+        106,
+      'TIME 00:00',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: width < 600 ? '9px' : '10px',
+        color: '#8df4ff',
+        fontStyle: 'bold',
+        letterSpacing: 1.2
+      }
+    )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(1002);
+
+const close =
+  this.add
+    .text(
+        width / 2 +
+          panelWidth / 2 -
+          28,
+        height / 2 -
+          panelHeight / 2 +
+          24,
+        '×',
+        {
+          fontFamily: 'Arial',
+          fontSize: '24px',
+          color: '#ff826e',
+          fontStyle: 'bold'
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1003)
+      .setInteractive({
+        useHandCursor: true
+      });
+
+  close.on(
+    'pointerover',
+    () => {
+      close.setColor('#ffffff');
+    }
+  );
+
+  close.on(
+    'pointerout',
+    () => {
+      close.setColor('#ff826e');
+    }
+  );
+
+  close.on(
+    'pointerdown',
+    () => {
+      this.closeRelayPuzzle();
+    }
+  );
+
+ const difficulty =
+  Number(
+    this.relayPuzzleGate?.getData(
+      'difficulty'
+    )
+  ) || 1;
+
+const securityLevel =
+  difficulty >= 3
+    ? 'SECURITY LEVEL // OMEGA'
+    : difficulty === 2
+      ? 'SECURITY LEVEL // ALPHA'
+      : 'SECURITY LEVEL // BETA';
+
+const retry =
+  this.add
+    .text(
+      width / 2 -
+        panelWidth / 2 +
+        56,
+      height / 2 +
+        panelHeight / 2 -
+        25,
+      '↻ RETRY',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: width < 600 ? '8px' : '9px',
+        color: '#8df4ff',
+        fontStyle: 'bold',
+        letterSpacing: 1
+      }
+    )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(1003)
+    .setInteractive({
+      useHandCursor: true
+    });
+
+retry.on(
+  'pointerover',
+  () => {
+    retry.setColor('#ffffff');
+  }
+);
+
+retry.on(
+  'pointerout',
+  () => {
+    retry.setColor('#8df4ff');
+  }
+);
+
+retry.on(
+  'pointerdown',
+  () => {
+    this.retryRelayPuzzle();
+  }
+);
+
+const difficultyLabel =
+  this.add
+    .text(
+      width / 2,
+      height / 2 -
+        panelHeight / 2 +
+        92,
+      securityLevel,
+      {
+        fontFamily: 'DM Mono',
+        fontSize:
+          width < 600
+            ? '8px'
+            : '9px',
+        color:
+          difficulty >= 3
+            ? '#ff826e'
+            : '#8df4ff',
+        fontStyle: 'bold',
+        letterSpacing: 1.2
+      }
+    )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(1002);
+
+this.relayPuzzleUI = {
+  overlay,
+  panel,
+  inner,
+  title,
+  subtitle,
+  status,
+  timer,
+  instruction,
+  close,
+  retry,
+  difficultyLabel,
+  grid: null,
+  links: null,
+  startLabel: null,
+  endLabel: null,
+  startNode: null,
+  endNode: null,
+   tiles: [],
+  codeButtons: [],
+  sequenceButtons: [],
+  puzzleObjects: [],
+  solved: false
+};
+
+  this.createRelayPuzzleContent();
+
+  if (!this.motionReduced) {
+    this.tweens.add({
+      targets: [
+        panel,
+        inner
+      ],
+      alpha: {
+        from: 0,
+        to: 1
+      },
+      scale: {
+        from: 0.96,
+        to: 1
+      },
+      duration: 220,
+      ease: 'Cubic.out'
+    });
+  }
+
+  this.playerCue(
+    this.getRelayPuzzleMeta(
+      this.relayPuzzleType
+    ).title,
+    '#8df4ff'
+  );
+  this.gadgetPulse(
+    0x8df4ff,
+    12,
+    320
+  );
+}
+
+  // ============================================================
+// RELAY PUZZLE · CONTENT DIRECTOR
+// ============================================================
+
+createRelayPuzzleContent() {
+
+  const type =
+    this.relayPuzzleType ||
+    'circuit';
+
+  switch (type) {
+
+    case 'code':
+      return this.createMissionCodePuzzle();
+
+    case 'circuit':
+      return this.createRelayCircuitPreview();
+
+    case 'sequence':
+      return this.createMissionSequencePuzzle();
+
+    case 'tiles':
+      return this.createMissionTilesPuzzle();
+
+    case 'frequency':
+      return this.createMissionFrequencyPuzzle();
+
+    case 'grid':
+      return this.createMissionGridPuzzle();
+
+    case 'final':
+      return this.createMissionFinalPuzzle();
+
+    default:
+      this.relayPuzzleType = 'circuit';
+      return this.createRelayCircuitPreview();
+  }
+}
+
+  // ============================================================
+// MISSION PUZZLES · STATE
+// ============================================================
+
+createMissionPuzzleState() {
+
+  if (!this.relayPuzzleData) {
+    this.relayPuzzleData = {};
+  }
+
+  this.relayPuzzleData.missionId =
+    this.mission?.id || 'unknown';
+
+  this.relayPuzzleData.type =
+    this.relayPuzzleType || 'circuit';
+
+  this.relayPuzzleData.difficulty =
+    Number(
+      this.relayPuzzleGate?.getData(
+        'difficulty'
+      )
+    ) || 1;
+
+  this.relayPuzzleData.puzzleObjects =
+    [];
+
+  this.relayPuzzleData.finished =
+    false;
+
+  return this.relayPuzzleData;
+}
+
+  // ============================================================
+// PUZZLE 01 · ACCESS CODE
+// ============================================================
+
+createMissionCodePuzzle() {
+
+  const data =
+    this.createMissionPuzzleState();
+
+  const ui =
+    this.relayPuzzleUI;
+
+  const difficulty =
+    data.difficulty;
+
+  const codeLength =
+    difficulty >= 3
+      ? 5
+      : difficulty === 2
+        ? 4
+        : 3;
+
+  data.code =
+    Array.from(
+      { length: codeLength },
+      () => Phaser.Math.Between(1, 9)
+    );
+
+  data.input = [];
+  data.codeLocked = false;
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const centerX =
+    width / 2;
+
+  const centerY =
+    height / 2;
+
+  const display =
+    this.add
+      .text(
+        centerX,
+        centerY - 88,
+        `ACCESS CODE  //  ${data.code.join('  ')}`,
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '13px'
+              : '18px',
+          color: '#e8fdff',
+          fontStyle: 'bold',
+          letterSpacing: 2,
+          align: 'center',
+          stroke: '#07111d',
+          strokeThickness: 5
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1004);
+
+  data.puzzleObjects.push(
+    display
+  );
+
+  ui.status?.setText(
+    'MEMORIZE SECURITY CODE'
+  ).setColor(
+    '#8df4ff'
+  );
+
+  const revealTime =
+    difficulty >= 3
+      ? 900
+      : difficulty === 2
+        ? 1200
+        : 1600;
+
+  this.time.delayedCall(
+    revealTime,
+    () => {
+
+      if (
+        !this.relayPuzzleActive ||
+        ui.solved
+      ) {
+        return;
+      }
+
+      data.codeLocked =
+        true;
+
+      display.setText(
+        'ACCESS CODE  //  ' +
+        Array(codeLength)
+          .fill('?')
+          .join('  ')
+      );
+
+      ui.status?.setText(
+        'CODE HIDDEN · ENTER SEQUENCE'
+      ).setColor(
+        '#8df4ff'
+      );
+    }
+  );
+
+  // ------------------------------------------------------------
+  // INPUT DISPLAY
+  // ------------------------------------------------------------
+
+  const slots = [];
+
+  for (
+    let i = 0;
+    i < codeLength;
+    i++
+  ) {
+
+    const slot =
+      this.add
+        .rectangle(
+          centerX -
+            ((codeLength - 1) * 42) / 2 +
+            i * 42,
+          centerY - 28,
+          34,
+          34,
+          0x0a1e30,
+          0.96
+        )
+        .setStrokeStyle(
+          1.8,
+          0x276f8d,
+          0.9
+        )
+        .setScrollFactor(0)
+        .setDepth(1003);
+
+    const slotText =
+      this.add
+        .text(
+          slot.x,
+          slot.y,
+          '?',
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '15px',
+            color: '#8df4ff',
+            fontStyle: 'bold'
+          }
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1004);
+
+    data.puzzleObjects.push(
+      slot,
+      slotText
+    );
+
+    slots.push({
+      slot,
+      text: slotText
+    });
+  }
+
+  // ------------------------------------------------------------
+  // KEYPAD
+  // ------------------------------------------------------------
+
+  const keypadStartY =
+    centerY + 42;
+
+  for (
+    let digit = 1;
+    digit <= 9;
+    digit++
+  ) {
+
+    const index =
+      digit - 1;
+
+    const col =
+      index % 3;
+
+    const row =
+      Math.floor(index / 3);
+
+    const x =
+      centerX -
+      54 +
+      col * 54;
+
+    const y =
+      keypadStartY +
+      row * 43;
+
+    const button =
+      this.add
+        .rectangle(
+          x,
+          y,
+          42,
+          34,
+          0x0a1e30,
+          0.96
+        )
+        .setStrokeStyle(
+          1.5,
+          0x276f8d,
+          0.9
+        )
+        .setScrollFactor(0)
+        .setDepth(1003)
+        .setInteractive({
+          useHandCursor: true
+        });
+
+    const text =
+      this.add
+        .text(
+          x,
+          y,
+          String(digit),
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '14px',
+            color: '#8df4ff',
+            fontStyle: 'bold'
+          }
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1004);
+
+    data.puzzleObjects.push(
+      button,
+      text
+    );
+
+    button.on(
+      'pointerover',
+      () => {
+
+        if (
+          ui.solved ||
+          !data.codeLocked
+        ) {
+          return;
+        }
+
+        button.setStrokeStyle(
+          2.4,
+          0xe8fdff,
+          1
+        );
+
+        text.setColor(
+          '#ffffff'
+        );
+      }
+    );
+
+    button.on(
+      'pointerout',
+      () => {
+
+        if (
+          ui.solved
+        ) {
+          return;
+        }
+
+        button.setStrokeStyle(
+          1.5,
+          0x276f8d,
+          0.9
+        );
+
+        text.setColor(
+          '#8df4ff'
+        );
+      }
+    );
+
+    button.on(
+      'pointerdown',
+      () => {
+
+        if (
+          ui.solved ||
+          !data.codeLocked
+        ) {
+          return;
+        }
+
+        const position =
+          data.input.length;
+
+        if (
+          position >=
+          codeLength
+        ) {
+          return;
+        }
+
+        const expected =
+          data.code[position];
+
+        this.relayPuzzleAttempts++;
+
+        if (
+          digit !== expected
+        ) {
+
+          data.input = [];
+
+          slots.forEach(
+            entry => {
+              entry.text
+                .setText('?');
+
+              entry.slot
+                .setStrokeStyle(
+                  1.8,
+                  0x276f8d,
+                  0.9
+                );
+            }
+          );
+
+          ui.status?.setText(
+            'WRONG CODE · RESET'
+          ).setColor(
+            '#ff826e'
+          );
+
+    const resetSession =
+  this.relayPuzzleSession;
+
+this.time.delayedCall(
+  500,
+  () => {
+    if (
+      resetSession !==
+      this.relayPuzzleSession
+    ) {
+      return;
+    }
+
+    if (
+      this.relayPuzzleActive &&
+      !ui.solved
+    ) {
+                ui.status?.setText(
+                  'ENTER SECURITY CODE'
+                ).setColor(
+                  '#8df4ff'
+                );
+              }
+            }
+          );
+
+          return;
+        }
+
+        data.input.push(
+          digit
+        );
+
+        slots[position].text
+          .setText(
+            String(digit)
+          );
+
+        slots[position].slot
+          .setStrokeStyle(
+            2,
+            0x8df4ff,
+            1
+          );
+
+        ui.status?.setText(
+          `CODE INPUT  //  ${data.input.join(' ')}`
+        ).setColor(
+          '#8df4ff'
+        );
+
+        if (
+          data.input.length ===
+          codeLength
+        ) {
+
+          ui.solved =
+            true;
+
+          data.finished =
+            true;
+
+             ui.status?.setText(
+            'ACCESS GRANTED'
+          ).setColor(
+            '#8df4ff'
+          );
+
+          this.missionPuzzleVictoryFX(
+            'code',
+            this.getRelayPuzzlePerformance().grade
+          );
+
+          this.solveRelayGate();
+        }
+      }
+    );
+  }
+}
+
+  // ============================================================
+// PUZZLE 03 · SIGNAL SEQUENCE
+// ============================================================
+
+createMissionSequencePuzzle() {
+
+  const data =
+    this.createMissionPuzzleState();
+
+  const ui =
+    this.relayPuzzleUI;
+
+  const difficulty =
+    data.difficulty;
+
+  const length =
+    difficulty >= 3
+      ? 6
+      : difficulty === 2
+        ? 5
+        : 4;
+
+  data.sequence =
+    Phaser.Utils.Array.NumberArray(
+      1,
+      length
+    );
+
+  Phaser.Utils.Array.Shuffle(
+    data.sequence
+  );
+
+  data.sequenceIndex =
+    0;
+
+  data.sequenceLocked =
+    false;
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const cols = 3;
+
+  const buttons = [];
+
+  const sequenceText =
+    this.add
+      .text(
+        width / 2,
+        height / 2 - 92,
+        `ORDER  //  ${data.sequence.join(' → ')}`,
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '12px'
+              : '16px',
+          color: '#e8fdff',
+          fontStyle: 'bold',
+          letterSpacing: 1.8,
+          align: 'center'
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1004);
+
+  data.puzzleObjects.push(
+    sequenceText
+  );
+
+  ui.status?.setText(
+    'MEMORIZE SIGNAL ORDER'
+  ).setColor(
+    '#8df4ff'
+  );
+
+ const sequenceRevealSession =
+  this.relayPuzzleSession;
+
+this.time.delayedCall(
+  difficulty >= 3
+    ? 1200
+    : difficulty === 2
+      ? 1500
+      : 1800,
+  () => {
+
+    if (
+      sequenceRevealSession !==
+      this.relayPuzzleSession
+    ) {
+      return;
+    }
+
+    if (
+      !this.relayPuzzleActive ||
+      ui.solved
+    ) {
+      return;
+    }
+
+    data.sequenceLocked =
+      true;
+
+      sequenceText.setText(
+        'ORDER  //  ? ? ? ? ? ?'
+          .slice(
+            0,
+            11 +
+            length * 2
+          )
+      );
+
+      ui.status?.setText(
+        'ORDER HIDDEN · EXECUTE'
+      ).setColor(
+        '#8df4ff'
+      );
+    }
+  );
+
+  for (
+    let i = 0;
+    i < length;
+    i++
+  ) {
+
+    const col =
+      i % cols;
+
+    const row =
+      Math.floor(i / cols);
+
+    const x =
+      width / 2 -
+      55 +
+      col * 55;
+
+    const y =
+      height / 2 -
+      15 +
+      row * 55;
+
+    const button =
+      this.add
+        .circle(
+          x,
+          y,
+          21,
+          0x0a1e30,
+          0.96
+        )
+        .setStrokeStyle(
+          2,
+          0x276f8d,
+          0.9
+        )
+        .setScrollFactor(0)
+        .setDepth(1003)
+        .setInteractive({
+          useHandCursor: true
+        });
+
+    const label =
+      this.add
+        .text(
+          x,
+          y,
+          String(i + 1),
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '13px',
+            color: '#8df4ff',
+            fontStyle: 'bold'
+          }
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1004);
+
+    data.puzzleObjects.push(
+      button,
+      label
+    );
+
+    buttons.push(
+      button
+    );
+
+    button.on(
+      'pointerdown',
+      () => {
+
+          if (
+          ui.solved ||
+          !data.sequenceLocked
+        ) {
+          return;
+        }
+
+        this.relayPuzzleAttempts++;
+
+        const expected =
+          data.sequence[
+            data.sequenceIndex
+          ];
+
+        if (
+          i !== expected - 1
+        ) {
+
+          data.sequenceIndex =
+            0;
+
+          buttons.forEach(
+            entry => {
+              entry.setFillStyle(
+                0x0a1e30,
+                0.96
+              );
+
+              entry.setStrokeStyle(
+                2,
+                0x276f8d,
+                0.9
+              );
+            }
+          );
+
+          ui.status?.setText(
+            'SEQUENCE ERROR · RESET'
+          ).setColor(
+            '#ff826e'
+          );
+
+          return;
+        }
+
+        button
+          .setFillStyle(
+            0x12364a,
+            1
+          )
+          .setStrokeStyle(
+            2.6,
+            0x8df4ff,
+            1
+          );
+
+        data.sequenceIndex++;
+
+        if (
+          data.sequenceIndex >=
+          data.sequence.length
+        ) {
+
+          ui.solved =
+            true;
+
+               ui.status?.setText(
+            'SEQUENCE ACCEPTED'
+          ).setColor(
+            '#8df4ff'
+          );
+
+          this.missionPuzzleVictoryFX(
+            'sequence',
+            this.getRelayPuzzlePerformance().grade
+          );
+
+          this.solveRelayGate();
+        }
+      }
+    );
+  }
+}
+
+// ============================================================
+// PUZZLE 04 · ROUTE MATRIX
+// Mission: pursuit
+// Memory path / tile navigation.
+// ============================================================
+
+createMissionTilesPuzzle() {
+
+  const data =
+    this.createMissionPuzzleState();
+
+  const ui =
+    this.relayPuzzleUI;
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const difficulty =
+    data.difficulty;
+
+  const cols =
+    difficulty >= 3 ? 5 : 4;
+
+  const rows = 3;
+
+  const cellSize =
+    Math.min(
+      46,
+      (
+        Math.min(width - 100, 300) /
+        cols
+      )
+    );
+
+  const startX =
+    width / 2 -
+    (
+      (cols - 1) *
+      cellSize
+    ) / 2;
+
+  const startY =
+    height / 2 -
+    (
+      (rows - 1) *
+      cellSize
+    ) / 2;
+
+  const paths = [
+    [0, 1, 2, 3, 7, 11],
+    [0, 1, 5, 6, 7, 11],
+    [0, 4, 5, 9, 10, 11],
+    [0, 1, 5, 9, 10, 11]
+  ];
+
+  const path =
+    paths[
+      Phaser.Math.Between(
+        0,
+        paths.length - 1
+      )
+    ];
+
+  data.path =
+    path;
+
+  data.pathIndex =
+    0;
+
+  data.routeLocked =
+    false;
+
+  const cells = [];
+
+  for (
+    let index = 0;
+    index < cols * rows;
+    index++
+  ) {
+
+    const col =
+      index % cols;
+
+    const row =
+      Math.floor(index / cols);
+
+    const x =
+      startX +
+      col * cellSize;
+
+    const y =
+      startY +
+      row * cellSize;
+
+    const cell =
+      this.add
+        .rectangle(
+          x,
+          y,
+          cellSize - 6,
+          cellSize - 6,
+          0x0a1e30,
+          0.96
+        )
+        .setStrokeStyle(
+          1.8,
+          0x276f8d,
+          0.9
+        )
+        .setScrollFactor(0)
+        .setDepth(1003)
+        .setInteractive({
+          useHandCursor: true
+        });
+
+    data.puzzleObjects.push(
+      cell
+    );
+
+    cells.push(
+      cell
+    );
+  }
+
+  path.forEach(
+    index => {
+      cells[index]
+        .setFillStyle(
+          0x12364a,
+          1
+        )
+        .setStrokeStyle(
+          2.5,
+          0x8df4ff,
+          1
+        );
+    }
+  );
+
+  ui.status?.setText(
+    'MEMORIZE ROUTE'
+  ).setColor(
+    '#8df4ff'
+  );
+
+const routeRevealSession =
+  this.relayPuzzleSession;
+
+this.time.delayedCall(
+  difficulty >= 3
+    ? 1000
+    : 1400,
+  () => {
+
+    if (
+      routeRevealSession !==
+      this.relayPuzzleSession
+    ) {
+      return;
+    }
+
+    if (
+      !this.relayPuzzleActive ||
+      ui.solved
+    ) {
+      return;
+    }
+
+    cells.forEach(
+      cell => {
+        cell.setFillStyle(
+          0x0a1e30,
+          0.96
+        );
+
+        cell.setStrokeStyle(
+          1.8,
+          0x276f8d,
+          0.9
+        );
+      }
+    );
+
+    data.routeLocked =
+      true;
+
+    ui.status?.setText(
+      'ROUTE HIDDEN · NAVIGATE'
+    );
+  }
+);
+
+  cells.forEach(
+    (cell, index) => {
+
+      cell.on(
+        'pointerdown',
+        () => {
+
+                 if (
+            ui.solved ||
+            !data.routeLocked
+          ) {
+            return;
+          }
+
+          const expected =
+            path[data.pathIndex];
+
+          if (
+            index !== expected
+          ) {
+
+            data.pathIndex =
+              0;
+
+            cells.forEach(
+              entry => {
+                entry.setFillStyle(
+                  0x0a1e30,
+                  0.96
+                );
+
+                entry.setStrokeStyle(
+                  1.8,
+                  0x276f8d,
+                  0.9
+                );
+              }
+            );
+
+            this.relayPuzzleAttempts++;
+
+            ui.status?.setText(
+              'ROUTE LOST · RESET'
+            ).setColor(
+              '#ff826e'
+            );
+
+            return;
+          }
+
+          this.relayPuzzleAttempts++;
+
+          cell
+            .setFillStyle(
+              0x12364a,
+              1
+            )
+            .setStrokeStyle(
+              2.5,
+              0x8df4ff,
+              1
+            );
+
+          data.pathIndex++;
+
+          if (
+            data.pathIndex >=
+            path.length
+          ) {
+
+            ui.solved =
+              true;
+
+                   ui.status?.setText(
+              'ROUTE ESTABLISHED'
+            ).setColor(
+              '#8df4ff'
+            );
+
+            this.missionPuzzleVictoryFX(
+              'tiles',
+              this.getRelayPuzzlePerformance().grade
+            );
+
+            this.solveRelayGate();
+          }
+        }
+      );
+    }
+  );
+}
+
+// ============================================================
+// PUZZLE 05 · SIGNAL TUNER
+// Mission: signal-storm
+// ============================================================
+
+createMissionFrequencyPuzzle() {
+
+  const data =
+    this.createMissionPuzzleState();
+
+  const ui =
+    this.relayPuzzleUI;
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const channels =
+    data.difficulty >= 3
+      ? 4
+      : 3;
+
+  data.targets =
+    Array.from(
+      { length: channels },
+      () => Phaser.Math.Between(1, 5)
+    );
+
+data.values =
+    Array.from(
+      { length: channels },
+      () => Phaser.Math.Between(1, 5)
+    );
+
+  if (
+    data.values.every(
+      (value, index) =>
+        value === data.targets[index]
+    )
+  ) {
+    data.values[0] =
+      data.values[0] >= 5
+        ? 1
+        : data.values[0] + 1;
+  }
+
+  const controls = [];
+
+  const startY =
+    height / 2 -
+    (
+      (channels - 1) *
+      58
+    ) / 2;
+
+  for (
+    let i = 0;
+    i < channels;
+    i++
+  ) {
+
+    const y =
+      startY +
+      i * 58;
+
+    const label =
+      this.add
+        .text(
+          width / 2 - 125,
+          y,
+          `CH-${String(i + 1).padStart(2, '0')}`,
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '10px',
+            color: '#91a9b7',
+            fontStyle: 'bold'
+          }
+        )
+        .setOrigin(1, 0.5)
+        .setScrollFactor(0)
+        .setDepth(1004);
+
+    const target =
+      this.add
+        .text(
+          width / 2 + 110,
+          y - 16,
+          `TARGET ${data.targets[i]}`,
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '8px',
+            color: '#8df4ff'
+          }
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1004);
+
+    const button =
+      this.add
+        .rectangle(
+          width / 2,
+          y,
+          190,
+          34,
+          0x0a1e30,
+          0.96
+        )
+        .setStrokeStyle(
+          2,
+          0x276f8d,
+          0.9
+        )
+        .setScrollFactor(0)
+        .setDepth(1003)
+        .setInteractive({
+          useHandCursor: true
+        });
+
+    const value =
+      this.add
+        .text(
+          width / 2,
+          y,
+          `FREQ ${data.values[i]}`,
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '11px',
+            color: '#8df4ff',
+            fontStyle: 'bold'
+          }
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1004);
+
+    data.puzzleObjects.push(
+      label,
+      target,
+      button,
+      value
+    );
+
+    controls.push({
+      button,
+      value,
+      target: data.targets[i],
+      index: i
+    });
+
+    button.on(
+      'pointerdown',
+      () => {
+
+        if (
+          ui.solved
+        ) {
+          return;
+        }
+
+        data.values[i] =
+          data.values[i] >= 5
+            ? 1
+            : data.values[i] + 1;
+
+        value.setText(
+          `FREQ ${data.values[i]}`
+        );
+
+        this.relayPuzzleAttempts++;
+
+        button.setStrokeStyle(
+          2.4,
+          data.values[i] ===
+          data.targets[i]
+            ? 0x8df4ff
+            : 0x276f8d,
+          1
+        );
+
+        const solved =
+          data.values.every(
+            (entry, index) =>
+              entry ===
+              data.targets[index]
+          );
+
+        if (
+          solved
+        ) {
+
+          ui.solved =
+            true;
+
+                 ui.status?.setText(
+            'FREQUENCY LOCKED'
+          ).setColor(
+            '#8df4ff'
+          );
+
+          this.missionPuzzleVictoryFX(
+            'frequency',
+            this.getRelayPuzzlePerformance().grade
+          );
+
+          this.solveRelayGate();
+
+        } else {
+
+          ui.status?.setText(
+            'TUNE ALL CHANNELS'
+          ).setColor(
+            '#8df4ff'
+          );
+        }
+      }
+    );
+  }
+
+  ui.status?.setText(
+    'TUNE SIGNAL INTO TARGET BANDS'
+  ).setColor(
+    '#8df4ff'
+  );
+}
+
+// ============================================================
+// PUZZLE 06 · SECURITY GRID
+// Mission: corporate-lockdown
+// ============================================================
+
+createMissionGridPuzzle() {
+
+  const data =
+    this.createMissionPuzzleState();
+
+  const ui =
+    this.relayPuzzleUI;
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const size =
+    data.difficulty >= 3
+      ? 5
+      : 4;
+
+  const cellSize =
+    Math.min(
+      42,
+      (Math.min(width - 90, 260) / size)
+    );
+
+  const originX =
+    width / 2 -
+    (
+      (size - 1) *
+      cellSize
+    ) / 2;
+
+  const originY =
+    height / 2 -
+    (
+      (size - 1) *
+      cellSize
+    ) / 2;
+
+  const route = [];
+
+  for (
+    let i = 0;
+    i < size;
+    i++
+  ) {
+    route.push(
+      i * size
+    );
+  }
+
+  for (
+    let row = 1;
+    row < size;
+    row++
+  ) {
+    route.push(
+      row * size +
+      (size - 1)
+    );
+  }
+
+  data.route =
+    route;
+
+  data.routeIndex =
+    0;
+
+  data.routeLocked =
+    false;
+
+  const cells = [];
+
+  for (
+    let index = 0;
+    index < size * size;
+    index++
+  ) {
+
+    const col =
+      index % size;
+
+    const row =
+      Math.floor(index / size);
+
+    const cell =
+      this.add
+        .rectangle(
+          originX +
+            col * cellSize,
+          originY +
+            row * cellSize,
+          cellSize - 5,
+          cellSize - 5,
+          0x0a1e30,
+          0.96
+        )
+        .setStrokeStyle(
+          1.5,
+          0x276f8d,
+          0.9
+        )
+        .setScrollFactor(0)
+        .setDepth(1003)
+        .setInteractive({
+          useHandCursor: true
+        });
+
+    data.puzzleObjects.push(
+      cell
+    );
+
+    cells.push(
+      cell
+    );
+  }
+
+  route.forEach(
+    index => {
+      cells[index]
+        .setFillStyle(
+          0x12364a,
+          1
+        )
+        .setStrokeStyle(
+          2.4,
+          0x8df4ff,
+          1
+        );
+    }
+  );
+
+  ui.status?.setText(
+    'SECURITY PATH DETECTED'
+  ).setColor(
+    '#8df4ff'
+  );
+
+const gridRevealSession =
+  this.relayPuzzleSession;
+
+this.time.delayedCall(
+  data.difficulty >= 3
+    ? 1000
+    : 1350,
+  () => {
+
+    if (
+      gridRevealSession !==
+      this.relayPuzzleSession
+    ) {
+      return;
+    }
+
+    if (
+      !this.relayPuzzleActive ||
+      ui.solved
+    ) {
+      return;
+    }
+
+    cells.forEach(
+      cell => {
+        cell.setFillStyle(
+          0x0a1e30,
+          0.96
+        );
+
+        cell.setStrokeStyle(
+          1.5,
+          0x276f8d,
+          0.9
+        );
+      }
+    );
+
+    data.routeLocked =
+      true;
+
+    ui.status?.setText(
+      'GRID ARMED · FIND SAFE PATH'
+    );
+  }
+);
+
+  cells.forEach(
+    (cell, index) => {
+
+      cell.on(
+        'pointerdown',
+        () => {
+
+                   if (
+            ui.solved ||
+            !data.routeLocked
+          ) {
+            return;
+          }
+
+          const expected =
+            route[data.routeIndex];
+
+          this.relayPuzzleAttempts++;
+
+          if (
+            index !== expected
+          ) {
+
+            data.routeIndex =
+              0;
+
+            cells.forEach(
+              entry => {
+                entry.setFillStyle(
+                  0x0a1e30,
+                  0.96
+                );
+
+                entry.setStrokeStyle(
+                  1.5,
+                  0x276f8d,
+                  0.9
+                );
+              }
+            );
+
+            ui.status?.setText(
+              'INTRUSION DETECTED · RESET'
+            ).setColor(
+              '#ff826e'
+            );
+
+            return;
+          }
+
+          cell
+            .setFillStyle(
+              0x12364a,
+              1
+            )
+            .setStrokeStyle(
+              2.6,
+              0x8df4ff,
+              1
+            );
+
+          data.routeIndex++;
+
+          if (
+            data.routeIndex >=
+            route.length
+          ) {
+
+            ui.solved =
+              true;
+
+                     ui.status?.setText(
+              'SECURITY BREACH PREVENTED'
+            ).setColor(
+              '#8df4ff'
+            );
+
+            this.missionPuzzleVictoryFX(
+              'grid',
+              this.getRelayPuzzlePerformance().grade
+            );
+
+            this.solveRelayGate();
+          }
+        }
+      );
+    }
+  );
+}
+
+// ============================================================
+// PUZZLE 07 · APEX RELAY
+// Mission: final-relay
+// Three-core synchronization.
+// ============================================================
+
+createMissionFinalPuzzle() {
+
+  const data =
+    this.createMissionPuzzleState();
+
+  const ui =
+    this.relayPuzzleUI;
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const cores =
+    3;
+
+  data.targetStates =
+    [
+      Phaser.Math.Between(0, 2),
+      Phaser.Math.Between(0, 2),
+      Phaser.Math.Between(0, 2)
+    ];
+
+data.states =
+    [
+      Phaser.Math.Between(0, 2),
+      Phaser.Math.Between(0, 2),
+      Phaser.Math.Between(0, 2)
+    ];
+
+  if (
+    data.states.every(
+      (state, index) =>
+        state === data.targetStates[index]
+    )
+  ) {
+    data.states[0] =
+      (data.states[0] + 1) % 3;
+  }
+
+  const controls = [];
+
+  const startX =
+    width / 2 -
+    105;
+
+  for (
+    let i = 0;
+    i < cores;
+    i++
+  ) {
+
+    const x =
+      startX +
+      i * 105;
+
+    const core =
+      this.add
+        .circle(
+          x,
+          height / 2,
+          34,
+          0x0a1e30,
+          0.96
+        )
+        .setStrokeStyle(
+          2.5,
+          0x276f8d,
+          0.95
+        )
+        .setScrollFactor(0)
+        .setDepth(1003)
+        .setInteractive({
+          useHandCursor: true
+        });
+
+    const value =
+      this.add
+        .text(
+          x,
+          height / 2,
+          'SYNC 0',
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '9px',
+            color: '#8df4ff',
+            fontStyle: 'bold'
+          }
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1004);
+
+    const target =
+      this.add
+        .text(
+          x,
+          height / 2 + 56,
+          `TARGET ${data.targetStates[i]}`,
+          {
+            fontFamily: 'DM Mono',
+            fontSize: '8px',
+            color: '#91a9b7'
+          }
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1004);
+
+    data.puzzleObjects.push(
+      core,
+      value,
+      target
+    );
+
+    controls.push({
+      core,
+      value,
+      target,
+      index: i
+    });
+
+    core.on(
+      'pointerdown',
+      () => {
+
+        if (
+          ui.solved
+        ) {
+          return;
+        }
+
+        data.states[i] =
+          (
+            data.states[i] + 1
+          ) % 3;
+
+        value.setText(
+          `SYNC ${data.states[i]}`
+        );
+
+        this.relayPuzzleAttempts++;
+
+      const correct =
+  data.states[i] ===
+  data.targetStates[i];
+
+core.setStrokeStyle(
+  2.8,
+  correct
+    ? 0x8df4ff
+    : 0x276f8d,
+  1
+);
+
+/*
+ * ----------------------------------------------------------
+ * APEX CORE FEEDBACK
+ * ----------------------------------------------------------
+ */
+if (correct) {
+  ui.status?.setText(
+    `CORE ${String(i + 1).padStart(2, '0')} // SYNCHRONIZED`
+  ).setColor(
+    '#8df4ff'
+  );
+
+  this.tweens.killTweensOf(
+    core
+  );
+
+  if (!this.motionReduced) {
+    this.tweens.add({
+      targets: core,
+      scaleX: 1.16,
+      scaleY: 1.16,
+      duration: 110,
+      yoyo: true,
+      ease: 'Quad.out'
+    });
+  }
+} else {
+  ui.status?.setText(
+    `CORE ${String(i + 1).padStart(2, '0')} // RESYNC REQUIRED`
+  ).setColor(
+    '#ff826e'
+  );
+}
+
+      core.setFillStyle(
+  correct
+    ? 0x18384a
+    : 0x0a1e30,
+  1
+);
+
+core.setStrokeStyle(
+  correct
+    ? 3.2
+    : 2,
+  correct
+    ? 0xffd06e
+    : 0x2b6f8f,
+  1
+);
+
+if (
+  correct &&
+  !this.motionReduced
+) {
+  this.tweens.killTweensOf(
+    core
+  );
+
+  this.tweens.add({
+    targets: core,
+    scaleX: 1.12,
+    scaleY: 1.12,
+    duration: 90,
+    yoyo: true,
+    ease: 'Quad.out'
+  });
+}
+
+        const solved =
+          data.states.every(
+            (entry, index) =>
+              entry ===
+              data.targetStates[index]
+          );
+
+       if (
+  solved
+) {
+
+  ui.solved =
+    true;
+
+  ui.status?.setText(
+    'APEX RELAY // FULL SYNC'
+  ).setColor(
+    '#fff0a8'
+  );
+
+  /*
+   * --------------------------------------------------------
+   * FINAL CORE CONFIRMATION
+   * --------------------------------------------------------
+   */
+  controls.forEach(
+    entry => {
+      if (!entry?.core) {
+        return;
+      }
+
+      entry.core.setStrokeStyle(
+        3.2,
+        0xffd06e,
+        1
+      );
+
+      entry.core.setFillStyle(
+        0x18384a,
+        1
+      );
+
+      if (!this.motionReduced) {
+        this.tweens.killTweensOf(
+          entry.core
+        );
+
+        this.tweens.add({
+          targets: entry.core,
+          scaleX: 1.22,
+          scaleY: 1.22,
+          duration: 160,
+          delay:
+            entry.index * 80,
+          yoyo: true,
+          ease: 'Cubic.out'
+        });
+      }
+    }
+  );
+
+  this.missionPuzzleVictoryFX(
+    'final',
+    this.getRelayPuzzlePerformance().grade
+  );
+
+  this.solveRelayGate();
+
+        } else {
+
+          ui.status?.setText(
+            'SYNCHRONIZE ALL CORE NODES'
+          ).setColor(
+            '#8df4ff'
+          );
+        }
+      }
+    );
+  }
+
+  ui.status?.setText(
+    'FINAL PROTOCOL // SYNCHRONIZE CORES'
+  ).setColor(
+    '#8df4ff'
+  );
+}
+
+  // ============================================================
+// RELAY GATE · SOLVABLE CIRCUIT NETWORK
+// ============================================================
+
+rotateRelayMask(mask, turns = 1) {
+  const normalized =
+    ((Number(turns) % 4) + 4) % 4;
+
+  let result = mask;
+
+  for (let i = 0; i < normalized; i++) {
+    let next = 0;
+
+    if (result & 1) next |= 2;
+    if (result & 2) next |= 4;
+    if (result & 4) next |= 8;
+    if (result & 8) next |= 1;
+
+    result = next;
+  }
+
+  return result;
+}
+
+relayCircuitReachable(
+  masks,
+  columns,
+  rows
+) {
+  const total =
+    columns * rows;
+
+  if (
+    !Array.isArray(masks) ||
+    masks.length !== total
+  ) {
+    return new Set();
+  }
+
+  const NORTH = 1;
+  const EAST = 2;
+  const SOUTH = 4;
+  const WEST = 8;
+
+  const queue = [0];
+  const visited = new Set([0]);
+
+  const opposite = {
+    [NORTH]: SOUTH,
+    [EAST]: WEST,
+    [SOUTH]: NORTH,
+    [WEST]: EAST
+  };
+
+  const deltas = [
+    [NORTH, 0, -1],
+    [EAST, 1, 0],
+    [SOUTH, 0, 1],
+    [WEST, -1, 0]
+  ];
+
+  while (queue.length) {
+    const index =
+      queue.shift();
+
+    const row =
+      Math.floor(index / columns);
+
+    const col =
+      index % columns;
+
+    for (const [bit, dx, dy] of deltas) {
+      if (!(masks[index] & bit)) {
+        continue;
+      }
+
+      const nextCol =
+        col + dx;
+
+      const nextRow =
+        row + dy;
+
+      if (
+        nextCol < 0 ||
+        nextCol >= columns ||
+        nextRow < 0 ||
+        nextRow >= rows
+      ) {
+        continue;
+      }
+
+      const nextIndex =
+        nextRow * columns +
+        nextCol;
+
+      if (
+        !(masks[nextIndex] & opposite[bit])
+      ) {
+        continue;
+      }
+
+      if (!visited.has(nextIndex)) {
+        visited.add(nextIndex);
+        queue.push(nextIndex);
+      }
+    }
+  }
+
+  return visited;
+}
+
+generateRelayPuzzle() {
+  const difficulty =
+    Number(
+      this.relayPuzzleGate?.getData('difficulty')
+    ) || 1;
+
+  const columns =
+    difficulty >= 3
+      ? 5
+      : 4;
+
+  const rows =
+    difficulty >= 3
+      ? 3
+      : difficulty === 2
+        ? 3
+        : 2;
+
+  const count =
+    columns * rows;
+
+  const NORTH = 1;
+  const EAST = 2;
+  const SOUTH = 4;
+  const WEST = 8;
+
+  const solvedMasks =
+    Array(count).fill(0);
+
+  const path = [];
+
+  for (
+    let row = 0;
+    row < rows;
+    row++
+  ) {
+    if (row % 2 === 0) {
+      for (
+        let col = 0;
+        col < columns;
+        col++
+      ) {
+        path.push(
+          row * columns + col
+        );
+      }
+    } else {
+      for (
+        let col = columns - 1;
+        col >= 0;
+        col--
+      ) {
+        path.push(
+          row * columns + col
+        );
+      }
+    }
+  }
+
+  const directionBetween =
+    (a, b) => {
+      const ar =
+        Math.floor(a / columns);
+
+      const ac =
+        a % columns;
+
+      const br =
+        Math.floor(b / columns);
+
+      const bc =
+        b % columns;
+
+      if (
+        br === ar - 1 &&
+        bc === ac
+      ) {
+        return NORTH;
+      }
+
+      if (
+        br === ar &&
+        bc === ac + 1
+      ) {
+        return EAST;
+      }
+
+      if (
+        br === ar + 1 &&
+        bc === ac
+      ) {
+        return SOUTH;
+      }
+
+      if (
+        br === ar &&
+        bc === ac - 1
+      ) {
+        return WEST;
+      }
+
+      return 0;
+    };
+
+  for (
+    let i = 0;
+    i < path.length;
+    i++
+  ) {
+    const index =
+      path[i];
+
+    const previous =
+      i > 0
+        ? path[i - 1]
+        : null;
+
+    const next =
+      i < path.length - 1
+        ? path[i + 1]
+        : null;
+
+    if (previous !== null) {
+      solvedMasks[index] |=
+        directionBetween(
+          index,
+          previous
+        );
+    }
+
+    if (next !== null) {
+      solvedMasks[index] |=
+        directionBetween(
+          index,
+          next
+        );
+    }
+  }
+
+let rotations = [];
+let masks = [];
+
+const difficultyProfile = {
+  1: {
+    minRotated: 3,
+    minQuarterTurns: 4
+  },
+  2: {
+    minRotated: 6,
+    minQuarterTurns: 9
+  },
+  3: {
+    minRotated: 9,
+    minQuarterTurns: 14
+  }
+}[Math.min(3, Math.max(1, difficulty))];
+
+let generated = false;
+
+for (
+  let attempt = 0;
+  attempt < 80;
+  attempt++
+) {
+  const candidateRotations =
+    solvedMasks.map(() =>
+      Phaser.Math.Between(0, 3)
+    );
+
+  if (
+    candidateRotations.filter(
+      value => value !== 0
+    ).length <
+    difficultyProfile.minRotated
+  ) {
+    continue;
+  }
+
+  const totalQuarterTurns =
+    candidateRotations.reduce(
+      (sum, value) =>
+        sum + value,
+      0
+    );
+
+  if (
+    totalQuarterTurns <
+    difficultyProfile.minQuarterTurns
+  ) {
+    continue;
+  }
+
+  const candidateMasks =
+    solvedMasks.map(
+      (mask, index) => {
+        let rotation =
+          candidateRotations[index];
+
+        if (
+          index === 0 &&
+          rotation === 0
+        ) {
+          rotation = 1;
+        }
+
+        if (
+          index === count - 1 &&
+          rotation === 0
+        ) {
+          rotation = 1;
+        }
+
+        candidateRotations[index] =
+          rotation;
+
+        return this.rotateRelayMask(
+          mask,
+          rotation
+        );
+      }
+    );
+
+  const reachable =
+    this.relayCircuitReachable(
+      candidateMasks,
+      columns,
+      rows
+    );
+
+  if (
+    reachable.has(
+      count - 1
+    )
+  ) {
+    continue;
+  }
+
+  rotations =
+    candidateRotations;
+
+  masks =
+    candidateMasks;
+
+  generated = true;
+  break;
+}
+
+if (!generated) {
+  rotations =
+    solvedMasks.map(
+      () => 1
+    );
+
+  masks =
+    solvedMasks.map(
+      (mask, index) =>
+        this.rotateRelayMask(
+          mask,
+          rotations[index]
+        )
+    );
+}
+
+const baselineAttempts =
+  rotations.reduce(
+    (total, rotation) =>
+      total +
+      (
+        (4 - rotation) % 4
+      ),
+    0
+  );
+
+this.relayPuzzleData = {
+  columns,
+  rows,
+  count,
+  solvedMasks,
+  rotations,
+  masks,
+  baselineAttempts
+};
+}
+
+drawRelayCircuitState() {
+  const ui =
+    this.relayPuzzleUI;
+
+  const data =
+    this.relayPuzzleData;
+
+  if (!ui || !data) {
+    return;
+  }
+
+  const masks =
+    data.tiles?.map(
+      entry => {
+        const mask =
+          this.rotateRelayMask(
+            entry.baseMask,
+            entry.rotation / 90
+          );
+
+        entry.currentMask =
+          mask;
+
+        return mask;
+      }
+    ) || [];
+
+  data.masks =
+    masks;
+
+  const reachable =
+    this.relayCircuitReachable(
+      masks,
+      data.columns,
+      data.rows
+    );
+
+  const endIndex =
+    data.count - 1;
+
+  if (ui.links) {
+    ui.links.clear();
+
+    for (
+      let index = 0;
+      index < data.count;
+      index++
+    ) {
+      const row =
+        Math.floor(
+          index / data.columns
+        );
+
+      const col =
+        index % data.columns;
+
+      const x =
+        data.originX +
+        col *
+          (data.tileSize + data.gap);
+
+      const y =
+        data.originY +
+        row *
+          (data.tileSize + data.gap);
+
+      const mask =
+        masks[index];
+
+      if (
+        mask & 2 &&
+        col < data.columns - 1 &&
+        masks[index + 1] & 8
+      ) {
+        const connected =
+          reachable.has(index) &&
+          reachable.has(index + 1);
+
+        ui.links.lineStyle(
+          4,
+          connected
+            ? 0x8df4ff
+            : 0x55dfff,
+          connected
+            ? 0.55
+            : 0.16
+        );
+
+        ui.links.lineBetween(
+          x + data.tileSize / 2,
+          y,
+          x +
+            data.tileSize / 2 +
+            data.gap,
+          y
+        );
+      }
+
+      if (
+        mask & 4 &&
+        row < data.rows - 1 &&
+        masks[index + data.columns] & 1
+      ) {
+        const nextY =
+          y +
+          data.tileSize +
+          data.gap;
+
+        const connected =
+          reachable.has(index) &&
+          reachable.has(
+            index + data.columns
+          );
+
+        ui.links.lineStyle(
+          4,
+          connected
+            ? 0x8df4ff
+            : 0x55dfff,
+          connected
+            ? 0.55
+            : 0.16
+        );
+
+        ui.links.lineBetween(
+          x,
+          y + data.tileSize / 2,
+          x,
+          nextY -
+            data.tileSize / 2
+        );
+      }
+    }
+  }
+
+  ui.tiles?.forEach(
+    (entry, index) => {
+      const active =
+        reachable.has(index);
+
+      entry.connected =
+        active;
+
+    entry.tile
+  .setFillStyle(
+    active
+      ? 0x12364a
+      : 0x0a1e30,
+    active
+      ? 0.98
+      : 0.96
+  )
+  .setStrokeStyle(
+    active ? 2.2 : 1.5,
+    active
+      ? 0x8df4ff
+      : 0x276f8d,
+    active
+      ? 0.95
+      : 0.8
+  );
+
+entry.core.setFillStyle(
+        active
+          ? 0xe8fdff
+          : 0x8df4ff,
+        active
+          ? 1
+          : 0.75
+      );
+
+      entry.core.setScale(
+        active ? 1.2 : 1
+      );
+
+      entry.wire.clear();
+
+      const mask =
+        entry.currentMask;
+
+      entry.wire.lineStyle(
+        active ? 4.5 : 3.5,
+        active
+          ? 0x8df4ff
+          : 0x55dfff,
+        active
+          ? 0.92
+          : 0.28
+      );
+
+      const half =
+        data.tileSize * 0.39;
+
+      if (mask & 1) {
+        entry.wire.lineBetween(
+          0,
+          0,
+          0,
+          -half
+        );
+      }
+
+      if (mask & 2) {
+        entry.wire.lineBetween(
+          0,
+          0,
+          half,
+          0
+        );
+      }
+
+      if (mask & 4) {
+        entry.wire.lineBetween(
+          0,
+          0,
+          0,
+          half
+        );
+      }
+
+      if (mask & 8) {
+        entry.wire.lineBetween(
+          0,
+          0,
+          -half,
+          0
+        );
+      }
+    }
+  );
+
+  if (
+    reachable.has(
+      endIndex
+    )
+  ) {
+    ui.status?.setText(
+      `PATH LINKED · ${this.relayPuzzleAttempts} INPUTS`
+    ).setColor(
+      '#8df4ff'
+    );
+
+if (!ui.solved) {
+  ui.solved = true;
+
+this.missionPuzzleVictoryFX(
+  this.relayPuzzleType,
+  this.getRelayPuzzlePerformance().grade
+);
+
+  this.solveRelayGate();
+}
+
+    return true;
+  }
+
+  ui.status?.setText(
+    `SIGNAL ${reachable.size}/${data.count} · INPUTS ${this.relayPuzzleAttempts}`
+  ).setColor(
+    reachable.size > 1
+      ? '#8df4ff'
+      : '#55dfff'
+  );
+
+  return false;
+}
+
+createRelayCircuitPreview() {
+  if (!this.relayPuzzleUI) {
+    return;
+  }
+
+  this.generateRelayPuzzle();
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const data =
+    this.relayPuzzleData;
+
+  const gap =
+    Math.min(
+      10,
+      Math.max(
+        6,
+        width * 0.014
+      )
+    );
+
+  const availableWidth =
+    Math.min(
+      width - 86,
+      460
+    );
+
+  const availableHeight =
+    Math.min(
+      height * 0.48,
+      290
+    );
+
+  const tileSize =
+    Math.min(
+      68,
+      (
+        availableWidth -
+        (data.columns - 1) * gap
+      ) / data.columns,
+      (
+        availableHeight -
+        (data.rows - 1) * gap
+      ) / data.rows
+    );
+
+  data.tileSize =
+    tileSize;
+
+  data.gap =
+    gap;
+
+  const totalWidth =
+    data.columns * tileSize +
+    (data.columns - 1) * gap;
+
+  const totalHeight =
+    data.rows * tileSize +
+    (data.rows - 1) * gap;
+
+  data.originX =
+    width / 2 -
+    totalWidth / 2 +
+    tileSize / 2;
+
+  data.originY =
+    height / 2 -
+    totalHeight / 2 +
+    tileSize / 2 +
+    8;
+
+  const grid =
+    this.add
+      .rectangle(
+        width / 2,
+        data.originY +
+          totalHeight / 2,
+        totalWidth + 34,
+        totalHeight + 34,
+        0x06121f,
+        0.82
+      )
+      .setStrokeStyle(
+        1,
+        0x276f8d,
+        0.32
+      )
+      .setScrollFactor(0)
+      .setDepth(1001);
+
+  const links =
+    this.add
+      .graphics()
+      .setScrollFactor(0)
+      .setDepth(1002);
+
+  const startLabel =
+    this.add
+      .text(
+        data.originX -
+          tileSize / 2 -
+          12,
+        data.originY,
+        'START',
+        {
+          fontFamily: 'DM Mono',
+          fontSize: '9px',
+          color: '#8df4ff',
+          stroke: '#07111d',
+          strokeThickness: 3,
+          align: 'right'
+        }
+      )
+      .setOrigin(1, 0.5)
+      .setScrollFactor(0)
+      .setDepth(1004);
+
+  const endIndex =
+    data.count - 1;
+
+  const endRow =
+    Math.floor(
+      endIndex /
+        data.columns
+    );
+
+  const endCol =
+    endIndex %
+    data.columns;
+
+  const endX =
+    data.originX +
+    endCol *
+      (tileSize + gap);
+
+  const endY =
+    data.originY +
+    endRow *
+      (tileSize + gap);
+
+  const endLabel =
+    this.add
+      .text(
+        endX +
+          tileSize / 2 +
+          12,
+        endY,
+        'END',
+        {
+          fontFamily: 'DM Mono',
+          fontSize: '9px',
+          color: '#8df4ff',
+          stroke: '#07111d',
+          strokeThickness: 3,
+          align: 'left'
+        }
+      )
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(1004);
+
+  this.relayPuzzleUI.grid =
+    grid;
+
+  this.relayPuzzleUI.links =
+    links;
+
+  this.relayPuzzleUI.startLabel =
+    startLabel;
+
+ this.relayPuzzleUI.endLabel =
+  endLabel;
+
+// ============================================================
+// RELAY TERMINALS · START / END ENERGY NODES
+// ============================================================
+
+const startNode =
+  this.add
+    .circle(
+      data.originX -
+        tileSize / 2 -
+        24,
+      data.originY,
+      7,
+      0x8df4ff,
+      0.16
+    )
+    .setStrokeStyle(
+      2,
+      0x8df4ff,
+      0.9
+    )
+    .setScrollFactor(0)
+    .setDepth(1005);
+
+const endNode =
+  this.add
+    .circle(
+      endX +
+        tileSize / 2 +
+        24,
+      endY,
+      7,
+      0x8df4ff,
+      0.16
+    )
+    .setStrokeStyle(
+      2,
+      0x8df4ff,
+      0.9
+    )
+    .setScrollFactor(0)
+    .setDepth(1005);
+
+this.relayPuzzleUI.startNode =
+  startNode;
+
+this.relayPuzzleUI.endNode =
+  endNode;
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: [
+      startNode,
+      endNode
+    ],
+    scale: {
+      from: 0.82,
+      to: 1.28
+    },
+    alpha: {
+      from: 0.45,
+      to: 1
+    },
+    duration: 720,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
+
+  this.relayPuzzleUI.tiles =
+    [];
+
+  const tiles = [];
+
+  for (
+    let index = 0;
+    index < data.count;
+    index++
+  ) {
+    const row =
+      Math.floor(
+        index /
+          data.columns
+      );
+
+    const col =
+      index %
+      data.columns;
+
+    const x =
+      data.originX +
+      col *
+        (tileSize + gap);
+
+    const y =
+      data.originY +
+      row *
+        (tileSize + gap);
+
+    const tile =
+      this.add
+        .rectangle(
+          x,
+          y,
+          tileSize,
+          tileSize,
+          0x0a1e30,
+          0.96
+        )
+        .setStrokeStyle(
+          1.5,
+          0x276f8d,
+          0.8
+        )
+        .setScrollFactor(0)
+        .setDepth(1003)
+        .setInteractive({
+          useHandCursor: true
+        });
+
+    const wire =
+      this.add
+        .graphics()
+        .setPosition(x, y)
+        .setScrollFactor(0)
+        .setDepth(1004);
+
+    const core =
+      this.add
+        .circle(
+          x,
+          y,
+          4,
+          0x8df4ff,
+          0.86
+        )
+        .setScrollFactor(0)
+        .setDepth(1005);
+
+    const entry = {
+      tile,
+      wire,
+      core,
+      baseMask:
+        data.solvedMasks[index],
+      rotation:
+        data.rotations[index] *
+        90,
+      currentMask: 0,
+      connected: false
+    };
+
+    tile.setData(
+      'relayIndex',
+      index
+    );
+
+    tile.on(
+      'pointerover',
+      () => {
+        if (
+          this.relayPuzzleUI?.solved
+        ) {
+          return;
+        }
+
+        tile.setStrokeStyle(
+          2.4,
+          0xe8fdff,
+          1
+        );
+
+        core.setScale(
+          1.35
+        );
+      }
+    );
+
+    tile.on(
+      'pointerout',
+      () => {
+        if (
+          this.relayPuzzleUI?.solved
+        ) {
+          return;
+        }
+
+        tile.setStrokeStyle(
+          entry.connected
+            ? 2.2
+            : 1.5,
+          entry.connected
+            ? 0x8df4ff
+            : 0x276f8d,
+          entry.connected
+            ? 0.95
+            : 0.8
+        );
+
+        core.setScale(
+          entry.connected
+            ? 1.2
+            : 1
+        );
+      }
+    );
+
+    tile.on(
+      'pointerdown',
+      () => {
+        if (
+          this.relayPuzzleUI?.solved
+        ) {
+          return;
+        }
+
+      entry.rotation =
+  (
+    entry.rotation +
+    90
+  ) % 360;
+
+this.relayPuzzleAttempts++;
+
+this.tweens.killTweensOf(
+  tile
+);
+
+tile.angle =
+  entry.rotation;
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: tile,
+    scaleX: 1.08,
+    scaleY: 1.08,
+    duration: 80,
+    yoyo: true,
+    ease: 'Quad.out'
+  });
+}
+
+this.tweens.add({
+  targets: core,
+  scaleX: 1.65,
+  scaleY: 1.65,
+  alpha: 0.25,
+  duration: 140,
+  yoyo: true,
+  ease: 'Quad.out'
+});
+
+this.drawRelayCircuitState();
+      }
+    );
+
+    tile.angle =
+      entry.rotation;
+
+    tiles.push(entry);
+  }
+
+  data.tiles =
+    tiles;
+
+  this.relayPuzzleUI.tiles =
+    tiles;
+
+  this.drawRelayCircuitState();
+}
+
+validateRelayPuzzle() {
+  if (
+    !this.relayPuzzleUI ||
+    !this.relayPuzzleData ||
+    this.relayPuzzleUI.solved
+  ) {
+    return false;
+  }
+
+  return this.drawRelayCircuitState();
+}
+
+/*
+ * ============================================================
+ * RELAY PUZZLE · PERFORMANCE RATING
+ * Measures efficiency without affecting gameplay.
+ * ============================================================
+ */
+
+getRelayPuzzlePerformance() {
+  const data =
+    this.relayPuzzleData || {};
+
+  const type =
+    this.relayPuzzleType || 'circuit';
+
+  const difficulty =
+    Number(
+      data.difficulty ??
+      this.relayPuzzleGate?.getData?.('difficulty')
+    ) || 1;
+
+  const attempts =
+    Math.max(
+      0,
+      Number(
+        this.relayPuzzleAttempts
+      ) || 0
+    );
+
+  const elapsedMs =
+    Math.max(
+      0,
+      this.time.now -
+        (
+          this.relayPuzzleStartedAt ||
+          this.time.now
+        )
+    );
+
+  /*
+   * ============================================================
+   * CIRCUIT
+   * Keep the original circuit performance model.
+   * ============================================================
+   */
+  if (
+    type === 'circuit' &&
+    data?.rotations?.length
+  ) {
+    const baselineAttempts =
+      Math.max(
+        1,
+        Number(
+          data.baselineAttempts
+        ) || 1
+      );
+
+    const efficiency =
+      Phaser.Math.Clamp(
+        baselineAttempts /
+          Math.max(
+            baselineAttempts,
+            attempts
+          ),
+        0,
+        1
+      );
+
+    let grade = 'C';
+
+    if (
+      attempts <= baselineAttempts &&
+      elapsedMs <= 5500
+    ) {
+      grade = 'S';
+    } else if (
+      efficiency >= 0.88 &&
+      elapsedMs <= 8000
+    ) {
+      grade = 'A';
+    } else if (
+      efficiency >= 0.70
+    ) {
+      grade = 'B';
+    }
+
+    return {
+      attempts,
+      elapsedMs,
+      baselineAttempts,
+      efficiency,
+      grade
+    };
+  }
+
+  /*
+   * ============================================================
+   * MISSION PUZZLES
+   * Each puzzle receives its own fair interaction baseline.
+   * ============================================================
+   */
+
+  let baselineAttempts = 1;
+
+  switch (type) {
+
+    /*
+     * ACCESS CODE
+     * One correct input per digit.
+     */
+    case 'code': {
+      const codeLength =
+        Array.isArray(data.code)
+          ? data.code.length
+          : difficulty >= 3
+            ? 5
+            : difficulty === 2
+              ? 4
+              : 3;
+
+      baselineAttempts =
+        Math.max(
+          1,
+          codeLength
+        );
+
+      break;
+    }
+
+    /*
+     * GRID SEQUENCE
+     * One correct node per sequence step.
+     */
+    case 'sequence': {
+      const sequenceLength =
+        Array.isArray(data.sequence)
+          ? data.sequence.length
+          : difficulty >= 3
+            ? 6
+            : difficulty === 2
+              ? 5
+              : 4;
+
+      baselineAttempts =
+        Math.max(
+          1,
+          sequenceLength
+        );
+
+      break;
+    }
+
+    /*
+     * ROUTE MATRIX
+     * One correct tile per route step.
+     */
+    case 'tiles': {
+      const pathLength =
+        Array.isArray(data.path)
+          ? data.path.length
+          : 1;
+
+      baselineAttempts =
+        Math.max(
+          1,
+          pathLength
+        );
+
+      break;
+    }
+
+    /*
+     * SIGNAL TUNER
+     * Baseline is based on the number of channels
+     * plus the minimum circular tuning distance.
+     */
+    case 'frequency': {
+      if (
+        Array.isArray(data.values) &&
+        Array.isArray(data.targets) &&
+        data.values.length ===
+          data.targets.length
+      ) {
+        baselineAttempts =
+          data.values.reduce(
+            (
+              total,
+              value,
+              index
+            ) => {
+              const current =
+                Number(value) || 1;
+
+              const target =
+                Number(
+                  data.targets[index]
+                ) || 1;
+
+              const forward =
+                (
+                  target -
+                  current +
+                  5
+                ) % 5;
+
+              return (
+                total +
+                forward
+              );
+            },
+            0
+          );
+      } else {
+        baselineAttempts =
+          difficulty >= 3
+            ? 4
+            : 3;
+      }
+
+      baselineAttempts =
+        Math.max(
+          1,
+          baselineAttempts
+        );
+
+      break;
+    }
+
+    /*
+     * SECURITY GRID
+     * One correct cell per route step.
+     */
+    case 'grid': {
+      const routeLength =
+        Array.isArray(data.route)
+          ? data.route.length
+          : difficulty >= 3
+            ? 9
+            : 7;
+
+      baselineAttempts =
+        Math.max(
+          1,
+          routeLength
+        );
+
+      break;
+    }
+
+    /*
+     * APEX RELAY
+     * Each core is a 3-state cycle.
+     * Count the minimum forward taps needed
+     * from the generated starting state to target.
+     */
+    case 'final': {
+      if (
+        Array.isArray(data.states) &&
+        Array.isArray(data.targetStates) &&
+        data.states.length ===
+          data.targetStates.length
+      ) {
+        baselineAttempts =
+          data.states.reduce(
+            (
+              total,
+              state,
+              index
+            ) => {
+              const current =
+                Number(state) || 0;
+
+              const target =
+                Number(
+                  data.targetStates[index]
+                ) || 0;
+
+              return (
+                total +
+                (
+                  target -
+                  current +
+                  3
+                ) % 3
+              );
+            },
+            0
+          );
+      } else {
+        baselineAttempts = 3;
+      }
+
+      baselineAttempts =
+        Math.max(
+          1,
+          baselineAttempts
+        );
+
+      break;
+    }
+
+    default:
+      baselineAttempts =
+        Math.max(
+          1,
+          difficulty + 2
+        );
+      break;
+  }
+
+  /*
+   * ============================================================
+   * FAIRNESS / EFFICIENCY
+   * Extra clicks reduce efficiency.
+   * Faster completion improves the grade.
+   * ============================================================
+   */
+
+  const efficiency =
+    Phaser.Math.Clamp(
+      baselineAttempts /
+        Math.max(
+          baselineAttempts,
+          attempts
+        ),
+      0,
+      1
+    );
+
+  /*
+   * Different puzzles have different reasonable solve times.
+   */
+  const timeLimitS =
+    type === 'code'
+      ? difficulty >= 3 ? 5.5 : 7
+      : type === 'sequence'
+        ? difficulty >= 3 ? 7 : 9
+        : type === 'tiles'
+          ? difficulty >= 3 ? 7 : 9
+          : type === 'frequency'
+            ? difficulty >= 3 ? 8 : 10
+            : type === 'grid'
+              ? difficulty >= 3 ? 8 : 10
+              : type === 'final'
+                ? difficulty >= 3 ? 7 : 9
+                : 8;
+
+  const timeLimitMs =
+    timeLimitS * 1000;
+
+  /*
+   * S = baseline or better + fast solve
+   * A = very efficient + good time
+   * B = solid completion
+   * C = slower / inefficient
+   */
+  let grade = 'C';
+
+  if (
+    attempts <= baselineAttempts &&
+    elapsedMs <= timeLimitMs
+  ) {
+    grade = 'S';
+  } else if (
+    efficiency >= 0.88 &&
+    elapsedMs <= timeLimitMs * 1.35
+  ) {
+    grade = 'A';
+  } else if (
+    efficiency >= 0.70 &&
+    elapsedMs <= timeLimitMs * 1.9
+  ) {
+    grade = 'B';
+  }
+
+  return {
+    attempts,
+    elapsedMs,
+    baselineAttempts,
+    efficiency,
+    grade
+  };
+}
+
+/*
+ * ============================================================
+ * RELAY PUZZLE · COMPLETION ENERGY SURGE
+ * Visual-only completion burst.
+ * ============================================================
+ */
+
+missionPuzzleVictoryFX(
+  type = 'circuit',
+  grade = 'C'
+) {
+
+  const ui =
+    this.relayPuzzleUI;
+
+  if (
+    !ui ||
+    this.motionReduced
+  ) {
+    return;
+  }
+
+  /*
+   * ============================================================
+   * UNIVERSAL PUZZLE VICTORY FX
+   * Every puzzle gets its own visual identity.
+   * Purely visual — no gameplay/state mutation.
+   * ============================================================
+   */
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const centerX =
+    width / 2;
+
+  const centerY =
+    height / 2;
+
+  const gradeColor =
+    grade === 'S'
+      ? 0xfff0a8
+      : grade === 'A'
+        ? 0x8df4ff
+        : grade === 'B'
+          ? 0xaee37f
+          : 0xff826e;
+
+  /*
+   * ------------------------------------------------------------
+   * CORE BURST
+   * ------------------------------------------------------------
+   */
+
+  const burst =
+    this.add
+      .circle(
+        centerX,
+        centerY,
+        10,
+        gradeColor,
+        0.24
+      )
+      .setScrollFactor(0)
+      .setDepth(1008);
+
+  burst.setStrokeStyle(
+    2,
+    0xe8fdff,
+    0.9
+  );
+
+  this.tweens.add({
+    targets: burst,
+
+    scaleX: 7,
+    scaleY: 7,
+
+    alpha: 0,
+
+    duration: 520,
+
+    ease: 'Cubic.out',
+
+    onComplete: () =>
+      burst.destroy()
+  });
+
+  /*
+   * ------------------------------------------------------------
+   * SECONDARY SHOCK RING
+   * ------------------------------------------------------------
+   */
+
+  const shock =
+    this.add
+      .circle(
+        centerX,
+        centerY,
+        24,
+        gradeColor,
+        0
+      )
+      .setScrollFactor(0)
+      .setDepth(1007);
+
+  shock.setStrokeStyle(
+    2,
+    gradeColor,
+    0.72
+  );
+
+  this.tweens.add({
+    targets: shock,
+
+    scaleX: 4.8,
+    scaleY: 4.8,
+
+    alpha: 0,
+
+    duration: 620,
+
+    delay: 50,
+
+    ease: 'Quad.out',
+
+    onComplete: () =>
+      shock.destroy()
+  });
+
+  /*
+   * ------------------------------------------------------------
+   * PUZZLE-SPECIFIC SIGNATURE FX
+   * ------------------------------------------------------------
+   */
+
+  switch (type) {
+
+    /*
+     * ACCESS CODE
+     * Digital unlock pulse.
+     */
+    case 'code': {
+
+      for (
+        let i = 0;
+        i < 6;
+        i++
+      ) {
+
+        const angle =
+          (Math.PI * 2 * i) / 6;
+
+        const particle =
+          this.add
+            .rectangle(
+              centerX,
+              centerY,
+              4,
+              16,
+              0x8df4ff,
+              0.9
+            )
+            .setOrigin(0.5)
+            .setRotation(angle)
+            .setScrollFactor(0)
+            .setDepth(1009);
+
+        this.tweens.add({
+          targets: particle,
+
+          x:
+            centerX +
+            Math.cos(angle) * 105,
+
+          y:
+            centerY +
+            Math.sin(angle) * 105,
+
+          alpha: 0,
+
+          scaleX: 0.25,
+          scaleY: 1.8,
+
+          duration: 420,
+
+          ease: 'Cubic.out',
+
+          onComplete: () =>
+            particle.destroy()
+        });
+      }
+
+      break;
+    }
+
+    /*
+     * CIRCUIT
+     * Preserve the original energy-path completion.
+     */
+    case 'circuit': {
+
+      const points =
+        ui.tiles
+          ?.filter(
+            entry =>
+              entry?.connected &&
+              entry.tile?.active
+          )
+          .map(
+            entry => ({
+              x: entry.tile.x,
+              y: entry.tile.y
+            })
+          ) || [];
+
+      if (points.length) {
+
+        const surge =
+          this.add
+            .graphics()
+            .setScrollFactor(0)
+            .setDepth(1006);
+
+        surge.lineStyle(
+          7,
+          0x8df4ff,
+          0.16
+        );
+
+        surge.beginPath();
+
+        points.forEach(
+          (
+            point,
+            index
+          ) => {
+
+            if (
+              index === 0
+            ) {
+              surge.moveTo(
+                point.x,
+                point.y
+              );
+            } else {
+              surge.lineTo(
+                point.x,
+                point.y
+              );
+            }
+          }
+        );
+
+        surge.strokePath();
+        surge.closePath();
+
+        this.tweens.add({
+          targets: surge,
+
+          alpha: {
+            from: 0.25,
+            to: 1
+          },
+
+          duration: 120,
+
+          yoyo: true,
+
+          repeat: 1,
+
+          ease: 'Quad.out',
+
+          onComplete: () =>
+            surge.destroy()
+        });
+      }
+
+      break;
+    }
+
+    /*
+     * SEQUENCE
+     * Sequential node detonation.
+     */
+    case 'sequence': {
+
+      const nodes =
+        ui.sequenceButtons ||
+        [];
+
+      nodes.forEach(
+        (
+          node,
+          index
+        ) => {
+
+          this.time.delayedCall(
+            index * 60,
+
+            () => {
+
+              if (
+                !node?.active
+              ) {
+                return;
+              }
+
+              const pulse =
+                this.add
+                  .circle(
+                    node.x,
+                    node.y,
+                    8,
+                    0x8df4ff,
+                    0.24
+                  )
+                  .setScrollFactor(0)
+                  .setDepth(1009);
+
+              this.tweens.add({
+                targets: pulse,
+
+                scale: 3.2,
+
+                alpha: 0,
+
+                duration: 240,
+
+                ease: 'Quad.out',
+
+                onComplete: () =>
+                  pulse.destroy()
+              });
+            }
+          );
+        }
+      );
+
+      break;
+    }
+
+    /*
+     * ROUTE MATRIX
+     * Horizontal route sweep.
+     */
+    case 'tiles': {
+
+      const sweep =
+        this.add
+          .rectangle(
+            centerX -
+              width * 0.35,
+            centerY,
+            8,
+            120,
+            0x8df4ff,
+            0.35
+          )
+          .setScrollFactor(0)
+          .setDepth(1009);
+
+      this.tweens.add({
+        targets: sweep,
+
+        x:
+          centerX +
+          width * 0.35,
+
+        alpha: 0,
+
+        scaleY: 1.4,
+
+        duration: 540,
+
+        ease: 'Cubic.inOut',
+
+        onComplete: () =>
+          sweep.destroy()
+      });
+
+      break;
+    }
+
+    /*
+     * SIGNAL TUNER
+     * Radial frequency rings.
+     */
+    case 'frequency': {
+
+      [0, 90, 180].forEach(
+        (
+          delay,
+          index
+        ) => {
+
+          const ring =
+            this.add
+              .circle(
+                centerX,
+                centerY,
+                18 + index * 12,
+                0x9b5cff,
+                0
+              )
+              .setScrollFactor(0)
+              .setDepth(1008);
+
+          ring.setStrokeStyle(
+            2,
+            0xb993ff,
+            0.7
+          );
+
+          this.tweens.add({
+            targets: ring,
+
+            scale: 3.8,
+
+            alpha: 0,
+
+            duration: 520,
+
+            delay,
+
+            ease: 'Sine.out',
+
+            onComplete: () =>
+              ring.destroy()
+          });
+        }
+      );
+
+      break;
+    }
+
+    /*
+     * SECURITY GRID
+     * Security breach scan.
+     */
+    case 'grid': {
+
+      const breach =
+        this.add
+          .rectangle(
+            centerX,
+            centerY,
+            width * 0.72,
+            3,
+            0xff826e,
+            0.55
+          )
+          .setScrollFactor(0)
+          .setDepth(1009);
+
+      this.tweens.add({
+        targets: breach,
+
+        scaleX: 0.05,
+
+        alpha: 0,
+
+        duration: 360,
+
+        ease: 'Cubic.out',
+
+        onComplete: () =>
+          breach.destroy()
+      });
+
+      break;
+    }
+
+    /*
+     * APEX RELAY
+     * Final multi-core victory pulse.
+     */
+    case 'final': {
+
+      const apexRing =
+        this.add
+          .circle(
+            centerX,
+            centerY,
+            34,
+            0xffd06e,
+            0.10
+          )
+          .setScrollFactor(0)
+          .setDepth(1010);
+
+      apexRing.setStrokeStyle(
+        3,
+        0xffd06e,
+        0.95
+      );
+
+      this.tweens.add({
+        targets: apexRing,
+
+        scale: 4.6,
+
+        alpha: 0,
+
+        duration: 760,
+
+        ease: 'Back.out',
+
+        onComplete: () =>
+          apexRing.destroy()
+      });
+
+      this.cameras.main.flash(
+        150,
+        255,
+        215,
+        120
+      );
+
+      this.shake(
+        120,
+        0.004
+      );
+
+      break;
+    }
+
+    default:
+      break;
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * GRADE PULSE
+   * ------------------------------------------------------------
+   */
+
+  const gradeFlash =
+    this.add
+      .circle(
+        centerX,
+        centerY,
+        6,
+        gradeColor,
+        0.72
+      )
+      .setScrollFactor(0)
+      .setDepth(1011);
+
+  this.tweens.add({
+    targets: gradeFlash,
+
+    scale: 2.5,
+
+    alpha: 0,
+
+    duration: 260,
+
+    ease: 'Quad.out',
+
+    onComplete: () =>
+      gradeFlash.destroy()
+  });
+
+  /*
+   * ------------------------------------------------------------
+   * CAMERA FEEDBACK
+   * ------------------------------------------------------------
+   */
+
+  this.cameras.main.flash(
+    grade === 'S'
+      ? 140
+      : 100,
+    grade === 'S'
+      ? 255
+      : 120,
+    grade === 'S'
+      ? 220
+      : 210,
+    180
+  );
+
+  this.shake(
+    grade === 'S'
+      ? 105
+      : 70,
+    grade === 'S'
+      ? 0.0035
+      : 0.0025
+  );
+
+  this.gadgetPulse(
+    gradeColor,
+    grade === 'S'
+      ? 18
+      : 14,
+    grade === 'S'
+      ? 520
+      : 380
+  );
+}
+
+/*
+ * ============================================================
+ * RELAY PUZZLE · RESULT / RANK PANEL
+ * Compact post-puzzle performance reveal.
+ * ============================================================
+ */
+showRelayPuzzleResult(performance = {}) {
+
+  if (
+    this.gameOverUI ||
+    this.missionMedalsUI
+  ) {
+    return;
+  }
+
+  if (this.relayPuzzleResultUI) {
+    return;
+  }
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const type =
+    this.relayPuzzleType ||
+    'circuit';
+
+  const meta =
+    this.getRelayPuzzleMeta(type);
+
+  const grade =
+    performance.grade ||
+    'C';
+
+  const gradeColor =
+    grade === 'S'
+      ? '#fff0a8'
+      : grade === 'A'
+        ? '#8df4ff'
+        : grade === 'B'
+          ? '#aee37f'
+          : '#ff826e';
+
+  const efficiency =
+    Math.round(
+      Phaser.Math.Clamp(
+        Number(
+          performance.efficiency
+        ) || 0,
+        0,
+        1
+      ) * 100
+    );
+
+  const elapsed =
+    Math.max(
+      0,
+      Number(
+        performance.elapsedMs
+      ) || 0
+    );
+
+  const elapsedText =
+    `${(elapsed / 1000).toFixed(2)}s`;
+
+  const attempts =
+    Math.max(
+      0,
+      Number(
+        performance.attempts
+      ) || 0
+    );
+
+  const baseline =
+    Math.max(
+      1,
+      Number(
+        performance.baselineAttempts
+      ) || 1
+    );
+
+  const panelWidth =
+    Math.min(
+      width - 34,
+      360
+    );
+
+  const panelHeight =
+    Math.min(
+      height - 40,
+      250
+    );
+
+  const centerX =
+    width / 2;
+
+  const centerY =
+    height / 2;
+
+  const panel =
+    this.add
+      .rectangle(
+        centerX,
+        centerY,
+        panelWidth,
+        panelHeight,
+        0x050914,
+        0.97
+      )
+      .setStrokeStyle(
+        2,
+        Phaser.Display.Color.HexStringToColor(
+          gradeColor
+        ).color,
+        0.82
+      )
+      .setScrollFactor(0)
+      .setDepth(140);
+
+  const topLine =
+    this.add
+      .rectangle(
+        centerX,
+        centerY -
+          panelHeight / 2 +
+          7,
+        panelWidth -
+          18,
+        2,
+        Phaser.Display.Color.HexStringToColor(
+          gradeColor
+        ).color,
+        0.8
+      )
+      .setScrollFactor(0)
+      .setDepth(141);
+
+  const header =
+    this.add
+      .text(
+        centerX,
+        centerY -
+          panelHeight / 2 +
+          29,
+        'PUZZLE COMPLETE',
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '11px'
+              : '13px',
+          fontStyle: 'bold',
+          color: '#dffcff',
+          stroke: '#08101c',
+          strokeThickness: 4,
+          align: 'center'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(141);
+
+  const title =
+    this.add
+      .text(
+        centerX,
+        centerY -
+          panelHeight / 2 +
+          51,
+        meta.title,
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '9px'
+              : '11px',
+          color: '#6f849d',
+          align: 'center'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(141);
+
+  const rankGlow =
+    this.add
+      .circle(
+        centerX,
+        centerY - 15,
+        width < 600
+          ? 38
+          : 43,
+        Phaser.Display.Color.HexStringToColor(
+          gradeColor
+        ).color,
+        0.10
+      )
+      .setScrollFactor(0)
+      .setDepth(140);
+
+  rankGlow.setStrokeStyle(
+    2,
+    Phaser.Display.Color.HexStringToColor(
+      gradeColor
+    ).color,
+    0.55
+  );
+
+  const rank =
+    this.add
+      .text(
+        centerX,
+        centerY - 15,
+        grade,
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '54px'
+              : '62px',
+          fontStyle: 'bold',
+          color: gradeColor,
+          stroke: '#08101c',
+          strokeThickness: 8,
+          align: 'center'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(142);
+
+  const stats =
+    this.add
+      .text(
+        centerX,
+        centerY + 46,
+        [
+          `ATTEMPTS     ${attempts}/${baseline}`,
+          `TIME         ${elapsedText}`,
+          `EFFICIENCY   ${efficiency}%`
+        ].join('\n'),
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '9px'
+              : '10px',
+          color: '#dffcff',
+          stroke: '#08101c',
+          strokeThickness: 3,
+          lineSpacing: 6,
+          align: 'left'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(142);
+
+  const footer =
+    this.add
+      .text(
+        centerX,
+        centerY +
+          panelHeight / 2 -
+          23,
+        'RELAY CHANNEL SYNCHRONIZED',
+        {
+          fontFamily: 'DM Mono',
+          fontSize:
+            width < 600
+              ? '7px'
+              : '8px',
+          color: '#8ba0b8',
+          align: 'center'
+        }
+      )
+      .setOrigin(.5)
+      .setScrollFactor(0)
+      .setDepth(142);
+
+  const objects = [
+    panel,
+    topLine,
+    header,
+    title,
+    rankGlow,
+    rank,
+    stats,
+    footer
+  ];
+
+  objects.forEach(
+    object => {
+      object
+        .setAlpha(0)
+        .setScale(.88);
+    }
+  );
+
+  this.relayPuzzleResultUI =
+    objects;
+
+  this.tweens.add({
+    targets: objects,
+    alpha: 1,
+    scaleX: 1,
+    scaleY: 1,
+    duration: 320,
+    ease: 'Back.out'
+  });
+
+  if (!this.motionReduced) {
+
+    this.tweens.add({
+      targets: rankGlow,
+      scale: 1.7,
+      alpha: 0,
+      duration: 760,
+      ease: 'Quad.out',
+      repeat: 1
+    });
+
+    this.cameras.main.flash(
+      grade === 'S'
+        ? 130
+        : 90,
+      grade === 'S'
+        ? 255
+        : 120,
+      grade === 'B'
+        ? 210
+        : 235,
+      150
+    );
+  }
+
+const resultSession =
+  this.relayPuzzleSession;
+
+this.time.delayedCall(
+  1250,
+  () => {
+
+    if (
+      resultSession !==
+      this.relayPuzzleSession
+    ) {
+      return;
+    }
+
+    if (
+      !this.relayPuzzleResultUI
+    ) {
+      return;
+    }
+
+      this.tweens.add({
+        targets:
+          this.relayPuzzleResultUI,
+        alpha: 0,
+        scaleX: .96,
+        scaleY: .96,
+        duration: 240,
+        ease: 'Quad.in',
+        onComplete: () => {
+
+          this.relayPuzzleResultUI
+            ?.forEach(
+              object =>
+                object.destroy()
+            );
+
+          this.relayPuzzleResultUI =
+            null;
+        }
+      });
+    }
+  );
+}
+
+solveRelayGate() {
+  const gate =
+    this.relayPuzzleGate;
+
+  if (
+    !gate ||
+    gate.getData('solved')
+  ) {
+    return;
+  }
+
+  gate.setData(
+    'solved',
+    true
+  );
+
+  gate.setData(
+    'puzzleOpen',
+    false
+  );
+
+const relayPerformance =
+  this.getRelayPuzzlePerformance();
+
+  this.relayPuzzlePerformanceGrade =
+  relayPerformance.grade;
+
+gate.setData(
+  'relayPerformance',
+  relayPerformance
+);
+  const core =
+    gate.getData('core');
+
+  const lock =
+    gate.getData('lock');
+
+  const status =
+    gate.getData('status');
+
+  const label =
+    gate.getData('label');
+
+  if (lock) {
+    this.tweens.killTweensOf(
+      lock
+    );
+
+    lock
+      .setFillStyle(
+        0x8df4ff,
+        0.2
+      )
+      .setStrokeStyle(
+        2,
+        0x8df4ff,
+        0.95
+      );
+  }
+
+  if (status) {
+    this.tweens.killTweensOf(
+      status
+    );
+
+    status
+      .setFillStyle(
+        0x8df4ff,
+        1
+      )
+      .setStrokeStyle(
+        1,
+        0xe8fdff,
+        0.95
+      );
+  }
+
+  if (label) {
+    label
+      .setText(
+        `RELAY ONLINE // ${String(
+          gate.getData('index') + 1
+        ).padStart(2, '0')}`
+      )
+      .setColor(
+        '#8df4ff'
+      );
+  }
+
+ const performance =
+  gate.getData(
+    'relayPerformance'
+  ) || {};
+
+const performanceColor =
+  performance.grade === 'S'
+    ? '#fff0a8'
+    : performance.grade === 'A'
+      ? '#8df4ff'
+      : performance.grade === 'B'
+        ? '#aee37f'
+        : '#ff826e';
+
+this.relayPuzzleUI?.status
+  ?.setText(
+    `ACCESS GRANTED · ${performance.grade}-RANK · ${performance.attempts} INPUTS`
+  )
+  .setColor(
+    performanceColor
+  );
+/*
+ * ============================================================
+ * RELAY VICTORY · SINGLE STACKED FEEDBACK
+ * Prevents duplicate playerCue overlap.
+ * ============================================================
+ */
+this.playerCue(
+  `RELAY GATE UNLOCKED  //  ${performance.grade}-RANK`,
+  performanceColor
+);
+
+const resultSession =
+  this.relayPuzzleSession;
+
+this.time.delayedCall(
+  140,
+  () => {
+
+    if (
+      resultSession !==
+      this.relayPuzzleSession
+    ) {
+      return;
+    }
+
+    this.showRelayPuzzleResult(
+      performance
+    );
+  }
+);
+
+  this.gadgetPulse(
+    0x8df4ff,
+    16,
+    420
+  );
+
+  this.shake(
+    90,
+    0.003
+  );
+
+  if (
+    core &&
+    !this.motionReduced
+  ) {
+    this.tweens.add({
+      targets: core,
+      scaleX: 1.3,
+      scaleY: 1.3,
+      alpha: 0,
+      duration: 420,
+      ease: 'Cubic.out'
+    });
+  }
+
+const gateHideSession =
+  this.relayPuzzleSession;
+
+this.time.delayedCall(
+  650,
+  () => {
+
+    if (
+      gateHideSession !==
+      this.relayPuzzleSession
+    ) {
+      return;
+    }
+
+    if (!gate?.active) {
+      return;
+    }
+
+    if (gate.body) {
+      gate.body.enable =
+        false;
+    }
+
+    this.tweens.add({
+      targets: [
+        gate,
+        core,
+        lock,
+        status,
+        label
+      ].filter(Boolean),
+      alpha: 0,
+      duration: 360,
+      ease: 'Cubic.in',
+      onComplete: () => {
+
+        if (
+          gateHideSession !==
+          this.relayPuzzleSession
+        ) {
+          return;
+        }
+
+        gate.setVisible(
+          false
+        );
+
+        core?.setVisible(
+          false
+        );
+
+        lock?.setVisible(
+          false
+        );
+
+        status?.setVisible(
+          false
+        );
+
+        label?.setVisible(
+          false
+        );
+      }
+    });
+  }
+);
+
+const solvedSession =
+  this.relayPuzzleSession;
+
+this.time.delayedCall(
+  900,
+  () => {
+
+    if (
+      solvedSession !==
+      this.relayPuzzleSession
+    ) {
+      return;
+    }
+
+    this.closeRelayPuzzle();
+  }
+);
+}
+
+  retryRelayPuzzle() {
+  const ui =
+    this.relayPuzzleUI;
+
+  const gate =
+    this.relayPuzzleGate;
+
+  if (
+    !ui ||
+    !gate ||
+    !this.relayPuzzleActive ||
+    ui.solved
+  ) {
+    return;
+  }
+
+  this.tweens.killTweensOf(
+    [
+      ui.panel,
+      ui.inner,
+      ui.startNode,
+      ui.endNode,
+      ui.retry
+    ].filter(Boolean)
+  );
+
+  ui.tiles?.forEach(
+    entry => {
+      entry.tile?.destroy();
+      entry.wire?.destroy();
+      entry.core?.destroy();
+    }
+  );
+
+  this.relayPuzzleData?.puzzleObjects?.forEach(
+    object => {
+      object?.destroy?.();
+    }
+  );
+
+  ui.grid?.destroy();
+  ui.links?.destroy();
+  ui.startLabel?.destroy();
+  ui.endLabel?.destroy();
+  ui.startNode?.destroy();
+  ui.endNode?.destroy();
+
+  ui.tiles = [];
+  ui.grid = null;
+  ui.links = null;
+  ui.startLabel = null;
+  ui.endLabel = null;
+  ui.startNode = null;
+  ui.endNode = null;
+  ui.solved = false;
+
+this.relayPuzzleSession += 1;
+
+this.relayPuzzleAttempts = 0;
+
+this.relayPuzzleStartedAt =
+  this.time.now;
+
+this.relayPuzzleTimerBand =
+  0;
+
+this.relayPuzzleData =
+  null;
+
+  ui.status?.setText(
+    'LOCKED · NEW HANDSHAKE'
+  ).setColor(
+    '#ff826e'
+  );
+
+  ui.timer?.setText(
+    'TIME 00:00'
+  ).setColor(
+    '#8df4ff'
+  );
+
+  this.createRelayPuzzleContent();
+}
+
+closeRelayPuzzle() {
+  this.relayPuzzleSession += 1;
+
+  const ui =
+    this.relayPuzzleUI;
+
+if (!ui) {
+  this.relayPuzzleActive =
+    false;
+
+  this.relayPuzzleGate =
+    null;
+
+  this.relayPuzzleType =
+    null;
+
+  this.relayPuzzleData =
+    null;
+
+  this.relayNearbyGate =
+    null;
+
+  if (
+    !this.finished &&
+    !this.respawning
+  ) {
+    this.physics.resume();
+  }
+
+  return;
+}
+
+this.tweens.killTweensOf(
+  [
+    ui.panel,
+    ui.inner,
+    ui.startNode,
+    ui.endNode,
+    ...(this.relayPuzzleResultUI || [])
+  ].filter(Boolean)
+);
+
+if (this.relayPuzzleResultUI) {
+  this.relayPuzzleResultUI.forEach(
+    object => {
+      object?.destroy?.();
+    }
+  );
+
+  this.relayPuzzleResultUI =
+    null;
+}
+
+ui.tiles?.forEach(
+    entry => {
+      entry.tile?.destroy();
+      entry.wire?.destroy();
+      entry.core?.destroy();
+    }
+  );
+
+  this.relayPuzzleData?.puzzleObjects?.forEach(
+    object => {
+      object?.destroy?.();
+    }
+  );
+
+  ui.overlay?.destroy();
+  ui.panel?.destroy();
+  ui.inner?.destroy();
+  ui.title?.destroy();
+  ui.subtitle?.destroy();
+  ui.status?.destroy();
+  ui.instruction?.destroy();
+ui.close?.destroy();
+ui.retry?.destroy();
+ui.timer?.destroy();
+ui.difficultyLabel?.destroy();
+ui.grid?.destroy();
+  ui.links?.destroy();
+ ui.startLabel?.destroy();
+ui.endLabel?.destroy();
+
+ui.startNode?.destroy();
+ui.endNode?.destroy();
+
+  this.relayPuzzleUI =
+    null;
+
+  this.relayPuzzleActive =
+    false;
+
+  this.relayPuzzleGate =
+    null;
+
+  this.relayPuzzleType =
+    null;
+
+  this.relayPuzzleData =
+    null;
+
+this.relayNearbyGate =
+  null;
+
+if (
+  !this.finished &&
+  !this.respawning
+) {
+  this.physics.resume();
+}
+
+}
+
+/*
+ * ============================================================
+ * RELAY GATES
+ * Locked progression gates used by the puzzle system.
+ * The gate is created here; puzzle logic comes afterwards.
+ * ============================================================
+ */
+createRelayGates() {
+  this.relayGates =
+    this.physics.add.staticGroup();
+
+  this.mission.relayGates.forEach(
+    (data, index) => {
+      const x =
+        Number.isFinite(data?.x)
+          ? data.x
+          : this.mission.spawn.x + 1400;
+
+      const y =
+        Number.isFinite(data?.y)
+          ? data.y
+          : this.mission.spawn.y;
+
+      const gate =
+        this.add
+          .rectangle(
+            x,
+            y,
+            92,
+            190,
+            0x071625,
+            0.96
+          )
+          .setStrokeStyle(
+            3,
+            0xff5364,
+            0.95
+          )
+          .setDepth(8);
+
+           this.physics.add.existing(
+        gate,
+        true
+      );
+
+      this.relayGates.add(
+        gate
+      );
+
+      gate.body.setSize(
+        92,
+        190
+      );
+
+      gate.setData(
+        'index',
+        index
+      );
+
+      gate.setData(
+        'type',
+        data?.type || 'circuit'
+      );
+
+      gate.setData(
+        'difficulty',
+        Number.isFinite(
+          data?.difficulty
+        )
+          ? data.difficulty
+          : 1
+      );
+
+      gate.setData(
+        'solved',
+        false
+      );
+
+      gate.setData(
+        'puzzleOpen',
+        false
+      );
+
+      /*
+       * Inner energy field.
+       */
+      const core =
+        this.add
+          .rectangle(
+            x,
+            y,
+            54,
+            142,
+            0x10263a,
+            0.92
+          )
+          .setStrokeStyle(
+            1,
+            0x8df4ff,
+            0.58
+          )
+          .setDepth(8);
+
+      gate.setData(
+        'core',
+        core
+      );
+
+      /*
+       * Central lock core.
+       */
+      const lock =
+        this.add
+          .circle(
+            x,
+            y,
+            18,
+            0xff5364,
+            0.16
+          )
+          .setStrokeStyle(
+            2,
+            0xff826e,
+            0.9
+          )
+          .setDepth(9);
+
+      gate.setData(
+        'lock',
+        lock
+      );
+
+      /*
+       * Top status light.
+       */
+      const status =
+        this.add
+          .circle(
+            x,
+            y - 72,
+            5,
+            0xff5364,
+            0.9
+          )
+          .setStrokeStyle(
+            1,
+            0xffd5c5,
+            0.8
+          )
+          .setDepth(9);
+
+      gate.setData(
+        'status',
+        status
+      );
+
+      /*
+       * Gate label.
+       */
+      const label =
+        this.add
+          .text(
+            x,
+            y - 112,
+            `RELAY GATE // ${String(index + 1).padStart(2, '0')}`,
+            {
+              fontFamily: 'DM Mono',
+              fontSize: '10px',
+              color: '#ff826e',
+              stroke: '#08101c',
+              strokeThickness: 3,
+              align: 'center'
+            }
+          )
+          .setOrigin(0.5)
+          .setDepth(9);
+
+      gate.setData(
+        'label',
+        label
+      );
+
+      /*
+       * Interaction zone.
+       * Not a physics blocker; it only detects proximity.
+       */
+      const interaction =
+        this.add
+          .zone(
+            x,
+            y,
+            150,
+            230
+          )
+          .setOrigin(0.5)
+          .setDepth(7);
+
+      interaction.setData(
+        'gate',
+        gate
+      );
+
+      gate.setData(
+        'interaction',
+        interaction
+      );
+
+      /*
+       * Locked pulse.
+       */
+      if (!this.motionReduced) {
+        this.tweens.add({
+          targets: lock,
+          scale: {
+            from: 0.9,
+            to: 1.28
+          },
+          alpha: {
+            from: 0.8,
+            to: 0.28
+          },
+          duration: 720,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+
+        this.tweens.add({
+          targets: status,
+          alpha: {
+            from: 0.35,
+            to: 1
+          },
+          duration: 540,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.inOut'
+        });
+      }
+    }
+  );
+}
+    
 createMovingGates() {
 this.movingGates =
 this.physics.add.group();
@@ -4970,9 +14874,11 @@ this.physics.add.overlap(
 
     egg.destroy();
 
-    this.takeSciFiHit(
-      'A chicken egg knocked the courier down.'
-    );
+   this.takeSciFiHit(
+  'A chicken egg knocked the courier down.',
+  egg.x,
+  egg.y
+);
   },
   undefined,
   this
@@ -4982,20 +14888,31 @@ this.physics.add.overlap(
   this.player,
   this.comets,
   (_, comet) => {
-    if (
-      this.dashTimer > 0 &&
-      this.perfectDodgeWindow > 0
-    ) {
-      comet.destroy();
-      this.registerPerfectDodge();
-      return;
-    }
+  if (
+  this.dashTimer > 0 &&
+  this.perfectDodgeWindow > 0
+) {
+  comet
+    .getData('trail')
+    ?.destroy();
 
-    comet.destroy();
+  comet.destroy();
 
-    this.takeSciFiHit(
-      'A falling comet struck the relay route.'
-    );
+  this.registerPerfectDodge();
+  return;
+}
+
+comet
+  .getData('trail')
+  ?.destroy();
+
+comet.destroy();
+
+this.takeSciFiHit(
+  'A falling comet struck the relay route.',
+  comet.x,
+  comet.y
+);
   },
   undefined,
   this
@@ -5016,9 +14933,11 @@ this.physics.add.overlap(
         'STOMP'
       );
     } else {
-      this.takeSciFiHit(
-        'An enemy attack knocked the courier down.'
-      );
+    this.takeSciFiHit(
+  'An enemy attack knocked the courier down.',
+  enemy.x,
+  enemy.y
+);
     }
   },
   undefined,
@@ -5247,7 +15166,12 @@ this.physics.add.overlap(
   this.comets,
   (plasma, comet) => {
     plasma.destroy();
-    comet.destroy();
+
+    comet
+      .getData?.('trail')
+      ?.destroy?.();
+
+    comet.destroy?.();
 
     const cometPulse =
   this.add
@@ -5307,18 +15231,7 @@ this.physics.add.overlap(
         shieldPulse.destroy()
     });
 
-    this.playerCue(
-  'SHIELD BLOCK',
-  '#8df4ff'
-);
-
-this.gadgetPulse(
-  0x8df4ff,
-  9,
-  260
-);
-
-    this.playerCue(
+ this.playerCue(
   'SHIELD BLOCK',
   '#8df4ff'
 );
@@ -5335,7 +15248,12 @@ this.physics.add.overlap(
   this.comets,
   this.shields,
   (comet, shield) => {
-    comet.destroy();
+
+    comet
+      .getData?.('trail')
+      ?.destroy?.();
+
+    comet.destroy?.();
 
     const shieldPulse =
       this.add
@@ -5412,7 +15330,11 @@ this.tweens.add({
 
 }
 
-takeSciFiHit(message) {
+takeSciFiHit(
+  message,
+  sourceX = this.player?.x ?? 0,
+  sourceY = this.player?.y ?? 0
+) {
 if (
 this.briefingProtected ||
 this.respawning ||
@@ -5474,12 +15396,89 @@ if (
       criticalPulse.destroy()
   });
 }
-this.healthInvulnerable = 1100;
+if (this.health > 0) {
+  this.healthInvulnerable = 1100;
+}
 
 this.game.events.emit(
   'health',
   this.health
 );
+
+/* -------------------------------------------------
+   DAMAGE DIRECTION INDICATOR
+   ------------------------------------------------- */
+
+if (
+  !this.motionReduced &&
+  this.player?.active
+) {
+  const dx =
+    sourceX -
+    this.player.x;
+
+  const dy =
+    sourceY -
+    this.player.y;
+
+  const distance =
+    Math.max(
+      1,
+      Math.hypot(dx, dy)
+    );
+
+  const directionX =
+    dx / distance;
+
+  const directionY =
+    dy / distance;
+
+  const angle =
+    Phaser.Math.RadToDeg(
+      Math.atan2(
+        directionY,
+        directionX
+      )
+    );
+
+  const indicator =
+    this.add
+      .triangle(
+        this.player.x,
+        this.player.y - 58,
+        0,
+        -12,
+        7,
+        7,
+        -7,
+        7,
+        0xff826e,
+        0.9
+      )
+      .setDepth(15)
+      .setAngle(
+        angle + 90
+      );
+
+  indicator.setStrokeStyle(
+    1,
+    0xffd9d2,
+    0.85
+  );
+
+  this.tweens.add({
+    targets: indicator,
+    y:
+      indicator.y - 9,
+    alpha: 0,
+    scaleX: 1.25,
+    scaleY: 1.25,
+    duration: 360,
+    ease: 'Quad.out',
+    onComplete: () =>
+      indicator.destroy()
+  });
+}
 
   /*
  * ============================================================
@@ -5536,37 +15535,7 @@ if (!this.motionReduced) {
   );
 }
   
-  if (
-  this.health === 1 &&
-  !this.motionReduced
-) {
-  this.cameras.main.flash(
-    120,
-    255,
-    70,
-    70
-  );
-
-  const dangerPulse =
-    this.add
-      .circle(
-        this.player.x,
-        this.player.y,
-        18,
-        0xff826e,
-        .22
-      )
-      .setDepth(12);
-
-  this.tweens.add({
-    targets: dangerPulse,
-    scale: 2.8,
-    alpha: 0,
-    duration: 360,
-    onComplete: () =>
-      dangerPulse.destroy()
-  });
-}
+  /* CRITICAL FX already handled above in takeSciFiHit(). */
 
 if (this.health <= 0) {
   this.fail(
@@ -5575,16 +15544,7 @@ if (this.health <= 0) {
   return;
 }
 
-this.player.setTint(
-  0xff826e
-);
-
-this.time.delayedCall(
-  180,
-  () =>
-    this.player?.active &&
-    this.player.clearTint()
-);
+/* Tint cleanup is already scheduled in the damage FX block above. */
 if (!this.motionReduced) {
   this.cameras.main.flash(
     120,
@@ -5627,8 +15587,17 @@ this.game.events.emit(
 }
 
 useBuild(slot) {
+if (
+  this.finished ||
+  this.respawning ||
+  this.cinematicActive ||
+  this.relayPuzzleActive
+) {
+  return;
+}
+
 const id =
-this.loadout.buildItems?.[slot];
+  this.loadout.buildItems?.[slot];
 
 if (
   !id ||
@@ -5805,6 +15774,72 @@ this.tweens.add({
   onComplete: () => hitPulse.destroy()
 });
 
+/* -------------------------------------------------
+   DIRECTIONAL HIT SPARK
+   Visual only — no damage / physics mutation.
+   ------------------------------------------------- */
+
+if (!this.motionReduced) {
+  const hitDirection =
+    this.player.x < enemy.x
+      ? -1
+      : 1;
+
+  const sparkX =
+    enemy.x +
+    hitDirection * 8;
+
+  const sparkY =
+    enemy.y - 2;
+
+  const spark =
+    this.add.graphics()
+      .setDepth(12);
+
+  spark.lineStyle(
+    2,
+    0xdffcff,
+    0.9
+  );
+
+  for (let i = 0; i < 5; i++) {
+    const angle =
+      Phaser.Math.DegToRad(
+        -150 +
+        i * 15
+      );
+
+    const length =
+      Phaser.Math.Between(
+        14,
+        24
+      );
+
+    spark.lineBetween(
+      sparkX,
+      sparkY,
+      sparkX +
+        Math.cos(angle) *
+        length *
+        hitDirection,
+      sparkY +
+        Math.sin(angle) *
+        length
+    );
+  }
+
+  this.tweens.add({
+    targets: spark,
+    alpha: 0,
+    scaleX: 0.55,
+    scaleY: 0.55,
+    duration: 135,
+    ease: 'Quad.out',
+    onComplete: () =>
+      spark.destroy()
+  });
+}
+
 enemy.x +=
   this.player.x < enemy.x
     ? 10
@@ -5977,11 +16012,60 @@ if (
   remaining > 0 &&
   remaining <= health * 0.5
 ) {
-  this.bossPhaseTwo = true;
+this.bossPhaseTwo = true;
 
-  // ============================================================
+// ============================================================
+// BOSS PHASE 2 · MICRO ENERGY BURST
+// Immediate visual confirmation of the phase transition.
+// Visual only — no physics / damage / AI mutation.
+// ============================================================
+if (
+  !this.motionReduced &&
+  enemy?.active
+) {
+  const burst =
+    this.add
+      .circle(
+        enemy.x,
+        enemy.y,
+        14,
+        0xffcf82,
+        0.34
+      )
+      .setStrokeStyle(
+        2,
+        0xffe0a8,
+        0.9
+      )
+      .setDepth(13);
+
+  this.tweens.add({
+    targets: burst,
+    scaleX: 4.2,
+    scaleY: 4.2,
+    alpha: 0,
+    duration: 360,
+    ease: 'Quad.out',
+    onComplete: () => {
+      if (burst?.active) {
+        burst.destroy();
+      }
+    }
+  });
+
+  this.cameras.main.flash(
+    90,
+    255,
+    205,
+    110,
+    true
+  );
+}
+
+// ============================================================
 // BOSS PHASE 2 · ENRAGE AURA
 // ============================================================
+  
 this.bossPhaseAura?.destroy();
 this.bossPhaseAuraFollow?.remove();
 
@@ -6283,15 +16367,32 @@ if (this.comets) {
     .getChildren()
     .forEach(projectile => {
       if (
-        projectile.active &&
-        projectile.getData('bossProjectile') === true
-      ) {
-        projectile.body?.setVelocity(0, 0);
-        projectile.body?.setEnable(false);
-        projectile.setActive(false);
-        projectile.setVisible(false);
-        projectile.destroy();
-      }
+  projectile.active &&
+  projectile.getData('bossProjectile') === true
+) {
+  projectile
+    .getData('trail')
+    ?.destroy();
+
+  projectile.body?.setVelocity(
+    0,
+    0
+  );
+
+  projectile.body?.setEnable(
+    false
+  );
+
+  projectile.setActive(
+    false
+  );
+
+  projectile.setVisible(
+    false
+  );
+
+  projectile.destroy();
+}
     });
 }
     
@@ -6699,6 +16800,33 @@ if (!this.motionReduced) {
         ? .004
         : .002
     );
+
+    this.worldLightPulse(
+      comboLevel >= 10
+        ? 0xffd06e
+        : 0xb993ff,
+      comboLevel >= 10
+        ? 0.22
+        : 0.13,
+      comboLevel >= 10
+        ? 360
+        : 240,
+      comboLevel >= 10
+        ? 72
+        : 48
+    );
+
+    this.worldLightFlash(
+      comboLevel >= 10
+        ? 0xffd06e
+        : 0xb993ff,
+      comboLevel >= 10
+        ? 0.07
+        : 0.035,
+      comboLevel >= 10
+        ? 150
+        : 100
+    );
   }
 }
   
@@ -6754,10 +16882,13 @@ this.playerCue(
 
 useBlaster() {
 if (
-this.blasterCooldown > 0 ||
-this.cinematicActive
+  this.blasterCooldown > 0 ||
+  this.cinematicActive ||
+  this.finished ||
+  this.respawning ||
+  this.relayPuzzleActive
 ) {
-return;
+  return;
 }
 
 if (!this.ammo) {
@@ -6911,10 +17042,13 @@ this.game.events.emit(
 
 useSword() {
 if (
-this.swordCooldown > 0 ||
-this.cinematicActive
+  this.swordCooldown > 0 ||
+  this.cinematicActive ||
+  this.finished ||
+  this.respawning ||
+  this.relayPuzzleActive
 ) {
-return;
+  return;
 }
 
 const direction =
@@ -7889,6 +18023,68 @@ this.gadgetPulse(
   320
 );
 
+/* -------------------------------------------------
+   BOOST WORLD REACTION
+   Purely visual — no physics / gameplay mutation.
+   ------------------------------------------------- */
+
+this.worldLightPulse(
+  0x8df4ff,
+  0.18,
+  240,
+  58
+);
+
+// ============================================================
+// BOOST · MICRO ENERGY PULSE
+// Two quick rings for stronger visual feedback.
+// Visual only — no gameplay mutation.
+// ============================================================
+if (
+  !this.motionReduced &&
+  this.player?.active
+) {
+  for (let i = 0; i < 2; i++) {
+    const pulse =
+      this.add
+        .ellipse(
+          this.player.x,
+          this.player.y + 24,
+          18,
+          7,
+          0x8df4ff,
+          0.28
+        )
+        .setStrokeStyle(
+          1.5,
+          0xe8fdff,
+          0.78
+        )
+        .setDepth(11);
+
+    this.tweens.add({
+      targets: pulse,
+      scaleX: 2.8,
+      scaleY: 1.6,
+      alpha: 0,
+      delay: i * 70,
+      duration: 220,
+      ease: 'Quad.out',
+      onComplete: () => {
+        if (pulse?.active) {
+          pulse.destroy();
+        }
+      }
+    });
+  }
+}
+
+this.worldLightFlash(
+  0x8df4ff,
+  0.045,
+  110
+);
+
 const boostPulse =
   this.add
     .circle(
@@ -8291,11 +18487,30 @@ this.physics.add.overlap(
   this.player,
   this.goal,
   () => {
-  if (this.goalTouched) {
-  return;
-}
+    if (this.goalTouched) {
+      return;
+    }
 
-this.goalTouched = true;
+    if (this.boss?.active) {
+      this.playerCue(
+        `${
+          this.boss.getData(
+            'bossName'
+          ) ||
+          'ALPHA DINO'
+        } BLOCKS THE RELAY · DEFEAT IT`,
+        '#ffcf82'
+      );
+
+      this.player.body?.setVelocityX(
+        -260
+      );
+
+      return;
+    }
+
+    this.goalTouched = true;
+    
     const arrivalLabel =
   this.add
     .text(
@@ -9665,7 +19880,12 @@ signal.disableBody(
 
 this.collected++;
 
-  this.playerCue(
+// ============================================================
+// SIGNAL INTERFERENCE · LIVE UPDATE
+// ============================================================
+this.updateSignalInterference(0);
+
+this.playerCue(
   'SIGNAL ACQUIRED',
   '#ffd06e'
 );
@@ -9723,20 +19943,13 @@ if (glow) {
     alpha: 0,
     duration: 360,
     ease: 'Quad.out',
-    onComplete: () =>
-      glow.destroy()
+    onComplete: () => {
+      if (glow?.active) {
+        glow.destroy();
+      }
+    }
   });
 }
-
-this.tweens.add({
-  targets: glow,
-  scale: 4.8,
-  alpha: 0,
-  duration: 360,
-  ease: 'Quad.out',
-  onComplete: () =>
-    glow.destroy()
-});
 
 // XP FLOATING TEXT DISABLED
 
@@ -9848,16 +20061,24 @@ this.game.events.emit(
 }
 
 activateCheckpoint(marker) {
-const index =
-marker.getData('index');
 
-if (
-  index <=
-  (this.checkpoint.index ??
-    -1)
-) {
-  return;
-}
+  if (
+    this.loadout.modifier?.id ===
+    'noCheckpoints'
+  ) {
+    return;
+  }
+
+  const index =
+    marker.getData('index');
+
+  if (
+    index <=
+    (this.checkpoint.index ??
+      -1)
+  ) {
+    return;
+  }
 
 const spawn =
   this.safeCheckpointSpawn(
@@ -9914,14 +20135,109 @@ const checkpointPulse =
     )
     .setDepth(11);
 
+checkpointPulse.setStrokeStyle(
+  2,
+  0xe8fdff,
+  0.9
+);
+
 this.tweens.add({
   targets: checkpointPulse,
   scale: 3.8,
   alpha: 0,
   duration: 360,
+  ease: 'Quad.out',
   onComplete: () =>
     checkpointPulse.destroy()
 });
+
+/* -------------------------------------------------
+   CHECKPOINT HOLOGRAPHIC ACTIVATION
+   Purely visual — checkpoint state already handled.
+   ------------------------------------------------- */
+
+if (
+  !this.motionReduced
+) {
+  const ringA =
+    this.add.circle(
+      marker.x,
+      marker.y - 22,
+      7,
+      0x8df4ff,
+      0.16
+    )
+    .setStrokeStyle(
+      1,
+      0xb9f5ff,
+      0.75
+    )
+    .setDepth(10);
+
+  const ringB =
+    this.add.circle(
+      marker.x,
+      marker.y - 22,
+      12,
+      0x8df4ff,
+      0
+    )
+    .setStrokeStyle(
+      1,
+      0x8df4ff,
+      0.45
+    )
+    .setDepth(10);
+
+  const scanLine =
+    this.add.rectangle(
+      marker.x,
+      marker.y - 44,
+      22,
+      2,
+      0xe8fdff,
+      0.55
+    )
+    .setDepth(11);
+
+  this.tweens.add({
+    targets: ringA,
+    scale: 2.8,
+    alpha: 0,
+    duration: 420,
+    ease: 'Quad.out',
+    onComplete: () =>
+      ringA.destroy()
+  });
+
+  this.tweens.add({
+    targets: ringB,
+    scale: 2.2,
+    alpha: 0,
+    duration: 500,
+    ease: 'Quad.out',
+    onComplete: () =>
+      ringB.destroy()
+  });
+
+  this.tweens.add({
+    targets: scanLine,
+    y:
+      scanLine.y + 38,
+    alpha: 0,
+    duration: 340,
+    ease: 'Sine.inOut',
+    onComplete: () =>
+      scanLine.destroy()
+  });
+
+  this.worldLightPulse(
+    0xb9f5ff,
+    0.12,
+    220,
+    42
+  );
+}
   
 this.game.events.emit(
   'checkpoint',
@@ -10028,8 +20344,17 @@ return true;
 }
 
 useGadget(slot) {
+if (
+  this.finished ||
+  this.respawning ||
+  this.cinematicActive ||
+  this.relayPuzzleActive
+) {
+  return;
+}
+
 const id =
-this.loadout.equipment?.[slot];
+  this.loadout.equipment?.[slot];
 
 if (
   !id ||
@@ -10044,6 +20369,13 @@ const bonuses =
   [];
 
 if (id === 'scanner') {
+  const interference =
+  this.getSignalInterferenceLevel();
+
+const interferenceTier =
+  this.getSignalInterferenceTier(
+    interference
+  );
   const range =
     bonuses.includes(
       'signalSense'
@@ -10070,24 +20402,33 @@ if (id === 'scanner') {
       )
   );
 
-  const nextSignal =
-    targets.sort(
-      (left, right) =>
-        Phaser.Math.Distance.Between(
-          this.player.x,
-          this.player.y,
-          left.x,
-          left.y
-        ) -
-        Phaser.Math.Distance.Between(
-          this.player.x,
-          this.player.y,
-          right.x,
-          right.y
-        )
-    )[0];
+const sortedTargets =
+  targets.sort(
+    (left, right) =>
+      Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        left.x,
+        left.y
+      ) -
+      Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        right.x,
+        right.y
+      )
+  );
+
+const nextSignal =
+  sortedTargets[0];
 
   if (nextSignal) {
+    if (
+  interferenceTier >= 3 &&
+  !this.signalOverrideTriggered
+) {
+  this.spawnSignalGhostEcho();
+}
     const marker =
       this.add
         .circle(
@@ -10321,15 +20662,10 @@ this.vaultCooldown = 450;
 
 body.setVelocityY(-510);
 
-  if (
+ if (
   !this.motionReduced &&
   this.player?.active
 ) {
-  this.player.angle =
-    this.player.flipX
-      ? -5
-      : 5;
-
   this.tweens.add({
     targets: this.player,
     scaleX:
@@ -10380,9 +20716,38 @@ return true;
 }
 
 updateEnemies(delta) {
+const signalHeat =
+  Phaser.Math.Clamp(
+    this.signalInterference || 0,
+    0,
+    1
+  );
+
+const signalTier =
+  this.getSignalInterferenceTier(
+    signalHeat
+  );
+
+const heatRangeBonus =
+  signalTier >= 3
+    ? 70
+    : signalTier >= 2
+      ? 45
+      : signalTier >= 1
+        ? 20
+        : 0;
+
+const baseDetectionRange =
+  this.mission.blackout &&
+  this.loadout.upgrades?.includes('ghost')
+    ? 190
+    : this.mission.blackout
+      ? 260
+      : 320;
+
 const detectionRange =
-  this.mission.blackout && this.loadout.upgrades?.includes('ghost') ? 190 :
-  this.mission.blackout ? 260 : 320;
+  baseDetectionRange +
+  heatRangeBonus;
 
 if (!this.enemies)
 return;
@@ -10410,13 +20775,17 @@ this.enemies
       if (!enemy.active)
         return;
 
-      const route =
-        enemy.getData(
-          'route'
-        );
+    const route =
+  enemy.getData(
+    'route'
+  );
 
-      const type =
-        route.type;
+if (!route) {
+  return;
+}
+
+const type =
+  route.type;
 
       let direction =
         enemy.getData(
@@ -10435,32 +20804,156 @@ this.enemies
           this.player.y
         );
 
-     const aiState =
+   const aiState =
 
 enemy.getData('aiState') ||
 'IDLE';
 
-const speed =
+/* -------------------------------------------------
+   ENEMY THREAT SIGNATURE
+   Purely visual — reads existing AI/distance state.
+   No AI / physics / damage mutation.
+   ------------------------------------------------- */
+
+const threatIndicator =
+  enemy.getData(
+    'indicator'
+  );
+
+if (
+  threatIndicator?.active &&
+  !this.motionReduced
+) {
+  const threatRatio =
+    Phaser.Math.Clamp(
+      1 -
+        horizontalDistance /
+          detectionRange,
+      0,
+      1
+    );
+
+  let threatAlpha =
+    Phaser.Math.Linear(
+      0.10,
+      0.34,
+      threatRatio
+    );
+
+  let threatScale =
+    Phaser.Math.Linear(
+      0.82,
+      1.12,
+      threatRatio
+    );
+
+  if (
+    aiState === 'HUNT'
+  ) {
+    const pulse =
+      0.5 +
+      Math.sin(
+        this.time.now / 95
+      ) * 0.5;
+
+    threatAlpha =
+      Phaser.Math.Linear(
+        0.24,
+        0.58,
+        pulse
+      );
+
+    threatScale =
+      Phaser.Math.Linear(
+        1.00,
+        1.35,
+        pulse
+      );
+  } else if (
+    aiState === 'SEARCH'
+  ) {
+    const pulse =
+      0.5 +
+      Math.sin(
+        this.time.now / 170
+      ) * 0.5;
+
+    threatAlpha =
+      Phaser.Math.Linear(
+        0.14,
+        0.32,
+        pulse
+      );
+
+    threatScale =
+      Phaser.Math.Linear(
+        0.92,
+        1.12,
+        pulse
+      );
+  }
+
+  threatIndicator
+    .setAlpha(
+      threatAlpha
+    )
+    .setScale(
+      threatScale
+    );
+
+  threatIndicator.setStrokeStyle(
+    aiState === 'HUNT'
+      ? 1.6
+      : 1,
+    aiState === 'HUNT'
+      ? 0xff5364
+      : 0xffd5c5,
+    aiState === 'HUNT'
+      ? 0.92
+      : 0.60
+  );
+}
+
+const baseSpeed =
 aiState === 'HUNT'
-? type === 'dino'
-? 96
-: type === 'enemy-runner'
-? 145
-: type === 'security'
-? 78
-: type === 'invader'
-? 42
-: 58
-: type === 'dino'
-? 74
-: type === 'enemy-runner' &&
-horizontalDistance < 300
-? 118
-: type === 'invader'
-? 28
-: type === 'security'
-? 55
-: 38;
+  ? type === 'dino'
+    ? 96
+    : type === 'enemy-runner'
+      ? 145
+      : type === 'security'
+        ? 78
+        : type === 'invader'
+          ? 42
+          : 58
+  : type === 'dino'
+    ? 74
+    : type === 'enemy-runner' &&
+      horizontalDistance < 300
+      ? 118
+      : type === 'invader'
+        ? 28
+        : type === 'security'
+          ? 55
+          : 38;
+
+const signalHeatMultiplier =
+  aiState === 'HUNT'
+    ? signalTier >= 4
+      ? 1.18
+      : signalTier >= 3
+        ? 1.12
+        : signalTier >= 2
+          ? 1.07
+          : signalTier >= 1
+            ? 1.03
+            : 1
+    : signalTier >= 3
+      ? 1.05
+      : 1;
+
+const speed =
+  baseSpeed *
+  signalHeatMultiplier;
 
 if (
 aiState === 'HUNT'
@@ -10730,31 +21223,51 @@ enemy.x
         'IDLE';
 
       if (
-        currentAIState === 'IDLE' &&
-        horizontalDistance <
-          detectionRange * 1.8 &&
-        verticalDistance <
-          150
-      ) {
-        enemy.setData(
+  currentAIState === 'IDLE' &&
+  horizontalDistance <
+    detectionRange *
+      (
+        signalTier >= 4
+          ? 2.15
+          : signalTier >= 3
+            ? 2.0
+            : signalTier >= 2
+              ? 1.9
+              : 1.8
+      ) &&
+  verticalDistance <
+    (
+      signalTier >= 3
+        ? 170
+        : 150
+    )
+) {
+  enemy.setData(
+    'lastKnownX',
+    this.player.x
+  );
 
-'lastKnownX',
-this.player.x
-);
-enemy.setData(
-'lastKnownY',
-this.player.y
-);
-enemy.setData(
-'aiState',
-'SUSPICIOUS'
-);
+  enemy.setData(
+    'lastKnownY',
+    this.player.y
+  );
 
-        enemy.setData(
-          'aiTimer',
-          900
-        );
-      }
+  enemy.setData(
+    'aiState',
+    signalTier >= 3
+      ? 'ALERT'
+      : 'SUSPICIOUS'
+  );
+
+  enemy.setData(
+    'aiTimer',
+    signalTier >= 4
+      ? 450
+      : signalTier >= 3
+        ? 650
+        : 900
+  );
+}
       if (
 
 currentAIState === 'SUSPICIOUS'
@@ -10942,7 +21455,13 @@ detectionValue
 
 updateSciFiThreats(delta) {
 const now =
-this.elapsedMs;
+  this.elapsedMs;
+
+if (
+  this.empTimer > 0
+) {
+  return;
+}
 
   // ============================================================
 // BOSS DEATH FREEZE
@@ -11166,6 +21685,92 @@ if (
       'nextShot'
     )
 ) {
+  /* -------------------------------------------------
+     BOSS ATTACK TELEGRAPH
+     Visual warning before the projectile launches.
+     ------------------------------------------------- */
+
+  if (
+    !this.motionReduced &&
+    this.player?.active
+  ) {
+    const bossColor =
+      this.boss.getData(
+        'bossColor'
+      ) ||
+      0xff826e;
+
+    const telegraph =
+      this.add
+        .rectangle(
+          this.boss.x,
+          this.boss.y - 18,
+          10,
+          4,
+          bossColor,
+          0.18
+        )
+        .setDepth(12);
+
+    telegraph.setStrokeStyle(
+      2,
+      0xfff1df,
+      0.85
+    );
+
+    const lockLine =
+      this.add
+        .rectangle(
+          this.boss.x,
+          this.player.y,
+          Math.min(
+            500,
+            Math.abs(
+              this.player.x -
+              this.boss.x
+            )
+          ),
+          2,
+          bossColor,
+          0.32
+        )
+        .setDepth(11);
+
+    if (
+      this.player.x <
+      this.boss.x
+    ) {
+      lockLine.x =
+        this.boss.x -
+        lockLine.width / 2;
+    } else {
+      lockLine.x =
+        this.boss.x +
+        lockLine.width / 2;
+    }
+
+    this.tweens.add({
+      targets: telegraph,
+      scaleX: 2.8,
+      scaleY: 1.8,
+      alpha: 0,
+      duration: 180,
+      ease: 'Quad.out',
+      onComplete: () =>
+        telegraph.destroy()
+    });
+
+    this.tweens.add({
+      targets: lockLine,
+      alpha: 0,
+      scaleX: 0.96,
+      duration: 180,
+      ease: 'Quad.out',
+      onComplete: () =>
+        lockLine.destroy()
+    });
+  }
+
   const bolt =
     this.comets
       .create(
@@ -11228,17 +21833,24 @@ if (
 // ============================================================
 if (
   this.boss.getData('phase') === 2 &&
-  !this.motionReduced
+  !this.bossSecondShotPending
 ) {
   const secondShotDelay = 180;
 
+  this.bossSecondShotPending =
+    true;
+
   this.time.delayedCall(
     secondShotDelay,
-    () => {
-  if (
+  () => {
+  this.bossSecondShotPending =
+    false;
+
+if (
   !this.boss?.active ||
   this.finished ||
   this.respawning ||
+  this.respawnGrace > 0 ||
   this.bossVictoryLock === true
 ) {
   return;
@@ -11252,13 +21864,54 @@ if (
         return;
       }
 
-      const secondBolt =
-        this.comets
-          .create(
-            this.boss.x,
-            this.boss.y + 6,
-            'comet'
-          )
+    if (
+  !this.motionReduced &&
+  this.boss?.active &&
+  this.player?.active
+) {
+  const bossColor =
+    this.boss.getData(
+      'bossColor'
+    ) ||
+    0xff826e;
+
+  const secondTelegraph =
+    this.add
+      .rectangle(
+        this.boss.x,
+        this.boss.y + 8,
+        9,
+        4,
+        bossColor,
+        0.18
+      )
+      .setDepth(12);
+
+  secondTelegraph.setStrokeStyle(
+    2,
+    0xfff1df,
+    0.8
+  );
+
+  this.tweens.add({
+    targets: secondTelegraph,
+    scaleX: 2.6,
+    scaleY: 1.7,
+    alpha: 0,
+    duration: 120,
+    ease: 'Quad.out',
+    onComplete: () =>
+      secondTelegraph.destroy()
+  });
+}
+
+const secondBolt =
+  this.comets
+    .create(
+      this.boss.x,
+      this.boss.y + 6,
+      'comet'
+    )
           .setDepth(11)
           .setTint(
             this.boss.getData(
@@ -11356,64 +22009,136 @@ this.enemies
               'nextShot'
             )
         ) {
-          const projectile =
-            type ===
-            'chicken'
-              ? 'egg'
-              : 'comet';
+        const projectile =
+  type ===
+  'chicken'
+    ? 'egg'
+    : 'comet';
 
-          const egg =
-            this.eggs
-              .create(
-                enemy.x,
-                enemy.y + 12,
-                projectile
-              )
-              .setDepth(11);
+/* -------------------------------------------------
+   ENEMY ATTACK TELEGRAPH
+   Purely visual — projectile logic remains unchanged.
+   ------------------------------------------------- */
 
-          const predictedX =
-            this.player.x +
-            this.player.body
-              .velocity.x *
-              .22;
+if (
+  !this.motionReduced &&
+  enemy?.active
+) {
+  const charge =
+    this.add.circle(
+      enemy.x,
+      enemy.y - 4,
+      type === 'chicken'
+        ? 7
+        : 9,
+      type === 'chicken'
+        ? 0xffd06e
+        : 0xff5364,
+      0.20
+    )
+    .setDepth(10);
 
-          egg.body
-            .setAllowGravity(false)
-            .setVelocity(
-              (
-                predictedX -
-                enemy.x
-              ) * .72,
-              type === 'chicken'
-                ? 210
-                : 90
-            );
+  charge.setStrokeStyle(
+    2,
+    type === 'chicken'
+      ? 0xfff0c7
+      : 0xff826e,
+    0.82
+  );
 
-          enemy.setData(
-            'nextShot',
-            now +
-              (
-                type ===
-                'enemy-runner'
-                  ? 1500
-                  : type ===
-                      'invader'
-                    ? 1900
-                    : 2400
-              )
-          );
+  this.tweens.add({
+    targets: charge,
+    scale: 1.9,
+    alpha: 0,
+    duration: 120,
+    ease: 'Quad.out',
+    onComplete: () =>
+      charge.destroy()
+  });
 
-          this.playerCue(
-            type === 'chicken'
-              ? 'EGG INCOMING'
-              : 'ENEMY FIRE',
-            '#ff826e'
-          );
+  const chargeLine =
+    this.add.rectangle(
+      enemy.x,
+      enemy.y - 4,
+      type === 'chicken'
+        ? 18
+        : 24,
+      2,
+      type === 'chicken'
+        ? 0xffd06e
+        : 0xff5364,
+      0.38
+    )
+    .setDepth(10);
 
-          this.game.events.emit(
-            'feedback',
-            'warning'
-          );
+  this.tweens.add({
+    targets: chargeLine,
+    scaleX: 1.8,
+    alpha: 0,
+    duration: 110,
+    ease: 'Quad.out',
+    onComplete: () =>
+      chargeLine.destroy()
+  });
+}
+
+const predictedX =
+  this.player.x +
+  this.player.body
+    .velocity.x *
+    .22;
+
+const egg =
+  this.eggs
+    .create(
+      enemy.x,
+      enemy.y + 12,
+      projectile
+    )
+    .setDepth(11);
+
+egg.setData(
+  'createdAt',
+  now
+);
+
+egg.body
+  .setAllowGravity(false)
+  .setVelocity(
+    (
+      predictedX -
+      enemy.x
+    ) * .72,
+    type === 'chicken'
+      ? 210
+      : 90
+  );
+
+enemy.setData(
+  'nextShot',
+  now +
+    (
+      type ===
+      'enemy-runner'
+        ? 1500
+        : type ===
+            'invader'
+          ? 1900
+          : 2400
+    )
+);
+
+this.playerCue(
+  type === 'chicken'
+    ? 'EGG INCOMING'
+    : 'ENEMY FIRE',
+  '#ff826e'
+);
+
+this.game.events.emit(
+  'feedback',
+  'warning'
+);
         }
       }
 
@@ -11474,9 +22199,11 @@ this.enemies
             this.player.x
           ) < 66
         ) {
-          this.takeSciFiHit(
-            'A dinosaur charge knocked the courier down.'
-          );
+         this.takeSciFiHit(
+  'A dinosaur charge knocked the courier down.',
+  enemy.x,
+  enemy.y
+);
         }
       }
     }
@@ -11548,15 +22275,25 @@ this.enemies
         return;
       }
 
-      const bolt =
-        this.eggs.create(
-          enemy.x,
-          enemy.y,
-          'comet'
-        ).setDepth(11);
+ const bolt =
+  this.eggs.create(
+    enemy.x,
+    enemy.y,
+    'comet'
+  ).setDepth(11);
 
-      bolt.body
-        .setAllowGravity(false)
+bolt.setData(
+  'projectileType',
+  'alien-bolt'
+);
+
+bolt.setData(
+  'createdAt',
+  now
+);
+
+bolt.body
+  .setAllowGravity(false)
         .setVelocity(
           (
             this.player.x -
@@ -11634,6 +22371,49 @@ const tier =
     this.mission.difficulty?.split('/')[0]
   ) || 1;
 
+/* -------------------------------------------------
+   COMET TRAIL FOLLOW
+   Purely visual.
+   ------------------------------------------------- */
+if (
+  !this.motionReduced &&
+  this.comets?.active
+) {
+  this.comets
+    .getChildren()
+    .forEach(comet => {
+      if (!comet?.active) {
+        comet
+          ?.getData('trail')
+          ?.destroy();
+
+        return;
+      }
+
+      const trail =
+        comet.getData(
+          'trail'
+        );
+
+      if (trail?.active) {
+        trail.clear();
+
+        trail.lineStyle(
+          2,
+          0x8df4ff,
+          0.34
+        );
+
+        trail.lineBetween(
+          comet.x,
+          comet.y - 6,
+          comet.x,
+          comet.y - 54
+        );
+      }
+    });
+}
+
 this.cometTimer -=
   delta;
 
@@ -11642,31 +22422,63 @@ if (
   this.cometTimer <=
     0
 ) {
-  const comet =
-    this.comets
-      .create(
-        Math.min(
-          this.worldWidth - 80,
-          this.player.x + 360
-        ),
-        -30,
-        'comet'
-      )
-      .setDepth(11);
+ const comet =
+  this.comets
+    .create(
+      Math.min(
+        this.worldWidth - 80,
+        this.player.x + 360
+      ),
+      -30,
+      'comet'
+    )
+    .setDepth(11);
 
-  comet.body
-    .setAllowGravity(false)
-    .setVelocity(
-      -80,
-      520
-    );
+/* -------------------------------------------------
+   COMET TRAIL FX
+   Visual only — comet physics remain unchanged.
+   ------------------------------------------------- */
 
-  this.cometTimer =
-    Math.max(
-      2400,
-      5600 -
-        tier * 420
-    );
+if (
+  !this.motionReduced &&
+  comet?.active
+) {
+  const cometTrail =
+    this.add.graphics()
+      .setDepth(10);
+
+  comet.setData(
+    'trail',
+    cometTrail
+  );
+
+  cometTrail.lineStyle(
+    2,
+    0x8df4ff,
+    0.34
+  );
+
+  cometTrail.lineBetween(
+    comet.x,
+    comet.y - 6,
+    comet.x,
+    comet.y - 58
+  );
+}
+
+comet.body
+  .setAllowGravity(false)
+  .setVelocity(
+    -80,
+    520
+  );
+
+this.cometTimer =
+  Math.max(
+    2400,
+    5600 -
+      tier * 420
+  );
 
   this.game.events.emit(
     'feedback',
@@ -11800,6 +22612,19 @@ onComplete: () => muzzleFlash.destroy()
 });
 }
 
+const destroyProjectile =
+  projectile => {
+    if (!projectile) {
+      return;
+    }
+
+    projectile
+      .getData?.('trail')
+      ?.destroy?.();
+
+    projectile.destroy?.();
+  };
+
 const prune = (
   group,
   maxAge,
@@ -11838,12 +22663,14 @@ const prune = (
         ) >
           720;
 
-      if (
-        tooOld ||
-        tooFar
-      ) {
-        object.destroy();
-      }
+   if (
+  tooOld ||
+  tooFar
+) {
+  destroyProjectile(
+    object
+  );
+}
     });
 };
 
@@ -11857,6 +22684,18 @@ prune(
   this.kineticBalls,
   1800,
   1300
+);
+
+prune(
+  this.eggs,
+  4200,
+  1600
+);
+
+prune(
+  this.comets,
+  Infinity,
+  1800
 );
 
 }
@@ -12157,12 +22996,20 @@ const completeLabel =
       fontSize: '16px',
       color: '#fff0b5',
       stroke: '#08101c',
-      strokeThickness: 5
+      strokeThickness: 5,
+      shadow: {
+        offsetX: 0,
+        offsetY: 0,
+        color: '#8df4ff',
+        blur: 10,
+        stroke: true,
+        fill: true
+      }
     }
   )
-    .setOrigin(.5)
-    .setDepth(13)
-    .setScale(.65);
+  .setOrigin(.5)
+  .setDepth(13)
+  .setScale(.65);
 
 this.tweens.add({
   targets: relayGlow,
@@ -12228,7 +23075,11 @@ this.time.delayedCall(
   
 this.time.delayedCall(
   120,
-  () =>
+  () => {
+    if (!this.scene.isActive()) {
+      return;
+    }
+
     this.game.events.emit(
       'complete',
       this.collected,
@@ -12285,10 +23136,12 @@ this.time.delayedCall(
             250 +
           this.boostedSignals *
             100
-      },
-      this.runId
-    )
-);
+        }
+      );
+    },
+    undefined,
+    this
+  );
 
 }
 
@@ -12365,10 +23218,10 @@ calculateMissionMedals() {
     this.enemyDefeats || 0;
 
   const enemyCount =
-    Math.max(
-      1,
-      this.enemies?.getChildren?.().length || 1
-    );
+  Math.max(
+    1,
+    this.mission.enemies?.length || 1
+  );
 
   const combatRatio =
     Phaser.Math.Clamp(
@@ -12513,9 +23366,12 @@ showMissionMedals() {
       430
     );
 
-const panelHeight = Math.min(
-  height - 28,
-  330
+const panelHeight = Math.max(
+  260,
+  Math.min(
+    height - 28,
+    330
+  )
 );
 
   const panel =
@@ -13257,8 +24113,25 @@ briefingButton.on(
 
 this.missionMedalsClosing = true;
 
-this.tweens.killAll();
-      this.scene.restart();
+if (this.missionMedalsUI) {
+  this.missionMedalsUI.forEach(
+    object => {
+      if (object?.active) {
+        this.tweens.killTweensOf(object);
+      }
+    }
+  );
+}
+
+this.scene.restart({
+  mission: this.mission,
+  runId: this.runId,
+  abilities: Array.from(this.abilities || []),
+  rain: this.rainEnabled,
+  screenShake: this.screenShake,
+  reducedMotion: this.motionReduced,
+  firstTimeTutorial: false
+});
     }
   );
 
@@ -13371,26 +24244,24 @@ this.time.delayedCall(
 fail(message) {
 
 if (
-this.briefingProtected ||
-this.finished ||
-this.respawning ||
-this.respawnGrace > 0 ||
-this.healthInvulnerable > 0
+  this.briefingProtected ||
+  this.finished ||
+  this.respawning ||
+  this.respawnGrace > 0
 ) {
-return;
+  return;
 }
 
 const collision =
-  message.includes(
-    'barrier'
-  ) ||
-  message.includes(
-    'interceptor'
-  );
+  message.includes('barrier') ||
+  message.includes('interceptor');
+
+const waterHazard =
+  message.includes('shark');
 
 if (collision) {
   this.collisions++;
-} else {
+} else if (!waterHazard) {
   this.falls++;
 }
 
@@ -13418,6 +24289,12 @@ if (
   this.deaths >=
   this.deathLimit
 ) {
+  this.game.events.emit(
+    'deaths',
+    this.deaths,
+    this.deathLimit
+  );
+
   this.finished = true;
   this.physics.pause();
 
@@ -13583,15 +24460,196 @@ this.collected =
 this.secretsCollected =
   this.checkpoint.secrets.size;
 
+this.signalInterference =
+  this.getSignalInterferenceLevel();
+
+this.signalInterferenceTier =
+  this.getSignalInterferenceTier(
+    this.signalInterference
+  );
+
+this.signalOverrideTriggered =
+  this.signalInterference >= 0.999;
+
+this.signalGhostTimer = 0;
+this.signalInterferencePulse = 0;
+
 this.health = 3;
+
+this.waterAttackActive = false;
+this.waterDeathTimer = 0;
+this.waterAttackToken++;
+
+this.empTimer =
+  0;
+
+this.decoyTimer =
+  0;
+
+this.boosterTimer =
+  0;
+
+this.alarmTimer =
+  0;
+
+this.boosterAura
+  ?.destroy();
+
+this.boosterAura =
+  null;
+
+this.decoyBeacon
+  ?.destroy();
+
+this.decoyBeacon =
+  null;
+
+// ------------------------------------------------------------
+// DEPLOYABLE RESET
+// Death starts a clean attempt.
+// ------------------------------------------------------------
+[
+  this.shields,
+  this.kineticBalls,
+  this.turrets,
+  this.springPads
+].forEach(
+  group => {
+    group
+      ?.getChildren()
+      ?.forEach(
+        object =>
+          object?.destroy?.()
+      );
+  }
+);
+
+this.waterZones
+  ?.getChildren()
+  ?.forEach(water => {
+    if (water?.active) {
+      water.setData(
+        'used',
+        false
+      );
+    }
+  });
 
 this.game.events.emit(
   'health',
   this.health
 );
 
+this.playerCrouched =
+  false;
+
+this.slideTimer =
+  0;
+
+this.dashTimer =
+  0;
+
+this.dashFxTimer =
+  0;
+
+this.airDashUsed =
+  false;
+
+this.coyote =
+  0;
+
+this.jumpBuffer =
+  0;
+
+this.jumpHeld =
+  false;
+
+this.wallJumpTimer =
+  0;
+
+this.wallJumpCooldown =
+  0;
+
+this.combatCombo =
+  0;
+
+this.comboTimer =
+  0;
+
+this.overdriveTimer =
+  0;
+
+this.perfectDodgeWindow =
+  0;
+
+this.perfectDodgeCooldown =
+  0;
+
+this.dashCooldown =
+  0;
+
+this.blasterCooldown =
+  0;
+
+this.swordCooldown =
+  0;
+
+this.vaultCooldown =
+  0;
+
+this.boostCooldown =
+  0;
+
+this.gadgetCooldowns =
+  this.gadgetCooldowns.map(
+    () => 0
+  );
+
+this.buildCooldowns =
+  this.buildCooldowns.map(
+    () => 0
+  );
+
+this.mobileDirection =
+  null;
+
+this.mobileActions.jump =
+  false;
+
+this.mobileActions.fire =
+  false;
+
+this.mobileActions.sword =
+  false;
+
+this.mobileActions.dash =
+  false;
+
+this.mobileActions.crouch =
+  false;
+
+this.mobileActions.interact =
+  false;
+
+this.mobileActions.build1 =
+  false;
+
+this.mobileActions.build2 =
+  false;
+
+this.mobileActions.gadget1 =
+  false;
+
+this.mobileActions.gadget2 =
+  false;
+
 this.player
   .clearTint()
+  .setAlpha(1)
+  .setScale(
+    this.playerVisualBaseScaleX,
+    this.playerVisualBaseScaleY
+  )
   .setPosition(
     this.checkpoint.x,
     this.checkpoint.y
@@ -13599,6 +24657,16 @@ this.player
   .play(
     'runner-idle',
     true
+  );
+
+this.player.body
+  .setSize(
+    this.playerBodyConfig.standing.width,
+    this.playerBodyConfig.standing.height
+  )
+  .setOffset(
+    this.playerBodyConfig.standing.offsetX,
+    this.playerBodyConfig.standing.offsetY
   );
 
 this.player.body.reset(
@@ -13627,17 +24695,21 @@ this.healthInvulnerable =
       ?.getChildren()
       .forEach(
         projectile => {
-          if (
-            projectile.active &&
-            Phaser.Math.Distance.Between(
-              projectile.x,
-              projectile.y,
-              this.checkpoint.x,
-              this.checkpoint.y
-            ) < 360
-          ) {
-            projectile.destroy();
-          }
+  if (
+  projectile.active &&
+  Phaser.Math.Distance.Between(
+    projectile.x,
+    projectile.y,
+    this.checkpoint.x,
+    this.checkpoint.y
+  ) < 360
+) {
+  projectile
+    .getData?.('trail')
+    ?.destroy?.();
+
+  projectile.destroy?.();
+}
         }
       )
 );
@@ -13656,16 +24728,20 @@ this.enemies
         return;
       }
 
-      const route =
-        enemy.getData(
-          'route'
-        );
+const route =
+  enemy.getData(
+    'route'
+  );
 
-      const direction =
-        enemy.x <
-        this.checkpoint.x
-          ? -1
-          : 1;
+if (!route) {
+  return;
+}
+
+const direction =
+  enemy.x <
+  this.checkpoint.x
+    ? -1
+    : 1;
 
       enemy.x =
         Phaser.Math.Clamp(
@@ -13675,12 +24751,42 @@ this.enemies
           route.max
         );
 
-      enemy.setData(
-        'direction',
-        direction
-      );
+    enemy.setData(
+  'direction',
+  direction
+);
 
-      enemy.body.updateFromGameObject();
+enemy.setData(
+  'aiState',
+  'IDLE'
+);
+
+enemy.setData(
+  'aiTimer',
+  0
+);
+
+enemy.setData(
+  'alerted',
+  false
+);
+
+enemy.setData(
+  'lastKnownX',
+  enemy.x
+);
+
+enemy.setData(
+  'lastKnownY',
+  enemy.y
+);
+
+enemy.setData(
+  'nextShot',
+  this.elapsedMs + 700
+);
+
+enemy.body.updateFromGameObject();
     }
   );
 
@@ -13785,16 +24891,1340 @@ this.game.events.emit(
 
 }
 
-update(_, delta) {
+updateDynamicWaterFX(delta) {
+  if (
+    this.motionReduced ||
+    !this.player?.active ||
+    !this.waterZones
+  ) {
+    return;
+  }
+
+  if (this.waterAttackActive) {
+    return;
+  }
+
+  this.waterDynamicFxTimer =
+    Math.max(
+      0,
+      (this.waterDynamicFxTimer || 0) -
+        delta
+    );
+
+  const body =
+    this.player.body;
+
+  const onGround =
+    body?.blocked?.down ||
+    body?.touching?.down;
+
+  if (!onGround) {
+    this.wetSurfaceActive = false;
+    this.wetSurfaceGrip = 1;
+    return;
+  }
+
+  const wetZone =
+    this.waterZones
+      .getChildren()
+      .find(zone => {
+        if (!zone?.active) {
+          return false;
+        }
+
+        const left =
+          zone.x -
+          zone.width / 2;
+
+        const right =
+          zone.x +
+          zone.width / 2;
+
+        const surfaceY =
+          zone.y -
+          zone.height / 2;
+
+        return (
+          this.player.x >= left &&
+          this.player.x <= right &&
+          Math.abs(
+            body.bottom -
+            surfaceY
+          ) <= 18
+        );
+      });
+
+  this.wetSurfaceActive =
+    Boolean(wetZone);
+
+  this.wetSurfaceGrip =
+    this.wetSurfaceActive
+      ? 0.28
+      : 1;
+
+  // Existing water visual FX
+  if (
+    this.waterDynamicFxTimer > 0
+  ) {
+    return;
+  }
+
+  const speed =
+    Math.abs(
+      body.velocity.x || 0
+    );
+
+  if (
+    !wetZone ||
+    speed < 120
+  ) {
+    return;
+  }
+
+  const speedRatio =
+    Phaser.Math.Clamp(
+      speed /
+        RUNNER_TUNING.maxRunSpeed,
+      0,
+      1
+    );
+
+this.triggerPlayerWaterRipple(
+  this.player,
+  wetZone,
+  0.65 +
+    speedRatio * 0.65
+);
+
+// ============================================================
+// WET FOOT SPRAY · SMALL MOVEMENT FEEDBACK
+// ============================================================
 if (
-this.finished ||
-this.respawning ||
-this.cinematicActive
+  !this.motionReduced &&
+  speed > 140 &&
+  this.player?.active
 ) {
-return;
+  const direction =
+    this.player.body.velocity.x >= 0
+      ? 1
+      : -1;
+
+  const sprayCount =
+    speed > 360
+      ? 3
+      : 2;
+
+  for (
+    let i = 0;
+    i < sprayCount;
+    i++
+  ) {
+    const spray =
+      this.add
+        .circle(
+          this.player.x -
+            direction *
+            Phaser.Math.Between(8, 18),
+          this.player.y + 29,
+          Phaser.Math.Between(1, 2.5),
+          0xb9f5ff,
+          Phaser.Math.FloatBetween(
+            0.18,
+            0.34
+          )
+        )
+        .setDepth(8);
+
+    this.tweens.add({
+      targets: spray,
+      x:
+        spray.x -
+        direction *
+        Phaser.Math.Between(10, 24),
+      y:
+        spray.y -
+        Phaser.Math.Between(3, 10),
+      scale:
+        Phaser.Math.FloatBetween(
+          1.4,
+          2.2
+        ),
+      alpha: 0,
+      duration:
+        Phaser.Math.Between(
+          150,
+          230
+        ),
+      ease: 'Quad.out',
+      onComplete: () => {
+        if (spray.active) {
+          spray.destroy();
+        }
+      }
+    });
+  }
+
+  this.waterDynamicFxTimer =
+    Phaser.Math.Linear(
+      220,
+      85,
+      speedRatio
+    );
+  }
+}
+
+  updateRelayPuzzleTimer() {
+  const ui =
+    this.relayPuzzleUI;
+
+  if (
+    !ui?.timer ||
+    !this.relayPuzzleActive ||
+    ui.solved
+  ) {
+    return;
+  }
+
+const elapsedMs =
+  Math.max(
+    0,
+    this.time.now -
+      (
+        this.relayPuzzleStartedAt ||
+        this.time.now
+      )
+  );
+
+const elapsedSeconds =
+  elapsedMs / 1000;
+
+const displayElapsedSeconds =
+  Math.floor(elapsedSeconds);
+
+const minutes =
+  String(
+    Math.floor(
+      displayElapsedSeconds / 60
+    )
+  ).padStart(2, '0');
+
+const seconds =
+  String(
+    displayElapsedSeconds % 60
+  ).padStart(2, '0');
+
+ui.timer.setText(
+  `TIME ${minutes}:${seconds}`
+);
+
+const type =
+  this.relayPuzzleType ||
+  'circuit';
+
+const difficulty =
+  Number(
+    this.relayPuzzleData?.difficulty ??
+    this.relayPuzzleGate?.getData?.('difficulty')
+  ) || 1;
+
+const timeLimitS =
+  type === 'code'
+    ? difficulty >= 3 ? 5.5 : 7
+    : type === 'sequence'
+      ? difficulty >= 3 ? 7 : 9
+      : type === 'tiles'
+        ? difficulty >= 3 ? 7 : 9
+        : type === 'frequency'
+          ? difficulty >= 3 ? 8 : 10
+          : type === 'grid'
+            ? difficulty >= 3 ? 8 : 10
+            : type === 'final'
+              ? difficulty >= 3 ? 7 : 9
+              : 8;
+
+const warningS =
+  timeLimitS * 0.72;
+
+const criticalS =
+  timeLimitS;
+
+const timerBand =
+  elapsedSeconds >= criticalS
+    ? 3
+    : elapsedSeconds >= warningS
+      ? 2
+      : 1;
+
+ui.timer.setColor(
+  timerBand === 3
+    ? '#ff826e'
+    : timerBand === 2
+      ? '#ffd06e'
+      : '#8df4ff'
+);
+
+if (
+  timerBand !==
+  this.relayPuzzleTimerBand
+) {
+  this.relayPuzzleTimerBand =
+    timerBand;
+
+  if (
+    timerBand >= 2
+  ) {
+    this.tweens.killTweensOf(
+      ui.timer
+    );
+
+    ui.timer.setScale(1);
+
+    this.tweens.add({
+      targets: ui.timer,
+      scaleX:
+        timerBand === 3
+          ? 1.08
+          : 1.04,
+      scaleY:
+        timerBand === 3
+          ? 1.08
+          : 1.04,
+      duration:
+        timerBand === 3
+          ? 110
+          : 140,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+  } else {
+    this.tweens.killTweensOf(
+      ui.timer
+    );
+
+    ui.timer.setScale(1);
+  }
+
+  if (
+    elapsedSeconds >=
+      timeLimitS &&
+    this.relayPuzzleActive &&
+    !this.relayPuzzleUI?.solved
+  ) {
+    const timeoutSession =
+      this.relayPuzzleSession;
+
+    this.relayPuzzleTimerBand =
+      3;
+
+    this.relayPuzzleUI?.status
+      ?.setText(
+        'SECURITY TIMEOUT · RESET'
+      )
+      .setColor(
+        '#ff826e'
+      );
+
+    this.time.delayedCall(
+      450,
+      () => {
+        if (
+          timeoutSession !==
+            this.relayPuzzleSession ||
+          !this.relayPuzzleActive ||
+          this.relayPuzzleUI?.solved
+        ) {
+          return;
+        }
+
+        this.retryRelayPuzzle();
+      }
+    );
+  }
+}
+}
+
+// ============================================================
+// SIGNAL INTERFERENCE SYSTEM
+// Progressive signal corruption.
+// Visual only — never changes actual world coordinates.
+// ============================================================
+
+getSignalInterferenceLevel() {
+  const totalSignals =
+    Math.max(
+      1,
+      this.mission?.signals?.length || 1
+    );
+
+  const collected =
+    Phaser.Math.Clamp(
+      this.collected || 0,
+      0,
+      totalSignals
+    );
+
+  return Phaser.Math.Clamp(
+    collected / totalSignals,
+    0,
+    1
+  );
+}
+
+getSignalInterferenceTier(level) {
+  if (level >= 0.999) return 4;
+  if (level >= 0.72) return 3;
+  if (level >= 0.48) return 2;
+  if (level >= 0.25) return 1;
+  return 0;
+}
+
+  updateSignalInterferenceHUD() {
+  if (
+    !this.signalHUD ||
+    !this.signalHUD.active
+  ) {
+    return;
+  }
+
+  const level =
+    Phaser.Math.Clamp(
+      this.signalInterference || 0,
+      0,
+      1
+    );
+
+  const tier =
+    this.signalInterferenceTier ?? 0;
+
+  const percent =
+    Math.round(level * 100);
+
+  const status =
+    tier >= 4
+      ? 'OVERRIDE'
+      : tier >= 3
+        ? 'CRITICAL'
+        : tier >= 2
+          ? 'DESYNC'
+          : tier >= 1
+            ? 'NOISE'
+            : 'STABLE';
+
+  const color =
+    tier >= 4
+      ? '#ffe0a8'
+      : tier >= 3
+        ? '#e0a7ff'
+        : tier >= 2
+          ? '#b993ff'
+          : tier >= 1
+            ? '#8df4ff'
+            : '#8ba0b8';
+
+  if (this.signalHUD.percentText) {
+    this.signalHUD.percentText.setText(
+      `${percent}%`
+    );
+  }
+
+  if (this.signalHUD.statusText) {
+    this.signalHUD.statusText
+      .setText(status)
+      .setColor(color);
+  }
+
+  if (this.signalHUD.fill) {
+    this.signalHUD.fill.setDisplaySize(
+      Math.max(
+        2,
+        this.signalHUD.maxWidth * level
+      ),
+      this.signalHUD.height
+    );
+  }
+
+  if (
+    tier >= 3 &&
+    !this.motionReduced
+  ) {
+    const pulse =
+      0.5 +
+      Math.sin(
+        this.time.now / 110
+      ) * 0.5;
+
+    this.signalHUD.fill.setAlpha(
+      0.65 + pulse * 0.35
+    );
+  } else {
+    this.signalHUD.fill.setAlpha(1);
+  }
+}
+  
+ensureSignalInterferenceFX() {
+  if (
+    this.signalInterferenceObjects ||
+    !this.add
+  ) {
+    return;
+  }
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const overlay =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        width,
+        height,
+        0x7b4dff,
+        0
+      )
+      .setScrollFactor(0)
+      .setDepth(950);
+
+  const scanlines = [];
+
+  for (
+    let i = 0;
+    i < 7;
+    i++
+  ) {
+    const line =
+      this.add
+        .rectangle(
+          0,
+          0,
+          width,
+          i % 2 === 0 ? 2 : 1,
+          0xe0a7ff,
+          0
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(951);
+
+    scanlines.push(line);
+  }
+
+  const ghostA =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        width * 0.72,
+        height,
+        0xb993ff,
+        0
+      )
+      .setScrollFactor(0)
+      .setDepth(949);
+
+  const ghostB =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        width * 0.72,
+        height,
+        0x8df4ff,
+        0
+      )
+      .setScrollFactor(0)
+      .setDepth(948);
+
+  this.signalInterferenceObjects = {
+    overlay,
+    scanlines,
+    ghostA,
+    ghostB
+  };
+
+  this.events.once(
+    Phaser.Scenes.Events.SHUTDOWN,
+    () => {
+      this.signalInterferenceObjects = null;
+    }
+  );
+}
+
+triggerSignalInterferenceBurst(tier) {
+  if (
+    this.motionReduced ||
+    !this.cameras?.main
+  ) {
+    return;
+  }
+
+  const camera =
+    this.cameras.main;
+
+  const burstColor =
+    tier >= 4
+      ? 0xffe0a8
+      : tier >= 3
+        ? 0xe0a7ff
+        : tier >= 2
+          ? 0xb993ff
+          : 0x8df4ff;
+
+  camera.flash(
+    tier >= 4 ? 180 : 90,
+    (burstColor >> 16) & 255,
+    (burstColor >> 8) & 255,
+    burstColor & 255
+  );
+
+  if (
+    tier >= 3 &&
+    this.screenShake
+  ) {
+    this.shake(
+      90,
+      tier >= 4
+        ? 0.0028
+        : 0.0016
+    );
+  }
+
+  this.gadgetPulse(
+    burstColor,
+    tier >= 4 ? 18 : 10,
+    tier >= 4 ? 520 : 300
+  );
+}
+
+triggerSignalOverride() {
+  if (
+    this.signalOverrideTriggered
+  ) {
+    return;
+  }
+
+  this.signalOverrideTriggered =
+    true;
+
+  this.signalInterferencePulse =
+    1100;
+
+  this.playerCue(
+    'SIGNAL OVERRIDE',
+    '#e0a7ff'
+  );
+
+  this.game.events.emit(
+    'feedback',
+    'signal_override'
+  );
+
+  this.triggerSignalInterferenceBurst(
+    4
+  );
+
+  if (
+    this.motionReduced
+  ) {
+    return;
+  }
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  const shock =
+    this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        width,
+        height,
+        0xe0a7ff,
+        0.16
+      )
+      .setScrollFactor(0)
+      .setDepth(952);
+
+  this.tweens.add({
+    targets: shock,
+    alpha: 0,
+    duration: 520,
+    ease: 'Quad.out',
+    onComplete: () => {
+      if (shock?.active) {
+        shock.destroy();
+      }
+    }
+  });
+
+  this.tweens.add({
+    targets: this.player,
+    scaleX:
+      this.playerVisualBaseScaleX *
+      1.08,
+    scaleY:
+      this.playerVisualBaseScaleY *
+      0.94,
+    duration: 100,
+    yoyo: true,
+    ease: 'Quad.out'
+  });
+
+  // Full sync reveal.
+  this.time.delayedCall(
+    620,
+    () => {
+      if (
+        !this.scene?.isActive?.()
+      ) {
+        return;
+      }
+
+      this.signalInterferencePulse = 0;
+
+      if (
+        this.signalInterferenceObjects
+      ) {
+        const {
+          overlay,
+          ghostA,
+          ghostB
+        } =
+          this.signalInterferenceObjects;
+
+        overlay.setAlpha(0);
+
+        ghostA.setAlpha(0);
+        ghostB.setAlpha(0);
+      }
+
+      this.playerCue(
+        'SIGNAL SYNC COMPLETE',
+        '#8df4ff'
+      );
+
+      this.game.events.emit(
+        'feedback',
+        'signal_sync'
+      );
+    }
+  );
+}
+
+applySignalInterferenceVisuals(
+  level,
+  tier,
+  delta
+) {
+  this.ensureSignalInterferenceFX();
+
+  const fx =
+    this.signalInterferenceObjects;
+
+  if (!fx) {
+    return;
+  }
+
+  const width =
+    this.scale.width;
+
+  const height =
+    this.scale.height;
+
+  fx.overlay.setPosition(
+    width / 2,
+    height / 2
+  );
+
+  fx.overlay.setSize(
+    width,
+    height
+  );
+
+  fx.ghostA.setPosition(
+    width / 2 +
+      Math.sin(
+        this.time.now * 0.0031
+      ) *
+        (4 + level * 12),
+    height / 2
+  );
+
+  fx.ghostB.setPosition(
+    width / 2 +
+      Math.cos(
+        this.time.now * 0.0027
+      ) *
+        (3 + level * 9),
+    height / 2
+  );
+
+  const overlayAlpha =
+    tier === 0
+      ? 0
+      : tier === 1
+        ? 0.018
+        : tier === 2
+          ? 0.035
+          : tier === 3
+            ? 0.065
+            : 0.018;
+
+  fx.overlay
+    .setFillStyle(
+      tier >= 3
+        ? 0xb993ff
+        : 0x8df4ff,
+      overlayAlpha
+    );
+
+  fx.ghostA.setAlpha(
+    tier >= 3
+      ? 0.018 + level * 0.03
+      : 0
+  );
+
+  fx.ghostB.setAlpha(
+    tier >= 2
+      ? 0.012 + level * 0.02
+      : 0
+  );
+
+  const lineAlpha =
+    tier === 0
+      ? 0
+      : 0.025 +
+        level * 0.075;
+
+  fx.scanlines.forEach(
+    (line, index) => {
+      const y =
+        (
+          (
+            this.time.now *
+              (0.06 + level * 0.16)
+          ) +
+          index *
+            (height / 7)
+        ) %
+        height;
+
+      line.setPosition(
+        width / 2,
+        y
+      );
+
+      line.setSize(
+        width,
+        index % 2 === 0
+          ? 2
+          : 1
+      );
+
+      line.setAlpha(
+        index % 2 === 0
+          ? lineAlpha
+          : lineAlpha * 0.45
+      );
+    }
+  );
+
+  // Never touch actual signal coordinates.
+  if (this.signals) {
+    this.signals
+      .getChildren()
+      .forEach(
+        signal => {
+          if (!signal.active) {
+            return;
+          }
+
+          if (tier === 0) {
+            signal.clearTint();
+            return;
+          }
+
+          signal.setTint(
+            tier >= 3
+              ? 0xb993ff
+              : tier >= 2
+                ? 0xd1bcff
+                : 0x8df4ff
+          );
+        }
+      );
+  }
+
+  this.signalInterferenceJitter =
+    Phaser.Math.Linear(
+      0,
+      tier >= 3 ? 3.5 : 1.5,
+      level
+    );
+
+  if (
+    tier >= 2 &&
+    this.signalInterferenceJitter >
+      0
+  ) {
+    const jitter =
+      Phaser.Math.Between(
+        -this.signalInterferenceJitter,
+        this.signalInterferenceJitter
+      );
+
+    // Visual pulse only. No world movement.
+    if (
+      this.player?.active &&
+      Math.abs(jitter) > 0
+    ) {
+      this.player.setAngle(
+        Phaser.Math.Clamp(
+          jitter,
+          -2.5,
+          2.5
+        )
+      );
+    }
+  } else if (
+    this.player?.active
+  ) {
+   this.player.setAngle(
+  this.playerBaseAngle || 0
+);
+  }
+
+  // ============================================================
+  // MICRO GLITCH / RADIO STATIC
+  // ============================================================
+  if (
+    tier >= 2 &&
+    !this.motionReduced &&
+    Math.random() <
+      delta *
+        (0.00045 +
+          level * 0.0011)
+  ) {
+    const glitch =
+      this.add
+        .rectangle(
+          Phaser.Math.Between(
+            0,
+            this.scale.width
+          ),
+          Phaser.Math.Between(
+            0,
+            this.scale.height
+          ),
+          Phaser.Math.Between(
+            30,
+            180
+          ),
+          Phaser.Math.Between(
+            1,
+            4
+          ),
+          tier >= 3
+            ? 0xe0a7ff
+            : 0x8df4ff,
+          0.18
+        )
+        .setScrollFactor(0)
+        .setDepth(953);
+
+    this.tweens.add({
+      targets: glitch,
+      alpha: 0,
+      duration: Phaser.Math.Between(
+        45,
+        100
+      ),
+      onComplete: () => {
+        if (glitch?.active) {
+          glitch.destroy();
+        }
+      }
+    });
+  }
+
 }
 
   // ============================================================
+// SIGNAL INTERFERENCE · FAKE SIGNAL ECHO
+// Visual decoy only — never changes real signal coordinates.
+// ============================================================
+
+spawnSignalGhostEcho() {
+  if (
+    this.motionReduced ||
+    !this.signals ||
+    !this.player?.active
+  ) {
+    return;
+  }
+
+  const activeSignals =
+    this.signals
+      .getChildren()
+      .filter(
+        signal =>
+          signal.active
+      );
+
+  if (!activeSignals.length) {
+    return;
+  }
+
+  const realSignal =
+    Phaser.Utils.Array.GetRandom(
+      activeSignals
+    );
+
+  const angle =
+    Phaser.Math.FloatBetween(
+      0,
+      Math.PI * 2
+    );
+
+  const distance =
+    Phaser.Math.Between(
+      140,
+      300
+    );
+
+  const ghostX =
+    realSignal.x +
+    Math.cos(angle) *
+      distance;
+
+  const ghostY =
+    realSignal.y +
+    Math.sin(angle) *
+      distance;
+
+  const ghost =
+    this.add
+      .circle(
+        ghostX,
+        ghostY,
+        15,
+        0xb993ff,
+        0.16
+      )
+      .setScrollFactor(1)
+      .setDepth(10);
+
+  ghost.setStrokeStyle(
+    2,
+    0xe0a7ff,
+    0.78
+  );
+
+  const inner =
+    this.add
+      .circle(
+        ghostX,
+        ghostY,
+        5,
+        0xe0a7ff,
+        0.55
+      )
+      .setScrollFactor(1)
+      .setDepth(11);
+
+  this.tweens.add({
+    targets: ghost,
+    scale: 2.4,
+    alpha: 0,
+    duration: 520,
+    ease: 'Quad.out',
+    onComplete: () => {
+      if (ghost?.active) {
+        ghost.destroy();
+      }
+    }
+  });
+
+  this.tweens.add({
+    targets: inner,
+    scale: 1.8,
+    alpha: 0,
+    duration: 420,
+    ease: 'Quad.out',
+    onComplete: () => {
+      if (inner?.active) {
+        inner.destroy();
+      }
+    }
+  });
+}
+
+  updateSignalInterferenceEnemyFX(delta) {
+  if (
+    !this.enemies ||
+    this.motionReduced
+  ) {
+    return;
+  }
+
+  const level =
+    this.getSignalInterferenceLevel();
+
+  const tier =
+    this.getSignalInterferenceTier(
+      level
+    );
+
+  if (tier <= 0) {
+    return;
+  }
+
+  const now =
+    this.time.now;
+
+  this.enemies
+    .getChildren()
+    .forEach(enemy => {
+      if (!enemy?.active) {
+        return;
+      }
+
+      const indicator =
+        enemy.getData(
+          'indicator'
+        );
+
+      if (!indicator?.active) {
+        return;
+      }
+
+      const pulse =
+        0.5 +
+        Math.sin(
+          now /
+            (
+              tier >= 3
+                ? 85
+                : tier >= 2
+                  ? 120
+                  : 170
+            )
+        ) *
+        0.5;
+
+      const baseAlpha =
+        Phaser.Math.Linear(
+          0.18,
+          0.42,
+          level
+        );
+
+      const flicker =
+        tier >= 3
+          ? pulse
+          : 0.35 + pulse * 0.35;
+
+      indicator.setAlpha(
+        Phaser.Math.Clamp(
+          baseAlpha +
+            flicker * 0.22,
+          0.08,
+          0.72
+        )
+      );
+
+      indicator.setScale(
+        Phaser.Math.Linear(
+          1.0,
+          tier >= 4
+            ? 1.5
+            : tier >= 3
+              ? 1.28
+              : 1.12,
+          pulse
+        )
+      );
+
+      const color =
+        tier >= 4
+          ? 0xffe0a8
+          : tier >= 3
+            ? 0xe0a7ff
+            : tier >= 2
+              ? 0xb993ff
+              : 0x8df4ff;
+
+      indicator.setStrokeStyle(
+        tier >= 3 ? 1.8 : 1.2,
+        color,
+        tier >= 3
+          ? 0.95
+          : 0.72
+      );
+    });
+}
+
+updateSignalInterference(delta) {
+  if (
+    this.finished ||
+    this.respawning ||
+    this.cinematicActive ||
+    this.relayPuzzleActive
+  ) {
+    return;
+  }
+
+  const level =
+    this.getSignalInterferenceLevel();
+
+  const tier =
+    this.getSignalInterferenceTier(
+      level
+    );
+
+  const previousTier =
+    this.signalInterferenceTier;
+
+  this.signalInterference =
+    level;
+
+  this.signalInterferenceTier =
+    tier;
+
+  this.applySignalInterferenceVisuals(
+    level,
+    tier,
+    delta
+  );
+
+  this.updateSignalInterferenceHUD();
+  
+  // ------------------------------------------------------------
+// PERIODIC FAKE SIGNAL ECHO
+// Only appears once interference is meaningful.
+// ------------------------------------------------------------
+if (
+  tier >= 2 &&
+  !this.signalOverrideTriggered
+) {
+  this.signalGhostTimer =
+    Math.max(
+      0,
+      (this.signalGhostTimer || 0) -
+        delta
+    );
+
+  if (
+    this.signalGhostTimer <= 0
+  ) {
+    this.spawnSignalGhostEcho();
+
+    this.signalGhostTimer =
+      tier >= 3
+        ? 900
+        : 1450;
+  }
+} else {
+  this.signalGhostTimer = 0;
+}
+
+  if (
+    tier !== previousTier &&
+    previousTier >= 0
+  ) {
+    this.triggerSignalInterferenceBurst(
+      tier
+    );
+if (tier === 1) {
+  this.playerCue(
+    'SIGNAL NOISE DETECTED',
+    '#8df4ff'
+  );
+}
+
+if (tier === 2) {
+  this.playerCue(
+    'MAP DESYNC',
+    '#b993ff'
+  );
+
+  this.game.events.emit(
+    'tutorial',
+    'NAVIGATION SIGNALS UNSTABLE'
+  );
+}
+
+if (tier === 3) {
+  this.playerCue(
+    'CRITICAL SIGNAL',
+    '#e0a7ff'
+  );
+
+  this.game.events.emit(
+    'tutorial',
+    'SIGNAL ECHOES DETECTED'
+  );
+}
+  }
+
+  if (
+    tier >= 4 &&
+    !this.signalOverrideTriggered
+  ) {
+    this.triggerSignalOverride();
+  }
+}
+
+update(_, delta) {
+  if (
+    this.finished ||
+    this.respawning ||
+    this.cinematicActive
+  ) {
+    return;
+  }
+
+this.updateDynamicWaterFX(delta);
+
+// ============================================================
+// SIGNAL INTERFERENCE · CONTINUOUS UPDATE
+// ============================================================
+this.updateSignalInterference(delta);
+this.updateSignalInterferenceEnemyFX(delta);
+
+this.updateRelayGateInteraction();
+
+  if (this.relayPuzzleActive) {
+  this.elapsedMs +=
+    delta;
+
+  this.timeEmitTimer +=
+    delta;
+
+  if (
+    this.timeEmitTimer >=
+    100
+  ) {
+    this.timeEmitTimer = 0;
+
+    this.game.events.emit(
+      'time',
+      this.elapsedMs
+    );
+  }
+
+  this.updateRelayPuzzleTimer();
+  return;
+}
+  
+// ============================================================
 // CELESTIAL · ORBIT UPDATE
 // ============================================================
 
@@ -14103,8 +26533,6 @@ if (
   !this.motionReduced &&
   this.player?.active
 ) {
-  this.player.angle = 0;
-
   this.tweens.add({
     targets: this.player,
     scaleX:
@@ -14127,6 +26555,89 @@ if (
       )
       .setDepth(10);
 
+  /* DASH AFTER-IMAGE */
+
+  if (
+    !this.motionReduced &&
+    this.player?.active
+  ) {
+    const ghostA =
+      this.add
+        .sprite(
+          this.player.x -
+            (this.player.flipX ? -18 : 18),
+          this.player.y,
+          this.player.texture.key
+        )
+        .setFlipX(
+          this.player.flipX
+        )
+        .setAlpha(0.24)
+        .setTint(0x8df4ff)
+        .setScale(
+          this.player.scaleX,
+          this.player.scaleY
+        )
+        .setAngle(
+          this.player.angle
+        )
+        .setDepth(7);
+
+    const ghostB =
+      this.add
+        .sprite(
+          this.player.x -
+            (this.player.flipX ? -34 : 34),
+          this.player.y,
+          this.player.texture.key
+        )
+        .setFlipX(
+          this.player.flipX
+        )
+        .setAlpha(0.12)
+        .setTint(0xb9f5ff)
+        .setScale(
+          this.player.scaleX,
+          this.player.scaleY
+        )
+        .setAngle(
+          this.player.angle
+        )
+        .setDepth(6);
+
+    this.tweens.add({
+      targets: ghostA,
+      x:
+        ghostA.x -
+        (this.player.flipX ? -28 : 28),
+      alpha: 0,
+      scaleX:
+        ghostA.scaleX * 0.92,
+      scaleY:
+        ghostA.scaleY * 0.92,
+      duration: 170,
+      ease: 'Quad.out',
+      onComplete: () =>
+        ghostA.destroy()
+    });
+
+    this.tweens.add({
+      targets: ghostB,
+      x:
+        ghostB.x -
+        (this.player.flipX ? -34 : 34),
+      alpha: 0,
+      scaleX:
+        ghostB.scaleX * 0.88,
+      scaleY:
+        ghostB.scaleY * 0.88,
+      duration: 210,
+      ease: 'Quad.out',
+      onComplete: () =>
+        ghostB.destroy()
+    });
+  }
+
   this.tweens.add({
     targets: exitBurst,
     scaleX: 2.6,
@@ -14137,6 +26648,20 @@ if (
     onComplete: () =>
       exitBurst.destroy()
   });
+
+  // WORLD REACTION · DASH EXIT
+  this.worldLightPulse(
+    0x8df4ff,
+    0.14,
+    180,
+    38
+  );
+
+  this.worldLightFlash(
+    0x8df4ff,
+    0.045,
+    100
+  );
 }
 
 
@@ -14591,29 +27116,36 @@ if (!this.motionReduced) {
   );
 }
 
-this.ammoRecharge +=
-  delta;
-
 if (
-  this.ammo <
-    this.ammoMax &&
-  this.ammoRecharge >=
-    1050
+  this.ammo >=
+  this.ammoMax
 ) {
-  this.ammo++;
-  this.gadgetPulse(
-  0x8df4ff,
-  8,
-  260
-);
   this.ammoRecharge = 0;
+} else {
+  this.ammoRecharge +=
+    delta;
 
-  this.game.events.emit(
-    'ammo',
-    this.ammo /
-      this.ammoMax *
-      100
-  );
+  if (
+    this.ammoRecharge >=
+    1050
+  ) {
+    this.ammo++;
+
+    this.gadgetPulse(
+      0x8df4ff,
+      8,
+      260
+    );
+
+    this.ammoRecharge = 0;
+
+    this.game.events.emit(
+      'ammo',
+      this.ammo /
+        this.ammoMax *
+        100
+    );
+  }
 }
 
 this.updateBuilds();
@@ -14670,6 +27202,109 @@ const onGround =
   body.blocked.down ||
   body.touching.down;
 
+const justLeftGround =
+  this.wasGrounded &&
+  !onGround;
+
+  /* -------------------------------------------------
+   JUMP TAKEOFF FX
+   Purely visual — triggered when leaving ground.
+   ------------------------------------------------- */
+
+if (
+  !this.motionReduced &&
+  justLeftGround &&
+  body.velocity.y < -120 &&
+  this.player?.active
+) {
+  const takeoff =
+    this.add.circle(
+      this.player.x,
+      this.player.y + 27,
+      5,
+      0x8df4ff,
+      0.24
+    )
+    .setDepth(8);
+
+  // ============================================================
+  // JUMP TAKEOFF · MICRO SPARKS
+  // Small visible launch feedback.
+  // Visual only — no physics/input mutation.
+  // ============================================================
+  for (let i = 0; i < 3; i++) {
+    const spark =
+      this.add.circle(
+        this.player.x +
+          Phaser.Math.Between(-8, 8),
+        this.player.y + 27,
+        Phaser.Math.Between(1, 2),
+        0xe8fdff,
+        0.75
+      )
+      .setDepth(9);
+
+    this.tweens.add({
+      targets: spark,
+      x:
+        spark.x +
+        Phaser.Math.Between(-10, 10),
+      y:
+        spark.y +
+        Phaser.Math.Between(4, 10),
+      alpha: 0,
+      scale: 0.25,
+      duration: 160,
+      ease: 'Quad.out',
+      onComplete: () => {
+        if (spark?.active) {
+          spark.destroy();
+        }
+      }
+    });
+  }
+
+  takeoff.setStrokeStyle(
+    1.5,
+    0xe8fdff,
+    0.75
+  );
+
+  this.tweens.add({
+    targets: takeoff,
+    scaleX: 3.2,
+    scaleY: 0.45,
+    alpha: 0,
+    y: takeoff.y + 5,
+    duration: 145,
+    ease: 'Quad.out',
+    onComplete: () =>
+      takeoff.destroy()
+  });
+
+  const launchSpark =
+    this.add.rectangle(
+      this.player.x,
+      this.player.y + 28,
+      10,
+      2,
+      0xe8fdff,
+      0.32
+    )
+    .setDepth(9);
+
+  this.tweens.add({
+    targets: launchSpark,
+    scaleX: 1.8,
+    alpha: 0,
+    y: launchSpark.y + 7,
+    duration: 110,
+    ease: 'Quad.out',
+    onComplete: () =>
+      launchSpark.destroy()
+  });
+}
+
 const movingAgainstVelocity =
   (
     left &&
@@ -14699,12 +27334,34 @@ const acceleration =
       : 1
   );
 
+const wetGrip =
+  onGround &&
+  this.wetSurfaceActive
+    ? 0.28
+    : 1;
+
+const wetAcceleration =
+  onGround &&
+  this.wetSurfaceActive
+    ? acceleration * 0.82
+    : acceleration;
+
+const wetDeceleration =
+  onGround &&
+  this.wetSurfaceActive
+    ? RUNNER_TUNING.groundDeceleration * 0.16
+    : RUNNER_TUNING.groundDeceleration;
+
 if (left) {
   body
     .setAccelerationX(
-      -acceleration
+      -wetAcceleration
     )
-    .setDragX(0);
+    .setDragX(
+      this.wetSurfaceActive
+        ? wetGrip
+        : 0
+    );
 
   this.player.setFlipX(
     true
@@ -14712,9 +27369,13 @@ if (left) {
 } else if (right) {
   body
     .setAccelerationX(
-      acceleration
+      wetAcceleration
     )
-    .setDragX(0);
+    .setDragX(
+      this.wetSurfaceActive
+        ? wetGrip
+        : 0
+    );
 
   this.player.setFlipX(
     false
@@ -14724,7 +27385,7 @@ if (left) {
     .setAccelerationX(0)
     .setDragX(
       onGround
-        ? RUNNER_TUNING.groundDeceleration
+        ? wetDeceleration
         : 520
     );
 }
@@ -14874,6 +27535,8 @@ if (
   );
 }
 
+let grabTriggered = false;
+
 const grabPressed =
   Phaser.Input.Keyboard.JustDown(
     this.keys.SPACE
@@ -14893,6 +27556,10 @@ if (
     'ledgeGrab'
   )
 ) {
+  grabTriggered = true;
+
+  this.jumpBuffer = 0;
+
   body.setVelocityY(
     -120
   );
@@ -14929,6 +27596,7 @@ const canWallJump =
   this.wallJumpCooldown <= 0;
 
 if (
+  !grabTriggered &&
   this.jumpBuffer > 0 &&
   (
     this.coyote > 0 ||
@@ -15048,21 +27716,63 @@ burst.setDepth(11);
   } else {
     this.jumpsUsed++;
 
-    if (
-      this.jumpsUsed ===
-      2
-    ) {
-      this.leaveAfterimage(
-        0xffd06e
-      );
+  if (
+  this.jumpsUsed ===
+  2
+) {
+  this.leaveAfterimage(
+    0xffd06e
+  );
 
-      this.playerCue(
-        'DOUBLE JUMP',
-        '#ffd06e'
-      );
+  // ============================================================
+  // DOUBLE JUMP · AIR SPARKS
+  // Small visible mid-air energy burst.
+  // Visual only — no physics mutation.
+  // ============================================================
+  if (
+    !this.motionReduced &&
+    this.player?.active
+  ) {
+    for (let i = 0; i < 4; i++) {
+      const spark =
+        this.add.circle(
+          this.player.x +
+            Phaser.Math.Between(-7, 7),
+          this.player.y +
+            Phaser.Math.Between(8, 20),
+          Phaser.Math.Between(1, 2),
+          0xffd06e,
+          0.78
+        )
+        .setDepth(12);
 
+      this.tweens.add({
+        targets: spark,
+        x:
+          spark.x +
+          Phaser.Math.Between(-14, 14),
+        y:
+          spark.y +
+          Phaser.Math.Between(8, 20),
+        alpha: 0,
+        scale: 0.2,
+        duration: 180,
+        ease: 'Quad.out',
+        onComplete: () => {
+          if (spark?.active) {
+            spark.destroy();
+          }
+        }
+      });
+    }
+  }
+
+this.playerCue(
+  'DOUBLE JUMP'
+);
+      
       // ============================================================
-// DOUBLE JUMP · PREMIUM BOOST
+      // DOUBLE JUMP · PREMIUM BOOST
 // ============================================================
 
 if (
@@ -15209,69 +27919,202 @@ if (
   }
 }
 
-const slidePressed =
-  this.keys.S.isDown &&
+// ============================================================
+// CROUCH / SLIDE INPUT
+// S = CROUCH
+// FAST + S + SLIDE ABILITY = SLIDE
+// ============================================================
+
+const applyPlayerCollider =
+  config => {
+    const footY =
+      body.bottom;
+
+    body.setSize(
+      config.width,
+      config.height
+    );
+
+    body.setOffset(
+      config.offsetX,
+      config.offsetY
+    );
+
+    // Keep the feet locked to the exact same world Y.
+    body.y =
+      footY -
+      body.height;
+
+    body.updateFromGameObject();
+  };
+
+const crouchHeld =
+  this.keys.S.isDown ||
+  this.mobileActions.crouch;
+
+const fastEnoughForSlide =
+  Math.abs(body.velocity.x) > 120;
+
+if (!crouchHeld) {
+  this.slideCrouchLocked = false;
+}
+
+const slideReady =
+  crouchHeld &&
+  !this.slideCrouchLocked &&
   onGround &&
-  Math.abs(
-    body.velocity.x
-  ) > 120 &&
-  this.abilities.has(
-    'slide'
-  ) &&
-  this.slideTimer <= 0;
+  fastEnoughForSlide &&
+  this.abilities.has('slide') &&
+  this.slideTimer <= 0 &&
+  this.energy >= 10;
+
+// ------------------------------------------------------------
+// ENTER CROUCH
+// ------------------------------------------------------------
 
 if (
-  slidePressed &&
+  crouchHeld &&
+  onGround &&
+  !slideReady &&
+  !this.playerCrouched
+) {
+  this.playerCrouched = true;
+
+applyPlayerCollider(
+  this.playerBodyConfig.crouching
+);
+
+  this.player.setScale(
+    this.playerVisualBaseScaleX * 1.04,
+    this.playerVisualBaseScaleY * 0.84
+  );
+
+  this.game.events.emit(
+    'feedback',
+    'crouch'
+  );
+}
+
+// MOBILE CROUCH INPUT
+// Do NOT clear here.
+// The mobile button must control this state with press/release.
+// ------------------------------------------------------------
+// STAND UP
+// ------------------------------------------------------------
+
+if (
+  !crouchHeld &&
+  this.playerCrouched
+) {
+  const standingWidth =
+    this.playerBodyConfig.standing.width;
+
+  const standingHeight =
+    this.playerBodyConfig.standing.height;
+
+  const standingOffsetX =
+    this.playerBodyConfig.standing.offsetX;
+
+  const standingOffsetY =
+    this.playerBodyConfig.standing.offsetY;
+
+  const crouchHeight =
+    this.playerBodyConfig.crouching.height;
+
+  const extraHeight =
+    standingHeight - crouchHeight;
+
+  const canStand =
+    !this.physics.world.overlapRect(
+      body.x,
+      body.y - extraHeight,
+      standingWidth,
+      extraHeight,
+      true,
+      true
+    );
+
+  if (canStand) {
+    this.playerCrouched = false;
+
+   applyPlayerCollider({
+  width: standingWidth,
+  height: standingHeight,
+  offsetX: standingOffsetX,
+  offsetY: standingOffsetY
+});
+
+    this.player.setScale(
+      this.playerVisualBaseScaleX,
+      this.playerVisualBaseScaleY
+    );
+  }
+}
+
+// ------------------------------------------------------------
+// SLIDE
+// ------------------------------------------------------------
+
+if (
+  slideReady &&
   this.useEnergy(
     10,
     'slide'
   )
 ) {
-  this.slideTimer =
-    360;
+  this.playerCrouched = true;
 
-  body.setVelocityX(
-    Math.sign(
-      body.velocity.x
-    ) *
-    560
+  applyPlayerCollider(
+    this.playerBodyConfig.crouching
   );
 
-this.player.setScale(
-  this.playerVisualBaseScaleX * 1.12,
-  this.playerVisualBaseScaleY * 0.82
+ this.slideTimer = 360;
+this.slideCrouchLocked = true;
+
+body.setVelocityX(
+  Math.sign(body.velocity.x) * 560
 );
 
-const slideBurst =
-  this.add
-    .circle(
-      this.player.x,
-      this.player.y + 22,
-      10,
-      0xffd06e,
-      .26
-    )
-    .setDepth(11);
+  this.tweens.add({
+    targets: this.player,
+    scaleX:
+      this.playerVisualBaseScaleX * 1.12,
+    scaleY:
+      this.playerVisualBaseScaleY * 0.82,
+    duration: 90,
+    yoyo: true,
+    ease: 'Quad.out'
+  });
 
-this.tweens.add({
-  targets: slideBurst,
-  scale: 3.6,
-  alpha: 0,
-  duration: 220,
-  onComplete: () =>
-    slideBurst.destroy()
-});
+  const slideBurst =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y + 22,
+        10,
+        0xffd06e,
+        0.26
+      )
+      .setDepth(11);
 
-this.tweens.add({
-  targets:
-    this.player,
-  scaleX:
-    this.playerVisualBaseScaleX,
-  scaleY:
-    this.playerVisualBaseScaleY,
-  duration: 220,
-  ease: 'Quad.out'
-});
+  this.tweens.add({
+    targets: slideBurst,
+    scale: 3.6,
+    alpha: 0,
+    duration: 220,
+    onComplete: () =>
+      slideBurst.destroy()
+  });
+
+  this.tweens.add({
+    targets: this.player,
+    scaleX:
+      this.playerVisualBaseScaleX,
+    scaleY:
+      this.playerVisualBaseScaleY,
+    duration: 220,
+    ease: 'Quad.out'
+  });
 
   this.playerCue(
     'SLIDE',
@@ -15283,7 +28126,6 @@ this.tweens.add({
     'slide'
   );
 }
-
 this.slideTimer =
   Math.max(
     0,
@@ -15394,19 +28236,11 @@ if (
   this.dashTimer =
     RUNNER_TUNING.dashDurationMs;
 
-  // ============================================================
+// ============================================================
 // PLAYER · DASH TILT
 // ============================================================
-
-if (
-  this.player &&
-  !this.motionReduced
-) {
-  this.player.angle =
-    direction > 0
-      ? 7
-      : -7;
-}
+// Final angle is handled by the centralized SPEED LEAN / AIR TILT
+// system below. Dash itself keeps its physics unchanged.
 
   // ============================================================
 // DASH · CAMERA IMPACT
@@ -15630,8 +28464,32 @@ scaleY:
     });
   }
 
- this.landingTimer =
-  hardLanding ? 135 : 105;
+  // WORLD REACTION · LANDING
+  this.worldLightPulse(
+    hardLanding
+      ? 0xffd06e
+      : 0x8df4ff,
+    hardLanding
+      ? 0.20
+      : 0.10,
+    hardLanding
+      ? 280
+      : 180,
+    hardLanding
+      ? 54
+      : 34
+  );
+
+  if (hardLanding) {
+    this.worldLightFlash(
+      0xffd06e,
+      0.055,
+      135
+    );
+  }
+
+  this.landingTimer =
+    hardLanding ? 135 : 105;
 
 // ============================================================
 // PLAYER · LANDING SHOCKWAVE
@@ -15702,6 +28560,63 @@ if (
     'runner-dash',
     true
   );
+
+  // ============================================================
+  // PLAYER · DASH ENERGY STREAK
+  // Visual only — does not modify dash physics.
+  // ============================================================
+  if (
+    !this.motionReduced &&
+    this.player?.active
+  ) {
+    this.dashFxTimer =
+      Math.max(
+        0,
+       this.dashFxTimer -
+        delta
+      );
+
+    if (
+      this.dashFxTimer <= 0
+    ) {
+        // Trail always spawns behind the runner.
+    const dashDirection =
+  this.player.body?.velocity?.x >= 0
+    ? 1
+    : -1;
+
+      const streak =
+        this.add
+          .circle(
+            this.player.x -
+              dashDirection * 10,
+            this.player.y + 4,
+            4,
+            0x8df4ff,
+            0.26
+          )
+          .setDepth(9);
+
+      streak.scaleX = 1.8;
+      streak.scaleY = 0.7;
+
+      this.tweens.add({
+        targets: streak,
+        x:
+          streak.x +
+          dashDirection * 34,
+        scaleX: 0.35,
+        scaleY: 1.8,
+        alpha: 0,
+        duration: 120,
+        ease: 'Quad.out',
+        onComplete: () =>
+          streak.destroy()
+      });
+
+      this.dashFxTimer = 38;
+      }
+  }
 } else if (
   this.wallJumpTimer > 0
 ) {
@@ -15826,49 +28741,8 @@ const apexRatio =
 const rising =
   body.velocity.y < 0;
 
-const targetAirScaleX =
-  this.playerVisualBaseScaleX *
-  (
-    1 +
-    (
-      rising
-        ? 0.022
-        : 0.042
-    ) * airRatio +
-    apexRatio * 0.018
-  );
-
-const targetAirScaleY =
-  this.playerVisualBaseScaleY *
-  (
-    1 -
-    (
-      rising
-        ? 0.028
-        : 0.058
-    ) * airRatio +
-    apexRatio * 0.012
-  );
-
-  this.player.scaleX =
-  Phaser.Math.Linear(
-    this.player.scaleX,
-    targetAirScaleX,
-    Math.min(
-      1,
-      delta * 0.018
-    )
-  );
-
-  this.player.scaleY =
-    Phaser.Math.Linear(
-      this.player.scaleY,
-      targetAirScaleY,
-      Math.min(
-        1,
-        delta * 0.018
-      )
-    );
+  // Airborne state is handled by the final SPEED LEAN / AIR TILT
+  // transform below. No competing scale target is created here.
 }
   
 } else if (
@@ -15906,91 +28780,181 @@ if (
       1
     );
 
-  this.player.scaleX =
-    Phaser.Math.Linear(
-      this.player.scaleX,
-      this.playerVisualBaseScaleX *
-        (1 + runPulse * 0.025),
-      Math.min(
-        1,
-        delta * 0.02
-      )
-    );
+  // Run speed is represented by animation rate.
+  // Final visual scaling is handled by SPEED LEAN / AIR TILT below.
 
-  const runRate =
+  const targetRunRate =
     Phaser.Math.Linear(
       11,
       17,
       runPulse
     );
 
-  if (
-    this.player.anims?.currentAnim?.key ===
+  // Smooth animation-speed response.
+  // Prevents visible stepping when player speed changes rapidly.
+  this.runnerAnimRate =
+    Phaser.Math.Linear(
+      this.runnerAnimRate,
+      targetRunRate,
+      Math.min(
+        1,
+        delta * 0.012
+      )
+    );
+
+ if (
+  this.player.anims?.currentAnim?.key ===
+  'runner-run'
+) {
+  this.player.anims.msPerFrame =
+    1000 /
+    this.runnerAnimRate;
+}
+
+/* -------------------------------------------------
+   FOOTSTEP IMPACT
+   Purely visual — synced to run animation.
+   ------------------------------------------------- */
+
+if (
+  !this.motionReduced &&
+  onGround &&
+  Math.abs(body.velocity.x) > 90 &&
+  this.player?.active &&
+  this.player.anims?.currentAnim?.key ===
     'runner-run'
+) {
+  const currentFrame =
+    this.player.anims.currentFrame?.index ??
+    0;
+
+  if (
+    currentFrame !==
+    this.lastRunFrame
   ) {
-    this.player.anims.msPerFrame =
-      1000 / runRate;
+    const frameChanged =
+      this.lastRunFrame !== -1;
+
+    this.lastRunFrame =
+      currentFrame;
+
+    if (
+      frameChanged &&
+      (currentFrame === 0 ||
+       currentFrame === 1)
+    ) {
+      const direction =
+        Math.sign(body.velocity.x) || 1;
+
+      const stepRatio =
+        Phaser.Math.Clamp(
+          Math.abs(body.velocity.x) /
+            RUNNER_TUNING.maxRunSpeed,
+          0,
+          1
+        );
+
+      const stepX =
+        this.player.x +
+        direction * 4;
+
+      const stepY =
+        this.player.y + 30;
+
+      const stepRing =
+        this.add.circle(
+          stepX,
+          stepY,
+          Phaser.Math.Linear(
+            3.5,
+            5.5,
+            stepRatio
+          ),
+          0x8df4ff,
+          Phaser.Math.Linear(
+            0.20,
+            0.34,
+            stepRatio
+          )
+        )
+        .setDepth(8);
+
+      stepRing.setStrokeStyle(
+        1.2,
+        0xb9f5ff,
+        0.72
+      );
+
+      this.tweens.add({
+        targets: stepRing,
+        scaleX: 2.5,
+        scaleY: 0.55,
+        alpha: 0,
+        y: stepY + 3,
+        duration: Phaser.Math.Linear(
+          150,
+          105,
+          stepRatio
+        ),
+        ease: 'Quad.out',
+        onComplete: () =>
+          stepRing.destroy()
+      });
+
+      const spark =
+        this.add.rectangle(
+          stepX -
+            direction * 3,
+          stepY,
+          Phaser.Math.Between(
+            5,
+            9
+          ),
+          1.5,
+          0xe8fdff,
+          Phaser.Math.Linear(
+            0.22,
+            0.48,
+            stepRatio
+          )
+        )
+        .setDepth(9);
+
+      this.tweens.add({
+        targets: spark,
+        x:
+          spark.x -
+          direction *
+            Phaser.Math.Between(
+              10,
+              18
+            ),
+        y:
+          spark.y -
+          Phaser.Math.Between(
+            3,
+            7
+          ),
+        alpha: 0,
+        duration: 120,
+        ease: 'Quad.out',
+        onComplete: () =>
+          spark.destroy()
+      });
+    }
   }
 }
   
- } else {
+} else {
   this.player.play(
     'runner-idle',
     true
   );
 
-  // ============================================================
-  // PLAYER · RUN → IDLE TRANSITION
-  // ============================================================
-
-  if (
-    !this.motionReduced &&
-    this.player?.active
-  ) {
-    const idleVelocity =
-      Math.abs(
-        body.velocity.x
-      );
-
-    const idleSnap =
-      Phaser.Math.Clamp(
-        idleVelocity / 35,
-        0,
-        1
-      );
-
-    this.player.scaleX =
-      Phaser.Math.Linear(
-        this.player.scaleX,
-        this.playerVisualBaseScaleX *
-          (
-            1 +
-            idleSnap * 0.018
-          ),
-        Math.min(
-          1,
-          delta * 0.025
-        )
-      );
-
-    this.player.scaleY =
-      Phaser.Math.Linear(
-        this.player.scaleY,
-        this.playerVisualBaseScaleY *
-          (
-            1 -
-            idleSnap * 0.012
-          ),
-        Math.min(
-          1,
-          delta * 0.025
-        )
-      );
-  }
-}
-
- 
-  // ============================================================
+// Run → idle uses the normal animation-state transition above.
+// No additional transform is required here.
+  
+   // ============================================================
 // PLAYER · SPEED LEAN / AIR TILT
 // ============================================================
 
@@ -16019,6 +28983,12 @@ if (
       8
     );
 
+  // When nearly stationary, return to a clean neutral silhouette.
+  const neutralizedAngle =
+    speedRatio < 0.08
+      ? 0
+      : targetAngle;
+
   const targetScaleX =
     this.playerVisualBaseScaleX *
     (
@@ -16032,48 +29002,48 @@ if (
       1 -
       speedRatio * 0.025
     );
-
-  this.player.angle =
-    Phaser.Math.Linear(
-      this.player.angle,
-      targetAngle,
-      Math.min(
-        1,
-        delta * 0.012
+const airTilt =
+  Math.abs(vy) > 80 &&
+  speedRatio > 0.12
+    ? Phaser.Math.Clamp(
+        vx * 0.008,
+        -5,
+        5
       )
-    );
+    : 0;
 
-  this.player.scaleX =
-    Phaser.Math.Linear(
-      this.player.scaleX,
-      targetScaleX,
-      Math.min(
-        1,
-        delta * 0.018
-      )
-    );
+const finalAngle =
+  neutralizedAngle + airTilt;
 
-  this.player.scaleY =
-    Phaser.Math.Linear(
-      this.player.scaleY,
-      targetScaleY,
-      Math.min(
-        1,
-        delta * 0.018
-      )
-    );
+this.player.angle =
+  Phaser.Math.Linear(
+    this.player.angle,
+    finalAngle,
+    Math.min(
+      1,
+      delta * 0.012
+    )
+  );
 
-  if (Math.abs(vy) > 80) {
-    this.player.angle =
-      Phaser.Math.Linear(
-        this.player.angle,
-        vx * 0.012,
-        Math.min(
-          1,
-          delta * 0.015
-        )
-      );
-  }
+this.player.scaleX =
+  Phaser.Math.Linear(
+    this.player.scaleX,
+    targetScaleX,
+    Math.min(
+      1,
+      delta * 0.018
+    )
+  );
+
+this.player.scaleY =
+  Phaser.Math.Linear(
+    this.player.scaleY,
+    targetScaleY,
+    Math.min(
+      1,
+      delta * 0.018
+    )
+  );
 }
   
 this.dustTimer -=
@@ -16095,9 +29065,7 @@ if (
   this.dustTimer = 90;
 }
 
-this.speedTimer -=
-  delta;
-
+this.speedTimer -= delta;
 if (
   !this.motionReduced &&
   Math.abs(
@@ -16226,6 +29194,181 @@ const velocityX =
 
 const velocityY =
   body.velocity.y;
+
+/*
+ * ============================================================
+ * SPEED-REACTIVE KINETIC TRAIL
+ * Visual only — no physics changes.
+ * ============================================================
+ */
+
+const speedAbs =
+  Math.abs(velocityX);
+
+const speedRatio =
+  Phaser.Math.Clamp(
+    speedAbs /
+      RUNNER_TUNING.maxRunSpeed,
+    0,
+    1.8
+  );
+
+  if (
+  !this.motionReduced &&
+  speedRatio > 0.72 &&
+  this.player?.active
+) {
+  this.kineticTrailTimer =
+    Math.max(
+      0,
+      this.kineticTrailTimer -
+        delta
+    );
+
+  if (
+    this.kineticTrailTimer <= 0
+  ) {
+    this.kineticTrailTimer =
+      Phaser.Math.Linear(
+        90,
+        42,
+        Phaser.Math.Clamp(
+          speedRatio - .72,
+          0,
+          1
+        )
+      );
+
+    const direction =
+      velocityX >= 0
+        ? 1
+        : -1;
+
+    const streak =
+      this.add
+        .rectangle(
+          this.player.x -
+            direction * 24,
+          this.player.y +
+            Phaser.Math.Between(
+              -10,
+              10
+            ),
+          Phaser.Math.Linear(
+            18,
+            42,
+            Phaser.Math.Clamp(
+              speedRatio - .72,
+              0,
+              1
+            )
+          ),
+          Phaser.Math.Between(
+            1,
+            3
+          ),
+          0x8df4ff,
+          Phaser.Math.Linear(
+            .10,
+            .24,
+            Phaser.Math.Clamp(
+              speedRatio - .72,
+              0,
+              1
+            )
+          )
+        )
+        .setOrigin(.5)
+        .setDepth(8);
+
+    this.tweens.add({
+      targets: streak,
+      x:
+        streak.x -
+        direction * 38,
+      scaleX: .35,
+      alpha: 0,
+      duration: 150,
+      ease: 'Quad.out',
+            onComplete: () =>
+        streak.destroy()
+    });
+  }
+}
+
+/*
+ * ============================================================
+ * GROUND ENERGY FLOW
+ * Purely visual — follows player movement.
+ * ============================================================
+ */
+
+if (
+  !this.motionReduced &&
+  onGround &&
+  Math.abs(velocityX) > 120 &&
+  this.player?.active
+) {
+  this.groundFxTimer =
+    Math.max(
+      0,
+      (this.groundFxTimer || 0) -
+        delta
+    );
+
+  if (
+    this.groundFxTimer <= 0
+  ) {
+    this.groundFxTimer =
+      Phaser.Math.Linear(
+        120,
+        55,
+        Phaser.Math.Clamp(
+          speedRatio,
+          0,
+          1
+        )
+      );
+
+    const direction =
+      velocityX >= 0
+        ? 1
+        : -1;
+
+    const groundLine =
+      this.add
+        .rectangle(
+          this.player.x -
+            direction * 18,
+          this.player.y + 31,
+          Phaser.Math.Between(
+            18,
+            34
+          ),
+          2,
+          0x8df4ff,
+          .24
+        )
+        .setOrigin(.5)
+        .setDepth(7);
+
+    this.tweens.add({
+      targets: groundLine,
+      x:
+        groundLine.x -
+        direction * Phaser.Math.Between(
+          24,
+          42
+        ),
+      scaleX: .35,
+      alpha: 0,
+      duration: 180,
+      ease: 'Quad.out',
+      onComplete: () =>
+        groundLine.destroy()
+    });
+  }
+}
 
 const dashActive =
   this.dashTimer > 0;
@@ -16408,17 +29551,13 @@ this.cameras.main
     this.cameraZoom
   );
 
-this.blaster.setPosition(
-  this.player.x +
-    (
-      this.player.flipX
-        ? -22
-        : 22
-    ),
-  this.player.y + 4
-).setFlipX(
-  this.player.flipX
-);
+if (this.blaster?.active && this.player?.active) {
+  this.blaster.setPosition(
+    this.player.x +
+      (this.player.flipX ? -22 : 22),
+    this.player.y + 4
+  ).setFlipX(this.player.flipX);
+}
 
 this.updateChaser(
   delta
@@ -16427,22 +29566,37 @@ this.updateChaser(
 this.wasGrounded =
   onGround;
 
+const deathY =
+  Number.isFinite(this.mission?.deathY)
+    ? this.mission.deathY
+    : 850;
+
 if (
-  this.player.y > 805
+  this.player.y > deathY &&
+  !this.waterAttackActive
 ) {
   this.fail(
-    'The rain swallowed the route below.'
+    'The route vanished below.'
   );
 }
 
+const spawnX =
+  Number(this.mission?.spawn?.x) || 0;
+
+const goalX =
+  Number(this.mission?.goal?.x) ||
+  spawnX + 1;
+
 const progress =
-  Math.min(
-    100,
+  Phaser.Math.Clamp(
     Math.round(
-      this.player.x /
-        Math.max(1, this.mission.goal.x) *
-        100
-    )
+      (
+        (this.player.x - spawnX) /
+        Math.max(1, goalX - spawnX)
+      ) * 100
+    ),
+    0,
+    100
   );
 
 if (
@@ -16459,4 +29613,8 @@ if (
 }
 
   }
+}
+
+}
+
 }
