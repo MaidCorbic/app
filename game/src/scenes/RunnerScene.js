@@ -4442,9 +4442,30 @@ this.surpriseCacheInteractionLocked = false;
     this.time.removeAllEvents();
     this.activeShark?.destroy();
 this.activeShark = null;
-    this.input.keyboard.off(
-      'keydown-SPACE',
-      this.cinematicSkipHandler
+   this.input.keyboard.once(
+  'keydown-SPACE',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.once(
+  'keydown-A',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.once(
+  'keydown-D',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.once(
+  'keydown-LEFT',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.once(
+  'keydown-RIGHT',
+  this.cinematicSkipHandler
+);
     );
     this.eventState.clear();
   }
@@ -22523,10 +22544,30 @@ if (this.player.body) {
     overlay.destroy(true);
     this.divineArrivalOverlay = null;
 
-    this.input.keyboard.off(
-      'keydown-SPACE',
-      this.cinematicSkipHandler
-    );
+  this.input.keyboard.off(
+  'keydown-SPACE',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.off(
+  'keydown-A',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.off(
+  'keydown-D',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.off(
+  'keydown-LEFT',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.off(
+  'keydown-RIGHT',
+  this.cinematicSkipHandler
+);
 
     this.cameras.main.startFollow(
       this.player,
