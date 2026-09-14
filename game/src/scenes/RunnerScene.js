@@ -34903,9 +34903,9 @@ if (
   !this.wasGrounded &&
   this.fallSpeed > 80
 ) {
-  const hardLanding =
-    this.fallSpeed >
-    260;
+ const hardLanding =
+  this.landingTimer > 0 &&
+  this.fallSpeed > 260;
 
  if (this.graphicsLevel >= 1) {
   this.dust.emitParticleAt(
