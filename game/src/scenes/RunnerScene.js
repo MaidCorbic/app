@@ -33569,13 +33569,17 @@ const body =
 
 const left =
   this.cursors.left.isDown ||
+  this.cursors.down.isDown ||
   this.keys.A.isDown ||
+  this.keys.S.isDown ||
   this.mobileDirection ===
     'left';
 
 const right =
   this.cursors.right.isDown ||
+  this.cursors.up.isDown ||
   this.keys.D.isDown ||
+  this.keys.W.isDown ||
   this.mobileDirection ===
     'right';
 
@@ -33997,9 +34001,6 @@ const keyboardPressed =
     this.cursors.up
   ) ||
   Phaser.Input.Keyboard.JustDown(
-    this.keys.W
-  ) ||
-  Phaser.Input.Keyboard.JustDown(
     this.keys.SPACE
   );
 
@@ -34008,23 +34009,11 @@ const keyboardReleased =
     this.cursors.up
   ) ||
   Phaser.Input.Keyboard.JustUp(
-    this.keys.W
-  ) ||
-  Phaser.Input.Keyboard.JustUp(
     this.keys.SPACE
   );
 
-const pressed =
-  keyboardPressed ||
-  this.mobileActions.jump;
-
-const released =
-  keyboardReleased ||
-  this.mobileActions.jumpReleased;
-
 const jumpHeld =
   this.cursors.up.isDown ||
-  this.keys.W.isDown ||
   this.keys.SPACE.isDown ||
   this.mobileActions.jumpHeld;
 
