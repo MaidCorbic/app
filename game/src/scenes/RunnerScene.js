@@ -4466,7 +4466,7 @@ this.input.keyboard.once(
   'keydown-RIGHT',
   this.cinematicSkipHandler
 );
-    );
+    
     this.eventState.clear();
   }
 );
