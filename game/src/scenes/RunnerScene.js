@@ -19833,37 +19833,37 @@ createOpeningCinematic() {
     figure
   ]);
 
-  // ------------------------------------------------------------
-  // PLAYER STARTS ABOVE SPAWN
-  // ------------------------------------------------------------
-  this.player
-    .setPosition(
-      spawnX,
-      spawnY - 230
-    )
-    .setAlpha(0)
-    .setAngle(-2)
-    .setScale(
-      this.playerVisualBaseScaleX,
-      this.playerVisualBaseScaleY
-    );
-
-  this.player.play(
-    'runner-fall',
-    true
+ // ------------------------------------------------------------
+// PLAYER STARTS DIRECTLY AT SPAWN
+// ------------------------------------------------------------
+this.player
+  .setPosition(
+    spawnX,
+    spawnY
+  )
+  .setAlpha(1)
+  .setAngle(0)
+  .setScale(
+    this.playerVisualBaseScaleX,
+    this.playerVisualBaseScaleY
   );
 
-  if (this.player.body) {
-    this.player.body.reset(
-      spawnX,
-      spawnY - 230
-    );
+this.player.play(
+  'runner-idle',
+  true
+);
 
-    this.player.body.setVelocity(
-      0,
-      0
-    );
-  }
+if (this.player.body) {
+  this.player.body.reset(
+    spawnX,
+    spawnY
+  );
+
+  this.player.body.setVelocity(
+    0,
+    0
+  );
+}
 
   // ============================================================
   // PHASE 1 · LIGHT APPEARS
@@ -19936,20 +19936,40 @@ createOpeningCinematic() {
       });
 
       this.player.setAlpha(1);
+this.player
+  .setPosition(
+    spawnX,
+    spawnY
+  )
+  .setAngle(0)
+  .setAlpha(1)
+  .setScale(
+    this.playerVisualBaseScaleX,
+    this.playerVisualBaseScaleY
+  )
+  .play(
+    'runner-idle',
+    true
+  );
 
-      this.tweens.add({
-        targets: this.player,
-        y: spawnY,
-        angle: 0,
-        duration: 720,
-        ease: 'Cubic.in'
-      });
+if (this.player.body) {
+  this.player.body.reset(
+    spawnX,
+    spawnY
+  );
+
+  this.player.body.setVelocity(
+    0,
+    0
+  );
+}
     }
   );
 
   // ============================================================
   // PHASE 3 · IMPACT
   // ============================================================
+  
   this.time.delayedCall(
     1800,
     () => {
@@ -20786,91 +20806,95 @@ createObjectiveHUD() {
   const compact =
     this.scale.width < 600;
 
-  const width =
-    Math.min(
-      this.scale.width - 32,
-      compact ? 260 : 340
-    );
+const width =
+  Math.min(
+    this.scale.width - 32,
+    compact ? 280 : 390
+  );
 
-  const x = 16;
-  const y = compact ? 82 : 24;
+const x = 16;
+const y = compact ? 82 : 24;
 
   const container =
     this.add.container(x, y)
       .setScrollFactor(0)
       .setDepth(100);
 
-  const plate =
-    this.add.rectangle(
-      width / 2,
-      30,
-      width,
-      60,
-      0x07101f,
-      0.92
-    )
+const plate =
+  this.add.rectangle(
+    width / 2,
+    34,
+    width,
+    68,
+    0x07101f,
+    0.95
+  )
     .setStrokeStyle(
       1,
       0x8df4ff,
       0.65
     );
 
-  const title =
-    this.add.text(
-      14,
-      10,
-      'OBJECTIVE',
-      {
-        fontFamily: 'DM Mono',
-        fontSize: compact
-          ? '8px'
-          : '9px',
-        color: '#8df4ff',
-        stroke: '#08101c',
-        strokeThickness: 3
+const title =
+  this.add.text(
+    14,
+    10,
+    'OBJECTIVE',
+    {
+      fontFamily: 'DM Mono',
+      fontSize: compact
+        ? '9px'
+        : '10px',
+      color: '#8df4ff',
+      stroke: '#08101c',
+      strokeThickness: 4
+    }
+  );
+
+const objective =
+  this.add.text(
+    14,
+    25,
+    this.mission?.story?.arrival ||
+      'REACH THE RELAY',
+    {
+      fontFamily: 'DM Mono',
+      fontSize: compact
+        ? '9px'
+        : '11px',
+      color: '#dffcff',
+      stroke: '#08101c',
+      strokeThickness: 4,
+      lineSpacing: 2,
+      wordWrap: {
+        width: Math.max(
+          150,
+          width - 122
+        ),
+        useAdvancedWrap: true
       }
-    );
+    }
+  );
 
-  const objective =
-    this.add.text(
-      14,
-      25,
-      this.mission?.story?.arrival ||
-        'REACH THE RELAY',
-      {
-        fontFamily: 'DM Mono',
-        fontSize: compact
-          ? '9px'
-          : '10px',
-        color: '#dffcff',
-        stroke: '#08101c',
-        strokeThickness: 3,
-        wordWrap: {
-          width: width - 100
-        }
-      }
-    );
+const progressBack =
+  this.add.rectangle(
+    width - 54,
+    25,
+    82,
+    7,
+    0x18283c,
+    1
+  );
 
-  const progressBack =
-    this.add.rectangle(
-      width - 54,
-      25,
-      72,
-      6,
-      0x18283c,
-      1
-    );
-
-  const progressFill =
-    this.add.rectangle(
-      width - 54,
-      25,
-      72,
-      6,
-      0x8df4ff,
-      1
-    )
-    .setOrigin(0.5);
+const progressFill =
+  this.add.rectangle(
+    width - 54,
+    25,
+    82,
+    7,
+    0x8df4ff,
+    1
+  )
 
   const progressText =
     this.add.text(
@@ -20904,12 +20928,11 @@ createDetectionHUD() {
   const compact =
     this.scale.width < 600;
 
-  const width =
-    Math.min(
-      this.scale.width - 32,
-      compact ? 190 : 230
-    );
-
+ const width =
+  Math.min(
+    this.scale.width - 32,
+    compact ? 210 : 260
+  );
   const x =
     this.scale.width - width - 16;
 
@@ -20924,53 +20947,53 @@ createDetectionHUD() {
     .setScrollFactor(0)
     .setDepth(100);
 
-  const plate =
-    this.add.rectangle(
-      width / 2,
-      30,
-      width,
-      60,
-      0x160b12,
-      0.92
-    )
+const plate =
+  this.add.rectangle(
+    width / 2,
+    34,
+    width,
+    68,
+    0x160b12,
+    0.96
+  )
     .setStrokeStyle(
       1,
       0xff5364,
       0.7
     );
 
-  const title =
-    this.add.text(
-      14,
-      9,
-      'DETECTION',
-      {
-        fontFamily: 'DM Mono',
-        fontSize: compact
-          ? '8px'
-          : '9px',
-        color: '#ff7180',
-        stroke: '#180910',
-        strokeThickness: 3
-      }
-    );
+const title =
+  this.add.text(
+    14,
+    9,
+    'DETECTION',
+    {
+      fontFamily: 'DM Mono',
+      fontSize: compact
+        ? '9px'
+        : '10px',
+      color: '#ff7180',
+      stroke: '#180910',
+      strokeThickness: 4
+    }
+  );
 
-  const status =
-    this.add.text(
-      14,
-      25,
-      'CLEAR',
-      {
-        fontFamily: 'DM Mono',
-        fontSize: compact
-          ? '9px'
-          : '10px',
-        color: '#dffcff',
-        stroke: '#180910',
-        strokeThickness: 3
-      }
-    );
-
+const status =
+  this.add.text(
+    14,
+    25,
+    'CLEAR',
+    {
+      fontFamily: 'DM Mono',
+      fontSize: compact
+        ? '9px'
+        : '11px',
+      color: '#dffcff',
+      stroke: '#180910',
+      strokeThickness: 4,
+      lineSpacing: 2
+    }
+  );
   const progressBack =
     this.add.rectangle(
       width - 52,
