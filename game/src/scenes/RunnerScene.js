@@ -5,20 +5,59 @@ import { enemyIntel, signatureThreats } from '../enemy-intel.js';
 
 // Kept together so movement can be tuned without touching level or state logic.
 const RUNNER_TUNING = {
-maxRunSpeed: 475,
-groundAcceleration: 4500,
-airAcceleration: 2500,
+
+  maxRunSpeed: 475,
+
+  // GROUND
+  groundAcceleration: 4500,
+  groundDeceleration: 3500,
+
+  // AIR MOVEMENT
+airAcceleration: 3150,
+airDeceleration: 1450,
+airTurnAcceleration: 4200,
+airMomentumRetention: 0.92,
 turnAcceleration: 5900,
-groundDeceleration: 3500,
-jumpVelocity: -735,
-jumpCutMultiplier: .44,
-coyoteMs: 135,
-jumpBufferMs: 145,
-fallGravity: 735,
-maxFallSpeed: 1120,
-dashSpeed: 720,
-dashDurationMs: 155,
-dashCooldownMs: 580,
+
+  // ADVANCED AIR STEERING
+airSteeringMin: 0.72,
+airSteeringMax: 1.08,
+airSteeringTurnBoost: 1.12,
+
+// MOBILE AIR STEERING
+mobileAirSteerResponse: 0.22,
+mobileAirSteerDeadzone: 8,
+
+  // JUMP
+  jumpVelocity: -750,
+  doubleJumpVelocity: -800,
+  jumpCutMultiplier: .44,
+
+  coyoteMs: 135,
+  jumpBufferMs: 145,
+
+  // VERTICAL AIR PHYSICS
+  riseGravity: 500,
+  fallGravity: 735,
+  fallGravityBoost: 1.16,
+  maxFallSpeed: 1120,
+
+  // APEX FLOAT
+  apexVelocityThreshold: 85,
+  apexGravityMultiplier: 0.58,
+
+  // FALL RAMP
+  fallRampStart: 260,
+  fallRampMax: 760,
+  fallRampBonus: 1.18,
+
+  // AIR DASH
+  dashSpeed: 720,
+  dashDurationMs: 155,
+  dashCooldownMs: 580,
+
+  // AIR DASH RECOVERY
+  airDashRecoveryVelocity: 90
 };
 
 const DISTRICT_VISUALS = {
@@ -87,7 +126,807 @@ const DISTRICT_VISUALS = {
 };
 
 export class RunnerScene extends Phaser.Scene {
-constructor() { super('runner'); }
+constructor() {
+  super('runner');
+
+  // ============================================================
+  // AI VOICE / COMMENTATOR
+  // Uses existing narration events.
+  // ============================================================
+this.voiceEnabled = true;
+this.voiceVolume = 1.0;
+this.voiceVoiceName = '';
+
+try {
+  if (
+    typeof window !== 'undefined' &&
+    window.localStorage
+  ) {
+    const savedVoiceEnabled =
+      window.localStorage.getItem(
+        'runner_voice_enabled'
+      );
+
+    const savedVoiceVolume =
+      Number(
+        window.localStorage.getItem(
+          'runner_voice_volume'
+        )
+      );
+
+    const savedVoiceName =
+      window.localStorage.getItem(
+        'runner_voice_name'
+      );
+
+    if (
+      savedVoiceEnabled !== null
+    ) {
+      this.voiceEnabled =
+        savedVoiceEnabled === '1';
+    }
+
+    if (
+      Number.isFinite(savedVoiceVolume)
+    ) {
+      this.voiceVolume =
+        Phaser.Math.Clamp(
+          savedVoiceVolume,
+          0,
+          1
+        );
+    }
+
+    if (
+      typeof savedVoiceName === 'string'
+    ) {
+      this.voiceVoiceName =
+        savedVoiceName;
+    }
+  }
+} catch (error) {
+  console.warn(
+    '[AI VOICE] Failed to load saved settings:',
+    error
+  );
+}
+
+this.voiceQueue = [];
+this.voiceSpeaking = false;
+this.voiceVoicesChangedHandler = null;
+
+this.voiceLastText = '';
+this.voiceLastTextAt = 0;
+this.voiceLastAt = 0;
+this.voiceCooldownMs = 1800;
+this.voiceRepeatLockMs = 2600;
+
+  // Browser TTS voices loaded by setupNarrationVoice().
+  this.voiceVoices = [];
+
+  this.voiceProfile = {
+  type: 'MISSION',
+  rate: 1.02,
+  pitch: 0.92,
+  volume: 0.82
+};
+}
+
+setVoiceEnabled(enabled) {
+  this.voiceEnabled =
+    Boolean(enabled);
+
+  try {
+    if (
+      typeof window !== 'undefined' &&
+      window.localStorage
+    ) {
+      window.localStorage.setItem(
+        'runner_voice_enabled',
+        this.voiceEnabled ? '1' : '0'
+      );
+    }
+  } catch (error) {
+    console.warn(
+      '[AI VOICE] Failed to save enabled state:',
+      error
+    );
+  }
+
+  if (!this.voiceEnabled) {
+    this.voiceQueue = [];
+
+    if (
+      typeof window !== 'undefined' &&
+      'speechSynthesis' in window
+    ) {
+      window.speechSynthesis.cancel();
+    }
+
+    this.voiceSpeaking = false;
+
+    this.voiceSerial =
+      (this.voiceSerial || 0) + 1;
+  }
+}
+
+setVoiceVolume(volume) {
+  const nextVolume =
+    Number(volume);
+
+  if (
+    !Number.isFinite(nextVolume)
+  ) {
+    return;
+  }
+
+  this.voiceVolume =
+    Phaser.Math.Clamp(
+      nextVolume,
+      0,
+      1
+    );
+
+  try {
+    if (
+      typeof window !== 'undefined' &&
+      window.localStorage
+    ) {
+      window.localStorage.setItem(
+        'runner_voice_volume',
+        String(this.voiceVolume)
+      );
+    }
+  } catch (error) {
+    console.warn(
+      '[AI VOICE] Failed to save volume:',
+      error
+    );
+  }
+}
+
+setVoiceByName(name) {
+  if (
+    typeof name !== 'string'
+  ) {
+    return;
+  }
+
+  this.voiceVoiceName =
+    name.trim();
+
+  try {
+    if (
+      typeof window !== 'undefined' &&
+      window.localStorage
+    ) {
+      window.localStorage.setItem(
+        'runner_voice_name',
+        this.voiceVoiceName
+      );
+    }
+  } catch (error) {
+    console.warn(
+      '[AI VOICE] Failed to save voice:',
+      error
+    );
+  }
+}
+
+getVoiceSettings() {
+  return {
+    enabled:
+      this.voiceEnabled,
+    volume:
+      this.voiceVolume,
+    voiceName:
+      this.voiceVoiceName
+  };
+}
+
+testVoice() {
+  if (
+    !this.voiceEnabled
+  ) {
+    return;
+  }
+
+  if (
+    typeof window === 'undefined' ||
+    !('speechSynthesis' in window)
+  ) {
+    console.warn(
+      '[AI VOICE] Speech synthesis is not available.'
+    );
+    return;
+  }
+
+  const testText =
+    'SYSTEM ONLINE. VOICE COMMS READY.';
+
+  window.speechSynthesis.cancel();
+
+  this.voiceSpeaking = false;
+
+  this.voiceSerial =
+    (this.voiceSerial || 0) + 1;
+
+  this.voiceQueue = [];
+
+  this.voiceLastText = '';
+  this.voiceLastTextAt = 0;
+
+  this.speakNarration(
+    testText
+  );
+}
+
+speakNarration(text) {
+  if (
+    !this.voiceEnabled ||
+    typeof window === 'undefined' ||
+    !('speechSynthesis' in window) ||
+    typeof text !== 'string'
+  ) {
+    return;
+  }
+
+  const cleanText =
+    text
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  if (!cleanText) {
+    return;
+  }
+
+  /*
+   * ============================================================
+   * AI VOICE POLISH · REACTION VARIANTS
+   * ============================================================
+   */
+  const voiceVariants = {
+    'PERFECT DODGE': [
+      'PERFECT DODGE',
+      'PERFECT',
+      'CLEAN DODGE'
+    ],
+
+    'LOW HEALTH': [
+      'LOW HEALTH',
+      'HEALTH CRITICAL',
+      'WARNING LOW HEALTH'
+    ],
+
+    'OVERDRIVE': [
+      'OVERDRIVE',
+      'OVERDRIVE ACTIVE',
+      'MAXIMUM OUTPUT'
+    ],
+
+    'BOSS ENGAGED': [
+      'BOSS ENGAGED',
+      'BOSS TARGET ACQUIRED',
+      'BOSS CONTACT'
+    ],
+
+    'BOSS PHASE TWO': [
+      'BOSS PHASE TWO',
+      'PHASE TWO',
+      'SECOND PHASE'
+    ],
+
+    'FINAL ENRAGE': [
+      'FINAL ENRAGE',
+      'ENRAGE PROTOCOL',
+      'FINAL PHASE'
+    ],
+
+    'BOSS DEFEATED': [
+      'BOSS DEFEATED',
+      'TARGET ELIMINATED',
+      'THREAT ELIMINATED'
+    ]
+  };
+
+  const variants =
+    voiceVariants[cleanText];
+
+  const voicedText =
+    Array.isArray(variants) &&
+    variants.length
+      ? variants[
+          Phaser.Math.Between(
+            0,
+            variants.length - 1
+          )
+        ]
+      : cleanText;
+
+  // ------------------------------------------------------------
+  // VOICE DIRECTOR // duplicate protection
+  // ------------------------------------------------------------
+
+const repeatNow =
+  this.time?.now ??
+  Date.now();
+
+const lastTextAt =
+  Number.isFinite(this.voiceLastTextAt)
+    ? this.voiceLastTextAt
+    : 0;
+
+const repeatLock =
+  Number.isFinite(this.voiceRepeatLockMs)
+    ? this.voiceRepeatLockMs
+    : 2600;
+
+if (
+ this.voiceLastText === voicedText &&
+  repeatNow - lastTextAt < repeatLock
+) {
+  return;
+}
+
+this.voiceLastText =
+  voicedText;
+
+this.voiceLastTextAt =
+  repeatNow;
+  // ------------------------------------------------------------
+  // VOICE PROFILE DETECTION
+  // ------------------------------------------------------------
+
+const upperText =
+  voicedText.toUpperCase();
+
+  let profile = {
+    type: 'MISSION',
+    rate: 1.02,
+    pitch: 0.92,
+    volume: 0.82
+  };
+
+  if (
+    upperText.includes('BOSS') ||
+    upperText.includes('TARGET ACQUIRED') ||
+    upperText.includes('FINAL')
+  ) {
+    profile = {
+      type: 'BOSS',
+      rate: 0.94,
+      pitch: 0.78,
+      volume: 1.0
+    };
+  } else if (
+    upperText.includes('CRITICAL') ||
+    upperText.includes('DANGER') ||
+    upperText.includes('LOW HEALTH') ||
+    upperText.includes('DETECTED')
+  ) {
+    profile = {
+      type: 'CRITICAL',
+      rate: 1.10,
+      pitch: 0.84,
+      volume: 1.0
+    };
+ } else if (
+  upperText.includes('OVERDRIVE')
+) {
+  profile = {
+    type: 'COMBAT',
+    rate: 1.04,
+    pitch: 1.00,
+    volume: 0.96
+  };
+} else if (
+  upperText.includes('DODGE') ||
+  upperText.includes('COMBO') ||
+  upperText.includes('KILL') ||
+  upperText.includes('HUNT')
+) {
+  profile = {
+    type: 'COMBAT',
+    rate: 1.08,
+    pitch: 0.98,
+    volume: 0.90
+  };
+  } else if (
+    upperText.includes('TUTORIAL') ||
+    upperText.includes('TAP') ||
+    upperText.includes('PRESS')
+  ) {
+    profile = {
+      type: 'TUTORIAL',
+      rate: 0.98,
+      pitch: 1.02,
+      volume: 0.74
+    };
+  }
+
+ this.voiceProfile =
+  profile;
+
+// ------------------------------------------------------------
+// VOICE DIRECTOR // smart cooldown
+// BOSS / CRITICAL can interrupt the normal cooldown.
+// COMBAT / MISSION / TUTORIAL are rate-limited.
+// ------------------------------------------------------------
+
+const priority =
+  profile.type === 'BOSS'
+    ? 4
+    : profile.type === 'CRITICAL'
+      ? 3
+      : profile.type === 'COMBAT'
+        ? 2
+        : profile.type === 'MISSION'
+          ? 1
+          : 0;
+
+const now =
+  this.time?.now ??
+  Date.now();
+
+const lastVoiceAt =
+  Number.isFinite(this.voiceLastAt)
+    ? this.voiceLastAt
+    : 0;
+
+const cooldown =
+  Number.isFinite(this.voiceCooldownMs)
+    ? this.voiceCooldownMs
+    : 1800;
+
+const bypassCooldown =
+  priority >= 3;
+
+// High-priority commentary takes control immediately.
+if (
+  bypassCooldown &&
+  this.voiceSpeaking &&
+  typeof window !== 'undefined' &&
+  'speechSynthesis' in window
+) {
+  this.voiceSerial =
+    (this.voiceSerial || 0) + 1;
+
+  window.speechSynthesis.cancel();
+  this.voiceSpeaking = false;
+}
+
+if (
+  !bypassCooldown &&
+  now - lastVoiceAt < cooldown
+) {
+  return;
+}
+
+// Prevent queue spam during fast gameplay.
+if (
+  this.voiceQueue.some(
+    entry =>
+      entry?.text === voicedText
+  )
+) {
+  return;
+}
+
+// Start cooldown only after the line is actually accepted.
+this.voiceLastAt =
+  now;
+// Keep only the latest 4 pending lines.
+if (
+  this.voiceQueue.length >= 4
+) {
+  this.voiceQueue.shift();
+}
+
+const entry = {
+  text: voicedText,
+  profile,
+  priority
+};
+
+this.voiceQueue.push(entry);
+
+this.voiceQueue.sort(
+  (a, b) =>
+    (b?.priority || 0) -
+    (a?.priority || 0)
+);
+
+// High-priority commentary owns the queue.
+// Discard stale low-priority lines when BOSS / CRITICAL arrives.
+if (
+  priority >= 3
+) {
+  this.voiceQueue =
+    this.voiceQueue.filter(
+      queued =>
+        (queued?.priority || 0) >= priority
+    );
+}
+
+  // Keep the queue bounded even during heavy combat.
+  if (this.voiceQueue.length > 4) {
+    this.voiceQueue =
+      this.voiceQueue.slice(0, 4);
+  }
+
+  this.pumpNarrationVoice();
+}
+
+pumpNarrationVoice() {
+  if (
+    !this.voiceEnabled ||
+    this.voiceSpeaking ||
+    !this.voiceQueue.length ||
+    typeof window === 'undefined' ||
+    !('speechSynthesis' in window)
+  ) {
+    return;
+  }
+
+let entry = null;
+
+while (
+  this.voiceQueue.length
+) {
+  const candidate =
+    this.voiceQueue.shift();
+
+  if (
+    candidate &&
+    typeof candidate.text === 'string' &&
+    candidate.text.trim()
+  ) {
+    entry =
+      candidate;
+    break;
+  }
+}
+
+if (!entry) {
+  return;
+}
+
+  const text =
+    entry.text;
+
+  const profile =
+    entry.profile || {
+      type: 'MISSION',
+      rate: 1.02,
+      pitch: 0.92,
+      volume: 0.82
+    };
+
+this.voiceSpeaking = true;
+
+const voiceSerial =
+  (this.voiceSerial || 0) + 1;
+
+this.voiceSerial =
+  voiceSerial;
+
+const utterance =
+  new SpeechSynthesisUtterance(
+    text
+  );
+
+  utterance.lang =
+    'en-US';
+
+  utterance.rate =
+    Number.isFinite(profile.rate)
+      ? profile.rate
+      : 1.02;
+
+  utterance.pitch =
+    Number.isFinite(profile.pitch)
+      ? profile.pitch
+      : 0.92;
+
+const profileVolume =
+  Number.isFinite(profile.volume)
+    ? profile.volume
+    : 0.82;
+
+const masterVolume =
+  Number.isFinite(this.voiceVolume)
+    ? this.voiceVolume
+    : 1.0;
+
+utterance.volume =
+  Phaser.Math.Clamp(
+    profileVolume * masterVolume,
+    0,
+    1
+  );
+
+  const voices =
+    Array.isArray(this.voiceVoices) &&
+    this.voiceVoices.length
+      ? this.voiceVoices
+      : window.speechSynthesis.getVoices();
+
+const selectedVoice =
+  this.voiceVoiceName
+    ? voices.find(
+        voice =>
+          voice.name ===
+          this.voiceVoiceName
+      )
+    : null;
+
+const preferredVoice =
+  selectedVoice ||
+  voices.find(
+    voice =>
+      voice.lang === 'en-US' &&
+      /Google|Microsoft|Natural|Samantha|Alex/i.test(
+        voice.name || ''
+      )
+  ) ||
+  voices.find(
+    voice =>
+      voice.lang === 'en-US'
+  ) ||
+  voices.find(
+    voice =>
+      voice.lang?.startsWith('en')
+  );
+  if (preferredVoice) {
+    utterance.voice =
+      preferredVoice;
+  }
+
+const currentVoiceSerial =
+  this.voiceSerial || 0;
+
+const finishVoice =
+  (delay = 0) => {
+    if (
+      (this.voiceSerial || 0) !==
+      currentVoiceSerial
+    ) {
+      return;
+    }
+
+    if (
+      this.scene?.isActive &&
+      !this.scene.isActive()
+    ) {
+      return;
+    }
+
+    this.voiceSpeaking =
+      false;
+
+    this.time?.delayedCall(
+      delay,
+      () => {
+        if (
+          (this.voiceSerial || 0) !==
+          currentVoiceSerial
+        ) {
+          return;
+        }
+
+        if (
+          this.scene?.isActive &&
+          !this.scene.isActive()
+        ) {
+          return;
+        }
+
+        this.pumpNarrationVoice();
+      }
+    );
+  };
+
+utterance.onend =
+  () => {
+    finishVoice(180);
+  };
+
+utterance.onerror =
+  () => {
+    finishVoice(120);
+  };
+
+try {
+  window.speechSynthesis.speak(
+    utterance
+  );
+} catch (error) {
+  console.warn(
+    '[AI VOICE] speechSynthesis.speak failed:',
+    error
+  );
+
+  this.voiceSpeaking =
+    false;
+
+  this.time?.delayedCall(
+    100,
+    () =>
+      this.pumpNarrationVoice()
+  );
+}
+}
+
+setupNarrationVoice() {
+  if (
+    typeof window === 'undefined' ||
+    !('speechSynthesis' in window)
+  ) {
+    return;
+  }
+
+  if (this.narrationHandler) {
+    this.game.events.off(
+      'narration',
+      this.narrationHandler
+    );
+  }
+
+  this.narrationHandler =
+    text => {
+      this.speakNarration(text);
+    };
+
+  this.game.events.on(
+    'narration',
+    this.narrationHandler
+  );
+
+  const loadVoices = () => {
+    const voices =
+      window.speechSynthesis.getVoices();
+
+    this.voiceVoices =
+      Array.isArray(voices)
+        ? voices
+        : [];
+  };
+
+  loadVoices();
+
+  if (
+    'onvoiceschanged' in
+    window.speechSynthesis
+  ) {
+    const previousHandler =
+      window.speechSynthesis.onvoiceschanged;
+
+    this.voiceVoicesChangedHandler =
+      () => {
+        loadVoices();
+
+        if (
+          typeof previousHandler === 'function' &&
+          previousHandler !==
+            this.voiceVoicesChangedHandler
+        ) {
+          try {
+            previousHandler.call(
+              window.speechSynthesis
+            );
+          } catch (error) {
+            console.warn(
+              '[AI VOICE] Previous voiceschanged handler failed:',
+              error
+            );
+          }
+        }
+      };
+
+    window.speechSynthesis.onvoiceschanged =
+      this.voiceVoicesChangedHandler;
+  }
+}
 
 createTextures() {
 const make = (key, width, height, draw) => {
@@ -2359,10 +3198,20 @@ this.screenShake = screenShake;
 this.motionReduced = reducedMotion;
 this.firstTimeTutorial = firstTimeTutorial;
 
+// ============================================================
+// OPENING CINEMATIC · MISSION 01 FIRST ENTRY ONLY
+// ============================================================
+this.cinematicActive =
+  this.mission.id === 'first-delivery' &&
+  firstTimeTutorial;
+
+this.isPlayerTransformLocked = false;
+
 this.collected = 0;
 this.secretsCollected = 0;
 this.playerBaseAngle = 0;
 this.enemyDefeats = 0;
+this.bossHitCount = 0;
 this.elapsedMs = 0;
 this.timeEmitTimer = 0;
 
@@ -2435,14 +3284,27 @@ this.gameOverRestarting = false;
 this.missionMedalsUI = null;
 this.missionMedalsClosing = false;
 this.respawning = false;
-this.respawnGrace = 0;
 
-this.cinematicActive = this.mission.id === 'first-delivery' && firstTimeTutorial;
+// ============================================================
+// PLAYER PRESENTATION FX
+// ============================================================
+this.divineArrivalPlayed = false;
+this.divineArrivalOverlay = null;
+
+this.dizzyStars = null;
+this.dizzyStarsTimer = 0;
+this.dizzyStarsIntensity = 0;
+this.dizzyStarsSerial = 0;
+this.celestialUpdateTimer = 0;
+
 this.eventState = new Map();
 this.mobileDirection = null;
+this.mobileAirDirection = 0;
 this.slideCrouchLocked = false;
 this.mobileActions = {
   jump: false,
+  jumpHeld: false,
+  jumpReleased: false,
   fire: false,
   sword: false,
   dash: false,
@@ -2455,6 +3317,7 @@ this.mobileActions = {
 };
 this.empTimer = 0; this.decoyTimer = 0; this.boosterTimer = 0;
 this.boosterAura = null; this.decoyBeacon = null; this.infoCard = null; this.landingTimer = 0;
+this.lastHardLanding = false;
 this.bossDefeated = false;
 this.bossPhaseTwo = false;
 this.bossVictorySequence = false;
@@ -2507,6 +3370,7 @@ this.fallSpeed = 0;
 this.cameraOffsetX = -85;
 this.cameraOffsetY = 65;
 this.cameraZoom = 1;
+this.firstPersonCamera = false;
 this.lastParallaxBoost = -1;
 this.cameraVelocityX = 0;
 this.jumpHeld = false;
@@ -2524,6 +3388,10 @@ this.weatherPhase = 0;
 this.routeHintTimer = 0;
 this.eventCheckTimer = 0;
 
+this.objectiveHUD = null;
+this.objectiveProgressBar = null;
+this.objectiveProgressText = null;;
+
 this.checkpoint = {
   x: this.mission.spawn.x,
   y: this.mission.spawn.y,
@@ -2531,6 +3399,8 @@ this.checkpoint = {
   secrets: new Set()
 };
 
+this.checkpointArrow = null;
+this.platformEmergencyTarget = null;
 }
 
 validateMission() {
@@ -2720,10 +3590,14 @@ if (!this.motionReduced) {
     255
   );
 
-  this.playerCue(
-    'PERFECT DODGE',
-    '#8df4ff'
-  );
+this.playerCue(
+  'PERFECT DODGE',
+  '#8df4ff'
+);
+
+this.speakNarration(
+  'PERFECT DODGE'
+);
 
   this.gadgetPulse(
     0x8df4ff,
@@ -3035,7 +3909,9 @@ this.loadout.upgrades?.includes('escape') ? .85 : 1
 }
 
 create() {
-this.validateMission();
+  this.setupNarrationVoice();
+
+  this.validateMission();
 const requiredTextures = [
   'runner-idle',
   'runner-run-a',
@@ -3097,6 +3973,10 @@ this.vaultCooldown = 0;
 this.airDashUsed = false;
 this.alarmTimer = 0;
 this.alarms = 0;
+
+this.detectionHUD = null;
+this.detectionProgressBar = null;
+this.detectionProgressText = null;
 this.chaseEscapes = 0;
 this.worldWidth = Math.max(this.mission.goal?.x ?? 1200, this.mission.spawn?.x ?? 0) + 180;
 this.physics.world.setBounds(
@@ -4729,220 +5609,1258 @@ this.parallaxLayers = [
 
 }
 
-createPlatforms() {
-this.platforms = this.physics.add.staticGroup();
+findNextSafePlatform(source) {
+  if (!source?.active || !this.platforms) {
+    return null;
+  }
 
-this.mission.platforms.forEach(
-  ([x, y, width, height, type]) => {
-    const isRoof = type === 'roof';
-    const blackout = this.mission.blackout;
+  const sourceRight =
+    source.x +
+    source.width / 2;
 
-    const platform = this.add
-      .rectangle(
-        x + width / 2,
-        y + height / 2,
-        width,
-        height,
-        isRoof
-          ? blackout
-            ? 0x17253a
-            : 0x293950
-          : blackout
-            ? 0x131d2f
-            : 0x202d43
-      )
-      .setStrokeStyle(
-        3,
-        isRoof
-          ? blackout
-            ? 0x537a94
-            : 0x93c6d4
-          : blackout
-            ? 0x3e5870
-            : 0x607b99
+const candidates =
+  this.platforms
+    .getChildren()
+    .filter(
+      platform => {
+        if (
+          !platform?.active ||
+          platform === source ||
+          platform.body?.enable === false
+        ) {
+          return false;
+        }
+
+        const dx =
+          platform.x -
+          source.x;
+
+        const dy =
+          platform.y -
+          source.y;
+
+        const maxForward =
+          900;
+
+        const maxVertical =
+          260;
+
+        /*
+         * Prefer platforms that are actually
+         * reachable in the forward route.
+         */
+        if (
+          dx < 40 ||
+          dx > maxForward
+        ) {
+          return false;
+        }
+
+        if (
+          Math.abs(dy) >
+          maxVertical
+        ) {
+          return false;
+        }
+
+        return true;
+      }
+    );
+
+  if (!candidates.length) {
+    return null;
+  }
+
+candidates.sort(
+  (a, b) => {
+    const aDx =
+      Math.max(
+        0,
+        a.x - source.x
       );
 
-    this.physics.add.existing(platform, true);
-    this.platforms.add(platform);
+    const bDx =
+      Math.max(
+        0,
+        b.x - source.x
+      );
 
-  
-   const detail = this.add.graphics();
+    const aDy =
+      Math.abs(
+        a.y - source.y
+      );
 
-// Platform inset
-detail
-  .fillStyle(
-    0x0b1422,
-    blackout ? .72 : .82
-  )
-  .fillRect(
-    x + 6,
-    y + 8,
-    Math.max(
-      0,
-      width - 12
-    ),
-    Math.max(
-      4,
-      height - 14
-    )
-  );
+    const bDy =
+      Math.abs(
+        b.y - source.y
+      );
 
-// Structural panel marks
-detail
-  .fillStyle(
-    0x111a29,
-    blackout ? .7 : .9
-  );
+    /*
+     * Forward distance is more important
+     * than raw Euclidean distance.
+     */
+    const aScore =
+      aDx +
+      aDy * 1.35;
 
-for (
-  let mark = x + 18;
-  mark < x + width - 10;
-  mark += 34
-) {
-  detail.fillRect(
-    mark,
-    y + 18,
-    Math.min(
-      16,
-      x + width - mark - 8
-    ),
-    5
-  );
-}
+    const bScore =
+      bDx +
+      bDy * 1.35;
 
-// Neon top edge
-detail
-  .fillStyle(
-    isRoof
-      ? 0x94f5ff
-      : 0x9eb6c8,
-    blackout
-      ? isRoof
-        ? .38
-        : .12
-      : isRoof
-        ? .62
-        : .22
-  )
-  .fillRect(
-    x,
-    y + 3,
-    width,
-    isRoof ? 4 : 3
-  );
-
-// Lower energy strip
-detail
-  .fillStyle(
-    isRoof
-      ? 0x8df4ff
-      : 0x536d84,
-    blackout
-      ? .18
-      : .12
-  )
-  .fillRect(
-    x + 10,
-    y + height - 5,
-    Math.max(
-      0,
-      width - 20
-    ),
-    2
-  );
-
-if (isRoof) {
-  // Roof frame
-  detail
-    .lineStyle(
-      2,
-      0xaabccc,
-      .8
-    )
-    .lineBetween(
-      x + 14,
-      y,
-      x + 14,
-      y - 18
-    )
-    .lineBetween(
-      x + 14,
-      y - 18,
-      x + width - 14,
-      y - 18
-    )
-    .lineBetween(
-      x + width - 14,
-      y - 18,
-      x + width - 14,
-      y
-    );
-
-  // Roof signal nodes
-  detail
-    .fillStyle(
-      0x8df4ff,
-      blackout ? .35 : .55
-    )
-    .fillCircle(
-      x + 14,
-      y - 18,
-      2
-    )
-    .fillCircle(
-      x + width - 14,
-      y - 18,
-      2
-    );
-}
+    return aScore - bScore;
   }
 );
 
-const props = this.add.graphics();
+  return candidates[0];
+}
 
-props
-  .fillStyle(0x192238)
-  .fillRect(90, 508, 72, 102)
-  .fillStyle(0xffbd5b)
-  .fillRect(104, 523, 44, 20);
+armPlatformCollapse(platform) {
+  if (
+    !platform?.active ||
+    !platform.getData('collapsible') ||
+    platform.getData('collapseState') !== 'ready'
+  ) {
+    return;
+  }
+  
+platform.setData(
+  'collapseState',
+  'warning'
+);
 
-props
-  .lineStyle(4, 0x7e91a2)
-  .lineBetween(
-    1070,
-    610,
-    1070,
-    430
-  )
-  .lineBetween(
-    1070,
-    430,
-    1180,
-    430
-  )
-  .lineBetween(
-    1180,
-    430,
-    1180,
-    610
+const warningGlow =
+  platform.getData('warningGlow');
+
+this.tweens.killTweensOf(
+  [
+    platform.getData('warning'),
+    warningGlow
+  ].filter(Boolean)
+);
+
+platform.getData('warning')
+  ?.setAlpha(0);
+
+warningGlow?.setAlpha(0);
+
+  const token =
+    (platform.getData('collapseToken') || 0) +
+    1;
+
+  platform.setData(
+    'collapseToken',
+    token
   );
 
-props
-  .fillStyle(0x34233a)
-  .fillRect(
-    1770,
-    455,
-    140,
-    58
-  )
-  .fillStyle(0xff7580)
-  .fillRect(
-    1784,
-    470,
-    112,
-    25
+  const width =
+    platform.width;
+
+  const height =
+    platform.height;
+
+  let warning =
+  platform.getData('warning');
+
+let cracks =
+  platform.getData('cracks');
+
+if (!warning || !warning.active) {
+  warning =
+    this.add
+      .rectangle(
+        platform.x,
+        platform.y,
+        Math.max(
+          20,
+          width - 4
+        ),
+        Math.max(
+          8,
+          height - 4
+        ),
+        0xff5364,
+        0.14
+      )
+      .setDepth(7);
+
+  warning.setStrokeStyle(
+    2,
+    0xff826e,
+    0.72
   );
 
+  platform.setData(
+    'warning',
+    warning
+  );
+}
+
+if (!cracks || !cracks.active) {
+  cracks =
+    this.add
+      .graphics()
+      .setDepth(8);
+
+  cracks.lineStyle(
+    2,
+    0xff5364,
+    0.95
+  );
+
+  const left =
+    platform.x -
+    width / 2;
+
+  const top =
+    platform.y -
+    height / 2;
+
+  cracks
+    .lineBetween(
+      left + width * .24,
+      top + 2,
+      left + width * .34,
+      top + height * .55
+    )
+    .lineBetween(
+      left + width * .34,
+      top + height * .55,
+      left + width * .27,
+      top + height - 2
+    )
+    .lineBetween(
+      left + width * .58,
+      top + 2,
+      left + width * .49,
+      top + height * .44
+    )
+    .lineBetween(
+      left + width * .49,
+      top + height * .44,
+      left + width * .67,
+      top + height - 2
+    )
+    .lineBetween(
+      left + width * .75,
+      top + 2,
+      left + width * .66,
+      top + height * .30
+    );
+
+  platform.setData(
+    'cracks',
+    cracks
+  );
+}
+
+warning
+  .setPosition(
+    platform.x,
+    platform.y
+  )
+  .setVisible(true)
+  .setAlpha(0.10)
+  .setScale(1);
+
+cracks
+  .setVisible(true)
+  .setAlpha(0.55)
+  .setPosition(0, 0);
+
+  this.playerCue(
+    'PLATFORM UNSTABLE · MOVE',
+    '#ff826e'
+  );
+
+  this.game.events.emit(
+    'feedback',
+    'platform_warning'
+  );
+
+ if (!this.motionReduced) {
+  this.tweens.add({
+    targets: warning,
+    alpha: {
+      from: 0.10,
+      to: 0.46
+    },
+    scaleX: {
+      from: 0.98,
+      to: 1.02
+    },
+    duration: 170,
+    yoyo: true,
+    repeat: 5,
+    ease: 'Sine.inOut'
+  });
+
+  this.tweens.add({
+    targets: warningGlow,
+    alpha: {
+      from: 0.03,
+      to: 0.18
+    },
+    scaleX: {
+      from: 0.96,
+      to: 1.04
+    },
+    duration: 120,
+    yoyo: true,
+    repeat: 7,
+    ease: 'Sine.inOut'
+  });
+
+  this.tweens.add({
+    targets: cracks,
+    alpha: {
+      from: 0.55,
+      to: 1
+    },
+    duration: 150,
+    yoyo: true,
+    repeat: 6,
+    ease: 'Sine.inOut'
+  });
+}
+
+  this.time.delayedCall(
+    1250,
+    () => {
+      if (
+        !platform?.active ||
+        platform.getData('collapseToken') !== token ||
+        platform.getData('collapseState') !== 'warning'
+      ) {
+        return;
+      }
+
+      this.collapsePlatform(
+        platform
+      );
+    }
+  );
+}
+
+collapsePlatform(platform) {
+  if (
+    !platform?.active ||
+    platform.getData('collapseState') !== 'warning'
+  ) {
+    return;
+  }
+
+  platform.setData(
+    'collapseState',
+    'broken'
+  );
+
+  platform.setData(
+    'collapseToken',
+    (platform.getData('collapseToken') || 0) + 1
+  );
+
+  const warning =
+    platform.getData('warning');
+
+  const cracks =
+    platform.getData('cracks');
+
+warning?.destroy?.();
+cracks?.destroy?.();
+
+const warningGlow =
+  platform.getData('warningGlow');
+
+this.tweens.killTweensOf(
+  warningGlow
+);
+
+warningGlow
+  ?.setVisible(false)
+  ?.setAlpha(0)
+  ?.setScale(1);
+
+platform.setData(
+  'warning',
+  null
+);
+
+platform.setData(
+  'cracks',
+  null
+);
+
+  const detail =
+    platform.getData('detail');
+
+  detail?.setVisible(false);
+
+  if (platform.body) {
+    platform.body.enable = false;
+  }
+
+  platform.setVisible(false);
+
+  const fragmentColor =
+    platform.getData(
+      'originalFillColor'
+    ) ?? 0x202d43;
+
+  const fragments = [];
+
+  const fragmentOffsets = [
+    [-0.30, 0.16],
+    [-0.10, 0.08],
+    [ 0.14, 0.14],
+    [ 0.34, 0.07]
+  ];
+
+  fragmentOffsets.forEach(
+    ([offsetX, offsetY], index) => {
+      const fragment =
+        this.add.rectangle(
+          platform.x +
+            platform.width *
+            offsetX,
+          platform.y +
+            platform.height *
+            offsetY,
+          Math.max(
+            12,
+            platform.width * .20
+          ),
+          Math.max(
+            5,
+            platform.height * .28
+          ),
+          fragmentColor,
+          0.90
+        )
+        .setDepth(7)
+        .setAngle(
+          index % 2 === 0
+            ? -8
+            : 8
+        );
+
+      fragments.push(
+        fragment
+      );
+
+      if (!this.motionReduced) {
+        this.tweens.add({
+          targets: fragment,
+          y:
+            fragment.y +
+            70 +
+            index * 12,
+          angle:
+            fragment.angle +
+            (index % 2 === 0
+              ? -26
+              : 26),
+          alpha: 0,
+          duration:
+            460 +
+            index * 70,
+          ease: 'Quad.in',
+          onComplete: () =>
+            fragment.destroy()
+        });
+      }
+    }
+  );
+
+  platform.setData(
+    'fragments',
+    fragments
+  );
+
+  this.platformEmergencyTarget =
+    this.findNextSafePlatform(
+      platform
+    );
+
+  this.playerCue(
+    this.platformEmergencyTarget
+      ? 'PLATFORM LOST · FIND ANOTHER'
+      : 'PLATFORM LOST · ROUTE AHEAD',
+    '#ff5364'
+  );
+
+ this.game.events.emit(
+  'feedback',
+  'platform_collapsed'
+);
+
+this.game.events.emit(
+  'tutorial',
+  this.platformEmergencyTarget
+    ? 'PLATFORM FAILURE · MOVE TO THE NEXT PLATFORM'
+    : 'PLATFORM FAILURE · ROUTE AHEAD'
+);
+
+  if (!this.motionReduced) {
+    this.cameras.main.flash(
+      90,
+      255,
+      90,
+      100
+    );
+
+    this.shake(
+      110,
+      0.008
+    );
+  }
+
+  this.updateCheckpointArrow();
+}
+
+handlePlatformLanding(platform) {
+  if (
+    !platform?.active ||
+    this.respawning ||
+    this.finished ||
+    !this.player?.active
+  ) {
+    return;
+  }
+
+  const body =
+    this.player.body;
+
+  const grounded =
+    body?.blocked?.down ||
+    body?.touching?.down;
+
+  if (!grounded) {
+    return;
+  }
+
+  if (
+    this.platformEmergencyTarget ===
+    platform
+  ) {
+    this.platformEmergencyTarget =
+      null;
+
+    this.updateCheckpointArrow();
+  }
+
+  this.armPlatformCollapse(
+    platform
+  );
+}
+
+resetCollapsingPlatforms() {
+  this.platformEmergencyTarget = null;
+
+  this.platforms
+    ?.getChildren()
+    ?.forEach(
+      platform => {
+        if (
+          !platform?.active ||
+          !platform.getData('collapsible')
+        ) {
+          return;
+        }
+
+     platform.setData(
+  'collapseToken',
+  (platform.getData('collapseToken') || 0) + 1
+);
+
+platform.setData(
+  'collapseState',
+  'ready'
+);
+
+platform
+  .getData('warning')
+  ?.setVisible(false)
+  ?.setAlpha(0)
+  ?.setScale(1);
+
+platform
+  .getData('warningGlow')
+  ?.setVisible(false)
+  ?.setAlpha(0)
+  ?.setScale(1);
+
+platform
+  .getData('cracks')
+  ?.setVisible(false)
+  ?.setAlpha(0)
+  ?.setScale(1);
+
+     const warning =
+  platform.getData('warning');
+
+const warningGlow =
+  platform.getData('warningGlow');
+
+const cracks =
+  platform.getData('cracks');
+
+const fragments =
+  platform.getData('fragments');
+
+/*
+ * Cancel all active platform FX.
+ */
+this.tweens.killTweensOf(
+  [
+    warning,
+    warningGlow,
+    cracks
+  ].filter(Boolean)
+);
+
+/*
+ * Fragments are one-shot objects.
+ * They must be destroyed because they are
+ * no longer reused after collapse.
+ */
+if (Array.isArray(fragments)) {
+  fragments.forEach(
+    fragment =>
+      fragment?.destroy?.()
+  );
+}
+
+/*
+ * Reuse warning / glow / cracks objects.
+ */
+warning
+  ?.setVisible(false)
+  ?.setAlpha(0)
+  ?.setScale(1);
+
+warningGlow
+  ?.setVisible(false)
+  ?.setAlpha(0)
+  ?.setScale(1);
+
+cracks
+  ?.setVisible(false)
+  ?.setAlpha(0)
+  ?.setScale(1);
+
+platform.setData(
+  'fragments',
+  null
+);
+
+platform.setVisible(true);
+platform.setAlpha(1);
+
+        platform.setFillStyle(
+          platform.getData(
+            'originalFillColor'
+          ),
+          1
+        );
+
+        platform.setStrokeStyle(
+          platform.getData(
+            'originalStrokeWidth'
+          ) ?? 3,
+          platform.getData(
+            'originalStrokeColor'
+          ) ?? 0x607b99,
+          1
+        );
+
+        const detail =
+          platform.getData('detail');
+
+        detail?.setVisible(true);
+        detail?.setAlpha(1);
+
+        if (platform.body) {
+          platform.body.enable = true;
+          platform.refreshBody();
+        }
+      }
+    );
+}
+
+createPlatforms() {
+
+  const visual =
+    DISTRICT_VISUALS[this.mission.id] ||
+    DISTRICT_VISUALS['first-delivery'];
+
+  const blackout =
+    Boolean(this.mission.blackout);
+
+  /*
+   * ------------------------------------------------------------
+   * PLATFORM SOURCE
+   *
+   * Uses the actual mission.platforms array.
+   *
+   * Supported format:
+   * [x, y, width, height]
+   * [x, y, width, height, isRoof]
+   * [x, y, width, height, isRoof, collapsible]
+   *
+   * ------------------------------------------------------------
+   */
+
+  const sourcePlatforms =
+    Array.isArray(this.mission.platforms)
+      ? this.mission.platforms
+      : [];
+
+  this.platforms =
+    this.physics.add.staticGroup();
+
+  sourcePlatforms.forEach(
+    (
+      data,
+      index
+    ) => {
+
+      if (
+        !Array.isArray(data) ||
+        data.length < 4
+      ) {
+        return;
+      }
+
+      const x =
+        Number(data[0]) || 0;
+
+      const y =
+        Number(data[1]) || 0;
+
+      const width =
+        Math.max(
+          20,
+          Number(data[2]) || 20
+        );
+
+      const height =
+        Math.max(
+          8,
+          Number(data[3]) || 8
+        );
+
+      const isRoof =
+        Boolean(data[4]);
+
+      const collapsible =
+        Boolean(data[5]);
+
+      const baseColor =
+        blackout
+          ? 0x0a1420
+          : 0x102338;
+
+      const strokeColor =
+        visual.accent ??
+        0x8df4ff;
+
+      /*
+       * ----------------------------------------------------------
+       * PLATFORM = VISUAL + PHYSICS
+       *
+       * One object only.
+       * This is important because the collapse/reset system
+       * already expects platform.setFillStyle(),
+       * platform.setStrokeStyle(), platform.setVisible(),
+       * platform.body and refreshBody().
+       * ----------------------------------------------------------
+       */
+
+      const platform =
+        this.add
+          .rectangle(
+            x + width / 2,
+            y + height / 2,
+            width,
+            height,
+            baseColor,
+            0.98
+          )
+          .setStrokeStyle(
+            isRoof ? 2 : 1.5,
+            strokeColor,
+            isRoof ? 0.72 : 0.42
+          )
+          .setDepth(7);
+
+      this.physics.add.existing(
+        platform,
+        true
+      );
+
+      this.platforms.add(
+        platform
+      );
+
+      /*
+       * ----------------------------------------------------------
+       * CORE PLATFORM DATA
+       * ----------------------------------------------------------
+       */
+
+      platform.setData(
+        'index',
+        index
+      );
+
+      platform.setData(
+        'x',
+        x
+      );
+
+      platform.setData(
+        'y',
+        y
+      );
+
+      platform.setData(
+        'width',
+        width
+      );
+
+      platform.setData(
+        'height',
+        height
+      );
+
+      platform.setData(
+        'isRoof',
+        isRoof
+      );
+
+      platform.setData(
+        'collapsible',
+        collapsible
+      );
+
+      platform.setData(
+        'collapseState',
+        'ready'
+      );
+
+      platform.setData(
+        'collapseToken',
+        0
+      );
+
+      /*
+       * Keep original source data available.
+       */
+      platform.setData(
+        'sourceData',
+        data.slice()
+      );
+
+      /*
+       * The platform itself is now the authoritative visual.
+       * No second rectangle is required.
+       */
+      platform.setData(
+        'visual',
+        platform
+      );
+
+      /*
+       * ----------------------------------------------------------
+       * ORIGINAL STYLE
+       * ----------------------------------------------------------
+       */
+
+      platform.setData(
+        'originalFillColor',
+        baseColor
+      );
+
+      platform.setData(
+        'originalStrokeColor',
+        strokeColor
+      );
+
+      platform.setData(
+        'originalStrokeWidth',
+        isRoof ? 2 : 1.5
+      );
+
+      /*
+       * ----------------------------------------------------------
+       * PLATFORM DETAIL
+       * ----------------------------------------------------------
+       */
+
+      const detail =
+        this.add
+          .graphics()
+          .setDepth(7);
+
+      platform.setData(
+        'detail',
+        detail
+      );
+
+      /*
+       * Platform inset
+       */
+      detail
+        .fillStyle(
+          0x0b1422,
+          blackout ? 0.72 : 0.82
+        )
+        .fillRect(
+          x + 6,
+          y + 8,
+          Math.max(
+            0,
+            width - 12
+          ),
+          Math.max(
+            4,
+            height - 14
+          )
+        );
+
+      /*
+       * Structural panel marks
+       */
+      detail
+        .fillStyle(
+          0x111a29,
+          blackout ? 0.70 : 0.90
+        );
+
+      for (
+        let mark = x + 18;
+        mark < x + width - 10;
+        mark += 34
+      ) {
+
+        detail.fillRect(
+          mark,
+          y + 18,
+          Math.min(
+            16,
+            x + width - mark - 8
+          ),
+          5
+        );
+      }
+
+      /*
+       * Neon top edge
+       */
+      detail
+        .fillStyle(
+          isRoof
+            ? 0x94f5ff
+            : 0x9eb6c8,
+          blackout
+            ? (
+                isRoof
+                  ? 0.38
+                  : 0.12
+              )
+            : (
+                isRoof
+                  ? 0.62
+                  : 0.22
+              )
+        )
+        .fillRect(
+          x,
+          y + 3,
+          width,
+          isRoof ? 4 : 3
+        );
+
+      /*
+       * Lower energy strip
+       */
+      detail
+        .fillStyle(
+          isRoof
+            ? 0x8df4ff
+            : 0x536d84,
+          blackout
+            ? 0.18
+            : 0.12
+        )
+        .fillRect(
+          x + 10,
+          y + height - 5,
+          Math.max(
+            0,
+            width - 20
+          ),
+          2
+        );
+
+      /*
+       * Roof frame
+       */
+      if (isRoof) {
+
+        detail
+          .lineStyle(
+            2,
+            0xaabccc,
+            0.80
+          )
+          .lineBetween(
+            x + 14,
+            y,
+            x + 14,
+            y - 18
+          )
+          .lineBetween(
+            x + 14,
+            y - 18,
+            x + width - 14,
+            y - 18
+          )
+          .lineBetween(
+            x + width - 14,
+            y - 18,
+            x + width - 14,
+            y
+          );
+
+        /*
+         * Roof signal nodes
+         */
+        detail
+          .fillStyle(
+            0x8df4ff,
+            blackout
+              ? 0.35
+              : 0.55
+          )
+          .fillCircle(
+            x + 14,
+            y - 18,
+            2
+          )
+          .fillCircle(
+            x + width - 14,
+            y - 18,
+            2
+          );
+      }
+
+      /*
+       * ----------------------------------------------------------
+       * COLLAPSIBLE PLATFORM STATE
+       * ----------------------------------------------------------
+       */
+
+      platform.setData(
+        'warning',
+        null
+      );
+
+      platform.setData(
+        'warningGlow',
+        null
+      );
+
+      platform.setData(
+        'cracks',
+        null
+      );
+
+      platform.setData(
+        'fragments',
+        null
+      );
+
+      if (collapsible) {
+
+        const warning =
+          this.add
+            .rectangle(
+              x + width / 2,
+              y + 4,
+              Math.max(
+                12,
+                width - 8
+              ),
+              3,
+              0xff5364,
+              0
+            )
+            .setDepth(8);
+
+        const warningGlow =
+          this.add
+            .rectangle(
+              x + width / 2,
+              y + 5,
+              Math.max(
+                10,
+                width - 16
+              ),
+              8,
+              0xff5364,
+              0
+            )
+            .setDepth(7);
+
+        warning.setStrokeStyle(
+          1,
+          0xff826e,
+          0.72
+        );
+
+        platform.setData(
+          'warning',
+          warning
+        );
+
+        platform.setData(
+          'warningGlow',
+          warningGlow
+        );
+      }
+
+      /*
+       * ----------------------------------------------------------
+       * BODY SAFETY
+       * ----------------------------------------------------------
+       */
+
+      if (platform.body) {
+
+        platform.body.allowGravity =
+          false;
+
+        platform.body.immovable =
+          true;
+
+        platform.body.enable =
+          true;
+      }
+
+      /*
+       * ----------------------------------------------------------
+       * ALIGNMENT HELPERS
+       * ----------------------------------------------------------
+       */
+
+      platform.setData(
+        'left',
+        x
+      );
+
+      platform.setData(
+        'right',
+        x + width
+      );
+
+      platform.setData(
+        'top',
+        y
+      );
+
+      platform.setData(
+        'bottom',
+        y + height
+      );
+    }
+  );
+
+ /*
+ * ------------------------------------------------------------
+ * PLATFORM COLLIDER
+ *
+ * IMPORTANT:
+ * Player is created AFTER createPlatforms().
+ * The player ↔ platform collider is therefore created
+ * inside createPlayer(), exactly once.
+ * ------------------------------------------------------------
+ */
+
+  /*
+   * ------------------------------------------------------------
+   * WORLD PROPS
+   * ------------------------------------------------------------
+   */
+
+  const props =
+    this.add
+      .graphics()
+      .setDepth(6);
+
+  props
+    .fillStyle(
+      0x192238
+    )
+    .fillRect(
+      90,
+      508,
+      72,
+      102
+    )
+    .fillStyle(
+      0xffbd5b
+    )
+    .fillRect(
+      104,
+      523,
+      44,
+      20
+    );
+
+  props
+    .lineStyle(
+      4,
+      0x7e91a2
+    )
+    .lineBetween(
+      1070,
+      610,
+      1070,
+      430
+    )
+    .lineBetween(
+      1070,
+      430,
+      1180,
+      430
+    )
+    .lineBetween(
+      1180,
+      430,
+      1180,
+      610
+    );
+
+  props
+    .fillStyle(
+      0x34233a
+    )
+    .fillRect(
+      1770,
+      455,
+      140,
+      58
+    )
+    .fillStyle(
+      0xff7580
+    )
+    .fillRect(
+      1784,
+      470,
+      112,
+      25
+    );
 }
 
 createWorldLandmarks() {
@@ -5894,7 +7812,14 @@ this.playerEnergyFollow =
 
 this.physics.add.collider(
   this.player,
-  this.platforms
+  this.platforms,
+  (player, platform) => {
+    this.handlePlatformLanding(
+      platform
+    );
+  },
+  undefined,
+  this
 );
 
 this.blaster = this.add
@@ -5910,11 +7835,13 @@ this.cursors =
 
 this.keys =
   this.input.keyboard.addKeys(
-    'A,D,F,W,S,E,Q,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
+    'A,D,C,F,W,S,E,Q,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
   );
 
 this.mobileActions = {
   jump: false,
+  jumpHeld: false,
+  jumpReleased: false,
   fire: false,
   sword: false,
   dash: false,
@@ -5929,6 +7856,17 @@ this.mobileActions = {
 this.mobileDirection = null;
 
 this.mobileActionHandler = action => {
+if (
+  !action ||
+  !this.scene.isActive() ||
+  this.relayPuzzleActive ||
+  this.finished ||
+  this.respawning ||
+  this.cinematicActive
+) {
+  return;
+}
+
   if (action === 'build1') {
     return this.useBuild(0);
   }
@@ -5945,23 +7883,51 @@ this.mobileActionHandler = action => {
     return this.useGadget(1);
   }
 
-if (action === 'crouch') {
-  this.mobileActions.crouch =
-    !this.mobileActions.crouch;
+  if (action === 'crouch') {
+    this.mobileActions.crouch =
+      !this.mobileActions.crouch;
 
+    return;
+  }
+
+if (
+  action === 'jump'
+) {
+  this.mobileActions.jump = true;
+  this.mobileActions.jumpHeld = true;
   return;
 }
 
-if (action in this.mobileActions) {
+if (
+  action === 'jumpRelease'
+) {
+  this.mobileActions.jumpReleased = true;
+  this.mobileActions.jumpHeld = false;
+  return;
+}
+
+if (
+  Object.prototype.hasOwnProperty.call(
+    this.mobileActions,
+    action
+  )
+) {
   this.mobileActions[action] = true;
 }
 };
 
 this.mobileMoveHandler =
   direction => {
-    this.mobileDirection = direction;
-  };
+    if (
+      direction === 'left' ||
+      direction === 'right'
+    ) {
+      this.mobileDirection = direction;
+      return;
+    }
 
+    this.mobileDirection = null;
+  };
 this.game.events.on(
   'mobile-action',
   this.mobileActionHandler
@@ -5984,13 +7950,23 @@ this.events.once(
       'mobile-move',
       this.mobileMoveHandler
     );
+
+    this.mobileDirection = null;
+
+    Object.keys(this.mobileActions).forEach(
+      action => {
+        this.mobileActions[action] = false;
+      }
+    );
   }
 );
 
 if (this.cinematicActive) {
   this.createOpeningCinematic();
 } else {
-  this.createMissionTransmission();
+ this.createMissionTransmission();
+this.createObjectiveHUD();
+this.createDetectionHUD();
 }
 
 }
@@ -6257,6 +8233,224 @@ return {
   y: platform.y - 46
 };
 
+}
+
+updateCheckpointArrow() {
+  if (
+    this.finished ||
+    this.respawning ||
+    this.cinematicActive ||
+    !this.player?.active ||
+    !this.checkpoints
+  ) {
+    this.checkpointArrow?.setVisible(false);
+    return;
+  }
+
+  const currentIndex =
+    this.checkpoint?.index ?? -1;
+
+let target = null;
+
+/*
+ * EMERGENCY ROUTE
+ * A collapsing platform gets priority over
+ * the normal checkpoint route.
+ */
+if (
+  this.platformEmergencyTarget?.active &&
+  this.platformEmergencyTarget.body?.enable !== false
+) {
+  target =
+    this.platformEmergencyTarget;
+}
+
+if (!target) {
+  const checkpoints =
+    this.checkpoints
+      .getChildren()
+      .filter(
+        marker =>
+          marker?.active &&
+          (marker.getData('index') ?? -1) >
+            currentIndex
+      )
+      .sort(
+        (a, b) =>
+          (a.getData('index') ?? 0) -
+          (b.getData('index') ?? 0)
+      );
+
+  if (checkpoints.length) {
+    target =
+      checkpoints[0];
+  } else if (this.goal) {
+    target =
+      this.goal;
+  }
+}
+
+  if (!target) {
+    this.checkpointArrow?.setVisible(false);
+    return;
+  }
+
+  if (!this.checkpointArrow) {
+    this.checkpointArrow =
+      this.add
+        .triangle(
+          0,
+          0,
+          0,
+          -16,
+          11,
+          10,
+          -11,
+          10,
+          0x8df4ff,
+          0.95
+        )
+        .setOrigin(0.5)
+        .setDepth(50)
+        .setScrollFactor(0);
+
+     this.checkpointArrow.setStrokeStyle(
+      1.5,
+      0xe8fdff,
+      0.95
+    );
+
+    this.checkpointArrow.setBlendMode(
+      Phaser.BlendModes.ADD
+    );
+
+    this.tweens.add({
+      targets: this.checkpointArrow,
+      scaleX: {
+        from: 0.94,
+        to: 1.06
+      },
+      scaleY: {
+        from: 0.94,
+        to: 1.06
+      },
+      alpha: {
+        from: 0.82,
+        to: 1
+      },
+      duration: 620,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.inOut'
+    });
+  }
+
+  const camera =
+    this.cameras.main;
+
+  const dx =
+    target.x -
+    this.player.x;
+
+  const dy =
+    target.y -
+    this.player.y;
+
+  const distance =
+    Math.hypot(dx, dy);
+
+  if (!Number.isFinite(distance) || distance < 1) {
+    this.checkpointArrow.setVisible(false);
+    return;
+  }
+
+   const dirX =
+    dx / distance;
+
+  const dirY =
+    dy / distance;
+
+  const targetAngle =
+    Math.atan2(
+      dirY,
+      dirX
+    ) +
+    Math.PI / 2;
+
+  const currentAngle =
+    Number.isFinite(
+      this.checkpointArrow.angle
+    )
+      ? this.checkpointArrow.angle
+      : targetAngle;
+
+  const angleDelta =
+    Phaser.Math.Angle.Wrap(
+      targetAngle -
+      currentAngle
+    );
+
+  const smoothAngle =
+    currentAngle +
+    angleDelta * 0.20;
+
+  const playerScreenX =
+    (this.player.x - camera.worldView.x) *
+    camera.zoom;
+
+  const playerScreenY =
+    (this.player.y - camera.worldView.y) *
+    camera.zoom;
+
+  const nearCheckpoint =
+    distance < 165;
+
+  const offset =
+    nearCheckpoint
+      ? 46
+      : 54;
+
+  let arrowX =
+    playerScreenX +
+    dirX * offset;
+
+  let arrowY =
+    playerScreenY +
+    dirY * offset;
+
+  const margin = 30;
+
+  arrowX =
+    Phaser.Math.Clamp(
+      arrowX,
+      margin,
+      this.scale.width - margin
+    );
+
+  arrowY =
+    Phaser.Math.Clamp(
+      arrowY,
+      margin,
+      this.scale.height - margin
+    );
+
+  this.checkpointArrow
+    .setPosition(
+      Phaser.Math.Linear(
+        this.checkpointArrow.x,
+        arrowX,
+        0.24
+      ),
+      Phaser.Math.Linear(
+        this.checkpointArrow.y,
+        arrowY,
+        0.24
+      )
+    )
+    .setRotation(
+      smoothAngle
+    )
+    .setVisible(true);
 }
 
 updateRouteHints() {
@@ -8413,6 +10607,8 @@ this.tweens.add({
 }
 
 shutdown() {
+  this.checkpointArrow?.destroy();
+  this.checkpointArrow = null;
   if (this.waterWaveTimers) {
     this.waterWaveTimers.forEach(
       timer => {
@@ -8459,7 +10655,54 @@ shutdown() {
     this._relayPuzzleResizeBound =
       false;
   }
+
+  // ============================================================
+  // AI VOICE / COMMENTATOR · CLEANUP
+  // Prevent duplicate narration listeners after scene restart.
+  // Invalidate all callbacks belonging to the previous voice state.
+  // ============================================================
+  this.voiceSerial =
+    (this.voiceSerial || 0) + 1;
+
+  if (this.narrationHandler) {
+    this.game.events.off(
+      'narration',
+      this.narrationHandler
+    );
+
+    this.narrationHandler =
+      null;
+  }
+
+  if (
+    typeof window !== 'undefined' &&
+    'speechSynthesis' in window
+  ) {
+    window.speechSynthesis.cancel();
+
+    if (
+      window.speechSynthesis.onvoiceschanged ===
+      this.voiceVoicesChangedHandler
+    ) {
+      window.speechSynthesis.onvoiceschanged =
+        null;
+    }
+  }
+
+  this.voiceVoicesChangedHandler =
+    null;
+
+this.voiceVoices = [];
+
+this.voiceQueue = [];
+this.voiceSpeaking = false;
+
+this.voiceLastText = '';
+this.voiceLastTextAt = 0;
+this.voiceLastAt = 0;
 }
+
+
 
 /*
  * ============================================================
@@ -8932,6 +11175,9 @@ this.mobileActions.sword =
 this.mobileActions.dash =
   false;
 
+this.mobileActions.crouch =
+  false;
+
 this.mobileActions.interact =
   false;
 
@@ -8947,8 +11193,9 @@ this.mobileActions.gadget1 =
 this.mobileActions.gadget2 =
   false;
 
+this.mobileDirection = null;
+  
 this.physics.pause();
-
 this.createRelayPuzzleUI();
 }
 // ============================================================
@@ -14249,6 +16496,18 @@ ui.endNode?.destroy();
 this.relayNearbyGate =
   null;
 
+this.mobileDirection =
+  null;
+
+Object.keys(
+  this.mobileActions
+).forEach(
+  action => {
+    this.mobileActions[action] =
+      false;
+  }
+);
+
 if (
   !this.finished &&
   !this.respawning
@@ -15544,6 +17803,19 @@ if (this.health <= 0) {
   return;
 }
 
+// ============================================================
+// DIZZY / IMPACT RESPONSE
+// Non-lethal damage only.
+// ============================================================
+const dizzyIntensity =
+  this.health === 1
+    ? 1.35
+    : 1.0;
+
+this.showDizzyStars(
+  dizzyIntensity
+);
+
 /* Tint cleanup is already scheduled in the damage FX block above. */
 if (!this.motionReduced) {
   this.cameras.main.flash(
@@ -15572,10 +17844,23 @@ this.tweens.add({
   onComplete: () =>
     damagePulse.destroy()
 });
+  
 this.playerCue(
   `HIT · ${this.health} HEALTH`,
   '#ff9c91'
 );
+
+if (
+  this.health > 0 &&
+  this.health <=
+    Math.ceil(
+      this.healthMax * 0.25
+    )
+) {
+  this.speakNarration(
+    'LOW HEALTH'
+  );
+}
 
 this.shake(80, .006);
 
@@ -15872,9 +18157,22 @@ if (health) {
 
 if (isBoss) {
   this.game.events.emit(
-  'feedback',
-  'boss_hit'
-);
+    'feedback',
+    'boss_hit'
+  );
+
+  this.bossHitCount =
+    (this.bossHitCount || 0) + 1;
+
+  if (
+    this.bossHitCount === 1 ||
+    this.bossHitCount % 5 === 0
+  ) {
+    this.speakNarration(
+      'BOSS ENGAGED'
+    );
+  }
+  
   const bossPulse =
     this.add
       .circle(
@@ -15945,11 +18243,14 @@ if (
     currentCooldown * .48
   );
 
-  this.playerCue(
-    'FINAL ENRAGE',
-    '#ff4f5f'
-  );
+this.playerCue(
+  'FINAL ENRAGE',
+  '#ff4f5f'
+);
 
+this.speakNarration(
+  'FINAL ENRAGE'
+);
   this.gadgetPulse(
     0xff4f5f,
     30,
@@ -16125,29 +18426,34 @@ this.bossPhaseAuraFollow =
       }
 
       this.bossPhaseAura.x = enemy.x;
-      if (
+    if (
   enemy.active &&
   !this.motionReduced
 ) {
-  const baseY =
-    enemy.getData('premiumBaseY');
-
-  if (
-    typeof baseY !== 'number'
-  ) {
-    enemy.setData(
-      'premiumBaseY',
-      enemy.y
-    );
-  } else {
-    enemy.y =
-      baseY +
-      Math.sin(
-        this.time.now * 0.0028
-      ) * 4;
-  }
+  this.bossPhaseAura.y =
+    enemy.y +
+    Math.sin(
+      this.time.now * 0.0028
+    ) * 4;
 }
-      this.bossPhaseAura.y = enemy.y;
+      this.bossPhaseAura.y =
+  enemy.y +
+  (
+    !this.motionReduced
+      ? Math.sin(
+          this.time.now * 0.0028
+        ) * 4
+      : 0
+  );
+      this.bossPhaseAura.y =
+  enemy.y +
+  (
+    !this.motionReduced
+      ? Math.sin(
+          this.time.now * 0.0028
+        ) * 4
+      : 0
+  );
     }
   });
   
@@ -16208,10 +18514,14 @@ this.bossPhaseAuraFollow =
     });
   }
 
-  this.game.events.emit(
-    'feedback',
-    'boss_phase_two'
-  );
+this.game.events.emit(
+  'feedback',
+  'boss_phase_two'
+);
+
+this.speakNarration(
+  'BOSS PHASE TWO'
+);
 }
   
   enemy.setData(
@@ -16404,7 +18714,10 @@ this.playerCue(
   'BOSS DEFEATED',
   '#8df4ff'
 );
-    
+
+this.speakNarration(
+  'BOSS DEFEATED'
+);
     // ============================================================
 // BOSS VICTORY BANNER
 // ============================================================
@@ -16675,10 +18988,14 @@ if (
 ) {
   this.overdriveTimer = 4200;
 
-  this.playerCue(
-    'OVERDRIVE',
-    '#ffd06e'
-  );
+this.playerCue(
+  'OVERDRIVE',
+  '#ffd06e'
+);
+
+this.speakNarration(
+  'OVERDRIVE'
+);
 
   this.gadgetPulse(
     0xffd06e,
@@ -16857,6 +19174,14 @@ this.game.events.emit(
   this.comboTimer
 );
 
+if (
+  this.combatCombo >= 2 &&
+  this.combatCombo % 2 === 0
+) {
+  this.speakNarration(
+    `COMBO ${this.combatCombo}`
+  );
+}
 this.player.body.setVelocityY(
   method === 'STOMP'
     ? -360
@@ -17143,30 +19468,682 @@ this.playerCue(
 
 }
 
-createOpeningCinematic() {
-const finish = () => {
-if (!this.cinematicActive) {
-return;
+showDizzyStars(intensity = 1) {
+  if (
+    this.motionReduced ||
+    !this.player?.active ||
+    this.finished ||
+    this.respawning ||
+    this.cinematicActive
+  ) {
+    return;
+  }
+
+  const power = Phaser.Math.Clamp(
+    Number(intensity) || 1,
+    0.5,
+    1.5
+  );
+
+  this.dizzyStarsIntensity = Math.max(
+    this.dizzyStarsIntensity || 0,
+    power
+  );
+
+  this.dizzyStarsTimer = Math.max(
+    this.dizzyStarsTimer || 0,
+    650 + power * 550
+  );
+
+  // Reuse active effect.
+  if (this.dizzyStars?.active) {
+    return;
+  }
+
+  this.dizzyStarsSerial++;
+
+  const container = this.add
+    .container(
+      this.player.x,
+      this.player.y - 42
+    )
+    .setDepth(16);
+
+  this.dizzyStars = container;
+
+  const count =
+    power >= 1.2
+      ? 5
+      : power >= 0.85
+        ? 4
+        : 3;
+
+  const stars = [];
+
+  const makeStar = (radius = 7) => {
+    const graphics = this.add.graphics();
+    const points = [];
+
+    for (let i = 0; i < 10; i++) {
+      const angle =
+        -Math.PI / 2 +
+        i * Math.PI / 5;
+
+      const r =
+        i % 2 === 0
+          ? radius
+          : radius * 0.42;
+
+      points.push(
+        new Phaser.Geom.Point(
+          Math.cos(angle) * r,
+          Math.sin(angle) * r
+        )
+      );
+    }
+
+    graphics
+      .fillStyle(0xfff0b5, 1)
+      .fillPoints(points, true);
+
+    graphics
+      .lineStyle(1, 0xffffff, 0.9)
+      .strokePoints(points, true);
+
+    graphics.setBlendMode(
+      Phaser.BlendModes.ADD
+    );
+
+    return graphics;
+  };
+
+  for (
+    let index = 0;
+    index < count;
+    index++
+  ) {
+    const star = makeStar(
+      index % 2 === 0 ? 6 : 8
+    );
+
+    star.setData(
+      'orbitIndex',
+      index
+    );
+
+    star.setData(
+      'orbitRadius',
+      20 + power * 10
+    );
+
+    star.setData(
+      'orbitAngle',
+      (
+        Math.PI * 2 * index
+      ) / count
+    );
+
+    star.setData(
+      'spin',
+      index % 2 === 0 ? 1 : -1
+    );
+
+    container.add(star);
+    stars.push(star);
+  }
+
+  const serial =
+    this.dizzyStarsSerial;
+
+  this.tweens.add({
+    targets: stars,
+    scale: {
+      from: 0.45,
+      to: 1
+    },
+    alpha: {
+      from: 0,
+      to: 1
+    },
+    duration: 150,
+    ease: 'Back.out'
+  });
+
+  this.time.delayedCall(
+    650 + power * 550,
+    () => {
+      if (
+        serial !==
+        this.dizzyStarsSerial
+      ) {
+        return;
+      }
+
+      this.tweens.add({
+        targets: stars,
+        scale: 0.2,
+        alpha: 0,
+        duration: 220,
+        ease: 'Quad.in',
+        onComplete: () => {
+          container.destroy(true);
+
+          if (
+            this.dizzyStars ===
+            container
+          ) {
+            this.dizzyStars = null;
+          }
+
+          this.dizzyStarsTimer = 0;
+          this.dizzyStarsIntensity = 0;
+        }
+      });
+    }
+  );
+
+  this.tweens.add({
+    targets: this.player,
+    angle: -4 * power,
+    duration: 90,
+    yoyo: true,
+    repeat: 3,
+    ease: 'Sine.inOut'
+  });
 }
 
-  this.cinematicActive = false;
+createOpeningCinematic() {
+  if (
+    !this.cinematicActive ||
+    this.divineArrivalPlayed
+  ) {
+    return;
+  }
 
-  this.input.keyboard.off(
+  this.divineArrivalPlayed = true;
+
+  const width = this.scale.width;
+  const height = this.scale.height;
+
+  const spawnX = this.mission.spawn.x;
+  const spawnY = this.mission.spawn.y;
+
+  // ============================================================
+  // DIVINE ARRIVAL · CINEMATIC LOCK
+  // ============================================================
+  this.physics.pause();
+
+  if (this.player?.body) {
+    this.player.body.setVelocity(0, 0);
+  }
+
+  this.cameras.main.stopFollow();
+
+  const overlay = this.add
+    .container(0, 0)
+    .setScrollFactor(0)
+    .setDepth(150);
+
+  this.divineArrivalOverlay = overlay;
+
+  // ------------------------------------------------------------
+  // DARKNESS
+  // ------------------------------------------------------------
+  const darkness = this.add.rectangle(
+    width / 2,
+    height / 2,
+    width,
+    height,
+    0x000208,
+    1
+  );
+
+  // ------------------------------------------------------------
+  // DIVINE LIGHT
+  // ------------------------------------------------------------
+  const divineGlow = this.add.circle(
+    width / 2,
+    height * 0.32,
+    Math.min(width, height) * 0.24,
+    0xfff0b5,
+    0
+  ).setBlendMode(
+    Phaser.BlendModes.ADD
+  );
+
+  const divineCore = this.add.circle(
+    width / 2,
+    height * 0.32,
+    Math.min(width, height) * 0.075,
+    0xffffff,
+    0
+  ).setBlendMode(
+    Phaser.BlendModes.ADD
+  );
+
+  // ------------------------------------------------------------
+  // DIVINE FIGURE · SYMBOLIC SILHOUETTE
+  // ------------------------------------------------------------
+  const figure = this.add.container(
+    width / 2,
+    height * 0.30
+  );
+
+  const halo = this.add.circle(
+    0,
+    -46,
+    26,
+    0xffe7a6,
+    0
+  ).setBlendMode(
+    Phaser.BlendModes.ADD
+  );
+
+  const head = this.add.circle(
+    0,
+    -46,
+    10,
+    0xffffff,
+    0
+  );
+
+  const body = this.add.rectangle(
+    0,
+    -10,
+    18,
+    62,
+    0xffffff,
+    0
+  );
+
+  const arms = this.add.graphics();
+
+  arms.lineStyle(
+    7,
+    0xffffff,
+    1
+  );
+
+  arms.lineBetween(
+    -6,
+    -28,
+    -48,
+    -2
+  );
+
+  arms.lineBetween(
+    6,
+    -28,
+    48,
+    -2
+  );
+
+  const robe = this.add.triangle(
+    0,
+    28,
+    -25,
+    -20,
+    25,
+    -20,
+    0,
+    42,
+    0xffffff,
+    0
+  );
+
+  figure.add([
+    halo,
+    head,
+    body,
+    arms,
+    robe
+  ]);
+
+  // ------------------------------------------------------------
+  // LIGHT BEAM
+  // ------------------------------------------------------------
+  const beam = this.add.rectangle(
+    width / 2,
+    height * 0.52,
+    Math.min(width, height) * 0.22,
+    height * 0.82,
+    0xfff5cf,
+    0
+  ).setBlendMode(
+    Phaser.BlendModes.ADD
+  );
+
+  const beamCore = this.add.rectangle(
+    width / 2,
+    height * 0.52,
+    Math.min(width, height) * 0.055,
+    height * 0.82,
+    0xffffff,
+    0
+  ).setBlendMode(
+    Phaser.BlendModes.ADD
+  );
+
+  overlay.add([
+    darkness,
+    beam,
+    beamCore,
+    divineGlow,
+    divineCore,
+    figure
+  ]);
+
+  // ------------------------------------------------------------
+  // PLAYER STARTS ABOVE SPAWN
+  // ------------------------------------------------------------
+  this.player
+    .setPosition(
+      spawnX,
+      spawnY - 230
+    )
+    .setAlpha(0)
+    .setAngle(-2)
+    .setScale(
+      this.playerVisualBaseScaleX,
+      this.playerVisualBaseScaleY
+    );
+
+  this.player.play(
+    'runner-fall',
+    true
+  );
+
+  if (this.player.body) {
+    this.player.body.reset(
+      spawnX,
+      spawnY - 230
+    );
+
+    this.player.body.setVelocity(
+      0,
+      0
+    );
+  }
+
+  // ============================================================
+  // PHASE 1 · LIGHT APPEARS
+  // ============================================================
+  this.tweens.add({
+    targets: [
+      divineGlow,
+      divineCore,
+      beam,
+      beamCore,
+      figure
+    ],
+    alpha: 1,
+    duration: 650,
+    ease: 'Cubic.out'
+  });
+
+  this.tweens.add({
+    targets: divineGlow,
+    scale: 1.55,
+    alpha: 0.28,
+    duration: 900,
+    yoyo: true,
+    ease: 'Sine.inOut'
+  });
+
+  this.tweens.add({
+    targets: halo,
+    scale: 1.35,
+    alpha: 1,
+    duration: 550,
+    ease: 'Quad.out'
+  });
+
+  // ============================================================
+  // PHASE 2 · FIGURE FADES / PLAYER DESCENDS
+  // ============================================================
+  this.time.delayedCall(
+    1050,
+    () => {
+      if (!this.cinematicActive) {
+        return;
+      }
+
+      this.tweens.add({
+        targets: figure,
+        y: height * 0.34,
+        alpha: 0,
+        duration: 420,
+        ease: 'Quad.in'
+      });
+
+      this.tweens.add({
+        targets: [
+          divineGlow,
+          divineCore
+        ],
+        scale: 0.35,
+        alpha: 0,
+        duration: 480,
+        ease: 'Quad.in'
+      });
+
+      this.tweens.add({
+        targets: beam,
+        scaleX: 0.25,
+        alpha: 0.12,
+        duration: 520,
+        ease: 'Quad.in'
+      });
+
+      this.player.setAlpha(1);
+
+      this.tweens.add({
+        targets: this.player,
+        y: spawnY,
+        angle: 0,
+        duration: 720,
+        ease: 'Cubic.in'
+      });
+    }
+  );
+
+  // ============================================================
+  // PHASE 3 · IMPACT
+  // ============================================================
+  this.time.delayedCall(
+    1800,
+    () => {
+      if (!this.cinematicActive) {
+        return;
+      }
+
+      this.player.play(
+        'runner-land',
+        true
+      );
+
+      this.player.setScale(
+        this.playerVisualBaseScaleX * 1.18,
+        this.playerVisualBaseScaleY * 0.78
+      );
+
+      this.worldLightPulse(
+        0xffd06e,
+        0.24,
+        380,
+        70
+      );
+
+      this.worldLightFlash(
+        0xfff0b5,
+        0.10,
+        160
+      );
+
+      this.shake(
+        220,
+        0.010
+      );
+
+      if (!this.motionReduced) {
+        this.dust.emitParticleAt(
+          spawnX,
+          spawnY + 12,
+          18
+        );
+
+        const landingShock =
+          this.add
+            .circle(
+              spawnX,
+              spawnY + 28,
+              10,
+              0xffd06e,
+              0.34
+            )
+            .setDepth(12);
+
+        landingShock.setStrokeStyle(
+          2,
+          0xfff0b5,
+          0.9
+        );
+
+        this.tweens.add({
+          targets: landingShock,
+          scale: 5.4,
+          alpha: 0,
+          duration: 340,
+          ease: 'Quad.out',
+          onComplete: () =>
+            landingShock.destroy()
+        });
+      }
+
+      this.tweens.add({
+        targets: this.player,
+        scaleX:
+          this.playerVisualBaseScaleX,
+        scaleY:
+          this.playerVisualBaseScaleY,
+        duration: 150,
+        ease: 'Back.out'
+      });
+    }
+  );
+
+  // ============================================================
+  // PHASE 4 · SHAKE OFF
+  // ============================================================
+  this.time.delayedCall(
+    2050,
+    () => {
+      if (!this.cinematicActive) {
+        return;
+      }
+
+      this.player.play(
+        'runner-land',
+        true
+      );
+
+      this.tweens.add({
+        targets: this.player,
+        angle: -5,
+        duration: 90,
+        yoyo: true,
+        repeat: 3,
+        ease: 'Sine.inOut'
+      });
+    }
+  );
+
+  // ============================================================
+  // PHASE 5 · GAMEPLAY
+  // ============================================================
+  const finish = () => {
+    if (!this.cinematicActive) {
+      return;
+    }
+
+    this.cinematicActive = false;
+
+    this.tweens.killTweensOf(
+      this.player
+    );
+
+    this.player
+      .setAngle(0)
+      .setAlpha(1)
+      .setScale(
+        this.playerVisualBaseScaleX,
+        this.playerVisualBaseScaleY
+      )
+      .setPosition(
+        spawnX,
+        spawnY
+      )
+      .play(
+        'runner-idle',
+        true
+      );
+
+    if (this.player.body) {
+      this.player.body.reset(
+        spawnX,
+        spawnY
+      );
+
+      this.player.body.setVelocity(
+        0,
+        0
+      );
+    }
+
+    overlay.destroy(true);
+    this.divineArrivalOverlay = null;
+
+    this.input.keyboard.off(
+      'keydown-SPACE',
+      this.cinematicSkipHandler
+    );
+
+    this.cameras.main.startFollow(
+      this.player,
+      true,
+      0.1,
+      0.1,
+      this.cameraOffsetX,
+      this.cameraOffsetY
+    );
+
+    this.physics.resume();
+
+    this.playerCue(
+      'ARRIVAL COMPLETE · MOVE OUT',
+      '#8df4ff'
+    );
+
+    this.createMissionTransmission();
+  };
+
+  this.cinematicSkipHandler =
+    finish;
+
+  this.input.keyboard.once(
     'keydown-SPACE',
     this.cinematicSkipHandler
   );
 
-  overlay.destroy(true);
-
-  this.playerCue(
-    'LANDING COMPLETE · E TO FIRE · STOMP FROM ABOVE',
-    '#8df4ff'
+  this.time.delayedCall(
+    2850,
+    finish
   );
-  this.createMissionTransmission();
-};
-
-const story =
-  this.mission.story;
+}
+   
+createMissionTransmission() {
+  const story =
+    this.mission.story;
 
 const width =
   this.scale.width;
@@ -17800,143 +20777,251 @@ this.input.keyboard.once(
 
 }
 
-createMissionTransmission() {
-  const story =
-    this.mission.story;
+createObjectiveHUD() {
+  const compact =
+    this.scale.width < 600;
 
-  const chapter =
-    story?.chapter ||
-    'RUNNER TRANSMISSION';
+  const width =
+    Math.min(
+      this.scale.width - 32,
+      compact ? 260 : 340
+    );
 
-  const objective =
-    story?.arrival ||
-    'Keep moving, read the route and protect the relay.';
+  const x = 16;
+  const y = compact ? 82 : 24;
 
-  const panel =
-    this.add
-      .container(36, 520)
+  const container =
+    this.add.container(x, y)
       .setScrollFactor(0)
-      .setDepth(30);
+      .setDepth(100);
 
   const plate =
     this.add.rectangle(
-      280,
-      68,
-      520,
-      112,
+      width / 2,
+      30,
+      width,
+      60,
       0x07101f,
-      .88
-    ).setStrokeStyle(
+      0.92
+    )
+    .setStrokeStyle(
       1,
       0x8df4ff,
-      .45
+      0.65
     );
 
-  const label =
+  const title =
     this.add.text(
-      40,
-      28,
-      '',
+      14,
+      10,
+      'OBJECTIVE',
       {
         fontFamily: 'DM Mono',
-        fontSize: '12px',
+        fontSize: compact
+          ? '8px'
+          : '9px',
+        color: '#8df4ff',
+        stroke: '#08101c',
+        strokeThickness: 3
+      }
+    );
+
+  const objective =
+    this.add.text(
+      14,
+      25,
+      this.mission?.story?.arrival ||
+        'REACH THE RELAY',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: compact
+          ? '9px'
+          : '10px',
+        color: '#dffcff',
+        stroke: '#08101c',
+        strokeThickness: 3,
+        wordWrap: {
+          width: width - 100
+        }
+      }
+    );
+
+  const progressBack =
+    this.add.rectangle(
+      width - 54,
+      25,
+      72,
+      6,
+      0x18283c,
+      1
+    );
+
+  const progressFill =
+    this.add.rectangle(
+      width - 54,
+      25,
+      72,
+      6,
+      0x8df4ff,
+      1
+    )
+    .setOrigin(0.5);
+
+  const progressText =
+    this.add.text(
+      width - 54,
+      39,
+      '0%',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '8px',
         color: '#8df4ff'
       }
+    )
+    .setOrigin(0.5);
+
+  container.add([
+    plate,
+    title,
+    objective,
+    progressBack,
+    progressFill,
+    progressText
+  ]);
+
+  this.objectiveHUD = container;
+this.objectiveText = objective;
+this.objectiveProgressBar = progressFill;
+this.objectiveProgressText = progressText;
+}
+
+createDetectionHUD() {
+  const compact =
+    this.scale.width < 600;
+
+  const width =
+    Math.min(
+      this.scale.width - 32,
+      compact ? 190 : 230
     );
 
-  const copy =
+  const x =
+    this.scale.width - width - 16;
+
+  const y =
+    compact ? 150 : 24;
+
+  const container =
+    this.add.container(
+      x,
+      y
+    )
+    .setScrollFactor(0)
+    .setDepth(100);
+
+  const plate =
+    this.add.rectangle(
+      width / 2,
+      30,
+      width,
+      60,
+      0x160b12,
+      0.92
+    )
+    .setStrokeStyle(
+      1,
+      0xff5364,
+      0.7
+    );
+
+  const title =
     this.add.text(
-      40,
-      54,
-      '',
+      14,
+      9,
+      'DETECTION',
       {
         fontFamily: 'DM Mono',
-        fontSize: '12px',
-        color: '#dffcff',
-        wordWrap: {
-          width: 440
-        },
-        lineSpacing: 5
+        fontSize: compact
+          ? '8px'
+          : '9px',
+        color: '#ff7180',
+        stroke: '#180910',
+        strokeThickness: 3
       }
     );
 
-  panel.add([
+  const status =
+    this.add.text(
+      14,
+      25,
+      'CLEAR',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: compact
+          ? '9px'
+          : '10px',
+        color: '#dffcff',
+        stroke: '#180910',
+        strokeThickness: 3
+      }
+    );
+
+  const progressBack =
+    this.add.rectangle(
+      width - 52,
+      26,
+      70,
+      6,
+      0x321722,
+      1
+    );
+
+  const progressFill =
+    this.add.rectangle(
+      width - 52,
+      26,
+      70,
+      6,
+      0xff5364,
+      1
+    )
+    .setOrigin(0.5);
+
+  const progressText =
+    this.add.text(
+      width - 52,
+      40,
+      '0%',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '8px',
+        color: '#ff7180',
+        stroke: '#180910',
+        strokeThickness: 2
+      }
+    )
+    .setOrigin(0.5);
+
+  container.add([
     plate,
-    label,
-    copy
+    title,
+    status,
+    progressBack,
+    progressFill,
+    progressText
   ]);
 
-  panel.setAlpha(0);
+  this.detectionHUD =
+    container;
 
-  this.tweens.add({
-    targets: panel,
-    alpha: 1,
-    x: 58,
-    duration: 340,
-    ease: 'Cubic.out'
-  });
+  this.detectionStatusText =
+    status;
 
-  // TYPEWRITER — MISSION CHAPTER
-this.tweens.addCounter({
-  from: 0,
-  to: chapter.length,
-  duration: Math.max(
-    500,
-    chapter.length * 38
-  ),
-  onUpdate: tween => {
-    if (!panel.active) return;
+  this.detectionProgressBar =
+    progressFill;
 
-    const count =
-      Math.floor(tween.getValue());
-
-    label.setText(
-      chapter.slice(0, count)
-    );
-  }
-});
-    this.time.delayedCall(
-    Math.max(
-      550,
-      chapter.length * 38
-    ),
-    () => {
-      if (!panel.active) return;
-
-      this.tweens.addCounter({
-        from: 0,
-        to: objective.length,
-        duration: Math.max(
-          900,
-          objective.length * 28
-        ),
-        onUpdate: tween => {
-          if (!panel.active) return;
-
-          const count =
-            Math.floor(tween.getValue());
-
-          copy.setText(
-            objective.slice(0, count)
-          );
-        }
-      });
-    }
-  );
-
-  this.tweens.add({
-    targets: panel,
-    alpha: 0,
-   delay: Math.max(
-  3900,
-  Math.max(550, chapter.length * 38) +
-  Math.max(900, objective.length * 28) +
-  300
-),
-    duration: 500,
-    onComplete: () =>
-      panel.destroy()
-  });
+  this.detectionProgressText =
+    progressText;
 }
 
 createBoostPads() {
@@ -20123,7 +23208,28 @@ this.checkpoint = {
 marker.setTint(
   0xdffcff
 );
-  
+
+this.tweens.killTweensOf(marker);
+
+if (!this.motionReduced) {
+  this.tweens.add({
+    targets: marker,
+    alpha: {
+      from: 1,
+      to: 0.72
+    },
+    duration: 180,
+    yoyo: true,
+    repeat: 2,
+    ease: 'Sine.inOut',
+    onComplete: () => {
+      if (marker?.active) {
+        marker.setAlpha(1);
+      }
+    }
+  });
+}
+
 const checkpointPulse =
   this.add
     .circle(
@@ -20134,7 +23240,6 @@ const checkpointPulse =
       .35
     )
     .setDepth(11);
-
 checkpointPulse.setStrokeStyle(
   2,
   0xe8fdff,
@@ -21449,6 +24554,45 @@ this.game.events.emit(
 'detection',
 detectionValue
 );
+}
+
+  if (
+  this.detectionProgressBar &&
+  this.detectionProgressText &&
+  this.detectionStatusText
+) {
+  const alarmDuration =
+    Math.max(
+      1,
+      this.alarmDuration(3400)
+    );
+
+  const detectionPercent =
+    Phaser.Math.Clamp(
+      Math.round(
+        (
+          this.alarmTimer /
+          alarmDuration
+        ) * 100
+      ),
+      0,
+      100
+    );
+
+  this.detectionProgressBar.scaleX =
+    detectionPercent / 100;
+
+  this.detectionProgressText.setText(
+    `${detectionPercent}%`
+  );
+
+  this.detectionStatusText.setText(
+    detectionPercent > 0
+      ? detectionPercent >= 75
+        ? 'ALERT'
+        : 'DETECTED'
+      : 'CLEAR'
+  );
 }
 
 }
@@ -24384,10 +27528,20 @@ this.time.delayedCall(
 }
 
 respawnCheckpoint() {
+  this.dizzyStarsSerial++;
+
+  this.dizzyStars
+    ?.destroy?.(true);
+
+  this.dizzyStars = null;
+  this.dizzyStarsTimer = 0;
+  this.dizzyStarsIntensity = 0;
+
   this.game.events.emit(
-  'feedback',
-  'respawn'
-);
+    'feedback',
+    'respawn'
+  );
+  
 if (
 this.loadout.modifier
 ?.id ===
@@ -24400,6 +27554,8 @@ signals: new Set(),
 secrets: new Set()
 };
 }
+
+this.resetCollapsingPlatforms();
 
 let lostSignals = 0;
 let lostSecrets = 0;
@@ -24566,6 +27722,15 @@ this.jumpHeld =
 
 this.wallJumpTimer =
   0;
+
+this.firstPersonCamera =
+  false;
+
+if (
+  this.player?.active
+) {
+  this.player.setAlpha(1);
+}
 
 this.wallJumpCooldown =
   0;
@@ -26135,13 +29300,13 @@ if (
   this.signalGhostTimer = 0;
 }
 
-  if (
-    tier !== previousTier &&
-    previousTier >= 0
-  ) {
-    this.triggerSignalInterferenceBurst(
-      tier
-    );
+if (
+  tier > previousTier &&
+  previousTier >= 0
+) {
+  this.triggerSignalInterferenceBurst(
+    tier
+  );
 if (tier === 1) {
   this.playerCue(
     'SIGNAL NOISE DETECTED',
@@ -26183,21 +29348,192 @@ if (tier === 3) {
 }
 
 update(_, delta) {
+  delta = Phaser.Math.Clamp(
+    Number(delta) || 0,
+    0,
+    50
+  );
+
   if (
     this.finished ||
     this.respawning ||
-    this.cinematicActive
+    this.cinematicActive ||
+    !this.player?.active
   ) {
     return;
   }
+// ============================================================
+// DIZZY STARS · FOLLOW PLAYER HEAD
+// ============================================================
+if (
+  this.dizzyStars?.active
+) {
+  this.dizzyStars.x =
+    this.player.x;
 
+  this.dizzyStars.y =
+    this.player.y -
+    42;
+
+  const children =
+    this.dizzyStars.list || [];
+
+  const now =
+    this.time.now * 0.0045;
+
+  children.forEach(
+    star => {
+      const orbitRadius =
+        Number(
+          star.getData(
+            'orbitRadius'
+          )
+        ) || 20;
+
+      const orbitAngle =
+        Number(
+          star.getData(
+            'orbitAngle'
+          )
+        ) || 0;
+
+      const spin =
+        Number(
+          star.getData(
+            'spin'
+          )
+        ) || 1;
+
+      const index =
+        Number(
+          star.getData(
+            'orbitIndex'
+          )
+        ) || 0;
+
+    const angle =
+  orbitAngle +
+  now *
+    spin;
+
+const bobPhase =
+  orbitAngle +
+  index * 0.75;
+
+const horizontalRadius =
+  orbitRadius +
+  index * 1.8;
+
+const verticalRadius =
+  7 +
+  Math.sin(
+    now * 1.35 +
+    bobPhase
+  ) * 2.5;
+
+star.x =
+  Math.cos(angle) *
+  horizontalRadius;
+
+star.y =
+  Math.sin(angle) *
+    verticalRadius +
+  Math.sin(
+    now * 0.9 +
+    bobPhase
+  ) * 1.5;
+
+const pulsePhase =
+  now * 1.8 +
+  orbitAngle +
+  index * 0.9;
+
+const pulse =
+  1 +
+  Math.sin(pulsePhase) * 0.12;
+
+const shimmer =
+  0.82 +
+  (
+    Math.sin(
+      now * 2.4 +
+      index * 1.7
+    ) + 1
+  ) * 0.09;
+
+star.scale =
+  pulse;
+
+star.alpha =
+  shimmer;
+
+star.rotation =
+  now *
+    spin *
+    0.72;
+    0.72;
+    }
+  );
+}
+
+this.dizzyStarsTimer =
+  Math.max(
+    0,
+    (this.dizzyStarsTimer || 0) -
+      delta
+  );
+
+if (
+  this.dizzyStars?.active &&
+  this.dizzyStarsTimer <= 0
+) {
+  this.dizzyStarsSerial++;
+
+  this.dizzyStars.destroy(true);
+  this.dizzyStars = null;
+
+  this.dizzyStarsIntensity = 0;
+}
 this.updateDynamicWaterFX(delta);
 
 // ============================================================
+// CAMERA MODE · C = THIRD PERSON / FIRST PERSON
+// ============================================================
+if (
+  Phaser.Input.Keyboard.JustDown(
+    this.keys.C
+  )
+) {
+  this.firstPersonCamera =
+    !this.firstPersonCamera;
+
+  if (
+    this.player?.active
+  ) {
+    this.player.setAlpha(
+      this.firstPersonCamera
+        ? 0
+        : 1
+    );
+  }
+
+  this.game.events.emit(
+    'feedback',
+    this.firstPersonCamera
+      ? 'first-person'
+      : 'third-person'
+  );
+}
+// ============================================================
 // SIGNAL INTERFERENCE · CONTINUOUS UPDATE
 // ============================================================
-this.updateSignalInterference(delta);
-this.updateSignalInterferenceEnemyFX(delta);
+  
+if (
+  !this.motionReduced
+) {
+  this.updateSignalInterference(delta);
+  this.updateSignalInterferenceEnemyFX(delta);
+}
 
 this.updateRelayGateInteraction();
 
@@ -26208,11 +29544,12 @@ this.updateRelayGateInteraction();
   this.timeEmitTimer +=
     delta;
 
-  if (
+ if (
     this.timeEmitTimer >=
     100
   ) {
-    this.timeEmitTimer = 0;
+    this.timeEmitTimer -=
+      100;
 
     this.game.events.emit(
       'time',
@@ -26228,8 +29565,20 @@ this.updateRelayGateInteraction();
 // CELESTIAL · ORBIT UPDATE
 // ============================================================
 
-const celestialTime =
-  (this.time.now % 180000) / 180000;
+this.celestialUpdateTimer =
+  Math.max(
+    0,
+    (this.celestialUpdateTimer || 0) -
+      delta
+  );
+
+if (
+  this.celestialUpdateTimer <= 0
+) {
+  this.celestialUpdateTimer = 33;
+
+  const celestialTime =
+    (this.time.now % 180000) / 180000;
 
 const sunAngle =
   celestialTime * Math.PI * 2;
@@ -26424,7 +29773,7 @@ this.celestialMoonGlow.setAlpha(
     1
   )
 );
-}
+  }
 }
 
 this.elapsedMs += delta;
@@ -26434,7 +29783,8 @@ if (
   this.timeEmitTimer >=
   100
 ) {
-  this.timeEmitTimer = 0;
+  this.timeEmitTimer -=
+    100;
 
   this.game.events.emit(
     'time',
@@ -26516,7 +29866,7 @@ this.dashCooldown =
       delta
   );
 
-  const previousDashTimer =
+const previousDashTimer =
   this.dashTimer;
 
 this.dashTimer =
@@ -26525,6 +29875,19 @@ this.dashTimer =
     this.dashTimer -
       delta
   );
+
+// DASH COOLDOWN · READY EDGE
+if (
+  previousDashCooldown > 0 &&
+  this.dashCooldown <= 0 &&
+  !this.motionReduced &&
+  this.player?.active
+) {
+  this.game.events.emit(
+    'feedback',
+    'dash-ready'
+  );
+}
 
 // DASH → MOVEMENT TRANSITION
 if (
@@ -26605,36 +29968,42 @@ if (
         )
         .setDepth(6);
 
-    this.tweens.add({
-      targets: ghostA,
-      x:
-        ghostA.x -
-        (this.player.flipX ? -28 : 28),
-      alpha: 0,
-      scaleX:
-        ghostA.scaleX * 0.92,
-      scaleY:
-        ghostA.scaleY * 0.92,
-      duration: 170,
-      ease: 'Quad.out',
-      onComplete: () =>
-        ghostA.destroy()
+this.tweens.add({
+  targets: ghostA,
+  x:
+    ghostA.x -
+    (this.player.flipX ? -32 : 32),
+  alpha: 0,
+  scaleX:
+    ghostA.scaleX * 0.86,
+  scaleY:
+    ghostA.scaleY * 0.94,
+  duration: 145,
+  ease: 'Cubic.out',
+   onComplete: () => {
+  if (ghostA?.active) {
+    ghostA.destroy();
+  }
+}
     });
 
     this.tweens.add({
-      targets: ghostB,
-      x:
-        ghostB.x -
-        (this.player.flipX ? -34 : 34),
-      alpha: 0,
-      scaleX:
-        ghostB.scaleX * 0.88,
-      scaleY:
-        ghostB.scaleY * 0.88,
-      duration: 210,
-      ease: 'Quad.out',
-      onComplete: () =>
-        ghostB.destroy()
+  targets: ghostB,
+  x:
+    ghostB.x -
+    (this.player.flipX ? -40 : 40),
+  alpha: 0,
+  scaleX:
+    ghostB.scaleX * 0.80,
+  scaleY:
+    ghostB.scaleY * 0.90,
+  duration: 185,
+  ease: 'Cubic.out',
+     onComplete: () => {
+  if (ghostB?.active) {
+    ghostB.destroy();
+  }
+}
     });
   }
 
@@ -26725,6 +30094,13 @@ this.wallJumpCooldown =
   Math.max(
     0,
     this.wallJumpCooldown -
+      delta
+  );
+
+this.wallJumpTimer =
+  Math.max(
+    0,
+    this.wallJumpTimer -
       delta
   );
 
@@ -26935,8 +30311,9 @@ this.updateSciFiThreats(
 this.routeHintTimer -= delta;
 
 if (this.routeHintTimer <= 0) {
-this.routeHintTimer = 100;
-this.updateRouteHints();
+  this.routeHintTimer = 100;
+  this.updateRouteHints();
+  this.updateCheckpointArrow();
 }
 
 if (
@@ -27198,6 +30575,52 @@ const right =
   this.mobileDirection ===
     'right';
 
+/*
+ * MOBILE AIR STEERING
+ * Smooth target direction instead of hard switching.
+ */
+const mobileTargetDirection =
+  this.mobileDirection === 'left'
+    ? -1
+    : this.mobileDirection === 'right'
+      ? 1
+      : 0;
+
+if (
+  !this.mobileAirDirection
+) {
+  this.mobileAirDirection = 0;
+}
+
+if (
+  mobileTargetDirection !== 0
+) {
+  this.mobileAirDirection =
+    Phaser.Math.Linear(
+      this.mobileAirDirection,
+      mobileTargetDirection,
+      Phaser.Math.Clamp(
+        RUNNER_TUNING.mobileAirSteerResponse *
+        (delta / 16.667),
+        0,
+        1
+      )
+    );
+} else {
+  this.mobileAirDirection =
+    Phaser.Math.Linear(
+      this.mobileAirDirection,
+      0,
+      Phaser.Math.Clamp(
+        RUNNER_TUNING.mobileAirSteerResponse *
+        0.75 *
+        (delta / 16.667),
+        0,
+        1
+      )
+    );
+}
+
 const onGround =
   body.blocked.down ||
   body.touching.down;
@@ -27316,22 +30739,73 @@ const movingAgainstVelocity =
     body.velocity.x <
       -20
   );
+  
+const airControlMultiplier =
+  !onGround
+    ? (
+        this.mobileAirDirection !== 0 &&
+        !this.cursors.left.isDown &&
+        !this.cursors.right.isDown &&
+        !this.keys.A.isDown &&
+        !this.keys.D.isDown
+      )
+        ? Math.max(
+            0.85,
+            Math.abs(
+              this.mobileAirDirection
+            )
+          )
+        : (
+            upgrades.includes(
+              'airControl'
+            )
+              ? 1.18
+              : 1
+          )
+    : 1;
+
+/*
+ * ADVANCED AIR STEERING
+ * Viša brzina = malo teže održavati puni steering.
+ * Promjena smjera = dodatni turn boost.
+ */
+const airSpeedRatio =
+  Phaser.Math.Clamp(
+    Math.abs(body.velocity.x) /
+      RUNNER_TUNING.maxRunSpeed,
+    0,
+    1
+  );
+
+const airSteeringCurve =
+  Phaser.Math.Linear(
+    RUNNER_TUNING.airSteeringMax,
+    RUNNER_TUNING.airSteeringMin,
+    airSpeedRatio
+  );
+
+const airTurnBoost =
+  movingAgainstVelocity &&
+  !onGround
+    ? RUNNER_TUNING.airSteeringTurnBoost
+    : 1;
 
 const acceleration =
   (
     movingAgainstVelocity
-      ? RUNNER_TUNING.turnAcceleration
+      ? onGround
+        ? RUNNER_TUNING.turnAcceleration
+        : RUNNER_TUNING.airTurnAcceleration
       : onGround
         ? RUNNER_TUNING.groundAcceleration
         : RUNNER_TUNING.airAcceleration
   ) *
+  airControlMultiplier *
   (
-    !onGround &&
-    upgrades.includes(
-      'airControl'
-    )
-      ? 1.12
-      : 1
+    onGround
+      ? 1
+      : airSteeringCurve *
+        airTurnBoost
   );
 
 const wetGrip =
@@ -27386,8 +30860,29 @@ if (left) {
     .setDragX(
       onGround
         ? wetDeceleration
-        : 520
+        : RUNNER_TUNING.airDeceleration
     );
+
+  /*
+   * AIR MOMENTUM
+   * Zadrži horizontalni momentum u zraku,
+   * ali ga normalizuj prema frame-timeu.
+   */
+  if (
+    !onGround &&
+    Math.abs(body.velocity.x) > 1
+  ) {
+    const retention =
+      Math.pow(
+        RUNNER_TUNING.airMomentumRetention,
+        delta / 16.667
+      );
+
+    body.setVelocityX(
+      body.velocity.x *
+      retention
+    );
+  }
 }
 
 if (
@@ -27417,15 +30912,57 @@ const gravityMultiplier =
     ? 0.55
     : 1;
 
+let verticalGravity;
+
+const verticalSpeed =
+  Math.abs(body.velocity.y);
+
+if (
+  verticalSpeed <=
+  RUNNER_TUNING.apexVelocityThreshold
+) {
+  verticalGravity =
+    RUNNER_TUNING.riseGravity *
+    RUNNER_TUNING.apexGravityMultiplier;
+
+} else if (
+  body.velocity.y < 0
+) {
+  verticalGravity =
+    RUNNER_TUNING.riseGravity;
+
+} else {
+  const fallProgress =
+    Phaser.Math.Clamp(
+      (
+        verticalSpeed -
+        RUNNER_TUNING.fallRampStart
+      ) /
+      (
+        RUNNER_TUNING.fallRampMax -
+        RUNNER_TUNING.fallRampStart
+      ),
+      0,
+      1
+    );
+
+  const fallRamp =
+    Phaser.Math.Linear(
+      1,
+      RUNNER_TUNING.fallRampBonus,
+      fallProgress
+    );
+
+  verticalGravity =
+    RUNNER_TUNING.fallGravity *
+    RUNNER_TUNING.fallGravityBoost *
+    fallRamp;
+}
+
 body.setGravityY(
-  (
-    body.velocity.y > 0
-      ? RUNNER_TUNING.fallGravity
-      : 0
-  ) *
+  verticalGravity *
   gravityMultiplier
 );
-
 body.setMaxVelocityY(RUNNER_TUNING.maxFallSpeed);
 
 if (onGround) {
@@ -27443,7 +30980,7 @@ if (onGround) {
     );
 }
 
-const pressed =
+const keyboardPressed =
   Phaser.Input.Keyboard.JustDown(
     this.cursors.up
   ) ||
@@ -27452,13 +30989,9 @@ const pressed =
   ) ||
   Phaser.Input.Keyboard.JustDown(
     this.keys.SPACE
-  ) ||
-  this.mobileActions.jump;
+  );
 
-this.mobileActions.jump =
-  false;
-
-const released =
+const keyboardReleased =
   Phaser.Input.Keyboard.JustUp(
     this.cursors.up
   ) ||
@@ -27468,6 +31001,23 @@ const released =
   Phaser.Input.Keyboard.JustUp(
     this.keys.SPACE
   );
+
+const pressed =
+  keyboardPressed ||
+  this.mobileActions.jump;
+
+const released =
+  keyboardReleased ||
+  this.mobileActions.jumpReleased;
+
+const jumpHeld =
+  this.cursors.up.isDown ||
+  this.keys.W.isDown ||
+  this.keys.SPACE.isDown ||
+  this.mobileActions.jumpHeld;
+
+this.mobileActions.jump = false;
+this.mobileActions.jumpReleased = false;
 
 if (pressed) {
   this.jumpBuffer =
@@ -27829,9 +31379,22 @@ if (
       
     }
 
+ const isDoubleJump =
+  !onGround &&
+  this.jumpsUsed >= 1;
+
+if (isDoubleJump) {
+  body.setVelocityY(
+    Math.min(
+      body.velocity.y,
+      RUNNER_TUNING.doubleJumpVelocity
+    )
+  );
+} else {
   body.setVelocityY(
     RUNNER_TUNING.jumpVelocity
   );
+}
 
   if (!this.motionReduced) {
 const jumpBurst =
@@ -27895,9 +31458,11 @@ if (
   });
 }
 
-  this.coyote = 0;
-  this.jumpBuffer = 0;
-  this.jumpHeld = true;
+this.coyote = 0;
+this.jumpBuffer = 0;
+
+this.jumpHeld =
+  jumpHeld;
 
   this.dust.emitParticleAt(
     this.player.x,
@@ -28024,20 +31589,20 @@ if (
   const extraHeight =
     standingHeight - crouchHeight;
 
-  const canStand =
-    !this.physics.world.overlapRect(
-      body.x,
-      body.y - extraHeight,
-      standingWidth,
-      extraHeight,
-      true,
-      true
-    );
-
+const canStand =
+  !this.physics.overlapRect(
+    body.x,
+    body.y - extraHeight,
+    standingWidth,
+    extraHeight,
+    true,
+    true
+  );
+  
   if (canStand) {
     this.playerCrouched = false;
 
-   applyPlayerCollider({
+  applyPlayerCollider({
   width: standingWidth,
   height: standingHeight,
   offsetX: standingOffsetX,
@@ -28075,17 +31640,17 @@ body.setVelocityX(
   Math.sign(body.velocity.x) * 560
 );
 
-  this.tweens.add({
-    targets: this.player,
-    scaleX:
-      this.playerVisualBaseScaleX * 1.12,
-    scaleY:
-      this.playerVisualBaseScaleY * 0.82,
-    duration: 90,
-    yoyo: true,
-    ease: 'Quad.out'
-  });
+this.tweens.killTweensOf(this.player);
 
+this.tweens.add({
+  targets: this.player,
+  scaleX:
+    this.playerVisualBaseScaleX * 1.12,
+  scaleY:
+    this.playerVisualBaseScaleY * 0.82,
+  duration: 90,
+  ease: 'Quad.out'
+});
   const slideBurst =
     this.add
       .circle(
@@ -28106,15 +31671,15 @@ body.setVelocityX(
       slideBurst.destroy()
   });
 
-  this.tweens.add({
-    targets: this.player,
-    scaleX:
-      this.playerVisualBaseScaleX,
-    scaleY:
-      this.playerVisualBaseScaleY,
-    duration: 220,
-    ease: 'Quad.out'
-  });
+this.tweens.add({
+  targets: this.player,
+  scaleX:
+    this.playerVisualBaseScaleX,
+  scaleY:
+    this.playerVisualBaseScaleY,
+  duration: 220,
+  ease: 'Quad.out'
+});
 
   this.playerCue(
     'SLIDE',
@@ -28196,9 +31761,9 @@ if (
     this.airDashUsed =
       true;
 
-    body.setVelocityY(
-      0
-    );
+  body.setVelocityY(
+  -RUNNER_TUNING.airDashRecoveryVelocity
+);
 
     this.playerCue(
       'AIR DASH'
@@ -28406,11 +31971,13 @@ if (
       : 1
   );
 
- if (hardLanding) {
-  this.shake(
-    105,
-    .0028
-  );
+if (hardLanding) {
+  if (!this.motionReduced) {
+    this.shake(
+      105,
+      .0028
+    );
+  }
 
   this.playerCue(
     'HARD LANDING',
@@ -28418,25 +31985,27 @@ if (
   );
 }
 
+if (!this.motionReduced) {
   const landingPulse =
-  this.add
-    .circle(
-      this.player.x,
-      this.player.y + 28,
-      14,
-      0xffcf82,
-      .30
-    )
-    .setDepth(11);
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y + 28,
+        14,
+        0xffcf82,
+        .30
+      )
+      .setDepth(11);
 
-this.tweens.add({
-  targets: landingPulse,
- scale: 4.4,
-alpha: 0,
-duration: 290,
-  onComplete: () =>
-    landingPulse.destroy()
-});
+  this.tweens.add({
+    targets: landingPulse,
+    scale: 4.4,
+    alpha: 0,
+    duration: 290,
+    onComplete: () =>
+      landingPulse.destroy()
+  });
+}
 
   if (!this.motionReduced) {
     this.tweens.add({
@@ -28480,16 +32049,24 @@ scaleY:
       : 34
   );
 
-  if (hardLanding) {
-    this.worldLightFlash(
-      0xffd06e,
-      0.055,
-      135
-    );
-  }
+if (hardLanding) {
+  this.worldLightFlash(
+    0xffd06e,
+    0.055,
+    135
+  );
 
-  this.landingTimer =
-    hardLanding ? 135 : 105;
+  // Strong fall = stronger dizzy reaction.
+  this.showDizzyStars(
+    1.25
+  );
+}
+
+this.landingTimer =
+  hardLanding ? 135 : 105;
+
+this.lastHardLanding =
+  hardLanding;
 
 // ============================================================
 // PLAYER · LANDING SHOCKWAVE
@@ -28680,7 +32257,10 @@ if (
 ) {
   this.fastFallFxTimer -= delta;
 
-  if (this.fastFallFxTimer <= 0) {
+  if (
+    this.fastFallFxTimer <= 0 &&
+    this.player?.active
+  ) {
     const fallTrail =
       this.add
         .circle(
@@ -28694,17 +32274,23 @@ if (
 
     this.tweens.add({
       targets: fallTrail,
-      y: fallTrail.y + 28,
+      y:
+        fallTrail.y + 28,
       scaleY: 2.4,
       scaleX: 0.7,
       alpha: 0,
       duration: 150,
       ease: 'Quad.out',
-      onComplete: () =>
-        fallTrail.destroy()
+      onComplete: () => {
+        if (
+          fallTrail?.active
+        ) {
+          fallTrail.destroy();
+        }
+      }
     });
 
-    this.fastFallFxTimer = 55;
+    this.fastFallFxTimer = 65;
   }
 } else {
   this.fastFallFxTimer = 0;
@@ -28960,7 +32546,10 @@ if (
 
 if (
   this.player?.active &&
-  !this.motionReduced
+  !this.motionReduced &&
+  !this.cinematicActive &&
+  !this.respawning &&
+  !this.isPlayerTransformLocked
 ) {
   const vx =
     this.player.body?.velocity?.x || 0;
@@ -29046,8 +32635,12 @@ this.player.scaleY =
   );
 }
   
-this.dustTimer -=
-  delta;
+this.dustTimer =
+  Math.max(
+    0,
+    this.dustTimer -
+      delta
+  );
 
 if (
   onGround &&
@@ -29062,12 +32655,13 @@ if (
     1
   );
 
-  this.dustTimer = 90;
+ this.dustTimer = 90;
 }
 
 this.speedTimer -= delta;
 if (
   !this.motionReduced &&
+  this.player?.active &&
   Math.abs(
     body.velocity.x
   ) > 280 &&
@@ -29138,8 +32732,13 @@ if (
       speedRatio
     ),
     ease: 'Quad.out',
-    onComplete: () =>
-      runStreak.destroy()
+  onComplete: () => {
+  if (
+    runStreak?.active
+  ) {
+    runStreak.destroy();
+  }
+}
   });
 
   this.speedTimer =
@@ -29374,8 +32973,8 @@ const dashActive =
   this.dashTimer > 0;
 
 const hardLanding =
-  this.landingTimer > 0 &&
-  this.fallSpeed > 260;
+  this.lastHardLanding &&
+  this.landingTimer > 0;
 
 const wallJumpActive =
   this.wallJumpTimer > 0;
@@ -29399,17 +32998,44 @@ if (
       : 95;
 }
 
-/* Vertical anticipation. */
+/* Vertical air anticipation. */
 let targetOffsetY = 65;
 
 if (
   velocityY < -110
 ) {
-  targetOffsetY = 18;
+  targetOffsetY =
+    Phaser.Math.Linear(
+      18,
+      4,
+      Phaser.Math.Clamp(
+        Math.abs(velocityY) /
+        RUNNER_TUNING.jumpVelocity * -1,
+        0,
+        1
+      )
+    );
+
 } else if (
   velocityY > 180
 ) {
-  targetOffsetY = 102;
+  targetOffsetY =
+    Phaser.Math.Linear(
+      102,
+      124,
+      Phaser.Math.Clamp(
+        velocityY /
+        RUNNER_TUNING.maxFallSpeed,
+        0,
+        1
+      )
+    );
+
+} else if (
+  Math.abs(velocityY) <=
+  RUNNER_TUNING.apexVelocityThreshold
+) {
+  targetOffsetY = 48;
 }
 
 /* Small extra framing during special movement states. */
@@ -29433,9 +33059,27 @@ if (hardLanding) {
   targetOffsetY = 112;
 }
 
-/* Speed-based cinematic zoom. */
-
 let cinematicTargetZoom = 1;
+
+/* ============================================================
+ * FIRST PERSON CAMERA
+ * C = THIRD PERSON / FIRST PERSON
+ * ============================================================ */
+if (this.firstPersonCamera) {
+  targetOffsetX =
+    velocityX >= 0
+      ? -12
+      : 12;
+
+  targetOffsetY = 8;
+  cinematicTargetZoom = 1.16;
+
+  if (
+    this.player?.active
+  ) {
+    this.player.setAlpha(0);
+  }
+}
 
 if (!this.motionReduced) {
   if (speed > 520) {
@@ -29606,15 +33250,68 @@ if (
   this.lastProgress =
     progress;
 
-  this.game.events.emit(
-    'progress',
-    progress
+ if (
+  this.objectiveProgressBar &&
+  this.objectiveProgressText
+) {
+this.objectiveProgressBar.scaleX =
+  progress / 100;
+
+this.objectiveProgressText.setText(
+  `${progress}%`
+);
+
+if (
+  this.objectiveText &&
+  this.objectiveText.active
+) {
+  this.objectiveText.setText(
+    this.mission?.story?.arrival ||
+    'REACH THE RELAY'
   );
 }
 
+if (
+  this.objectiveHUD &&
+  this.objectiveHUD.active
+) {
+  const objectiveText =
+    this.mission?.story?.arrival ||
+    'REACH THE RELAY';
+
+  const checkpointCount =
+    this.checkpoints?.countActive
+      ? this.checkpoints.countActive(true)
+      : 0;
+
+  const completed =
+    this.checkpoint?.signals?.size || 0;
+
+  if (
+    checkpointCount > 0 &&
+    completed > 0 &&
+    progress < 100
+  ) {
+    this.objectiveHUD.list
+      .find(
+        item =>
+          item?.type === 'Text' &&
+          item.y === 25
+      )
+      ?.setText(
+        `${objectiveText} · CHECKPOINT ${Math.min(
+          completed + 1,
+          checkpointCount
+        )}`
+      );
+  }
+}
+}
+}
+
+  }
   }
 }
 
 }
-
 }
