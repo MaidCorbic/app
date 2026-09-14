@@ -8357,31 +8357,10 @@ if (
 }
 };
 
-this.mobileMoveHandler =
-  direction => {
-    const isPortrait =
-      this.scale.height > this.scale.width;
-
-    if (isPortrait) {
-      this.mobileDirection = null;
-      return;
-    }
-
-    if (
-      direction === 'left' ||
-      direction === 'right'
-    ) {
-      this.mobileDirection = direction;
-      return;
-    }
-
-    this.mobileDirection = null;
-  };
-
-this.game.events.on(
-  'mobile-action',
-  this.mobileActionHandler
-);
+this.mobileMoveHandler = null;
+  
+// MOBILE INPUT V9 OWNS JOYSTICK MOVEMENT.
+// Do not register the legacy mobile-move listener here.
 
 this.game.events.on(
   'mobile-move',
