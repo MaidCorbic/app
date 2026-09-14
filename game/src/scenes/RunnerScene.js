@@ -194,6 +194,7 @@ try {
 this.voiceQueue = [];
 this.voiceSpeaking = false;
 this.voiceVoicesChangedHandler = null;
+this.voicePreviousVoicesChangedHandler = null;
 
 this.voiceLastText = '';
 this.voiceLastTextAt = 0;
@@ -313,6 +314,190 @@ setVoiceByName(name) {
   }
 }
 
+setGraphicsQuality(level) {
+  const quality =
+    String(level || '')
+      .trim()
+      .toUpperCase();
+
+  if (
+    ![
+      'LOW',
+      'MEDIUM',
+      'HIGH',
+      'ULTRA'
+    ].includes(quality)
+  ) {
+    return false;
+  }
+
+  this.graphicsQuality =
+    quality;
+
+  this.graphicsLevel = {
+    LOW: 0,
+    MEDIUM: 1,
+    HIGH: 2,
+    ULTRA: 3
+  }[quality];
+
+  this.graphicsSettings = {
+    quality,
+    level: this.graphicsLevel,
+    effects: true,
+    particles:
+      this.graphicsLevel >= 1,
+    lighting:
+      this.graphicsLevel >= 2,
+    weather:
+      this.graphicsLevel >= 1
+  };
+
+  try {
+    if (
+      typeof window !== 'undefined' &&
+      window.localStorage
+    ) {
+      window.localStorage.setItem(
+        'runner_graphics_quality',
+        quality
+      );
+    }
+  } catch (error) {
+    console.warn(
+      '[GRAPHICS] Failed to save quality:',
+      error
+    );
+  }
+
+this.applyGraphicsSettings();
+
+this.game.events.emit(
+  'graphics-settings-changed',
+  this.graphicsSettings
+);
+
+return true;
+}
+
+getGraphicsSettings() {
+  return {
+    ...(this.graphicsSettings || {}),
+    quality:
+      this.graphicsQuality || 'HIGH',
+    level:
+      Number.isFinite(this.graphicsLevel)
+        ? this.graphicsLevel
+        : 2
+  };
+}
+
+applyGraphicsSettings() {
+  const quality =
+    this.graphicsQuality || 'HIGH';
+
+  const level =
+    Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
+  const previousLevel =
+    Number.isFinite(
+      this._appliedGraphicsLevel
+    )
+      ? this._appliedGraphicsLevel
+      : null;
+
+  const previousWaveLevel =
+    previousLevel !== null &&
+    previousLevel >= 2;
+
+  const nextWaveLevel =
+    level >= 2;
+
+  this.graphicsSettings = {
+    quality,
+    level,
+    effects: true,
+    particles:
+      level >= 1,
+    lighting:
+      level >= 2,
+    weather:
+      level >= 1
+  };
+
+  const rainVisible =
+    Boolean(
+      this.rainEnabled &&
+      level >= 1
+    );
+
+  this.rain?.setVisible(
+    rainVisible
+  );
+
+  this.dust?.setVisible(
+    level >= 1
+  );
+
+  this.speedLines?.setVisible(
+    level >= 1
+  );
+
+  if (
+    this.weatherOverlay &&
+    typeof this.weatherOverlay.setAlpha === 'function'
+  ) {
+    this.weatherOverlay.setAlpha(
+      level >= 1
+        ? 0.045
+        : 0
+    );
+  }
+
+   /*
+   * ============================================================
+   * WATER WAVES · RUNTIME GRAPHICS QUALITY
+   * HIGH / ULTRA = active wave system
+   * LOW / MEDIUM = remove heavy wave system
+   * ============================================================
+   */
+
+  if (
+    previousWaveLevel &&
+    !nextWaveLevel
+  ) {
+    this.clearWaterWaves();
+  }
+
+  if (
+    previousLevel !== null &&
+    !previousWaveLevel &&
+    nextWaveLevel &&
+    !this.motionReduced &&
+    this.waterZones &&
+    this.mission?.waterZones
+  ) {
+    this.createWaterWaves();
+  }
+
+  /*
+   * First application after scene creation.
+   * Do not force-create here because create()
+   * already calls createWaterWaves() in the correct order.
+   */
+  this._appliedGraphicsLevel =
+    level;
+
+  this.game.events.emit(
+    'graphics-settings-applied',
+    this.graphicsSettings
+  );
+
+  return this.graphicsSettings;
+}
+
 getVoiceSettings() {
   return {
     enabled:
@@ -354,11 +539,12 @@ testVoice() {
   this.voiceQueue = [];
 
   this.voiceLastText = '';
-  this.voiceLastTextAt = 0;
+this.voiceLastTextAt = 0;
+this.voiceLastAt = 0;
 
-  this.speakNarration(
-    testText
-  );
+this.speakNarration(
+  testText
+);
 }
 
 speakNarration(text) {
@@ -898,8 +1084,13 @@ setupNarrationVoice() {
     'onvoiceschanged' in
     window.speechSynthesis
   ) {
-    const previousHandler =
-      window.speechSynthesis.onvoiceschanged;
+const previousHandler =
+  window.speechSynthesis.onvoiceschanged;
+
+this.voicePreviousVoicesChangedHandler =
+  typeof previousHandler === 'function'
+    ? previousHandler
+    : null;
 
     this.voiceVoicesChangedHandler =
       () => {
@@ -946,6 +1137,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // PALETTE
     // ------------------------------------------------------------
+    
     const C = {
       void: 0x07111d,
       armor: 0x131f30,
@@ -965,6 +1157,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // OUTER MOTION FIELD
     // ------------------------------------------------------------
+    
     g.fillStyle(C.cyan, 0.035)
       .fillCircle(24, 31, 27);
 
@@ -974,6 +1167,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // REAR SILHOUETTE / BACKPACK / POWER UNIT
     // ------------------------------------------------------------
+    
     g.fillStyle(C.void)
       .fillRoundedRect(8, 24, 10, 22, 4);
 
@@ -992,6 +1186,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // NECK / REAR COLLAR
     // ------------------------------------------------------------
+    
     g.fillStyle(C.void)
       .fillRoundedRect(19, 17, 10, 9, 3);
 
@@ -1004,6 +1199,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // HEAD AURA
     // ------------------------------------------------------------
+    
     g.fillStyle(C.cyan, 0.08)
       .fillCircle(24, 11, 13);
 
@@ -1013,6 +1209,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // HELMET // stronger silhouette than simple circle
     // ------------------------------------------------------------
+    
     g.fillStyle(C.void)
       .fillRoundedRect(14, 3, 20, 16, 6);
 
@@ -1045,6 +1242,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // VISOR // dark glass + layered emissive strip
     // ------------------------------------------------------------
+    
     g.fillStyle(C.glass)
       .fillRoundedRect(13, 11, 22, 7, 3);
 
@@ -1067,6 +1265,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // SHOULDER MASS
     // ------------------------------------------------------------
+    
     g.fillStyle(C.void)
       .fillRoundedRect(9, 23, 11, 10, 3)
       .fillRoundedRect(28, 23, 11, 10, 3);
@@ -1091,6 +1290,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // MAIN CHEST SILHOUETTE
     // ------------------------------------------------------------
+    
     g.fillStyle(C.void)
       .fillRoundedRect(12, 21, 24, 27, 6);
 
@@ -1116,6 +1316,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // CHEST CORE // signature identity
     // ------------------------------------------------------------
+    
     g.fillStyle(C.cyan, 0.12)
       .fillCircle(24, 37, 8);
 
@@ -1144,6 +1345,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // ABDOMINAL ARMOR
     // ------------------------------------------------------------
+    
     g.fillStyle(C.void)
       .fillRoundedRect(18, 42, 12, 8, 2.5);
 
@@ -1156,6 +1358,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // BELT / UTILITY RIG
     // ------------------------------------------------------------
+    
     g.fillStyle(C.void)
       .fillRoundedRect(14, 46, 20, 5, 2);
 
@@ -1179,6 +1382,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ARMS
     // Dynamic endpoints preserve existing per-state pose system.
     // ------------------------------------------------------------
+    
     const leftShoulder = { x: 14, y: 29 };
     const leftElbow = { x: 9, y: arm };
     const rightShoulder = { x: 34, y: 29 };
@@ -1247,6 +1451,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // LEGS
     // Dynamic endpoints preserve existing run/jump/dash poses.
     // ------------------------------------------------------------
+    
     const leftHip = { x: 19, y: 47 };
     const rightHip = { x: 29, y: 47 };
 
@@ -1313,6 +1518,7 @@ const runner = (key, leftLeg, rightLeg, arm) =>
     // ------------------------------------------------------------
     // BOOTS // stronger silhouette + energy sole
     // ------------------------------------------------------------
+    
  const leftBootY =
   Phaser.Math.Clamp(
     leftKneeY + 8,
@@ -1348,6 +1554,7 @@ const rightBootY =
     // ------------------------------------------------------------
     // ARMOR SEAMS / MICRO DETAILS
     // ------------------------------------------------------------
+    
     g.lineStyle(1, C.metal, 0.3)
       .lineBetween(16, 26, 16, 29)
       .lineBetween(32, 26, 32, 29)
@@ -1362,6 +1569,7 @@ const rightBootY =
     // STATE-DEPENDENT ENERGY ACCENTS
     // Uses the existing arm/leg pose values to subtly vary energy.
     // ------------------------------------------------------------
+    
     const poseIntensity =
       Math.min(
         1,
@@ -1378,6 +1586,7 @@ const rightBootY =
     // ------------------------------------------------------------
     // TOP / CHEST HOT PIXELS
     // ------------------------------------------------------------
+    
     g.fillStyle(C.white, 0.65)
       .fillRect(28, 6, 2, 1)
       .fillRect(18, 20, 2, 1)
@@ -1386,6 +1595,7 @@ const rightBootY =
     // ------------------------------------------------------------
     // FINAL SILHOUETTE EDGE HIGHLIGHTS
     // ------------------------------------------------------------
+    
     g.lineStyle(1, C.cyan, 0.28)
       .lineBetween(16, 18, 13, 23)
       .lineBetween(32, 18, 35, 23)
@@ -3186,6 +3396,7 @@ init({
   rain,
   screenShake = true,
   reducedMotion = false,
+  graphicsQuality = 'HIGH',
   firstTimeTutorial = false
 } = {}) {
 this.mission = mission || {};
@@ -3196,6 +3407,47 @@ this.abilities = new Set(abilities || []);
 this.rainEnabled = rain;
 this.screenShake = screenShake;
 this.motionReduced = reducedMotion;
+
+const savedGraphicsQuality =
+  typeof window !== 'undefined' &&
+  window.localStorage
+    ? window.localStorage.getItem(
+        'runner_graphics_quality'
+      )
+    : null;
+
+const normalizedGraphicsQuality =
+  String(
+    savedGraphicsQuality || graphicsQuality || 'HIGH'
+  )
+    .trim()
+    .toUpperCase();
+
+this.graphicsQuality =
+  ['LOW', 'MEDIUM', 'HIGH', 'ULTRA'].includes(
+    normalizedGraphicsQuality
+  )
+    ? normalizedGraphicsQuality
+    : 'HIGH';
+
+this.graphicsLevel = {
+  LOW: 0,
+  MEDIUM: 1,
+  HIGH: 2,
+  ULTRA: 3
+}[this.graphicsQuality];
+
+this.graphicsSettings = {
+  quality: this.graphicsQuality,
+  level: this.graphicsLevel,
+  effects: true,
+  particles:
+    this.graphicsLevel >= 1,
+  lighting:
+    this.graphicsLevel >= 2,
+  weather:
+    this.graphicsLevel >= 1
+};
 this.firstTimeTutorial = firstTimeTutorial;
 
 // ============================================================
@@ -3209,6 +3461,34 @@ this.isPlayerTransformLocked = false;
 
 this.collected = 0;
 this.secretsCollected = 0;
+
+// ============================================================
+// UNKNOWN SIGNAL CACHE · SURPRISE / REWARD SYSTEM
+// ============================================================
+
+this.surpriseCache = null;
+this.surpriseCachePrompt = null;
+this.surpriseCacheCollected = false;
+this.surpriseCacheOpen = false;
+this.surpriseCacheResolved = false;
+this.surpriseCacheInteractionLocked = false;
+this.surpriseCacheSession = 0;
+this.surpriseCacheId = null;
+this.surpriseCollectedCacheIds = new Set();
+
+this.surpriseInventory = {
+  shieldCore: 0,
+  overdriveCell: 0,
+  energyPack: 0,
+  credits: 0
+};
+
+this.surpriseModifier = null;
+this.surprisePendingModifier = null;
+this.surpriseConsumedMissionRewards = {};
+this.surpriseNegativeStreak = 0;
+this.surpriseShieldCharges = 0;
+
 this.playerBaseAngle = 0;
 this.enemyDefeats = 0;
 this.bossHitCount = 0;
@@ -3252,6 +3532,7 @@ this.lowEnergyCueTimer = 0;
 this.detectionEmit = -1;
 
 this.health = 3;
+this.healthMax = 3;
 this.healthInvulnerable = 0;
 this.briefingProtected = false;
 
@@ -3268,6 +3549,42 @@ this.combatCombo = 0;
 this.bestCombatCombo = 0;
 this.comboTimer = 0;
 this.overdriveTimer = 0;
+this.polarityComboOverdriveTriggered = false;
+
+/*
+ * ============================================================
+ * POLARITY CORE · GAMEPLAY STATE
+ * No HUD creation here.
+ * Existing HUD can consume emitted events later.
+ * ============================================================
+ */
+this.polarity = 0;
+this.polarityMax = 100;
+
+this.polarityState = 'STABLE';
+this.polarityComboGain = 4;
+this.polarityDecayTimer = 0;
+this.polarityDecayDelay = 1800;
+
+this.polarityOverdriveBonus = 1;
+this.polarityLastState = 'STABLE';
+this.polarityPulseTimer = 0;
+
+this.polarityStats = {
+  gained: 0,
+  spent: 0,
+  peak: 0,
+  overdrives: 0,
+  breaks: 0
+};
+
+this.polarityAbilities = {
+  phase: false,
+  magnet: false,
+  overdrive: false,
+  break: false
+};
+
 this.jumps = 0;
 this.collisions = 0;
 this.falls = 0;
@@ -3313,7 +3630,8 @@ this.mobileActions = {
   build1: false,
   build2: false,
   gadget1: false,
-  gadget2: false
+  gadget2: false,
+  polarity: false
 };
 this.empTimer = 0; this.decoyTimer = 0; this.boosterTimer = 0;
 this.boosterAura = null; this.decoyBeacon = null; this.infoCard = null; this.landingTimer = 0;
@@ -3447,8 +3765,14 @@ worldLightPulse(
   duration = 220,
   radius = 90
 ) {
+  const graphicsLevel =
+    Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
   if (
     this.motionReduced ||
+    graphicsLevel < 2 ||
     !this.player?.active
   ) {
     return;
@@ -3485,8 +3809,14 @@ worldLightFlash(
   alpha = 0.08,
   duration = 120
 ) {
+  const graphicsLevel =
+    Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
   if (
     this.motionReduced ||
+    graphicsLevel < 2 ||
     !this.player?.active
   ) {
     return;
@@ -3544,6 +3874,11 @@ this.combatCombo = Math.min(
 
 this.comboTimer = 3000;
 
+this.addPolarity(
+  10,
+  'perfect-dodge'
+);
+
   this.bestCombatCombo = Math.max(
   this.bestCombatCombo || 0,
   this.combatCombo
@@ -3555,7 +3890,10 @@ this.comboTimer = 3000;
  * ============================================================
  */
   
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   const dodgeRing =
     this.add
       .circle(
@@ -3624,51 +3962,63 @@ this.game.events.emit(
   1
 );
 
+if (
+  !this.motionReduced &&
+  (
+    !Number.isFinite(this.graphicsLevel) ||
+    this.graphicsLevel >= 2
+  )
+) {
   const dodgeBurst =
-  this.add
-    .circle(
-      this.player.x,
-      this.player.y,
-      14,
-      0x8df4ff,
-      .34
-    )
-    .setDepth(13);
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        14,
+        0x8df4ff,
+        .34
+      )
+      .setDepth(13);
 
-this.tweens.add({
-  targets: dodgeBurst,
-  scale: 4.8,
-  alpha: 0,
-  duration: 320,
-  onComplete: () =>
-    dodgeBurst.destroy()
-});
+  this.tweens.add({
+    targets: dodgeBurst,
+    scale: 4.8,
+    alpha: 0,
+    duration: 320,
+    onComplete: () =>
+      dodgeBurst.destroy()
+  });
 
-this.shake(
-  70,
-  0.003
-);
-  
-const comboPulse =
-  this.add
-    .circle(
-      this.player.x,
-      this.player.y,
-      14,
-      0x8df4ff,
-      .24
-    )
-    .setDepth(12);
+  this.shake(
+    70,
+    0.003
+  );
 
-this.tweens.add({
-  targets: comboPulse,
-  scale: 3.8,
-  alpha: 0,
-  duration: 300,
-  onComplete: () =>
-    comboPulse.destroy()
-});
-this.shake(90, .004);
+  const comboPulse =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        14,
+        0x8df4ff,
+        .24
+      )
+      .setDepth(12);
+
+  this.tweens.add({
+    targets: comboPulse,
+    scale: 3.8,
+    alpha: 0,
+    duration: 300,
+    onComplete: () =>
+      comboPulse.destroy()
+  });
+
+  this.shake(
+    90,
+    0.004
+  );
+}
 
 }
 
@@ -3864,27 +4214,43 @@ this.game.events.emit(
 }
 
 leaveAfterimage(color = 0x8df4ff) {
-if (this.motionReduced) return;
+  if (
+    this.motionReduced ||
+    (Number.isFinite(this.graphicsLevel) &&
+      this.graphicsLevel < 2)
+  ) {
+    return;
+  }
 
-const image = this.add
-  .sprite(this.player.x, this.player.y, this.player.texture.key)
-  .setFlipX(this.player.flipX)
-  .setTint(color)
-  .setAlpha(.42)
-  .setDepth(9);
+  const image = this.add
+    .sprite(
+      this.player.x,
+      this.player.y,
+      this.player.texture.key
+    )
+    .setFlipX(this.player.flipX)
+    .setTint(color)
+    .setAlpha(.42)
+    .setDepth(9);
 
-this.tweens.add({
-  targets: image,
-  x: image.x - (this.player.flipX ? -1 : 1) * 24,
-  alpha: 0,
-  duration: 180,
-  onComplete: () => image.destroy()
-});
-
+  this.tweens.add({
+    targets: image,
+    x:
+      image.x -
+      (this.player.flipX ? -1 : 1) * 24,
+    alpha: 0,
+    duration: 180,
+    onComplete: () =>
+      image.destroy()
+  });
 }
 
 gadgetPulse(color, radius = 16, duration = 360) {
-if (this.motionReduced) {
+if (
+  this.motionReduced ||
+  (Number.isFinite(this.graphicsLevel) &&
+    this.graphicsLevel < 2)
+) {
   return;
 }
 
@@ -3910,6 +4276,8 @@ this.loadout.upgrades?.includes('escape') ? .85 : 1
 
 create() {
   this.setupNarrationVoice();
+
+  this.applyGraphicsSettings();
 
   this.validateMission();
 const requiredTextures = [
@@ -3939,9 +4307,10 @@ const requiredTextures = [
   'invader',
   'chicken',
   'dino',
-  'dino-boss',
-  'sentinel-boss',
-  'storm-boss'
+'dino-boss',
+'sentinel-boss',
+'storm-boss',
+'blaster'
 ];
 
 if (
@@ -3963,6 +4332,13 @@ this.loadout = this.mission.loadout || {
   upgrades: [],
   equipment: []
 };
+
+// ============================================================
+// UNKNOWN SIGNAL CACHE · LOAD PERSISTENT PROGRESS
+// ============================================================
+
+this.loadSurpriseProgress();
+this.prepareSurpriseMission();
 
 this.gadgetCooldowns = [0, 0];
 this.boostedSignals = 0;
@@ -3993,7 +4369,11 @@ this.createBrutalMapDetails();
 this.createRouteLighting();
 this.createPlayer();
 
-this.healthInvulnerable = 1600;
+this.respawnGrace =
+  1100;
+
+this.healthInvulnerable =
+  1600;
 
 const spawnShield = this.add
   .circle(
@@ -4016,6 +4396,7 @@ this.tweens.add({
 this.createRival();
 this.createSignals();
 this.createSecrets();
+this.createSurpriseCache();
 this.createCheckpoints();
 this.createHazards();
 this.createWaterHazards();
@@ -4029,6 +4410,7 @@ this.createBoostPads();
 this.createChaser();
 this.createGoal();
 this.createAtmosphere();
+this.createWeather();
 this.createGuides();
 this.createGuideCompanions();
 
@@ -4036,6 +4418,21 @@ this.events.once(
   Phaser.Scenes.Events.SHUTDOWN,
   () => {
     this.tweens.killAll();
+
+    this.surpriseCachePrompt
+      ?.destroy(true);
+
+    this.surpriseCachePrompt = null;
+
+    this.surpriseCache
+      ?.destroy();
+
+    this.surpriseCache = null;
+
+   this.surpriseCacheOpen = false;
+this.surpriseCacheCollected = false;
+this.surpriseCacheResolved = false;
+this.surpriseCacheInteractionLocked = false;
     this.time.removeAllEvents();
     this.activeShark?.destroy();
 this.activeShark = null;
@@ -6100,19 +6497,22 @@ this.game.events.emit(
     : 'PLATFORM FAILURE · ROUTE AHEAD'
 );
 
-  if (!this.motionReduced) {
-    this.cameras.main.flash(
-      90,
-      255,
-      90,
-      100
-    );
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  this.cameras.main.flash(
+    90,
+    255,
+    90,
+    100
+  );
 
-    this.shake(
-      110,
-      0.008
-    );
-  }
+  this.shake(
+    110,
+    0.008
+  );
+}
 
   this.updateCheckpointArrow();
 }
@@ -7835,7 +8235,7 @@ this.cursors =
 
 this.keys =
   this.input.keyboard.addKeys(
-    'A,D,C,F,W,S,E,Q,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
+    'A,D,C,F,W,S,E,Q,R,X,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
   );
 
 this.mobileActions = {
@@ -7850,22 +8250,30 @@ this.mobileActions = {
   build1: false,
   build2: false,
   gadget1: false,
-  gadget2: false
+  gadget2: false,
+  polarity: false
 };
 
 this.mobileDirection = null;
 
 this.mobileActionHandler = action => {
-if (
-  !action ||
-  !this.scene.isActive() ||
-  this.relayPuzzleActive ||
-  this.finished ||
-  this.respawning ||
-  this.cinematicActive
-) {
-  return;
-}
+  const isPortrait =
+    this.scale.height > this.scale.width;
+
+  if (isPortrait) {
+    return;
+  }
+
+  if (
+    !action ||
+    !this.scene.isActive() ||
+    this.relayPuzzleActive ||
+    this.finished ||
+    this.respawning ||
+    this.cinematicActive
+  ) {
+    return;
+  }
 
   if (action === 'build1') {
     return this.useBuild(0);
@@ -7879,11 +8287,16 @@ if (
     return this.useGadget(0);
   }
 
-  if (action === 'gadget2') {
-    return this.useGadget(1);
-  }
+if (action === 'gadget2') {
+  return this.useGadget(1);
+}
 
-  if (action === 'crouch') {
+if (action === 'polarity') {
+  this.breakPolarity();
+  return;
+}
+
+if (action === 'crouch') {
     this.mobileActions.crouch =
       !this.mobileActions.crouch;
 
@@ -7918,6 +8331,14 @@ if (
 
 this.mobileMoveHandler =
   direction => {
+    const isPortrait =
+      this.scale.height > this.scale.width;
+
+    if (isPortrait) {
+      this.mobileDirection = null;
+      return;
+    }
+
     if (
       direction === 'left' ||
       direction === 'right'
@@ -7927,6 +8348,7 @@ this.mobileMoveHandler =
     }
 
     this.mobileDirection = null;
+  };
   };
 this.game.events.on(
   'mobile-action',
@@ -8124,6 +8546,1564 @@ this.physics.add.overlap(
   this
 );
 
+}
+
+// ============================================================
+// UNKNOWN SIGNAL CACHE · SURPRISE SYSTEM
+// ============================================================
+
+loadSurpriseProgress() {
+  if (
+    typeof window === 'undefined' ||
+    !window.localStorage
+  ) {
+    return;
+  }
+
+  try {
+    const raw =
+      window.localStorage.getItem(
+        'runner_surprise_progress'
+      );
+
+    if (!raw) {
+      return;
+    }
+
+    const saved =
+      JSON.parse(raw);
+
+    if (
+      saved &&
+      typeof saved === 'object'
+    ) {
+      if (
+        Array.isArray(
+          saved.collectedCacheIds
+        )
+      ) {
+        this.surpriseCollectedCacheIds =
+          new Set(
+            saved.collectedCacheIds
+              .filter(
+                id =>
+                  typeof id === 'string'
+              )
+          );
+      }
+
+      if (
+        saved.inventory &&
+        typeof saved.inventory === 'object'
+      ) {
+        for (
+          const key of Object.keys(
+            this.surpriseInventory
+          )
+        ) {
+          const value =
+            Number(
+              saved.inventory[key]
+            );
+
+          this.surpriseInventory[key] =
+            Number.isFinite(value)
+              ? Math.max(
+                  0,
+                  Math.floor(value)
+                )
+              : 0;
+        }
+      }
+
+      if (
+        saved.pendingModifier &&
+        typeof saved.pendingModifier ===
+          'object'
+      ) {
+        this.surprisePendingModifier =
+          saved.pendingModifier;
+      }
+
+      if (
+        saved.consumedMissionRewards &&
+        typeof saved.consumedMissionRewards ===
+          'object'
+      ) {
+        this.surpriseConsumedMissionRewards =
+          saved.consumedMissionRewards;
+      }
+
+      this.surpriseNegativeStreak =
+        Number.isFinite(
+          saved.negativeStreak
+        )
+          ? Math.max(
+              0,
+              Math.floor(
+                saved.negativeStreak
+              )
+            )
+          : 0;
+    }
+  } catch (error) {
+    console.warn(
+      '[SURPRISE] Failed to load progress:',
+      error
+    );
+  }
+}
+
+saveSurpriseProgress() {
+  if (
+    typeof window === 'undefined' ||
+    !window.localStorage
+  ) {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(
+      'runner_surprise_progress',
+      JSON.stringify({
+        collectedCacheIds:
+          Array.from(
+            this.surpriseCollectedCacheIds ||
+              []
+          ),
+
+        inventory:
+          this.surpriseInventory,
+
+        pendingModifier:
+          this.surprisePendingModifier,
+
+        consumedMissionRewards:
+          this.surpriseConsumedMissionRewards,
+
+        negativeStreak:
+          this.surpriseNegativeStreak
+      })
+    );
+  } catch (error) {
+    console.warn(
+      '[SURPRISE] Failed to save progress:',
+      error
+    );
+  }
+}
+
+prepareSurpriseMission() {
+  const missionId =
+    String(
+      this.mission?.id ||
+        'unknown-mission'
+    );
+
+  this.surpriseModifier = null;
+  this.surpriseShieldCharges = 0;
+
+  const consumed =
+    Boolean(
+      this.surpriseConsumedMissionRewards
+        ?.[
+          missionId
+        ]
+    );
+
+  if (!consumed) {
+    if (
+      this.surpriseInventory
+        .shieldCore > 0
+    ) {
+      this.surpriseShieldCharges = 1;
+      this.surpriseInventory.shieldCore--;
+    }
+
+    if (
+      this.surpriseInventory
+        .overdriveCell > 0
+    ) {
+      this.overdriveTimer += 2500;
+      this.surpriseInventory.overdriveCell--;
+    }
+
+    if (
+      this.surpriseInventory
+        .energyPack > 0
+    ) {
+    this.energy =
+  Math.min(
+    this.energyMax,
+    this.energy + 25
+  );
+
+      this.surpriseInventory.energyPack--;
+    }
+
+    this.surpriseConsumedMissionRewards[
+      missionId
+    ] = true;
+  }
+
+  const pending =
+    this.surprisePendingModifier;
+
+if (
+  pending &&
+  (
+    pending.targetMissionId === missionId ||
+    (
+      !pending.targetMissionId &&
+      pending.sourceMissionId !== missionId
+    )
+  )
+) {
+    this.surpriseModifier = {
+      ...pending
+    };
+
+    this.surprisePendingModifier =
+      null;
+  }
+
+  this.saveSurpriseProgress();
+}
+
+createSurpriseCache() {
+  const missionId =
+    String(
+      this.mission?.id ||
+        'unknown-mission'
+    );
+
+  this.surpriseCacheId =
+    `${missionId}-surprise-cache-01`;
+
+  if (
+    this.surpriseCollectedCacheIds?.has(
+      this.surpriseCacheId
+    )
+  ) {
+    return;
+  }
+
+  const platforms =
+    Array.isArray(
+      this.mission?.platforms
+    )
+      ? this.mission.platforms
+      : [];
+
+  const midpoint =
+    (
+      Number(
+        this.mission?.spawn?.x
+      ) || 0
+    ) +
+    (
+      (
+        Number(
+          this.mission?.goal?.x
+        ) ||
+        (
+          Number(
+            this.mission?.spawn?.x
+          ) || 0
+        ) + 1200
+      ) -
+      (
+        Number(
+          this.mission?.spawn?.x
+        ) || 0
+      )
+    ) / 2;
+
+  let bestPlatform = null;
+  let bestDistance = Infinity;
+
+  platforms.forEach(
+    data => {
+      if (
+        !Array.isArray(data) ||
+        data.length < 4
+      ) {
+        return;
+      }
+
+      const x =
+        Number(data[0]) || 0;
+
+      const y =
+        Number(data[1]) || 0;
+
+      const width =
+        Math.max(
+          20,
+          Number(data[2]) || 20
+        );
+
+      const collapsible =
+        Boolean(data[5]);
+
+      if (collapsible) {
+        return;
+      }
+
+      const centerX =
+        x + width / 2;
+
+      const distance =
+        Math.abs(
+          centerX - midpoint
+        );
+
+      if (
+        distance <
+        bestDistance
+      ) {
+        bestDistance = distance;
+
+        bestPlatform = {
+          x: centerX,
+          y,
+          width
+        };
+      }
+    }
+  );
+
+  const cacheX =
+    bestPlatform?.x ??
+    midpoint;
+
+  const cacheY =
+    bestPlatform
+      ? bestPlatform.y - 46
+      : (
+          Number(
+            this.mission?.spawn?.y
+          ) || 420
+        ) - 46;
+
+  this.surpriseCache =
+    this.add
+      .sprite(
+        cacheX,
+        cacheY,
+        'signal'
+      )
+      .setScale(.9)
+      .setTint(0xb993ff)
+      .setDepth(14);
+
+  this.physics.add.existing(
+    this.surpriseCache
+  );
+
+  this.surpriseCache.body
+    ?.setAllowGravity(false);
+
+  this.surpriseCache.body
+    ?.setCircle(
+      18,
+      10,
+      10
+    );
+
+  this.surpriseCache.setData(
+    'cacheId',
+    this.surpriseCacheId
+  );
+
+  this.surpriseCache.setData(
+    'opened',
+    false
+  );
+
+  if (!this.motionReduced) {
+    this.tweens.add({
+      targets:
+        this.surpriseCache,
+
+      angle: 360,
+
+      scale: {
+        from: .88,
+        to: 1.02
+      },
+
+      duration: 1500,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.inOut'
+    });
+  }
+
+  this.surpriseCachePrompt =
+    this.add
+      .container(
+        cacheX,
+        cacheY - 58
+      )
+      .setDepth(80)
+      .setVisible(false);
+
+  const promptBg =
+    this.add
+      .rectangle(
+        0,
+        0,
+        156,
+        34,
+        0x071625,
+        .96
+      )
+      .setStrokeStyle(
+        1.5,
+        0xb993ff,
+        .92
+      );
+
+  const promptText =
+    this.add.text(
+      0,
+      0,
+      'R / TAP TO OPEN',
+      {
+        fontFamily:
+          'DM Mono',
+        fontSize: '11px',
+        color: '#f1e6ff',
+        stroke: '#08101c',
+        strokeThickness: 3
+      }
+    )
+      .setOrigin(.5);
+
+  this.surpriseCachePrompt.add([
+    promptBg,
+    promptText
+  ]);
+}
+
+updateSurpriseCacheInteraction() {
+  const cache =
+    this.surpriseCache;
+
+  if (
+    !cache ||
+    !cache.active ||
+    this.finished ||
+    this.respawning ||
+    this.surpriseCacheCollected ||
+    this.surpriseCacheOpen
+  ) {
+    this.surpriseCachePrompt
+      ?.setVisible(false);
+
+    return;
+  }
+
+  if (
+    !this.player?.active
+  ) {
+    return;
+  }
+
+  const distance =
+    Phaser.Math.Distance.Between(
+      this.player.x,
+      this.player.y,
+      cache.x,
+      cache.y
+    );
+
+  const nearby =
+    distance <= 120;
+
+  this.surpriseCachePrompt
+    ?.setVisible(
+      nearby
+    );
+
+  if (!nearby) {
+    return;
+  }
+
+  const keyboardPressed =
+    Phaser.Input.Keyboard.JustDown(
+      this.keys.R
+    );
+
+  const mobilePressed =
+    this.mobileActions.interact;
+
+  if (
+    keyboardPressed ||
+    mobilePressed
+  ) {
+    this.mobileActions.interact =
+      false;
+
+    this.tryOpenSurpriseCache();
+  }
+}
+
+tryOpenSurpriseCache() {
+  if (
+    this.surpriseCacheInteractionLocked ||
+    this.surpriseCacheCollected ||
+    this.surpriseCacheOpen ||
+    !this.surpriseCache?.active
+  ) {
+    return;
+  }
+
+  this.openSurpriseCache();
+}
+
+openSurpriseCache() {
+  const cache =
+    this.surpriseCache;
+
+  if (
+    !cache ||
+    !cache.active ||
+    this.surpriseCacheOpen
+  ) {
+    return;
+  }
+
+  const distance =
+    Phaser.Math.Distance.Between(
+      this.player.x,
+      this.player.y,
+      cache.x,
+      cache.y
+    );
+
+  if (distance > 120) {
+    return;
+  }
+
+  this.surpriseCacheOpen = true;
+  this.surpriseCacheInteractionLocked =
+    true;
+
+  this.surpriseCacheSession++;
+
+  const session =
+    this.surpriseCacheSession;
+
+  cache.setData(
+    'opened',
+    true
+  );
+
+  cache.disableBody(
+    true,
+    true
+  );
+
+  this.surpriseCachePrompt
+    ?.setVisible(false);
+
+  this.playerCue(
+    'UNKNOWN SIGNAL · DECRYPTING',
+    '#b993ff'
+  );
+
+ if (!this.motionReduced) {
+  const burst =
+    this.add
+      .circle(
+        cache.x,
+        cache.y,
+        12,
+        0xb993ff,
+        .28
+      )
+      .setDepth(16)
+      .setStrokeStyle(
+        2,
+        0xe0a7ff,
+        .95
+      );
+
+  const burstWide =
+    this.add
+      .circle(
+        cache.x,
+        cache.y,
+        24,
+        0xb993ff,
+        .05
+      )
+      .setDepth(15)
+      .setStrokeStyle(
+        1,
+        0xe0a7ff,
+        .75
+      );
+
+  const core =
+    this.add
+      .circle(
+        cache.x,
+        cache.y,
+        6,
+        0xffffff,
+        .95
+      )
+      .setDepth(17);
+
+  this.tweens.add({
+    targets:
+      burst,
+    scale:
+      5.2,
+    alpha:
+      0,
+    duration:
+      620,
+    ease:
+      'Quad.out',
+    onComplete:
+      () => {
+        if (
+          burst?.active
+        ) {
+          burst.destroy();
+        }
+      }
+  });
+
+  this.tweens.add({
+    targets:
+      burstWide,
+    scale:
+      4.2,
+    alpha:
+      0,
+    duration:
+      780,
+    ease:
+      'Cubic.out',
+    onComplete:
+      () => {
+        if (
+          burstWide?.active
+        ) {
+          burstWide.destroy();
+        }
+      }
+  });
+
+  this.tweens.add({
+    targets:
+      core,
+    scale:
+      3.8,
+    alpha:
+      0,
+    duration:
+      260,
+    ease:
+      'Quad.out',
+    onComplete:
+      () => {
+        if (
+          core?.active
+        ) {
+          core.destroy();
+        }
+      }
+  });
+
+  this.cameras.main.flash(
+    90,
+    185,
+    147,
+    255,
+    false
+  );
+
+  this.worldLightFlash(
+    0xb993ff,
+    .10,
+    180
+  );
+
+  this.gadgetPulse(
+    0xb993ff,
+    18,
+    360
+  );
+
+  this.shake(
+    65,
+    .003
+  );
+}
+
+this.time.delayedCall(
+  650,
+    () => {
+      if (
+        this.surpriseCacheSession !==
+        session
+      ) {
+        return;
+      }
+
+      this.resolveSurpriseCache();
+    }
+  );
+}
+
+resolveSurpriseCache() {
+  if (
+    this.surpriseCacheResolved
+  ) {
+    return;
+  }
+
+  this.surpriseCacheResolved =
+    true;
+
+  this.surpriseCacheCollected =
+    true;
+
+  this.surpriseCollectedCacheIds.add(
+    this.surpriseCacheId
+  );
+
+  let roll =
+    Math.random();
+
+  if (
+    this.surpriseNegativeStreak >= 2
+  ) {
+    roll = .05;
+  }
+
+  let outcomeType;
+
+  if (roll < .55) {
+    outcomeType = 'positive';
+  } else if (roll < .75) {
+    outcomeType = 'neutral';
+  } else {
+    outcomeType = 'negative';
+  }
+
+  const positivePool = [
+    'shieldCore',
+    'overdriveCell',
+    'energyPack'
+  ];
+
+  const neutralPool = [
+    'credits'
+  ];
+
+  const negativePool = [
+    'corruptedCore',
+    'energyDrain'
+  ];
+
+  const pool =
+    outcomeType === 'positive'
+      ? positivePool
+      : outcomeType === 'neutral'
+        ? neutralPool
+        : negativePool;
+
+  const rewardId =
+    pool[
+      Phaser.Math.Between(
+        0,
+        pool.length - 1
+      )
+    ];
+
+  if (
+    outcomeType === 'negative'
+  ) {
+    this.surpriseNegativeStreak++;
+  } else {
+    this.surpriseNegativeStreak = 0;
+  }
+
+  if (rewardId === 'shieldCore') {
+    this.surpriseInventory.shieldCore++;
+  }
+
+  if (rewardId === 'overdriveCell') {
+    this.surpriseInventory.overdriveCell++;
+  }
+
+  if (rewardId === 'energyPack') {
+    this.surpriseInventory.energyPack++;
+  }
+
+  if (rewardId === 'credits') {
+    this.surpriseInventory.credits += 100;
+  }
+
+if (rewardId === 'corruptedCore') {
+  this.surprisePendingModifier = {
+    id: 'corruptedCore',
+
+    sourceMissionId:
+      String(
+        this.mission?.id ||
+        'unknown-mission'
+      ),
+
+    targetMissionId:
+      String(
+        this.mission?.nextMissionId ||
+        ''
+      ) || null,
+
+    movementMultiplier: .92
+  };
+}
+
+  if (rewardId === 'energyDrain') {
+    this.energy =
+      Math.max(
+        0,
+        this.energy - 30
+      );
+  }
+
+/*
+ * If the mission does not expose nextMissionId,
+ * null means "apply to the next mission".
+ */
+if (
+  rewardId === 'corruptedCore'
+) {
+  this.playerCue(
+    'CORRUPTED CACHE',
+    '#ff826e'
+  );
+}
+
+  this.saveSurpriseProgress();
+
+  this.showSurpriseOutcome(
+    outcomeType,
+    rewardId
+  );
+}
+
+showSurpriseOutcome(
+  outcomeType,
+  rewardId
+) {
+  const labels = {
+    shieldCore:
+      'SHIELD CORE',
+    overdriveCell:
+      'OVERDRIVE CELL',
+    energyPack:
+      'ENERGY PACK',
+    credits:
+      '100 CREDITS',
+    corruptedCore:
+      'CORRUPTED CORE',
+    energyDrain:
+      'ENERGY DRAIN'
+  };
+
+  const descriptions = {
+    shieldCore:
+      'ONE FREE DAMAGE HIT',
+    overdriveCell:
+      '+2500 OVERDRIVE AT NEXT MISSION START',
+    energyPack:
+      '+25 ENERGY AT NEXT MISSION START',
+    credits:
+      'STORED IN PROFILE',
+    corruptedCore:
+      'NEXT MISSION · -8% MOVE SPEED',
+    energyDrain:
+      '-30 ENERGY NOW'
+  };
+
+  const title =
+    outcomeType === 'positive'
+      ? 'REWARD ACQUIRED'
+      : outcomeType === 'neutral'
+        ? 'DATA RECOVERED'
+        : 'SYSTEM COMPROMISED';
+
+  const color =
+    outcomeType === 'positive'
+      ? 0x8df4ff
+      : outcomeType === 'neutral'
+        ? 0xffd06e
+        : 0xff5364;
+
+  const colorHex =
+    `#${color.toString(16).padStart(6, '0')}`;
+
+  const camera =
+    this.cameras.main;
+
+  const centerX =
+    camera.width / 2;
+
+  const centerY =
+    camera.height / 2;
+
+  /* ============================================================
+   * SURPRISE CACHE · CINEMATIC REVEAL
+   * ============================================================ */
+
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  camera.flash(
+    120,
+    255,
+    255,
+    255,
+    false
+  );
+
+  this.worldLightFlash(
+    color,
+    0.12,
+    220
+  );
+
+  this.shake(
+    outcomeType === 'negative'
+      ? 150
+      : 95,
+    outcomeType === 'negative'
+      ? 0.008
+      : 0.004
+  );
+
+  this.gadgetPulse(
+    color,
+    outcomeType === 'positive'
+      ? 20
+      : 15,
+    outcomeType === 'negative'
+      ? 520
+      : 420
+  );
+}
+
+  const cinematic =
+    this.add
+      .container(
+        centerX,
+        centerY
+      )
+      .setScrollFactor(0)
+      .setDepth(250);
+
+  /* FULL SCREEN DIM */
+
+  const dim =
+    this.add
+      .rectangle(
+        0,
+        0,
+        camera.width + 80,
+        camera.height + 80,
+        0x02060b,
+        .72
+      );
+
+  cinematic.add(
+    dim
+  );
+
+  /* OUTER TECH FRAME */
+
+  const frame =
+    this.add
+      .rectangle(
+        0,
+        0,
+        360,
+        200,
+        0x06111d,
+        .98
+      )
+      .setStrokeStyle(
+        2,
+        color,
+        .98
+      );
+
+  cinematic.add(
+    frame
+  );
+
+  /* INNER FRAME */
+
+  const innerFrame =
+    this.add
+      .rectangle(
+        0,
+        0,
+        336,
+        176,
+        0x000000,
+        0
+      )
+      .setStrokeStyle(
+        1,
+        color,
+        .42
+      );
+
+  cinematic.add(
+    innerFrame
+  );
+
+  /* TOP STATUS BAR */
+
+  const topBar =
+    this.add
+      .rectangle(
+        0,
+        -83,
+        320,
+        2,
+        color,
+        .72
+      );
+
+  cinematic.add(
+    topBar
+  );
+
+  const titleText =
+    this.add.text(
+      0,
+      -61,
+      title,
+      {
+        fontFamily:
+          'DM Mono',
+        fontSize:
+          '15px',
+        fontStyle:
+          'bold',
+        color:
+          '#ffffff',
+        stroke:
+          '#000000',
+        strokeThickness:
+          4,
+        align:
+          'center'
+      }
+    )
+      .setOrigin(.5);
+
+  cinematic.add(
+    titleText
+  );
+
+  /* UNKNOWN SIGNAL */
+
+  const signalText =
+    this.add.text(
+      0,
+      -34,
+      'UNKNOWN SIGNAL',
+      {
+        fontFamily:
+          'DM Mono',
+        fontSize:
+          '9px',
+        letterSpacing:
+          2,
+        color:
+          colorHex,
+        stroke:
+          '#000000',
+        strokeThickness:
+          3
+      }
+    )
+      .setOrigin(.5);
+
+  cinematic.add(
+    signalText
+  );
+
+  /* CENTRAL CORE */
+
+  const coreOuter =
+    this.add
+      .circle(
+        0,
+        8,
+        28,
+        color,
+        .08
+      )
+      .setStrokeStyle(
+        2,
+        color,
+        .68
+      );
+
+  const coreMid =
+    this.add
+      .circle(
+        0,
+        8,
+        19,
+        color,
+        .14
+      )
+      .setStrokeStyle(
+        1,
+        color,
+        .82
+      );
+
+  const core =
+    this.add
+      .circle(
+        0,
+        8,
+        9,
+        color,
+        .92
+      )
+      .setStrokeStyle(
+        2,
+        0xffffff,
+        .9
+      );
+
+  const coreHot =
+    this.add
+      .circle(
+        -2,
+        6,
+        3,
+        0xffffff,
+        .96
+      );
+
+  cinematic.add([
+    coreOuter,
+    coreMid,
+    core,
+    coreHot
+  ]);
+
+  /* REWARD TEXT */
+
+  const rewardText =
+    this.add.text(
+      0,
+      54,
+      labels[rewardId] ||
+        rewardId.toUpperCase(),
+      {
+        fontFamily:
+          'DM Mono',
+        fontSize:
+          rewardId === 'credits'
+            ? '18px'
+            : '21px',
+        fontStyle:
+          'bold',
+        color:
+          colorHex,
+        stroke:
+          '#000000',
+        strokeThickness:
+          5,
+        align:
+          'center',
+        wordWrap: {
+          width:
+            300
+        }
+      }
+    )
+      .setOrigin(.5);
+
+  cinematic.add(
+    rewardText
+  );
+
+  /* DESCRIPTION */
+
+  const descriptionText =
+    this.add.text(
+      0,
+      79,
+      descriptions[rewardId] ||
+        '',
+      {
+        fontFamily:
+          'DM Mono',
+        fontSize:
+          '9px',
+        color:
+          '#dffcff',
+        stroke:
+          '#000000',
+        strokeThickness:
+          3,
+        align:
+          'center',
+        wordWrap: {
+          width:
+            290
+        }
+      }
+    )
+      .setOrigin(.5);
+
+  cinematic.add(
+    descriptionText
+  );
+
+  /* SIDE BRACKETS */
+
+  const leftBracket =
+    this.add
+      .rectangle(
+        -173,
+        0,
+        3,
+        90,
+        color,
+        .9
+      );
+
+  const rightBracket =
+    this.add
+      .rectangle(
+        173,
+        0,
+        3,
+        90,
+        color,
+        .9
+      );
+
+  cinematic.add([
+    leftBracket,
+    rightBracket
+  ]);
+
+  /* SCAN LINES */
+
+  const scanLines = [];
+
+  for (
+    let index = 0;
+    index < 5;
+    index++
+  ) {
+    const line =
+      this.add
+        .rectangle(
+          0,
+          -64 + index * 32,
+          300,
+          1,
+          color,
+          .18
+        );
+
+    scanLines.push(
+      line
+    );
+
+    cinematic.add(
+      line
+    );
+  }
+
+  /* CORNER NODES */
+
+  const nodes = [];
+
+  [
+    [-158, -82],
+    [158, -82],
+    [-158, 82],
+    [158, 82]
+  ].forEach(
+    ([x, y]) => {
+      const node =
+        this.add
+          .circle(
+            x,
+            y,
+            3,
+            color,
+            .95
+          );
+
+      nodes.push(
+        node
+      );
+
+      cinematic.add(
+        node
+      );
+    }
+  );
+
+  /* GLITCH BLOCKS */
+
+  const glitchBlocks = [];
+
+  for (
+    let index = 0;
+    index < 8;
+    index++
+  ) {
+    const block =
+      this.add
+        .rectangle(
+          Phaser.Math.Between(
+            -145,
+            145
+          ),
+          Phaser.Math.Between(
+            -72,
+            72
+          ),
+          Phaser.Math.Between(
+            8,
+            34
+          ),
+          Phaser.Math.Between(
+            2,
+            5
+          ),
+          color,
+          .18
+        );
+
+    glitchBlocks.push(
+      block
+    );
+
+    cinematic.add(
+      block
+    );
+  }
+
+  /* ============================================================
+   * ENTRY
+   * ============================================================ */
+
+  cinematic.setScale(
+    this.motionReduced
+      ? 1
+      : .72
+  );
+
+  cinematic.setAlpha(
+    this.motionReduced
+      ? 1
+      : 0
+  );
+
+  if (!this.motionReduced) {
+    this.tweens.add({
+      targets:
+        cinematic,
+      alpha:
+        1,
+      scale:
+        1,
+      duration:
+        260,
+      ease:
+        'Back.out'
+    });
+
+    this.tweens.add({
+      targets:
+        coreOuter,
+      scale:
+        1.45,
+      alpha:
+        .05,
+      duration:
+        520,
+      yoyo:
+        true,
+      repeat:
+        2,
+      ease:
+        'Sine.inOut'
+    });
+
+    this.tweens.add({
+      targets:
+        coreMid,
+      scale:
+        1.3,
+      alpha:
+        .06,
+      duration:
+        420,
+      yoyo:
+        true,
+      repeat:
+        3,
+      ease:
+        'Sine.inOut'
+    });
+
+    this.tweens.add({
+      targets:
+        core,
+      scale:
+        1.35,
+      duration:
+        260,
+      yoyo:
+        true,
+      repeat:
+        3,
+      ease:
+        'Sine.inOut'
+    });
+
+    scanLines.forEach(
+      (line, index) => {
+        this.tweens.add({
+          targets:
+            line,
+          x:
+            index % 2
+              ? 12
+              : -12,
+          alpha:
+            .52,
+          duration:
+            180 + index * 50,
+          yoyo:
+            true,
+          repeat:
+            4,
+          ease:
+            'Sine.inOut'
+        });
+      }
+    );
+
+    glitchBlocks.forEach(
+      block => {
+        this.tweens.add({
+          targets:
+            block,
+          alpha:
+            .55,
+          x:
+            block.x +
+            Phaser.Math.Between(
+              -8,
+              8
+            ),
+          duration:
+            Phaser.Math.Between(
+              70,
+              150
+            ),
+          yoyo:
+            true,
+          repeat:
+            3
+        });
+      }
+    );
+
+    this.tweens.add({
+      targets:
+        rewardText,
+      scale:
+        1.08,
+      duration:
+        190,
+      delay:
+        120,
+      yoyo:
+        true,
+      ease:
+        'Quad.out'
+    });
+  }
+
+  /* ============================================================
+   * CLEANUP
+   * ============================================================ */
+
+  const lifetime =
+    this.motionReduced
+      ? 2200
+      : 3200;
+
+  this.time.delayedCall(
+    lifetime,
+    () => {
+      if (!cinematic?.active) {
+        return;
+      }
+
+      if (
+        !this.motionReduced
+      ) {
+        this.tweens.add({
+          targets:
+            cinematic,
+          alpha:
+            0,
+          scale:
+            .94,
+          duration:
+            360,
+          ease:
+            'Quad.in',
+          onComplete:
+            () => {
+              if (
+                cinematic?.active
+              ) {
+                cinematic.destroy(
+                  true
+                );
+              }
+            }
+        });
+
+        return;
+      }
+
+      cinematic.destroy(
+        true
+      );
+    }
+  );
 }
 
 createCheckpoints() {
@@ -8647,9 +10627,15 @@ undefined,
 this
 );
 }
-  triggerPlayerWaterRipple(player, water, intensity = 1) {
+triggerPlayerWaterRipple(player, water, intensity = 1) {
+  const graphicsLevel =
+    Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
   if (
     this.motionReduced ||
+    graphicsLevel < 2 ||
     !player?.active ||
     !water?.active ||
     this.finished ||
@@ -9240,14 +11226,21 @@ this.activeShark = shark;
               .setDepth(12)
               .setAlpha(0);
 
-      const finishShark = () => {
+    const finishShark = () => {
   if (
-    this.waterAttackToken !== attackToken
+    !this.scene?.isActive?.() ||
+    !shark.active
   ) {
     return;
   }
 
-  this.waterAttackToken++;
+  const tokenMatches =
+    this.waterAttackToken ===
+    attackToken;
+
+  if (tokenMatches) {
+    this.waterAttackToken++;
+  }
 
   this.tweens.killTweensOf([
     shark,
@@ -9283,6 +11276,10 @@ this.activeShark = shark;
 
   if (this.activeShark === shark) {
     this.activeShark = null;
+  }
+
+  if (!tokenMatches) {
+    return;
   }
 
   this.waterAttackActive = false;
@@ -9416,17 +11413,22 @@ this.time.delayedCall(
       return;
     }
 
-             this.shake(
+     if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  this.cameras.main.flash(
+    75,
+    88,
+    231,
+    255,
+    true
+  );
+}
+
+this.shake(
   130,
   0.009
-);
-
-this.cameras.main.flash(
-  75,
-  88,
-  231,
-  255,
-  true
 );
 
 // ============================================================
@@ -9705,7 +11707,15 @@ triggerSharkWaterImpact(x, y) {
 }
 
 createWaterWaves() {
-  if (this.motionReduced) {
+  const graphicsLevel =
+    Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
+  if (
+    this.motionReduced ||
+    graphicsLevel < 2
+  ) {
     return;
   }
 
@@ -10606,9 +12616,7 @@ this.tweens.add({
   );
 }
 
-shutdown() {
-  this.checkpointArrow?.destroy();
-  this.checkpointArrow = null;
+clearWaterWaves() {
   if (this.waterWaveTimers) {
     this.waterWaveTimers.forEach(
       timer => {
@@ -10620,6 +12628,32 @@ shutdown() {
 
     this.waterWaveTimers = [];
   }
+
+  if (this.waterWaveObjects) {
+    this.tweens.killTweensOf(
+      this.waterWaveObjects
+    );
+
+    this.waterWaveObjects.forEach(
+      object => {
+        if (
+          object &&
+          object.active
+        ) {
+          object.destroy();
+        }
+      }
+    );
+
+    this.waterWaveObjects = [];
+  }
+}
+
+shutdown() {
+  this.checkpointArrow?.destroy();
+  this.checkpointArrow = null;
+
+  this.clearWaterWaves();
 
   if (this.waterWaveObjects) {
     this.tweens.killTweensOf(
@@ -10680,17 +12714,20 @@ shutdown() {
   ) {
     window.speechSynthesis.cancel();
 
-    if (
-      window.speechSynthesis.onvoiceschanged ===
-      this.voiceVoicesChangedHandler
-    ) {
-      window.speechSynthesis.onvoiceschanged =
-        null;
-    }
+if (
+  window.speechSynthesis.onvoiceschanged ===
+  this.voiceVoicesChangedHandler
+) {
+  window.speechSynthesis.onvoiceschanged =
+    this.voicePreviousVoicesChangedHandler || null;
+}
   }
 
-  this.voiceVoicesChangedHandler =
-    null;
+this.voiceVoicesChangedHandler =
+  null;
+
+this.voicePreviousVoicesChangedHandler =
+  null;
 
 this.voiceVoices = [];
 
@@ -16080,8 +18117,27 @@ solveRelayGate() {
 const relayPerformance =
   this.getRelayPuzzlePerformance();
 
-  this.relayPuzzlePerformanceGrade =
+this.relayPuzzlePerformanceGrade =
   relayPerformance.grade;
+
+// ============================================================
+// POLARITY · RELAY PUZZLE REWARD
+// S = 20 | A = 15 | B = 10 | C = 6
+// Awarded once because solveRelayGate() has a solved guard.
+// ============================================================
+const relayPolarityReward =
+  relayPerformance.grade === 'S'
+    ? 20
+    : relayPerformance.grade === 'A'
+      ? 15
+      : relayPerformance.grade === 'B'
+        ? 10
+        : 6;
+
+this.addPolarity(
+  relayPolarityReward,
+  `relay:${relayPerformance.grade}`
+);
 
 gate.setData(
   'relayPerformance',
@@ -16901,14 +18957,19 @@ const addThreat =
         .setDepth(8)
         .setImmovable(true);
 
-    const indicator =
-      this.add.circle(
-        x,
-        y - 34,
-        5,
-        0xff826e,
-        .28
-      )
+    enemy.setData(
+  'health',
+  1
+);
+
+const indicator =
+  this.add.circle(
+    x,
+    y - 34,
+    5,
+    0xff826e,
+    .28
+  )
         .setStrokeStyle(
           1,
           0xffd5c5,
@@ -17589,6 +19650,257 @@ this.tweens.add({
 
 }
 
+/*
+ * ============================================================
+ * POLARITY CORE · LOGIC
+ * Gameplay only.
+ * No HUD creation.
+ * ============================================================
+ */
+
+addPolarity(amount, reason = 'unknown') {
+  const value = Number(amount);
+
+  if (
+    !Number.isFinite(value) ||
+    value === 0
+  ) {
+    return;
+  }
+
+  const previous = this.polarity;
+
+  this.polarity =
+    Phaser.Math.Clamp(
+      this.polarity + value,
+      0,
+      this.polarityMax
+    );
+
+  if (value > 0) {
+    this.polarityStats.gained += value;
+  } else {
+    this.polarityStats.spent += Math.abs(value);
+  }
+
+  this.polarityStats.peak =
+    Math.max(
+      this.polarityStats.peak,
+      this.polarity
+    );
+
+  this.polarityDecayTimer =
+    this.polarityDecayDelay;
+
+  this.updatePolarityState();
+
+  this.game.events.emit(
+    'polarity',
+    this.polarity,
+    this.polarityMax,
+    reason
+  );
+
+  if (
+    previous < this.polarityMax &&
+    this.polarity >= this.polarityMax
+  ) {
+    this.game.events.emit(
+      'polarity-full',
+      this.polarity
+    );
+  }
+}
+
+consumePolarity(amount, reason = 'ability') {
+  const value =
+    Math.max(
+      0,
+      Number(amount) || 0
+    );
+
+  if (!value || this.polarity < value) {
+    return false;
+  }
+
+  this.polarity -= value;
+  this.polarityStats.spent += value;
+
+  this.updatePolarityState();
+
+  this.game.events.emit(
+    'polarity',
+    this.polarity,
+    this.polarityMax,
+    reason
+  );
+
+  return true;
+}
+
+updatePolarityState() {
+  const previous =
+    this.polarityState;
+
+  let next = 'STABLE';
+
+if (this.overdriveTimer > 0) {
+  next = 'OVERDRIVE';
+} else if (this.polarity >= 75) {
+  next = 'CHARGED';
+} else if (this.polarity <= 15) {
+  next = 'LOW';
+}
+
+  this.polarityState = next;
+
+  if (previous !== next) {
+    this.polarityLastState = next;
+
+    this.game.events.emit(
+      'polarity-state',
+      next,
+      this.polarity
+    );
+  }
+}
+
+updatePolarity(delta) {
+  if (
+    !Number.isFinite(delta) ||
+    this.finished ||
+    this.respawning
+  ) {
+    return;
+  }
+
+  this.polarityDecayTimer =
+    Math.max(
+      0,
+      this.polarityDecayTimer - delta
+    );
+
+if (
+  this.overdriveTimer > 0
+) {
+  this.polarity = this.polarityMax;
+  this.updatePolarityState();
+} else {
+
+/*
+ * OVERDRIVE JUST ENDED
+ * Re-evaluate state before normal decay.
+ */
+if (
+  this.polarityState === 'OVERDRIVE'
+) {
+  this.updatePolarityState();
+}
+
+  if (
+    this.polarityDecayTimer <= 0 &&
+    this.polarity > 0
+  ) {
+    this.polarity =
+      Math.max(
+        0,
+        this.polarity - 0.015 * delta
+      );
+
+    this.updatePolarityState();
+  }
+}
+
+ this.game.events.emit(
+  'polarity',
+  this.polarity,
+  this.polarityMax,
+  'tick'
+);
+}
+
+activatePolarityOverdrive() {
+  if (
+    this.overdriveTimer > 0 ||
+    this.polarity < this.polarityMax
+  ) {
+    return false;
+  }
+
+this.overdriveTimer =
+  Math.max(
+    this.overdriveTimer,
+    4200
+  );
+
+this.updatePolarityState();
+
+this.polarityStats.overdrives++;
+
+  this.game.events.emit(
+    'polarity-overdrive',
+    this.overdriveTimer
+  );
+
+  this.playerCue(
+    'POLARITY OVERDRIVE',
+    '#ffd06e'
+  );
+
+  this.speakNarration(
+    'OVERDRIVE'
+  );
+
+  return true;
+}
+
+breakPolarity() {
+  if (
+    this.overdriveTimer > 0
+  ) {
+    return false;
+  }
+
+  if (
+    !this.consumePolarity(
+      100,
+      'polarity-break'
+    )
+  ) {
+    return false;
+  }
+
+  this.polarityStats.breaks++;
+
+  this.game.events.emit(
+    'polarity-break'
+  );
+
+  this.playerCue(
+    'POLARITY BREAK',
+    '#8df4ff'
+  );
+
+ if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  this.cameras.main.flash(
+    100,
+    141,
+    244,
+    255
+  );
+
+  this.shake(
+    90,
+    0.004
+  );
+}
+
+  return true;
+}
+
 takeSciFiHit(
   message,
   sourceX = this.player?.x ?? 0,
@@ -17603,10 +19915,22 @@ this.healthInvulnerable > 0
 return;
 }
 
-this.health--;
-  // ============================================================
+const polarityLoss =
+  this.polarityState === 'OVERDRIVE'
+    ? 18
+    : this.polarityState === 'CHARGED'
+      ? 12
+      : 8;
+
+this.addPolarity(
+  -polarityLoss,
+  'damage'
+);
+
+// ============================================================
 // LOW HP · CRITICAL STATE
 // ============================================================
+  
 if (
   this.health === 1 &&
   !this.motionReduced
@@ -17616,12 +19940,14 @@ if (
     '#ff826e'
   );
 
-  this.cameras.main.flash(
-    120,
-    255,
-    70,
-    70
-  );
+  if (this.graphicsLevel >= 2) {
+    this.cameras.main.flash(
+      120,
+      255,
+      70,
+      70
+    );
+  }
 
   this.shake(
     120,
@@ -17744,7 +20070,10 @@ if (
  * DAMAGE IMPACT FX
  * ============================================================
  */
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   const impact =
     this.add
       .circle(
@@ -17797,9 +20126,10 @@ if (!this.motionReduced) {
   /* CRITICAL FX already handled above in takeSciFiHit(). */
 
 if (this.health <= 0) {
-  this.fail(
-    'The courier collapsed. Checkpoint health restored.'
-  );
+this.fail(
+  'The courier collapsed. Checkpoint health restored.',
+  true
+);
   return;
 }
 
@@ -17817,7 +20147,10 @@ this.showDizzyStars(
 );
 
 /* Tint cleanup is already scheduled in the damage FX block above. */
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   this.cameras.main.flash(
     120,
     255,
@@ -18064,7 +20397,10 @@ this.tweens.add({
    Visual only — no damage / physics mutation.
    ------------------------------------------------- */
 
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   const hitDirection =
     this.player.x < enemy.x
       ? -1
@@ -18257,20 +20593,23 @@ this.speakNarration(
     900
   );
 
-  if (!this.motionReduced) {
-    this.cameras.main.flash(
-      220,
-      255,
-      60,
-      60
-    );
+  if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  this.cameras.main.flash(
+    220,
+    255,
+    60,
+    60
+  );
 
-    this.shake(
-      260,
-      0.012
-    );
+  this.shake(
+    260,
+    0.012
+  );
 
-    const enrageBurst =
+  const enrageBurst =
       this.add
         .circle(
           enemy.x,
@@ -18322,6 +20661,7 @@ this.bossPhaseTwo = true;
 // ============================================================
 if (
   !this.motionReduced &&
+  this.graphicsLevel >= 2 &&
   enemy?.active
 ) {
   const burst =
@@ -18354,13 +20694,17 @@ if (
     }
   });
 
-  this.cameras.main.flash(
-    90,
-    255,
-    205,
-    110,
-    true
-  );
+  if (
+    this.graphicsLevel >= 2
+  ) {
+    this.cameras.main.flash(
+      90,
+      255,
+      205,
+      110,
+      true
+    );
+  }
 }
 
 // ============================================================
@@ -18473,13 +20817,17 @@ this.bossPhaseAuraFollow =
     760
   );
 
-  if (!this.motionReduced) {
-    this.cameras.main.flash(
-      180,
-      255,
-      130,
-      110
-    );
+  if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  this.cameras.main.flash(
+    180,
+    255,
+    208,
+    110
+  );
+}
 
     this.shake(
       220,
@@ -18921,16 +21269,18 @@ if (!this.motionReduced) {
       killRing.destroy()
   });
 }
-    if (!this.motionReduced) {
+    if (
+      !this.motionReduced &&
+      this.graphicsLevel >= 2
+    ) {
   this.cameras.main.flash(
     220,
     255,
     208,
     110
-  );
-}
-}
-}
+  ); 
+    }
+        }
 
 enemy
   .getData('indicator')
@@ -18967,10 +21317,46 @@ this.enemyDefeats =
 
 this.combatCombo =
   this.comboTimer > 0
-    ? this.combatCombo + 1
+    ? Math.min(
+        10,
+        this.combatCombo + 1
+      )
     : 1;
 
 this.comboTimer = 3000;
+
+/*
+ * POLARITY REWARD
+ * Stronger methods give slightly more charge.
+ */
+const basePolarityGain =
+  method === 'STOMP'
+    ? 7
+    : method === 'SWORD'
+      ? 6
+      : method === 'BLASTER'
+        ? 5
+        : 4;
+
+const comboPolarityMultiplier =
+  this.combatCombo >= 8
+    ? 1.75
+    : this.combatCombo >= 5
+      ? 1.45
+      : this.combatCombo >= 3
+        ? 1.20
+        : 1;
+
+const polarityGain =
+  Math.round(
+    basePolarityGain *
+    comboPolarityMultiplier
+  );
+
+this.addPolarity(
+  polarityGain,
+  `kill:${method}`
+);
 
   this.bestCombatCombo = Math.max(
   this.bestCombatCombo || 0,
@@ -18984,26 +21370,27 @@ this.comboTimer = 3000;
  */
 if (
   this.combatCombo >= 10 &&
-  this.overdriveTimer <= 0
+  this.overdriveTimer <= 0 &&
+  !this.polarityComboOverdriveTriggered
 ) {
-  this.overdriveTimer = 4200;
+  this.polarity = this.polarityMax;
 
-this.playerCue(
-  'OVERDRIVE',
-  '#ffd06e'
-);
+  this.updatePolarityState();
 
-this.speakNarration(
-  'OVERDRIVE'
-);
+ this.activatePolarityOverdrive();
 
-  this.gadgetPulse(
+this.polarityComboOverdriveTriggered = true;
+
+this.gadgetPulse(
     0xffd06e,
     22,
     700
   );
 
-  if (!this.motionReduced) {
+  if (
+    !this.motionReduced &&
+    this.graphicsLevel >= 2
+  ) {
     this.cameras.main.flash(
       150,
       255,
@@ -19055,7 +21442,11 @@ this.speakNarration(
  * COMBO VISUAL PROGRESSION
  * ============================================================
  */
-if (!this.motionReduced) {
+
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   const comboLevel =
     this.combatCombo;
 
@@ -20005,14 +22396,17 @@ if (this.player.body) {
         0.010
       );
 
-      if (!this.motionReduced) {
-        this.dust.emitParticleAt(
-          spawnX,
-          spawnY + 12,
-          18
-        );
+     if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  this.dust.emitParticleAt(
+    spawnX,
+    spawnY + 12,
+    18
+  );
 
-        const landingShock =
+  const landingShock =
           this.add
             .circle(
               spawnX,
@@ -20780,8 +23174,19 @@ if (!this.motionReduced) {
   });
 }
 
+const transmissionSession =
+  this.runId;
+
 const closeTransmission = () => {
-  if (!overlay?.active) {
+  this.input.keyboard.off(
+    'keydown-SPACE',
+    closeTransmission
+  );
+
+  if (
+    transmissionSession !== this.runId ||
+    !overlay?.active
+  ) {
     return;
   }
 
@@ -20800,133 +23205,359 @@ this.input.keyboard.once(
   closeTransmission
 );
 
+this.events.once(
+  Phaser.Scenes.Events.SHUTDOWN,
+  () => {
+    this.input.keyboard.off(
+      'keydown-SPACE',
+      closeTransmission
+    );
+  }
+);
+
 }
 
 createObjectiveHUD() {
   const compact =
-    this.scale.width < 600;
+    this.scale.width < 768;
 
-const width =
-  Math.min(
-    this.scale.width - 32,
-    compact ? 280 : 390
-  );
+  /*
+   * ============================================================
+   * MISSION OBJECTIVE HUD · PREMIUM CYBER
+   * Desktop only.
+   * Hidden on mobile / touch widths.
+   * ============================================================
+   */
 
-const x = 16;
-const y = compact ? 82 : 24;
+  const width =
+    Math.min(
+      this.scale.width - 32,
+      compact ? 300 : 430
+    );
+
+  const x = 16;
+  const y = compact ? 82 : 18;
 
   const container =
-    this.add.container(x, y)
+    this.add
+      .container(x, y)
       .setScrollFactor(0)
       .setDepth(100);
 
+  // ------------------------------------------------------------
+  // MOBILE
+  // ------------------------------------------------------------
   if (compact) {
     container.setVisible(false);
   }
 
-const plate =
-  this.add.rectangle(
-    width / 2,
-    34,
-    width,
-    68,
-    0x07101f,
-    0.95
-  )
-    .setStrokeStyle(
-      1,
+  // ------------------------------------------------------------
+  // OUTER SHADOW / GLOW
+  // ------------------------------------------------------------
+
+  const shadow =
+    this.add
+      .rectangle(
+        width / 2 + 2,
+        38,
+        width,
+        76,
+        0x000000,
+        0.28
+      );
+
+  // ------------------------------------------------------------
+  // MAIN PLATE
+  // ------------------------------------------------------------
+
+  const plate =
+    this.add
+      .rectangle(
+        width / 2,
+        36,
+        width,
+        72,
+        0x07111d,
+        0.97
+      )
+      .setStrokeStyle(
+        1.5,
+        0x8df4ff,
+        0.78
+      );
+
+  // ------------------------------------------------------------
+  // INNER PLATE
+  // ------------------------------------------------------------
+
+  const inner =
+    this.add
+      .rectangle(
+        width / 2,
+        36,
+        width - 8,
+        64,
+        0x0a1725,
+        0.74
+      )
+      .setStrokeStyle(
+        1,
+        0x2f6074,
+        0.45
+      );
+
+  // ------------------------------------------------------------
+  // LEFT ENERGY ACCENT
+  // ------------------------------------------------------------
+
+  const accent =
+    this.add.rectangle(
+      8,
+      36,
+      3,
+      50,
       0x8df4ff,
-      0.65
+      0.95
     );
 
-const title =
-  this.add.text(
-    14,
-    10,
-    'OBJECTIVE',
-    {
-      fontFamily: 'DM Mono',
-      fontSize: compact
-        ? '9px'
-        : '10px',
-      color: '#8df4ff',
-      stroke: '#08101c',
-      strokeThickness: 4
-    }
-  );
+  const accentGlow =
+    this.add.rectangle(
+      11,
+      36,
+      2,
+      40,
+      0x8df4ff,
+      0.32
+    );
 
-const objective =
-  this.add.text(
-    14,
-    25,
-    this.mission?.story?.arrival ||
-      'REACH THE RELAY',
-    {
-      fontFamily: 'DM Mono',
-      fontSize: compact
-        ? '9px'
-        : '11px',
-      color: '#dffcff',
-      stroke: '#08101c',
-      strokeThickness: 4,
-      lineSpacing: 2,
-      wordWrap: {
-        width: Math.max(
-          150,
-          width - 122
-        ),
-        useAdvancedWrap: true
-      }
-    }
-  );
+  // ------------------------------------------------------------
+  // HEADER
+  // ------------------------------------------------------------
 
-const progressBack =
-  this.add.rectangle(
-    width - 54,
-    25,
-    82,
-    7,
-    0x18283c,
-    1
-  );
-
-const progressFill =
-  this.add.rectangle(
-    width - 54,
-    25,
-    82,
-    7,
-    0x8df4ff,
-    1
-  )
-
-  const progressText =
+  const title =
     this.add.text(
-      width - 54,
-      39,
-      '0%',
+      20,
+      10,
+      'MISSION OBJECTIVE',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '9px',
+        color: '#8df4ff',
+        fontStyle: 'bold',
+        letterSpacing: 1.8,
+        stroke: '#06101a',
+        strokeThickness: 3
+      }
+    );
+
+  // ------------------------------------------------------------
+  // OBJECTIVE TEXT
+  // ------------------------------------------------------------
+
+  const objective =
+    this.add.text(
+      20,
+      27,
+      this.mission?.story?.arrival ||
+        'REACH THE RELAY',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '12px',
+        color: '#e8fdff',
+        fontStyle: 'bold',
+        stroke: '#06101a',
+        strokeThickness: 3,
+        lineSpacing: 2,
+        wordWrap: {
+          width: Math.max(
+            170,
+            width - 190
+          ),
+          useAdvancedWrap: true
+        }
+      }
+    );
+
+  // ------------------------------------------------------------
+  // PROGRESS LABEL
+  // ------------------------------------------------------------
+
+  const progressLabel =
+    this.add.text(
+      width - 148,
+      10,
+      'PROGRESS',
       {
         fontFamily: 'DM Mono',
         fontSize: '8px',
-        color: '#8df4ff'
+        color: '#6f879b',
+        fontStyle: 'bold',
+        letterSpacing: 1.2
+      }
+    );
+
+  // ------------------------------------------------------------
+  // PROGRESS TRACK
+  // ------------------------------------------------------------
+
+  const progressBack =
+    this.add.rectangle(
+      width - 82,
+      34,
+      124,
+      8,
+      0x18283c,
+      1
+    )
+      .setStrokeStyle(
+        1,
+        0x3b6174,
+        0.55
+      );
+
+  // ------------------------------------------------------------
+  // PROGRESS FILL
+  // ------------------------------------------------------------
+
+  const progressFill =
+    this.add
+      .rectangle(
+        width - 144,
+        34,
+        120,
+        5,
+        0x8df4ff,
+        1
+      )
+      .setOrigin(0, 0.5);
+
+  // ------------------------------------------------------------
+  // PROGRESS HOTLINE
+  // ------------------------------------------------------------
+
+  const progressHot =
+    this.add
+      .rectangle(
+        width - 144,
+        32,
+        120,
+        2,
+        0xe8fdff,
+        0.72
+      )
+      .setOrigin(0, 0.5);
+
+  // ------------------------------------------------------------
+  // PERCENTAGE
+  // ------------------------------------------------------------
+
+  const progressText =
+    this.add.text(
+      width - 18,
+      27,
+      '0%',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '13px',
+        color: '#e8fdff',
+        fontStyle: 'bold',
+        stroke: '#06101a',
+        strokeThickness: 3
       }
     )
-    .setOrigin(0.5);
+      .setOrigin(1, 0.5);
+
+  // ------------------------------------------------------------
+  // BOTTOM STATUS LINE
+  // ------------------------------------------------------------
+
+  const statusLine =
+    this.add.rectangle(
+      width / 2,
+      55,
+      width - 40,
+      1,
+      0x29495d,
+      0.55
+    );
+
+  const statusText =
+    this.add.text(
+      20,
+      58,
+      'ROUTE ACTIVE  //  RELAY LINK STABLE',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '7px',
+        color: '#6f879b',
+        letterSpacing: 1.1
+      }
+    );
+
+  // ------------------------------------------------------------
+  // CORNER SIGNAL
+  // ------------------------------------------------------------
+
+  const signal =
+    this.add
+      .circle(
+        width - 18,
+        58,
+        3,
+        0x8df4ff,
+        0.95
+      );
+
+  const signalGlow =
+    this.add
+      .circle(
+        width - 18,
+        58,
+        6,
+        0x8df4ff,
+        0.10
+      );
+
+  // ------------------------------------------------------------
+  // BUILD HUD
+  // ------------------------------------------------------------
 
   container.add([
+    shadow,
     plate,
+    inner,
+    accent,
+    accentGlow,
     title,
     objective,
+    progressLabel,
     progressBack,
     progressFill,
-    progressText
+    progressHot,
+    progressText,
+    statusLine,
+    statusText,
+    signalGlow,
+    signal
   ]);
 
-  this.objectiveHUD = container;
-this.objectiveText = objective;
-this.objectiveProgressBar = progressFill;
-this.objectiveProgressText = progressText;
+  // ------------------------------------------------------------
+  // REFERENCES USED BY GAMEPLAY PROGRESS LOGIC
+  // ------------------------------------------------------------
+
+  this.objectiveHUD =
+    container;
+
+  this.objectiveText =
+    objective;
+
+  this.objectiveProgressBar =
+    progressFill;
+
+  this.objectiveProgressText =
+    progressText;
 }
+
 
 createDetectionHUD() {
   const compact =
@@ -21227,11 +23858,13 @@ this.tweens.add({
     boostPulse.destroy()
 });
 
-    this.dust.emitParticleAt(
-      this.player.x,
-      this.player.y + 24,
-      7
-    );
+    if (this.graphicsLevel >= 1) {
+  this.dust.emitParticleAt(
+    this.player.x,
+    this.player.y + 24,
+    7
+  );
+}
 
     this.game.events.emit(
       'feedback',
@@ -21273,14 +23906,17 @@ this.physics.add.overlap(
   this.player,
   this.chaser,
  () => {
-  if (!this.motionReduced) {
-    this.cameras.main.flash(
-      180,
-      255,
-      60,
-      60
-    );
-  }
+ if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  this.cameras.main.flash(
+    180,
+    255,
+    60,
+    60
+  );
+}
 
   const hitPulse =
     this.add
@@ -21678,14 +24314,17 @@ this.tweens.add({
         goalBurst.destroy()
     });
 
-    if (!this.motionReduced) {
-      this.cameras.main.flash(
-        180,
-        255,
-        208,
-        110
-      );
-    }
+    if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  this.cameras.main.flash(
+    180,
+    255,
+    208,
+    110
+  );
+}
 
     this.shake(
       120,
@@ -21701,98 +24340,125 @@ this.tweens.add({
 }
 
 createAtmosphere() {
-this.rain =
-this.add
-.particles(
-0,
-0,
-'rain',
-{
-x: {
-min: 0,
-max: 1350
-},
-y: -10,
-speedY: {
-min: 320,
-max: 470
-},
-speedX: -55,
-lifespan: 1700,
-frequency: 35,
-quantity: 1,
-scale: {
-start: .55,
-end: .55
-},
-alpha: {
-start: .5,
-end: 0
-},
-blendMode: 'ADD'
-}
-)
-.setScrollFactor(.4)
-.setVisible(
-this.rainEnabled
-);
+  const graphicsLevel =
+    Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
 
-this.dust =
-  this.add.particles(
-    0,
-    0,
-    'dust',
-    {
-      speedX: {
-        min: -45,
-        max: 45
-      },
-      speedY: {
-        min: -15,
-        max: -70
-      },
-      lifespan: 350,
-      quantity: 0,
-      scale: {
-        start: .7,
-        end: 0
-      },
-      alpha: {
-        start: .4,
-        end: 0
-      }
-    }
-  );
+  const particleScale = {
+    0: 0.45,
+    1: 0.70,
+    2: 1.00,
+    3: 1.25
+  }[graphicsLevel] ?? 1;
+
+  const rainFrequency = {
+    0: 0,
+    1: 55,
+    2: 35,
+    3: 24
+  }[graphicsLevel] ?? 35;
+
+  const rainQuantity =
+    graphicsLevel >= 1
+      ? 1
+      : 0;
+
+  this.rain =
+    this.add
+      .particles(
+        0,
+        0,
+        'rain',
+        {
+          x: {
+            min: 0,
+            max: 1350
+          },
+          y: -10,
+          speedY: {
+            min: 320,
+            max: 470
+          },
+          speedX: -55,
+          lifespan: 1700,
+          frequency: rainFrequency,
+          quantity: rainQuantity,
+          scale: {
+            start: .55 * particleScale,
+            end: .55 * particleScale
+          },
+          alpha: {
+            start: .5,
+            end: 0
+          },
+          blendMode: 'ADD'
+        }
+      )
+      .setScrollFactor(.4)
+      .setVisible(
+        this.rainEnabled &&
+        graphicsLevel >= 1
+      );
+
+  this.dust =
+    this.add
+      .particles(
+        0,
+        0,
+        'dust',
+        {
+          speedX: {
+            min: -45,
+            max: 45
+          },
+          speedY: {
+            min: -15,
+            max: -70
+          },
+          lifespan: 350,
+          quantity: 0,
+          scale: {
+            start: .7 * particleScale,
+            end: 0
+          },
+          alpha: {
+            start: .4,
+            end: 0
+          }
+        }
+      );
 
 this.speedLines =
-  this.add.particles(
-    0,
-    0,
-    'speed-line',
-    {
-      speedX: {
-        min: -220,
-        max: -130
-      },
-      speedY: {
-        min: -12,
-        max: 12
-      },
-      lifespan: 210,
-      quantity: 0,
-      scale: {
-        start: .7,
-        end: .15
-      },
-      alpha: {
-        start: .42,
-        end: 0
-      },
-      blendMode: 'ADD'
-    }
-  );
+  this.add
+    .particles(
+      0,
+      0,
+      'speed-line',
+      {
+        speedX: {
+          min: -220,
+          max: -130
+        },
+        speedY: {
+          min: -12,
+          max: 12
+        },
+        lifespan: 210,
+        quantity: 0,
+        scale: {
+          start: .7 * particleScale,
+          end: .15 * particleScale
+        },
+        alpha: {
+          start: .42,
+          end: 0
+        },
+        blendMode: 'ADD'
+      }
+    );
 
-const weather = {
+  const weather = {
   'first-delivery': [
     'NIGHT RAIN',
     0x6d8faa
@@ -21855,10 +24521,22 @@ updateWeather(delta) {
   const intense =
     this.weatherPhase === 1;
 
+  const graphicsLevel =
+    Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
+  const weatherEnabled =
+    graphicsLevel >= 1;
+
   this.weatherOverlay?.setAlpha(
-    intense
-      ? .14
-      : .045
+    weatherEnabled
+      ? (
+          intense
+            ? .14
+            : .045
+        )
+      : 0
   );
 
 
@@ -21867,12 +24545,19 @@ if (
   this.mission.id ===
     'signal-storm'
 ) {
-  this.cameras.main.flash(
-    100,
-    160,
-    120,
-    255
-  );
+  const graphicsLevel =
+    Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
+  if (graphicsLevel >= 2) {
+    this.cameras.main.flash(
+      100,
+      160,
+      120,
+      255
+    );
+  }
 
   this.game.events.emit(
     'feedback',
@@ -21911,19 +24596,27 @@ y,
 .setAlpha(0)
 .setDepth(2);
 
-    if (!this.motionReduced) {
-      this.tweens.add({
-        targets: guide,
-        alpha: {
-          from: .9,
-          to: .25
-        },
-        y: y - 5,
-        duration: 900,
-        yoyo: true,
-        repeat: -1
-      });
-    }
+  const graphicsLevel =
+  Number.isFinite(this.graphicsLevel)
+    ? this.graphicsLevel
+    : 2;
+
+if (
+  !this.motionReduced &&
+  graphicsLevel >= 2
+) {
+  this.tweens.add({
+    targets: guide,
+    alpha: {
+      from: .9,
+      to: .25
+    },
+    y: y - 5,
+    duration: 900,
+    yoyo: true,
+    repeat: -1
+  });
+}
   }
 );
 
@@ -22009,16 +24702,24 @@ createGuideCompanions() {
       /*
        * BASIC FLOATING
        */
-      if (!this.motionReduced) {
-        this.tweens.add({
-          targets: guide,
-          y: y - 12,
-          duration: 760,
-          yoyo: true,
-          repeat: -1,
-          ease: 'Sine.inOut'
-        });
-      }
+     const graphicsLevel =
+  Number.isFinite(this.graphicsLevel)
+    ? this.graphicsLevel
+    : 2;
+
+if (
+  !this.motionReduced &&
+  graphicsLevel >= 2
+) {
+  this.tweens.add({
+    targets: guide,
+    y: y - 12,
+    duration: 760,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+}
 
       /*
  * FLOATING SHADOW
@@ -22042,7 +24743,10 @@ guide.setData(
   shadow
 );
 
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  graphicsLevel >= 2
+) {
   this.tweens.add({
     targets: shadow,
     scaleX: {
@@ -22968,9 +25672,9 @@ return;
 if (
   this.boosterTimer > 0
 ) {
-  this.boostedSignals++;
+this.boostedSignals++;
 
-  this.playerCue(
+this.playerCue(
   'BOOSTED SIGNAL',
   '#8df4ff'
 );
@@ -22982,17 +25686,19 @@ this.gadgetPulse(
 );
 }
 
-this.dust.emitParticleAt(
-  signal.x,
-  signal.y,
-  14
-);
+if (this.graphicsLevel >= 1) {
+  this.dust.emitParticleAt(
+    signal.x,
+    signal.y,
+    14
+  );
 
-this.speedLines.emitParticleAt(
-  signal.x,
-  signal.y,
-  5
-);
+  this.speedLines.emitParticleAt(
+    signal.x,
+    signal.y,
+    5
+  );
+}
 
 signal.disableBody(
   true,
@@ -23001,9 +25707,22 @@ signal.disableBody(
 
 this.collected++;
 
+const signalPolarityGain =
+  this.boosterTimer > 0
+    ? 12
+    : 6;
+
+this.addPolarity(
+  signalPolarityGain,
+  this.boosterTimer > 0
+    ? 'boosted-signal'
+    : 'signal'
+);
+
 // ============================================================
 // SIGNAL INTERFERENCE · LIVE UPDATE
 // ============================================================
+  
 this.updateSignalInterference(0);
 
 this.playerCue(
@@ -23096,7 +25815,15 @@ secret.disableBody(
   // ============================================================
 // SECRET DISCOVERY · RARE PICKUP FX
 // ============================================================
-if (!this.motionReduced) {
+const graphicsLevel =
+  Number.isFinite(this.graphicsLevel)
+    ? this.graphicsLevel
+    : 2;
+
+if (
+  !this.motionReduced &&
+  graphicsLevel >= 2
+) {
   const secretBurst =
     this.add
       .circle(
@@ -23157,7 +25884,14 @@ if (!this.motionReduced) {
     0.0025
   );
 }
+  
 this.secretsCollected++;
+
+this.addPolarity(
+  15,
+  'secret'
+);
+
 this.playerCue(
   'SECRET ACQUIRED',
   '#b993ff'
@@ -26081,7 +28815,10 @@ this.player.setTint(
   0xffefad
 );
 
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   this.cameras.main.flash(
     260,
     255,
@@ -26130,17 +28867,19 @@ if (
   });
 }
 
-this.dust.emitParticleAt(
-  this.goal.x + 20,
-  this.goal.y + 25,
-  34
-);
+if (this.graphicsLevel >= 1) {
+  this.dust.emitParticleAt(
+    this.goal.x + 20,
+    this.goal.y + 25,
+    34
+  );
 
-this.speedLines.emitParticleAt(
-  this.goal.x + 20,
-  this.goal.y + 25,
-  10
-);
+  this.speedLines.emitParticleAt(
+    this.goal.x + 20,
+    this.goal.y + 25,
+    10
+  );
+}
 
 this.tweens.add({
   targets: this.player,
@@ -26225,7 +28964,10 @@ this.gadgetPulse(
   520
 );
 
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   this.cameras.main.flash(
     140,
     255,
@@ -27421,15 +30163,74 @@ this.time.delayedCall(
     
 }
 
-fail(message) {
+fail(
+  message,
+  damageAlreadyApplied = false
+) {
 
 if (
   this.briefingProtected ||
-  this.finished ||
   this.respawning ||
-  this.respawnGrace > 0
+  this.finished ||
+  this.healthInvulnerable > 0
 ) {
   return;
+}
+
+if (
+  (this.surpriseShieldCharges || 0) > 0
+) {
+  this.surpriseShieldCharges--;
+
+  this.healthInvulnerable =
+    900;
+
+  this.playerCue(
+    'SHIELD CORE · IMPACT ABSORBED',
+    '#8df4ff'
+  );
+
+  this.game.events.emit(
+    'feedback',
+    'shield'
+  );
+
+  if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  this.cameras.main.flash(
+    100,
+    141,
+    244,
+    255
+  );
+
+  this.shake(
+    90,
+    0.003
+  );
+}
+
+  return;
+}
+
+if (!damageAlreadyApplied) {
+  this.health--;
+}
+
+if (!damageAlreadyApplied) {
+  const polarityLoss =
+    this.polarityState === 'OVERDRIVE'
+      ? 18
+      : this.polarityState === 'CHARGED'
+        ? 12
+        : 8;
+
+  this.addPolarity(
+    -polarityLoss,
+    'damage'
+  );
 }
 
 const collision =
@@ -27529,7 +30330,10 @@ this.shake(
   .014
 );
 
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   this.cameras.main.flash(
     120,
     255,
@@ -27543,17 +30347,19 @@ this.game.events.emit(
     'death'
 );
 
-this.dust.emitParticleAt(
-  this.player.x,
-  this.player.y + 10,
-  12
-);
+if (this.graphicsLevel >= 1) {
+  this.dust.emitParticleAt(
+    this.player.x,
+    this.player.y + 10,
+    12
+  );
 
-this.speedLines.emitParticleAt(
-  this.player.x,
-  this.player.y,
-  8
-);
+  this.speedLines.emitParticleAt(
+    this.player.x,
+    this.player.y,
+    8
+  );
+}
 
 this.time.delayedCall(
   180,
@@ -27666,7 +30472,29 @@ this.signalOverrideTriggered =
 this.signalGhostTimer = 0;
 this.signalInterferencePulse = 0;
 
-this.health = 3;
+this.health =
+  this.healthMax;
+
+this.polarity = 0;
+this.polarityState = 'STABLE';
+this.polarityDecayTimer = 0;
+this.polarityLastState = 'STABLE';
+this.polarityPulseTimer = 0;
+this.overdriveTimer = 0;
+this.polarityComboOverdriveTriggered = false;
+
+this.game.events.emit(
+  'polarity',
+  this.polarity,
+  this.polarityMax,
+  'respawn'
+);
+
+this.game.events.emit(
+  'polarity-state',
+  this.polarityState,
+  this.polarity
+);
 
 this.waterAttackActive = false;
 this.waterDeathTimer = 0;
@@ -27780,6 +30608,9 @@ this.comboTimer =
 this.overdriveTimer =
   0;
 
+this.polarityComboOverdriveTriggered =
+  false;
+
 this.perfectDodgeWindow =
   0;
 
@@ -27844,6 +30675,9 @@ this.mobileActions.gadget1 =
 this.mobileActions.gadget2 =
   false;
 
+this.mobileActions.polarity =
+  false;
+
 this.player
   .clearTint()
   .setAlpha(1)
@@ -27879,6 +30713,11 @@ this.player.body.setVelocity(
   0,
   0
 );
+
+this.fallSpeed = 0;
+this.wasGrounded = true;
+this.landingTimer = 0;
+this.lastHardLanding = false;
 
 this.respawnGrace =
   1100;
@@ -28093,6 +30932,11 @@ this.game.events.emit(
 }
 
 updateDynamicWaterFX(delta) {
+  const graphicsLevel =
+    Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
   if (
     this.motionReduced ||
     !this.player?.active ||
@@ -28202,6 +31046,7 @@ this.triggerPlayerWaterRipple(
 // ============================================================
 if (
   !this.motionReduced &&
+  graphicsLevel >= 2 &&
   speed > 140 &&
   this.player?.active
 ) {
@@ -29398,9 +32243,17 @@ update(_, delta) {
   ) {
     return;
   }
+
+  // ============================================================
+  // POLARITY CORE · CONTINUOUS UPDATE
+  // ============================================================
+  
+  this.updatePolarity(delta);
+  
 // ============================================================
 // DIZZY STARS · FOLLOW PLAYER HEAD
 // ============================================================
+  
 if (
   this.dizzyStars?.active
 ) {
@@ -29571,9 +32424,10 @@ if (
   this.updateSignalInterferenceEnemyFX(delta);
 }
 
+this.updateSurpriseCacheInteraction();
 this.updateRelayGateInteraction();
 
-  if (this.relayPuzzleActive) {
+if (this.relayPuzzleActive) {
   this.elapsedMs +=
     delta;
 
@@ -30081,10 +32935,31 @@ const packageSpeed =
     ?.speedMultiplier ||
   1;
 
+const surpriseSpeed =
+  Number.isFinite(
+    this.surpriseModifier
+      ?.movementMultiplier
+  )
+    ? this.surpriseModifier
+        .movementMultiplier
+    : 1;
+
 if (!this.dashTimer) {
+
+  const polaritySpeed =
+    this.polarityState === 'OVERDRIVE'
+      ? 1.10
+      : this.polarityState === 'CHARGED'
+        ? 1.04
+        : this.polarityState === 'LOW'
+          ? 0.97
+          : 1;
+
   this.player.body.setMaxVelocityX(
     RUNNER_TUNING.maxRunSpeed *
-    packageSpeed
+    packageSpeed *
+    surpriseSpeed *
+    polaritySpeed
   );
 }
 
@@ -30352,6 +33227,17 @@ if (this.routeHintTimer <= 0) {
   this.updateCheckpointArrow();
 }
 
+const polarityBreakPressed =
+  Phaser.Input.Keyboard.JustDown(
+    this.keys.X
+  );
+
+if (
+  polarityBreakPressed
+) {
+  this.breakPolarity();
+}
+
 if (
   Phaser.Input.Keyboard.JustDown(
     this.keys.ONE
@@ -30487,7 +33373,10 @@ if (
   // ============================================================
 // COMBO BREAK · IMPACT FX
 // ============================================================
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   const comboBreak =
     this.add
       .circle(
@@ -30520,14 +33409,15 @@ if (!this.motionReduced) {
     0.0035
   );
 }
-  this.combatCombo = 0;
+  
+this.combatCombo = 0;
+this.polarityComboOverdriveTriggered = false;
 
-  this.game.events.emit(
-    'combo',
-    0,
-    0
-  );
-}
+this.game.events.emit(
+  'combo',
+  0,
+  0
+);
 
 if (
   this.ammo >=
@@ -30931,17 +33821,25 @@ if (
       'highSpeed'
   )
 ) {
-  body.setMaxVelocityX(
-    RUNNER_TUNING.maxRunSpeed *
-    packageSpeed *
-    (
-      modifier?.id ===
-      'highSpeed'
-        ? 1.12
-        : 1.04
+body.setMaxVelocityX(
+  RUNNER_TUNING.maxRunSpeed *
+  packageSpeed *
+  (
+    modifier?.id ===
+    'highSpeed'
+      ? 1.12
+      : 1.04
+  ) *
+  (
+    Number.isFinite(
+      this.surpriseModifier
+        ?.movementMultiplier
     )
-  );
-}
+      ? this.surpriseModifier
+          .movementMultiplier
+      : 1
+  )
+);
 
 const gravityMultiplier =
   this.mission.gravityMode === 'low'
@@ -31214,23 +34112,28 @@ if (
       wallDirection *
         16;
 
-    this.dust.emitParticleAt(
-      wallX,
-      this.player.y + 12,
-      8
-    );
+    if (this.graphicsLevel >= 1) {
+  this.dust.emitParticleAt(
+    wallX,
+    this.player.y + 12,
+    8
+  );
 
-    this.speedLines.emitParticleAt(
-      wallX,
-      this.player.y,
-      4
-    );
+  this.speedLines.emitParticleAt(
+    wallX,
+    this.player.y,
+    4
+  );
+}
 
     // ============================================================
 // WALL JUMP · ENERGY RING
 // ============================================================
 
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   const wallJumpRing =
     this.add
       .circle(
@@ -31259,30 +34162,35 @@ if (!this.motionReduced) {
   });
 }
 
-    const burst =
-  this.add
-    .circle(
-      wallX,
-      this.player.y,
-      7,
-      0x8df4ff,
-      .5
-    );
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
+  const burst =
+    this.add
+      .circle(
+        wallX,
+        this.player.y,
+        7,
+        0x8df4ff,
+        .5
+      );
 
-burst.setBlendMode(
-  Phaser.BlendModes.ADD
-);
+  burst.setBlendMode(
+    Phaser.BlendModes.ADD
+  );
 
-burst.setDepth(11);
+  burst.setDepth(11);
 
-    this.tweens.add({
-      targets: burst,
-      scale: 2.2,
-      alpha: 0,
-      duration: 150,
-      onComplete: () =>
-        burst.destroy()
-    });
+  this.tweens.add({
+    targets: burst,
+    scale: 2.2,
+    alpha: 0,
+    duration: 150,
+    onComplete: () =>
+      burst.destroy()
+  });
+}
 
     this.leaveAfterimage();
 
@@ -31315,10 +34223,12 @@ burst.setDepth(11);
   // Small visible mid-air energy burst.
   // Visual only — no physics mutation.
   // ============================================================
-  if (
-    !this.motionReduced &&
-    this.player?.active
-  ) {
+    
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2 &&
+  this.player?.active
+) {
     for (let i = 0; i < 4; i++) {
       const spark =
         this.add.circle(
@@ -31432,7 +34342,10 @@ if (isDoubleJump) {
   );
 }
 
-  if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
 const jumpBurst =
   this.add.circle(
     this.player.x,
@@ -31464,6 +34377,7 @@ this.tweens.add({
 
 if (
   !this.motionReduced &&
+  this.graphicsLevel >= 2 &&
   this.jumps === 1
 ) {
   const takeoffRing =
@@ -31500,6 +34414,7 @@ this.jumpBuffer = 0;
 this.jumpHeld =
   jumpHeld;
 
+ if (this.graphicsLevel >= 1) {
   this.dust.emitParticleAt(
     this.player.x,
     this.player.y + 27,
@@ -31511,6 +34426,7 @@ this.jumpHeld =
     this.player.y + 22,
     2
   );
+}
 
   if (!canWallJump) {
     this.game.events.emit(
@@ -31991,6 +34907,7 @@ if (
     this.fallSpeed >
     260;
 
+ if (this.graphicsLevel >= 1) {
   this.dust.emitParticleAt(
     this.player.x,
     this.player.y + 28,
@@ -32006,6 +34923,7 @@ if (
       ? 4
       : 1
   );
+}
 
 if (hardLanding) {
   if (!this.motionReduced) {
@@ -32021,7 +34939,10 @@ if (hardLanding) {
   );
 }
 
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   const landingPulse =
     this.add
       .circle(
@@ -32108,7 +35029,10 @@ this.lastHardLanding =
 // PLAYER · LANDING SHOCKWAVE
 // ============================================================
 
-if (!this.motionReduced) {
+if (
+  !this.motionReduced &&
+  this.graphicsLevel >= 2
+) {
   const landingShock =
     this.add
       .circle(
@@ -32165,6 +35089,10 @@ this.landingTimer =
     ) -
       delta
   );
+
+if (this.landingTimer <= 0) {
+  this.lastHardLanding = false;
+}
 
 if (
   this.dashTimer > 0
@@ -32679,6 +35607,7 @@ this.dustTimer =
   );
 
 if (
+  this.graphicsLevel >= 1 &&
   onGround &&
   Math.abs(
     body.velocity.x
@@ -32691,12 +35620,13 @@ if (
     1
   );
 
- this.dustTimer = 90;
+  this.dustTimer = 90;
 }
 
 this.speedTimer -= delta;
 if (
   !this.motionReduced &&
+  this.graphicsLevel >= 1 &&
   this.player?.active &&
   Math.abs(
     body.velocity.x
@@ -33010,7 +35940,7 @@ const dashActive =
 
 const hardLanding =
   this.landingTimer > 0 &&
-  this.fallSpeed > 260;
+  this.lastHardLanding === true;
 
 const wallJumpActive =
   this.wallJumpTimer > 0;
@@ -33342,12 +36272,14 @@ if (
       );
   }
 }
-}
-}
-
-  }
   }
 }
 
+    }
+  }
 }
+
+  }
 }
+    }
+  }
