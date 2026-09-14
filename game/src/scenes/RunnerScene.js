@@ -8413,9 +8413,8 @@ this.events.once(
 if (this.cinematicActive) {
   this.createOpeningCinematic();
 } else {
- this.createMissionTransmission();
-this.createObjectiveHUD();
-this.createDetectionHUD();
+  this.createObjectiveHUD();
+  this.createDetectionHUD();
 }
 
 }
@@ -22585,7 +22584,7 @@ this.input.keyboard.off(
       '#8df4ff'
     );
 
-    this.createMissionTransmission();
+    // Mission transmission hidden — Objectives HUD handles mission info.
   };
 
   this.cinematicSkipHandler =
@@ -23321,9 +23320,9 @@ createObjectiveHUD() {
     this.add
       .rectangle(
         width / 2,
-        36,
+        39,
         width,
-        72,
+        84,
         0x07111d,
         0.97
       )
@@ -23341,9 +23340,9 @@ createObjectiveHUD() {
     this.add
       .rectangle(
         width / 2,
-        36,
+        39,
         width - 8,
-        64,
+        76,
         0x0a1725,
         0.74
       )
@@ -23401,38 +23400,40 @@ createObjectiveHUD() {
   // OBJECTIVE TEXT
   // ------------------------------------------------------------
 
-  const objective =
-    this.add.text(
-      20,
-      27,
-      this.mission?.story?.arrival ||
-        'REACH THE RELAY',
-      {
-        fontFamily: 'DM Mono',
-        fontSize: '12px',
-        color: '#e8fdff',
-        fontStyle: 'bold',
-        stroke: '#06101a',
-        strokeThickness: 3,
-        lineSpacing: 2,
-        wordWrap: {
-          width: Math.max(
-            170,
-            width - 190
-          ),
-          useAdvancedWrap: true
-        }
+const objective =
+  this.add.text(
+    20,
+    30,
+    this.mission?.story?.arrival ||
+      'REACH THE RELAY',
+    {
+      fontFamily: 'DM Mono',
+      fontSize: '13px',
+      color: '#f4fbff',
+      fontStyle: 'bold',
+      stroke: '#06101a',
+      strokeThickness: 4,
+      letterSpacing: 1.1,
+      lineSpacing: 3,
+      maxLines: 2,
+      wordWrap: {
+        width: Math.max(
+          165,
+          width - 205
+        ),
+        useAdvancedWrap: true
       }
-    );
+    }
+  );
 
   // ------------------------------------------------------------
   // PROGRESS LABEL
   // ------------------------------------------------------------
 
-  const progressLabel =
-    this.add.text(
-      width - 148,
-      10,
+ const progressLabel =
+  this.add.text(
+    width - 148,
+    18,
       'PROGRESS',
       {
         fontFamily: 'DM Mono',
@@ -23447,10 +23448,10 @@ createObjectiveHUD() {
   // PROGRESS TRACK
   // ------------------------------------------------------------
 
-  const progressBack =
-    this.add.rectangle(
-      width - 82,
-      34,
+const progressBack =
+  this.add.rectangle(
+    width - 82,
+    42,
       124,
       8,
       0x18283c,
@@ -23466,11 +23467,11 @@ createObjectiveHUD() {
   // PROGRESS FILL
   // ------------------------------------------------------------
 
-  const progressFill =
-    this.add
-      .rectangle(
-        width - 144,
-        34,
+ const progressFill =
+  this.add
+    .rectangle(
+      width - 144,
+      42,
         120,
         5,
         0x8df4ff,
@@ -23486,7 +23487,7 @@ createObjectiveHUD() {
     this.add
       .rectangle(
         width - 144,
-        32,
+        40,
         120,
         2,
         0xe8fdff,
@@ -23501,7 +23502,7 @@ createObjectiveHUD() {
   const progressText =
     this.add.text(
       width - 18,
-      27,
+      38,
       '0%',
       {
         fontFamily: 'DM Mono',
@@ -23531,7 +23532,7 @@ createObjectiveHUD() {
   const statusText =
     this.add.text(
       20,
-      58,
+      61,
       'ROUTE ACTIVE  //  RELAY LINK STABLE',
       {
         fontFamily: 'DM Mono',
