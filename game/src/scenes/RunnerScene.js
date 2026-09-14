@@ -20690,7 +20690,7 @@ narration.forEach(
     this.time.delayedCall(
       delay,
       () => {
-        if (!this.cinematicActive)
+        if (!overlay?.active)
           return;
 
         subtitle.setText(
@@ -20760,19 +20760,24 @@ if (!this.motionReduced) {
   });
 }
 
+const closeTransmission = () => {
+  if (!overlay?.active) {
+    return;
+  }
+
+  overlay.destroy(true);
+};
+
 this.time.delayedCall(
   compact
     ? 3600
     : 5600,
-  finish
+  closeTransmission
 );
-
-this.cinematicSkipHandler =
-  finish;
 
 this.input.keyboard.once(
   'keydown-SPACE',
-  this.cinematicSkipHandler
+  closeTransmission
 );
 
 }
@@ -32973,8 +32978,8 @@ const dashActive =
   this.dashTimer > 0;
 
 const hardLanding =
-  this.lastHardLanding &&
-  this.landingTimer > 0;
+  this.landingTimer > 0 &&
+  this.fallSpeed > 260;
 
 const wallJumpActive =
   this.wallJumpTimer > 0;
