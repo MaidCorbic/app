@@ -4442,27 +4442,28 @@ this.surpriseCacheInteractionLocked = false;
     this.time.removeAllEvents();
     this.activeShark?.destroy();
 this.activeShark = null;
-   this.input.keyboard.once(
+
+    this.input.keyboard.off(
   'keydown-SPACE',
   this.cinematicSkipHandler
 );
 
-this.input.keyboard.once(
+this.input.keyboard.off(
   'keydown-A',
   this.cinematicSkipHandler
 );
 
-this.input.keyboard.once(
+this.input.keyboard.off(
   'keydown-D',
   this.cinematicSkipHandler
 );
 
-this.input.keyboard.once(
+this.input.keyboard.off(
   'keydown-LEFT',
   this.cinematicSkipHandler
 );
 
-this.input.keyboard.once(
+this.input.keyboard.off(
   'keydown-RIGHT',
   this.cinematicSkipHandler
 );
@@ -22588,13 +22589,33 @@ this.input.keyboard.off(
     this.createMissionTransmission();
   };
 
-  this.cinematicSkipHandler =
-    finish;
+this.cinematicSkipHandler =
+  finish;
 
-  this.input.keyboard.once(
-    'keydown-SPACE',
-    this.cinematicSkipHandler
-  );
+this.input.keyboard.once(
+  'keydown-SPACE',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.once(
+  'keydown-A',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.once(
+  'keydown-D',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.once(
+  'keydown-LEFT',
+  this.cinematicSkipHandler
+);
+
+this.input.keyboard.once(
+  'keydown-RIGHT',
+  this.cinematicSkipHandler
+);
 
   this.time.delayedCall(
     2850,
