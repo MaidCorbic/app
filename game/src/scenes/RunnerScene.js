@@ -8349,7 +8349,7 @@ this.mobileMoveHandler =
 
     this.mobileDirection = null;
   };
-  };
+
 this.game.events.on(
   'mobile-action',
   this.mobileActionHandler
