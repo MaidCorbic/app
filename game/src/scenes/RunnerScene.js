@@ -3457,6 +3457,13 @@ this.cinematicActive =
   this.mission.id === 'first-delivery' &&
   firstTimeTutorial;
 
+if (
+  !this.cinematicActive &&
+  this.physics?.world?.isPaused
+) {
+  this.physics.resume();
+}
+
 this.isPlayerTransformLocked = false;
 
 this.collected = 0;
@@ -23235,7 +23242,7 @@ createObjectiveHUD() {
     );
 
   const x = 16;
-  const y = compact ? 82 : 18;
+  const y = compact ? 82 : 90;
 
   const container =
     this.add
@@ -23560,7 +23567,7 @@ createObjectiveHUD() {
 
 createDetectionHUD() {
   const compact =
-    this.scale.width < 600;
+    this.scale.width < 768;
 
  const width =
   Math.min(
@@ -23571,7 +23578,7 @@ createDetectionHUD() {
     this.scale.width - width - 16;
 
   const y =
-    compact ? 150 : 24;
+    compact ? 150 : 90;
 
   const container =
     this.add.container(
@@ -32241,6 +32248,16 @@ update(_, delta) {
     !this.player?.active
   ) {
     return;
+  }
+
+  if (
+    this.physics?.world?.isPaused &&
+    !this.relayPuzzleActive &&
+    !this.finished &&
+    !this.respawning &&
+    !this.cinematicActive
+  ) {
+    this.physics.resume();
   }
 
   // ============================================================
