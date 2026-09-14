@@ -4410,7 +4410,6 @@ this.createBoostPads();
 this.createChaser();
 this.createGoal();
 this.createAtmosphere();
-this.createWeather();
 this.createGuides();
 this.createGuideCompanions();
 
