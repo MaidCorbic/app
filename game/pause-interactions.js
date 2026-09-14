@@ -9,6 +9,7 @@
 
     const style = document.createElement('style');
     style.id = PORTRAIT_GUARD_STYLE_ID;
+
     style.textContent = `
       /* Portrait phones: remove landscape-only gameplay HUD and show the rotate state. */
       @media (pointer: coarse) and (orientation: portrait) {
@@ -26,6 +27,17 @@
           display: flex !important;
           visibility: visible !important;
           opacity: 1 !important;
+        }
+      }
+
+      /* Phones: hide Cargo Integrity in portrait and landscape. */
+      @media (pointer: coarse) and (max-width: 900px) and (max-height: 600px),
+             (pointer: coarse) and (max-width: 600px) and (max-height: 900px) {
+        html body.is-touch #cargoIntegrityV2 {
+          display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
         }
       }
 
@@ -52,7 +64,12 @@
           0 0 24px rgba(141,244,255,.28),
           0 0 40px rgba(255,208,110,.14);
         background:
-          radial-gradient(circle at center, rgba(8,28,42,.34), rgba(1,5,10,.72) 60%, rgba(0,0,0,.86));
+          radial-gradient(
+            circle at center,
+            rgba(8,28,42,.34),
+            rgba(1,5,10,.72) 60%,
+            rgba(0,0,0,.86)
+          );
         backdrop-filter: blur(2px);
         -webkit-backdrop-filter: blur(2px);
         opacity: 0;
@@ -86,6 +103,7 @@
         }
       }
     `;
+
     document.head.appendChild(style);
   };
 
@@ -114,6 +132,7 @@
     });
 
     const hud = document.createElement('div');
+
     hud.id = 'mobileBottomHud';
     hud.className = 'mobile-bottom-hud';
 
@@ -142,11 +161,13 @@
     document.body.append(hud);
 
     const rotatePrompt = document.createElement('div');
+
     rotatePrompt.id = 'mobileRotatePrompt';
     rotatePrompt.className = 'mobile-rotate-prompt';
     rotatePrompt.setAttribute('role', 'status');
     rotatePrompt.setAttribute('aria-live', 'polite');
     rotatePrompt.textContent = 'ROTATE YOUR DEVICE';
+
     document.body.append(rotatePrompt);
 
     const openPause = (tabName = null) => {
@@ -160,33 +181,44 @@
 
       const selectTab = () => {
         if (pauseMenu.classList.contains('hidden')) {
-          if (performance.now() < deadline) requestAnimationFrame(selectTab);
+          if (performance.now() < deadline) {
+            requestAnimationFrame(selectTab);
+          }
           return;
         }
 
-        const tab = pauseMenu.querySelector(`[data-tab="${tabName}"]`);
+        const tab = pauseMenu.querySelector(
+          `[data-tab="${tabName}"]`
+        );
+
         if (tab) {
           tab.click();
           return;
         }
 
-        if (performance.now() < deadline) requestAnimationFrame(selectTab);
+        if (performance.now() < deadline) {
+          requestAnimationFrame(selectTab);
+        }
       };
 
       requestAnimationFrame(selectTab);
     };
 
-    hud.querySelector('#mobilePauseButton')?.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      openPause();
-    });
+    hud
+      .querySelector('#mobilePauseButton')
+      ?.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        openPause();
+      });
 
-    hud.querySelector('#mobileSettingsButton')?.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      openPause('settings');
-    });
+    hud
+      .querySelector('#mobileSettingsButton')
+      ?.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        openPause('settings');
+      });
 
     const visible = id => {
       const el = document.getElementById(id);
@@ -222,10 +254,16 @@
         });
       });
 
-    window.addEventListener('resize', sync, { passive: true });
-    window.addEventListener('orientationchange', sync, { passive: true });
+    window.addEventListener('resize', sync, {
+      passive: true
+    });
+
+    window.addEventListener('orientationchange', sync, {
+      passive: true
+    });
 
     sync();
+
     return true;
   };
 
@@ -233,7 +271,9 @@
     if (install()) return;
 
     const observer = new MutationObserver(() => {
-      if (install()) observer.disconnect();
+      if (install()) {
+        observer.disconnect();
+      }
     });
 
     observer.observe(document.body, {
@@ -241,11 +281,17 @@
       subtree: true
     });
 
-    window.setTimeout(() => observer.disconnect(), 5000);
+    window.setTimeout(() => {
+      observer.disconnect();
+    }, 5000);
   };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
+    document.addEventListener(
+      'DOMContentLoaded',
+      boot,
+      { once: true }
+    );
   } else {
     boot();
   }
