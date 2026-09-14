@@ -20820,6 +20820,10 @@ const y = compact ? 82 : 24;
       .setScrollFactor(0)
       .setDepth(100);
 
+  if (compact) {
+    container.setVisible(false);
+  }
+
 const plate =
   this.add.rectangle(
     width / 2,
@@ -20946,6 +20950,10 @@ createDetectionHUD() {
     )
     .setScrollFactor(0)
     .setDepth(100);
+
+  if (compact) {
+    container.setVisible(false);
+  }
 
 const plate =
   this.add.rectangle(
