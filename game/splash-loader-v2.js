@@ -85,7 +85,7 @@
     progress: 0,
 
     imageReady: false,
-    pageReady: document.readyState === 'complete',
+    pageReady: document.readyState !== 'loading',
     engineReady: false,
 
     finishing: false,
@@ -100,11 +100,6 @@
   const getSplash = () =>
     document.querySelector(SELECTORS.splash) ||
     document.querySelector(SELECTORS.splashId);
-
-  const isPortraitMobile = () =>
-    window.matchMedia(
-      '(max-width:700px) and (orientation:portrait)'
-    ).matches;
 
   const wait = ms =>
     new Promise(resolve => {
@@ -170,7 +165,6 @@
 
     if (!image) return;
 
-    const portrait = isPortraitMobile();
 
     splash.style.width = '100dvw';
     splash.style.height = '100dvh';
@@ -192,10 +186,7 @@
     image.style.maxWidth = 'none';
     image.style.maxHeight = 'none';
 
-    image.style.objectFit =
-      portrait
-        ? 'contain'
-        : 'cover';
+      image.style.objectFit = 'cover';
 
     image.style.objectPosition = 'center';
 
@@ -1268,10 +1259,14 @@
         );
 
       const step = () => {
-        if (runtime.finishing) {
-          resolve();
-          return;
-        }
+    if (
+  runtime.finishing &&
+  runtime.progress < 100
+) {
+  setProgress(100, text);
+  resolve();
+  return;
+}
 
         const elapsed =
           performance.now() -
@@ -1449,14 +1444,14 @@
       return;
     }
 
- await animateTo(
-  100,
-  'READY'
-);
-
 runtime.finishing = true;
 
 clearTimers();
+
+await animateTo(
+  100,
+  'READY'
+);
 
     if (runtime.hud?.log) {
       runtime.hud.log
@@ -1593,9 +1588,8 @@ clearTimers();
       runtime.image.complete &&
       runtime.image.naturalWidth > 0;
 
-    runtime.pageReady =
-      document.readyState ===
-      'complete';
+        runtime.pageReady =
+      document.readyState !== 'loading';
 
     setProgress(
       0,
@@ -1642,36 +1636,16 @@ clearTimers();
       );
     }
 
-    if (
-      document.readyState ===
-      'loading'
-    ) {
+     if (document.readyState !== 'loading') {
+      markPageReady();
+    } else {
       addListener(
         document,
         'DOMContentLoaded',
-        () => {
-          void animateTo(
-            48,
-            'LOADING GAME SYSTEMS'
-          );
-        },
+        markPageReady,
         { once: true }
       );
-    } else {
-      void animateTo(
-        48,
-        'LOADING GAME SYSTEMS'
-      );
     }
-
-    addListener(
-      window,
-      'load',
-      () => {
-        markPageReady();
-      },
-      { once: true }
-    );
 
     if (runtime.pageReady) {
       void animateTo(
