@@ -28,15 +28,12 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
     ['titlePanel','relayInfoPanel','preflight','relayUpdateCenter'].forEach(id => $(id)?.classList.add('hidden'));
   };
 
-  const resumeRunner = () => {
-    const scene = window.__relayRunnerScene;
-    try { scene?.scene?.resume?.(); } catch {}
-  };
-
-  const hidePause = (resume = false) => {
+   const hidePause = () => {
     const pause = $('pauseMenu');
-    pause?.classList.add('hidden');
-    if (resume) resumeRunner();
+    if (!pause) return;
+
+    pause.classList.add('hidden');
+    pause.setAttribute('aria-hidden', 'true');
   };
 
   const toggleFullscreen = async () => {
@@ -169,17 +166,29 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
     }
   };
 
-  const openPause = tab => {
+const openPause = tab => {
+  try {
     closeAllOverlays();
     ensurePauseShell();
+
     const pause = $('pauseMenu');
-    if (!pause) return;
+    if (!pause) {
+      console.warn('[RelayRunner] pauseMenu not found');
+      return false;
+    }
+
     pause.classList.remove('hidden');
     pause.classList.add('relay-cinematic-overlay');
-    pause.setAttribute('aria-hidden','false');
-    try { window.__relayRunnerScene?.scene?.pause?.(); } catch {}
-    renderPause(tab || 'resume');
-  };
+    pause.setAttribute('aria-hidden', 'false');
+
+       renderPause(tab || 'resume');
+
+    return true;
+  } catch (error) {
+    console.error('[RelayRunner] openPause failed:', error);
+    return false;
+  }
+};
 
   const openTitleOptions = () => {
     closeAllOverlays();
@@ -201,14 +210,44 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
 
   const launchMissionViaLegacy = index => {
     const pause = $('pauseMenu');
-    const oldTab = pause?.querySelector('.menu .tab[data-tab="missions"]');
-    if (!oldTab) return false;
+    if (!pause) return false;
+
     try {
-      HTMLElement.prototype.click.call(oldTab);
-      const button = pause.querySelector(`.menu #panelContent [data-mission="${index}"]`);
-      if (button && !button.disabled) HTMLElement.prototype.click.call(button);
-      return true;
-    } catch { return false; }
+      const oldTab = pause.querySelector('.menu .tab[data-tab="missions"]');
+
+      if (oldTab) {
+        HTMLElement.prototype.click.call(oldTab);
+
+        const button = pause.querySelector(
+          `.menu #panelContent [data-mission="${index}"]`
+        );
+
+        if (button && !button.disabled) {
+          HTMLElement.prototype.click.call(button);
+          return true;
+        }
+      }
+
+      const newMissionButton = pause.querySelector(
+        `[data-pause-launch="${index}"]`
+      );
+
+      if (newMissionButton && !newMissionButton.disabled) {
+        const mission = missions[index];
+        const scene = window.__relayRunnerScene;
+
+        if (scene && typeof scene.startMission === 'function' && mission) {
+          scene.startMission(mission);
+          hidePause();
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error('[RelayRunner] Mission launch failed:', error);
+      return false;
+    }
   };
 
   const updateToggleDom = (button, enabled) => {
@@ -238,17 +277,39 @@ import { achievementDefinitions, getCourierRank, getLevelProgress, loadState, sa
     const faq = target.closest('[data-v3-faq], [data-relay-info="faq"]');
     if (faq) { event.preventDefault(); event.stopImmediatePropagation(); openFaq(); return; }
 
-    const pauseButton = target.closest('#pause, #mobilePauseButton');
-    if (pauseButton) { event.preventDefault(); event.stopImmediatePropagation(); openPause('resume'); return; }
+const pauseButton = target.closest('#pause, #mobilePauseButton');
+if (pauseButton) {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+
+  if (document.getElementById('pauseMenu')) {
+    openPause('resume');
+  }
+
+  return;
+}
     const settingsMobile = target.closest('#mobileSettingsButton');
     if (settingsMobile) { event.preventDefault(); event.stopImmediatePropagation(); openPause('settings'); return; }
 
-    const close = target.closest('[data-unified-close]');
-    if (close) { event.preventDefault(); if (close.closest('#pauseMenu')) hidePause(true); else closeAllOverlays(); return; }
+       const close = target.closest('[data-unified-close]');
+    if (close) {
+      event.preventDefault();
 
+      if (close.closest('#pauseMenu')) {
+        hidePause();
+      } else {
+        closeAllOverlays();
+      }
+
+      return;
+    }
     const pauseTab = target.closest('[data-pause-tab]');
     if (pauseTab) { event.preventDefault(); renderPause(pauseTab.dataset.pauseTab); return; }
-    if (target.closest('[data-unified-resume]')) { event.preventDefault(); hidePause(true); return; }
+        if (target.closest('[data-unified-resume]')) {
+      event.preventDefault();
+      hidePause();
+      return;
+    }
 
     const launch = target.closest('[data-pause-launch]');
     if (launch && !launch.disabled) { event.preventDefault(); launchMissionViaLegacy(Number(launch.dataset.pauseLaunch)); return; }
