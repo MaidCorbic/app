@@ -23675,14 +23675,15 @@ createObjectiveHUD() {
           fill: true
         },
       wordWrap: {
-  width:
-    Math.max(
-      165,
-      width - 245
-    ),
-  useAdvancedWrap: true
-},
-maxLines: 2
+          width:
+            Math.max(
+              165,
+              width - 245
+            ),
+          useAdvancedWrap: true
+        },
+        maxLines: 2
+      }
     );
 
   /*
