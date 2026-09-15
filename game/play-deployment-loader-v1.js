@@ -1,279 +1,32 @@
-/*
- * Runner Relay — PLAY NOW / MISSION deployment sequence.
- *
- * Purpose:
- * - Reuse one cinematic deployment loader for Home and mission-to-mission flow.
- * - Select the supplied desktop/mobile artwork for the requested mission.
- * - Keep actual mission launching owned by the existing UI handlers.
- * - Keep Mission Route V5/V6 briefing ownership unchanged.
- */
+/* Runner Relay — PLAY NOW / MISSION deployment sequence. */
 (() => {
   'use strict';
-
   if (window.__relayPlayDeploymentV1) return;
   window.__relayPlayDeploymentV1 = true;
-
   const WAIT = ms => new Promise(resolve => setTimeout(resolve, ms));
-  const introVisible = () => {
-    const intro = document.getElementById('intro');
-    return !!intro && !intro.classList.contains('hidden');
-  };
-
+  const introVisible = () => { const intro = document.getElementById('intro'); return !!intro && !intro.classList.contains('hidden'); };
   let active = false;
   let serial = 0;
-
-  const DEFAULT_ASSETS = Object.freeze({
-    desktop: '/game/assets/loadplay.jpg',
-    mobile: '/game/assets/loadplaymobile.jpg',
-  });
-
-  const normalizeConfig = config => ({
-    missionNumber: Math.max(1, Number(config?.missionNumber) || 1),
-    desktop: config?.desktop || DEFAULT_ASSETS.desktop,
-    mobile: config?.mobile || DEFAULT_ASSETS.mobile,
-    beforeRoute: typeof config?.beforeRoute === 'function' ? config.beforeRoute : null,
-  });
-
-  const makeOverlay = ({ missionNumber, desktop, mobile }) => {
-    const overlay = document.createElement('section');
-    overlay.id = 'relayPlayDeployment';
-    overlay.className = 'relay-splash relay-play-deployment';
-    overlay.setAttribute('role', 'status');
-    overlay.setAttribute('aria-live', 'polite');
-    overlay.setAttribute('aria-busy', 'true');
-
-    overlay.innerHTML = `
-      <picture class="relay-splash-picture">
-        <source
-          media="(max-width:700px)"
-          srcset="${mobile}"
-        >
-        <img
-          class="relay-splash-art"
-          src="${desktop}"
-          alt=""
-          decoding="async"
-          fetchpriority="high"
-        >
-      </picture>
-
-      <div class="relay-splash-brand relay-play-deployment-brand">
-        <b>R/</b>
-        <span>RELAY RUNNER</span>
-      </div>
-
-      <div class="relay-splash-network-status relay-play-deployment-network">
-        <i></i>
-        <span>NETWORK // ONLINE</span>
-      </div>
-
-      <div class="relay-splash-ui relay-play-deployment-ui">
-        <div class="relay-splash-meta">
-          <span class="relay-splash-status">PREPARING MISSION ${missionNumber}</span>
-          <span class="relay-splash-percent">0%</span>
-        </div>
-
-        <div class="relay-splash-track" aria-hidden="true">
-          <i class="relay-splash-progress"></i>
-        </div>
-
-        <div class="relay-boot-status-grid">
-          <div class="relay-boot-status-cell"><span>NODE</span><b>04 // ONLINE</b></div>
-          <div class="relay-boot-status-cell"><span>SIGNAL</span><b>STABLE</b></div>
-          <div class="relay-boot-status-cell"><span>RELAY</span><b>SYNCED</b></div>
-        </div>
-
-        <div class="relay-boot-log" aria-live="polite">
-          <span class="is-live">→ ROUTE DATA INITIALIZING</span>
-          <span class="is-muted">→ WORLD NODE AWAITING</span>
-        </div>
-
-        <div class="relay-boot-complete">
-          <b aria-hidden="true"></b>
-          <div>
-            <strong>DEPLOYMENT READY</strong>
-            <small>MISSION ${String(missionNumber).padStart(2, '0')} // ROUTE LOCKED</small>
-          </div>
-        </div>
-      </div>
-    `;
-
+  const DEFAULT_ASSETS = Object.freeze({ desktop:'/game/assets/loadplay.jpg', mobile:'/game/assets/loadplaymobile.jpg' });
+  const normalizeConfig = config => ({ missionNumber:Math.max(1,Number(config?.missionNumber)||1), desktop:config?.desktop||DEFAULT_ASSETS.desktop, mobile:config?.mobile||DEFAULT_ASSETS.mobile, beforeRoute:typeof config?.beforeRoute==='function'?config.beforeRoute:null });
+  const makeOverlay = ({missionNumber,desktop,mobile}) => {
+    const overlay=document.createElement('section');
+    overlay.id='relayPlayDeployment'; overlay.className='relay-splash relay-play-deployment';
+    overlay.setAttribute('role','status'); overlay.setAttribute('aria-live','polite'); overlay.setAttribute('aria-busy','true');
+    overlay.innerHTML=`<picture class="relay-splash-picture"><source media="(max-width:700px)" srcset="${mobile}"><img class="relay-splash-art" src="${desktop}" alt="" decoding="async" fetchpriority="high"></picture><div class="relay-splash-brand relay-play-deployment-brand"><b>R/</b><span>RELAY RUNNER</span></div><div class="relay-splash-network-status relay-play-deployment-network"><i></i><span>NETWORK // ONLINE</span></div><div class="relay-splash-ui relay-play-deployment-ui"><div class="relay-splash-meta"><span class="relay-splash-status">PREPARING MISSION ${missionNumber}</span><span class="relay-splash-percent">0%</span></div><div class="relay-splash-track" aria-hidden="true"><i class="relay-splash-progress"></i></div><div class="relay-boot-status-grid"><div class="relay-boot-status-cell"><span>NODE</span><b>04 // ONLINE</b></div><div class="relay-boot-status-cell"><span>SIGNAL</span><b>STABLE</b></div><div class="relay-boot-status-cell"><span>RELAY</span><b>SYNCED</b></div></div><div class="relay-boot-log" aria-live="polite"><span class="is-live">→ ROUTE DATA INITIALIZING</span><span class="is-muted">→ WORLD NODE AWAITING</span></div><div class="relay-boot-complete"><b aria-hidden="true"></b><div><strong>DEPLOYMENT READY</strong><small>MISSION ${String(missionNumber).padStart(2,'0')} // ROUTE LOCKED</small></div></div></div>`;
     return overlay;
   };
-
-  const installStyle = () => {
-    if (document.getElementById('relay-play-deployment-style')) return;
-
-    const style = document.createElement('style');
-    style.id = 'relay-play-deployment-style';
-    style.textContent = `
-      .relay-play-deployment{
-        z-index:2147483647 !important;
-        pointer-events:none !important;
-      }
-
-      .relay-play-deployment .relay-splash-picture{
-        position:absolute;
-        inset:0;
-        display:block;
-      }
-
-      .relay-play-deployment .relay-splash-art{
-        object-position:center !important;
-      }
-
-      .relay-play-deployment .relay-splash-brand::after{
-        content:"DEPLOYMENT SEQUENCE" !important;
-      }
-
-      .relay-play-deployment .relay-splash-ui{
-        width:min(900px,calc(100vw - 48px));
-      }
-
-      .relay-play-deployment .relay-splash-progress{
-        transition:width .18s cubic-bezier(.16,1,.3,1);
-      }
-
-      .relay-play-deployment .relay-play-deployment-network{
-        display:flex !important;
-      }
-
-      .relay-play-deployment .relay-boot-complete{
-        opacity:0;
-        transform:translateY(4px);
-        transition:opacity .22s ease,transform .22s ease;
-      }
-
-      .relay-play-deployment .relay-boot-complete.is-visible{
-        opacity:1;
-        transform:none;
-      }
-
-      .relay-play-deployment.is-closing{
-        opacity:0 !important;
-        visibility:hidden !important;
-        transition:opacity .28s ease,visibility .28s ease !important;
-      }
-
-      @media(max-width:700px) and (orientation:portrait){
-        .relay-play-deployment .relay-play-deployment-network{
-          display:none !important;
-        }
-
-        .relay-play-deployment .relay-splash-ui{
-          width:min(92vw,620px);
-        }
-      }
-    `;
+  const installStyle=()=>{
+    if(document.getElementById('relay-play-deployment-style')) return;
+    const style=document.createElement('style'); style.id='relay-play-deployment-style';
+    style.textContent=`.relay-play-deployment{z-index:2147483647 !important;pointer-events:none !important}.relay-play-deployment .relay-splash-picture{position:absolute;inset:0;display:block}.relay-play-deployment .relay-splash-art{object-position:center !important}.relay-play-deployment .relay-splash-brand::after{content:"DEPLOYMENT SEQUENCE" !important}.relay-play-deployment .relay-splash-ui{width:min(900px,calc(100vw - 48px))}.relay-play-deployment .relay-splash-progress{transition:width .18s cubic-bezier(.16,1,.3,1)}.relay-play-deployment .relay-play-deployment-network{display:flex !important}.relay-play-deployment .relay-boot-complete{opacity:0;transform:translateY(4px);transition:opacity .22s ease,transform .22s ease}.relay-play-deployment .relay-boot-complete.is-visible{opacity:1;transform:none}.relay-play-deployment.is-closing{opacity:0 !important;visibility:hidden !important;transition:opacity .28s ease,visibility .28s ease !important}@media(max-width:700px) and (orientation:portrait){.relay-play-deployment .relay-play-deployment-network{display:none !important}.relay-play-deployment .relay-splash-ui{width:min(92vw,620px)}}`;
     document.head.appendChild(style);
   };
-
-  const setStage = (overlay, percent, label, firstLog, secondLog) => {
-    const pct = overlay.querySelector('.relay-splash-percent');
-    const status = overlay.querySelector('.relay-splash-status');
-    const bar = overlay.querySelector('.relay-splash-progress');
-    const first = overlay.querySelector('.relay-boot-log span:first-child');
-    const second = overlay.querySelector('.relay-boot-log span:last-child');
-
-    if (pct) pct.textContent = `${Math.round(percent)}%`;
-    if (status) status.textContent = label;
-    if (bar) bar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
-    if (first && firstLog) first.textContent = firstLog;
-    if (second && secondLog) second.textContent = secondLog;
-  };
-
-  const getMissionReady = () => {
-    const api = window.relayGameplayIntroV5;
-    return !!api && typeof api.show === 'function';
-  };
-
-  const revealMissionRoute = async overlay => {
-    const api = window.relayGameplayIntroV5;
-
-    if (api && typeof api.close === 'function' && typeof api.show === 'function') {
-      if (typeof api.isVisible === 'function' && api.isVisible()) api.close();
-      api.show();
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    }
-
-    overlay.classList.add('is-closing');
-    await WAIT(320);
-    overlay.remove();
-    active = false;
-  };
-
-  const runDeployment = async rawConfig => {
-    if (active) return false;
-
-    const config = normalizeConfig(rawConfig);
-    active = true;
-    const token = ++serial;
-    let overlay;
-
-    try {
-      installStyle();
-      overlay = makeOverlay(config);
-      document.body.appendChild(overlay);
-
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      if (!active || token !== serial) return false;
-
-      const started = performance.now();
-      const minimumMs = 1550;
-
-      setStage(overlay, 8, `INITIALIZING MISSION ${config.missionNumber}`, '→ RELAY CORE READY', '→ WORLD NODE CONNECTING');
-      await WAIT(220);
-      if (!active || token !== serial) return false;
-
-      setStage(overlay, 27, 'LOADING ROUTE DATA', '→ ROUTE DATA RECEIVED', '→ CHECKPOINT MATRIX ONLINE');
-      await WAIT(230);
-      if (!active || token !== serial) return false;
-
-      setStage(overlay, 49, 'SYNCING WORLD', '→ WORLD NODE SYNCING', '→ SIGNAL CHANNEL STABLE');
-      await WAIT(250);
-      if (!active || token !== serial) return false;
-
-      setStage(overlay, 72, 'INITIALIZING PHASER', '→ PHASER CORE ONLINE', '→ MISSION SCENE PREPARING');
-      await WAIT(250);
-      if (!active || token !== serial) return false;
-
-      setStage(overlay, 91, 'FINALIZING DEPLOYMENT', '→ ROUTE LOCK CONFIRMED', '→ WORLD NODE ONLINE');
-
-      while (performance.now() - started < minimumMs || !getMissionReady()) {
-        await WAIT(50);
-        if (!active || token !== serial) return false;
-      }
-
-      setStage(overlay, 100, 'DEPLOYMENT READY', '→ MISSION DATA LOADED', '→ RELAY CHANNEL STABLE');
-      overlay.querySelector('.relay-boot-complete')?.classList.add('is-visible');
-      overlay.setAttribute('aria-busy', 'false');
-
-      await WAIT(240);
-      if (!active || token !== serial) return false;
-
-      await config.beforeRoute?.();
-      if (!active || token !== serial) return false;
-
-      await revealMissionRoute(overlay);
-      return true;
-    } catch (error) {
-      console.error('[RelayRunner] deployment loader failed', error);
-      overlay?.remove();
-      active = false;
-      return false;
-    }
-  };
-
-  window.relayPlayDeploymentV1 = Object.freeze({
-    show: runDeployment,
-    isActive: () => active,
-    defaultAssets: DEFAULT_ASSETS,
-  });
-
-  document.addEventListener('click', event => {
-    if (!introVisible() || active) return;
-    const button = event.target.closest('#start');
-    if (!button) return;
-    void runDeployment({ missionNumber: 1 });
-  }, true);
+  const setStage=(overlay,percent,label,firstLog,secondLog)=>{ const pct=overlay.querySelector('.relay-splash-percent'),status=overlay.querySelector('.relay-splash-status'),bar=overlay.querySelector('.relay-splash-progress'),first=overlay.querySelector('.relay-boot-log span:first-child'),second=overlay.querySelector('.relay-boot-log span:last-child'); if(pct)pct.textContent=`${Math.round(percent)}%`; if(status)status.textContent=label; if(bar)bar.style.width=`${Math.max(0,Math.min(100,percent))}%`; if(first&&firstLog)first.textContent=firstLog; if(second&&secondLog)second.textContent=secondLog; };
+  const getMissionReady=()=>{ const api=window.relayGameplayIntroV5; return !!api&&typeof api.show==='function'; };
+  const waitForMissionReady=async(started,timeoutMs=5000)=>{ const deadline=performance.now()+timeoutMs; while(performance.now()-started<1550||!getMissionReady()){ if(getMissionReady()&&performance.now()-started>=1550)return true; if(performance.now()>=deadline){ console.warn('[RelayRunner] Mission Route V5 timeout; continuing without blocking deployment.'); return false; } await WAIT(50); } return getMissionReady(); };
+  const revealMissionRoute=async overlay=>{ const api=window.relayGameplayIntroV5; if(api&&typeof api.close==='function'&&typeof api.show==='function'){ if(typeof api.isVisible==='function'&&api.isVisible())api.close(); api.show(); await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))); } overlay.classList.add('is-closing'); await WAIT(320); overlay.remove(); active=false; };
+  const runDeployment=async rawConfig=>{ if(active)return false; const config=normalizeConfig(rawConfig); active=true; const token=++serial; let overlay; try{ installStyle(); overlay=makeOverlay(config); document.body.appendChild(overlay); await new Promise(resolve=>requestAnimationFrame(resolve)); if(!active||token!==serial)return false; const started=performance.now(); setStage(overlay,8,`INITIALIZING MISSION ${config.missionNumber}`,'→ RELAY CORE READY','→ WORLD NODE CONNECTING'); await WAIT(220); if(!active||token!==serial)return false; setStage(overlay,27,'LOADING ROUTE DATA','→ ROUTE DATA RECEIVED','→ CHECKPOINT MATRIX ONLINE'); await WAIT(230); if(!active||token!==serial)return false; setStage(overlay,49,'SYNCING WORLD','→ WORLD NODE SYNCING','→ SIGNAL CHANNEL STABLE'); await WAIT(250); if(!active||token!==serial)return false; setStage(overlay,72,'INITIALIZING PHASER','→ PHASER CORE ONLINE','→ MISSION SCENE PREPARING'); await WAIT(250); if(!active||token!==serial)return false; setStage(overlay,91,'FINALIZING DEPLOYMENT','→ ROUTE LOCK CONFIRMED','→ WORLD NODE ONLINE'); const missionReady=await waitForMissionReady(started,5000); if(!active||token!==serial)return false; setStage(overlay,100,missionReady?'DEPLOYMENT READY':'DEPLOYMENT CONTINUING',missionReady?'→ MISSION DATA LOADED':'→ MISSION ROUTE STILL INITIALIZING',missionReady?'→ RELAY CHANNEL STABLE':'→ RELAY CHANNEL OPEN'); overlay.querySelector('.relay-boot-complete')?.classList.add('is-visible'); overlay.setAttribute('aria-busy','false'); await WAIT(240); if(!active||token!==serial)return false; await config.beforeRoute?.(); if(!active||token!==serial)return false; await revealMissionRoute(overlay); return true; }catch(error){ console.error('[RelayRunner] deployment loader failed',error); overlay?.remove(); active=false; return false; } };
+  window.relayPlayDeploymentV1=Object.freeze({show:runDeployment,isActive:()=>active,defaultAssets:DEFAULT_ASSETS});
+  document.addEventListener('click',event=>{ if(!introVisible()||active)return; const button=event.target.closest('#start'); if(!button)return; void runDeployment({missionNumber:1}); },true);
 })();
