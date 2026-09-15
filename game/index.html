@@ -75,15 +75,15 @@
       </div>
 
       <div class="input-guide">
-        <kbd>A</kbd><kbd>D</kbd> RUN
+        <kbd>W</kbd><kbd>S</kbd> MOVE
+        <i></i>
+        <kbd>A</kbd><kbd>D</kbd> LEFT / RIGHT
+        <i></i>
+        <kbd>F</kbd> FLIGHT
+        <i></i>
+        <kbd>E</kbd> INTERACT
         <i></i>
         <kbd>SPACE</kbd> JUMP
-        <i></i>
-        <kbd>E</kbd> FIRE
-        <i></i>
-        <kbd>Q</kbd> BLADE
-        <i></i>
-        <kbd>SHIFT</kbd> DASH
       </div>
 
       <div class="mobile-controls" aria-label="Touch game controls">
@@ -92,11 +92,14 @@
         </div>
         <div class="mobile-actions">
           <button type="button" data-mobile-action="jump">JUMP<small>SPACE</small></button>
-          <button type="button" data-mobile-action="fire">FIRE<small>E</small></button>
+          <button type="button" data-mobile-action="interact">INTERACT<small>E</small></button>
           <button type="button" data-mobile-action="sword">SWORD<small>Q</small></button>
           <button type="button" data-mobile-action="dash">DASH<small>SHIFT</small></button>
-          <button type="button" data-mobile-action="build1">BUILD<small>1</small></button>
-          <button type="button" data-mobile-action="gadget1">GEAR<small>3</small></button>
+          <button type="button" data-mobile-action="flight">FLIGHT<small>F</small></button>
+          <button type="button" data-mobile-action="build1">BUILD 1<small>1</small></button>
+          <button type="button" data-mobile-action="build2">BUILD 2<small>2</small></button>
+          <button type="button" data-mobile-action="gadget1">GEAR 1<small>3</small></button>
+          <button type="button" data-mobile-action="gadget2">GEAR 2<small>4</small></button>
         </div>
       </div>
 
@@ -247,6 +250,8 @@
   <script type="module" src="./home-v3-guard.js"></script>
   <script type="module" src="./home-v3-interaction-fix.js"></script>
 
+  <!-- Reserve canonical mobile input ownership before legacy DOMContentLoaded handlers. -->
+  <script type="module" src="./src/systems/canonical-keyboard-boot.js"></script>
   <script type="module" src="/src/systems/runtime-guard.js"></script>
   <script type="module" src="/src/systems/core-stability.js"></script>
   <script type="module" src="/src/systems/mobile-viewport-hardening.js"></script>
@@ -266,6 +271,7 @@
   <script type="module" src="./pause-final-polish-v1.js"></script>
 
   <script type="module" src="./relay-ui-init.js"></script>
+  <script type="module" src="./src/systems/canonical-keyboard-controller-v1.js"></script>
   <script type="module" src="./world-interaction-v1.js"></script>
   <script type="module" src="./gameplay-touch-lock.js"></script>
   <script type="module" src="./cinematic-arrival-v2.js"></script>
