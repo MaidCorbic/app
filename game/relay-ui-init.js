@@ -50,14 +50,109 @@ const eyebrow = document.getElementById('relayInfoEyebrow');
 const heading = document.getElementById('relayInfoHeading');
 const content = document.getElementById('relayInfoContent');
 
+const FAQ_CATEGORY_RANGES = [
+  ['CORE', 0, 3],
+  ['COMBAT', 4, 6],
+  ['MISSIONS', 7, 14],
+  ['PROGRESSION', 15, 20],
+  ['MOBILE', 21, 25],
+  ['INTERFACE', 26, 33],
+  ['ENEMIES', 34, Number.POSITIVE_INFINITY]
+];
+
+const getFaqCategory = index => {
+  const match = FAQ_CATEGORY_RANGES.find(([, start, end]) => index >= start && index <= end);
+  return match?.[0] ?? 'CORE';
+};
+
+const renderFaqItem = (item, index) => {
+  const question = item?.[0] ?? 'UNKNOWN QUESTION';
+  const answer = item?.[1] ?? 'No field data is currently available.';
+  const category = getFaqCategory(index);
+  const number = String(index + 1).padStart(2, '0');
+  const isOpen = index === 0;
+
+  return `
+    <article class="relay-faq-item${isOpen ? ' open' : ''}" data-faq-category="${category}">
+      <button
+        class="relay-faq-question"
+        type="button"
+        aria-expanded="${isOpen ? 'true' : 'false'}"
+        aria-controls="relayFaqAnswer-${index}"
+      >
+        <span class="faq-index" aria-hidden="true">${number}</span>
+        <span class="faq-question-text">${question}</span>
+        <span class="faq-question-state" aria-hidden="true">${isOpen ? 'OPEN' : 'VIEW'}</span>
+      </button>
+      <div
+        id="relayFaqAnswer-${index}"
+        class="relay-faq-answer"
+        ${isOpen ? '' : 'hidden'}
+      >${answer}</div>
+    </article>
+  `;
+};
+
+const renderFaq = activeCategory => {
+  const category = activeCategory || 'ALL';
+  const total = RELAY_FAQ.length;
+  const visible = category === 'ALL'
+    ? total
+    : RELAY_FAQ.reduce((count, _, index) => count + (getFaqCategory(index) === category ? 1 : 0), 0);
+
+  content.innerHTML = `
+    <section class="relay-faq-header">
+      <div class="relay-faq-eyebrow">
+        <i class="relay-status-dot" aria-hidden="true"></i>
+        RELAY RUNNER // FIELD GUIDE
+      </div>
+
+      <div class="relay-faq-heading-row">
+        <div>
+          <p class="relay-faq-kicker">SECURE KNOWLEDGE CHANNEL</p>
+          <h2>FAQ</h2>
+          <p class="relay-faq-intro">
+            Operational guidance for controls, missions, progression, mobile play and field systems.
+          </p>
+        </div>
+
+        <div class="relay-faq-terminal" aria-label="Terminal status">
+          <span>CHANNEL</span>
+          <b>FIELD / 01</b>
+          <small>LINK STABLE</small>
+        </div>
+      </div>
+
+      <div class="relay-faq-counters" aria-label="FAQ statistics">
+        <span>ENTRIES <b>${total}</b></span>
+        <span>VISIBLE <b>${visible}</b></span>
+        <span>STATUS <b>ONLINE</b></span>
+      </div>
+    </section>
+
+    <nav class="relay-faq-categories" aria-label="FAQ categories">
+      <button type="button" class="${category === 'ALL' ? 'active' : ''}" data-faq-filter="ALL">ALL</button>
+      ${FAQ_CATEGORY_RANGES.map(([name]) => `
+        <button type="button" class="${category === name ? 'active' : ''}" data-faq-filter="${name}">${name}</button>
+      `).join('')}
+    </nav>
+
+    <div class="relay-faq-list" role="list">
+      ${RELAY_FAQ.map(renderFaqItem).join('')}
+    </div>
+  `;
+};
+
 const open = kind => {
   if (!panel || !eyebrow || !heading || !content) return;
+
   panel.classList.remove('hidden');
   panel.classList.toggle('relay-update-mode', kind === 'update');
+
   if (kind === 'faq') {
     eyebrow.textContent = 'RELAY RUNNER // FIELD GUIDE';
     heading.textContent = 'FAQ';
-    content.innerHTML = '<div class="relay-faq-list">' + RELAY_FAQ.map(item => `<article class="relay-faq-item"><button class="relay-faq-question" type="button">${item[0]}</button><div class="relay-faq-answer">${item[1]}</div></article>`).join('') + '</div>';
+    renderFaq('ALL');
   } else {
     eyebrow.textContent = LATEST_UPDATE.version;
     heading.textContent = LATEST_UPDATE.title;
@@ -72,8 +167,27 @@ document.querySelectorAll('[data-relay-info]').forEach(button => {
 });
 
 document.addEventListener('click', event => {
+  const filter = event.target.closest('[data-faq-filter]');
+  if (filter && content?.contains(filter)) {
+    renderFaq(filter.dataset.faqFilter || 'ALL');
+    return;
+  }
+
   const question = event.target.closest('.relay-faq-question');
-  if (question) question.closest('.relay-faq-item')?.classList.toggle('open');
+  if (question && content?.contains(question)) {
+    const item = question.closest('.relay-faq-item');
+    const answer = item?.querySelector('.relay-faq-answer');
+    const isOpen = item?.classList.toggle('open') ?? false;
+
+    question.setAttribute('aria-expanded', String(isOpen));
+    item?.querySelector('.faq-question-state')?.replaceChildren(
+      document.createTextNode(isOpen ? 'OPEN' : 'VIEW')
+    );
+
+    if (answer) answer.hidden = !isOpen;
+    return;
+  }
+
   if (event.target.closest('[data-relay-close]') || event.target === panel) {
     panel?.classList.add('hidden');
     panel?.classList.remove('relay-update-mode');
