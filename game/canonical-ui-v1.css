@@ -1,25 +1,48 @@
-/* Relay Runner — Canonical UI V2
- * Visual authority for Home, gameplay HUD, overlays and touch controls.
- * Gameplay logic is intentionally outside this file.
- *
- * V2 goals:
- * - one consistent HUD geometry
- * - existing cyan / gold / green / red language preserved
- * - desktop gameplay HUD aligned in one clean row
- * - mobile/touch behaviour preserved
- * - no gameplay state ownership
- */
+/* ==========================================================================
+   RELAY RUNNER — CANONICAL UI V3
+   Visual authority for:
+   - Home
+   - Gameplay HUD
+   - Mission presentation
+   - Pause / Settings
+   - Overlays
+   - Touch controls
+   - Mobile landscape
+
+   RULES
+   - Visual layer only. No gameplay state ownership.
+   - Desktop keeps Mission / Progress / XP HUD.
+   - Mobile gameplay hides Mission / Cargo / Progress HUD.
+   - Mobile keeps only essential gameplay controls.
+   - Touch targets remain readable and interactive.
+   - Responsive geometry uses safe-area aware positioning.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   01. DESIGN TOKENS
+   ========================================================================== */
 
 :root{
+  /* Core surfaces */
   --ui-bg:#050914;
+  --ui-bg-deep:#02060f;
+
   --ui-panel:rgba(9,18,32,.94);
   --ui-panel-strong:rgba(5,12,23,.975);
+  --ui-panel-soft:rgba(10,21,35,.84);
 
+  /* Borders */
   --ui-line:rgba(141,244,255,.22);
   --ui-line-strong:rgba(141,244,255,.52);
+  --ui-line-soft:rgba(141,244,255,.10);
 
+  /* Brand language */
   --ui-cyan:#8df4ff;
+  --ui-cyan-bright:#d8fbff;
+
   --ui-gold:#ffd06e;
+  --ui-gold-bright:#fff0b5;
 
   --ui-paper:#f3f7fa;
   --ui-muted:#8ba0b8;
@@ -27,12 +50,66 @@
   --ui-danger:#ff826e;
   --ui-success:#aee37f;
 
+  /* Geometry */
   --ui-radius:12px;
+  --ui-radius-lg:16px;
+  --ui-radius-sm:9px;
 
+  /* Typography */
+  --ui-label:
+    clamp(7px,.55vw,9px);
+
+  --ui-value:
+    clamp(10px,.8vw,13px);
+
+  --ui-title:
+    clamp(13px,1.05vw,18px);
+
+  /* Touch */
+  --touch-btn:
+    clamp(50px,12vw,62px);
+
+  --touch-gap:
+    clamp(6px,1.5vw,10px);
+
+  /* Z hierarchy */
+  --z-game:0;
+  --z-world:100;
+  --z-marker:200;
+  --z-hud:300;
+  --z-touch:400;
+  --z-map:700;
+  --z-preflight:800;
+  --z-modal:900;
+  --z-pause:1000;
+  --z-result:1100;
+  --z-toast:1200;
+
+  /* Motion */
+  --ui-ease:
+    160ms cubic-bezier(.22,.8,.24,1);
+
+  --ui-ease-slow:
+    260ms cubic-bezier(.22,.8,.24,1);
+
+  /* Shadows */
   --ui-shadow:
     0 18px 60px rgba(0,0,0,.52),
     0 0 32px rgba(141,244,255,.06);
+
+  --ui-shadow-soft:
+    0 10px 26px rgba(0,0,0,.34),
+    0 0 20px rgba(141,244,255,.035);
+
+  --ui-shadow-gold:
+    0 10px 26px rgba(0,0,0,.34),
+    0 0 24px rgba(255,208,110,.10);
 }
+
+
+/* ==========================================================================
+   02. GLOBAL RESET
+   ========================================================================== */
 
 *,
 *::before,
@@ -53,78 +130,168 @@ body{
   font-family:
     "Manrope",
     system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
 
   overflow:hidden;
+
+  text-rendering:
+    optimizeLegibility;
+
+  -webkit-font-smoothing:
+    antialiased;
+
+  -moz-osx-font-smoothing:
+    grayscale;
 }
 
 button,
 input,
-select{
+select,
+textarea{
   font:inherit;
 }
 
 button{
   appearance:none;
   -webkit-appearance:none;
+
+  border:0;
+
+  margin:0;
+
+  user-select:none;
+
+  -webkit-tap-highlight-color:
+    transparent;
 }
 
+button:disabled{
+  cursor:not-allowed;
+}
+
+
 /* ==========================================================================
-   STACKING CONTRACT
+   03. CANVAS / STACKING CONTRACT
    ========================================================================== */
 
 #game{
   position:relative;
+
   isolation:isolate;
+
   min-height:100dvh;
+
   overflow:hidden;
+
+  background:
+    var(--ui-bg);
 }
 
 #play{
   position:absolute;
+
   inset:0;
-  z-index:1;
+
+  z-index:var(--z-game);
+
   min-height:100dvh;
+
+  overflow:hidden;
 }
 
 #phaser-game{
   position:absolute;
+
   inset:0;
-  z-index:0;
+
+  z-index:var(--z-game);
+
   overflow:hidden;
 }
 
 #play>.vignette{
   position:absolute;
+
   inset:0;
+
   z-index:8;
 
   pointer-events:none;
 
   box-shadow:
-    inset 0 0 12vw rgba(0,0,0,.42);
+    inset 0 0 12vw rgba(0,0,0,.42),
+    inset 0 -12vh 18vh rgba(0,0,0,.14);
 }
 
+
 /* ==========================================================================
-   GAMEPLAY HUD — BASE
+   04. GLOBAL SURFACE
+   ========================================================================== */
+
+#play .hud-route,
+#play .hud-progress,
+#play .hud-xp,
+#play .hud-actions>button{
+
+  box-sizing:border-box;
+
+  min-height:42px;
+
+  border:
+    1px solid
+    var(--ui-line);
+
+  border-radius:
+    var(--ui-radius);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(9,18,32,.96),
+      rgba(3,8,16,.985)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    inset 0 0 0 1px rgba(141,244,255,.025),
+    var(--ui-shadow-soft) !important;
+
+  backdrop-filter:
+    blur(10px);
+
+  -webkit-backdrop-filter:
+    blur(10px);
+}
+
+
+/* ==========================================================================
+   05. GAMEPLAY HUD — BASE
    ========================================================================== */
 
 #play .hud{
   position:fixed;
-  inset:0 0 auto 0;
 
-  z-index:300;
+  inset:
+    0 0 auto 0;
+
+  z-index:var(--z-hud);
 
   display:flex;
+
   align-items:flex-start;
 
   gap:10px;
 
+  width:100%;
+
   padding:
+    max(10px, env(safe-area-inset-top) + 6px)
+    max(16px, env(safe-area-inset-right))
     12px
-    max(16px,env(safe-area-inset-right))
-    12px
-    max(16px,env(safe-area-inset-left));
+    max(16px, env(safe-area-inset-left));
 
   pointer-events:none;
 
@@ -148,45 +315,10 @@ button{
   margin-left:auto;
 }
 
-/* ==========================================================================
-   GAMEPLAY HUD — CARD LANGUAGE
-   ========================================================================== */
-
-#play .hud-route,
-#play .hud-progress,
-#play .hud-xp,
-#play .hud-actions>button{
-
-  box-sizing:border-box;
-
-  min-height:42px;
-
-  border:
-    1px solid
-    rgba(141,244,255,.20);
-
-  border-radius:var(--ui-radius);
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(9,18,32,.96),
-      rgba(3,8,16,.98)
-    ) !important;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.045),
-    inset 0 0 0 1px rgba(141,244,255,.025),
-    0 10px 26px rgba(0,0,0,.34),
-    0 0 20px rgba(141,244,255,.035) !important;
-
-  backdrop-filter:blur(10px);
-
-  -webkit-backdrop-filter:blur(10px);
-}
 
 /* ==========================================================================
-   MISSION CARD
+   06. MISSION HUD
+   Desktop-first visual authority
    ========================================================================== */
 
 #play .hud-route{
@@ -194,29 +326,63 @@ button{
 
   align-items:center;
 
-  gap:9px;
+  gap:10px;
 
   min-width:190px;
 
-  padding:8px 11px;
+  padding:8px 12px;
 
   overflow:hidden;
+
+  position:relative;
+
+  isolation:isolate;
 }
 
-#play .hud-route .route-dot{
-  width:7px;
-  height:7px;
+/* Active mission light */
+#play .hud-route::before{
+  content:"";
 
-  flex:0 0 7px;
+  position:absolute;
+
+  inset:0;
+
+  z-index:-1;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(141,244,255,.045),
+      transparent 45%,
+      rgba(255,208,110,.025)
+    );
+
+  opacity:.95;
+
+  pointer-events:none;
+}
+
+/* Left mission indicator */
+#play .hud-route .route-dot{
+  width:8px;
+  height:8px;
+
+  flex:0 0 8px;
 
   border-radius:50%;
 
-  background:var(--ui-cyan);
+  background:
+    var(--ui-cyan);
 
   box-shadow:
-    0 0 12px rgba(141,244,255,.85);
+    0 0 10px rgba(141,244,255,.72),
+    0 0 20px rgba(141,244,255,.30);
+
+  animation:
+    missionPulse 2.4s ease-in-out infinite;
 }
 
+/* Label */
 #play .hud-route small{
   display:block;
 
@@ -225,17 +391,22 @@ button{
   color:var(--ui-muted);
 
   font:
-    800 7px/1.1
+    900 var(--ui-label)/1.1
     "DM Mono",
+    "SFMono-Regular",
+    Consolas,
     monospace;
 
   letter-spacing:.14em;
 
   white-space:nowrap;
+
   overflow:hidden;
+
   text-overflow:ellipsis;
 }
 
+/* Mission name */
 #play .hud-route b{
   display:block;
 
@@ -246,19 +417,27 @@ button{
   color:var(--ui-paper);
 
   font:
-    900 11px/1.05
+    950 var(--ui-title)/1.05
     "DM Mono",
+    "SFMono-Regular",
+    Consolas,
     monospace;
 
-  letter-spacing:.06em;
+  letter-spacing:.055em;
 
   white-space:nowrap;
+
   overflow:hidden;
+
   text-overflow:ellipsis;
+
+  text-shadow:
+    0 0 16px rgba(141,244,255,.08);
 }
 
+
 /* ==========================================================================
-   FLOW / SIGNALS CARD
+   07. PROGRESS / SIGNAL HUD
    ========================================================================== */
 
 #play .hud-progress{
@@ -270,7 +449,7 @@ button{
     auto
     minmax(0,1fr);
 
-  gap:4px 8px;
+  gap:5px 9px;
 
   align-items:center;
 
@@ -287,8 +466,10 @@ button{
   color:var(--ui-paper);
 
   font:
-    900 14px/1
+    950 clamp(13px,1vw,16px)/1
     "DM Mono",
+    "SFMono-Regular",
+    Consolas,
     monospace;
 
   white-space:nowrap;
@@ -300,25 +481,31 @@ button{
   color:var(--ui-gold);
 
   font:
-    900 7px/1
+    900 var(--ui-label)/1
     "DM Mono",
+    "SFMono-Regular",
+    Consolas,
     monospace;
 
   letter-spacing:.12em;
 
   white-space:nowrap;
+
   overflow:hidden;
+
   text-overflow:ellipsis;
 }
 
+/* Track */
 #play .hud-progress>div{
-  grid-column:1 / -1;
+  grid-column:
+    1 / -1;
 
   position:relative;
 
   width:100%;
 
-  height:4px;
+  height:5px;
 
   margin-top:4px;
 
@@ -333,8 +520,11 @@ button{
     inset 0 1px 2px rgba(0,0,0,.28);
 }
 
+/* Fill */
 #play .hud-progress>div i{
   display:block;
+
+  position:relative;
 
   height:100%;
 
@@ -346,17 +536,50 @@ button{
     linear-gradient(
       90deg,
       var(--ui-gold),
-      #fff0b5
+      var(--ui-gold-bright)
     );
 
   box-shadow:
     0 0 12px rgba(255,208,110,.48);
 
-  transform-origin:left center;
+  transform-origin:
+    left center;
+
+  transition:
+    width .32s cubic-bezier(.22,.8,.24,1);
 }
 
+/* Subtle animated highlight */
+#play .hud-progress>div i::after{
+  content:"";
+
+  position:absolute;
+
+  top:0;
+  right:0;
+
+  width:35%;
+
+  height:100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.40),
+      transparent
+    );
+
+  transform:
+    translateX(120%);
+
+  animation:
+    progressSweep 3.2s ease-in-out infinite;
+}
+
+
 /* ==========================================================================
-   XP CARD
+   08. XP HUD
    ========================================================================== */
 
 #play .hud-xp{
@@ -388,6 +611,8 @@ button{
   font:
     900 6px/1
     "DM Mono",
+    "SFMono-Regular",
+    Consolas,
     monospace;
 
   letter-spacing:.15em;
@@ -405,6 +630,8 @@ button{
   font:
     950 12px/1
     "DM Mono",
+    "SFMono-Regular",
+    Consolas,
     monospace;
 
   letter-spacing:.06em;
@@ -415,11 +642,14 @@ button{
   white-space:nowrap;
 }
 
+
 /* ==========================================================================
-   ACTION BUTTONS
+   09. HUD ACTION BUTTONS
    ========================================================================== */
 
 #play .hud-actions>button{
+  position:relative;
+
   width:44px;
   min-width:44px;
 
@@ -438,17 +668,52 @@ button{
 
   line-height:1;
 
+  overflow:hidden;
+
   transition:
-    transform .14s ease,
-    border-color .14s ease,
-    box-shadow .14s ease,
-    filter .14s ease;
+    transform var(--ui-ease),
+    border-color var(--ui-ease),
+    box-shadow var(--ui-ease),
+    filter var(--ui-ease),
+    background var(--ui-ease);
+}
+
+/* Light sweep */
+#play .hud-actions>button::before{
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  pointer-events:none;
+
+  background:
+    linear-gradient(
+      110deg,
+      transparent 25%,
+      rgba(255,255,255,.07) 50%,
+      transparent 75%
+    );
+
+  transform:
+    translateX(-140%);
+
+  transition:
+    transform .45s cubic-bezier(.22,.8,.24,1);
+}
+
+#play .hud-actions>button:hover::before,
+#play .hud-actions>button:focus-visible::before{
+  transform:
+    translateX(140%);
 }
 
 #play .hud-actions>button:hover,
 #play .hud-actions>button:focus-visible{
 
-  transform:translateY(-1px);
+  transform:
+    translateY(-1px);
 
   border-color:
     rgba(255,208,110,.62) !important;
@@ -458,16 +723,30 @@ button{
     0 12px 30px rgba(0,0,0,.40),
     0 0 25px rgba(255,208,110,.10) !important;
 
-  filter:brightness(1.06);
+  filter:
+    brightness(1.07);
 }
 
 #play .hud-actions>button:active{
   transform:
     translateY(1px)
-    scale(.97);
+    scale(.96);
+
+  filter:
+    brightness(1.12);
 }
 
-/* PAUSE — GOLD AUTHORITY */
+#play .hud-actions>button:disabled{
+  opacity:.45;
+
+  filter:
+    saturate(.45);
+
+  box-shadow:
+    none !important;
+}
+
+/* Pause — Gold Authority */
 #play .hud-actions>#pause{
   color:#ffe7a6 !important;
 
@@ -480,8 +759,16 @@ button{
     0 0 20px rgba(255,208,110,.06) !important;
 }
 
+/* Settings / utility family */
+#play .hud-actions>#settings,
+#play .hud-actions>[data-action="settings"]{
+  color:
+    var(--ui-cyan) !important;
+}
+
+
 /* ==========================================================================
-   DESKTOP HUD — FINAL UNIFIED GEOMETRY
+   10. DESKTOP HUD — FINAL GEOMETRY
    ========================================================================== */
 
 @media (min-width:761px){
@@ -500,16 +787,17 @@ button{
     gap:10px !important;
 
     width:100% !important;
+
     max-width:none !important;
 
     padding:
       12px
-      max(16px,env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-right))
       12px
-      max(16px,env(safe-area-inset-left)) !important;
+      max(16px, env(safe-area-inset-left)) !important;
   }
 
-  /* LEFT */
+  /* LEFT — Mission */
   #play .hud-route{
 
     grid-column:1 !important;
@@ -523,7 +811,7 @@ button{
     margin:0 !important;
   }
 
-  /* CENTER */
+  /* CENTER — Progress */
   #play .hud-progress{
 
     grid-column:2 !important;
@@ -539,7 +827,7 @@ button{
     margin:0 !important;
   }
 
-  /* RIGHT */
+  /* RIGHT — XP + utilities */
   #play .hud-actions{
 
     grid-column:3 !important;
@@ -572,10 +860,7 @@ button{
     height:42px !important;
   }
 
-  /*
-   * Hard alignment:
-   * no legacy top/right/left positioning may pull these cards apart.
-   */
+  /* Neutralise legacy positioning */
   #play .hud-route,
   #play .hud-progress,
   #play .hud-xp,
@@ -593,9 +878,9 @@ button{
   }
 }
 
+
 /* ==========================================================================
-   MISSION 01 WORLD MARKER
-   Keep it centered under the HUD instead of floating randomly on desktop.
+   11. MISSION WORLD MARKER — DESKTOP ONLY
    ========================================================================== */
 
 @media (min-width:761px){
@@ -626,7 +911,7 @@ button{
 
     overflow:hidden !important;
 
-    z-index:290 !important;
+    z-index:var(--z-marker) !important;
 
     pointer-events:none !important;
 
@@ -638,7 +923,8 @@ button{
       2px solid
       var(--ui-gold) !important;
 
-    border-radius:10px !important;
+    border-radius:
+      10px !important;
 
     background:
       linear-gradient(
@@ -652,8 +938,11 @@ button{
       0 12px 28px rgba(0,0,0,.34),
       0 0 22px rgba(255,208,110,.05) !important;
 
-    backdrop-filter:blur(9px) !important;
-    -webkit-backdrop-filter:blur(9px) !important;
+    backdrop-filter:
+      blur(9px) !important;
+
+    -webkit-backdrop-filter:
+      blur(9px) !important;
   }
 
   #game #play .world-marker span{
@@ -663,8 +952,10 @@ button{
     color:var(--ui-gold) !important;
 
     font:
-      900 6px/1
+      900 7px/1
       "DM Mono",
+      "SFMono-Regular",
+      Consolas,
       monospace !important;
 
     letter-spacing:
@@ -682,8 +973,10 @@ button{
     color:var(--ui-paper) !important;
 
     font:
-      950 9px/1.15
+      950 10px/1.15
       "DM Mono",
+      "SFMono-Regular",
+      Consolas,
       monospace !important;
 
     letter-spacing:.45px !important;
@@ -691,12 +984,14 @@ button{
     white-space:nowrap !important;
 
     overflow:hidden !important;
+
     text-overflow:ellipsis !important;
   }
 }
 
+
 /* ==========================================================================
-   TABLET
+   12. TABLET
    ========================================================================== */
 
 @media (max-width:900px) and (min-width:761px){
@@ -732,6 +1027,7 @@ button{
   #play .hud-actions>button{
     width:42px !important;
     min-width:42px !important;
+
     height:40px !important;
   }
 
@@ -744,8 +1040,9 @@ button{
   }
 }
 
+
 /* ==========================================================================
-   MODALS / MAP / PREFLIGHT / RESULTS
+   13. OVERLAYS / MODALS
    ========================================================================== */
 
 #titlePanel,
@@ -754,43 +1051,43 @@ button{
 #finish,
 #gameOver,
 #levelUp,
-#abilityUnlock{
-  position:fixed !important;
-  inset:0 !important;
-}
-
+#abilityUnlock,
 #worldMap,
 #preflight{
+
   position:fixed !important;
+
   inset:0 !important;
+
+  box-sizing:border-box !important;
 }
 
 #worldMap{
-  z-index:700 !important;
+  z-index:var(--z-map) !important;
 }
 
 #preflight{
-  z-index:800 !important;
+  z-index:var(--z-preflight) !important;
 }
 
 #titlePanel,
 #relayInfoPanel{
-  z-index:900 !important;
+  z-index:var(--z-modal) !important;
 }
 
 #pauseMenu{
-  z-index:1000 !important;
+  z-index:var(--z-pause) !important;
 }
 
 #finish,
 #gameOver,
 #levelUp,
 #abilityUnlock{
-  z-index:1100 !important;
+  z-index:var(--z-result) !important;
 }
 
 .toast{
-  z-index:1200 !important;
+  z-index:var(--z-toast);
 }
 
 #titlePanel,
@@ -806,8 +1103,17 @@ button{
   background:
     rgba(2,6,15,.90) !important;
 
-  backdrop-filter:blur(12px);
+  backdrop-filter:
+    blur(12px);
+
+  -webkit-backdrop-filter:
+    blur(12px);
 }
+
+
+/* ==========================================================================
+   14. PANEL SYSTEM
+   ========================================================================== */
 
 #titlePanel .title-panel-card,
 #relayInfoPanel .relay-info-card,
@@ -821,15 +1127,17 @@ button{
   width:
     min(960px,calc(100vw - 28px));
 
-  max-height:92dvh;
+  max-height:
+    92dvh;
 
   overflow:auto;
 
   border:
     1px solid
-    rgba(141,244,255,.22);
+    var(--ui-line);
 
-  border-radius:16px;
+  border-radius:
+    var(--ui-radius-lg);
 
   background:
     linear-gradient(
@@ -838,9 +1146,14 @@ button{
       rgba(3,10,20,.985)
     );
 
-  box-shadow:var(--ui-shadow);
+  box-shadow:
+    var(--ui-shadow);
 
-  color:var(--ui-paper);
+  color:
+    var(--ui-paper);
+
+  scrollbar-width:
+    thin;
 }
 
 #titlePanel .title-panel-card,
@@ -854,6 +1167,11 @@ button{
   padding:
     clamp(20px,3vw,30px);
 }
+
+
+/* ==========================================================================
+   15. PAUSE MENU
+   ========================================================================== */
 
 #pauseMenu{
   padding:
@@ -918,6 +1236,9 @@ button{
     1px solid
     rgba(141,244,255,.10);
 
+  border-radius:
+    var(--ui-radius-sm);
+
   background:
     rgba(10,21,35,.80);
 
@@ -926,23 +1247,35 @@ button{
   text-align:left;
 
   font:
-    800 8px/1
+    850 8px/1
     "DM Mono",
+    "SFMono-Regular",
+    Consolas,
     monospace;
 
   letter-spacing:.1em;
 
   cursor:pointer;
+
+  transition:
+    transform var(--ui-ease),
+    border-color var(--ui-ease),
+    background var(--ui-ease),
+    box-shadow var(--ui-ease),
+    color var(--ui-ease);
 }
 
-#pauseMenu .tab.active,
 #pauseMenu .tab:hover,
 #pauseMenu .tab:focus-visible{
+
+  transform:
+    translateX(2px);
 
   border-color:
     rgba(141,244,255,.44);
 
-  color:#e9fcff;
+  color:
+    #e9fcff;
 
   background:
     rgba(10,29,46,.88);
@@ -950,6 +1283,26 @@ button{
   box-shadow:
     inset 3px 0 var(--ui-cyan),
     0 0 20px rgba(141,244,255,.05);
+}
+
+#pauseMenu .tab.active{
+
+  border-color:
+    rgba(141,244,255,.55);
+
+  color:
+    #e9fcff;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(10,34,51,.92),
+      rgba(10,23,38,.88)
+    );
+
+  box-shadow:
+    inset 3px 0 var(--ui-cyan),
+    0 0 24px rgba(141,244,255,.07);
 }
 
 #pauseMenu #panelContent{
@@ -976,6 +1329,11 @@ button{
     rgba(3,9,18,.78);
 }
 
+
+/* ==========================================================================
+   16. WORLD MAP
+   ========================================================================== */
+
 #worldMap header,
 #worldMap .district-grid{
 
@@ -998,7 +1356,11 @@ button{
   font-size:
     clamp(30px,5vw,58px);
 
-  letter-spacing:-.04em;
+  line-height:
+    .95;
+
+  letter-spacing:
+    -.04em;
 }
 
 #worldMap .board-tabs{
@@ -1014,36 +1376,57 @@ button{
 #worldMap .district-mission,
 #worldMap .job-card button{
 
+  min-height:44px;
+
+  padding:
+    9px 12px;
+
   border:
     1px solid
     rgba(141,244,255,.18);
 
+  border-radius:
+    var(--ui-radius-sm);
+
   background:
     rgba(8,20,34,.88);
 
-  color:var(--ui-paper);
+  color:
+    var(--ui-paper);
 
-  border-radius:9px;
+  cursor:pointer;
+
+  transition:
+    transform var(--ui-ease),
+    border-color var(--ui-ease),
+    box-shadow var(--ui-ease),
+    color var(--ui-ease),
+    background var(--ui-ease);
 }
 
 #worldMap .board-tabs button:hover,
+#worldMap .board-tabs button:focus-visible,
 #worldMap .district-mission:not(:disabled):hover,
 #worldMap .job-card button:not(:disabled):hover{
+
+  transform:
+    translateY(-1px);
 
   border-color:
     rgba(255,208,110,.62);
 
-  color:var(--ui-gold);
+  color:
+    var(--ui-gold);
 
   box-shadow:
-    0 0 20px
-    rgba(255,208,110,.05);
+    0 0 20px rgba(255,208,110,.05);
 }
 
 #worldMap .district-card,
 #worldMap .job-card{
 
-  border-radius:12px;
+  border-radius:
+    var(--ui-radius);
 
   background:
     rgba(8,19,32,.92);
@@ -1052,11 +1435,16 @@ button{
     rgba(141,244,255,.14);
 
   box-shadow:
-    0 14px 34px
-    rgba(0,0,0,.25);
+    0 14px 34px rgba(0,0,0,.25);
 }
 
+
+/* ==========================================================================
+   17. PREFLIGHT
+   ========================================================================== */
+
 #preflight{
+
   display:grid;
 
   place-items:center;
@@ -1064,8 +1452,9 @@ button{
   padding:18px;
 }
 
+
 /* ==========================================================================
-   TOUCH LAYOUT
+   18. TOUCH / MOBILE CONTROL AUTHORITY
    ========================================================================== */
 
 body.is-touch #play .mobile-controls{
@@ -1090,7 +1479,8 @@ body.is-touch #play .mobile-controls{
       env(safe-area-inset-bottom) + 14px
     ) !important;
 
-  z-index:350 !important;
+  z-index:
+    var(--z-touch) !important;
 
   display:flex !important;
 
@@ -1103,22 +1493,39 @@ body.is-touch #play .mobile-controls{
   width:auto;
 
   pointer-events:none;
+
+  isolation:isolate;
 }
+
+
+/* ==========================================================================
+   19. MOBILE JOYSTICK
+   ========================================================================== */
 
 body.is-touch #play .mobile-joystick{
 
   width:
-    clamp(78px,21vw,112px) !important;
+    clamp(82px,21vw,116px) !important;
 
   height:
-    clamp(78px,21vw,112px) !important;
+    clamp(82px,21vw,116px) !important;
 
-  flex:0 0 auto;
+  flex:
+    0 0 auto;
 
   pointer-events:auto;
 
   touch-action:none;
+
+  user-select:none;
+
+  -webkit-user-select:none;
 }
+
+
+/* ==========================================================================
+   20. MOBILE ACTION GRID
+   ========================================================================== */
 
 body.is-touch #play .mobile-actions{
 
@@ -1127,44 +1534,196 @@ body.is-touch #play .mobile-actions{
   grid-template-columns:
     repeat(
       3,
-      clamp(46px,13vw,60px)
+      var(--touch-btn)
     );
 
+  grid-auto-rows:
+    var(--touch-btn);
+
   gap:
-    clamp(5px,1.5vw,9px);
+    var(--touch-gap);
 
   pointer-events:none;
+
+  align-items:end;
+
+  justify-content:end;
 }
 
 body.is-touch #play .mobile-actions button{
 
   width:
-    clamp(46px,13vw,60px) !important;
+    var(--touch-btn) !important;
+
+  min-width:
+    var(--touch-btn) !important;
 
   height:
-    clamp(46px,13vw,60px) !important;
+    var(--touch-btn) !important;
+
+  min-height:
+    var(--touch-btn) !important;
+
+  padding:0 !important;
+
+  display:grid;
+
+  place-items:center;
 
   pointer-events:auto;
 
   touch-action:manipulation;
+
+  cursor:pointer;
+
+  user-select:none;
+
+  -webkit-user-select:none;
+
+  border:
+    1px solid
+    rgba(141,244,255,.30);
+
+  border-radius:
+    13px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(9,22,38,.94),
+      rgba(3,10,19,.98)
+    );
+
+  color:
+    var(--ui-paper);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 8px 22px rgba(0,0,0,.32),
+    0 0 18px rgba(141,244,255,.035);
+
+  transition:
+    transform var(--ui-ease),
+    border-color var(--ui-ease),
+    box-shadow var(--ui-ease),
+    filter var(--ui-ease),
+    background var(--ui-ease);
 }
+
+body.is-touch #play .mobile-actions button:hover,
+body.is-touch #play .mobile-actions button:focus-visible{
+
+  border-color:
+    rgba(141,244,255,.62);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 10px 24px rgba(0,0,0,.38),
+    0 0 24px rgba(141,244,255,.10);
+
+  filter:
+    brightness(1.07);
+}
+
+body.is-touch #play .mobile-actions button:active,
+body.is-touch #play .mobile-actions button.is-pressed{
+
+  transform:
+    scale(.94);
+
+  border-color:
+    rgba(255,208,110,.72);
+
+  box-shadow:
+    inset 0 0 18px rgba(255,208,110,.08),
+    0 6px 18px rgba(0,0,0,.35),
+    0 0 26px rgba(255,208,110,.12);
+}
+
+
+/* ==========================================================================
+   21. TOUCH LABELS
+   ========================================================================== */
 
 body.is-touch #play .mobile-actions small{
 
   display:none !important;
 }
 
-body.is-touch #play .input-guide,
-body.is-touch #play .world-marker{
 
-  display:none !important;
+/* ==========================================================================
+   22. MOBILE HUD CLEANUP
+   IMPORTANT:
+   Mission / Cargo / Progress are NOT gameplay HUD on phone.
+   ========================================================================== */
+
+@media (max-width:760px){
+
+  /* Mission HUD — hidden on phone */
+  #play .hud-route{
+
+    display:none !important;
+  }
+
+  /* Progress / signal HUD — hidden on phone */
+  #play .hud-progress{
+
+    display:none !important;
+  }
+
+  /* World mission marker — hidden on phone */
+  #play .world-marker{
+
+    display:none !important;
+  }
+
+  /*
+   * Cargo Integrity is a desktop gameplay information surface.
+   * It must not occupy mobile gameplay space.
+   */
+  #play #cargoIntegrityV2{
+
+    display:none !important;
+
+    visibility:hidden !important;
+
+    pointer-events:none !important;
+  }
+
+  /*
+   * Existing lower cargo/mobile HUD compatibility surface.
+   * Keep it hidden on phone as well.
+   */
+  body.is-touch #play .mobile-bottom-hud{
+
+    display:none !important;
+
+    visibility:hidden !important;
+
+    pointer-events:none !important;
+  }
+
+  /*
+   * Prevent any legacy cargo/mission presentation from stealing
+   * mobile gameplay space.
+   */
+  body.is-touch #play [data-cargo-hud],
+  body.is-touch #play [data-mission-hud],
+  body.is-touch #play [data-world-marker]{
+
+    display:none !important;
+
+    visibility:hidden !important;
+
+    pointer-events:none !important;
+  }
 }
 
-/*
- * Touch HUD sizing.
- * Geometry stays compact and is deliberately NOT forced into
- * the desktop grid above.
- */
+
+/* ==========================================================================
+   23. MOBILE GAMEPLAY HUD
+   Keep only essential utility actions.
+   ========================================================================== */
 
 body.is-touch #play .hud{
 
@@ -1187,48 +1746,30 @@ body.is-touch #play .hud{
     );
 }
 
-body.is-touch #play .hud-route{
 
-  min-width:0;
+/* Utility buttons can remain visible if present */
+body.is-touch #play .hud-actions{
 
-  max-width:52vw;
+  display:flex;
+
+  align-items:center;
+
+  justify-content:flex-end;
+
+  gap:6px;
+
+  margin-left:auto;
 }
 
-body.is-touch #play .hud-route b{
 
-  font-size:9px;
-
-  white-space:nowrap;
-
-  overflow:hidden;
-
-  text-overflow:ellipsis;
-}
-
-@media (orientation:portrait){
-
-  body.is-touch #play .hud-progress{
-
-    display:none !important;
-  }
-}
-
+/* XP is not useful enough to consume mobile HUD space */
 body.is-touch #play .hud-xp{
 
-  display:flex !important;
-
-  min-width:58px !important;
-
-  width:58px !important;
-
-  height:38px !important;
-
-  min-height:38px !important;
-
-  padding:
-    5px 8px !important;
+  display:none !important;
 }
 
+
+/* Compact system buttons */
 body.is-touch #play .hud-actions>button{
 
   width:42px !important;
@@ -1238,10 +1779,55 @@ body.is-touch #play .hud-actions>button{
   height:38px !important;
 
   min-height:38px !important;
+
+  border-radius:
+    10px !important;
 }
 
+
+/* Pause remains available */
+body.is-touch #play .hud-actions>#pause{
+
+  display:grid !important;
+}
+
+
 /* ==========================================================================
-   SMALL MOBILE
+   24. PORTRAIT
+   ========================================================================== */
+
+@media (
+  orientation:portrait
+){
+
+  body.is-touch #play .mobile-controls{
+
+    bottom:
+      max(
+        12px,
+        env(safe-area-inset-bottom) + 10px
+      ) !important;
+  }
+
+  body.is-touch #play .hud-progress{
+
+    display:none !important;
+  }
+
+  body.is-touch #play #cargoIntegrityV2{
+
+    display:none !important;
+  }
+
+  body.is-touch #play .world-marker{
+
+    display:none !important;
+  }
+}
+
+
+/* ==========================================================================
+   25. SMALL MOBILE
    ========================================================================== */
 
 @media (max-width:760px){
@@ -1256,6 +1842,7 @@ body.is-touch #play .hud-actions>button{
 
   #intro .menu-version{
     max-width:48vw;
+
     text-align:right;
   }
 
@@ -1264,17 +1851,24 @@ body.is-touch #play .hud-actions>button{
   }
 
   #intro .title-lockup{
-    padding-block:4vh 4vh;
+    padding-block:
+      4vh
+      4vh;
   }
 
   #intro h1{
+
     font-size:
       clamp(54px,16vw,86px);
+
+    line-height:
+      .92;
   }
 
   #intro .title-secondary{
 
-    grid-template-columns:1fr;
+    grid-template-columns:
+      1fr;
 
     width:100%;
 
@@ -1291,15 +1885,20 @@ body.is-touch #play .hud-actions>button{
 
   #worldMap,
   #preflight{
+
     padding:14px;
   }
 
   #worldMap .district-grid{
-    grid-template-columns:1fr;
+
+    grid-template-columns:
+      1fr;
   }
 
   #pauseMenu .menu-grid{
-    grid-template-columns:1fr;
+
+    grid-template-columns:
+      1fr;
   }
 
   #pauseMenu aside{
@@ -1320,18 +1919,26 @@ body.is-touch #play .hud-actions>button{
     overflow-x:auto;
 
     gap:6px;
+
+    scrollbar-width:none;
+  }
+
+  #pauseMenu aside nav::-webkit-scrollbar{
+    display:none;
   }
 
   #pauseMenu .tab{
 
     flex:0 0 auto;
 
-    min-width:max-content;
+    min-width:
+      max-content;
   }
 
   #pauseMenu #panelContent{
 
-    max-height:66dvh;
+    max-height:
+      66dvh;
 
     padding:16px;
   }
@@ -1342,14 +1949,16 @@ body.is-touch #play .hud-actions>button{
     width:
       calc(100vw - 16px);
 
-    max-height:94dvh;
+    max-height:
+      94dvh;
 
     padding:16px;
   }
 }
 
+
 /* ==========================================================================
-   SHORT LANDSCAPE
+   26. SHORT LANDSCAPE — PHONE
    ========================================================================== */
 
 @media (
@@ -1359,7 +1968,9 @@ body.is-touch #play .hud-actions>button{
 ){
 
   #intro .title-lockup{
-    padding-block:2vh 2vh;
+    padding-block:
+      2vh
+      2vh;
   }
 
   #intro h1{
@@ -1383,16 +1994,31 @@ body.is-touch #play .hud-actions>button{
 
   body.is-touch #play .mobile-controls{
 
+    left:
+      max(
+        8px,
+        env(safe-area-inset-left) + 8px
+      ) !important;
+
+    right:
+      max(
+        8px,
+        env(safe-area-inset-right) + 8px
+      ) !important;
+
     bottom:
       max(
         7px,
         env(safe-area-inset-bottom) + 7px
       ) !important;
+
+    gap:8px;
   }
 
   body.is-touch #play .mobile-joystick{
 
     width:78px !important;
+
     height:78px !important;
   }
 
@@ -1400,12 +2026,40 @@ body.is-touch #play .hud-actions>button{
 
     grid-template-columns:
       repeat(3,48px);
+
+    grid-auto-rows:
+      48px;
+
+    gap:5px;
   }
 
   body.is-touch #play .mobile-actions button{
 
     width:48px !important;
+
+    min-width:48px !important;
+
     height:48px !important;
+
+    min-height:48px !important;
+
+    border-radius:11px;
+  }
+
+  body.is-touch #play .hud-actions{
+
+    gap:5px;
+  }
+
+  body.is-touch #play .hud-actions>button{
+
+    width:38px !important;
+
+    min-width:38px !important;
+
+    height:34px !important;
+
+    min-height:34px !important;
   }
 
   #pauseMenu .menu-grid{
@@ -1426,10 +2080,21 @@ body.is-touch #play .hud-actions>button{
 
     padding:14px;
   }
+
+  /* Explicit mobile landscape cleanup */
+  #play .hud-route,
+  #play .hud-progress,
+  #play .hud-xp,
+  #play .world-marker,
+  #play #cargoIntegrityV2{
+
+    display:none !important;
+  }
 }
 
+
 /* ==========================================================================
-   LARGE TOUCH / HYBRID DEVICES
+   27. LARGE TOUCH / HYBRID DEVICES
    ========================================================================== */
 
 @media (min-width:761px){
@@ -1438,17 +2103,75 @@ body.is-touch #play .hud-actions>button{
 
     grid-template-columns:
       repeat(3,58px);
+
+    grid-auto-rows:
+      58px;
+
+    gap:7px;
   }
 
   body.is-touch #play .mobile-actions button{
 
     width:58px !important;
+
+    min-width:58px !important;
+
     height:58px !important;
+
+    min-height:58px !important;
   }
 }
 
+
 /* ==========================================================================
-   REDUCED MOTION
+   28. MISSION / INTERACTION ANIMATIONS
+   ========================================================================== */
+
+@keyframes missionPulse{
+
+  0%,
+  100%{
+    opacity:.72;
+
+    transform:
+      scale(.92);
+
+    box-shadow:
+      0 0 8px rgba(141,244,255,.50),
+      0 0 16px rgba(141,244,255,.18);
+  }
+
+  50%{
+    opacity:1;
+
+    transform:
+      scale(1.08);
+
+    box-shadow:
+      0 0 12px rgba(141,244,255,.92),
+      0 0 24px rgba(141,244,255,.32);
+  }
+}
+
+
+@keyframes progressSweep{
+
+  0%,
+  55%,
+  100%{
+    transform:
+      translateX(120%);
+  }
+
+  72%{
+    transform:
+      translateX(-160%);
+  }
+}
+
+
+/* ==========================================================================
+   29. REDUCED MOTION
    ========================================================================== */
 
 @media (prefers-reduced-motion:reduce){
@@ -1457,39 +2180,112 @@ body.is-touch #play .hud-actions>button{
     animation:none !important;
   }
 
+  #play .hud-route .route-dot,
+  #play .hud-progress>div i::after{
+
+    animation:none !important;
+  }
+
   *,
   *::before,
   *::after{
 
     scroll-behavior:auto !important;
+
+    animation-duration:.001ms !important;
+
+    animation-iteration-count:1 !important;
+
+    transition-duration:.001ms !important;
   }
 }
 
+
 /* ==========================================================================
-   ACCESSIBILITY
+   30. ACCESSIBILITY
    ========================================================================== */
 
 :focus-visible{
 
   outline:
     2px solid
-    rgba(141,244,255,.82);
+    rgba(141,244,255,.90);
 
-  outline-offset:2px;
+  outline-offset:
+    2px;
 }
 
+#play .hud-actions>button:focus-visible,
+body.is-touch #play .mobile-actions button:focus-visible{
+
+  outline:
+    2px solid
+    rgba(141,244,255,.90);
+
+  outline-offset:
+    2px;
+}
+
+
 /* ==========================================================================
-   LEGACY MOBILE SURFACES
+   31. MOBILE LEGACY SURFACES — HARD HIDE
    ========================================================================== */
 
 body.is-touch #play .mobile-bottom-hud{
 
   display:none !important;
 
+  visibility:hidden !important;
+
   pointer-events:none !important;
 }
 
-body.is-touch #play .hud-actions>#pause{
 
-  display:grid !important;
+/*
+ * Mission/Cargo are intentionally NOT mobile HUD surfaces.
+ * Desktop remains authoritative.
+ */
+
+body.is-touch #play #cargoIntegrityV2,
+body.is-touch #play .hud-route,
+body.is-touch #play .hud-progress,
+body.is-touch #play .world-marker{
+
+  display:none !important;
+
+  visibility:hidden !important;
+
+  pointer-events:none !important;
+}
+
+
+/* ==========================================================================
+   32. FINAL MOBILE GAMEPLAY RULE
+   ========================================================================== */
+
+@media (max-width:760px){
+
+  /*
+   * Clean gameplay composition:
+   *
+   *            GAME WORLD
+   *
+   * joystick                 actions
+   *
+   * No Mission HUD.
+   * No Cargo HUD.
+   * No Progress HUD.
+   * No World Marker.
+   */
+
+  #play .mobile-controls{
+
+    pointer-events:none !important;
+  }
+
+  #play .mobile-joystick,
+  #play .mobile-actions{
+
+    pointer-events:auto;
+  }
 }
