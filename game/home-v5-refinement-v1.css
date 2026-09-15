@@ -293,9 +293,11 @@
 }
 
 #intro.home-v3 .home-v4-mission::before{
-  width:52%;
-  height:2px;
-  background:linear-gradient(90deg,#38bdf8,#a78bfa 66%,transparent);
+  width:42px;
+  height:1px;
+  background:#38bdf8;
+  opacity:.85;
+  box-shadow:0 0 12px rgba(56,189,248,.35);
 }
 
 #intro.home-v3 .home-v4-mission::after{
@@ -731,4 +733,33 @@
   0%,62%{left:-25%;opacity:0;}
   72%{opacity:1;}
   100%{left:125%;opacity:0;}
+}
+
+/* =========================================================
+   HOME V4 // COMPACT RELAY CHANNEL BADGE
+   ========================================================= */
+
+#intro.home-v3 .home-v4-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  width:max-content;
+  max-width:100%;
+
+  padding:6px 9px;
+
+  white-space:nowrap;
+
+  border-radius:4px;
+
+  font-size:7px;
+  line-height:1;
+  letter-spacing:.14em;
+
+  transform:none;
+}
+
+#intro.home-v3 .home-v4-profile{
+  margin-top:16px;
 }
