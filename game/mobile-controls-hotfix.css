@@ -1,0 +1,46 @@
+/* MOBILE CONTROLS HOTFIX */
+@media (pointer: coarse) {
+  html body.is-touch #play .mobile-controls {
+    --button-size: clamp(60px, 15vw, 72px) !important;
+    --button-gap: clamp(6px, 1.8vw, 10px) !important;
+    --joystick-size: clamp(100px, 25vw, 124px) !important;
+  }
+
+  html body.is-touch #play .mobile-actions {
+    grid-template-columns: repeat(3, var(--button-size)) !important;
+    grid-template-rows: repeat(2, var(--button-size)) !important;
+    gap: var(--button-gap) !important;
+    max-width: none !important;
+  }
+
+  html body.is-touch #play .mobile-actions > [data-mobile-action="jump"] { grid-column: 1; grid-row: 1; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="fire"] { grid-column: 2; grid-row: 1; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="sword"] { grid-column: 3; grid-row: 1; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="dash"] { grid-column: 1; grid-row: 2; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="build1"] { grid-column: 2; grid-row: 2; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="gadget1"] { grid-column: 3; grid-row: 2; }
+
+  html body.is-touch #play .mobile-actions > button {
+    width: var(--button-size) !important;
+    height: var(--button-size) !important;
+    min-width: var(--button-size) !important;
+    min-height: var(--button-size) !important;
+    font-size: clamp(9px, 2.5vw, 12px) !important;
+  }
+
+  @media (max-width: 390px) {
+    html body.is-touch #play .mobile-controls {
+      --button-size: 58px !important;
+      --joystick-size: 98px !important;
+      --button-gap: 5px !important;
+      gap: 8px !important;
+    }
+  }
+
+  @media (orientation: landscape) and (max-height: 520px) {
+    html body.is-touch #play .mobile-controls {
+      --button-size: clamp(50px, 10vh, 64px) !important;
+      --joystick-size: clamp(82px, 18vh, 106px) !important;
+    }
+  }
+}
