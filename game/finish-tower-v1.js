@@ -1,48 +1,253 @@
 /* =========================================================
-   UPDATE 11.8 — FINISH RELAY TOWER
-   CINEMATIC / MOBILE-FRIENDLY VISUAL UPGRADE
+   UPDATE 11.9 — FINISH RELAY TOWER
+   CINEMATIC / MOBILE-FRIENDLY / STABLE VERSION
 
-   - Tower ~28% taller
-   - Slightly wider structure
+   - Taller relay tower
+   - Wider structure
    - Stronger core / beacon
-   - Better proportions
+   - Stable climb state
    - Mobile friendly
+   - Prevents duplicate tower creation
+   - Proper cleanup support
    - Gameplay logic preserved
    ========================================================= */
 
 import Phaser from 'phaser';
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-
 /* =========================================================
    TOWER CONFIG
    ========================================================= */
 
-const TOWER = {
-  /* Visual / gameplay proportions */
+const TOWER = Object.freeze({
   height: 315,
   baseHeight: 34,
+
+  towerWidth: 158,
   ladderWidth: 68,
 
-  /* Gameplay intentionally preserved */
   climbSpeed: 170,
+  engageRadius: 84,
 
-  /* Slightly wider interaction zone for larger tower */
-  engageRadius: 84
-};
+  topZoneWidth: 82,
+  topZoneHeight: 44,
 
+  baseColliderWidth: 140,
+
+  supportHalfWidth: 68,
+  innerSupportHalfWidth: 24,
+
+  particles: 14,
+  sideLights: 6
+});
 
 /* =========================================================
    PREVENT DOUBLE PATCH
    ========================================================= */
 
-if (!window.__relayFinishTowerV11_8) {
-
-  window.__relayFinishTowerV11_8 = true;
+if (!window.__relayFinishTowerV11_9) {
+  window.__relayFinishTowerV11_9 = true;
 
   const originalUpdate =
     RunnerScene.prototype.update;
 
+  /* =======================================================
+     HELPERS
+     ======================================================= */
+
+  const safeDestroy = object => {
+    try {
+      object?.destroy?.();
+    } catch {}
+  };
+
+  const safeKillTweens = (scene, targets) => {
+    try {
+      if (!scene?.tweens) return;
+
+      const list = Array.isArray(targets)
+        ? targets
+        : [targets];
+
+      list
+        .filter(Boolean)
+        .forEach(target => {
+          try {
+            scene.tweens.killTweensOf(target);
+          } catch {}
+        });
+    } catch {}
+  };
+
+  const destroyTower = scene => {
+    if (!scene) return;
+
+    const visuals =
+      scene.finishTowerVisuals;
+
+    if (visuals) {
+      safeKillTweens(
+        scene,
+        Object.values(visuals)
+          .flatMap(value =>
+            Array.isArray(value)
+              ? value
+              : [value]
+          )
+      );
+
+      [
+        visuals.atmosphere,
+        visuals.atmosphere2,
+
+        visuals.coreGlow,
+        visuals.coreGlow2,
+
+        visuals.core,
+        visuals.coreInner,
+
+        visuals.ringOuter,
+        visuals.ringMiddle,
+        visuals.ringInner,
+
+        visuals.orbit,
+
+        visuals.beaconGlow,
+        visuals.beacon,
+
+        visuals.scanBeam,
+
+        ...(visuals.sideLights || []),
+        ...(visuals.particles || []),
+
+        ...(visuals.labels || [])
+      ].forEach(safeDestroy);
+    }
+
+    safeDestroy(scene.finishTowerBase);
+    safeDestroy(scene.finishTowerZone);
+    safeDestroy(scene.finishTowerTopZone);
+
+    scene.finishTowerVisuals = null;
+    scene.finishTowerBase = null;
+    scene.finishTowerZone = null;
+    scene.finishTowerTopZone = null;
+    scene.finishTower = null;
+    scene.finishTowerKeys = null;
+  };
+
+  const setPlayerGravity = (scene, enabled) => {
+    try {
+      scene.player?.body
+        ?.setAllowGravity?.(enabled);
+    } catch {}
+  };
+
+  const stopPlayerMovement = scene => {
+    try {
+      scene.player?.body?.setVelocity?.(0, 0);
+    } catch {}
+  };
+
+  const restorePlayerTexture = scene => {
+    try {
+      if (
+        scene.player?.texture &&
+        scene.textures?.exists?.('runner-idle')
+      ) {
+        scene.player.setTexture('runner-idle');
+      }
+    } catch {}
+  };
+
+  const emitClimbState = (scene, active) => {
+    try {
+      scene.game?.events?.emit(
+        'finish-tower-climb',
+        {
+          active
+        }
+      );
+    } catch {}
+  };
+
+  const stopClimbing = scene => {
+    const tower =
+      scene.finishTower;
+
+    if (!tower) {
+      return;
+    }
+
+    tower.climbing = false;
+    tower.request = false;
+
+    setPlayerGravity(scene, true);
+    stopPlayerMovement(scene);
+    restorePlayerTexture(scene);
+
+    emitClimbState(scene, false);
+  };
+
+  const activateTopFinish = scene => {
+    const tower =
+      scene.finishTower;
+
+    if (
+      !tower ||
+      tower.completed ||
+      scene.finished
+    ) {
+      return;
+    }
+
+    const wasFinished =
+      Boolean(scene.finished);
+
+    scene.complete?.();
+
+    if (
+      !scene.finished ||
+      wasFinished
+    ) {
+      return;
+    }
+
+    tower.completed = true;
+    tower.climbing = false;
+    tower.request = false;
+
+    setPlayerGravity(scene, true);
+
+    try {
+      scene.dismissIntelCard?.();
+    } catch {}
+
+    scene.briefingProtected = false;
+    scene.cinematicActive = false;
+
+    try {
+      scene.game?.events?.emit(
+        'finish-tower',
+        {
+          missionId:
+            scene.mission?.id,
+
+          runId:
+            scene.runId
+        }
+      );
+
+      scene.game?.events?.emit(
+        'finish-tower-climb',
+        {
+          active: false
+        }
+      );
+    } catch {}
+
+    scene.activateFinishTowerVisuals?.();
+  };
 
   /* =======================================================
      CREATE FINISH RELAY TOWER
@@ -51,22 +256,30 @@ if (!window.__relayFinishTowerV11_8) {
   RunnerScene.prototype.createGoal =
     function createFinishRelayTower() {
 
-      const x =
-        this.mission.goal.x;
-
-      const topY =
-        this.mission.goal.y;
-
       /*
-       * Do not artificially cap the tower height.
-       * The level itself determines where the base sits.
+       * Prevent duplicate tower instances.
        */
+      if (this.finishTower) {
+        destroyTower(this);
+      }
+
+      const goal =
+        this.mission?.goal;
+
+      if (
+        !goal ||
+        !Number.isFinite(goal.x) ||
+        !Number.isFinite(goal.y)
+      ) {
+        return;
+      }
+
+      const x = goal.x;
+      const topY = goal.y;
       const baseY =
         topY + TOWER.height;
 
-
       this.finishTower = {
-
         x,
         topY,
         baseY,
@@ -77,35 +290,45 @@ if (!window.__relayFinishTowerV11_8) {
         visualActive: false
       };
 
+      /* =====================================================
+         LEGACY GOAL
+         ===================================================== */
 
-      /* ===================================================
-         EXISTING GOAL
-         =================================================== */
-
-      this.goal =
-        this.physics.add
-          .staticImage(
+      try {
+        this.goal =
+          this.physics.add.staticImage(
             x,
             topY,
             'goal'
-          )
-          .setVisible(false);
+          );
 
-      this.goal.body.enable = false;
+        this.goal
+          .setVisible(false)
+          .setActive(false);
 
+        if (this.goal.body) {
+          this.goal.body.enable = false;
+        }
+      } catch {
+        this.goal = null;
+      }
 
-      /* ===================================================
+      /* =====================================================
          DEPTH
-         =================================================== */
+         ===================================================== */
 
-      const towerDepth = 5;
-      const fxDepth = 6;
-      const coreDepth = 8;
+      const DEPTH = Object.freeze({
+        atmosphere: 4,
+        tower: 5,
+        fx: 6,
+        core: 8,
+        labels: 10,
+        burst: 999
+      });
 
-
-      /* ===================================================
+      /* =====================================================
          ATMOSPHERE
-         =================================================== */
+         ===================================================== */
 
       const atmosphere =
         this.add
@@ -116,8 +339,9 @@ if (!window.__relayFinishTowerV11_8) {
             0xffd06e,
             0.042
           )
-          .setDepth(4);
-
+          .setDepth(
+            DEPTH.atmosphere
+          );
 
       const atmosphere2 =
         this.add
@@ -128,31 +352,34 @@ if (!window.__relayFinishTowerV11_8) {
             0xffe0a8,
             0.052
           )
-          .setDepth(4);
+          .setDepth(
+            DEPTH.atmosphere
+          );
 
+      /* =====================================================
+         MAIN TOWER
+         ===================================================== */
 
-      /* ===================================================
-         MAIN TOWER GRAPHICS
-         =================================================== */
-
-      const g =
+      const graphics =
         this.add
           .graphics()
-          .setDepth(towerDepth);
+          .setDepth(
+            DEPTH.tower
+          );
 
+      const baseWidth =
+        TOWER.towerWidth;
 
-      /* ===================================================
+      /* =====================================================
          BASE
-         =================================================== */
+         ===================================================== */
 
-      const baseWidth = 158;
-
-      g.fillStyle(
+      graphics.fillStyle(
         0x0b1422,
         0.98
       );
 
-      g.fillRoundedRect(
+      graphics.fillRoundedRect(
         x - baseWidth / 2,
         baseY - 7,
         baseWidth,
@@ -160,14 +387,13 @@ if (!window.__relayFinishTowerV11_8) {
         9
       );
 
-
-      g.lineStyle(
+      graphics.lineStyle(
         2,
         0x6f879e,
         0.9
       );
 
-      g.strokeRoundedRect(
+      graphics.strokeRoundedRect(
         x - baseWidth / 2,
         baseY - 7,
         baseWidth,
@@ -175,130 +401,120 @@ if (!window.__relayFinishTowerV11_8) {
         9
       );
 
+      /* =====================================================
+         ENERGY STRIP
+         ===================================================== */
 
-      /* ===================================================
-         BASE ENERGY STRIP
-         =================================================== */
-
-      g.fillStyle(
+      graphics.fillStyle(
         0xffd06e,
         0.18
       );
 
-      g.fillRect(
+      graphics.fillRect(
         x - 75,
         baseY - 5,
         150,
         5
       );
 
-
-      g.fillStyle(
+      graphics.fillStyle(
         0xffd06e,
         0.78
       );
 
-      g.fillRect(
+      graphics.fillRect(
         x - 48,
         baseY - 5,
         96,
         2
       );
 
-
-      /* ===================================================
+      /* =====================================================
          MAIN SUPPORTS
-         =================================================== */
+         ===================================================== */
 
-      g.lineStyle(
+      graphics.lineStyle(
         7,
         0x344b63,
         0.98
       );
 
-
-      g.lineBetween(
-        x - 68,
+      graphics.lineBetween(
+        x - TOWER.supportHalfWidth,
         baseY,
         x - 36,
         topY + 34
       );
 
-
-      g.lineBetween(
-        x + 68,
+      graphics.lineBetween(
+        x + TOWER.supportHalfWidth,
         baseY,
         x + 36,
         topY + 34
       );
 
-
-      /* ===================================================
+      /* =====================================================
          INNER SUPPORTS
-         =================================================== */
+         ===================================================== */
 
-      g.lineStyle(
+      graphics.lineStyle(
         3,
         0x8fa4b7,
         0.78
       );
 
-
-      g.lineBetween(
-        x - 24,
+      graphics.lineBetween(
+        x - TOWER.innerSupportHalfWidth,
         baseY - 5,
-        x - 24,
+        x - TOWER.innerSupportHalfWidth,
         topY + 35
       );
 
-
-      g.lineBetween(
-        x + 24,
+      graphics.lineBetween(
+        x + TOWER.innerSupportHalfWidth,
         baseY - 5,
-        x + 24,
+        x + TOWER.innerSupportHalfWidth,
         topY + 35
       );
 
-
-      /* ===================================================
+      /* =====================================================
          CROSS BRACES
-         =================================================== */
+         ===================================================== */
 
-      g.lineStyle(
+      graphics.lineStyle(
         2,
         0x8ba2b7,
         0.62
       );
-
 
       for (
         let y = baseY - 38;
         y > topY + 44;
         y -= 42
       ) {
-
-        const t =
-          (baseY - y) /
-          TOWER.height;
-
+        const progress =
+          Phaser.Math.Clamp(
+            (baseY - y) /
+              TOWER.height,
+            0,
+            1
+          );
 
         const half =
           Phaser.Math.Linear(
             61,
             33,
-            t
+            progress
           );
 
-
-        g.lineBetween(
+        graphics.lineBetween(
           x - half,
           y,
           x + half,
           y
         );
 
-
-        g.lineBetween(
+        graphics.lineBetween(
           x - half + 6,
           y - 13,
           x + half - 6,
@@ -306,48 +522,42 @@ if (!window.__relayFinishTowerV11_8) {
         );
       }
 
-
-      /* ===================================================
+      /* =====================================================
          LADDER
-         =================================================== */
+         ===================================================== */
 
-      g.lineStyle(
+      graphics.lineStyle(
         4,
         0xb8c7d5,
         0.92
       );
 
-
-      g.lineBetween(
+      graphics.lineBetween(
         x - 24,
         baseY - 6,
         x - 24,
         topY + 34
       );
 
-
-      g.lineBetween(
+      graphics.lineBetween(
         x + 24,
         baseY - 6,
         x + 24,
         topY + 34
       );
 
-
-      g.lineStyle(
+      graphics.lineStyle(
         2,
         0xffd06e,
         0.78
       );
-
 
       for (
         let y = baseY - 15;
         y > topY + 35;
         y -= 24
       ) {
-
-        g.lineBetween(
+        graphics.lineBetween(
           x - 23,
           y,
           x + 23,
@@ -355,18 +565,16 @@ if (!window.__relayFinishTowerV11_8) {
         );
       }
 
-
-      /* ===================================================
+      /* =====================================================
          TOP HOUSING
-         =================================================== */
+         ===================================================== */
 
-      g.fillStyle(
+      graphics.fillStyle(
         0x101e31,
         0.99
       );
 
-
-      g.fillRoundedRect(
+      graphics.fillRoundedRect(
         x - 42,
         topY - 9,
         84,
@@ -374,15 +582,13 @@ if (!window.__relayFinishTowerV11_8) {
         9
       );
 
-
-      g.lineStyle(
+      graphics.lineStyle(
         2,
         0xffd06e,
         0.96
       );
 
-
-      g.strokeRoundedRect(
+      graphics.strokeRoundedRect(
         x - 42,
         topY - 9,
         84,
@@ -390,15 +596,13 @@ if (!window.__relayFinishTowerV11_8) {
         9
       );
 
-
-      g.lineStyle(
+      graphics.lineStyle(
         2,
         0x9eb2c4,
         0.52
       );
 
-
-      g.strokeRoundedRect(
+      graphics.strokeRoundedRect(
         x - 32,
         topY - 1,
         64,
@@ -406,83 +610,73 @@ if (!window.__relayFinishTowerV11_8) {
         5
       );
 
-
-      /* ===================================================
+      /* =====================================================
          ANTENNA
-         =================================================== */
+         ===================================================== */
 
-      g.lineStyle(
+      graphics.lineStyle(
         4,
         0xffe0a8,
         0.96
       );
 
-
-      g.lineBetween(
+      graphics.lineBetween(
         x,
         topY - 9,
         x,
         topY - 49
       );
 
-
-      g.lineStyle(
+      graphics.lineStyle(
         2,
         0xffd06e,
         0.86
       );
 
-
-      g.lineBetween(
+      graphics.lineBetween(
         x,
         topY - 43,
         x + 40,
         topY - 28
       );
 
-
-      g.lineBetween(
+      graphics.lineBetween(
         x,
         topY - 43,
         x - 29,
         topY - 31
       );
 
-
-      /* ===================================================
+      /* =====================================================
          ENERGY RAILS
-         =================================================== */
+         ===================================================== */
 
-      g.lineStyle(
+      graphics.lineStyle(
         3,
         0xffd06e,
         0.5
       );
 
-
-      g.lineBetween(
+      graphics.lineBetween(
         x - 34,
         topY + 30,
         x - 34,
         baseY - 7
       );
 
-
-      g.lineBetween(
+      graphics.lineBetween(
         x + 34,
         topY + 30,
         x + 34,
         baseY - 7
       );
 
-
-      /* ===================================================
-         ENERGY CORE
-         =================================================== */
+      /* =====================================================
+         CORE
+         ===================================================== */
 
       const coreX = x;
       const coreY = topY + 11;
-
 
       const coreGlow =
         this.add
@@ -493,8 +687,9 @@ if (!window.__relayFinishTowerV11_8) {
             0xffd06e,
             0.085
           )
-          .setDepth(fxDepth);
-
+          .setDepth(
+            DEPTH.fx
+          );
 
       const coreGlow2 =
         this.add
@@ -505,8 +700,9 @@ if (!window.__relayFinishTowerV11_8) {
             0xffe0a8,
             0.125
           )
-          .setDepth(fxDepth);
-
+          .setDepth(
+            DEPTH.fx
+          );
 
       const core =
         this.add
@@ -517,8 +713,9 @@ if (!window.__relayFinishTowerV11_8) {
             0xfff1c7,
             1
           )
-          .setDepth(coreDepth);
-
+          .setDepth(
+            DEPTH.core
+          );
 
       const coreInner =
         this.add
@@ -529,12 +726,13 @@ if (!window.__relayFinishTowerV11_8) {
             0xffffff,
             1
           )
-          .setDepth(coreDepth + 1);
+          .setDepth(
+            DEPTH.core + 1
+          );
 
-
-      /* ===================================================
+      /* =====================================================
          CORE RINGS
-         =================================================== */
+         ===================================================== */
 
       const ringOuter =
         this.add
@@ -549,8 +747,9 @@ if (!window.__relayFinishTowerV11_8) {
             0xffd06e,
             0.72
           )
-          .setDepth(fxDepth);
-
+          .setDepth(
+            DEPTH.fx
+          );
 
       const ringMiddle =
         this.add
@@ -565,8 +764,9 @@ if (!window.__relayFinishTowerV11_8) {
             0xffe0a8,
             0.64
           )
-          .setDepth(fxDepth);
-
+          .setDepth(
+            DEPTH.fx
+          );
 
       const ringInner =
         this.add
@@ -581,25 +781,26 @@ if (!window.__relayFinishTowerV11_8) {
             0xffffff,
             0.68
           )
-          .setDepth(fxDepth);
+          .setDepth(
+            DEPTH.fx
+          );
 
-
-      /* ===================================================
+      /* =====================================================
          ORBIT
-         =================================================== */
+         ===================================================== */
 
       const orbit =
         this.add
           .graphics()
-          .setDepth(fxDepth);
-
+          .setDepth(
+            DEPTH.fx
+          );
 
       orbit.lineStyle(
         2,
         0xffd06e,
         0.68
       );
-
 
       orbit.lineBetween(
         x - 45,
@@ -608,7 +809,6 @@ if (!window.__relayFinishTowerV11_8) {
         coreY - 10
       );
 
-
       orbit.lineBetween(
         x + 31,
         coreY + 10,
@@ -616,14 +816,12 @@ if (!window.__relayFinishTowerV11_8) {
         coreY
       );
 
-
-      /* ===================================================
+      /* =====================================================
          BEACON
-         =================================================== */
+         ===================================================== */
 
       const beaconY =
         topY - 49;
-
 
       const beaconGlow =
         this.add
@@ -634,8 +832,9 @@ if (!window.__relayFinishTowerV11_8) {
             0xffd06e,
             0.095
           )
-          .setDepth(fxDepth);
-
+          .setDepth(
+            DEPTH.fx
+          );
 
       const beacon =
         this.add
@@ -646,12 +845,13 @@ if (!window.__relayFinishTowerV11_8) {
             0xfff1c7,
             1
           )
-          .setDepth(coreDepth);
+          .setDepth(
+            DEPTH.core
+          );
 
-
-      /* ===================================================
+      /* =====================================================
          SCAN BEAM
-         =================================================== */
+         ===================================================== */
 
       const scanBeam =
         this.add
@@ -663,27 +863,25 @@ if (!window.__relayFinishTowerV11_8) {
             0xffd06e,
             0.095
           )
-          .setDepth(fxDepth);
+          .setDepth(
+            DEPTH.fx
+          );
 
-
-      /* ===================================================
-         SIDE ENERGY LIGHTS
-         =================================================== */
+      /* =====================================================
+         SIDE LIGHTS
+         ===================================================== */
 
       const sideLights = [];
 
-
       for (
         let i = 0;
-        i < 6;
+        i < TOWER.sideLights;
         i += 1
       ) {
-
         const y =
           topY +
           50 +
           i * 40;
-
 
         const left =
           this.add
@@ -694,8 +892,9 @@ if (!window.__relayFinishTowerV11_8) {
               0xffd06e,
               0.8
             )
-            .setDepth(fxDepth);
-
+            .setDepth(
+              DEPTH.fx
+            );
 
         const right =
           this.add
@@ -706,8 +905,9 @@ if (!window.__relayFinishTowerV11_8) {
               0xffd06e,
               0.8
             )
-            .setDepth(fxDepth);
-
+            .setDepth(
+              DEPTH.fx
+            );
 
         sideLights.push(
           left,
@@ -715,20 +915,17 @@ if (!window.__relayFinishTowerV11_8) {
         );
       }
 
-
-      /* ===================================================
-         FLOATING PARTICLES
-         =================================================== */
+      /* =====================================================
+         PARTICLES
+         ===================================================== */
 
       const particles = [];
 
-
       for (
         let i = 0;
-        i < 14;
+        i < TOWER.particles;
         i += 1
       ) {
-
         const particle =
           this.add
             .circle(
@@ -752,20 +949,17 @@ if (!window.__relayFinishTowerV11_8) {
                 0.55
               )
             )
-            .setDepth(fxDepth);
-
+            .setDepth(
+              DEPTH.fx
+            );
 
         particles.push(
           particle
         );
 
-
         if (!this.motionReduced) {
-
           this.tweens.add({
-
-            targets:
-              particle,
+            targets: particle,
 
             y:
               particle.y -
@@ -774,7 +968,7 @@ if (!window.__relayFinishTowerV11_8) {
                 46
               ),
 
-            alpha:0,
+            alpha: 0,
 
             duration:
               Phaser.Math.Between(
@@ -788,9 +982,14 @@ if (!window.__relayFinishTowerV11_8) {
                 1000
               ),
 
-            repeat:-1,
+            repeat: -1,
 
-            onRepeat:() => {
+            onRepeat: () => {
+              if (
+                !particle.active
+              ) {
+                return;
+              }
 
               particle.y =
                 topY +
@@ -799,14 +998,12 @@ if (!window.__relayFinishTowerV11_8) {
                   275
                 );
 
-
               particle.x =
                 x +
                 Phaser.Math.Between(
                   -42,
                   42
                 );
-
 
               particle.alpha =
                 Phaser.Math.FloatBetween(
@@ -818,14 +1015,105 @@ if (!window.__relayFinishTowerV11_8) {
         }
       }
 
+      /* =====================================================
+         LABELS
+         ===================================================== */
 
-      /* ===================================================
-         STORE VISUAL REFERENCES
-         =================================================== */
+      const labels = [];
+
+      labels.push(
+        this.add
+          .text(
+            x,
+            topY - 80,
+            'RELAY TOWER',
+            {
+              fontFamily: 'DM Mono',
+              fontSize: '12px',
+              color: '#ffe0a8',
+              stroke: '#08101c',
+              strokeThickness: 4,
+              letterSpacing: 1.1
+            }
+          )
+          .setOrigin(0.5)
+          .setDepth(
+            DEPTH.labels
+          )
+      );
+
+      labels.push(
+        this.add
+          .text(
+            x,
+            topY - 61,
+            'SECURE // TRANSMIT',
+            {
+              fontFamily: 'DM Mono',
+              fontSize: '7px',
+              color: '#9bb0c2',
+              stroke: '#08101c',
+              strokeThickness: 3,
+              letterSpacing: 1
+            }
+          )
+          .setOrigin(0.5)
+          .setDepth(
+            DEPTH.labels
+          )
+          .setAlpha(0.72)
+      );
+
+      labels.push(
+        this.add
+          .text(
+            x,
+            baseY + 40,
+            'CLIMB TO SECURE RELAY',
+            {
+              fontFamily: 'DM Mono',
+              fontSize: '9px',
+              color: '#9bb0c2',
+              stroke: '#08101c',
+              strokeThickness: 3,
+              letterSpacing: 0.6
+            }
+          )
+          .setOrigin(0.5)
+          .setDepth(
+            DEPTH.labels
+          )
+          .setAlpha(0.82)
+      );
+
+      labels.push(
+        this.add
+          .text(
+            x,
+            baseY - 58,
+            '↑ / JUMP',
+            {
+              fontFamily: 'DM Mono',
+              fontSize: '8px',
+              color: '#ffd06e',
+              stroke: '#08101c',
+              strokeThickness: 3,
+              letterSpacing: 0.8
+            }
+          )
+          .setOrigin(0.5)
+          .setDepth(
+            DEPTH.labels
+          )
+          .setAlpha(0.74)
+      );
+
+      /* =====================================================
+         STORE VISUALS
+         ===================================================== */
 
       this.finishTowerVisuals = {
-
-        graphics:g,
+        graphics,
 
         atmosphere,
         atmosphere2,
@@ -848,212 +1136,130 @@ if (!window.__relayFinishTowerV11_8) {
         scanBeam,
 
         sideLights,
-        particles
+        particles,
+
+        labels
       };
 
-
-      /* ===================================================
+      /* =====================================================
          IDLE ANIMATION
-         =================================================== */
+         ===================================================== */
 
       if (!this.motionReduced) {
-
         this.tweens.add({
-
-          targets:
-            atmosphere,
-
-          scale:1.18,
-          alpha:0.02,
-
-          duration:1500,
-
-          yoyo:true,
-          repeat:-1,
-
-          ease:'Sine.easeInOut'
+          targets: atmosphere,
+          scale: 1.18,
+          alpha: 0.02,
+          duration: 1500,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            atmosphere2,
-
-          scale:1.24,
-          alpha:0.025,
-
-          duration:950,
-
-          yoyo:true,
-          repeat:-1,
-
-          ease:'Sine.easeInOut'
+          targets: atmosphere2,
+          scale: 1.24,
+          alpha: 0.025,
+          duration: 950,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            core,
-
-          scale:1.34,
-          alpha:0.55,
-
-          duration:620,
-
-          yoyo:true,
-          repeat:-1,
-
-          ease:'Sine.easeInOut'
+          targets: core,
+          scale: 1.34,
+          alpha: 0.55,
+          duration: 620,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            coreGlow,
-
-          scale:1.25,
-          alpha:0.035,
-
-          duration:900,
-
-          yoyo:true,
-          repeat:-1,
-
-          ease:'Sine.easeInOut'
+          targets: coreGlow,
+          scale: 1.25,
+          alpha: 0.035,
+          duration: 900,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            coreGlow2,
-
-          scale:1.32,
-          alpha:0.055,
-
-          duration:760,
-
-          yoyo:true,
-          repeat:-1,
-
-          ease:'Sine.easeInOut'
+          targets: coreGlow2,
+          scale: 1.32,
+          alpha: 0.055,
+          duration: 760,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            ringOuter,
-
-          scale:1.32,
-          alpha:0.05,
-
-          duration:1050,
-
-          repeat:-1,
-
-          ease:'Sine.easeOut'
+          targets: ringOuter,
+          scale: 1.32,
+          alpha: 0.05,
+          duration: 1050,
+          repeat: -1,
+          ease: 'Sine.easeOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            ringMiddle,
-
-          scale:1.24,
-          alpha:0.08,
-
-          duration:820,
-
-          repeat:-1,
-
-          ease:'Sine.easeOut'
+          targets: ringMiddle,
+          scale: 1.24,
+          alpha: 0.08,
+          duration: 820,
+          repeat: -1,
+          ease: 'Sine.easeOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            ringInner,
-
-          scale:1.18,
-          alpha:0.16,
-
-          duration:560,
-
-          yoyo:true,
-          repeat:-1,
-
-          ease:'Sine.easeInOut'
+          targets: ringInner,
+          scale: 1.18,
+          alpha: 0.16,
+          duration: 560,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            beacon,
-
-          alpha:0.25,
-          scale:1.45,
-
-          duration:500,
-
-          yoyo:true,
-          repeat:-1,
-
-          ease:'Sine.easeInOut'
+          targets: beacon,
+          alpha: 0.25,
+          scale: 1.45,
+          duration: 500,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            beaconGlow,
-
-          alpha:0.025,
-          scale:1.35,
-
-          duration:700,
-
-          yoyo:true,
-          repeat:-1,
-
-          ease:'Sine.easeInOut'
+          targets: beaconGlow,
+          alpha: 0.025,
+          scale: 1.35,
+          duration: 700,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
         });
 
-
         this.tweens.add({
-
-          targets:
-            scanBeam,
-
-          y:
-            topY + 205,
-
-          alpha:0.025,
-
-          duration:1450,
-
-          repeat:-1,
-          yoyo:true,
-
-          ease:'Sine.easeInOut'
+          targets: scanBeam,
+          y: topY + 205,
+          alpha: 0.025,
+          duration: 1450,
+          repeat: -1,
+          yoyo: true,
+          ease: 'Sine.easeInOut'
         });
-
 
         sideLights.forEach(
-          (light,index) => {
-
+          (light, index) => {
             this.tweens.add({
+              targets: light,
 
-              targets:
-                light,
-
-              alpha:0.2,
+              alpha: 0.2,
 
               duration:
                 420 +
@@ -1062,284 +1268,143 @@ if (!window.__relayFinishTowerV11_8) {
               delay:
                 index * 90,
 
-              yoyo:true,
-              repeat:-1,
+              yoyo: true,
+              repeat: -1,
 
-              ease:'Sine.easeInOut'
+              ease: 'Sine.easeInOut'
             });
           }
         );
 
-
         this.tweens.add({
-
-          targets:
-            orbit,
-
-          angle:360,
-
-          duration:4200,
-
-          repeat:-1,
-
-          ease:'Linear'
+          targets: orbit,
+          angle: 360,
+          duration: 4200,
+          repeat: -1,
+          ease: 'Linear'
         });
       }
 
-
-      /* ===================================================
-         LABELS
-         =================================================== */
-
-      this.add
-        .text(
-          x,
-          topY - 80,
-          'RELAY TOWER',
-          {
-            fontFamily:'DM Mono',
-            fontSize:'12px',
-            color:'#ffe0a8',
-            stroke:'#08101c',
-            strokeThickness:4,
-            letterSpacing:1.1
-          }
-        )
-        .setOrigin(0.5)
-        .setDepth(10);
-
-
-      this.add
-        .text(
-          x,
-          topY - 61,
-          'SECURE // TRANSMIT',
-          {
-            fontFamily:'DM Mono',
-            fontSize:'7px',
-            color:'#9bb0c2',
-            stroke:'#08101c',
-            strokeThickness:3,
-            letterSpacing:1
-          }
-        )
-        .setOrigin(0.5)
-        .setDepth(10)
-        .setAlpha(0.72);
-
-
-      this.add
-        .text(
-          x,
-          baseY + 40,
-          'CLIMB TO SECURE RELAY',
-          {
-            fontFamily:'DM Mono',
-            fontSize:'9px',
-            color:'#9bb0c2',
-            stroke:'#08101c',
-            strokeThickness:3,
-            letterSpacing:0.6
-          }
-        )
-        .setOrigin(0.5)
-        .setDepth(10)
-        .setAlpha(0.82);
-
-
-      this.add
-        .text(
-          x,
-          baseY - 58,
-          '↑ / JUMP',
-          {
-            fontFamily:'DM Mono',
-            fontSize:'8px',
-            color:'#ffd06e',
-            stroke:'#08101c',
-            strokeThickness:3,
-            letterSpacing:0.8
-          }
-        )
-        .setOrigin(0.5)
-        .setDepth(10)
-        .setAlpha(0.74);
-
-
-      /* ===================================================
-         PHYSICS
-         =================================================== */
+      /* =====================================================
+         BASE COLLIDER
+         ===================================================== */
 
       const base =
         this.add
           .rectangle(
             x,
             baseY + 10,
-            140,
+            TOWER.baseColliderWidth,
             TOWER.baseHeight,
             0x000000,
             0
           )
           .setVisible(false);
 
-
       this.physics.add.existing(
         base,
         true
       );
 
-
       this.finishTowerBase =
         base;
 
+      if (this.player) {
+        this.physics.add.collider(
+          this.player,
+          base
+        );
+      }
 
-      this.physics.add.collider(
-        this.player,
-        base
-      );
-
-
-      /* ===================================================
+      /* =====================================================
          CLIMB ZONE
-         =================================================== */
+         ===================================================== */
+
+      const climbHeight =
+        Math.max(
+          1,
+          baseY - topY
+        );
 
       this.finishTowerZone =
         this.add.zone(
           x,
-          (topY + baseY) / 2,
+          topY + climbHeight / 2,
           TOWER.ladderWidth,
-          baseY - topY
+          climbHeight
         );
-
 
       this.physics.add.existing(
         this.finishTowerZone
       );
 
-
       this.finishTowerZone.body
         .setAllowGravity(false)
         .setImmovable(true);
-
 
       this.physics.add.overlap(
         this.player,
         this.finishTowerZone,
         () => {
+          const tower =
+            this.finishTower;
 
           if (
-            !this.finishTower.completed &&
-            !this.cinematicActive
+            !tower ||
+            tower.completed ||
+            tower.climbing ||
+            this.cinematicActive
           ) {
-
-            this.finishTower.request =
-              true;
+            return;
           }
+
+          tower.request = true;
         }
       );
 
-
-      /* ===================================================
+      /* =====================================================
          TOP ZONE
-         =================================================== */
+         ===================================================== */
 
       this.finishTowerTopZone =
         this.add.zone(
           x,
           topY + 8,
-          82,
-          44
+          TOWER.topZoneWidth,
+          TOWER.topZoneHeight
         );
-
 
       this.physics.add.existing(
         this.finishTowerTopZone
       );
 
-
       this.finishTowerTopZone.body
         .setAllowGravity(false)
         .setImmovable(true);
-
 
       this.physics.add.overlap(
         this.player,
         this.finishTowerTopZone,
         () => {
+          const tower =
+            this.finishTower;
 
           if (
-            this.finishTower.completed ||
-            !this.finishTower.climbing ||
+            !tower ||
+            tower.completed ||
+            !tower.climbing ||
             this.finished
           ) {
             return;
           }
 
-
-          const wasFinished =
-            this.finished;
-
-
-          this.complete();
-
-
-          if (
-            this.finished &&
-            !wasFinished
-          ) {
-
-            this.finishTower.completed =
-              true;
-
-            this.finishTower.climbing =
-              false;
-
-
-            this.player.body
-              .setAllowGravity(true);
-
-
-            this.dismissIntelCard?.();
-
-
-            this.briefingProtected =
-              false;
-
-
-            this.cinematicActive =
-              false;
-
-
-            this.game.events.emit(
-              'finish-tower',
-              {
-                missionId:
-                  this.mission.id,
-
-                runId:
-                  this.runId
-              }
-            );
-
-
-            this.game.events.emit(
-              'finish-tower-climb',
-              {
-                active:false
-              }
-            );
-
-
-            this.activateFinishTowerVisuals();
-          }
+          activateTopFinish(this);
         }
       );
-
 
       this.finishTowerKeys =
         this.keys;
     };
-
 
   /* =======================================================
      ACTIVATION EFFECT
@@ -1354,7 +1419,6 @@ if (!window.__relayFinishTowerV11_8) {
       const visuals =
         this.finishTowerVisuals;
 
-
       if (
         !tower ||
         !visuals ||
@@ -1363,13 +1427,9 @@ if (!window.__relayFinishTowerV11_8) {
         return;
       }
 
-
-      tower.visualActive =
-        true;
-
+      tower.visualActive = true;
 
       const {
-
         atmosphere,
         atmosphere2,
 
@@ -1389,9 +1449,7 @@ if (!window.__relayFinishTowerV11_8) {
 
         sideLights,
         particles
-
       } = visuals;
-
 
       const x =
         tower.x;
@@ -1399,197 +1457,164 @@ if (!window.__relayFinishTowerV11_8) {
       const y =
         tower.topY + 11;
 
+      /* =====================================================
+         STOP IDLE ANIMATION
+         ===================================================== */
 
-      /* ===================================================
-         STOP IDLE CORE ANIMATION
-         =================================================== */
+      safeKillTweens(
+        this,
+        [
+          atmosphere,
+          atmosphere2,
 
-      this.tweens.killTweensOf([
+          coreGlow,
+          coreGlow2,
 
-        core,
-        coreGlow,
-        coreGlow2,
+          core,
 
-        ringOuter,
-        ringMiddle,
-        ringInner,
+          ringOuter,
+          ringMiddle,
+          ringInner,
 
-        beacon,
-        beaconGlow
-      ]);
+          beaconGlow,
+          beacon,
 
+          scanBeam,
 
-      /* ===================================================
+          ...sideLights,
+          ...particles
+        ]
+      );
+
+      /* =====================================================
          CORE ACTIVATION
-         =================================================== */
+         ===================================================== */
 
       this.tweens.add({
-
-        targets:[
+        targets: [
           core,
           coreGlow,
           coreGlow2
         ],
 
-        scale:2.2,
-        alpha:1,
+        scale: 2.2,
+        alpha: 1,
 
-        duration:280,
+        duration: 280,
 
-        ease:'Back.easeOut'
+        ease: 'Back.easeOut'
       });
 
+      /* =====================================================
+         RINGS
+         ===================================================== */
 
-      /* ===================================================
-         ENERGY RINGS
-         =================================================== */
-
-      this.tweens.add({
-
-        targets:
-          ringOuter,
-
-        scale:3.8,
-        alpha:0,
-
-        duration:700,
-
-        ease:'Cubic.easeOut'
-      });
-
-
-      this.tweens.add({
-
-        targets:
-          ringMiddle,
-
-        scale:3,
-
-        alpha:0,
-
-        duration:560,
-
-        ease:'Cubic.easeOut'
-      });
-
-
-      this.tweens.add({
-
-        targets:
-          ringInner,
-
-        scale:2.5,
-
-        alpha:0,
-
-        duration:420,
-
-        ease:'Cubic.easeOut'
-      });
-
-
-      /* ===================================================
-         BEACON
-         =================================================== */
-
-      this.tweens.add({
-
-        targets:
-          beacon,
-
-        scale:2.8,
-        alpha:1,
-
-        duration:220,
-
-        yoyo:true,
-
-        ease:'Cubic.easeOut'
-      });
-
-
-      this.tweens.add({
-
-        targets:
-          beaconGlow,
-
-        scale:3.2,
-        alpha:0.35,
-
-        duration:280,
-
-        yoyo:true,
-
-        ease:'Cubic.easeOut'
-      });
-
-
-      /* ===================================================
-         SCAN BEAM
-         =================================================== */
-
-      this.tweens.add({
-
-        targets:
-          scanBeam,
-
-        scaleX:8,
-        scaleY:1.35,
-
-        alpha:0.42,
-
-        duration:220,
-
-        yoyo:true,
-
-        ease:'Cubic.easeOut'
-      });
-
-
-      /* ===================================================
-         SIDE LIGHTS
-         =================================================== */
-
-      sideLights.forEach(
-        (light,index) => {
-
+      [
+        [ringOuter, 3.8, 700],
+        [ringMiddle, 3, 560],
+        [ringInner, 2.5, 420]
+      ].forEach(
+        ([target, scale, duration]) => {
           this.tweens.add({
+            targets: target,
 
-            targets:
-              light,
+            scale,
+            alpha: 0,
 
-            scale:2.6,
-            alpha:1,
+            duration,
 
-            duration:130,
-
-            delay:
-              index * 55,
-
-            yoyo:true,
-
-            ease:'Quad.easeOut'
+            ease: 'Cubic.easeOut'
           });
         }
       );
 
+      /* =====================================================
+         BEACON
+         ===================================================== */
 
-      /* ===================================================
+      this.tweens.add({
+        targets: beacon,
+
+        scale: 2.8,
+        alpha: 1,
+
+        duration: 220,
+
+        yoyo: true,
+
+        ease: 'Cubic.easeOut'
+      });
+
+      this.tweens.add({
+        targets: beaconGlow,
+
+        scale: 3.2,
+        alpha: 0.35,
+
+        duration: 280,
+
+        yoyo: true,
+
+        ease: 'Cubic.easeOut'
+      });
+
+      /* =====================================================
+         SCAN BEAM
+         ===================================================== */
+
+      this.tweens.add({
+        targets: scanBeam,
+
+        scaleX: 8,
+        scaleY: 1.35,
+
+        alpha: 0.42,
+
+        duration: 220,
+
+        yoyo: true,
+
+        ease: 'Cubic.easeOut'
+      });
+
+      /* =====================================================
+         SIDE LIGHTS
+         ===================================================== */
+
+      sideLights.forEach(
+        (light, index) => {
+          this.tweens.add({
+            targets: light,
+
+            scale: 2.6,
+            alpha: 1,
+
+            duration: 130,
+
+            delay:
+              index * 55,
+
+            yoyo: true,
+
+            ease: 'Quad.easeOut'
+          });
+        }
+      );
+
+      /* =====================================================
          PARTICLE BURST
-         =================================================== */
+         ===================================================== */
 
       particles.forEach(
-        (particle,index) => {
+        (particle, index) => {
 
-          this.tweens.killTweensOf(
+          safeKillTweens(
+            this,
             particle
           );
 
-
           this.tweens.add({
-
-            targets:
-              particle,
+            targets: particle,
 
             y:
               tower.topY -
@@ -1598,9 +1623,9 @@ if (!window.__relayFinishTowerV11_8) {
                 110
               ),
 
-            alpha:0,
+            alpha: 0,
 
-            scale:2,
+            scale: 2,
 
             duration:
               450 +
@@ -1609,15 +1634,14 @@ if (!window.__relayFinishTowerV11_8) {
             delay:
               index * 35,
 
-            ease:'Cubic.easeOut'
+            ease: 'Cubic.easeOut'
           });
         }
       );
 
-
-      /* ===================================================
+      /* =====================================================
          SCREEN FLASH
-         =================================================== */
+         ===================================================== */
 
       const flash =
         this.add
@@ -1630,39 +1654,35 @@ if (!window.__relayFinishTowerV11_8) {
             0
           )
           .setScrollFactor(0)
-          .setDepth(999);
-
+          .setDepth(
+            DEPTH_BURST
+          );
 
       this.tweens.add({
+        targets: flash,
 
-        targets:
-          flash,
+        alpha: 0.18,
 
-        alpha:0.18,
+        duration: 90,
 
-        duration:90,
+        yoyo: true,
 
-        yoyo:true,
+        hold: 70,
 
-        hold:70,
-
-        onComplete:() => {
-
-          flash.destroy();
+        onComplete: () => {
+          safeDestroy(flash);
         }
       });
 
-
-      /* ===================================================
+      /* =====================================================
          COMPLETION WAVES
-         =================================================== */
+         ===================================================== */
 
       for (
         let i = 0;
         i < 3;
         i += 1
       ) {
-
         const burst =
           this.add
             .circle(
@@ -1677,19 +1697,18 @@ if (!window.__relayFinishTowerV11_8) {
               0xffd06e,
               0.85
             )
-            .setDepth(999);
-
+            .setDepth(
+              DEPTH_BURST
+            );
 
         this.tweens.add({
-
-          targets:
-            burst,
+          targets: burst,
 
           scale:
             8 +
             i * 2,
 
-          alpha:0,
+          alpha: 0,
 
           duration:
             850 +
@@ -1698,49 +1717,44 @@ if (!window.__relayFinishTowerV11_8) {
           delay:
             i * 100,
 
-          ease:'Cubic.easeOut',
+          ease: 'Cubic.easeOut',
 
-          onComplete:() => {
-
-            burst.destroy();
+          onComplete: () => {
+            safeDestroy(burst);
           }
         });
       }
 
-
-      /* ===================================================
-         VERTICAL ENERGY COLUMNS
-         =================================================== */
+      /* =====================================================
+         VERTICAL ENERGY
+         ===================================================== */
 
       for (
         let i = 0;
         i < 4;
         i += 1
       ) {
-
         const beam =
           this.add
             .rectangle(
               x +
-                (i - 1.5) *
-                20,
+                (i - 1.5) * 20,
               tower.topY + 100,
               2,
               100,
               0xffd06e,
               0.28
             )
-            .setDepth(999);
-
+            .setDepth(
+              DEPTH_BURST
+            );
 
         this.tweens.add({
+          targets: beam,
 
-          targets:
-            beam,
+          scaleY: 2.8,
 
-          scaleY:2.8,
-
-          alpha:0,
+          alpha: 0,
 
           duration:
             650 +
@@ -1749,25 +1763,17 @@ if (!window.__relayFinishTowerV11_8) {
           delay:
             i * 80,
 
-          ease:'Cubic.easeOut',
+          ease: 'Cubic.easeOut',
 
-          onComplete:() => {
-
-            beam.destroy();
+          onComplete: () => {
+            safeDestroy(beam);
           }
         });
       }
 
-
-      atmosphere.setAlpha(
-        0.08
-      );
-
-      atmosphere2.setAlpha(
-        0.10
-      );
+      atmosphere.setAlpha(0.08);
+      atmosphere2.setAlpha(0.10);
     };
-
 
   /* =======================================================
      GAMEPLAY UPDATE
@@ -1779,234 +1785,263 @@ if (!window.__relayFinishTowerV11_8) {
       delta
     ) {
 
-      const mobileJumpBeforeUpdate =
-        Boolean(
-          this.mobileActions?.jump
-        );
-
-
-      const jumpBeforeUpdate =
-        Boolean(
-
-          this.keys?.W?.isDown ||
-
-          this.keys?.SPACE?.isDown ||
-
-          this.cursors?.up?.isDown
-        );
-
-
-      const result =
-        originalUpdate.apply(
-          this,
-          arguments
-        );
-
+      const scene =
+        this;
 
       const tower =
-        this.finishTower;
+        scene.finishTower;
 
+      /*
+       * Always preserve the original RunnerScene update.
+       */
+      const result =
+        originalUpdate.apply(
+          scene,
+          arguments
+        );
 
       if (
         !tower ||
         tower.completed ||
-        !this.player?.body
+        !scene.player?.body
       ) {
-
         return result;
       }
 
+      /* =====================================================
+         CINEMATIC LOCK
+         ===================================================== */
 
       if (
-        this.cinematicActive
+        scene.cinematicActive
       ) {
-
         if (
-          mobileJumpBeforeUpdate
+          scene.mobileActions?.jump
         ) {
-
-          this.mobileActions.jump =
+          scene.mobileActions.jump =
             false;
 
-          this.cinematicSkipHandler?.();
+          try {
+            scene.cinematicSkipHandler?.();
+          } catch {}
         }
-
 
         return result;
       }
 
+      /* =====================================================
+         INPUT
+         ===================================================== */
 
       const keys =
-        this.finishTowerKeys ||
+        scene.finishTowerKeys ||
+        scene.keys ||
         {};
 
+      const jumpPressed =
+        Boolean(
+          scene.mobileActions?.jump ||
+          scene.keys?.W?.isDown ||
+          scene.keys?.SPACE?.isDown ||
+          scene.cursors?.up?.isDown
+        );
 
-      const down =
-        keys.S?.isDown ||
-        this.cursors?.down?.isDown;
+      const movingDown =
+        Boolean(
+          keys.S?.isDown ||
+          scene.cursors?.down?.isDown
+        );
 
+      /* =====================================================
+         PROXIMITY
+         ===================================================== */
+
+      const distanceX =
+        Math.abs(
+          scene.player.x -
+          tower.x
+        );
 
       const near =
-
-        Math.abs(
-          this.player.x -
-          tower.x
-        ) <=
+        distanceX <=
           TOWER.engageRadius &&
-
-        this.player.y >=
+        scene.player.y >=
           tower.topY - 35 &&
-
-        this.player.y <=
+        scene.player.y <=
           tower.baseY + 30;
 
-
-      /* ===================================================
+      /* =====================================================
          START CLIMB
-         =================================================== */
+         ===================================================== */
 
       if (
-
         !tower.climbing &&
-
         near &&
-
         (
-
           tower.request ||
-
-          mobileJumpBeforeUpdate ||
-
-          jumpBeforeUpdate ||
-
-          this.player.body.velocity.y <
-            -120
+          jumpPressed ||
+          scene.player.body.velocity.y < -120
         )
-
       ) {
+        tower.climbing = true;
+        tower.request = false;
 
-        tower.climbing =
-          true;
-
-
-        tower.request =
-          false;
-
-
-        this.player.body
-          .setAllowGravity(false)
-          .setVelocity(0,0);
-
-
-        this.player.setTexture(
-          'runner-wall'
+        setPlayerGravity(
+          scene,
+          false
         );
 
+        stopPlayerMovement(
+          scene
+        );
 
-        this.game.events.emit(
-          'finish-tower-climb',
-          {
-            active:true
+        try {
+          if (
+            scene.textures?.exists?.(
+              'runner-wall'
+            )
+          ) {
+            scene.player.setTexture(
+              'runner-wall'
+            );
           }
+        } catch {}
+
+        emitClimbState(
+          scene,
+          true
         );
       }
-
 
       if (
         !tower.climbing
       ) {
-
         return result;
       }
 
+      /* =====================================================
+         CLIMB MOTION
+         ===================================================== */
 
-      /* ===================================================
-         CLIMBING
-         =================================================== */
+      setPlayerGravity(
+        scene,
+        false
+      );
 
-      this.player.body
-        .setAllowGravity(false)
-        .setVelocity(0,0);
+      stopPlayerMovement(
+        scene
+      );
 
-
-      this.player.x =
+      /*
+       * Pull the player toward the center
+       * of the ladder smoothly.
+       */
+      scene.player.x =
         Phaser.Math.Linear(
-          this.player.x,
+          scene.player.x,
           tower.x,
           0.28
         );
 
+      /*
+       * Default movement is UP.
+       * Holding DOWN reverses to DOWN.
+       */
+      const climbDirection =
+        movingDown
+          ? 1
+          : -1;
 
-      const direction =
-        down ? -1 : 1;
-
-
-      this.player.y -=
+      scene.player.y +=
         TOWER.climbSpeed *
-        direction *
+        climbDirection *
         delta /
         1000;
 
+      /* =====================================================
+         CLAMP
+         ===================================================== */
 
-      this.player.y =
+      const minY =
+        tower.topY + 16;
+
+      const maxY =
+        tower.baseY - 28;
+
+      scene.player.y =
         Phaser.Math.Clamp(
-          this.player.y,
-
-          tower.topY + 12,
-
-          tower.baseY - 28
+          scene.player.y,
+          minY,
+          maxY
         );
 
-
-      /* ===================================================
-         TOP CLAMP
-         =================================================== */
+      /* =====================================================
+         REACHED TOP
+         ===================================================== */
 
       if (
-        this.player.y <=
-        tower.topY + 18
+        scene.player.y <=
+        minY
       ) {
-
-        this.player.y =
-          tower.topY + 16;
+        scene.player.y =
+          minY;
       }
 
-
-      /* ===================================================
-         RETURN DOWN
-         =================================================== */
+      /* =====================================================
+         RETURN TO BOTTOM
+         ===================================================== */
 
       if (
-
-        this.player.y >=
-          tower.baseY - 28 &&
-
-        down
-
+        scene.player.y >= maxY &&
+        movingDown
       ) {
-
-        tower.climbing =
-          false;
-
-
-        this.player.body
-          .setAllowGravity(true);
-
-
-        this.player.setTexture(
-          'runner-idle'
-        );
-
-
-        this.game.events.emit(
-          'finish-tower-climb',
-          {
-            active:false
-          }
+        stopClimbing(
+          scene
         );
       }
-
 
       return result;
     };
+
+  /* =======================================================
+     SCENE CLEANUP
+     ======================================================= */
+
+  const originalShutdown =
+    RunnerScene.prototype.shutdown;
+
+  if (
+    typeof originalShutdown ===
+    'function'
+  ) {
+    RunnerScene.prototype.shutdown =
+      function finishTowerShutdown() {
+
+        destroyTower(this);
+
+        return originalShutdown.apply(
+          this,
+          arguments
+        );
+      };
+  }
+
+  const originalDestroy =
+    RunnerScene.prototype.destroy;
+
+  if (
+    typeof originalDestroy ===
+    'function'
+  ) {
+    RunnerScene.prototype.destroy =
+      function finishTowerDestroy() {
+
+        destroyTower(this);
+
+        return originalDestroy.apply(
+          this,
+          arguments
+        );
+      };
+  }
 }
