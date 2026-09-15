@@ -1,82 +1,133 @@
-/* =========================================================
-   RELAY RUNNER
-   FAQ + LATEST UPDATE CONTENT
-   UI CONTENT ONLY
-   ========================================================= */
+(() => {
+  const panel = document.getElementById('relayInfoPanel');
+  const card = panel?.querySelector('.relay-info-card');
+  const faqItems = [...document.querySelectorAll('.relay-faq-item')];
+  const filterButtons = [...document.querySelectorAll('[data-faq-filter]')];
 
-export const RELAY_FAQ = [
-  [
-    'How do I play?',
-    'Use A / D or the left and right side of the joystick to move. Use SPACE or JUMP to jump. On mobile, use the touch controls.'
-  ],
+  if (!panel || !card) return;
 
-  [
-    'How do I complete a mission?',
-    'Follow the active mission objective, collect the required signals and reach the delivery beacon. When the mission is complete, select NEXT MISSION.'
-  ],
+  const closeFaq = () => {
+    panel.classList.add('hidden');
+    panel.setAttribute('aria-hidden', 'true');
 
-  [
-    'How do I move to the next mission?',
-    'After successfully completing the current mission, select NEXT MISSION. The game will load the next available mission.'
-  ],
+    faqItems.forEach(item => {
+      item.classList.remove('open');
 
-  [
-    'What do SWORD, DASH and BUILD do?',
-    'SWORD is your close-range combat ability. DASH gives you a fast movement burst for avoiding hazards and closing distance. BUILD activates available construction abilities.'
-  ],
+      const button = item.querySelector('.relay-faq-question');
+      const answer = item.querySelector('.relay-faq-answer');
 
-  [
-    'Can I play on a phone?',
-    'Yes. Relay Runner supports touch controls on mobile devices. Landscape orientation is recommended for the clearest gameplay view and full control layout.'
-  ],
+      button?.setAttribute('aria-expanded', 'false');
 
-  [
-    'Why is there no sound?',
-    'Mobile browsers can block automatic audio playback. Tap the game once to unlock audio, then check your device volume, media volume and mute settings.'
-  ],
+      if (answer) {
+        answer.hidden = true;
+      }
+    });
+  };
 
-  [
-    'Is my progress saved?',
-    'Mission progress and game data use the existing save system. Avoid clearing browser or site data if you want to keep your local progress.'
-  ],
+  const openFaq = () => {
+    panel.classList.remove('hidden');
+    panel.setAttribute('aria-hidden', 'false');
+  };
 
-  [
-    'What is XP?',
-    'XP means experience points. You earn XP through missions and activities, helping advance your courier rank.'
-  ],
+  /* FAQ accordion */
 
-  [
-    'How do I pause the game?',
-    'During gameplay, use the ☰ button in the HUD to open the Courier Terminal. From there you can resume the run, inspect missions and progress, or open settings.'
-  ],
+  faqItems.forEach(item => {
+    const button = item.querySelector('.relay-faq-question');
+    const answer = item.querySelector('.relay-faq-answer');
 
-  [
-    'Where can I see the latest changes?',
-    'From the title screen, open the circular INFO button in the upper-right corner to view the latest gameplay update.'
-  ]
-];
+    if (!button || !answer) return;
 
+    button.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
 
-/* =========================================================
-   LATEST UPDATE
-   ========================================================= */
+      faqItems.forEach(other => {
+        if (other === item) return;
 
-export const LATEST_UPDATE = {
-  version: 'LATEST UPDATE // GAMEPLAY',
+        other.classList.remove('open');
 
-  title: 'ENEMY AWARENESS',
+        const otherButton =
+          other.querySelector('.relay-faq-question');
 
-  items: [
-    'Enemy AI now uses a unified movement controller for smoother and more frame-rate-safe movement.',
+        const otherAnswer =
+          other.querySelector('.relay-faq-answer');
 
-    'Enemies now recognize platform positions and only pursue the player when the route is physically reachable.',
+        otherButton?.setAttribute(
+          'aria-expanded',
+          'false'
+        );
 
-    'Enemy awareness and combat difficulty scale progressively across all seven missions.',
+        if (otherAnswer) {
+          otherAnswer.hidden = true;
+        }
+      });
 
-    'Platform combat, ranged attacks and enemy abilities remain active without forcing enemies through level geometry.',
+      item.classList.toggle('open', !isOpen);
+      button.setAttribute(
+        'aria-expanded',
+        String(!isOpen)
+      );
 
-    'Egg Hazard now uses a ballistic flight arc with target prediction and rotation that follows its actual flight direction.',
+      answer.hidden = isOpen;
+    });
+  });
 
-    'Home briefing, FAQ and the latest gameplay update remain accessible directly from the title screen.'
-  ]
-};
+  /* CATEGORY FILTER */
+
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const filter = button.dataset.faqFilter || 'all';
+
+      filterButtons.forEach(btn => {
+        btn.classList.toggle(
+          'active',
+          btn === button
+        );
+      });
+
+      faqItems.forEach(item => {
+        const category = item.dataset.category;
+
+        const visible =
+          filter === 'all' ||
+          category === filter;
+
+        item.classList.toggle(
+          'faq-filter-hidden',
+          !visible
+        );
+      });
+    });
+  });
+
+  /* CLOSE BY ESC */
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      if (!panel.classList.contains('hidden')) {
+        closeFaq();
+      }
+    }
+  });
+
+  /* CLOSE BY BACKDROP */
+
+  panel.addEventListener('click', event => {
+    if (event.target === panel) {
+      closeFaq();
+    }
+  });
+
+  /* OPTIONAL GLOBAL API */
+
+  window.relayFaq = {
+    open: openFaq,
+    close: closeFaq,
+    toggle() {
+      if (panel.classList.contains('hidden')) {
+        openFaq();
+      } else {
+        closeFaq();
+      }
+    }
+  };
+})();
