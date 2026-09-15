@@ -1,1 +1,13 @@
 .relay-splash-status{display:inline-block;color:#f5f7fb;font-weight:700;min-width:0}.relay-splash-meta{justify-content:space-between}.relay-splash-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:480px){.relay-splash-status{max-width:calc(100% - 56px)}}
+
+/* P0 MOBILE FAIL-OPEN: remove the presentation overlay even if the JS
+   event loop is delayed by Phaser/runtime initialization. */
+.relay-splash{animation:relaySplashEmergencyReveal 4.2s linear forwards;will-change:opacity,visibility}
+.relay-splash.is-hidden{animation:none!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+@keyframes relaySplashEmergencyReveal{
+  0%,76%{opacity:1;visibility:visible;pointer-events:auto}
+  100%{opacity:0;visibility:hidden;pointer-events:none}
+}
+@media(max-width:700px) and (orientation:portrait){
+  .relay-splash{animation-duration:3.6s}
+}
