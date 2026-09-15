@@ -1449,14 +1449,14 @@
       return;
     }
 
-    runtime.finishing = true;
+ await animateTo(
+  100,
+  'READY'
+);
 
-    clearTimers();
+runtime.finishing = true;
 
-    await animateTo(
-      100,
-      'READY'
-    );
+clearTimers();
 
     if (runtime.hud?.log) {
       runtime.hud.log
