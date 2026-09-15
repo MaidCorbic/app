@@ -214,7 +214,6 @@
 
     const elapsed = () => performance.now() - started;
 
-    // Deterministic presentation stages. None of these stages waits for runtime readiness.
     const stages = [
       [8, 'INITIALIZING RELAY', 120],
       [26, 'LOADING INTERFACE', 420],
@@ -233,8 +232,6 @@
       else window.setTimeout(maybeFinish, MIN_SPLASH_MS - elapsed());
     };
 
-    // The splash is deliberately independent from image/page/engine readiness.
-    // If the artwork fails, Home still opens.
     if (image.complete && image.naturalWidth > 0) {
       setProgress(26, 'LOADING INTERFACE');
     } else {
@@ -248,6 +245,8 @@
     window.setTimeout(() => window.clearTimeout(finishTimer), MAX_SPLASH_MS + 50);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-  else boot();
+  // Module scripts execute after the document has been parsed, but DOMContentLoaded
+  // waits for module execution. Waiting for DOMContentLoaded here therefore delayed
+  // the splash controller until after the rest of the runtime boot. Start immediately.
+  boot();
 })();
