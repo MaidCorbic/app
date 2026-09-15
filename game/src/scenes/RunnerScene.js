@@ -8307,6 +8307,114 @@ this.keys =
 this.flightMode = false;
 this.flightSpeed = 420;
 
+/*
+ * ============================================================
+ * KEYBOARD INPUT FALLBACK
+ * Browser-level state is the authoritative fallback for
+ * gameplay keyboard controls.
+ * ============================================================
+ */
+this.rawKeyboardState = Object.create(null);
+
+this.rawKeyboardDownHandler = event => {
+  const code = event?.code;
+
+  if (
+    code !== 'KeyW' &&
+    code !== 'KeyA' &&
+    code !== 'KeyS' &&
+    code !== 'KeyD' &&
+    code !== 'KeyE' &&
+    code !== 'KeyF' &&
+    code !== 'Space' &&
+    code !== 'ShiftLeft' &&
+    code !== 'ShiftRight'
+  ) {
+    return;
+  }
+
+  this.rawKeyboardState[code] = true;
+
+  /*
+   * W/A/S/D must be able to release the opening cinematic
+   * immediately instead of waiting for the timeout.
+   */
+  if (
+    this.cinematicActive &&
+    (
+      code === 'KeyW' ||
+      code === 'KeyA' ||
+      code === 'KeyS' ||
+      code === 'KeyD'
+    )
+  ) {
+    this.cinematicSkipHandler?.();
+  }
+
+  const tag =
+    event.target?.tagName?.toUpperCase();
+
+  /*
+   * Prevent browser scrolling/default behaviour while
+   * the game owns the keyboard.
+   */
+  if (
+    this.scene.isActive() &&
+    !this.finished &&
+    !this.respawning &&
+    !this.relayPuzzleActive &&
+    tag !== 'INPUT' &&
+    tag !== 'TEXTAREA' &&
+    tag !== 'SELECT' &&
+    tag !== 'BUTTON'
+  ) {
+    event.preventDefault();
+  }
+};
+
+this.rawKeyboardUpHandler = event => {
+  const code = event?.code;
+
+  if (
+    code === 'KeyW' ||
+    code === 'KeyA' ||
+    code === 'KeyS' ||
+    code === 'KeyD' ||
+    code === 'KeyE' ||
+    code === 'KeyF' ||
+    code === 'Space' ||
+    code === 'ShiftLeft' ||
+    code === 'ShiftRight'
+  ) {
+    this.rawKeyboardState[code] = false;
+  }
+};
+
+this.rawKeyboardBlurHandler = () => {
+  Object.keys(this.rawKeyboardState).forEach(
+    code => {
+      this.rawKeyboardState[code] = false;
+    }
+  );
+};
+
+window.addEventListener(
+  'keydown',
+  this.rawKeyboardDownHandler,
+  true
+);
+
+window.addEventListener(
+  'keyup',
+  this.rawKeyboardUpHandler,
+  true
+);
+
+window.addEventListener(
+  'blur',
+  this.rawKeyboardBlurHandler
+);
+
 this.mobileActions = {
   jump: false,
   jumpHeld: false,
@@ -12770,6 +12878,34 @@ clearWaterWaves() {
 }
 
 shutdown() {
+  if (this.rawKeyboardDownHandler) {
+    window.removeEventListener(
+      'keydown',
+      this.rawKeyboardDownHandler,
+      true
+    );
+  }
+
+  if (this.rawKeyboardUpHandler) {
+    window.removeEventListener(
+      'keyup',
+      this.rawKeyboardUpHandler,
+      true
+    );
+  }
+
+  if (this.rawKeyboardBlurHandler) {
+    window.removeEventListener(
+      'blur',
+      this.rawKeyboardBlurHandler
+    );
+  }
+
+  this.rawKeyboardState = null;
+  this.rawKeyboardDownHandler = null;
+  this.rawKeyboardUpHandler = null;
+  this.rawKeyboardBlurHandler = null;
+
   this.checkpointArrow?.destroy();
   this.checkpointArrow = null;
 
@@ -33640,6 +33776,10 @@ updateAfkSystem(delta) {
     Math.abs(body.velocity?.x || 0) +
     Math.abs(body.velocity?.y || 0);
 
+  const rawKeyboard =
+    this.rawKeyboardState ||
+    {};
+
   const keyboardMovement =
     Boolean(
       this.cursors?.left?.isDown ||
@@ -33649,7 +33789,11 @@ updateAfkSystem(delta) {
       this.keys?.A?.isDown ||
       this.keys?.D?.isDown ||
       this.keys?.W?.isDown ||
-      this.keys?.S?.isDown
+      this.keys?.S?.isDown ||
+      rawKeyboard.KeyA ||
+      rawKeyboard.KeyD ||
+      rawKeyboard.KeyW ||
+      rawKeyboard.KeyS
     );
 
   const keyboardAction =
@@ -33660,7 +33804,12 @@ updateAfkSystem(delta) {
       this.keys?.F?.isDown ||
       this.keys?.Q?.isDown ||
       this.keys?.R?.isDown ||
-      this.keys?.X?.isDown
+      this.keys?.X?.isDown ||
+      rawKeyboard.Space ||
+      rawKeyboard.ShiftLeft ||
+      rawKeyboard.ShiftRight ||
+      rawKeyboard.KeyE ||
+      rawKeyboard.KeyF
     );
 
   const mobileMovement =
@@ -35987,23 +36136,44 @@ if (!body) {
   return;
 }
 
+const rawKeyboard =
+  this.rawKeyboardState ||
+  {};
+
 const left =
   this.cursors.left.isDown ||
   this.keys.A.isDown ||
+  rawKeyboard.KeyA ||
   this.mobileDirection ===
     'left';
 
 const right =
   this.cursors.right.isDown ||
   this.keys.D.isDown ||
+  rawKeyboard.KeyD ||
   this.mobileDirection ===
     'right';
 
 const forward =
-  this.keys.W.isDown;
+  this.keys.W.isDown ||
+  rawKeyboard.KeyW;
 
 const backward =
-  this.keys.S.isDown;
+  this.keys.S.isDown ||
+  rawKeyboard.KeyS;
+
+/*
+ * If AFK/cryostasis previously disabled movement,
+ * any real keyboard movement input re-enables the body.
+ */
+if (
+  left ||
+  right ||
+  forward ||
+  backward
+) {
+  body.moves = true;
+}
 
 /*
  * MOBILE AIR STEERING
