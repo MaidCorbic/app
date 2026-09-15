@@ -14,23 +14,54 @@
   window.__relayHomeV4 = true;
 
   const $ = id => document.getElementById(id);
-const introVisible = () => {
-  const intro = $('intro');
-  if (!intro) return false;
 
-  intro.classList.remove('hidden');
-  intro.removeAttribute('hidden');
-  intro.style.setProperty('display', 'block', 'important');
-  intro.style.setProperty('visibility', 'visible', 'important');
-  intro.style.setProperty('opacity', '1', 'important');
-  intro.style.setProperty('pointer-events', 'auto', 'important');
+  const introVisible = () => {
+    const intro = $('intro');
+    return !!intro && !intro.classList.contains('hidden');
+  };
 
-  return true;
-};
+  const forceStartVisible = start => {
+    if (!(start instanceof HTMLElement)) return;
+
+    start.hidden = false;
+    start.removeAttribute('hidden');
+    start.classList.remove('hidden');
+
+    start.style.setProperty(
+      'display',
+      'flex',
+      'important'
+    );
+
+    start.style.setProperty(
+      'visibility',
+      'visible',
+      'important'
+    );
+
+    start.style.setProperty(
+      'opacity',
+      '1',
+      'important'
+    );
+
+    start.style.setProperty(
+      'pointer-events',
+      'auto',
+      'important'
+    );
+  };
 
   const clickExisting = selector => {
     const target = document.querySelector(selector);
-    if (!(target instanceof HTMLElement) || target.disabled) return false;
+
+    if (
+      !(target instanceof HTMLElement) ||
+      target.disabled
+    ) {
+      return false;
+    }
+
     try {
       HTMLElement.prototype.click.call(target);
       return true;
@@ -41,42 +72,66 @@ const introVisible = () => {
 
   const openOptions = () => {
     try {
-      if (typeof window.relayUnifiedCinematicUI?.openOptions === 'function') {
+      if (
+        typeof window.relayUnifiedCinematicUI?.openOptions ===
+        'function'
+      ) {
         window.relayUnifiedCinematicUI.openOptions();
         return true;
       }
     } catch {}
-    return clickExisting('[data-title-panel="controls"]');
+
+    return clickExisting(
+      '[data-title-panel="controls"]'
+    );
   };
 
   const openFaq = () => {
     try {
-      if (typeof window.relayUnifiedCinematicUI?.openFAQ === 'function') {
+      if (
+        typeof window.relayUnifiedCinematicUI?.openFAQ ===
+        'function'
+      ) {
         window.relayUnifiedCinematicUI.openFAQ();
         return true;
       }
     } catch {}
-    return clickExisting('[data-relay-info="faq"]');
+
+    return clickExisting(
+      '[data-relay-info="faq"]'
+    );
   };
 
   const openUpdate = () => {
     console.log('[RelayRunner] UPDATE CLICKED');
 
-    const panel = document.getElementById('relayInfoPanel');
-    const eyebrow = document.getElementById('relayInfoEyebrow');
-    const heading = document.getElementById('relayInfoHeading');
-    const content = document.getElementById('relayInfoContent');
+    const panel =
+      document.getElementById('relayInfoPanel');
+
+    const eyebrow =
+      document.getElementById('relayInfoEyebrow');
+
+    const heading =
+      document.getElementById('relayInfoHeading');
+
+    const content =
+      document.getElementById('relayInfoContent');
 
     try {
       if (typeof window.relayOpenInfo === 'function') {
         window.relayOpenInfo('update');
       }
     } catch (error) {
-      console.error('[RelayRunner] UPDATE open failed:', error);
+      console.error(
+        '[RelayRunner] UPDATE open failed:',
+        error
+      );
     }
 
     if (!(panel instanceof HTMLElement)) {
-      console.error('[RelayRunner] relayInfoPanel NOT FOUND');
+      console.error(
+        '[RelayRunner] relayInfoPanel NOT FOUND'
+      );
       return false;
     }
 
@@ -93,13 +148,30 @@ const introVisible = () => {
 
     if (content instanceof HTMLElement) {
       content.innerHTML = `
-        <p class="relay-update-meta">CHAPTER 01 / NIGHT SHIFT · PATCH 01.08 · DEPLOYMENT READY</p>
+        <p class="relay-update-meta">
+          CHAPTER 01 / NIGHT SHIFT · PATCH 01.08 · DEPLOYMENT READY
+        </p>
+
         <div class="relay-update-list">
-          <div class="relay-update-item">SYSTEM STATUS // ONLINE</div>
-          <div class="relay-update-item">GAMEPLAY CORE // SYNCHRONIZED</div>
-          <div class="relay-update-item">NEW // IMPROVED ROOFTOP MOVEMENT</div>
-          <div class="relay-update-item">NEW // REFINED MOBILE CONTROLS</div>
-          <div class="relay-update-item">PATCH // HUD STABILITY IMPROVEMENTS</div>
+          <div class="relay-update-item">
+            SYSTEM STATUS // ONLINE
+          </div>
+
+          <div class="relay-update-item">
+            GAMEPLAY CORE // SYNCHRONIZED
+          </div>
+
+          <div class="relay-update-item">
+            NEW // IMPROVED ROOFTOP MOVEMENT
+          </div>
+
+          <div class="relay-update-item">
+            NEW // REFINED MOBILE CONTROLS
+          </div>
+
+          <div class="relay-update-item">
+            PATCH // HUD STABILITY IMPROVEMENTS
+          </div>
         </div>
       `;
     }
@@ -107,66 +179,47 @@ const introVisible = () => {
     return true;
   };
 
-const setHomeState = () => {
-  const intro = $('intro');
-  const visible = introVisible();
+  const setHomeState = () => {
+    const intro = $('intro');
+    const visible = introVisible();
 
-  document.body.classList.toggle(
-    'home-v3-active',
-    visible
-  );
+    document.body.classList.toggle(
+      'home-v3-active',
+      visible
+    );
 
-  intro?.classList.toggle(
-    'home-v3',
-    visible
-  );
+    intro?.classList.toggle(
+      'home-v3',
+      visible
+    );
 
-  if (visible) {
+    if (!visible) return;
+
     const start = intro?.querySelector('#start');
 
-    if (start instanceof HTMLElement) {
-      start.hidden = false;
-      start.removeAttribute('hidden');
-      start.classList.remove('hidden');
-
-      start.style.setProperty(
-        'display',
-        'flex',
-        'important'
-      );
-
-      start.style.setProperty(
-        'visibility',
-        'visible',
-        'important'
-      );
-
-      start.style.setProperty(
-        'opacity',
-        '1',
-        'important'
-      );
-
-      start.style.setProperty(
-        'pointer-events',
-        'auto',
-        'important'
-      );
-    }
-  }
-};
+    forceStartVisible(start);
+  };
 
   const bindOnce = (node, event, handler) => {
     if (!(node instanceof HTMLElement)) return;
+
     const key = `homeV4Bound${event}`;
+
     if (node.dataset[key] === '1') return;
+
     node.dataset[key] = '1';
     node.addEventListener(event, handler);
   };
 
   const buildHome = () => {
     const intro = $('intro');
-    if (!intro || intro.dataset.homeV4Built === '1') return;
+
+    if (
+      !intro ||
+      intro.dataset.homeV4Built === '1'
+    ) {
+      return;
+    }
 
     const sourceStart = $('start');
     const sourceContinue = $('continue');
@@ -176,8 +229,13 @@ const setHomeState = () => {
     intro.replaceChildren();
 
     const scene = document.createElement('div');
+
     scene.className = 'home-v4-scene';
-    scene.setAttribute('aria-hidden', 'true');
+    scene.setAttribute(
+      'aria-hidden',
+      'true'
+    );
+
     scene.innerHTML = `
       <div class="home-v4-art"></div>
       <div class="home-v4-sky"></div>
@@ -189,14 +247,23 @@ const setHomeState = () => {
     `;
 
     const shell = document.createElement('div');
+
     shell.className = 'home-v4-shell';
+
     shell.innerHTML = `
       <header class="home-v4-topbar">
-        <div class="home-v4-brand" aria-label="Relay Runner">
+        <div
+          class="home-v4-brand"
+          aria-label="Relay Runner"
+        >
           <span class="home-v4-brand-mark">R/</span>
           <span>RELAY RUNNER</span>
         </div>
-        <div class="home-v4-status" aria-label="System status">
+
+        <div
+          class="home-v4-status"
+          aria-label="System status"
+        >
           <span class="home-v4-status-dot"></span>
           <b>SYSTEM ONLINE</b>
           <span>NIGHT SHIFT</span>
@@ -204,117 +271,256 @@ const setHomeState = () => {
       </header>
 
       <main class="home-v4-main">
-        <section class="home-v4-copy" aria-labelledby="homeV4Title">
-          <p class="home-v4-kicker">CHAPTER 01 / OLD QUARTER</p>
-          <h1 id="homeV4Title" class="home-v4-title">RELAY<span>RUNNER</span></h1>
-          <p class="home-v4-subline">ROOFTOP RELAY // LIVE NETWORK</p>
-          <p class="home-v4-description">Run the sleeping city. Carry the signal farther than anyone else can. Keep the line open.</p>
+        <section
+          class="home-v4-copy"
+          aria-labelledby="homeV4Title"
+        >
+          <p class="home-v4-kicker">
+            CHAPTER 01 / OLD QUARTER
+          </p>
 
-          <div class="home-v4-actions" aria-label="Main menu">
-            <button id="start" class="home-v4-primary" type="button">
+          <h1
+            id="homeV4Title"
+            class="home-v4-title"
+          >
+            RELAY<span>RUNNER</span>
+          </h1>
+
+          <p class="home-v4-subline">
+            ROOFTOP RELAY // LIVE NETWORK
+          </p>
+
+          <p class="home-v4-description">
+            Run the sleeping city. Carry the signal farther
+            than anyone else can. Keep the line open.
+          </p>
+
+          <div
+            class="home-v4-actions"
+            aria-label="Main menu"
+          >
+            <button
+              id="start"
+              class="home-v4-primary"
+              type="button"
+            >
               <span class="home-v4-primary-content">
                 <span>START RUN</span>
-                <span class="home-v4-arrow-key" aria-hidden="true">ENTER</span>
-                <span class="home-v4-primary-arrow" aria-hidden="true">→</span>
+                <span
+                  class="home-v4-arrow-key"
+                  aria-hidden="true"
+                >
+                  ENTER
+                </span>
+                <span
+                  class="home-v4-primary-arrow"
+                  aria-hidden="true"
+                >
+                  →
+                </span>
               </span>
             </button>
 
-            <button id="continue" class="home-v4-secondary hidden" type="button">
+            <button
+              id="continue"
+              class="home-v4-secondary hidden"
+              type="button"
+            >
               <span>CONTINUE</span>
               <small>RESUME LAST RUN</small>
             </button>
           </div>
-          <p class="home-v4-micro"><b>DEPLOYMENT READY</b> · PRESS ENTER TO BEGIN</p>
+
+          <p class="home-v4-micro">
+            <b>DEPLOYMENT READY</b>
+            · PRESS ENTER TO BEGIN
+          </p>
         </section>
 
-        <section class="home-v4-mission-wrap" aria-label="Current mission">
+        <section
+          class="home-v4-mission-wrap"
+          aria-label="Current mission"
+        >
           <article class="home-v4-mission">
             <div class="home-v4-mission-head">
-              <span class="home-v4-mission-label">ACTIVE MISSION</span>
-              <span class="home-v4-mission-code">RR-01 / NIGHT</span>
+              <span class="home-v4-mission-label">
+                ACTIVE MISSION
+              </span>
+
+              <span class="home-v4-mission-code">
+                RR-01 / NIGHT
+              </span>
             </div>
-            <h2 class="home-v4-mission-title">FOLLOW<br>THE RELAY</h2>
-            <p class="home-v4-mission-sub">RECONNECT THE SIGNAL CHAIN ACROSS OLD QUARTER.</p>
+
+            <h2 class="home-v4-mission-title">
+              FOLLOW<br>THE RELAY
+            </h2>
+
+            <p class="home-v4-mission-sub">
+              RECONNECT THE SIGNAL CHAIN ACROSS OLD QUARTER.
+            </p>
 
             <div class="home-v4-mission-progress">
               <div class="home-v4-progress-meta">
                 <span>SIGNAL RECOVERY</span>
-                <strong id="homeV4SignalValue">02 / 08</strong>
+                <strong id="homeV4SignalValue">
+                  02 / 08
+                </strong>
               </div>
-              <div class="home-v4-progress-bar" aria-hidden="true"><div id="homeV4SignalFill" class="home-v4-progress-fill"></div></div>
+
+              <div
+                class="home-v4-progress-bar"
+                aria-hidden="true"
+              >
+                <div
+                  id="homeV4SignalFill"
+                  class="home-v4-progress-fill"
+                ></div>
+              </div>
             </div>
 
             <div class="home-v4-stat-grid">
-              <div class="home-v4-stat"><small>MISSION XP</small><b>+120</b></div>
-              <div class="home-v4-stat"><small>BEST RATING</small><b>A</b></div>
+              <div class="home-v4-stat">
+                <small>MISSION XP</small>
+                <b>+120</b>
+              </div>
+
+              <div class="home-v4-stat">
+                <small>BEST RATING</small>
+                <b>A</b>
+              </div>
             </div>
           </article>
 
-          <div class="home-v4-badge">LIVE RELAY CHANNEL // 01</div>
+          <div class="home-v4-badge">
+            LIVE RELAY CHANNEL // 01
+          </div>
         </section>
       </main>
 
       <footer class="home-v4-bottom">
         <div class="home-v4-bottom-left">
-          <button class="home-v4-utility" type="button" data-home-v4-action="faq">? &nbsp;FAQ</button>
-          <button class="home-v4-utility" type="button" data-home-v4-action="update">↗ &nbsp;UPDATE</button>
-          <button class="home-v4-utility" type="button" data-home-v4-action="options">⚙ &nbsp;OPTIONS</button>
+          <button
+            class="home-v4-utility"
+            type="button"
+            data-home-v4-action="faq"
+          >
+            ? &nbsp;FAQ
+          </button>
+
+          <button
+            class="home-v4-utility"
+            type="button"
+            data-home-v4-action="update"
+          >
+            ↗ &nbsp;UPDATE
+          </button>
+
+          <button
+            class="home-v4-utility"
+            type="button"
+            data-home-v4-action="options"
+          >
+            ⚙ &nbsp;OPTIONS
+          </button>
         </div>
-        <div class="home-v4-bottom-meta">RELAY NETWORK <b>ONLINE</b> · V1.1.0</div>
+
+        <div class="home-v4-bottom-meta">
+          RELAY NETWORK <b>ONLINE</b> · V1.1.0
+        </div>
       </footer>
 
-      <button id="exitTitle" type="button" aria-hidden="true" tabindex="-1" class="home-v4-compat-anchor">EXIT</button>
+      <button
+        id="exitTitle"
+        type="button"
+        aria-hidden="true"
+        tabindex="-1"
+        class="home-v4-compat-anchor"
+      >
+        EXIT
+      </button>
     `;
 
     intro.append(scene, shell);
 
-    bindOnce(shell.querySelector('[data-home-v4-action="faq"]'), 'click', event => {
-      event.preventDefault();
-      openFaq();
-    });
-    bindOnce(shell.querySelector('[data-home-v4-action="update"]'), 'click', event => {
-      event.preventDefault();
-      openUpdate();
-    });
-    bindOnce(shell.querySelector('[data-home-v4-action="options"]'), 'click', event => {
-      event.preventDefault();
-      openOptions();
-    });
+    bindOnce(
+      shell.querySelector(
+        '[data-home-v4-action="faq"]'
+      ),
+      'click',
+      event => {
+        event.preventDefault();
+        openFaq();
+      }
+    );
 
-   const start = shell.querySelector('#start');
+    bindOnce(
+      shell.querySelector(
+        '[data-home-v4-action="update"]'
+      ),
+      'click',
+      event => {
+        event.preventDefault();
+        openUpdate();
+      }
+    );
 
-if (start instanceof HTMLElement) {
-  start.hidden = false;
-  start.removeAttribute('hidden');
-  start.classList.remove('hidden');
+    bindOnce(
+      shell.querySelector(
+        '[data-home-v4-action="options"]'
+      ),
+      'click',
+      event => {
+        event.preventDefault();
+        openOptions();
+      }
+    );
 
-  start.style.setProperty('display', 'flex', 'important');
-  start.style.setProperty('visibility', 'visible', 'important');
-  start.style.setProperty('opacity', '1', 'important');
-  start.style.setProperty('pointer-events', 'auto', 'important');
-}
+    const start =
+      shell.querySelector('#start');
 
-bindOnce(start, 'click', event => {
-  event.preventDefault();
+    forceStartVisible(start);
 
-  if (!(sourceStart instanceof HTMLElement)) return;
+    bindOnce(
+      start,
+      'click',
+      event => {
+        event.preventDefault();
 
-  try {
-    HTMLElement.prototype.click.call(sourceStart);
-  } catch {}
-});
-    const continueButton = shell.querySelector('#continue');
+        if (
+          !(sourceStart instanceof HTMLElement)
+        ) {
+          return;
+        }
+
+        try {
+          HTMLElement.prototype.click.call(
+            sourceStart
+          );
+        } catch {}
+      }
+    );
+
+    const continueButton =
+      shell.querySelector('#continue');
 
     const syncContinue = () => {
-      if (!(continueButton instanceof HTMLElement)) return;
-      if (!(sourceContinue instanceof HTMLElement)) return;
+      if (
+        !(continueButton instanceof HTMLElement) ||
+        !(sourceContinue instanceof HTMLElement)
+      ) {
+        return;
+      }
 
       const hidden =
         sourceContinue.classList.contains('hidden') ||
         getComputedStyle(sourceContinue).display === 'none' ||
         sourceContinue.hasAttribute('hidden');
 
-      continueButton.classList.toggle('hidden', hidden);
+      continueButton.classList.toggle(
+        'hidden',
+        hidden
+      );
     };
 
     syncContinue();
@@ -326,83 +532,136 @@ bindOnce(start, 'click', event => {
     ) {
       sourceContinue.dataset.homeV4Observed = '1';
 
-      new MutationObserver(syncContinue).observe(
+      new MutationObserver(
+        syncContinue
+      ).observe(
         sourceContinue,
         {
-          attributes:true,
-          attributeFilter:['class','style','hidden']
+          attributes: true,
+          attributeFilter: [
+            'class',
+            'style',
+            'hidden'
+          ]
         }
       );
     }
 
-    bindOnce(continueButton, 'click', event => {
-      event.preventDefault();
+    bindOnce(
+      continueButton,
+      'click',
+      event => {
+        event.preventDefault();
 
-      if (!(sourceContinue instanceof HTMLElement)) return;
+        if (
+          !(sourceContinue instanceof HTMLElement)
+        ) {
+          return;
+        }
 
-      try {
-        HTMLElement.prototype.click.call(sourceContinue);
-      } catch {}
-    });
+        try {
+          HTMLElement.prototype.click.call(
+            sourceContinue
+          );
+        } catch {}
+      }
+    );
   };
 
   const installKeyboard = () => {
-    if (document.documentElement.dataset.homeV4Keys === '1') return;
+    if (
+      document.documentElement.dataset.homeV4Keys === '1'
+    ) {
+      return;
+    }
+
     document.documentElement.dataset.homeV4Keys = '1';
-    document.addEventListener('keydown', event => {
-      if (!introVisible() || event.repeat) return;
-      if (event.key === 'Enter') {
-        const active = document.activeElement;
-        const tag = active?.tagName;
-        if (tag !== 'BUTTON' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
-          event.preventDefault();
-          clickExisting('#start');
+
+    document.addEventListener(
+      'keydown',
+      event => {
+        if (!introVisible() || event.repeat) {
+          return;
+        }
+
+        if (event.key === 'Enter') {
+          const active =
+            document.activeElement;
+
+          const tag =
+            active?.tagName;
+
+          if (
+            tag !== 'BUTTON' &&
+            tag !== 'INPUT' &&
+            tag !== 'TEXTAREA'
+          ) {
+            event.preventDefault();
+            clickExisting('#start');
+          }
+        }
+
+        if (event.key === 'Escape') {
+          const title =
+            $('titlePanel');
+
+          const info =
+            $('relayInfoPanel');
+
+          if (
+            !title?.classList.contains('hidden')
+          ) {
+            title.classList.add('hidden');
+          }
+
+          if (
+            !info?.classList.contains('hidden')
+          ) {
+            info.classList.add('hidden');
+          }
         }
       }
-      if (event.key === 'Escape') {
-        const title = $('titlePanel');
-        const info = $('relayInfoPanel');
-        if (!title?.classList.contains('hidden')) title.classList.add('hidden');
-        if (!info?.classList.contains('hidden')) info.classList.add('hidden');
-      }
-    });
+    );
   };
 
-const boot = () => {
-  buildHome();
+  const boot = () => {
+    buildHome();
+    setHomeState();
+    installKeyboard();
 
-  const intro = $('intro');
+    const intro = $('intro');
 
-  if (intro instanceof HTMLElement) {
-    intro.classList.remove('hidden');
-    intro.removeAttribute('hidden');
-
-    intro.style.setProperty('display', 'block', 'important');
-    intro.style.setProperty('visibility', 'visible', 'important');
-    intro.style.setProperty('opacity', '1', 'important');
-    intro.style.setProperty('pointer-events', 'auto', 'important');
-  }
-
-  setHomeState();
-  installKeyboard();
-
-  if (intro && intro.dataset.homeV4Observed !== '1') {
-    intro.dataset.homeV4Observed = '1';
-
-    new MutationObserver(setHomeState).observe(intro, {
-      attributes: true,
-      attributeFilter: ['class', 'style', 'hidden']
-    });
-  }
-};
+    if (
+      intro &&
+      intro.dataset.homeV4Observed !== '1'
+    ) {
       intro.dataset.homeV4Observed = '1';
-      new MutationObserver(setHomeState).observe(intro, {
-        attributes:true,
-        attributeFilter:['class','style','hidden']
-      });
+
+      new MutationObserver(
+        setHomeState
+      ).observe(
+        intro,
+        {
+          attributes: true,
+          attributeFilter: [
+            'class',
+            'style',
+            'hidden'
+          ]
+        }
+      );
     }
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
-  else boot();
+  if (
+    document.readyState === 'loading'
+  ) {
+    document.addEventListener(
+      'DOMContentLoaded',
+      boot,
+      { once: true }
+    );
+  } else {
+    boot();
+  }
 })();
