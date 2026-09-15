@@ -3503,6 +3503,37 @@ this.elapsedMs = 0;
 this.timeEmitTimer = 0;
 
 // ============================================================
+// AFK / CRYOSTASIS SYSTEM
+// Visual-only V1.
+// 0-4s  NORMAL
+// 4-8s  IDLE
+// 8-12s FROST
+// 12s+  CRYOSTASIS
+// ============================================================
+this.afkTimer = 0;
+this.afkStage = 0;
+this.afkFreezeFx = null;
+
+// Small persistent ice-particle pool.
+// Objects are created once and reused.
+this.afkIceParticles = [];
+
+// CRYOSTASIS DEEP FREEZE FX
+this.afkCryoFx = null;
+this.afkCryoTriggered = false;
+
+// CRYOSTASIS ICE SHARD FX
+this.afkCryoShards = [];
+
+// CRYOSTASIS GAMEPLAY FREEZE
+this.afkCryostasisActive = false;
+this.afkCryoPreviousMoves = true;
+this.afkCryoPreviousAllowGravity = true;
+
+// AFK STATUS HUD
+this.afkStatusText = null;
+
+// ============================================================
 // SIGNAL INTERFERENCE SYSTEM
 // 0.00 = clean signal
 // 1.00 = critical interference / full override
@@ -4377,10 +4408,10 @@ this.createRouteLighting();
 this.createPlayer();
 
 this.respawnGrace =
-  1100;
+  1400;
 
 this.healthInvulnerable =
-  1600;
+  2000;
 
 const spawnShield = this.add
   .circle(
@@ -4484,7 +4515,10 @@ this.cameras.main
   )
   .setDeadzone(185, 100);
 
-this.game.events.emit('runner-ready');
+if (!this._runnerReadyEmitted) {
+  this._runnerReadyEmitted = true;
+  this.game.events.emit('runner-ready');
+}
 this.game.events.emit('health', this.health);
 this.game.events.emit(
   'ammo',
@@ -4495,12 +4529,7 @@ this.game.events.emit(
   this.energy / this.energyMax * 100
 );
 
-if (this.package?.condition) {
-  this.game.events.emit(
-    'package',
-    this.packageCondition
-  );
-}
+// CARGO HUD DISABLED
 
 }
 
@@ -6546,14 +6575,16 @@ if (
 }
 
 handlePlatformLanding(platform) {
-  if (
-    !platform?.active ||
-    this.respawning ||
-    this.finished ||
-    !this.player?.active
-  ) {
-    return;
-  }
+if (
+  this.finished ||
+  this.respawning ||
+  this.cinematicActive ||
+  !this.player?.active ||
+  !this.keys ||
+  !this.cursors
+) {
+  return;
+}
 
   const body =
     this.player.body;
@@ -8242,12 +8273,19 @@ this.physics.add.collider(
   this.player,
   this.platforms,
   (player, platform) => {
-    this.handlePlatformLanding(
-      platform
-    );
-  },
-  undefined,
-  this
+    if (!this.scene.isActive()) return;
+
+    try {
+      this.handlePlatformLanding(
+        platform
+      );
+    } catch (error) {
+      console.error(
+        '[RunnerScene] Platform landing error:',
+        error
+      );
+    }
+  }
 );
 
 this.blaster = this.add
@@ -8301,6 +8339,18 @@ this.mobileActionHandler = action => {
     this.cinematicActive
   ) {
     return;
+  }
+
+  // ============================================================
+  // AFK ACTIVITY · MOBILE INPUT
+  // Any accepted mobile action immediately wakes the player.
+  // ============================================================
+  this.afkTimer = 0;
+
+  if (
+    this.afkStage !== 0
+  ) {
+    this.clearAfkState();
   }
 
   if (action === 'build1') {
@@ -8357,15 +8407,10 @@ if (
 }
 };
 
-this.mobileMoveHandler = null;
-  
 // MOBILE INPUT V9 OWNS JOYSTICK MOVEMENT.
-// Do not register the legacy mobile-move listener here.
+// Legacy mobile-move listener is intentionally disabled.
 
-this.game.events.on(
-  'mobile-move',
-  this.mobileMoveHandler
-);
+this.mobileMoveHandler = null;
 
 this.events.once(
   Phaser.Scenes.Events.SHUTDOWN,
@@ -8375,10 +8420,60 @@ this.events.once(
       this.mobileActionHandler
     );
 
-    this.game.events.off(
-      'mobile-move',
-      this.mobileMoveHandler
-    );
+    // ============================================================
+    // AFK / CRYOSTASIS · SHUTDOWN CLEANUP
+    // ============================================================
+    if (this.afkFreezeFx) {
+      Object.values(
+        this.afkFreezeFx
+      ).forEach(
+        object => {
+          if (!object) {
+            return;
+          }
+
+          this.tweens.killTweensOf(
+            object
+          );
+
+          if (object.active) {
+            object.destroy();
+          }
+        }
+      );
+    }
+
+   this.afkFreezeFx = null;
+
+if (
+  Array.isArray(
+    this.afkIceParticles
+  )
+) {
+  this.afkIceParticles.forEach(
+    particle => {
+      if (!particle) {
+        return;
+      }
+
+      this.tweens.killTweensOf(
+        particle
+      );
+
+      if (particle.active) {
+        particle.destroy();
+      }
+    }
+  );
+
+  this.afkIceParticles = [];
+}
+
+this.afkTimer = 0;
+this.afkStage = 0;
+
+// Legacy mobile-move cleanup intentionally disabled.
+// MOBILE INPUT V9 owns joystick movement.
 
     this.mobileDirection = null;
 
@@ -10894,16 +10989,24 @@ const surfaceY =
 
         const originX = player.x;
 
-        player.body?.setVelocityY(
-          Math.min(
-            player.body.velocity.y,
-            140
-          )
-        );
+    const playerBody =
+  player?.body;
 
-        player.body?.setVelocityX(
-          player.body.velocity.x * 0.22
-        );
+if (!playerBody) {
+  this.waterAttackActive = false;
+  return;
+}
+
+playerBody.setVelocityY(
+  Math.min(
+    playerBody.velocity.y,
+    140
+  )
+);
+
+playerBody.setVelocityX(
+  playerBody.velocity.x * 0.22
+);
 
         this.playerCue(
           'SHARK INCOMING',
@@ -11464,14 +11567,21 @@ if (attackVariant === 1) {
   );
 }
 
-          player.body?.setVelocityY(
+     const playerBody =
+  player?.body;
+
+if (!playerBody) {
+  return;
+}
+
+playerBody.setVelocityY(
   attackVariant === 0
     ? 420
     : 500
 );
 
-player.body?.setVelocityX(
-  player.body.velocity.x *
+playerBody.setVelocityX(
+  playerBody.velocity.x *
     (attackVariant === 0
       ? 0.15
       : 0.08)
@@ -19004,16 +19114,49 @@ const indicator =
 1
 );
 
-    enemy.setData(
-      'nextShot',
-      500
-    );
-    enemy.setData(
-      'indicator',
-      indicator
-    );
+  enemy.setData(
+  'nextShot',
+  500
+);
 
-    return enemy;
+if (type === 'chicken') {
+  enemy.setData(
+    'fireNext',
+    0
+  );
+
+  enemy.setData(
+    'fireUntil',
+    0
+  );
+
+enemy.setData(
+  'fireNextDamage',
+  0
+);
+
+enemy.setData(
+  'fireHitLock',
+  0
+);
+
+enemy.setData(
+  'fireAngle',
+  0
+);
+
+enemy.setData(
+  'fireFx',
+  null
+);
+}
+
+enemy.setData(
+  'indicator',
+  indicator
+);
+
+return enemy;
   };
 
 const startX =
@@ -19608,19 +19751,27 @@ this.physics.add.overlap(
   this.player,
   this.springPads,
   () => {
-    if (this.boostCooldown > 0)
+    const body =
+      this.player?.body;
+
+    if (
+      !body ||
+      !this.player?.active ||
+      this.boostCooldown > 0
+    ) {
       return;
+    }
 
     this.boostCooldown = 260;
 
-    this.player.body.setVelocityY(
+    body.setVelocityY(
       -880
     );
 
     this.playerCue(
-  'SPRING LAUNCH',
-  '#aee37f'
-);
+      'SPRING LAUNCH',
+      '#aee37f'
+    );
 
 this.gadgetPulse(
   0xaee37f,
@@ -20363,6 +20514,41 @@ method,
 power = 1
 ) {
 if (!enemy?.active) return;
+
+const fireFx =
+  enemy.getData(
+    'fireFx'
+  );
+
+if (fireFx) {
+  fireFx.destroy();
+
+  enemy.setData(
+    'fireFx',
+    null
+  );
+}
+
+enemy.setData(
+  'fireUntil',
+  0
+);
+
+enemy.setData(
+  'fireChargeUntil',
+  0
+);
+
+enemy.setData(
+  'fireNextDamage',
+  0
+);
+
+enemy.setData(
+  'fireHitLock',
+  0
+);
+
 enemy.setTint(0xffffff);
 
 this.time.delayedCall(
@@ -21580,11 +21766,16 @@ if (
     `COMBO ${this.combatCombo}`
   );
 }
-this.player.body.setVelocityY(
-  method === 'STOMP'
-    ? -360
-    : this.player.body.velocity.y
-);
+const body =
+  this.player?.body;
+
+if (body) {
+  body.setVelocityY(
+    method === 'STOMP'
+      ? -360
+      : body.velocity.y
+  );
+}
 
 this.playerCue(
   `${method} · ${
@@ -21601,15 +21792,14 @@ this.playerCue(
   '#8df4ff'
 );
 
-}
-
-useBlaster() {
 if (
   this.blasterCooldown > 0 ||
   this.cinematicActive ||
   this.finished ||
   this.respawning ||
-  this.relayPuzzleActive
+  this.relayPuzzleActive ||
+  !this.player?.active ||
+  !this.player?.body
 ) {
   return;
 }
@@ -23264,105 +23454,153 @@ this.events.once(
 
 }
 
-createObjectiveHUD() {
+  createObjectiveHUD() {
   const compact =
     this.scale.width < 768;
 
-  /*
-   * ============================================================
-   * MISSION OBJECTIVE HUD · PREMIUM CYBER
-   * Desktop only.
-   * Hidden on mobile / touch widths.
-   * ============================================================
-   */
+  // ============================================================
+  // MISSION OBJECTIVE HUD · PREMIUM CYBER COMMAND
+  // Desktop HUD only.
+  // Hidden on mobile.
+  // ============================================================
+
+  if (compact) {
+    this.objectiveHUD = null;
+    this.objectiveText = null;
+    this.objectiveProgressBar = null;
+    this.objectiveProgressText = null;
+    return;
+  }
 
   const width =
     Math.min(
       this.scale.width - 32,
-      compact ? 300 : 430
+      456
     );
 
-  const x = 16;
-  const y = compact ? 82 : 90;
+  const x = 18;
+  const y = 78;
 
   const container =
     this.add
-      .container(x, y)
+      .container(
+        x,
+        y
+      )
       .setScrollFactor(0)
       .setDepth(100);
 
-  // ------------------------------------------------------------
-  // MOBILE
-  // ------------------------------------------------------------
-  if (compact) {
-    container.setVisible(false);
-  }
+  // ============================================================
+  // OUTER AURA
+  // ============================================================
 
-  // ------------------------------------------------------------
-  // OUTER SHADOW / GLOW
-  // ------------------------------------------------------------
+  const aura =
+    this.add
+      .rectangle(
+        width / 2,
+        40,
+        width + 10,
+        84,
+        0x07111d,
+        0.16
+      );
+
+  aura
+    .setStrokeStyle(
+      2,
+      0x8df4ff,
+      0.12
+    );
+
+  // ============================================================
+  // SHADOW
+  // ============================================================
 
   const shadow =
     this.add
       .rectangle(
-        width / 2 + 2,
-        38,
+        width / 2 + 4,
+        42,
         width,
-        76,
+        80,
         0x000000,
-        0.28
+        0.44
       );
 
-  // ------------------------------------------------------------
-  // MAIN PLATE
-  // ------------------------------------------------------------
+  // ============================================================
+  // MAIN PANEL
+  // ============================================================
 
   const plate =
     this.add
       .rectangle(
         width / 2,
-        36,
+        40,
         width,
-        72,
-        0x07111d,
-        0.97
+        80,
+        0x06101a,
+        0.98
       )
       .setStrokeStyle(
-        1.5,
+        2,
         0x8df4ff,
-        0.78
+        0.72
       );
 
-  // ------------------------------------------------------------
-  // INNER PLATE
-  // ------------------------------------------------------------
+  // ============================================================
+  // INNER GLASS
+  // ============================================================
 
   const inner =
     this.add
       .rectangle(
         width / 2,
-        36,
-        width - 8,
-        64,
-        0x0a1725,
-        0.74
+        40,
+        width - 10,
+        70,
+        0x0b1a29,
+        0.78
       )
       .setStrokeStyle(
         1,
-        0x2f6074,
-        0.45
+        0x2d6178,
+        0.55
       );
 
-  // ------------------------------------------------------------
-  // LEFT ENERGY ACCENT
-  // ------------------------------------------------------------
+  // ============================================================
+  // TOP SCAN BAR
+  // ============================================================
+
+  const topBar =
+    this.add.rectangle(
+      width / 2,
+      5,
+      width - 26,
+      2,
+      0x8df4ff,
+      0.7
+    );
+
+  const topHot =
+    this.add.rectangle(
+      width / 2,
+      5,
+      62,
+      2,
+      0xe8fdff,
+      0.9
+    );
+
+  // ============================================================
+  // LEFT CYAN POWER STRIPE
+  // ============================================================
 
   const accent =
     this.add.rectangle(
-      8,
-      36,
+      7,
+      40,
       3,
-      50,
+      58,
       0x8df4ff,
       0.95
     );
@@ -23370,41 +23608,66 @@ createObjectiveHUD() {
   const accentGlow =
     this.add.rectangle(
       11,
-      36,
-      2,
       40,
+      2,
+      48,
       0x8df4ff,
-      0.32
+      0.25
     );
 
-  // ------------------------------------------------------------
-  // HEADER
-  // ------------------------------------------------------------
+  // ============================================================
+  // MISSION LABEL
+  // ============================================================
 
-  const title =
+  const missionLabel =
     this.add.text(
       20,
-      10,
-      'MISSION OBJECTIVE',
+      9,
+      'MISSION // OBJECTIVE',
       {
         fontFamily: 'DM Mono',
         fontSize: '9px',
         color: '#8df4ff',
         fontStyle: 'bold',
-        letterSpacing: 1.8,
-        stroke: '#06101a',
-        strokeThickness: 3
+        letterSpacing: 1.9,
+        stroke: '#04101a',
+        strokeThickness: 4,
+        shadow: {
+          offsetX: 0,
+          offsetY: 0,
+          color: '#56eaff',
+          blur: 8,
+          fill: true
+        }
       }
     );
 
-  // ------------------------------------------------------------
+  // ============================================================
+  // SUB LABEL
+  // ============================================================
+
+  const subLabel =
+    this.add.text(
+      20,
+      21,
+      'ACTIVE DELIVERY DIRECTIVE',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '7px',
+        color: '#55738a',
+        fontStyle: 'bold',
+        letterSpacing: 1.2
+      }
+    );
+
+  // ============================================================
   // OBJECTIVE TEXT
-  // ------------------------------------------------------------
+  // ============================================================
 
   const objective =
     this.add.text(
       20,
-      27,
+      35,
       this.mission?.story?.arrival ||
         'REACH THE RELAY',
       {
@@ -23412,185 +23675,312 @@ createObjectiveHUD() {
         fontSize: '12px',
         color: '#e8fdff',
         fontStyle: 'bold',
-        stroke: '#06101a',
-        strokeThickness: 3,
+        letterSpacing: 0.5,
         lineSpacing: 2,
+        stroke: '#04101a',
+        strokeThickness: 4,
+        shadow: {
+          offsetX: 0,
+          offsetY: 0,
+          color: '#8df4ff',
+          blur: 6,
+          fill: true
+        },
         wordWrap: {
-          width: Math.max(
-            170,
-            width - 190
-          ),
+          width:
+            Math.max(
+              185,
+              width - 205
+            ),
           useAdvancedWrap: true
         }
       }
     );
 
-  // ------------------------------------------------------------
-  // PROGRESS LABEL
-  // ------------------------------------------------------------
+  // ============================================================
+  // RIGHT STATUS HEADER
+  // ============================================================
 
   const progressLabel =
     this.add.text(
-      width - 148,
-      10,
-      'PROGRESS',
-      {
-        fontFamily: 'DM Mono',
-        fontSize: '8px',
-        color: '#6f879b',
-        fontStyle: 'bold',
-        letterSpacing: 1.2
-      }
-    );
-
-  // ------------------------------------------------------------
-  // PROGRESS TRACK
-  // ------------------------------------------------------------
-
-  const progressBack =
-    this.add.rectangle(
-      width - 82,
-      34,
-      124,
-      8,
-      0x18283c,
-      1
-    )
-      .setStrokeStyle(
-        1,
-        0x3b6174,
-        0.55
-      );
-
-  // ------------------------------------------------------------
-  // PROGRESS FILL
-  // ------------------------------------------------------------
-
-  const progressFill =
-    this.add
-      .rectangle(
-        width - 144,
-        34,
-        120,
-        5,
-        0x8df4ff,
-        1
-      )
-      .setOrigin(0, 0.5);
-
-  // ------------------------------------------------------------
-  // PROGRESS HOTLINE
-  // ------------------------------------------------------------
-
-  const progressHot =
-    this.add
-      .rectangle(
-        width - 144,
-        32,
-        120,
-        2,
-        0xe8fdff,
-        0.72
-      )
-      .setOrigin(0, 0.5);
-
-  // ------------------------------------------------------------
-  // PERCENTAGE
-  // ------------------------------------------------------------
-
-  const progressText =
-    this.add.text(
-      width - 18,
-      27,
-      '0%',
-      {
-        fontFamily: 'DM Mono',
-        fontSize: '13px',
-        color: '#e8fdff',
-        fontStyle: 'bold',
-        stroke: '#06101a',
-        strokeThickness: 3
-      }
-    )
-      .setOrigin(1, 0.5);
-
-  // ------------------------------------------------------------
-  // BOTTOM STATUS LINE
-  // ------------------------------------------------------------
-
-  const statusLine =
-    this.add.rectangle(
-      width / 2,
-      55,
-      width - 40,
-      1,
-      0x29495d,
-      0.55
-    );
-
-  const statusText =
-    this.add.text(
-      20,
-      58,
-      'ROUTE ACTIVE  //  RELAY LINK STABLE',
+      width - 170,
+      11,
+      'MISSION STATUS',
       {
         fontFamily: 'DM Mono',
         fontSize: '7px',
         color: '#6f879b',
-        letterSpacing: 1.1
+        fontStyle: 'bold',
+        letterSpacing: 1.3
       }
     );
 
-  // ------------------------------------------------------------
-  // CORNER SIGNAL
-  // ------------------------------------------------------------
-
-  const signal =
-    this.add
-      .circle(
-        width - 18,
-        58,
-        3,
-        0x8df4ff,
-        0.95
+  const progressValue =
+    this.add.text(
+      width - 18,
+      9,
+      '0%',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '14px',
+        color: '#e8fdff',
+        fontStyle: 'bold',
+        stroke: '#04101a',
+        strokeThickness: 4,
+        shadow: {
+          offsetX: 0,
+          offsetY: 0,
+          color: '#8df4ff',
+          blur: 7,
+          fill: true
+        }
+      }
+    )
+      .setOrigin(
+        1,
+        0
       );
+
+  // ============================================================
+  // PROGRESS TRACK
+  // ============================================================
+
+  const progressBack =
+    this.add
+      .rectangle(
+        width - 88,
+        31,
+        142,
+        7,
+        0x12263a,
+        1
+      )
+      .setStrokeStyle(
+        1,
+        0x355e72,
+        0.68
+      );
+
+  // ============================================================
+  // PROGRESS FILL
+  // ============================================================
+
+  const progressFill =
+    this.add
+      .rectangle(
+        width - 159,
+        31,
+        138,
+        4,
+        0x8df4ff,
+        1
+      )
+      .setOrigin(
+        0,
+        0.5
+      );
+
+  // ============================================================
+  // PROGRESS HOT EDGE
+  // ============================================================
+
+  const progressHot =
+    this.add
+      .rectangle(
+        width - 159,
+        29,
+        138,
+        2,
+        0xe8fdff,
+        0.86
+      )
+      .setOrigin(
+        0,
+        0.5
+      );
+
+  // ============================================================
+  // DIVIDER
+  // ============================================================
+
+  const divider =
+    this.add.rectangle(
+      width / 2,
+      55,
+      width - 42,
+      1,
+      0x31566a,
+      0.72
+    );
+
+  // ============================================================
+  // BOTTOM STATUS
+  // ============================================================
+
+  const statusText =
+    this.add.text(
+      20,
+      61,
+      'ROUTE ACTIVE  //  RELAY LINK STABLE',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '7px',
+        color: '#71899d',
+        fontStyle: 'bold',
+        letterSpacing: 1.05
+      }
+    );
+
+  // ============================================================
+  // LIVE SIGNAL
+  // ============================================================
 
   const signalGlow =
     this.add
       .circle(
-        width - 18,
-        58,
-        6,
+        width - 24,
+        65,
+        7,
         0x8df4ff,
         0.10
       );
 
-  // ------------------------------------------------------------
-  // BUILD HUD
-  // ------------------------------------------------------------
+  const signal =
+    this.add
+      .circle(
+        width - 24,
+        65,
+        3,
+        0x8df4ff,
+        1
+      );
+
+  // ============================================================
+  // CORNER MARKERS
+  // ============================================================
+
+  const cornerTL =
+    this.add.rectangle(
+      16,
+      13,
+      18,
+      1,
+      0x8df4ff,
+      0.65
+    );
+
+  const cornerTR =
+    this.add.rectangle(
+      width - 16,
+      13,
+      18,
+      1,
+      0x8df4ff,
+      0.65
+    );
+
+  const cornerBL =
+    this.add.rectangle(
+      16,
+      70,
+      18,
+      1,
+      0x8df4ff,
+      0.35
+    );
+
+  const cornerBR =
+    this.add.rectangle(
+      width - 16,
+      70,
+      18,
+      1,
+      0x8df4ff,
+      0.35
+    );
+
+  // ============================================================
+  // BUILD
+  // ============================================================
 
   container.add([
+    aura,
     shadow,
     plate,
     inner,
+    topBar,
+    topHot,
     accent,
     accentGlow,
-    title,
+    missionLabel,
+    subLabel,
     objective,
     progressLabel,
+    progressValue,
     progressBack,
     progressFill,
     progressHot,
-    progressText,
-    statusLine,
+    divider,
     statusText,
     signalGlow,
-    signal
+    signal,
+    cornerTL,
+    cornerTR,
+    cornerBL,
+    cornerBR
   ]);
 
-  // ------------------------------------------------------------
+  // ============================================================
+  // SUBTLE ANIMATION
+  // ============================================================
+
+  this.tweens.add({
+    targets: topHot,
+    x: {
+      from: width / 2 - 100,
+      to: width / 2 + 100
+    },
+    alpha: {
+      from: 0.25,
+      to: 0.95
+    },
+    duration: 1800,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+
+  this.tweens.add({
+    targets: signalGlow,
+    scale: {
+      from: 0.8,
+      to: 1.55
+    },
+    alpha: {
+      from: 0.06,
+      to: 0.20
+    },
+    duration: 900,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+
+  this.tweens.add({
+    targets: signal,
+    alpha: {
+      from: 0.55,
+      to: 1
+    },
+    duration: 650,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+
+  // ============================================================
   // REFERENCES USED BY GAMEPLAY PROGRESS LOGIC
-  // ------------------------------------------------------------
+  // ============================================================
 
   this.objectiveHUD =
     container;
@@ -23602,9 +23992,8 @@ createObjectiveHUD() {
     progressFill;
 
   this.objectiveProgressText =
-    progressText;
+    progressValue;
 }
-
 
 createDetectionHUD() {
   const compact =
@@ -23759,19 +24148,23 @@ this.physics.add.overlap(
   this.player,
   this.boostPads,
   () => {
+    const body =
+      this.player?.body;
+
     if (
+      !body ||
+      !this.player?.active ||
       this.boostCooldown > 0 ||
-      this.player.body.velocity.y <
-        -60
+      body.velocity.y < -60
     ) {
       return;
     }
 
-this.boostCooldown = 260;
+    this.boostCooldown = 260;
 
-this.player.body.setVelocityY(
-  -825
-);
+    body.setVelocityY(
+      -825
+    );
 
 if (
   !this.motionReduced &&
@@ -24295,23 +24688,25 @@ this.physics.add.overlap(
       return;
     }
 
-    if (this.boss?.active) {
-      this.playerCue(
-        `${
-          this.boss.getData(
-            'bossName'
-          ) ||
-          'ALPHA DINO'
-        } BLOCKS THE RELAY · DEFEAT IT`,
-        '#ffcf82'
-      );
+  if (this.boss?.active) {
+  this.playerCue(
+    `${
+      this.boss.getData(
+        'bossName'
+      ) ||
+      'ALPHA DINO'
+    } BLOCKS THE RELAY · DEFEAT IT`,
+    '#ffcf82'
+  );
 
-      this.player.body?.setVelocityX(
-        -260
-      );
+  if (this.player?.body) {
+    this.player.body.setVelocityX(
+      -260
+    );
+  }
 
-      return;
-    }
+  return;
+}
 
     this.goalTouched = true;
     
@@ -26564,11 +26959,19 @@ this.game.events.emit(
 }
 
 tryVault() {
-const body = this.player.body;
+  const body =
+    this.player?.body;
 
-const grounded =
-body.blocked.down ||
-body.touching.down;
+  if (
+    !body ||
+    !this.player?.active
+  ) {
+    return false;
+  }
+
+  const grounded =
+    body.blocked.down ||
+    body.touching.down;
 
 if (
 !this.abilities.has('vault') ||
@@ -27937,40 +28340,62 @@ this.enemies
       if (!enemy.active)
         return;
 
-      const type =
-        enemy.getData(
-          'route'
-        )?.type;
+     const type =
+  enemy.getData(
+    'route'
+  )?.type;
 
-      if (
-        type === 'chicken' ||
+if (
+  type === 'chicken'
+) {
+  this.updateChickenFireBreath(
+    enemy,
+    now
+  );
+}
+
+if (
+  type === 'chicken' ||
         type === 'invader' ||
         type === 'enemy-runner'
       ) {
-        const firingRange =
-          type === 'chicken'
-            ? 240
-            : type ===
-                'invader'
-              ? 320
-              : 280;
+       const firingRange =
+  type === 'chicken'
+    ? 360
+    : type ===
+        'invader'
+      ? 320
+      : 280;
 
-        if (
-          Math.abs(
-            this.player.x -
-            enemy.x
-          ) <
-            firingRange &&
-          Math.abs(
-            this.player.y -
-            enemy.y
-          ) < 190 &&
-          now >=
-            enemy.getData(
-              'nextShot'
-            )
-        ) {
-        const projectile =
+      if (
+  Math.abs(
+    this.player.x -
+    enemy.x
+  ) <
+    firingRange &&
+  Math.abs(
+    this.player.y -
+    enemy.y
+  ) < 190 &&
+  now >=
+    enemy.getData(
+      'nextShot'
+    )
+) {
+
+  // CHICKEN SPECIAL ATTACK
+  // FIRE BREATH TAKES PRIORITY OVER EGG.
+  if (
+    type === 'chicken' &&
+    this.startChickenFireBreath(
+      enemy,
+      now
+    )
+  ) {
+    return;
+  }
+
+  const projectile =
   type ===
   'chicken'
     ? 'egg'
@@ -28043,10 +28468,19 @@ if (
   });
 }
 
+const body =
+  this.player?.body;
+
+if (
+  !body ||
+  !this.player?.active
+) {
+  return;
+}
+
 const predictedX =
   this.player.x +
-  this.player.body
-    .velocity.x *
+  body.velocity.x *
     .22;
 
 const egg =
@@ -28138,18 +28572,25 @@ this.game.events.emit(
           now + 1700
         );
 
-        enemy.setTint(
-          0xff826e
-        );
+       enemy.setTint(
+  0xff826e
+);
 
-        this.tweens.add({
-          targets: enemy,
-          x:
-            this.player.x +
-            this.player.body
-              .velocity.x *
-              .12,
-          duration: 340,
+const playerBody =
+  this.player?.body;
+
+if (!playerBody) {
+  enemy.clearTint();
+  return;
+}
+
+this.tweens.add({
+  targets: enemy,
+  x:
+    this.player.x +
+    playerBody.velocity.x *
+      .12,
+  duration: 340,
           onComplete: () =>
             enemy.clearTint()
         });
@@ -28830,6 +29271,650 @@ event.x - 120,
 
 }
 
+startChickenFireBreath(enemy, now) {
+  if (
+    !enemy?.active ||
+    !this.player?.active
+  ) {
+    return false;
+  }
+
+  const distance =
+    Phaser.Math.Distance.Between(
+      enemy.x,
+      enemy.y,
+      this.player.x,
+      this.player.y
+    );
+
+  const verticalDistance =
+    Math.abs(
+      this.player.y -
+      enemy.y
+    );
+
+  if (
+    distance < 140 ||
+    distance > 360 ||
+    verticalDistance > 150
+  ) {
+    return false;
+  }
+
+  const fireNext =
+    Number(
+      enemy.getData('fireNext')
+    ) || 0;
+
+  if (now < fireNext) {
+    return false;
+  }
+
+  // Not every chicken attack becomes fire.
+  // This keeps the egg attack relevant.
+  if (Math.random() > 0.38) {
+    return false;
+  }
+
+const existingFireUntil =
+  Number(
+    enemy.getData(
+      'fireUntil'
+    )
+  ) || 0;
+
+if (
+  existingFireUntil > now
+) {
+  return false;
+}
+
+const fireChargeTime =
+  420;
+
+const fireDuration =
+  850;
+
+enemy.setData(
+  'fireChargeUntil',
+  now + fireChargeTime
+);
+
+enemy.setData(
+  'fireUntil',
+  now + fireChargeTime + fireDuration
+);
+
+const fireAngle =
+  Phaser.Math.Angle.Between(
+    enemy.x,
+    enemy.y,
+    this.player.x,
+    this.player.y
+  );
+
+enemy.setData(
+  'fireAngle',
+  fireAngle
+);
+
+enemy.setData(
+  'fireNextDamage',
+  now + fireChargeTime
+);
+
+enemy.setData(
+  'fireHitLock',
+  now + fireChargeTime
+);
+
+enemy.setData(
+  'fireNext',
+  now +
+  fireChargeTime +
+  4200
+);
+
+enemy.setData(
+  'nextShot',
+  now +
+  fireChargeTime +
+  4200
+);
+
+  const fireFx =
+    this.add
+      .graphics()
+      .setDepth(12);
+
+  enemy.setData(
+    'fireFx',
+    fireFx
+  );
+
+this.playerCue(
+  'CHICKEN FIRE BREATH · GET CLEAR',
+  '#ff826e'
+);
+
+this.game.events.emit(
+  'feedback',
+  'warning'
+);
+
+  this.game.events.emit(
+    'feedback',
+    'chicken-fire'
+  );
+
+  return true;
+}
+
+updateChickenFireBreath(enemy, now) {
+  if (!enemy?.active) {
+    return;
+  }
+
+  const fireUntil =
+    Number(
+      enemy.getData('fireUntil')
+    ) || 0;
+
+  const fireFx =
+    enemy.getData('fireFx');
+
+  if (
+    fireFx &&
+    !fireFx.active
+  ) {
+    enemy.setData(
+      'fireFx',
+      null
+    );
+  }
+
+  const fireChargeUntil =
+    Number(
+      enemy.getData('fireChargeUntil')
+    ) || 0;
+
+  if (
+    fireUntil <= 0 ||
+    now >= fireUntil
+  ) {
+    if (fireFx) {
+      fireFx.destroy();
+
+      enemy.setData(
+        'fireFx',
+        null
+      );
+    }
+
+    enemy.setData(
+      'fireUntil',
+      0
+    );
+
+    enemy.setData(
+      'fireChargeUntil',
+      0
+    );
+
+enemy.setData(
+  'fireNextDamage',
+  0
+);
+
+enemy.setData(
+  'fireHitLock',
+  0
+);
+
+enemy.setData(
+  'fireAngle',
+  0
+);
+
+return;
+  }
+
+  if (!this.player?.active) {
+    return;
+  }
+
+  // ============================================================
+  // FIRE CHARGE / WARNING
+  // ============================================================
+
+  if (
+    fireChargeUntil > now
+  ) {
+    if (fireFx) {
+      fireFx.clear();
+
+      const remaining =
+        Phaser.Math.Clamp(
+          (
+            fireChargeUntil -
+            now
+          ) / 420,
+          0,
+          1
+        );
+
+      const pulse =
+        0.55 +
+        Math.sin(
+          now * 0.035
+        ) * 0.20;
+
+      fireFx
+        .fillStyle(
+          0xff5364,
+          0.08 +
+          (1 - remaining) * 0.16
+        )
+        .fillCircle(
+          enemy.x + 20,
+          enemy.y - 5,
+          10 +
+          (1 - remaining) * 8
+        );
+
+      fireFx
+        .lineStyle(
+          2,
+          0xff826e,
+          0.45 +
+          (1 - remaining) * 0.45
+        )
+        .strokeCircle(
+          enemy.x + 20,
+          enemy.y - 5,
+          9 +
+          (1 - remaining) * 9
+        );
+
+      fireFx
+        .fillStyle(
+          0xffd06e,
+          pulse
+        )
+        .fillCircle(
+          enemy.x + 20,
+          enemy.y - 5,
+          4 +
+          (1 - remaining) * 4
+        );
+
+      fireFx
+        .lineStyle(
+          2,
+          0xffd06e,
+          0.20
+        )
+        .lineBetween(
+          enemy.x + 24,
+          enemy.y - 5,
+          this.player.x,
+          this.player.y
+        );
+    }
+
+    return;
+  }
+
+  if (!this.player?.active) {
+    return;
+  }
+
+  const angle =
+  Number(
+    enemy.getData(
+      'fireAngle'
+    )
+  ) || 0;
+
+  const length =
+    310;
+
+  const halfAngle =
+    Phaser.Math.DegToRad(22);
+
+  if (fireFx) {
+    fireFx.clear();
+
+    // OUTER FIRE CONE
+    fireFx
+      .fillStyle(
+        0xff6a2a,
+        0.18
+      )
+      .fillTriangle(
+        enemy.x + 20,
+        enemy.y - 5,
+        enemy.x +
+          Math.cos(
+            angle - halfAngle
+          ) * length,
+        enemy.y +
+          Math.sin(
+            angle - halfAngle
+          ) * length,
+        enemy.x +
+          Math.cos(
+            angle + halfAngle
+          ) * length,
+        enemy.y +
+          Math.sin(
+            angle + halfAngle
+          ) * length
+      );
+
+    // INNER HOT FLAME
+    fireFx
+      .fillStyle(
+        0xffc247,
+        0.28
+      )
+      .fillTriangle(
+        enemy.x + 24,
+        enemy.y - 5,
+        enemy.x +
+          Math.cos(
+            angle - halfAngle * 0.62
+          ) * 245,
+        enemy.y +
+          Math.sin(
+            angle - halfAngle * 0.62
+          ) * 245,
+        enemy.x +
+          Math.cos(
+            angle + halfAngle * 0.62
+          ) * 245,
+        enemy.y +
+          Math.sin(
+            angle + halfAngle * 0.62
+          ) * 245
+      );
+
+    // FIRE CORE
+    fireFx
+      .fillStyle(
+        0xfff2b0,
+        0.72
+      )
+      .fillTriangle(
+        enemy.x + 26,
+        enemy.y - 5,
+        enemy.x +
+          Math.cos(
+            angle - halfAngle * 0.28
+          ) * 145,
+        enemy.y +
+          Math.sin(
+            angle - halfAngle * 0.28
+          ) * 145,
+        enemy.x +
+          Math.cos(
+            angle + halfAngle * 0.28
+          ) * 145,
+        enemy.y +
+          Math.sin(
+            angle + halfAngle * 0.28
+          ) * 145
+      );
+
+    // MUZZLE FIRE
+    fireFx
+      .fillStyle(
+        0xffe09a,
+        0.90
+      )
+      .fillCircle(
+        enemy.x + 24,
+        enemy.y - 5,
+        11
+      );
+
+ // FIRE PARTICLE POINTS
+const pulse =
+  0.65 +
+  Math.sin(now * 0.035) *
+    0.20;
+
+// ANIMATED FIRE TONGUES
+const fireCos = Math.cos(angle);
+const fireSin = Math.sin(angle);
+
+for (let i = 0; i < 7; i++) {
+  const t = (i + 1) / 8;
+  const spread =
+    Math.sin(
+      now * 0.018 +
+      i * 1.7
+    ) * (7 + t * 10);
+
+  const drift =
+    Math.cos(
+      now * 0.024 +
+      i * 2.3
+    ) * (4 + t * 7);
+
+  const px =
+    enemy.x +
+    fireCos * (28 + t * 245) -
+    fireSin * spread;
+
+  const py =
+    enemy.y +
+    fireSin * (28 + t * 245) +
+    fireCos * spread +
+    drift;
+
+  const radius =
+    (1.5 + (1 - t) * 3.2) *
+    (0.8 + pulse * 0.35);
+
+  g.fillStyle(
+    i % 2 === 0
+      ? 0xfff0a8
+      : 0xff8a38,
+    0.82 - t * 0.08
+  );
+
+  g.fillCircle(
+    px,
+    py,
+    radius
+  );
+}
+
+// HOT EMBERS
+for (let i = 0; i < 5; i++) {
+  const t =
+    ((now * 0.0007 + i * 0.21) % 1);
+
+  const spread =
+    Math.sin(
+      now * 0.021 +
+      i * 2.4
+    ) * 14;
+
+  const px =
+    enemy.x +
+    fireCos * (55 + t * 245) -
+    fireSin * spread;
+
+  const py =
+    enemy.y +
+    fireSin * (55 + t * 245) +
+    fireCos * spread -
+    10 * t;
+
+  g.fillStyle(
+    0xffc45c,
+    0.72 * (1 - t)
+  );
+
+  g.fillCircle(
+    px,
+    py,
+    1.2 + (1 - t) * 1.5
+  );
+}
+
+    fireFx
+      .fillStyle(
+        0xff826e,
+        pulse
+      )
+      .fillCircle(
+        enemy.x +
+          Math.cos(angle) * 105,
+        enemy.y +
+          Math.sin(angle) * 105,
+        7
+      );
+
+    fireFx
+      .fillStyle(
+        0xffd06e,
+        pulse
+      )
+      .fillCircle(
+        enemy.x +
+          Math.cos(angle) * 175,
+        enemy.y +
+          Math.sin(angle) * 175,
+        5
+      );
+  }
+
+  // ============================================================
+  // FIRE CONE HIT TEST
+  // ============================================================
+
+  const playerDistance =
+    Phaser.Math.Distance.Between(
+      enemy.x,
+      enemy.y,
+      this.player.x,
+      this.player.y
+    );
+
+  const playerAngle =
+    Phaser.Math.Angle.Between(
+      enemy.x,
+      enemy.y,
+      this.player.x,
+      this.player.y
+    );
+
+  let angleDelta =
+    Phaser.Math.Angle.Wrap(
+      playerAngle - angle
+    );
+
+  angleDelta =
+    Math.abs(angleDelta);
+
+  const insideCone =
+    playerDistance >= 35 &&
+    playerDistance <= length &&
+    angleDelta <= halfAngle;
+
+  if (!insideCone) {
+    return;
+  }
+
+const fireNextDamage =
+  Number(
+    enemy.getData(
+      'fireNextDamage'
+    )
+  ) || 0;
+
+const fireHitLock =
+  Number(
+    enemy.getData(
+      'fireHitLock'
+    )
+  ) || 0;
+
+if (
+  now < fireNextDamage ||
+  now < fireHitLock
+) {
+  return;
+}
+
+enemy.setData(
+  'fireNextDamage',
+  now + 220
+);
+
+enemy.setData(
+  'fireHitLock',
+  now + 220
+);
+
+// ============================================================
+// FIRE IMPACT FX
+// ============================================================
+
+if (
+  !this.motionReduced
+) {
+  this.cameras.main.shake(
+    90,
+    0.004
+  );
+
+  this.cameras.main.flash(
+    80,
+    255,
+    110,
+    60,
+    false
+  );
+
+  const impact =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        10,
+        0xff6a2a,
+        0.65
+      )
+      .setDepth(30);
+
+  impact.setStrokeStyle(
+    2,
+    0xfff2b0,
+    0.9
+  );
+
+  this.tweens.add({
+    targets: impact,
+    scale: 2.8,
+    alpha: 0,
+    duration: 240,
+    ease: 'Cubic.out',
+    onComplete: () =>
+      impact.destroy()
+  });
+}
+
+this.takeSciFiHit(
+  'The chicken breathed fire on the courier.',
+  this.player.x,
+  this.player.y
+);
+}
+
 complete() {
 if (this.finished)
 return;
@@ -28845,11 +29930,13 @@ if (this.boss?.active) {
     '#ffcf82'
   );
 
+if (this.player?.body) {
   this.player.body.setVelocityX(
     -260
   );
+}
 
-  return;
+return;
 }
 
 this.finished = true;
@@ -30219,7 +31306,9 @@ if (
   this.briefingProtected ||
   this.respawning ||
   this.finished ||
-  this.healthInvulnerable > 0
+  this.healthInvulnerable > 0 ||
+  !this.player ||
+  !this.player.active
 ) {
   return;
 }
@@ -30306,11 +31395,6 @@ if (this.package?.condition) {
             : 35
         )
     );
-
-  this.game.events.emit(
-    'package',
-    this.packageCondition
-  );
 }
 
 if (
@@ -30985,27 +32069,27 @@ updateDynamicWaterFX(delta) {
       : 2;
 
   if (
-    this.motionReduced ||
-    !this.player?.active ||
-    !this.waterZones
-  ) {
-    return;
-  }
+  this.motionReduced ||
+  !this.player?.active ||
+  !this.player?.body ||
+  !this.waterZones
+) {
+  return;
+}
 
-  if (this.waterAttackActive) {
-    return;
-  }
+if (this.waterAttackActive) {
+  return;
+}
 
-  this.waterDynamicFxTimer =
-    Math.max(
-      0,
-      (this.waterDynamicFxTimer || 0) -
-        delta
-    );
+this.waterDynamicFxTimer =
+  Math.max(
+    0,
+    (this.waterDynamicFxTimer || 0) -
+      delta
+  );
 
-  const body =
-    this.player.body;
-
+const body =
+  this.player.body;
   const onGround =
     body?.blocked?.down ||
     body?.touching?.down;
@@ -31092,10 +32176,10 @@ this.triggerPlayerWaterRipple(
 // WET FOOT SPRAY · SMALL MOVEMENT FEEDBACK
 // ============================================================
 if (
-  !this.motionReduced &&
   graphicsLevel >= 2 &&
   speed > 140 &&
-  this.player?.active
+  this.player?.active &&
+  this.player?.body
 ) {
   const direction =
     this.player.body.velocity.x >= 0
@@ -32275,12 +33359,1078 @@ if (tier === 3) {
   }
 }
 
+// ============================================================
+// AFK / CRYOSTASIS SYSTEM
+// ============================================================
+updateAfkSystem(delta) {
+  if (
+    !this.player?.active ||
+    !this.player?.body ||
+    this.finished ||
+    this.respawning ||
+    this.cinematicActive ||
+    this.relayPuzzleActive
+  ) {
+    return;
+  }
+
+  const body =
+    this.player.body;
+
+  const speed =
+    Math.abs(body.velocity?.x || 0) +
+    Math.abs(body.velocity?.y || 0);
+
+  const keyboardMovement =
+    Boolean(
+      this.cursors?.left?.isDown ||
+      this.cursors?.right?.isDown ||
+      this.cursors?.up?.isDown ||
+      this.cursors?.down?.isDown ||
+      this.keys?.A?.isDown ||
+      this.keys?.D?.isDown ||
+      this.keys?.W?.isDown ||
+      this.keys?.S?.isDown
+    );
+
+  const keyboardAction =
+    Boolean(
+      this.keys?.SPACE?.isDown ||
+      this.keys?.SHIFT?.isDown ||
+      this.keys?.E?.isDown ||
+      this.keys?.F?.isDown ||
+      this.keys?.Q?.isDown ||
+      this.keys?.R?.isDown ||
+      this.keys?.X?.isDown
+    );
+
+  const mobileMovement =
+    this.mobileDirection === 'left' ||
+    this.mobileDirection === 'right';
+
+  const playerMoving =
+    speed > 18;
+
+  const active =
+    keyboardMovement ||
+    keyboardAction ||
+    mobileMovement ||
+    playerMoving;
+
+  if (active) {
+    this.afkTimer = 0;
+
+    if (this.afkStage !== 0) {
+      this.clearAfkState();
+    }
+
+    return;
+  }
+
+  this.afkTimer += delta;
+
+  let nextStage = 0;
+
+  if (
+    this.afkTimer >= 12000
+  ) {
+    nextStage = 3;
+  } else if (
+    this.afkTimer >= 8000
+  ) {
+    nextStage = 2;
+  } else if (
+    this.afkTimer >= 4000
+  ) {
+    nextStage = 1;
+  }
+
+  if (
+    nextStage === this.afkStage
+  ) {
+    if (
+      this.afkStage > 0
+    ) {
+      this.updateAfkFx();
+    }
+
+    return;
+  }
+
+this.afkStage =
+  nextStage;
+
+// ------------------------------------------------------------
+// AFK STATUS HUD
+// ------------------------------------------------------------
+if (
+  this.afkStage > 0 &&
+  !this.afkStatusText &&
+  this.player?.active
+) {
+  this.afkStatusText =
+    this.add
+      .text(
+        this.player.x,
+        this.player.y - 58,
+        '',
+        {
+          fontFamily: 'DM Mono',
+          fontSize: '11px',
+          fontStyle: 'bold',
+          color: '#b9f5ff',
+          stroke: '#07111d',
+          strokeThickness: 5,
+          letterSpacing: 2,
+          shadow: {
+            offsetX: 0,
+            offsetY: 0,
+            color: '#8df4ff',
+            blur: 12,
+            fill: true
+          }
+        }
+      )
+      .setOrigin(0.5)
+      .setDepth(40);
+}
+
+if (this.afkStatusText) {
+  const statusMap = {
+    1: 'IDLE',
+    2: 'FROST',
+    3: 'CRYOSTASIS'
+  };
+
+  const colorMap = {
+    1: '#b9f5ff',
+    2: '#dffcff',
+    3: '#8df4ff'
+  };
+
+  this.afkStatusText.setText(
+    statusMap[this.afkStage] || ''
+  );
+
+  this.afkStatusText.setColor(
+    colorMap[this.afkStage] || '#b9f5ff'
+  );
+}
+
+// ------------------------------------------------------------
+// CRYOSTASIS · REAL GAMEPLAY FREEZE
+// ------------------------------------------------------------
+if (
+  this.afkStage === 3 &&
+  !this.afkCryostasisActive &&
+  this.player?.body
+) {
+  const body = this.player.body;
+
+  this.afkCryostasisActive = true;
+
+  this.afkCryoPreviousMoves =
+    body.moves !== false;
+
+  this.afkCryoPreviousAllowGravity =
+    body.allowGravity !== false;
+
+  body.setVelocity(
+    0,
+    0
+  );
+
+  body.setAcceleration(
+    0,
+    0
+  );
+
+  body.setAllowGravity(
+    false
+  );
+
+  body.moves = false;
+}
+
+// ------------------------------------------------------------
+// NORMAL
+// ------------------------------------------------------------
+  if (
+    this.afkStage === 0
+  ) {
+    this.clearAfkState();
+    return;
+  }
+
+if (
+  !this.afkFreezeFx
+) {
+  this.afkFreezeFx = {
+    aura: null,
+    ring: null,
+    core: null
+  };
+}
+
+const graphicsLevel =
+  Number.isFinite(
+    this.graphicsLevel
+  )
+    ? this.graphicsLevel
+    : 2;
+
+const afkParticlesAllowed =
+  graphicsLevel >= 1;
+
+if (
+  afkParticlesAllowed &&
+  this.afkStage >= 2 &&
+  Array.isArray(this.afkIceParticles) &&
+  this.afkIceParticles.length === 0
+) {
+  for (
+    let i = 0;
+    i < 6;
+    i++
+  ) {
+    const particle =
+      this.add
+        .text(
+          this.player.x,
+          this.player.y,
+          '✦',
+          {
+            fontFamily: 'Arial',
+            fontSize: '10px',
+            color: '#dffcff',
+            stroke: '#58e7ff',
+            strokeThickness: 2
+          }
+        )
+        .setOrigin(0.5)
+        .setAlpha(0)
+        .setDepth(14);
+
+    particle.setData(
+      'afkIndex',
+      i
+    );
+
+    this.afkIceParticles.push(
+      particle
+    );
+  }
+}
+
+  // ------------------------------------------------------------
+  // STAGE 1 · IDLE
+  // ------------------------------------------------------------
+  if (
+    this.afkStage === 1
+  ) {
+    if (
+      !this.afkFreezeFx.aura
+    ) {
+      this.afkFreezeFx.aura =
+        this.add
+          .circle(
+            this.player.x,
+            this.player.y,
+            28,
+            0xb9f5ff,
+            0.045
+          )
+          .setDepth(10);
+    }
+
+    this.tweens.killTweensOf(
+      this.afkFreezeFx.aura
+    );
+
+    this.tweens.add({
+      targets:
+        this.afkFreezeFx.aura,
+      scale: 1.14,
+      alpha: 0.10,
+      duration: 850,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.inOut'
+    });
+
+this.playerCue(
+  'IDLE STATE DETECTED',
+  '#b9f5ff'
+);
+
+this.speakNarration(
+  'IDLE STATE DETECTED'
+);
+
+this.game.events.emit(
+  'player-afk-warning',
+  {
+    stage: 1,
+    elapsed: this.afkTimer
+  }
+);
+
+return;
+  }
+
+  // ------------------------------------------------------------
+  // STAGE 2 · FROST
+  // ------------------------------------------------------------
+  if (
+    this.afkStage === 2
+  ) {
+    if (
+      !this.afkFreezeFx.ring
+    ) {
+      this.afkFreezeFx.ring =
+        this.add
+          .circle(
+            this.player.x,
+            this.player.y + 8,
+            18,
+            0xb9f5ff,
+            0.035
+          )
+          .setStrokeStyle(
+            2,
+            0xe8fdff,
+            0.62
+          )
+          .setDepth(12);
+    }
+
+    this.tweens.killTweensOf(
+      this.afkFreezeFx.ring
+    );
+
+    this.tweens.add({
+      targets:
+        this.afkFreezeFx.ring,
+      scale: 1.45,
+      alpha: 0.02,
+      duration: 950,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.inOut'
+    });
+
+this.playerCue(
+  'FROST BUILDUP',
+  '#b9f5ff'
+);
+
+this.speakNarration(
+  'FROST BUILDUP'
+);
+
+this.game.events.emit(
+  'player-afk',
+  {
+    stage: 2,
+    elapsed: this.afkTimer
+  }
+);
+
+return;
+  }
+
+  // ------------------------------------------------------------
+  // STAGE 3 · CRYOSTASIS
+  // ------------------------------------------------------------
+  if (
+    !this.afkFreezeFx.core
+  ) {
+    this.afkFreezeFx.core =
+      this.add
+        .circle(
+          this.player.x,
+          this.player.y,
+          11,
+          0xe8fdff,
+          0.07
+        )
+        .setStrokeStyle(
+          2,
+          0xb9f5ff,
+          0.82
+        )
+        .setDepth(13);
+  }
+
+  this.tweens.killTweensOf(
+    this.afkFreezeFx.core
+  );
+
+this.tweens.add({
+  targets:
+    this.afkFreezeFx.core,
+  scale: 1.55,
+  alpha: 0.015,
+  duration: 1050,
+  yoyo: true,
+  repeat: -1,
+  ease: 'Sine.inOut'
+});
+
+// ------------------------------------------------------------
+// CRYOSTASIS DEEP FREEZE FX
+// ------------------------------------------------------------
+if (
+  !this.afkCryoFx
+) {
+  this.afkCryoFx = {
+    outer:
+      this.add
+        .circle(
+          this.player.x,
+          this.player.y,
+          34,
+          0xb9f5ff,
+          0.035
+        )
+        .setStrokeStyle(
+          2,
+          0xe8fdff,
+          0.72
+        )
+        .setDepth(11),
+
+    inner:
+      this.add
+        .circle(
+          this.player.x,
+          this.player.y,
+          16,
+          0xe8fdff,
+          0.055
+        )
+        .setStrokeStyle(
+          1.5,
+          0xb9f5ff,
+          0.90
+        )
+        .setDepth(13)
+   };
+}
+
+// ------------------------------------------------------------
+// CRYOSTASIS · ICE SHARDS
+// Quality-gated visual shards around the player.
+// ------------------------------------------------------------
+if (
+  graphicsLevel >= 2 &&
+  Array.isArray(this.afkCryoShards) &&
+  this.afkCryoShards.length === 0
+) {
+  for (let i = 0; i < 8; i++) {
+    const shard =
+      this.add
+        .triangle(
+          this.player.x,
+          this.player.y,
+          0,
+          -8,
+          6,
+          5,
+          -6,
+          5,
+          0xe8fdff,
+          0.18
+        )
+        .setStrokeStyle(
+          1,
+          0x8df4ff,
+          0.75
+        )
+        .setDepth(14);
+
+    shard.setData(
+      'afkShardIndex',
+      i
+    );
+
+    this.afkCryoShards.push(
+      shard
+    );
+  }
+}
+
+this.tweens.killTweensOf(
+  this.afkCryoFx.outer
+);
+
+this.tweens.killTweensOf(
+  this.afkCryoFx.inner
+);
+
+this.tweens.add({
+  targets:
+    this.afkCryoFx.outer,
+  scale: 1.32,
+  alpha: 0.01,
+  duration: 1200,
+  yoyo: true,
+  repeat: -1,
+  ease: 'Sine.inOut'
+});
+
+this.tweens.add({
+  targets:
+    this.afkCryoFx.inner,
+  scale: 0.72,
+  alpha: 0.10,
+  duration: 760,
+  yoyo: true,
+  repeat: -1,
+  ease: 'Sine.inOut'
+});
+
+// ------------------------------------------------------------
+// ULTRA · CRYOSTASIS IMPACT PULSE
+// One-shot visual burst when deep freeze engages.
+// Gameplay is untouched.
+// ------------------------------------------------------------
+if (
+  graphicsLevel >= 3 &&
+  !this.motionReduced &&
+  !this.afkCryoTriggered
+) {
+  this.afkCryoTriggered = true;
+
+  this.cameras.main.flash(
+    180,
+    205,
+    248,
+    255
+  );
+
+  this.shake(
+    120,
+    0.004
+  );
+
+  const cryoPulse =
+    this.add
+      .circle(
+        this.player.x,
+        this.player.y,
+        22,
+        0xdffcff,
+        0.18
+      )
+      .setStrokeStyle(
+        3,
+        0x8df4ff,
+        0.95
+      )
+      .setDepth(15);
+
+  this.tweens.add({
+    targets:
+      cryoPulse,
+    scale: 4.8,
+    alpha: 0,
+    duration: 620,
+    ease: 'Cubic.out',
+    onComplete: () => {
+      if (
+        cryoPulse?.active
+      ) {
+        cryoPulse.destroy();
+      }
+    }
+  });
+}
+
+this.playerCue(
+  'CRYOSTASIS ENGAGED',
+  '#b9f5ff'
+);
+
+this.speakNarration(
+  'CRYOSTASIS ENGAGED'
+);
+
+this.game.events.emit(
+  'player-cryostasis',
+  {
+    stage: 3,
+    elapsed: this.afkTimer
+  }
+);
+
+  this.updateAfkFx();
+}
+
+// ============================================================
+// AFK FX FOLLOW PLAYER
+// ============================================================
+updateAfkFx() {
+  if (
+    !this.afkFreezeFx ||
+    !this.player?.active
+  ) {
+    return;
+  }
+
+ const now =
+  this.time.now * 0.001;
+
+// ------------------------------------------------------------
+// AFK STATUS FOLLOW
+// ------------------------------------------------------------
+if (
+  this.afkStatusText?.active &&
+  this.player?.active
+) {
+  this.afkStatusText.x =
+    this.player.x;
+
+  this.afkStatusText.y =
+    this.player.y - 58;
+
+  this.afkStatusText.setAlpha(
+    0.72 +
+    Math.sin(now * 4) * 0.16
+  );
+
+  this.afkStatusText.setScale(
+    0.96 +
+    Math.sin(now * 3.2) * 0.04
+  );
+}
+
+const graphicsLevel =
+  Number.isFinite(
+    this.graphicsLevel
+  )
+    ? this.graphicsLevel
+    : 2;
+
+if (
+  Array.isArray(
+    this.afkIceParticles
+  ) &&
+  this.afkStage >= 2 &&
+  graphicsLevel >= 1
+) {
+    this.afkIceParticles.forEach(
+      particle => {
+        if (!particle?.active) {
+          return;
+        }
+
+        const index =
+          Number(
+            particle.getData(
+              'afkIndex'
+            )
+          ) || 0;
+
+        const angle =
+          now * (0.7 + index * 0.05) +
+          index * 1.047;
+
+        const radius =
+          24 +
+          Math.sin(
+            now * 1.8 + index
+          ) * 5;
+
+        particle.x =
+          this.player.x +
+          Math.cos(angle) * radius;
+
+        particle.y =
+          this.player.y +
+          Math.sin(angle) * radius -
+          8;
+
+        particle.setAlpha(
+          0.28 +
+          (
+            Math.sin(
+              now * 3 +
+              index
+            ) + 1
+          ) * 0.18
+        );
+
+        particle.setScale(
+          0.75 +
+          (
+            Math.sin(
+              now * 2.4 +
+              index
+            ) + 1
+          ) * 0.15
+        );
+      }
+    );
+  }
+if (
+  Array.isArray(
+    this.afkIceParticles
+  )
+) {
+  const particlesEnabled =
+    graphicsLevel >= 1;
+
+  this.afkIceParticles.forEach(
+    particle => {
+      if (!particle?.active) {
+        return;
+      }
+
+      particle.setVisible(
+        particlesEnabled
+      );
+
+      if (!particlesEnabled) {
+        particle.setAlpha(0);
+      }
+    }
+  );
+}
+  // ------------------------------------------------------------
+// CRYOSTASIS · ICE SHARD FOLLOW / ORBIT
+// ------------------------------------------------------------
+if (
+  Array.isArray(
+    this.afkCryoShards
+  ) &&
+  this.afkStage >= 3
+) {
+  this.afkCryoShards.forEach(
+    shard => {
+      if (!shard?.active) {
+        return;
+      }
+
+      const index =
+        Number(
+          shard.getData(
+            'afkShardIndex'
+          )
+        ) || 0;
+
+      const angle =
+        now * 0.32 +
+        index * (Math.PI * 2 / 8);
+
+      const radius =
+        38 +
+        Math.sin(
+          now * 1.7 + index
+        ) * 4;
+
+      shard.x =
+        this.player.x +
+        Math.cos(angle) * radius;
+
+      shard.y =
+        this.player.y +
+        Math.sin(angle) * radius -
+        4;
+
+      shard.rotation =
+        angle + Math.PI / 2;
+
+      shard.setAlpha(
+        0.10 +
+        (
+          Math.sin(
+            now * 2.6 + index
+          ) + 1
+        ) * 0.10
+      );
+
+      shard.setScale(
+        0.82 +
+        (
+          Math.sin(
+            now * 2.1 + index
+          ) + 1
+        ) * 0.10
+      );
+    }
+  );
+}
+  
+  const {
+    aura,
+    ring,
+    core
+  } = this.afkFreezeFx;
+
+  if (
+    aura?.active
+  ) {
+    aura.x =
+      this.player.x;
+
+    aura.y =
+      this.player.y;
+  }
+
+  if (
+    ring?.active
+  ) {
+    ring.x =
+      this.player.x;
+
+    ring.y =
+      this.player.y + 8;
+  }
+
+  if (
+    core?.active
+  ) {
+    core.x =
+      this.player.x;
+
+    core.y =
+      this.player.y;
+  }
+  if (
+  this.afkCryoFx
+) {
+  if (
+    this.afkCryoFx.outer?.active
+  ) {
+    this.afkCryoFx.outer.x =
+      this.player.x;
+
+    this.afkCryoFx.outer.y =
+      this.player.y;
+  }
+
+  if (
+    this.afkCryoFx.inner?.active
+  ) {
+    this.afkCryoFx.inner.x =
+      this.player.x;
+
+    this.afkCryoFx.inner.y =
+      this.player.y;
+  }
+}
+}
+
+// ============================================================
+// AFK CLEAR
+// ============================================================
+clearAfkState() {
+  // ------------------------------------------------------------
+  // CRYOSTASIS · UNFREEZE BURST
+  // ------------------------------------------------------------
+  if (
+    this.afkCryostasisActive &&
+    this.player?.active
+  ) {
+    const burst =
+      this.add
+        .circle(
+          this.player.x,
+          this.player.y,
+          10,
+          0xe8fdff,
+          0.16
+        )
+        .setStrokeStyle(
+          2,
+          0x8df4ff,
+          0.95
+        )
+        .setDepth(16);
+
+    this.tweens.add({
+      targets: burst,
+      scale: 4.6,
+      alpha: 0,
+      duration: 420,
+      ease: 'Cubic.out',
+      onComplete: () => {
+        if (burst?.active) {
+          burst.destroy();
+        }
+      }
+    });
+
+    this.cameras.main.flash(
+      90,
+      220,
+      250,
+      255
+    );
+  }
+
+  // ------------------------------------------------------------
+  // CRYOSTASIS · RESTORE PLAYER PHYSICS
+  // ------------------------------------------------------------
+  if (
+    this.afkCryostasisActive &&
+    this.player?.body
+  ) {
+    const body = this.player.body;
+
+    body.moves =
+      this.afkCryoPreviousMoves;
+
+    body.setAllowGravity(
+      this.afkCryoPreviousAllowGravity
+    );
+
+    body.setAcceleration(
+      0,
+      0
+    );
+
+    this.afkCryostasisActive = false;
+  }
+
+  this.afkTimer = 0;
+  this.afkStage = 0;
+
+  if (
+    this.afkFreezeFx
+  ) {
+    Object.values(
+      this.afkFreezeFx
+    ).forEach(
+      object => {
+        if (!object) {
+          return;
+        }
+
+        this.tweens.killTweensOf(
+          object
+        );
+
+        if (
+          object.active
+        ) {
+          object.destroy();
+        }
+      }
+    );
+  }
+
+this.afkFreezeFx = null;
+
+if (
+  Array.isArray(
+    this.afkIceParticles
+  )
+) {
+  this.afkIceParticles.forEach(
+    particle => {
+      if (!particle) {
+        return;
+      }
+
+      this.tweens.killTweensOf(
+        particle
+      );
+
+      if (particle.active) {
+        particle.destroy();
+      }
+    }
+  );
+
+  this.afkIceParticles = [];
+}
+  if (
+  this.afkCryoFx
+) {
+  Object.values(
+    this.afkCryoFx
+  ).forEach(
+    object => {
+      if (!object) {
+        return;
+      }
+
+      this.tweens.killTweensOf(
+        object
+      );
+
+      if (
+        object.active
+      ) {
+        object.destroy();
+      }
+    }
+  );
+}
+
+if (
+  Array.isArray(
+    this.afkCryoShards
+  )
+) {
+  this.afkCryoShards.forEach(
+    shard => {
+      if (!shard) {
+        return;
+      }
+
+      this.tweens.killTweensOf(
+        shard
+      );
+
+      if (shard.active) {
+        shard.destroy();
+      }
+    }
+  );
+
+this.afkCryoShards = [];
+}
+
+if (
+  this.afkStatusText
+) {
+  this.tweens.killTweensOf(
+    this.afkStatusText
+  );
+
+  if (
+    this.afkStatusText.active
+  ) {
+    this.afkStatusText.destroy();
+  }
+
+  this.afkStatusText = null;
+}
+
+this.afkCryoFx = null;
+this.afkCryoTriggered = false;
+
+this.game.events.emit(
+  'player-afk-cleared'
+);
+  }
+
 update(_, delta) {
   delta = Phaser.Math.Clamp(
     Number(delta) || 0,
     0,
     50
   );
+
+  if (
+    !this.scene.isActive() ||
+    !this.player?.active
+  ) {
+    return;
+  }
 
   if (
     this.finished ||
@@ -32291,8 +34441,32 @@ update(_, delta) {
     return;
   }
 
-  if (
-    this.physics?.world?.isPaused &&
+// ============================================================
+// AFK / CRYOSTASIS
+// ============================================================
+this.updateAfkSystem(delta);
+
+// CRYOSTASIS owns the player until input clears AFK.
+if (
+  this.afkCryostasisActive
+) {
+  if (this.player?.body) {
+    this.player.body.setVelocity(
+      0,
+      0
+    );
+
+    this.player.body.setAcceleration(
+      0,
+      0
+    );
+  }
+
+  return;
+}
+
+if (
+  this.physics?.world?.isPaused &&
     !this.relayPuzzleActive &&
     !this.finished &&
     !this.respawning &&
@@ -32416,7 +34590,6 @@ star.alpha =
 star.rotation =
   now *
     spin *
-    0.72;
     0.72;
     }
   );
@@ -33001,7 +35174,10 @@ const surpriseSpeed =
         .movementMultiplier
     : 1;
 
-if (!this.dashTimer) {
+if (
+  !this.dashTimer &&
+  this.player?.body
+) {
 
   const polaritySpeed =
     this.polarityState === 'OVERDRIVE'
@@ -33543,8 +35719,14 @@ if (swordPressed) {
 
 // energyMax is resolved before regeneration above.
 
+// energyMax is resolved before regeneration above.
+
 const body =
-  this.player.body;
+  this.player?.body;
+
+if (!body) {
+  return;
+}
 
 const left =
   this.cursors.left.isDown ||
@@ -35555,11 +37737,12 @@ if (
 // ============================================================
 
 if (
-  this.player?.active &&
   !this.motionReduced &&
   !this.cinematicActive &&
   !this.respawning &&
-  !this.isPlayerTransformLocked
+  !this.isPlayerTransformLocked &&
+  this.player?.active &&
+  this.player?.body
 ) {
   const vx =
     this.player.body?.velocity?.x || 0;
