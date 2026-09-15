@@ -33,6 +33,28 @@ import { loadState, saveState } from './src/state.js';
 
   const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, Number(value) || 0));
 
+  const isElement = node => node instanceof Element;
+
+  const safeQuery = (root, selector) => {
+    if (!isElement(root) || typeof root.querySelector !== 'function') return null;
+    try {
+      return root.querySelector(selector);
+    } catch (error) {
+      console.warn('[Relay Options] query failed', { selector, error });
+      return null;
+    }
+  };
+
+  const safeQueryAll = (root, selector) => {
+    if (!isElement(root) || typeof root.querySelectorAll !== 'function') return [];
+    try {
+      return [...root.querySelectorAll(selector)];
+    } catch (error) {
+      console.warn('[Relay Options] queryAll failed', { selector, error });
+      return [];
+    }
+  };
+
   const escapeHtml = value => String(value)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -163,9 +185,10 @@ import { loadState, saveState } from './src/state.js';
   };
 
   const updateToggleDom = (host, key, enabled) => {
-    const button = [...host.querySelectorAll('[data-unified-toggle]')].find(item => item.dataset.unifiedToggle === key);
+    const button = safeQueryAll(host, '[data-unified-toggle]')
+      .find(item => item?.dataset?.unifiedToggle === key);
     if (!button) return;
-    button.classList.toggle('is-on', enabled);
+    button.classList.toggle('is-on', Boolean(enabled));
     button.classList.toggle('is-off', !enabled);
     button.setAttribute('aria-pressed', String(Boolean(enabled)));
     button.setAttribute('aria-label', `${key}: ${enabled ? 'ON' : 'OFF'}`);
@@ -173,14 +196,19 @@ import { loadState, saveState } from './src/state.js';
   };
 
   const mount = (root, kind) => {
-    if (!root) return false;
+    if (!isElement(root)) return false;
     injectStyles();
     root.classList.add('relay-options-unified');
     root.removeAttribute('hidden');
     root.setAttribute('aria-hidden', 'false');
-    const host = kind === 'home' ? root.querySelector('#titlePanelContent') : root.querySelector('#panelContent');
-    if (!host) return false;
-
+    const host = safeQuery(
+      root,
+      kind === 'home' ? '#titlePanelContent' : '#panelContent'
+    );
+    if (!isElement(host)) {
+      console.warn('[Relay Options] mount skipped: host is missing.', { kind });
+      return false;
+    }
     if (!boundRoots.has(root)) {
       boundRoots.add(root);
       host.innerHTML = buildContent();
@@ -191,7 +219,7 @@ import { loadState, saveState } from './src/state.js';
 
   const findOpenHome = () => {
     const panel = document.getElementById('titlePanel');
-    if (!panel || panel.classList.contains('hidden')) return null;
+    if (!isElement(panel) || panel.classList.contains('hidden')) return null;
     const heading = document.getElementById('titlePanelHeading');
     if (heading && /OPTIONS|RUN SETTINGS/i.test(heading.textContent || '')) return panel;
     return panel.classList.contains('relay-options-unified') ? panel : null;
@@ -199,20 +227,20 @@ import { loadState, saveState } from './src/state.js';
 
   const findOpenPause = () => {
     const pause = document.getElementById('pauseMenu');
-    if (!pause || pause.classList.contains('hidden')) return null;
-    const tab = pause.querySelector('[data-tab="settings"]');
+    if (!isElement(pause) || pause.classList.contains('hidden')) return null;
+    const tab = safeQuery(pause, '[data-tab="settings"]');
     return tab?.classList.contains('active') ? pause : null;
   };
 
   const openHomeOptions = event => {
     const panel = document.getElementById('titlePanel');
     const heading = document.getElementById('titlePanelHeading');
-    if (!panel) return false;
+    if (!isElement(panel)) return false;
     event?.preventDefault?.();
     panel.classList.remove('hidden');
     panel.removeAttribute('hidden');
     panel.setAttribute('aria-hidden', 'false');
-    if (heading) {
+    if (isElement(heading)) {
       heading.textContent = 'OPTIONS';
       heading.className = 'relay-options-title';
     }
@@ -220,14 +248,16 @@ import { loadState, saveState } from './src/state.js';
   };
 
   const openControls = host => {
-    const panel = host.querySelector('[data-unified-controls-panel]');
-    const button = host.querySelector('[data-unified-controls]');
-    if (!panel) return;
+    if (!isElement(host)) return;
+    const panel = safeQuery(host, '[data-unified-controls-panel]');
+    const button = safeQuery(host, '[data-unified-controls]');
+    if (!isElement(panel)) return;
     panel.hidden = !panel.hidden;
     button?.setAttribute('aria-expanded', String(!panel.hidden));
   };
 
   const resetOptions = host => {
+    if (!isElement(host)) return;
     saveState({ ...getState(), ...STATE_DEFAULTS });
     writePresentation(PRESENTATION_DEFAULTS);
     setLanguage('en');
@@ -237,7 +267,9 @@ import { loadState, saveState } from './src/state.js';
   };
 
   const handleToggle = (host, button) => {
+    if (!isElement(host) || !isElement(button)) return;
     const key = button.dataset.unifiedToggle;
+    if (!key) return;
     const state = getState();
     const prefs = readPresentation();
     const current = PRESENTATION_KEYS.has(key)
@@ -246,7 +278,6 @@ import { loadState, saveState } from './src/state.js';
         ? state.muted !== true
         : Boolean(state[key]);
     const next = !current;
-
     if (PRESENTATION_KEYS.has(key)) {
       prefs[key] = next;
       writePresentation(prefs);
@@ -255,7 +286,6 @@ import { loadState, saveState } from './src/state.js';
       emitSettingsChange({ key, value: next, presentation: true });
       return;
     }
-
     savePatch(key === 'muted' ? { muted: !next } : { [key]: next });
     if (key === 'aiVoice' && !next) {
       try { window.speechSynthesis?.cancel?.(); } catch {}
@@ -265,9 +295,12 @@ import { loadState, saveState } from './src/state.js';
   };
 
   const handleRange = (host, range) => {
+    if (!isElement(host) || !isElement(range)) return;
     const key = range.dataset.unifiedRange;
+    if (!key) return;
     const value = clamp(range.value);
-    const label = [...host.querySelectorAll('[data-range-value]')].find(item => item.dataset.rangeValue === key);
+    const label = safeQueryAll(host, '[data-range-value]')
+      .find(item => item?.dataset?.rangeValue === key);
     if (label) label.textContent = `${Math.round(value * 100)}%`;
     savePatch({ [key]: value });
     emitSettingsChange({ key, value });
@@ -276,14 +309,12 @@ import { loadState, saveState } from './src/state.js';
   const init = () => {
     injectStyles();
     syncPresentationClasses(readPresentation());
-
     document.addEventListener('relay-open-home-options', openHomeOptions);
-
     document.addEventListener('click', event => {
       const target = event.target;
-      if (!(target instanceof Element)) return;
+      if (!isElement(target)) return;
 
-      const pauseSettings = target.closest('#pauseMenu [data-tab="settings"]');
+      const pauseSettings = safeQuery(target, '#pauseMenu [data-tab="settings"]');
       if (pauseSettings) {
         window.setTimeout(() => {
           const pause = findOpenPause();
@@ -292,7 +323,7 @@ import { loadState, saveState } from './src/state.js';
         return;
       }
 
-      const homeControl = target.closest('#intro [data-title-panel="controls"]');
+      const homeControl = safeQuery(target, '#intro [data-title-panel="controls"]');
       if (homeControl) {
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -300,30 +331,30 @@ import { loadState, saveState } from './src/state.js';
         return;
       }
 
-      const host = target.closest('#titlePanelContent, #panelContent');
-      if (!host) return;
-      const root = host.closest('#titlePanel, #pauseMenu');
-      if (!root?.classList.contains('relay-options-unified')) return;
+      const host = safeQuery(target, '#titlePanelContent, #panelContent');
+      if (!isElement(host)) return;
+      const root = safeQuery(host, '#titlePanel, #pauseMenu');
+      if (!isElement(root) || !root.classList.contains('relay-options-unified')) return;
 
-      const toggle = target.closest('[data-unified-toggle]');
+      const toggle = safeQuery(target, '[data-unified-toggle]');
       if (toggle) {
         event.preventDefault();
         handleToggle(host, toggle);
         return;
       }
 
-      const langButton = target.closest('[data-unified-language]');
+      const langButton = safeQuery(target, '[data-unified-language]');
       if (langButton) {
         event.preventDefault();
-        const menu = host.querySelector('[data-unified-language-menu]');
-        if (!menu) return;
+        const menu = safeQuery(host, '[data-unified-language-menu]');
+        if (!isElement(menu)) return;
         const open = !menu.classList.contains('hidden');
         menu.classList.toggle('hidden', open);
         langButton.setAttribute('aria-expanded', String(!open));
         return;
       }
 
-      const langCode = target.closest('[data-unified-language-code]');
+      const langCode = safeQuery(target, '[data-unified-language-code]');
       if (langCode) {
         event.preventDefault();
         setLanguage(langCode.dataset.unifiedLanguageCode);
@@ -331,7 +362,7 @@ import { loadState, saveState } from './src/state.js';
         return;
       }
 
-      const fullscreen = target.closest('[data-unified-fullscreen]');
+      const fullscreen = safeQuery(target, '[data-unified-fullscreen]');
       if (fullscreen) {
         event.preventDefault();
         (async () => {
@@ -344,14 +375,14 @@ import { loadState, saveState } from './src/state.js';
         return;
       }
 
-      const reset = target.closest('[data-unified-reset]');
+      const reset = safeQuery(target, '[data-unified-reset]');
       if (reset) {
         event.preventDefault();
         resetOptions(host);
         return;
       }
 
-      const controls = target.closest('[data-unified-controls]');
+      const controls = safeQuery(target, '[data-unified-controls]');
       if (controls) {
         event.preventDefault();
         openControls(host);
@@ -360,22 +391,22 @@ import { loadState, saveState } from './src/state.js';
 
     document.addEventListener('input', event => {
       const target = event.target;
-      if (!(target instanceof HTMLInputElement)) return;
+      if (!isElement(target) || !(target instanceof HTMLInputElement)) return;
       if (!target.matches('[data-unified-range]')) return;
-      const host = target.closest('#titlePanelContent, #panelContent');
-      if (!host) return;
-      const root = host.closest('#titlePanel, #pauseMenu');
-      if (!root?.classList.contains('relay-options-unified')) return;
+      const host = safeQuery(target, '#titlePanelContent, #panelContent');
+      if (!isElement(host)) return;
+      const root = safeQuery(host, '#titlePanel, #pauseMenu');
+      if (!isElement(root) || !root.classList.contains('relay-options-unified')) return;
       handleRange(host, target);
     }, { capture: true });
 
     document.addEventListener('click', event => {
       const target = event.target;
-      if (!(target instanceof Element)) return;
-      if (target.closest('.relay-select')) return;
-      document.querySelectorAll('.relay-language-menu').forEach(menu => {
+      if (!isElement(target)) return;
+      if (safeQuery(target, '.relay-select')) return;
+      safeQueryAll(document, '.relay-language-menu').forEach(menu => {
         menu.classList.add('hidden');
-        menu.parentElement?.querySelector('[data-unified-language]')?.setAttribute('aria-expanded', 'false');
+        safeQuery(menu.parentElement, '[data-unified-language]')?.setAttribute('aria-expanded', 'false');
       });
     }, false);
 
@@ -397,6 +428,9 @@ import { loadState, saveState } from './src/state.js';
     }, 0);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
-  else init();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
 })();
