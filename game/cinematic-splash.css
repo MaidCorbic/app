@@ -1,674 +1,216 @@
 /* =========================================================
-   RELAY RUNNER — CINEMATIC SPLASH V4
-   Presentation layer for splash-loader-v2.js
-   No gameplay logic here.
+   RELAY RUNNER — CINEMATIC TACTICAL SPLASH
+   Loading presentation only. Runtime logic stays in splash-loader-v2.js.
    ========================================================= */
 
 :root{
   --rr-bg:#010308;
-  --rr-bg-deep:#000205;
-
   --rr-cyan:#00eaff;
   --rr-cyan2:#8dfaff;
   --rr-blue:#168cff;
-  --rr-blue2:#006dff;
-
   --rr-gold:#ffd23c;
-
   --rr-white:#f5fdff;
-  --rr-text:rgba(235,252,255,.94);
-  --rr-dim:rgba(210,245,255,.68);
-  --rr-muted:rgba(150,210,225,.48);
-
-  --rr-line:rgba(90,236,255,.16);
-  --rr-line-strong:rgba(90,236,255,.36);
-
-  --rr-panel:rgba(1,8,16,.74);
-  --rr-panel-strong:rgba(0,11,20,.86);
-
-  --rr-shadow:
-    0 14px 50px rgba(0,0,0,.46),
-    0 0 36px rgba(0,180,255,.08);
-
-  --rr-mono:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    "Liberation Mono",
-    monospace;
-}
-
-/* =========================================================
-   ROOT / RESET
-   ========================================================= */
-
-.relay-splash,
-.relay-splash *{
-  box-sizing:border-box;
+  --rr-dim:rgba(210,245,255,.72);
+  --rr-panel:rgba(1,8,16,.72);
 }
 
 .relay-splash{
-  position:fixed!important;
-  inset:0!important;
-
+  position:fixed;
+  inset:0;
   width:100vw!important;
   height:100vh!important;
-
   width:100dvw!important;
   height:100dvh!important;
-
   z-index:2147483647;
-
   display:grid;
   place-items:center;
-
   overflow:hidden;
   isolation:isolate;
-
-  background:
-    radial-gradient(
-      circle at 50% 45%,
-      rgba(0,180,255,.08),
-      transparent 42%
-    ),
-    var(--rr-bg);
-
-  color:var(--rr-white);
-
+  background:var(--rr-bg);
   opacity:1;
   visibility:visible;
-
-  pointer-events:auto;
-
-  user-select:none;
-  -webkit-user-select:none;
-
-  transition:
-    opacity .72s cubic-bezier(.16,1,.3,1),
-    visibility .72s linear;
+  transition:opacity .75s cubic-bezier(.16,1,.3,1),visibility .75s;
 }
-
-/* Final hidden state used by loader */
-.relay-splash.is-hidden{
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-/* =========================================================
-   BACKGROUND ATMOSPHERE
-   ========================================================= */
 
 .relay-splash::before{
   content:"";
-
   position:absolute;
-  inset:-18%;
-
+  inset:-20%;
   z-index:1;
   pointer-events:none;
-
   background:
-    radial-gradient(
-      circle at 50% 46%,
-      rgba(0,234,255,.16),
-      transparent 31%
-    ),
-    radial-gradient(
-      circle at 6% 94%,
-      rgba(0,234,255,.10),
-      transparent 27%
-    ),
-    radial-gradient(
-      circle at 96% 8%,
-      rgba(22,140,255,.12),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 50% 110%,
-      rgba(0,0,0,.70),
-      transparent 52%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.22),
-      transparent 32%,
-      rgba(0,0,0,.88)
-    );
-
-  animation:
-    rr-atmosphere
-    6s ease-in-out
-    infinite alternate;
+    radial-gradient(circle at 50% 46%,rgba(0,234,255,.18),transparent 34%),
+    radial-gradient(circle at 7% 92%,rgba(0,234,255,.12),transparent 28%),
+    radial-gradient(circle at 94% 9%,rgba(22,140,255,.13),transparent 27%),
+    linear-gradient(180deg,rgba(0,0,0,.18),transparent 35%,rgba(0,0,0,.88));
+  animation:rr-atmosphere 5s ease-in-out infinite alternate;
 }
-
-/* =========================================================
-   CINEMATIC SCANLINES / VIGNETTE
-   ========================================================= */
 
 .relay-splash::after{
   content:"";
-
   position:absolute;
   inset:0;
-
-  z-index:6;
+  z-index:5;
   pointer-events:none;
-
   background:
-    repeating-linear-gradient(
-      180deg,
-      rgba(255,255,255,.018) 0 1px,
-      transparent 1px 4px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(0,0,0,.84),
-      transparent 16%,
-      transparent 84%,
-      rgba(0,0,0,.84)
-    ),
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.64),
-      transparent 18%,
-      transparent 64%,
-      rgba(0,0,0,.94)
-    );
-
-  opacity:.82;
-
+    repeating-linear-gradient(180deg,rgba(255,255,255,.022) 0 1px,transparent 1px 4px),
+    linear-gradient(90deg,rgba(0,0,0,.78),transparent 17%,transparent 83%,rgba(0,0,0,.78)),
+    linear-gradient(180deg,rgba(0,0,0,.64),transparent 20%,transparent 66%,rgba(0,0,0,.9));
+  opacity:.76;
   mix-blend-mode:screen;
 }
 
-/* =========================================================
-   ARTWORK
-   ========================================================= */
-
-#relaySplashPicture{
+.relay-splash-art{
   position:absolute;
   inset:0;
-
-  width:100%;
-  height:100%;
-
   z-index:0;
-
-  display:block;
-
-  overflow:hidden;
-
-  background:var(--rr-bg);
-}
-
-.relay-splash-art{
-  position:absolute!important;
-  inset:0!important;
-
-  z-index:0;
-
   display:block!important;
-
   width:100vw!important;
   height:100vh!important;
-
   width:100dvw!important;
   height:100dvh!important;
-
   min-width:100%!important;
   min-height:100%!important;
-
   max-width:none!important;
   max-height:none!important;
-
   object-fit:cover!important;
-  object-position:center center!important;
-
-  background:var(--rr-bg);
-
-  filter:
-    saturate(.88)
-    contrast(1.15)
-    brightness(.64);
-
+  object-position:center!important;
+  background:#010308;
+  filter:saturate(.92) contrast(1.16) brightness(.7);
   transform:none!important;
   animation:none!important;
-
-  image-rendering:auto;
 }
 
 /* =========================================================
-   TOP LEFT BRAND
+   BRAND / CORNER HUD
    ========================================================= */
 
 .relay-splash-brand{
   position:absolute;
-
-  z-index:12;
-
-  left:max(
-    24px,
-    env(safe-area-inset-left)
-  );
-
-  top:max(
-    24px,
-    env(safe-area-inset-top)
-  );
-
+  z-index:8;
+  left:max(24px,env(safe-area-inset-left));
+  top:max(24px,env(safe-area-inset-top));
   display:flex;
   align-items:center;
-
   gap:12px;
-
   color:var(--rr-white);
-
-  font:
-    900 11px/1
-    var(--rr-mono);
-
+  font:900 11px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
   letter-spacing:.24em;
   text-transform:uppercase;
-
-  white-space:nowrap;
-
-  text-shadow:
-    0 2px 12px rgba(0,0,0,.95),
-    0 0 16px rgba(0,234,255,.42);
+  text-shadow:0 2px 12px #000,0 0 16px rgba(0,234,255,.45);
 }
 
 .relay-splash-brand::after{
   content:"BOOT SEQUENCE";
-
-  margin-left:5px;
-
+  margin-left:4px;
   padding:5px 8px;
-
-  border:1px solid rgba(0,234,255,.20);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,25,38,.56),
-      rgba(0,10,18,.42)
-    );
-
-  color:rgba(141,250,255,.56);
-
-  font:
-    700 7px/1
-    var(--rr-mono);
-
+  border:1px solid rgba(0,234,255,.2);
+  background:rgba(0,20,32,.42);
+  color:rgba(141,250,255,.52);
+  font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
   letter-spacing:.16em;
-
-  box-shadow:
-    inset 0 0 14px rgba(0,234,255,.04);
 }
 
 .relay-splash-brand b{
   position:relative;
-
   display:grid;
   place-items:center;
-
-  flex:0 0 38px;
-
   width:38px;
   height:38px;
-
   color:var(--rr-cyan2);
-
   border:1px solid rgba(0,234,255,.92);
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(0,234,255,.16),
-      rgba(0,20,35,.94)
-    );
-
-  box-shadow:
-    0 0 8px rgba(0,234,255,.76),
-    0 0 22px rgba(0,234,255,.34),
-    0 0 48px rgba(0,140,255,.16),
-    inset 0 0 18px rgba(0,234,255,.14);
-
-  font:
-    900 14px/1
-    var(--rr-mono);
-
-  animation:
-    rr-logo
-    2.2s ease-in-out
-    infinite;
+  background:linear-gradient(135deg,rgba(0,234,255,.16),rgba(0,20,35,.92));
+  box-shadow:0 0 8px rgba(0,234,255,.82),0 0 24px rgba(0,234,255,.4),0 0 55px rgba(0,140,255,.18),inset 0 0 18px rgba(0,234,255,.16);
+  font-size:14px;
+  animation:rr-logo 2s ease-in-out infinite;
 }
 
 .relay-splash-brand b::before,
 .relay-splash-brand b::after{
   content:"";
-
   position:absolute;
-
   width:8px;
   height:8px;
-
   border-color:var(--rr-cyan);
   border-style:solid;
 }
-
-.relay-splash-brand b::before{
-  left:-3px;
-  top:-3px;
-
-  border-width:2px 0 0 2px;
-}
-
-.relay-splash-brand b::after{
-  right:-3px;
-  bottom:-3px;
-
-  border-width:0 2px 2px 0;
-}
+.relay-splash-brand b::before{left:-3px;top:-3px;border-width:2px 0 0 2px}
+.relay-splash-brand b::after{right:-3px;bottom:-3px;border-width:0 2px 2px 0}
 
 /* =========================================================
-   MAIN SPLASH HUD
+   LOADING HUD
    ========================================================= */
 
 .relay-splash-ui{
   position:absolute;
-
-  z-index:14;
-
-  left:max(
-    24px,
-    env(safe-area-inset-left)
-  );
-
-  right:max(
-    24px,
-    env(safe-area-inset-right)
-  );
-
-  bottom:max(
-    30px,
-    calc(env(safe-area-inset-bottom) + 22px)
-  );
-
-  width:min(
-    920px,
-    calc(100vw - 48px)
-  );
-
-  margin:0 auto;
-
+  z-index:9;
+  left:max(24px,env(safe-area-inset-left));
+  right:max(24px,env(safe-area-inset-right));
+  bottom:max(30px,calc(env(safe-area-inset-bottom) + 22px));
+  width:min(860px,calc(100vw - 48px));
+  margin:auto;
   display:grid;
-
   gap:10px;
 }
 
-/* =========================================================
-   SYSTEM LINK LABEL
-   ========================================================= */
-
 .relay-splash-ui::before{
   content:"SYSTEM LINK  //  SECURE CHANNEL";
-
   justify-self:start;
-
-  padding:5px 9px;
-
+  padding:4px 8px;
   border-left:2px solid var(--rr-cyan);
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(0,234,255,.10),
-      rgba(0,234,255,.015),
-      transparent
-    );
-
-  color:rgba(141,250,255,.60);
-
-  font:
-    700 7px/1
-    var(--rr-mono);
-
+  background:linear-gradient(90deg,rgba(0,234,255,.09),transparent);
+  color:rgba(141,250,255,.55);
+  font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
   letter-spacing:.18em;
-
-  text-transform:uppercase;
-
-  box-shadow:
-    8px 0 24px rgba(0,234,255,.04);
 }
-
-/* =========================================================
-   STATUS ROW
-   ========================================================= */
 
 .relay-splash-meta{
-  position:relative;
-
-  min-height:48px;
-
   display:grid;
-
-  grid-template-columns:
-    minmax(0,1fr)
-    auto;
-
-  align-items:center;
-
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
   gap:18px;
-
-  padding:10px 13px 9px;
-
-  border:1px solid var(--rr-line);
-
-  border-bottom-color:var(--rr-line-strong);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(1,10,18,.84),
-      rgba(1,7,13,.54)
-    );
-
-  box-shadow:
-    var(--rr-shadow),
-    inset 0 0 22px rgba(0,234,255,.035);
-
-  overflow:hidden;
+  padding:10px 12px 9px;
+  border:1px solid rgba(117,247,255,.17);
+  border-bottom-color:rgba(117,247,255,.32);
+  background:linear-gradient(180deg,rgba(1,10,18,.78),rgba(1,7,13,.46));
+  box-shadow:0 10px 34px rgba(0,0,0,.36),inset 0 0 22px rgba(0,234,255,.035);
 }
-
-.relay-splash-meta::before{
-  content:"";
-
-  position:absolute;
-  inset:0;
-
-  pointer-events:none;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(0,234,255,.035),
-      transparent
-    );
-
-  transform:translateX(-100%);
-
-  animation:
-    rr-panel-scan
-    2.8s ease-in-out
-    infinite;
-}
-
-/* =========================================================
-   STATUS TEXT
-   ========================================================= */
 
 .relay-splash-status{
-  position:relative;
-
   min-width:0;
-
   display:flex;
   align-items:center;
-
-  color:var(--rr-text);
-
-  font:
-    800 10px/1.15
-    var(--rr-mono);
-
-  letter-spacing:.20em;
-
+  gap:0;
+  color:var(--rr-dim);
+  font:800 10px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.2em;
   text-transform:uppercase;
-
   white-space:nowrap;
-
   overflow:hidden;
-
   text-overflow:ellipsis;
-
-  text-shadow:
-    0 2px 10px rgba(0,0,0,.96),
-    0 0 14px rgba(0,234,255,.18);
+  text-shadow:0 2px 10px #000,0 0 14px rgba(0,234,255,.2);
 }
 
 .relay-splash-status::before{
   content:"";
-
   flex:0 0 6px;
-
   width:6px;
   height:6px;
-
   margin-right:10px;
-
   border-radius:50%;
-
   background:var(--rr-cyan);
-
-  box-shadow:
-    0 0 6px var(--rr-cyan),
-    0 0 14px var(--rr-cyan),
-    0 0 28px rgba(0,234,255,.70);
-
-  animation:
-    rr-live
-    .85s ease-in-out
-    infinite;
+  box-shadow:0 0 6px var(--rr-cyan),0 0 14px var(--rr-cyan),0 0 28px rgba(0,234,255,.72);
+  animation:rr-live .85s ease-in-out infinite;
 }
-
-/* =========================================================
-   PERCENTAGE
-   ========================================================= */
 
 .relay-splash-percent{
-  position:relative;
-
-  min-width:66px;
-
+  min-width:58px;
   color:var(--rr-cyan2);
-
-  font:
-    900 18px/1
-    var(--rr-mono);
-
-  font-variant-numeric:
-    tabular-nums;
-
+  font:900 18px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums;
   letter-spacing:.06em;
-
   text-align:right;
-
-  white-space:nowrap;
-
-  text-shadow:
-    0 0 8px rgba(0,234,255,1),
-    0 0 20px rgba(0,234,255,.68),
-    0 0 38px rgba(0,140,255,.30);
-}
-
-/* =========================================================
-   TELEMETRY / EXTRA BOOT HUD
-   ========================================================= */
-
-.relay-splash-telemetry{
-  display:grid;
-
-  grid-template-columns:
-    repeat(4,minmax(0,1fr));
-
-  gap:7px;
-}
-
-.relay-splash-telemetry > *{
-  min-width:0;
-
-  padding:
-    7px
-    9px;
-
-  border:
-    1px solid
-    rgba(90,236,255,.13);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(1,10,18,.74),
-      rgba(1,6,12,.54)
-    );
-
-  box-shadow:
-    inset 0 0 16px rgba(0,234,255,.025);
-
-  overflow:hidden;
-}
-
-/* Generic support for dynamically generated telemetry cells */
-.relay-splash-telemetry small,
-.relay-splash-telemetry label{
-  display:block;
-
-  margin-bottom:4px;
-
-  color:var(--rr-muted);
-
-  font:
-    700 6px/1
-    var(--rr-mono);
-
-  letter-spacing:.15em;
-
-  text-transform:uppercase;
-}
-
-.relay-splash-telemetry b,
-.relay-splash-telemetry strong,
-.relay-splash-telemetry span{
-  display:block;
-
-  min-width:0;
-
-  overflow:hidden;
-
-  text-overflow:ellipsis;
-
-  white-space:nowrap;
-
-  color:var(--rr-cyan2);
-
-  font:
-    800 9px/1.2
-    var(--rr-mono);
-
-  letter-spacing:.06em;
+  text-shadow:0 0 8px rgba(0,234,255,1),0 0 20px rgba(0,234,255,.7),0 0 38px rgba(0,140,255,.32);
 }
 
 /* =========================================================
@@ -677,695 +219,132 @@
 
 .relay-splash-track{
   position:relative;
-
-  width:100%;
-  height:11px;
-
-  border:
-    1px solid
-    rgba(117,247,255,.46);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,20,32,.98),
-      rgba(0,4,10,.99)
-    );
-
-  box-shadow:
-    0 0 8px rgba(0,234,255,.32),
-    0 0 30px rgba(0,140,255,.15),
-    inset 0 0 16px #000;
-
+  height:10px;
+  border:1px solid rgba(117,247,255,.48);
+  background:linear-gradient(180deg,rgba(0,20,32,.98),rgba(0,4,10,.99));
+  box-shadow:0 0 8px rgba(0,234,255,.34),0 0 30px rgba(0,140,255,.16),inset 0 0 16px #000;
   overflow:hidden;
 }
 
 .relay-splash-track::before{
   content:"";
-
   position:absolute;
   inset:1px;
-
-  z-index:1;
-
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(141,250,255,.10) 0 1px,
-      transparent 1px 24px
-    );
-
+  background:repeating-linear-gradient(90deg,rgba(141,250,255,.1) 0 1px,transparent 1px 24px);
   pointer-events:none;
 }
 
 .relay-splash-track::after{
   content:"";
-
   position:absolute;
   inset:-1px 0;
-
-  z-index:2;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent 0 4%,
-      rgba(0,234,255,.10) 4.5%,
-      transparent 5% 94%,
-      rgba(255,210,60,.20) 95.5%,
-      transparent 96%
-    );
-
+  background:linear-gradient(90deg,transparent 0 4%,rgba(0,234,255,.1) 4.5%,transparent 5% 95%,rgba(255,210,60,.2) 95.5%,transparent 96%);
   pointer-events:none;
 }
 
-/* =========================================================
-   PROGRESS FILL
-   ========================================================= */
-
 .relay-splash-progress{
   position:relative;
-
-  z-index:3;
-
   display:block;
-
-  width:0%;
+  width:0;
   height:100%;
-
-  background:
-    linear-gradient(
-      90deg,
-      #005a73 0%,
-      #006d8a 13%,
-      var(--rr-blue) 28%,
-      var(--rr-cyan) 62%,
-      var(--rr-cyan2) 86%,
-      #ffffff 100%
-    );
-
-  box-shadow:
-    0 0 8px rgba(0,234,255,1),
-    0 0 18px rgba(0,234,255,.82),
-    0 0 42px rgba(0,140,255,.48);
-
-  transition:
-    width .16s
-    cubic-bezier(.16,1,.3,1);
-
-  overflow:hidden;
+  background:linear-gradient(90deg,#006d8a 0%,var(--rr-blue) 24%,var(--rr-cyan) 62%,var(--rr-cyan2) 86%,#fff 100%);
+  box-shadow:0 0 8px rgba(0,234,255,1),0 0 18px rgba(0,234,255,.82),0 0 42px rgba(0,140,255,.48);
+  transition:width .16s cubic-bezier(.16,1,.3,1);
 }
 
 .relay-splash-progress::before{
   content:"";
-
   position:absolute;
   inset:0;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.58),
-      transparent 42%,
-      rgba(0,0,0,.12)
-    );
-
+  background:linear-gradient(180deg,rgba(255,255,255,.55),transparent 42%,rgba(0,0,0,.12));
   opacity:.55;
 }
 
 .relay-splash-progress::after{
   content:"";
-
   position:absolute;
+  top:-5px;
+  bottom:-5px;
+  left:-140px;
+  width:140px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),#fff,rgba(117,247,255,.72),transparent);
+  filter:blur(.25px) drop-shadow(0 0 10px rgba(255,255,255,1));
+  animation:rr-energy-scan 1s linear infinite;
+}
 
-  top:-6px;
-  bottom:-6px;
-
-  left:-150px;
-
-  width:150px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255,255,255,.10),
-      #ffffff,
-      rgba(117,247,255,.70),
-      transparent
-    );
-
-  filter:
-    blur(.25px)
-    drop-shadow(
-      0 0 10px
-      rgba(255,255,255,1)
-    );
-
-  animation:
-    rr-energy-scan
-    1s linear
-    infinite;
+.relay-splash[aria-busy="false"] .relay-splash-progress{
+  background:linear-gradient(90deg,var(--rr-cyan),var(--rr-cyan2),var(--rr-gold),#fff);
+  box-shadow:0 0 10px rgba(0,234,255,1),0 0 25px rgba(255,210,60,.82),0 0 55px rgba(255,210,60,.3);
 }
 
 /* =========================================================
-   BOOT LOG
-   ========================================================= */
-
-.relay-splash-log{
-  min-height:0;
-
-  padding:7px 9px;
-
-  border-left:
-    2px solid
-    rgba(0,234,255,.34);
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(0,234,255,.05),
-      rgba(0,0,0,.18),
-      transparent
-    );
-
-  color:rgba(170,232,242,.60);
-
-  font:
-    700 7px/1.45
-    var(--rr-mono);
-
-  letter-spacing:.08em;
-
-  text-transform:uppercase;
-
-  overflow:hidden;
-
-  white-space:nowrap;
-
-  text-overflow:ellipsis;
-}
-
-/* Generic dynamically created boot-log lines */
-.relay-splash-log > *,
-.relay-splash-log div,
-.relay-splash-log span{
-  min-width:0;
-
-  overflow:hidden;
-
-  text-overflow:ellipsis;
-
-  white-space:nowrap;
-}
-
-/* =========================================================
-   COMPLETE / READY STATE
-   ========================================================= */
-
-.relay-splash-complete{
-  display:flex;
-
-  align-items:center;
-  justify-content:space-between;
-
-  gap:12px;
-
-  min-width:0;
-
-  padding:
-    8px
-    10px;
-
-  border:
-    1px solid
-    rgba(255,210,60,.22);
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(255,210,60,.07),
-      rgba(0,234,255,.035),
-      rgba(0,0,0,.18)
-    );
-
-  color:var(--rr-gold);
-
-  font:
-    800 7px/1.2
-    var(--rr-mono);
-
-  letter-spacing:.16em;
-
-  text-transform:uppercase;
-
-  overflow:hidden;
-}
-
-.relay-splash-complete > *{
-  min-width:0;
-
-  overflow:hidden;
-
-  text-overflow:ellipsis;
-
-  white-space:nowrap;
-}
-
-/* =========================================================
-   READY STATE
-   ========================================================= */
-
-.relay-splash[data-state="ready"] .relay-splash-status{
-  color:var(--rr-cyan2);
-
-  text-shadow:
-    0 0 12px rgba(0,234,255,.42);
-}
-
-.relay-splash[data-state="ready"] .relay-splash-status::before{
-  background:var(--rr-gold);
-
-  box-shadow:
-    0 0 7px var(--rr-gold),
-    0 0 18px rgba(255,210,60,.76);
-}
-
-.relay-splash[data-state="ready"] .relay-splash-progress{
-  background:
-    linear-gradient(
-      90deg,
-      var(--rr-cyan),
-      var(--rr-cyan2),
-      var(--rr-gold),
-      #ffffff
-    );
-
-  box-shadow:
-    0 0 10px rgba(0,234,255,1),
-    0 0 25px rgba(255,210,60,.82),
-    0 0 55px rgba(255,210,60,.30);
-}
-
-/* =========================================================
-   MOBILE
+   RESPONSIVE
    ========================================================= */
 
 @media(max-width:700px){
-
   .relay-splash-brand{
-    left:max(
-      14px,
-      env(safe-area-inset-left)
-    );
-
-    top:max(
-      14px,
-      env(safe-area-inset-top)
-    );
-
+    left:max(14px,env(safe-area-inset-left));
+    top:max(14px,env(safe-area-inset-top));
     gap:8px;
-
     font-size:8px;
-
     letter-spacing:.13em;
   }
-
-  .relay-splash-brand::after{
-    display:none;
-  }
-
-  .relay-splash-brand b{
-    flex-basis:29px;
-
-    width:29px;
-    height:29px;
-
-    font-size:11px;
-  }
-
+  .relay-splash-brand::after{display:none}
+  .relay-splash-brand b{width:29px;height:29px;font-size:11px}
   .relay-splash-ui{
-    left:max(
-      10px,
-      env(safe-area-inset-left)
-    );
-
-    right:max(
-      10px,
-      env(safe-area-inset-right)
-    );
-
-    bottom:max(
-      16px,
-      calc(env(safe-area-inset-bottom) + 10px)
-    );
-
-    width:
-      calc(100vw - 20px);
-
-    gap:7px;
+    left:max(10px,env(safe-area-inset-left));
+    right:max(10px,env(safe-area-inset-right));
+    bottom:max(16px,calc(env(safe-area-inset-bottom) + 10px));
+    width:calc(100vw - 20px);
+    gap:8px;
   }
-
-  .relay-splash-ui::before{
-    font-size:6px;
-
-    letter-spacing:.12em;
-
-    padding:
-      4px
-      6px;
-  }
-
-  .relay-splash-meta{
-    min-height:42px;
-
-    gap:10px;
-
-    padding:
-      8px
-      9px
-      7px;
-  }
-
-  .relay-splash-status{
-    font-size:7px;
-
-    letter-spacing:.10em;
-  }
-
-  .relay-splash-status::before{
-    width:5px;
-    height:5px;
-    flex-basis:5px;
-
-    margin-right:7px;
-  }
-
-  .relay-splash-percent{
-    min-width:46px;
-
-    font-size:13px;
-  }
-
-  .relay-splash-track{
-    height:8px;
-  }
-
-  .relay-splash-telemetry{
-    grid-template-columns:
-      repeat(2,minmax(0,1fr));
-
-    gap:5px;
-  }
-
-  .relay-splash-telemetry > *{
-    padding:
-      6px
-      7px;
-  }
-
-  .relay-splash-telemetry small,
-  .relay-splash-telemetry label{
-    font-size:5px;
-  }
-
-  .relay-splash-telemetry b,
-  .relay-splash-telemetry strong,
-  .relay-splash-telemetry span{
-    font-size:7px;
-  }
-
-  .relay-splash-log{
-    padding:
-      6px
-      7px;
-
-    font-size:6px;
-  }
-
-  .relay-splash-complete{
-    padding:
-      7px
-      8px;
-
-    font-size:6px;
-
-    letter-spacing:.11em;
-  }
+  .relay-splash-ui::before{font-size:6px;letter-spacing:.13em;padding:4px 6px}
+  .relay-splash-meta{gap:12px;padding:8px 9px 7px}
+  .relay-splash-status{font-size:7px;letter-spacing:.11em}
+  .relay-splash-status::before{width:5px;height:5px;flex-basis:5px;margin-right:7px}
+  .relay-splash-percent{min-width:46px;font-size:13px}
+  .relay-splash-track{height:7px}
 }
-
-/* =========================================================
-   PHONE PORTRAIT
-   ========================================================= */
 
 @media(max-width:700px) and (orientation:portrait){
-
-  .relay-splash-art{
-    object-fit:cover!important;
-    object-position:center center!important;
-  }
-
-  .relay-splash-ui{
-    width:
-      calc(100vw - 20px);
-  }
-
-  /* Keep the lower HUD compact */
-  .relay-splash-log{
-    max-height:24px;
-  }
+  .relay-splash-art{object-fit:cover!important;object-position:center!important}
+  .relay-splash-ui{width:calc(100vw - 20px)}
 }
 
-/* =========================================================
-   SMALL PHONES
-   ========================================================= */
-
-@media(max-width:390px){
-
-  .relay-splash-brand{
-    left:10px;
-    top:10px;
-  }
-
-  .relay-splash-ui{
-    left:8px;
-    right:8px;
-
-    width:
-      calc(100vw - 16px);
-
-    gap:6px;
-  }
-
-  .relay-splash-meta{
-    min-height:38px;
-
-    padding:
-      7px
-      8px
-      6px;
-  }
-
-  .relay-splash-status{
-    font-size:6px;
-    letter-spacing:.08em;
-  }
-
-  .relay-splash-percent{
-    min-width:42px;
-    font-size:12px;
-  }
-
-  .relay-splash-track{
-    height:7px;
-  }
-
-  .relay-splash-log{
-    display:none;
-  }
-
-  .relay-splash-complete{
-    display:none;
-  }
+@media(orientation:landscape) and (max-height:520px){
+  .relay-splash-brand{top:max(9px,calc(env(safe-area-inset-top) + 5px))}
+  .relay-splash-ui{bottom:max(8px,calc(env(safe-area-inset-bottom) + 6px));gap:6px}
+  .relay-splash-ui::before{display:none}
+  .relay-splash-meta{padding:7px 9px 6px}
+  .relay-splash-track{height:6px}
 }
-
-/* =========================================================
-   LANDSCAPE MOBILE
-   ========================================================= */
-
-@media(
-  orientation:landscape
-) and (
-  max-height:520px
-){
-
-  .relay-splash-brand{
-    top:max(
-      8px,
-      calc(env(safe-area-inset-top) + 4px)
-    );
-
-    left:max(
-      12px,
-      env(safe-area-inset-left)
-    );
-  }
-
-  .relay-splash-ui{
-    left:max(
-      12px,
-      env(safe-area-inset-left)
-    );
-
-    right:max(
-      12px,
-      env(safe-area-inset-right)
-    );
-
-    bottom:max(
-      7px,
-      calc(env(safe-area-inset-bottom) + 5px)
-    );
-
-    gap:5px;
-
-    width:
-      calc(100vw - 24px);
-  }
-
-  .relay-splash-ui::before{
-    display:none;
-  }
-
-  .relay-splash-meta{
-    min-height:34px;
-
-    padding:
-      6px
-      8px
-      5px;
-  }
-
-  .relay-splash-track{
-    height:6px;
-  }
-
-  .relay-splash-telemetry{
-    display:none;
-  }
-
-  .relay-splash-log{
-    display:none;
-  }
-
-  .relay-splash-complete{
-    display:none;
-  }
-}
-
-/* =========================================================
-   ACCESSIBILITY / REDUCED MOTION
-   ========================================================= */
 
 @media(prefers-reduced-motion:reduce){
-
   .relay-splash::before,
   .relay-splash-brand b,
   .relay-splash-status::before,
-  .relay-splash-progress::after,
-  .relay-splash-meta::before{
-    animation:none!important;
-  }
-
+  .relay-splash-progress::after{animation:none!important}
   .relay-splash,
-  .relay-splash-progress{
-    transition:none!important;
-  }
+  .relay-splash-progress{transition:none!important}
 }
 
-/* =========================================================
-   ANIMATIONS
-   ========================================================= */
-
 @keyframes rr-atmosphere{
-
-  0%{
-    transform:scale(1);
-    opacity:.72;
-  }
-
-  50%{
-    opacity:1;
-  }
-
-  100%{
-    transform:scale(1.045);
-    opacity:.82;
-  }
+  0%{transform:scale(1);opacity:.7}
+  50%{opacity:1}
+  100%{transform:scale(1.045);opacity:.82}
 }
 
 @keyframes rr-logo{
-
-  0%,
-  100%{
-    box-shadow:
-      0 0 7px rgba(0,234,255,.55),
-      0 0 22px rgba(0,234,255,.22),
-      0 0 42px rgba(0,140,255,.12),
-      inset 0 0 15px rgba(0,234,255,.10);
-  }
-
-  50%{
-    box-shadow:
-      0 0 12px rgba(0,234,255,1),
-      0 0 30px rgba(0,234,255,.55),
-      0 0 60px rgba(0,140,255,.25),
-      inset 0 0 22px rgba(0,234,255,.20);
-  }
+  0%,100%{box-shadow:0 0 7px rgba(0,234,255,.55),0 0 22px rgba(0,234,255,.22),0 0 42px rgba(0,140,255,.12),inset 0 0 15px rgba(0,234,255,.1)}
+  50%{box-shadow:0 0 12px rgba(0,234,255,1),0 0 30px rgba(0,234,255,.55),0 0 60px rgba(0,140,255,.25),inset 0 0 22px rgba(0,234,255,.2)}
 }
 
 @keyframes rr-live{
-
-  0%,
-  100%{
-    opacity:.30;
-    transform:scale(.70);
-  }
-
-  50%{
-    opacity:1;
-    transform:scale(1.25);
-  }
+  0%,100%{opacity:.3;transform:scale(.7)}
+  50%{opacity:1;transform:scale(1.25)}
 }
 
 @keyframes rr-energy-scan{
-
-  from{
-    transform:translateX(0);
-  }
-
-  to{
-    transform:translateX(1200px);
-  }
-}
-
-@keyframes rr-panel-scan{
-
-  0%{
-    transform:translateX(-100%);
-    opacity:0;
-  }
-
-  18%{
-    opacity:.85;
-  }
-
-  52%{
-    opacity:.18;
-  }
-
-  100%{
-    transform:translateX(100%);
-    opacity:0;
-  }
+  from{transform:translateX(0)}
+  to{transform:translateX(1100px)}
 }
