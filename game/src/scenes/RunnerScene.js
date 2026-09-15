@@ -25422,41 +25422,55 @@ if (
 }
 
 createGuides() {
-this.mission.guides?.forEach(
-({ x, y, text }) => {
-const guide = this.add.zone(
-x,
-y,
-1,
-1
-)
-.setAlpha(0)
-.setDepth(2);
+  const guides = Array.isArray(this.mission?.guides)
+    ? this.mission.guides
+    : [];
 
-  const graphicsLevel =
-  Number.isFinite(this.graphicsLevel)
-    ? this.graphicsLevel
-    : 2;
+  guides.forEach(({ x, y, text }) => {
+    const guide = this.add?.zone?.(
+      Number(x) || 0,
+      Number(y) || 0,
+      1,
+      1
+    );
 
-if (
-  !this.motionReduced &&
-  graphicsLevel >= 2
-) {
-  this.tweens.add({
-    targets: guide,
-    alpha: {
-      from: .9,
-      to: .25
-    },
-    y: y - 5,
-    duration: 900,
-    yoyo: true,
-    repeat: -1
-  });
-}
-  }
-);
+    if (!guide) {
+      console.warn('[Relay Runner] Guide skipped: Phaser zone was not created.', {
+        x,
+        y,
+        text
+      });
+      return;
+    }
 
+    guide.setAlpha?.(0);
+    guide.setDepth?.(2);
+
+    guide.setData?.('guideText', text || '');
+
+    const level =
+      Number.isFinite(this.graphicsLevel)
+        ? this.graphicsLevel
+        : 2;
+
+    if (
+      !this.motionReduced &&
+      level >= 2 &&
+      this.tweens?.add
+    ) {
+      this.tweens.add({
+        targets: guide,
+        alpha: {
+          from: 0.9,
+          to: 0.25
+        },
+        y: (Number(y) || 0) - 5,
+        duration: 900,
+        yoyo: true,
+        repeat: -1
+      });
+    }
+   });
 }
 
 createGuideCompanions() {
@@ -25497,22 +25511,35 @@ createGuideCompanions() {
 
   placements.forEach(
     ([x, y, texture, lesson]) => {
-      const guide =
-        this.guideCompanions
-          .create(
+           const guide =
+        this.guideCompanions?.create(
+          x,
+          y,
+          texture
+        );
+
+      if (!guide) {
+        console.warn(
+          '[Relay Runner] Guide companion skipped: Phaser sprite was not created.',
+          {
             x,
             y,
-            texture
-          )
-          .setDepth(9)
-          .setData(
-            'lesson',
+            texture,
             lesson
-          );
+          }
+        );
+        return;
+      }
+
+      guide.setDepth?.(9);
+      guide.setData?.(
+        'lesson',
+        lesson
+      );
 
       guide.body
-        .setAllowGravity(false)
-        .setCircle(
+        ?.setAllowGravity?.(false)
+        ?.setCircle?.(
           14,
           6,
           5
