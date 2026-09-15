@@ -1,12 +1,36 @@
-/* Mobile in-game HUD: PAUSE + SETTINGS only during active gameplay. */
+/* ============================================================
+   RELAY RUNNER — MOBILE IN-GAME HUD
+   PAUSE + SETTINGS
+   Safe pause routing / no synthetic tab clicks
+   ============================================================ */
+
 (() => {
-  const PORTRAIT_GUARD_STYLE_ID = 'mobile-portrait-hud-rotate-style';
+  'use strict';
+
+  const PORTRAIT_GUARD_STYLE_ID =
+    'mobile-portrait-hud-rotate-style';
+
+  const HUD_ID = 'mobileBottomHud';
 
   const isTouchDevice = () =>
-    document.body.classList.contains('is-touch');
+    document.body?.classList.contains('is-touch') === true;
+
+  const getElement = id =>
+    document.getElementById(id);
+
+  const isVisible = id => {
+    const element = getElement(id);
+
+    return !!element &&
+      !element.classList.contains('hidden');
+  };
+
+  /* =========================================================
+     PORTRAIT GUARD
+     ========================================================= */
 
   const installPortraitGuardStyle = () => {
-    if (document.getElementById(PORTRAIT_GUARD_STYLE_ID)) {
+    if (getElement(PORTRAIT_GUARD_STYLE_ID)) {
       return;
     }
 
@@ -15,15 +39,17 @@
     style.id = PORTRAIT_GUARD_STYLE_ID;
 
     style.textContent = `
-      /* =========================================================
+      /* =======================================================
          MOBILE PORTRAIT GUARD
-         ========================================================= */
+         ======================================================= */
 
       @media (pointer: coarse) and (orientation: portrait) {
+
         html body.is-touch #cargoIntegrityV2,
         html body.is-touch #play .hud-xp,
         html body.is-touch #play #pause,
         html body.is-touch #mobileBottomHud .mobile-menu-pause {
+
           display: none !important;
           visibility: hidden !important;
           opacity: 0 !important;
@@ -31,6 +57,7 @@
         }
 
         html body.is-touch .mobile-rotate-prompt.is-active {
+
           display: flex !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -38,13 +65,20 @@
       }
 
 
-      /* =========================================================
-         MOBILE CARGO INTEGRITY GUARD
-         ========================================================= */
+      /* =======================================================
+         MOBILE CARGO GUARD
+         ======================================================= */
 
-      @media (pointer: coarse) and (max-width: 900px) and (max-height: 600px),
-             (pointer: coarse) and (max-width: 600px) and (max-height: 900px) {
+      @media
+        (pointer: coarse)
+        and (max-width: 900px)
+        and (max-height: 600px),
+        (pointer: coarse)
+        and (max-width: 600px)
+        and (max-height: 900px) {
+
         html body.is-touch #cargoIntegrityV2 {
+
           display: none !important;
           visibility: hidden !important;
           opacity: 0 !important;
@@ -53,21 +87,26 @@
       }
 
 
-      /* =========================================================
-         ROTATE DEVICE PROMPT
-         ========================================================= */
+      /* =======================================================
+         ROTATE PROMPT
+         ======================================================= */
 
       .mobile-rotate-prompt {
+
         position: fixed;
         inset: 0;
+
         z-index: 10000;
 
         display: none;
+
         align-items: center;
         justify-content: center;
+
         flex-direction: column;
 
         gap: 10px;
+
         padding: 24px;
 
         box-sizing: border-box;
@@ -75,6 +114,7 @@
         text-align: center;
 
         pointer-events: none;
+
         user-select: none;
         -webkit-user-select: none;
 
@@ -110,6 +150,7 @@
 
 
       .mobile-rotate-prompt::before {
+
         content: "";
 
         width: 42px;
@@ -132,6 +173,7 @@
 
 
       .mobile-rotate-prompt::after {
+
         content: "LANDSCAPE MODE";
 
         color: #ffd06e;
@@ -148,11 +190,12 @@
       }
 
 
-      /* =========================================================
+      /* =======================================================
          REDUCED MOTION
-         ========================================================= */
+         ======================================================= */
 
       @media (prefers-reduced-motion: reduce) {
+
         .mobile-rotate-prompt {
           transition: none !important;
         }
@@ -163,61 +206,263 @@
   };
 
 
-  /* ===========================================================
-     INSTALL MOBILE HUD
-     =========================================================== */
+  /* =========================================================
+     SAFE PAUSE ROUTER
+     ========================================================= */
 
-  const install = () => {
-    installPortraitGuardStyle();
+  const getPauseApi = () => {
 
-    const pause = document.querySelector('#pause');
-    const pauseMenu = document.querySelector('#pauseMenu');
-    const panel = pauseMenu?.querySelector('#panelContent');
+    const api =
+      window.relayUnifiedCinematicUI;
 
-    /*
-     * Do not create the mobile HUD until the canonical pause
-     * elements exist.
-     */
     if (
-      !pause ||
-      !pauseMenu ||
-      !panel ||
-      document.getElementById('mobileBottomHud')
+      api &&
+      typeof api.openPause === 'function'
     ) {
-      return false;
+      return api;
+    }
+
+    return null;
+  };
+
+
+  const openPause = tabName => {
+
+    const pauseMenu =
+      getElement('pauseMenu');
+
+    if (!pauseMenu) {
+      console.warn(
+        '[RelayRunner] pauseMenu not found'
+      );
+
+      return;
     }
 
 
-    /* =========================================================
-       PREVENT GAMEPLAY POINTER PROPAGATION INSIDE PAUSE MENU
-       ========================================================= */
+    /*
+     * IMPORTANT:
+     *
+     * Never use:
+     *
+     *   pause.click()
+     *   tab.click()
+     *
+     * Those can trigger multiple global click
+     * handlers and create duplicate pause routing.
+     */
 
-    panel.addEventListener('pointerdown', event => {
-      const target =
-        event.target instanceof Element
-          ? event.target
-          : null;
 
-      if (
-        target?.matches(
-          'input[type="range"], select, button, a'
-        )
-      ) {
-        event.stopPropagation();
+    const api = getPauseApi();
+
+    if (api) {
+
+      try {
+
+        api.openPause(
+          tabName || 'resume'
+        );
+
+        return;
+
+      } catch (error) {
+
+        console.error(
+          '[RelayRunner] Unified pause UI failed:',
+          error
+        );
+
       }
-    });
+    }
 
 
-    /* =========================================================
+    /*
+     * Minimal safe fallback.
+     *
+     * We only expose the pause menu.
+     * Phaser pause/resume remains owned by
+     * p1-gameplay-correctness-v1.js.
+     */
+
+    pauseMenu.classList.remove('hidden');
+
+    pauseMenu.setAttribute(
+      'aria-hidden',
+      'false'
+    );
+
+
+    /*
+     * Do not manually click a tab here.
+     *
+     * If the canonical UI is unavailable,
+     * leaving the menu open is safer than
+     * invoking another global click chain.
+     */
+
+  };
+
+
+  /* =========================================================
+     CLOSE PAUSE SAFELY
+     ========================================================= */
+
+  const closePause = () => {
+
+    const pauseMenu =
+      getElement('pauseMenu');
+
+    if (!pauseMenu) {
+      return;
+    }
+
+
+    /*
+     * Prefer canonical API if available.
+     */
+
+    const api = getPauseApi();
+
+    if (
+      api &&
+      typeof api.hidePause === 'function'
+    ) {
+
+      try {
+
+        api.hidePause();
+
+        return;
+
+      } catch (error) {
+
+        console.error(
+          '[RelayRunner] Unified pause close failed:',
+          error
+        );
+
+      }
+    }
+
+
+    /*
+     * Safe DOM fallback.
+     */
+
+    pauseMenu.classList.add('hidden');
+
+    pauseMenu.setAttribute(
+      'aria-hidden',
+      'true'
+    );
+
+  };
+
+
+  /* =========================================================
+     INSTALL MOBILE HUD
+     ========================================================= */
+
+  const install = () => {
+
+    installPortraitGuardStyle();
+
+
+    const pause =
+      getElement('pause');
+
+    const pauseMenu =
+      getElement('pauseMenu');
+
+    const panel =
+      pauseMenu?.querySelector(
+        '#panelContent'
+      );
+
+
+    /*
+     * Do not create the mobile HUD until
+     * the canonical game shell exists.
+     */
+
+    if (
+      !pause ||
+      !pauseMenu ||
+      !panel
+    ) {
+
+      return false;
+
+    }
+
+
+    /*
+     * Prevent gameplay pointer handlers from
+     * receiving pointer events originating
+     * inside pause controls.
+     */
+
+    if (
+      !panel.dataset.mobilePausePointerGuard
+    ) {
+
+      panel.dataset.mobilePausePointerGuard =
+        'true';
+
+      panel.addEventListener(
+        'pointerdown',
+        event => {
+
+          const target =
+            event.target instanceof Element
+              ? event.target
+              : null;
+
+          if (
+            target?.closest(
+              'button, input, select, textarea, a'
+            )
+          ) {
+
+            event.stopPropagation();
+
+          }
+
+        }
+      );
+
+    }
+
+
+    /*
+     * Already installed.
+     */
+
+    if (
+      getElement(HUD_ID)
+    ) {
+
+      return true;
+
+    }
+
+
+    /* =======================================================
        MOBILE BOTTOM HUD
-       ========================================================= */
+       ======================================================= */
 
-    const hud = document.createElement('div');
+    const hud =
+      document.createElement('div');
 
-    hud.id = 'mobileBottomHud';
-    hud.className = 'mobile-bottom-hud';
+    hud.id =
+      HUD_ID;
+
+    hud.className =
+      'mobile-bottom-hud';
+
 
     hud.innerHTML = `
+
       <button
         id="mobilePauseButton"
         class="mobile-menu-button mobile-menu-pause"
@@ -228,6 +473,7 @@
         <small>PAUSE</small>
       </button>
 
+
       <button
         id="mobileSettingsButton"
         class="mobile-menu-button mobile-menu-settings"
@@ -237,291 +483,224 @@
         <span aria-hidden="true">⚙</span>
         <small>SETTINGS</small>
       </button>
+
     `;
 
-    document.body.append(hud);
+
+    document.body.appendChild(hud);
 
 
-    /* =========================================================
+    /* =======================================================
        ROTATE PROMPT
-       ========================================================= */
+       ======================================================= */
 
-    const rotatePrompt = document.createElement('div');
-
-    rotatePrompt.id = 'mobileRotatePrompt';
-    rotatePrompt.className = 'mobile-rotate-prompt';
-
-    rotatePrompt.setAttribute(
-      'role',
-      'status'
-    );
-
-    rotatePrompt.setAttribute(
-      'aria-live',
-      'polite'
-    );
-
-    rotatePrompt.textContent =
-      'ROTATE YOUR DEVICE';
-
-    document.body.append(rotatePrompt);
+    let rotatePrompt =
+      getElement('mobileRotatePrompt');
 
 
-    /* =========================================================
-       OPEN PAUSE
-       
-       IMPORTANT:
-       - NEVER use pause.click()
-       - unified-cinematic-ui-v1.js owns the canonical
-         pause-menu UI route
-       - p1-gameplay-correctness-v1.js owns Phaser
-         pause/resume state
-       ========================================================= */
+    if (!rotatePrompt) {
 
-    const openPause = (tabName = 'resume') => {
-      try {
-        const api =
-          window.relayUnifiedCinematicUI;
+      rotatePrompt =
+        document.createElement('div');
 
-        /*
-         * Preferred path:
-         * use the already-installed unified cinematic UI.
-         */
-        if (
-          api &&
-          typeof api.openPause === 'function'
-        ) {
-          api.openPause(tabName);
-          return;
-        }
+      rotatePrompt.id =
+        'mobileRotatePrompt';
 
+      rotatePrompt.className =
+        'mobile-rotate-prompt';
 
-        /*
-         * Fallback:
-         *
-         * Only change DOM visibility.
-         *
-         * Do NOT call:
-         *   pause.click()
-         *   scene.pause()
-         *   scene.resume()
-         *
-         * The P1 pause observer is responsible for
-         * synchronising the Phaser scene.
-         */
+      rotatePrompt.setAttribute(
+        'role',
+        'status'
+      );
 
-        pauseMenu.classList.remove('hidden');
+      rotatePrompt.setAttribute(
+        'aria-live',
+        'polite'
+      );
 
-        pauseMenu.setAttribute(
-          'aria-hidden',
-          'false'
-        );
+      rotatePrompt.textContent =
+        'ROTATE YOUR DEVICE';
+
+      document.body.appendChild(
+        rotatePrompt
+      );
+
+    }
 
 
-        if (!tabName) {
-          return;
-        }
+    /* =======================================================
+       PAUSE BUTTON
+       ======================================================= */
+
+    const mobilePauseButton =
+      getElement('mobilePauseButton');
 
 
-        /*
-         * Wait briefly for the pause menu content
-         * and tabs to become available.
-         */
-        const deadline =
-          performance.now() + 750;
+    mobilePauseButton?.addEventListener(
+      'click',
+      event => {
 
+        event.preventDefault();
+        event.stopPropagation();
 
-        const selectTab = () => {
-          /*
-           * If another system closed the menu while
-           * we were waiting, stop trying.
-           */
-          if (
-            pauseMenu.classList.contains('hidden')
-          ) {
-            if (
-              performance.now() < deadline
-            ) {
-              requestAnimationFrame(selectTab);
-            }
+        openPause('resume');
 
-            return;
-          }
-
-
-          /*
-           * Support both current and legacy tab
-           * attributes.
-           */
-          const tab =
-            pauseMenu.querySelector(
-              `[data-pause-tab="${tabName}"],
-               [data-tab="${tabName}"]`
-            );
-
-
-          if (tab) {
-            /*
-             * The tab itself is safe to activate.
-             * This does NOT route through #pause.
-             */
-            tab.click();
-            return;
-          }
-
-
-          if (
-            performance.now() < deadline
-          ) {
-            requestAnimationFrame(selectTab);
-          }
-        };
-
-
-        requestAnimationFrame(selectTab);
-
-      } catch (error) {
-        console.error(
-          '[RelayRunner] Mobile pause open failed:',
-          error
-        );
+      },
+      {
+        passive: false
       }
-    };
+    );
 
 
-    /* =========================================================
-       MOBILE PAUSE BUTTON
-       ========================================================= */
+    /* =======================================================
+       SETTINGS BUTTON
+       ======================================================= */
 
-    hud
-      .querySelector('#mobilePauseButton')
-      ?.addEventListener(
-        'click',
-        event => {
-          event.preventDefault();
-          event.stopPropagation();
+    const mobileSettingsButton =
+      getElement('mobileSettingsButton');
 
-          /*
-           * Explicitly open the canonical pause UI.
-           *
-           * IMPORTANT:
-           * No pause.click().
-           */
-          openPause('resume');
+
+    mobileSettingsButton?.addEventListener(
+      'click',
+      event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        openPause('settings');
+
+      },
+      {
+        passive: false
+      }
+    );
+
+
+    /* =======================================================
+       ESC / BACK SUPPORT
+       ======================================================= */
+
+    document.addEventListener(
+      'keydown',
+      event => {
+
+        if (
+          event.key !== 'Escape'
+        ) {
+
+          return;
+
         }
-      );
 
 
-    /* =========================================================
-       MOBILE SETTINGS BUTTON
-       ========================================================= */
+        const pauseMenu =
+          getElement('pauseMenu');
 
-    hud
-      .querySelector('#mobileSettingsButton')
-      ?.addEventListener(
-        'click',
-        event => {
-          event.preventDefault();
-          event.stopPropagation();
 
-          /*
-           * Open pause UI directly on SETTINGS.
-           *
-           * No synthetic #pause click.
-           */
-          openPause('settings');
+        if (
+          !pauseMenu ||
+          pauseMenu.classList.contains('hidden')
+        ) {
+
+          return;
+
         }
-      );
 
 
-    /* =========================================================
-       VISIBILITY HELPER
-       ========================================================= */
+        event.preventDefault();
 
-    const visible = id => {
-      const element =
-        document.getElementById(id);
+        closePause();
 
-      return (
-        !!element &&
-        !element.classList.contains('hidden')
-      );
-    };
+      }
+    );
 
 
-    /* =========================================================
-       MOBILE HUD STATE
-       ========================================================= */
+    /* =======================================================
+       VISIBILITY
+       ======================================================= */
 
     const sync = () => {
+
+      const pauseMenu =
+        getElement('pauseMenu');
+
+
+      if (!pauseMenu) {
+        return;
+      }
+
+
       const active =
         isTouchDevice() &&
-        visible('play') &&
-        !visible('intro') &&
-        !visible('finish') &&
-        !visible('gameOver') &&
+        isVisible('play') &&
+        !isVisible('intro') &&
+        !isVisible('finish') &&
+        !isVisible('gameOver') &&
         pauseMenu.classList.contains('hidden');
 
 
-      /*
-       * HUD is visible only during active gameplay.
-       */
       hud.classList.toggle(
         'is-active',
         active
       );
 
 
-      /*
-       * Rotate prompt uses the same gameplay state.
-       *
-       * CSS decides whether it is visible in portrait.
-       */
-      rotatePrompt.classList.toggle(
+      rotatePrompt?.classList.toggle(
         'is-active',
         active
       );
+
     };
 
 
-    /* =========================================================
+    /* =======================================================
        DOM STATE OBSERVER
-       ========================================================= */
+       ======================================================= */
 
     const observer =
-      new MutationObserver(sync);
+      new MutationObserver(
+        sync
+      );
 
 
-    [
+    const observedElements = [
+
       document.body,
 
-      ...[
-        'intro',
-        'play',
-        'finish',
-        'gameOver'
-      ]
-        .map(id =>
-          document.getElementById(id)
-        ),
+      getElement('intro'),
+
+      getElement('play'),
+
+      getElement('finish'),
+
+      getElement('gameOver'),
 
       pauseMenu
-    ]
-      .filter(Boolean)
-      .forEach(element => {
+
+    ].filter(Boolean);
+
+
+    observedElements.forEach(
+      element => {
+
         observer.observe(
           element,
           {
             attributes: true,
-            attributeFilter: ['class']
+            attributeFilter: [
+              'class'
+            ]
           }
         );
-      });
+
+      }
+    );
 
 
-    /* =========================================================
+    /* =======================================================
        RESIZE / ORIENTATION
-       ========================================================= */
+       ======================================================= */
 
     window.addEventListener(
       'resize',
@@ -541,39 +720,40 @@
     );
 
 
-    /* =========================================================
+    /* =======================================================
        INITIAL STATE
-       ========================================================= */
+       ======================================================= */
 
     sync();
 
     return true;
+
   };
 
 
-  /* ===========================================================
+  /* =========================================================
      BOOT
-     =========================================================== */
+     ========================================================= */
 
   const boot = () => {
-    /*
-     * If everything already exists, install immediately.
-     */
+
     if (install()) {
       return;
     }
 
 
-    /*
-     * Otherwise wait for the game shell / pause menu
-     * to be created dynamically.
-     */
     const observer =
-      new MutationObserver(() => {
-        if (install()) {
-          observer.disconnect();
+      new MutationObserver(
+        () => {
+
+          if (install()) {
+
+            observer.disconnect();
+
+          }
+
         }
-      });
+      );
 
 
     observer.observe(
@@ -585,29 +765,38 @@
     );
 
 
-    /*
-     * Safety timeout.
-     */
-    window.setTimeout(() => {
-      observer.disconnect();
-    }, 5000);
+    window.setTimeout(
+      () => {
+
+        observer.disconnect();
+
+      },
+      5000
+    );
+
   };
 
 
-  /* ===========================================================
+  /* =========================================================
      DOM READY
-     =========================================================== */
+     ========================================================= */
 
   if (
     document.readyState === 'loading'
   ) {
+
     document.addEventListener(
       'DOMContentLoaded',
       boot,
-      { once: true }
+      {
+        once: true
+      }
     );
+
   } else {
+
     boot();
+
   }
 
 })();
