@@ -1,12 +1,12 @@
-// MOBILE INPUT SINGLE OWNER V10
-// One touch owner. Joystick movement is applied through Phaser postupdate so
-// gameplay cannot overwrite the mobile axis before the player moves.
+// MOBILE INPUT SINGLE OWNER V11
+// One canonical touch owner for movement + gameplay actions.
 const ACTION_KEYS = Object.freeze({
   jump: [32, ' ', 'Space'], fire: [69, 'e', 'KeyE'], sword: [81, 'q', 'KeyQ'],
   dash: [16, 'Shift', 'ShiftLeft'], build1: [49, '1', 'Digit1'], gadget1: [51, '3', 'Digit3'],
 });
 
 const isTouchDevice = () => navigator.maxTouchPoints > 0 || 'ontouchstart' in window || window.matchMedia?.('(pointer: coarse)').matches || window.matchMedia?.('(hover: none)').matches;
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 const keyEvent = (code, key, type, keyCode) => {
   const event = new KeyboardEvent(type, { key, code, bubbles: true, cancelable: true });
@@ -15,7 +15,15 @@ const keyEvent = (code, key, type, keyCode) => {
   }
   return event;
 };
-const emit = ([keyCode, key, code], type) => window.dispatchEvent(keyEvent(code, key, type, keyCode));
+
+// Phaser normally listens on the window/document keyboard target. Dispatch to both
+// targets so every existing gameplay key handler receives the same mobile action.
+const emit = ([keyCode, key, code], type) => {
+  const event = keyEvent(code, key, type, keyCode);
+  window.dispatchEvent(event);
+  document.dispatchEvent(event);
+};
+
 const replaceNode = node => { const clone = node.cloneNode(true); node.replaceWith(clone); return clone; };
 
 const detachLegacyRunnerInput = scene => {
@@ -27,15 +35,9 @@ const detachLegacyRunnerInput = scene => {
   scene.mobileMoveHandler = null;
 };
 
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-
-// The previous owner only changed keyboard flags. On touch browsers those flags
-// can be consumed/reset during the same frame. The canonical owner now applies
-// the active horizontal axis in Phaser's postupdate phase, after RunnerScene has
-// completed its movement pass.
 const installRunnerMovementBridge = scene => {
-  if (!scene?.events || scene.__relayMobileMovementBridgeV10) return;
-  scene.__relayMobileMovementBridgeV10 = true;
+  if (!scene?.events || scene.__relayMobileMovementBridgeV11) return;
+  scene.__relayMobileMovementBridgeV11 = true;
   scene.__relayMobileAxis = 0;
 
   const apply = () => {
@@ -44,19 +46,21 @@ const installRunnerMovementBridge = scene => {
     const body = scene.player.body;
     if (body.enable === false || body.moves === false) return;
 
+    // Mobile gets a lively but controllable run speed. The acceleration blend is
+    // intentionally quick so the character responds immediately to the thumb.
     const maxSpeed = Number(scene.__relayMobileRunSpeed) > 0
       ? Number(scene.__relayMobileRunSpeed)
-      : 475;
+      : 600;
     const target = axis * maxSpeed;
     const current = Number(body.velocity?.x) || 0;
-    const next = current + (target - current) * 0.55;
+    const next = current + (target - current) * 0.72;
     body.setVelocityX?.(clamp(next, -maxSpeed, maxSpeed));
   };
 
   scene.events.on('postupdate', apply);
   scene.events.once('shutdown', () => {
     scene.events.off('postupdate', apply);
-    scene.__relayMobileMovementBridgeV10 = false;
+    scene.__relayMobileMovementBridgeV11 = false;
     scene.__relayMobileAxis = 0;
   });
 };
@@ -89,18 +93,17 @@ const install = () => {
   const root = document.querySelector('.mobile-controls');
   if (!root) return;
   normalizeActionButtons(root);
-  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV10) return;
+  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV11) return;
 
   const actionButtons = [];
   root.querySelectorAll('[data-mobile-action]').forEach(node => actionButtons.push(replaceNode(node)));
-
   const joystickNode = root.querySelector('[data-mobile-joystick]');
   const joystick = joystickNode ? replaceNode(joystickNode) : null;
   const thumb = joystick?.querySelector('.mobile-joystick-thumb');
   if (!joystick || !thumb) return;
 
-  window.__relayMobileInputSingleOwnerV10 = true;
-  root.dataset.mobileControlsOwner = 'single-owner-v10';
+  window.__relayMobileInputSingleOwnerV11 = true;
+  root.dataset.mobileControlsOwner = 'single-owner-v11';
   attachSceneWhenReady();
 
   let readyRaf = 0;
@@ -112,7 +115,8 @@ const install = () => {
 
   const actionPointers = new Map();
   const pointerActions = new Map();
-  const release = (button, pointerId) => {
+
+  const releaseAction = (button, pointerId) => {
     const action = button.dataset.mobileAction;
     const pointers = actionPointers.get(action);
     if (!pointers?.has(pointerId)) return;
@@ -129,7 +133,8 @@ const install = () => {
   actionButtons.forEach(button => {
     button.setAttribute('aria-pressed', 'false');
     button.addEventListener('pointerdown', event => {
-      event.preventDefault(); event.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
       const action = button.dataset.mobileAction;
       if (!ACTION_KEYS[action] || pointerActions.has(event.pointerId)) return;
       let pointers = actionPointers.get(action);
@@ -139,25 +144,33 @@ const install = () => {
       pointerActions.set(event.pointerId, action);
       button.setPointerCapture?.(event.pointerId);
       if (wasEmpty) emit(ACTION_KEYS[action], 'keydown');
-      button.classList.add('is-active'); button.setAttribute('aria-pressed', 'true');
+      button.classList.add('is-active');
+      button.setAttribute('aria-pressed', 'true');
     }, { passive: false });
-    button.addEventListener('pointerup', event => release(button, event.pointerId));
-    button.addEventListener('pointercancel', event => release(button, event.pointerId));
-    button.addEventListener('lostpointercapture', event => release(button, event.pointerId));
+    button.addEventListener('pointerup', event => releaseAction(button, event.pointerId));
+    button.addEventListener('pointercancel', event => releaseAction(button, event.pointerId));
+    button.addEventListener('lostpointercapture', event => releaseAction(button, event.pointerId));
   });
 
   const releaseAll = () => {
     for (const [action, pointers] of actionPointers) {
       if (pointers.size && ACTION_KEYS[action]) emit(ACTION_KEYS[action], 'keyup');
     }
-    actionPointers.clear(); pointerActions.clear();
-    actionButtons.forEach(button => { button.classList.remove('is-active'); button.setAttribute('aria-pressed', 'false'); });
+    actionPointers.clear();
+    pointerActions.clear();
+    actionButtons.forEach(button => {
+      button.classList.remove('is-active');
+      button.setAttribute('aria-pressed', 'false');
+    });
   };
-  window.addEventListener('blur', releaseAll); window.addEventListener('pagehide', releaseAll);
+  window.addEventListener('blur', releaseAll);
+  window.addEventListener('pagehide', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
 
-  const maxDrag = 38;
-  const deadzone = 9;
+  // Larger thumb travel gives better fine control without requiring the player to
+  // drag outside the visible joystick. Horizontal input is intentionally weighted.
+  const maxDrag = 44;
+  const deadzone = 7;
   let pointerId = null;
   let direction = null;
 
@@ -210,17 +223,25 @@ const install = () => {
   };
 
   joystick.addEventListener('pointerdown', event => {
-    event.preventDefault(); event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
     if (pointerId !== null) return;
-    pointerId = event.pointerId; joystick.setPointerCapture?.(pointerId); joystick.classList.add('is-active'); move(event.clientX, event.clientY);
+    pointerId = event.pointerId;
+    joystick.setPointerCapture?.(pointerId);
+    joystick.classList.add('is-active');
+    move(event.clientX, event.clientY);
   }, { passive: false });
   joystick.addEventListener('pointermove', event => {
     if (event.pointerId !== pointerId) return;
-    event.preventDefault(); move(event.clientX, event.clientY);
+    event.preventDefault();
+    move(event.clientX, event.clientY);
   }, { passive: false });
   const end = event => { if (event && event.pointerId !== pointerId) return; reset(); };
-  joystick.addEventListener('pointerup', end); joystick.addEventListener('pointercancel', end); joystick.addEventListener('lostpointercapture', end);
-  window.addEventListener('blur', reset); window.addEventListener('pagehide', reset);
+  joystick.addEventListener('pointerup', end);
+  joystick.addEventListener('pointercancel', end);
+  joystick.addEventListener('lostpointercapture', end);
+  window.addEventListener('blur', reset);
+  window.addEventListener('pagehide', reset);
   document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
 };
 
