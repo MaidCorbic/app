@@ -5,8 +5,8 @@
 (() => {
   'use strict';
   if (window.__relaySplashV6) return;
-
-  const runtime = { splash:null,image:null,bar:null,percent:null,status:null,startedAt:performance.now(),progress:0,imageReady:false,pageReady:document.readyState!=='loading',engineReady:false,releasing:false,done:false,raf:0,finishTimer:0,pollTimer:0 };
+  window.__relaySplashV6 = true;
+  const runtime={splash:null,image:null,bar:null,percent:null,status:null,startedAt:performance.now(),progress:0,imageReady:false,pageReady:document.readyState!=='loading',engineReady:false,releasing:false,done:false,raf:0,finishTimer:0,pollTimer:0};
   const LIMITS={minimumMs:1800,maximumMs:6500,pollMs:60,fadeMs:520};
   const qs=(root,selector)=>{if(!root||typeof root.querySelector!=='function')return null;try{return root.querySelector(selector);}catch{return null;}};
   const setStatus=text=>{if(runtime.status)runtime.status.textContent=String(text||'LOADING');};
