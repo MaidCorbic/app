@@ -386,8 +386,15 @@ const boot = () => {
   setHomeState();
   installKeyboard();
 
-    const intro = $('intro');
-    if (intro && intro.dataset.homeV4Observed !== '1') {
+  if (intro && intro.dataset.homeV4Observed !== '1') {
+    intro.dataset.homeV4Observed = '1';
+
+    new MutationObserver(setHomeState).observe(intro, {
+      attributes: true,
+      attributeFilter: ['class', 'style', 'hidden']
+    });
+  }
+};
       intro.dataset.homeV4Observed = '1';
       new MutationObserver(setHomeState).observe(intro, {
         attributes:true,
