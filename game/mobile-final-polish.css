@@ -1,24 +1,9 @@
 /* =========================================================
-   RUNNER RELAY
-   MOBILE GAMEPLAY HUD — V10
-   LANDSCAPE FIRST / TOUCH SAFE / ZERO OVERLAP
-
-   Layout contract:
-   LEFT  = JOYSTICK
-   RIGHT = ACTION GRID
-
-           JUMP   FIRE   SWORD   DASH
-           BUILD  GEAR   CROUCH  DASH*
-
-   Notes:
-   - Gameplay HUD is landscape-only on touch devices.
-   - Portrait hides the gameplay controls without showing a rotate prompt.
-   - Input ownership remains in mobile-input-single-owner-v1.js.
-   - Crouch/Dash injected controls remain supported by ID.
+   RELAY RUNNER — MOBILE GAMEPLAY CONTROLS
+   SINGLE CANONICAL TOUCH LAYOUT
    ========================================================= */
 
 @media (pointer: coarse) {
-
   html body.is-touch #play {
     position: relative !important;
     width: 100% !important;
@@ -29,62 +14,68 @@
   }
 
   html body.is-touch #play .mobile-controls {
-    --hud-edge-x: max(12px, env(safe-area-inset-left));
-    --hud-edge-right: max(12px, env(safe-area-inset-right));
-    --hud-edge-bottom: max(10px, env(safe-area-inset-bottom));
-    --control-size: clamp(42px, 8vh, 54px);
-    --control-gap: clamp(5px, 1.05vh, 8px);
+    --hud-left: max(10px, env(safe-area-inset-left));
+    --hud-right: max(10px, env(safe-area-inset-right));
+    --hud-bottom: max(10px, env(safe-area-inset-bottom));
+    --button-size: clamp(52px, 10vw, 64px);
+    --button-gap: clamp(5px, 1.5vw, 9px);
+    --joystick-size: clamp(92px, 20vw, 118px);
 
     position: fixed !important;
-    left: var(--hud-edge-x) !important;
-    right: var(--hud-edge-right) !important;
-    bottom: var(--hud-edge-bottom) !important;
-    top: auto !important;
+    inset: auto var(--hud-right) var(--hud-bottom) var(--hud-left) !important;
+    z-index: 5000 !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: space-between !important;
+    gap: clamp(12px, 4vw, 34px) !important;
     width: auto !important;
     height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    box-sizing: border-box !important;
-
-    display: flex !important;
-    align-items: flex-end !important;
-    justify-content: space-between !important;
-    gap: clamp(16px, 4vw, 40px) !important;
-
     pointer-events: none !important;
     overflow: visible !important;
-    z-index: 5000 !important;
     transform: none !important;
   }
 
+  /* LEFT: movement joystick */
   html body.is-touch #play .mobile-joystick {
-    flex: 0 0 auto !important;
-    width: clamp(78px, 18vh, 104px) !important;
-    height: clamp(78px, 18vh, 104px) !important;
+    flex: 0 0 var(--joystick-size) !important;
+    width: var(--joystick-size) !important;
+    height: var(--joystick-size) !important;
+    min-width: var(--joystick-size) !important;
+    min-height: var(--joystick-size) !important;
+    max-width: var(--joystick-size) !important;
+    max-height: var(--joystick-size) !important;
+    position: relative !important;
+    inset: auto !important;
     margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
-    position: relative !important;
     pointer-events: auto !important;
     touch-action: none !important;
-    overflow: visible !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
     transform: none !important;
-    translate: none !important;
   }
 
   html body.is-touch #play .mobile-joystick-thumb {
-    width: 44% !important;
-    height: 44% !important;
-    margin: -22% 0 0 -22% !important;
+    width: 46% !important;
+    height: 46% !important;
+    margin: -23% 0 0 -23% !important;
+    pointer-events: none !important;
   }
 
+  /* RIGHT: action grid */
   html body.is-touch #play .mobile-actions {
-    flex: 0 0 auto !important;
+    flex: 0 1 auto !important;
     display: grid !important;
-    grid-template-columns: repeat(4, var(--control-size)) !important;
-    grid-template-rows: repeat(2, var(--control-size)) !important;
-    gap: var(--control-gap) !important;
+    grid-template-columns: repeat(4, var(--button-size)) !important;
+    grid-template-rows: repeat(2, var(--button-size)) !important;
+    gap: var(--button-gap) !important;
     width: max-content !important;
+    max-width: calc(100vw - var(--joystick-size) - 28px) !important;
     height: max-content !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -92,257 +83,136 @@
     justify-items: center !important;
     pointer-events: auto !important;
     overflow: visible !important;
-    z-index: 5001 !important;
   }
 
-  html body.is-touch #play .mobile-actions > [data-mobile-action="jump"] { grid-column: 1 !important; grid-row: 1 !important; }
-  html body.is-touch #play .mobile-actions > [data-mobile-action="fire"] { grid-column: 2 !important; grid-row: 1 !important; }
-  html body.is-touch #play .mobile-actions > [data-mobile-action="sword"] { grid-column: 3 !important; grid-row: 1 !important; }
-  html body.is-touch #play .mobile-actions > [data-mobile-action="dash"] { grid-column: 4 !important; grid-row: 1 !important; }
-  html body.is-touch #play .mobile-actions > [data-mobile-action="build1"] { grid-column: 1 !important; grid-row: 2 !important; }
-  html body.is-touch #play .mobile-actions > [data-mobile-action="gadget1"] { grid-column: 2 !important; grid-row: 2 !important; }
-  html body.is-touch #play .mobile-actions > #mobileCrouchButton { grid-column: 3 !important; grid-row: 2 !important; }
-  html body.is-touch #play .mobile-actions > #mobileDashButton { grid-column: 4 !important; grid-row: 2 !important; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="jump"] { grid-column: 1; grid-row: 1; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="fire"] { grid-column: 2; grid-row: 1; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="sword"] { grid-column: 3; grid-row: 1; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="dash"] { grid-column: 4; grid-row: 1; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="build1"] { grid-column: 1; grid-row: 2; }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="gadget1"] { grid-column: 2; grid-row: 2; }
+  html body.is-touch #play .mobile-actions > #mobileCrouchButton { grid-column: 3; grid-row: 2; }
+  html body.is-touch #play .mobile-actions > #mobileDashButton { grid-column: 4; grid-row: 2; }
 
   html body.is-touch #play .mobile-actions > button {
-    --button-border: rgba(141, 244, 255, 0.46);
-    --button-bg-a: rgba(8, 24, 40, 0.98);
-    --button-bg-b: rgba(3, 10, 19, 0.98);
-    --button-glow: rgba(56, 189, 248, 0.18);
-
     position: relative !important;
     inset: auto !important;
-    width: var(--control-size) !important;
-    min-width: var(--control-size) !important;
-    max-width: var(--control-size) !important;
-    height: var(--control-size) !important;
-    min-height: var(--control-size) !important;
-    max-height: var(--control-size) !important;
-    aspect-ratio: 1 / 1 !important;
+    width: var(--button-size) !important;
+    height: var(--button-size) !important;
+    min-width: var(--button-size) !important;
+    min-height: var(--button-size) !important;
+    max-width: var(--button-size) !important;
+    max-height: var(--button-size) !important;
+    box-sizing: border-box !important;
     margin: 0 !important;
     padding: 0 !important;
-    box-sizing: border-box !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
     display: grid !important;
     place-items: center !important;
-    align-content: center !important;
-    gap: 2px !important;
-
-    border: 1px solid var(--button-border) !important;
+    border: 1px solid rgba(141,244,255,.58) !important;
     border-radius: 50% !important;
     background:
-      radial-gradient(circle at 32% 24%, rgba(255,255,255,.075), transparent 36%),
-      linear-gradient(145deg, var(--button-bg-a), var(--button-bg-b)) !important;
+      radial-gradient(circle at 32% 24%, rgba(255,255,255,.09), transparent 36%),
+      linear-gradient(145deg, rgba(8,24,40,.98), rgba(3,10,19,.98)) !important;
     color: #e8fbff !important;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.10),
       inset 0 -8px 18px rgba(0,0,0,.20),
-      0 0 0 1px rgba(255,255,255,.018),
-      0 0 14px var(--button-glow),
-      0 7px 18px rgba(0,0,0,.28) !important;
-
+      0 0 16px rgba(56,189,248,.20),
+      0 7px 18px rgba(0,0,0,.30) !important;
+    font-size: clamp(8px, 2vw, 11px) !important;
+    font-weight: 900 !important;
     line-height: 1 !important;
+    letter-spacing: .04em !important;
     text-align: center !important;
     white-space: nowrap !important;
     overflow: hidden !important;
-    font-size: clamp(7px, 1.45vh, 10px) !important;
-    font-weight: 900 !important;
-    letter-spacing: .045em !important;
-    text-rendering: geometricPrecision !important;
-
     pointer-events: auto !important;
     touch-action: manipulation !important;
     user-select: none !important;
     -webkit-user-select: none !important;
     -webkit-tap-highlight-color: transparent !important;
-    cursor: pointer !important;
-
-    transition:
-      transform .12s cubic-bezier(.2,.8,.2,1),
-      border-color .12s ease,
-      box-shadow .12s ease,
-      filter .12s ease !important;
-  }
-
-  html body.is-touch #play .mobile-actions > button::before {
-    content: "" !important;
-    position: absolute !important;
-    inset: 3px !important;
-    border: 1px solid rgba(255,255,255,.045) !important;
-    border-radius: 50% !important;
-    pointer-events: none !important;
-  }
-
-  html body.is-touch #play .mobile-actions > button::after {
-    content: "" !important;
-    position: absolute !important;
-    width: 42% !important;
-    height: 42% !important;
-    top: 11% !important;
-    left: 16% !important;
-    border-radius: 50% !important;
-    background: rgba(255,255,255,.04) !important;
-    filter: blur(7px) !important;
-    opacity: .65 !important;
-    pointer-events: none !important;
+    transition: transform .10s ease, filter .10s ease, box-shadow .10s ease !important;
   }
 
   html body.is-touch #play .mobile-actions > button small {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 0 3px !important;
-    box-sizing: border-box !important;
-    font-size: clamp(5px, 1vh, 7px) !important;
-    line-height: 1 !important;
-    font-weight: 800 !important;
-    letter-spacing: .08em !important;
-    white-space: nowrap !important;
+    max-width: 90% !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    opacity: .68 !important;
+    white-space: nowrap !important;
+    font-size: clamp(5px, 1.2vw, 7px) !important;
+    line-height: 1 !important;
+    letter-spacing: .06em !important;
     pointer-events: none !important;
-    position: relative !important;
-    z-index: 2 !important;
-  }
-
-  html body.is-touch #play .mobile-actions > [data-mobile-action="jump"] {
-    --button-border: rgba(141,244,255,.62);
-    --button-glow: rgba(56,189,248,.20);
-  }
-
-  html body.is-touch #play .mobile-actions > [data-mobile-action="fire"] {
-    --button-border: rgba(255,151,102,.68);
-    --button-glow: rgba(255,126,76,.22);
-    color: #fff1eb !important;
-  }
-
-  html body.is-touch #play .mobile-actions > [data-mobile-action="sword"] {
-    --button-border: rgba(196,168,255,.65);
-    --button-glow: rgba(167,139,250,.22);
-    color: #f2ebff !important;
-  }
-
-  html body.is-touch #play .mobile-actions > [data-mobile-action="dash"] {
-    --button-border: rgba(174,227,127,.76);
-    --button-glow: rgba(174,227,127,.24);
-    color: #efffdc !important;
-  }
-
-  html body.is-touch #play .mobile-actions > [data-mobile-action="build1"],
-  html body.is-touch #play .mobile-actions > [data-mobile-action="gadget1"] {
-    --button-border: rgba(125,211,252,.44);
-  }
-
-  html body.is-touch #play .mobile-actions > #mobileCrouchButton {
-    --button-border: rgba(141,244,255,.64);
-    --button-glow: rgba(56,189,248,.20);
-  }
-
-  html body.is-touch #play .mobile-actions > #mobileCrouchButton.is-held {
-    transform: scale(.93) !important;
-    border-color: rgba(174,227,127,.96) !important;
-    color: #efffdc !important;
-    box-shadow:
-      inset 0 0 16px rgba(174,227,127,.08),
-      0 0 20px rgba(174,227,127,.38),
-      0 0 38px rgba(141,244,255,.14),
-      0 6px 16px rgba(0,0,0,.24) !important;
-  }
-
-  html body.is-touch #play .mobile-actions > #mobileDashButton {
-    --button-border: rgba(174,227,127,.82);
-    --button-glow: rgba(174,227,127,.26);
-    color: #e9ffd7 !important;
-  }
-
-  html body.is-touch #play .mobile-actions > #mobileDashButton.is-ready {
-    filter: brightness(1.08) saturate(1.05) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.10),
-      0 0 18px rgba(174,227,127,.28),
-      0 0 32px rgba(174,227,127,.10),
-      0 7px 18px rgba(0,0,0,.28) !important;
-  }
-
-  html body.is-touch #play .mobile-actions > #mobileDashButton.is-dashing {
-    transform: scale(.92) !important;
-    border-color: rgba(141,244,255,.98) !important;
-    color: #e7fdff !important;
-    box-shadow:
-      inset 0 0 18px rgba(141,244,255,.12),
-      0 0 24px rgba(141,244,255,.54),
-      0 0 44px rgba(141,244,255,.16),
-      0 5px 14px rgba(0,0,0,.24) !important;
   }
 
   html body.is-touch #play .mobile-actions > button:active,
   html body.is-touch #play .mobile-actions > button.is-active {
-    transform: scale(.93) !important;
-    filter: brightness(1.12) !important;
+    transform: scale(.92) !important;
+    filter: brightness(1.14) !important;
     box-shadow:
-      inset 0 0 15px rgba(141,244,255,.10),
-      0 0 22px rgba(141,244,255,.34),
+      inset 0 0 16px rgba(141,244,255,.12),
+      0 0 24px rgba(141,244,255,.40),
       0 6px 15px rgba(0,0,0,.24) !important;
   }
 
-  html body.is-touch #play .mobile-actions > #mobileCrouchButton.is-held,
-  html body.is-touch #play .mobile-actions > #mobileDashButton.is-dashing {
-    filter: none !important;
+  html body.is-touch #play .mobile-actions > [data-mobile-action="fire"] {
+    border-color: rgba(255,151,102,.72) !important;
+    box-shadow: 0 0 17px rgba(255,126,76,.22), 0 7px 18px rgba(0,0,0,.30) !important;
+  }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="sword"] {
+    border-color: rgba(196,168,255,.72) !important;
+    box-shadow: 0 0 17px rgba(167,139,250,.22), 0 7px 18px rgba(0,0,0,.30) !important;
+  }
+  html body.is-touch #play .mobile-actions > [data-mobile-action="dash"],
+  html body.is-touch #play .mobile-actions > #mobileDashButton {
+    border-color: rgba(174,227,127,.78) !important;
+    box-shadow: 0 0 18px rgba(174,227,127,.24), 0 7px 18px rgba(0,0,0,.30) !important;
   }
 
-  /* ---------------------------------------------------------
-     SMALL LANDSCAPE — PRESERVE HIT TARGETS
-     --------------------------------------------------------- */
-
-  @media (orientation: landscape) and (max-height: 520px) {
-    html body.is-touch #play .mobile-controls {
-      --hud-edge-x: max(8px, env(safe-area-inset-left));
-      --hud-edge-right: max(8px, env(safe-area-inset-right));
-      --hud-edge-bottom: max(7px, env(safe-area-inset-bottom));
-      --control-size: clamp(36px, 7.6vh, 46px);
-      --control-gap: 4px;
-      gap: 10px !important;
-    }
-
-    html body.is-touch #play .mobile-joystick {
-      width: clamp(64px, 17vh, 82px) !important;
-      height: clamp(64px, 17vh, 82px) !important;
-    }
-
-    html body.is-touch #play .mobile-actions > button {
-      font-size: clamp(6px, 1.3vh, 9px) !important;
-      letter-spacing: .035em !important;
-    }
-
-    html body.is-touch #play .mobile-actions > button small {
-      font-size: clamp(4px, .9vh, 6px) !important;
-      letter-spacing: .04em !important;
-      padding: 0 2px !important;
-    }
-  }
-
-  /* ---------------------------------------------------------
-     PORTRAIT — HIDE GAME CONTROLS WITHOUT A ROTATE PROMPT
-     --------------------------------------------------------- */
-
+  /* Portrait: controls remain usable instead of being hidden. */
   @media (orientation: portrait) {
     html body.is-touch #play .mobile-controls {
-      display: none !important;
+      --button-size: clamp(52px, 15vw, 60px);
+      --button-gap: clamp(5px, 1.8vw, 8px);
+      --joystick-size: clamp(92px, 25vw, 112px);
+      gap: clamp(8px, 3vw, 18px) !important;
+    }
+
+    html body.is-touch #play .mobile-actions {
+      grid-template-columns: repeat(4, var(--button-size)) !important;
+      grid-template-rows: repeat(2, var(--button-size)) !important;
+      max-width: calc(100vw - var(--joystick-size) - 20px) !important;
     }
   }
 
-  /* ---------------------------------------------------------
-     REDUCED MOTION
-     --------------------------------------------------------- */
+  /* Very narrow phones: keep hit targets large but prevent horizontal overflow. */
+  @media (max-width: 390px) {
+    html body.is-touch #play .mobile-controls {
+      --button-size: 52px;
+      --joystick-size: 92px;
+      --button-gap: 4px;
+      gap: 7px !important;
+    }
+
+    html body.is-touch #play .mobile-actions {
+      grid-template-columns: repeat(4, 52px) !important;
+      grid-template-rows: repeat(2, 52px) !important;
+    }
+  }
+
+  /* Landscape phones: slightly larger play surface without crowding. */
+  @media (orientation: landscape) and (max-height: 520px) {
+    html body.is-touch #play .mobile-controls {
+      --button-size: clamp(44px, 8.5vh, 56px);
+      --joystick-size: clamp(76px, 17vh, 100px);
+      --button-gap: 5px;
+      --hud-bottom: max(7px, env(safe-area-inset-bottom));
+    }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     html body.is-touch #play .mobile-controls,
     html body.is-touch #play .mobile-controls * {
-      scroll-behavior: auto !important;
       transition-duration: .001ms !important;
       animation-duration: .001ms !important;
       animation-iteration-count: 1 !important;
