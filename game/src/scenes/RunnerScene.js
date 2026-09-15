@@ -23963,7 +23963,7 @@ createObjectiveHUD() {
 }
 
 createDetectionHUD() {
-createDetectionHUD() {
+
   const compact =
     this.scale.width < 768;
 
