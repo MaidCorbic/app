@@ -8304,6 +8304,9 @@ this.keys =
     'A,D,C,F,W,S,E,Q,R,X,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
   );
 
+this.flightMode = false;
+this.flightSpeed = 420;
+
 this.mobileActions = {
   jump: false,
   jumpHeld: false,
@@ -13118,19 +13121,19 @@ updateRelayGateInteraction() {
     nearestGate
   );
 
-  const interactPressed =
-    Phaser.Input.Keyboard.JustDown(
-      this.keys.F
-    ) ||
-    this.mobileActions.interact;
+const interactPressed =
+  Phaser.Input.Keyboard.JustDown(
+    this.keys.E
+  ) ||
+  this.mobileActions.interact;
 
-  this.mobileActions.interact = false;
+this.mobileActions.interact = false;
 
-  if (interactPressed) {
-    this.openRelayPuzzle(
-      nearestGate
-    );
-  }
+if (interactPressed) {
+  this.openRelayPuzzle(
+    nearestGate
+  );
+}
 }
 
 showRelayInteractHint(gate) {
@@ -23454,15 +23457,21 @@ this.events.once(
 
 }
 
-  createObjectiveHUD() {
+createObjectiveHUD() {
   const compact =
     this.scale.width < 768;
 
-  // ============================================================
-  // MISSION OBJECTIVE HUD · PREMIUM CYBER COMMAND
-  // Desktop HUD only.
-  // Hidden on mobile.
-  // ============================================================
+  /*
+   * ============================================================
+   * OBJECTIVE HUD · CYBER COMMAND
+   * Premium gameplay HUD language:
+   * - dark glass
+   * - cyan energy edge
+   * - scan line
+   * - compact telemetry
+   * - clean spacing
+   * ============================================================
+   */
 
   if (compact) {
     this.objectiveHUD = null;
@@ -23475,161 +23484,145 @@ this.events.once(
   const width =
     Math.min(
       this.scale.width - 32,
-      456
+      430
     );
 
   const x = 18;
-  const y = 78;
+  const y = 118;
 
   const container =
     this.add
-      .container(
-        x,
-        y
-      )
+      .container(x, y)
       .setScrollFactor(0)
       .setDepth(100);
 
-  // ============================================================
-  // OUTER AURA
-  // ============================================================
-
+  /*
+   * OUTER GLOW
+   */
   const aura =
-    this.add
-      .rectangle(
-        width / 2,
-        40,
-        width + 10,
-        84,
-        0x07111d,
-        0.16
-      );
-
-  aura
+    this.add.rectangle(
+      width / 2,
+      40,
+      width + 12,
+      82,
+      0x07111d,
+      0.20
+    )
     .setStrokeStyle(
       2,
       0x8df4ff,
-      0.12
+      0.16
     );
 
-  // ============================================================
-  // SHADOW
-  // ============================================================
-
+  /*
+   * SHADOW / DEPTH
+   */
   const shadow =
-    this.add
-      .rectangle(
-        width / 2 + 4,
-        42,
-        width,
-        80,
-        0x000000,
-        0.44
-      );
+    this.add.rectangle(
+      width / 2 + 5,
+      44,
+      width,
+      78,
+      0x000000,
+      0.48
+    );
 
-  // ============================================================
-  // MAIN PANEL
-  // ============================================================
-
+  /*
+   * MAIN GLASS PLATE
+   */
   const plate =
-    this.add
-      .rectangle(
-        width / 2,
-        40,
-        width,
-        80,
-        0x06101a,
-        0.98
-      )
-      .setStrokeStyle(
-        2,
-        0x8df4ff,
-        0.72
-      );
+    this.add.rectangle(
+      width / 2,
+      40,
+      width,
+      78,
+      0x06101a,
+      0.97
+    )
+    .setStrokeStyle(
+      1.5,
+      0x8df4ff,
+      0.82
+    );
 
-  // ============================================================
-  // INNER GLASS
-  // ============================================================
-
+  /*
+   * INNER GLASS
+   */
   const inner =
-    this.add
-      .rectangle(
-        width / 2,
-        40,
-        width - 10,
-        70,
-        0x0b1a29,
-        0.78
-      )
-      .setStrokeStyle(
-        1,
-        0x2d6178,
-        0.55
-      );
+    this.add.rectangle(
+      width / 2,
+      40,
+      width - 8,
+      70,
+      0x0b1b2a,
+      0.78
+    )
+    .setStrokeStyle(
+      1,
+      0x35677d,
+      0.42
+    );
 
-  // ============================================================
-  // TOP SCAN BAR
-  // ============================================================
-
-  const topBar =
+  /*
+   * TOP SCAN LINE
+   */
+  const scanBase =
     this.add.rectangle(
       width / 2,
       5,
-      width - 26,
+      width - 22,
       2,
       0x8df4ff,
-      0.7
+      0.30
     );
 
-  const topHot =
+  const scanHot =
     this.add.rectangle(
-      width / 2,
+      width / 2 - 95,
       5,
-      62,
+      74,
       2,
       0xe8fdff,
-      0.9
+      0.95
     );
 
-  // ============================================================
-  // LEFT CYAN POWER STRIPE
-  // ============================================================
-
-  const accent =
+  /*
+   * LEFT ENERGY RAIL
+   */
+  const energyRail =
     this.add.rectangle(
       7,
       40,
       3,
       58,
       0x8df4ff,
-      0.95
+      1
     );
 
-  const accentGlow =
+  const energyRailGlow =
     this.add.rectangle(
       11,
       40,
       2,
       48,
       0x8df4ff,
-      0.25
+      0.22
     );
 
-  // ============================================================
-  // MISSION LABEL
-  // ============================================================
-
-  const missionLabel =
+  /*
+   * HEADER
+   */
+  const header =
     this.add.text(
       20,
       9,
-      'MISSION // OBJECTIVE',
+      'OBJECTIVE',
       {
         fontFamily: 'DM Mono',
-        fontSize: '9px',
+        fontSize: '10px',
         color: '#8df4ff',
         fontStyle: 'bold',
-        letterSpacing: 1.9,
+        letterSpacing: 1.35,
         stroke: '#04101a',
         strokeThickness: 4,
         shadow: {
@@ -23642,40 +23635,35 @@ this.events.once(
       }
     );
 
-  // ============================================================
-  // SUB LABEL
-  // ============================================================
-
-  const subLabel =
+  const headerSub =
     this.add.text(
       20,
-      21,
-      'ACTIVE DELIVERY DIRECTIVE',
+      23,
+      'ACTIVE MISSION DIRECTIVE',
       {
         fontFamily: 'DM Mono',
         fontSize: '7px',
-        color: '#55738a',
+        color: '#58788d',
         fontStyle: 'bold',
-        letterSpacing: 1.2
+        letterSpacing: 1.1
       }
     );
 
-  // ============================================================
-  // OBJECTIVE TEXT
-  // ============================================================
-
+  /*
+   * OBJECTIVE TEXT
+   */
   const objective =
     this.add.text(
       20,
-      35,
+      36,
       this.mission?.story?.arrival ||
         'REACH THE RELAY',
       {
         fontFamily: 'DM Mono',
-        fontSize: '12px',
+        fontSize: '11px',
         color: '#e8fdff',
         fontStyle: 'bold',
-        letterSpacing: 0.5,
+        letterSpacing: 0.45,
         lineSpacing: 2,
         stroke: '#04101a',
         strokeThickness: 4,
@@ -23683,42 +23671,41 @@ this.events.once(
           offsetX: 0,
           offsetY: 0,
           color: '#8df4ff',
-          blur: 6,
+          blur: 5,
           fill: true
         },
-        wordWrap: {
-          width:
-            Math.max(
-              185,
-              width - 205
-            ),
-          useAdvancedWrap: true
-        }
-      }
+      wordWrap: {
+  width:
+    Math.max(
+      165,
+      width - 245
+    ),
+  useAdvancedWrap: true
+},
+maxLines: 2
     );
 
-  // ============================================================
-  // RIGHT STATUS HEADER
-  // ============================================================
-
-  const progressLabel =
+  /*
+   * STATUS AREA
+   */
+  const statusHeader =
     this.add.text(
-      width - 170,
-      11,
-      'MISSION STATUS',
+      width - 162,
+      10,
+      'MISSION',
       {
         fontFamily: 'DM Mono',
         fontSize: '7px',
-        color: '#6f879b',
+        color: '#637f92',
         fontStyle: 'bold',
-        letterSpacing: 1.3
+        letterSpacing: 1.15
       }
     );
 
   const progressValue =
     this.add.text(
       width - 18,
-      9,
+      8,
       '0%',
       {
         fontFamily: 'DM Mono',
@@ -23736,73 +23723,57 @@ this.events.once(
         }
       }
     )
-      .setOrigin(
-        1,
-        0
-      );
+    .setOrigin(1, 0);
 
-  // ============================================================
-  // PROGRESS TRACK
-  // ============================================================
-
+  /*
+   * PROGRESS TRACK
+   */
   const progressBack =
-    this.add
-      .rectangle(
-        width - 88,
-        31,
-        142,
-        7,
-        0x12263a,
-        1
-      )
-      .setStrokeStyle(
-        1,
-        0x355e72,
-        0.68
-      );
-
-  // ============================================================
-  // PROGRESS FILL
-  // ============================================================
+    this.add.rectangle(
+      width - 83,
+      27,
+      136,
+      6,
+      0x12283a,
+      1
+    )
+    .setStrokeStyle(
+      1,
+      0x3a6478,
+      0.72
+    );
 
   const progressFill =
-    this.add
-      .rectangle(
-        width - 159,
-        31,
-        138,
-        4,
-        0x8df4ff,
-        1
-      )
-      .setOrigin(
-        0,
-        0.5
-      );
-
-  // ============================================================
-  // PROGRESS HOT EDGE
-  // ============================================================
+    this.add.rectangle(
+      width - 151,
+      27,
+      132,
+      3,
+      0x8df4ff,
+      1
+    )
+    .setOrigin(
+      0,
+      0.5
+    );
 
   const progressHot =
-    this.add
-      .rectangle(
-        width - 159,
-        29,
-        138,
-        2,
-        0xe8fdff,
-        0.86
-      )
-      .setOrigin(
-        0,
-        0.5
-      );
+    this.add.rectangle(
+      width - 151,
+      25,
+      132,
+      1.5,
+      0xe8fdff,
+      0.90
+    )
+    .setOrigin(
+      0,
+      0.5
+    );
 
-  // ============================================================
-  // DIVIDER
-  // ============================================================
-
+  /*
+   * DIVIDER
+   */
   const divider =
     this.add.rectangle(
       width / 2,
@@ -23810,112 +23781,106 @@ this.events.once(
       width - 42,
       1,
       0x31566a,
-      0.72
+      0.70
     );
 
-  // ============================================================
-  // BOTTOM STATUS
-  // ============================================================
-
+  /*
+   * TELEMETRY FOOTER
+   */
   const statusText =
     this.add.text(
       20,
-      61,
-      'ROUTE ACTIVE  //  RELAY LINK STABLE',
+      62,
+      'ROUTE ACTIVE  //  LINK STABLE',
       {
         fontFamily: 'DM Mono',
         fontSize: '7px',
         color: '#71899d',
         fontStyle: 'bold',
-        letterSpacing: 1.05
+        letterSpacing: 1.0
       }
     );
 
-  // ============================================================
-  // LIVE SIGNAL
-  // ============================================================
-
+  /*
+   * LIVE STATUS DOT
+   */
   const signalGlow =
-    this.add
-      .circle(
-        width - 24,
-        65,
-        7,
-        0x8df4ff,
-        0.10
-      );
+    this.add.circle(
+      width - 24,
+      65,
+      7,
+      0x8df4ff,
+      0.10
+    );
 
   const signal =
-    this.add
-      .circle(
-        width - 24,
-        65,
-        3,
-        0x8df4ff,
-        1
-      );
+    this.add.circle(
+      width - 24,
+      65,
+      3,
+      0x8df4ff,
+      1
+    );
 
-  // ============================================================
-  // CORNER MARKERS
-  // ============================================================
-
+  /*
+   * CORNER HUD MARKERS
+   */
   const cornerTL =
     this.add.rectangle(
-      16,
+      15,
       13,
-      18,
+      20,
       1,
       0x8df4ff,
-      0.65
+      0.72
     );
 
   const cornerTR =
     this.add.rectangle(
-      width - 16,
+      width - 15,
       13,
-      18,
+      20,
       1,
       0x8df4ff,
-      0.65
+      0.72
     );
 
   const cornerBL =
     this.add.rectangle(
-      16,
+      15,
       70,
-      18,
+      20,
       1,
       0x8df4ff,
-      0.35
+      0.34
     );
 
   const cornerBR =
     this.add.rectangle(
-      width - 16,
+      width - 15,
       70,
-      18,
+      20,
       1,
       0x8df4ff,
-      0.35
+      0.34
     );
 
-  // ============================================================
-  // BUILD
-  // ============================================================
-
+  /*
+   * BUILD
+   */
   container.add([
     aura,
     shadow,
     plate,
     inner,
-    topBar,
-    topHot,
-    accent,
-    accentGlow,
-    missionLabel,
-    subLabel,
+    scanBase,
+    scanHot,
+    energyRail,
+    energyRailGlow,
+    header,
+    headerSub,
     objective,
-    progressLabel,
+    statusHeader,
     progressValue,
     progressBack,
     progressFill,
@@ -23930,35 +23895,37 @@ this.events.once(
     cornerBR
   ]);
 
-  // ============================================================
-  // SUBTLE ANIMATION
-  // ============================================================
-
+  /*
+   * SCAN ANIMATION
+   */
   this.tweens.add({
-    targets: topHot,
+    targets: scanHot,
     x: {
-      from: width / 2 - 100,
-      to: width / 2 + 100
+      from: width / 2 - 95,
+      to: width / 2 + 95
     },
     alpha: {
-      from: 0.25,
-      to: 0.95
+      from: 0.20,
+      to: 1
     },
-    duration: 1800,
+    duration: 1750,
     yoyo: true,
     repeat: -1,
     ease: 'Sine.inOut'
   });
 
+  /*
+   * LIVE SIGNAL PULSE
+   */
   this.tweens.add({
     targets: signalGlow,
     scale: {
       from: 0.8,
-      to: 1.55
+      to: 1.6
     },
     alpha: {
       from: 0.06,
-      to: 0.20
+      to: 0.22
     },
     duration: 900,
     yoyo: true,
@@ -23969,7 +23936,7 @@ this.events.once(
   this.tweens.add({
     targets: signal,
     alpha: {
-      from: 0.55,
+      from: 0.45,
       to: 1
     },
     duration: 650,
@@ -23978,10 +23945,9 @@ this.events.once(
     ease: 'Sine.inOut'
   });
 
-  // ============================================================
-  // REFERENCES USED BY GAMEPLAY PROGRESS LOGIC
-  // ============================================================
-
+  /*
+   * GAMEPLAY REFERENCES
+   */
   this.objectiveHUD =
     container;
 
@@ -23996,124 +23962,416 @@ this.events.once(
 }
 
 createDetectionHUD() {
+createDetectionHUD() {
   const compact =
     this.scale.width < 768;
 
- const width =
-  Math.min(
-    this.scale.width - 32,
-    compact ? 210 : 260
-  );
-  const x =
-    this.scale.width - width - 16;
+  /*
+   * ============================================================
+   * DETECTION HUD · THREAT TELEMETRY
+   * Same visual language as gameplay HUD.
+   * ============================================================
+   */
 
-  const y =
-    compact ? 150 : 90;
+  const width =
+    Math.min(
+      this.scale.width - 32,
+      compact ? 215 : 250
+    );
+
+  const x =
+    this.scale.width -
+    width -
+    16;
+
+const y =
+    compact
+      ? 150
+      : 125;
 
   const container =
-    this.add.container(
-      x,
-      y
-    )
-    .setScrollFactor(0)
-    .setDepth(100);
+    this.add
+      .container(
+        x,
+        y
+      )
+      .setScrollFactor(0)
+      .setDepth(100);
 
   if (compact) {
     container.setVisible(false);
   }
 
-const plate =
-  this.add.rectangle(
-    width / 2,
-    34,
-    width,
-    68,
-    0x160b12,
-    0.96
-  )
+  /*
+   * OUTER AURA
+   */
+  const aura =
+    this.add.rectangle(
+      width / 2,
+      34,
+      width + 10,
+      70,
+      0x12070d,
+      0.20
+    )
     .setStrokeStyle(
-      1,
+      2,
       0xff5364,
-      0.7
+      0.16
     );
 
-const title =
-  this.add.text(
-    14,
-    9,
-    'DETECTION',
-    {
-      fontFamily: 'DM Mono',
-      fontSize: compact
-        ? '9px'
-        : '10px',
-      color: '#ff7180',
-      stroke: '#180910',
-      strokeThickness: 4
-    }
-  );
+  /*
+   * SHADOW
+   */
+  const shadow =
+    this.add.rectangle(
+      width / 2 + 4,
+      37,
+      width,
+      68,
+      0x000000,
+      0.48
+    );
 
-const status =
-  this.add.text(
-    14,
-    25,
-    'CLEAR',
-    {
-      fontFamily: 'DM Mono',
-      fontSize: compact
-        ? '9px'
-        : '11px',
-      color: '#dffcff',
-      stroke: '#180910',
-      strokeThickness: 4,
-      lineSpacing: 2
-    }
-  );
+  /*
+   * MAIN PLATE
+   */
+  const plate =
+    this.add.rectangle(
+      width / 2,
+      34,
+      width,
+      68,
+      0x11090f,
+      0.97
+    )
+    .setStrokeStyle(
+      1.5,
+      0xff5364,
+      0.82
+    );
+
+  /*
+   * INNER GLASS
+   */
+  const inner =
+    this.add.rectangle(
+      width / 2,
+      34,
+      width - 8,
+      60,
+      0x1a0d15,
+      0.78
+    )
+    .setStrokeStyle(
+      1,
+      0x70303d,
+      0.42
+    );
+
+  /*
+   * TOP SCAN
+   */
+  const scanBase =
+    this.add.rectangle(
+      width / 2,
+      4,
+      width - 22,
+      2,
+      0xff5364,
+      0.28
+    );
+
+  const scanHot =
+    this.add.rectangle(
+      width / 2 - 60,
+      4,
+      48,
+      2,
+      0xffd9de,
+      0.92
+    );
+
+  /*
+   * RIGHT THREAT RAIL
+   */
+  const threatRail =
+    this.add.rectangle(
+      width - 7,
+      34,
+      3,
+      50,
+      0xff5364,
+      1
+    );
+
+  const threatGlow =
+    this.add.rectangle(
+      width - 11,
+      34,
+      2,
+      42,
+      0xff5364,
+      0.20
+    );
+
+  /*
+   * HEADER
+   */
+  const title =
+    this.add.text(
+      14,
+      9,
+      'DETECTION',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: compact
+          ? '9px'
+          : '10px',
+        color: '#ff7180',
+        fontStyle: 'bold',
+        letterSpacing: 1.6,
+        stroke: '#180910',
+        strokeThickness: 4,
+        shadow: {
+          offsetX: 0,
+          offsetY: 0,
+          color: '#ff5364',
+          blur: 8,
+          fill: true
+        }
+      }
+    );
+
+  const subtitle =
+    this.add.text(
+      14,
+      22,
+      'THREAT TELEMETRY',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '7px',
+        color: '#875763',
+        fontStyle: 'bold',
+        letterSpacing: 1.05
+      }
+    );
+
+  /*
+   * STATUS
+   */
+  const status =
+    this.add.text(
+      14,
+      34,
+      'CLEAR',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: compact
+          ? '9px'
+          : '11px',
+        color: '#e8fdff',
+        fontStyle: 'bold',
+        letterSpacing: 0.6,
+        stroke: '#180910',
+        strokeThickness: 4
+      }
+    );
+
+  /*
+   * ALERT INDICATOR
+   */
+  const alertGlow =
+    this.add.circle(
+      width - 20,
+      13,
+      6,
+      0xff5364,
+      0.10
+    );
+
+  const alertDot =
+    this.add.circle(
+      width - 20,
+      13,
+      2.5,
+      0xff5364,
+      1
+    );
+
+  /*
+   * DETECTION TRACK
+   */
   const progressBack =
     this.add.rectangle(
-      width - 52,
-      26,
-      70,
+      width - 67,
+      28,
+      78,
       6,
-      0x321722,
+      0x31151f,
       1
+    )
+    .setStrokeStyle(
+      1,
+      0x66303b,
+      0.72
     );
 
   const progressFill =
     this.add.rectangle(
-      width - 52,
-      26,
-      70,
-      6,
+      width - 106,
+      28,
+      76,
+      3,
       0xff5364,
       1
     )
-    .setOrigin(0.5);
+    .setOrigin(
+      0,
+      0.5
+    );
+
+  const progressHot =
+    this.add.rectangle(
+      width - 106,
+      26,
+      76,
+      1.5,
+      0xffd9de,
+      0.88
+    )
+    .setOrigin(
+      0,
+      0.5
+    );
 
   const progressText =
     this.add.text(
-      width - 52,
-      40,
+      width - 67,
+      39,
       '0%',
       {
         fontFamily: 'DM Mono',
         fontSize: '8px',
         color: '#ff7180',
+        fontStyle: 'bold',
+        letterSpacing: 0.4,
         stroke: '#180910',
         strokeThickness: 2
       }
     )
-    .setOrigin(0.5);
+    .setOrigin(
+      0.5
+    );
 
+  /*
+   * DIVIDER
+   */
+  const divider =
+    this.add.rectangle(
+      width / 2,
+      52,
+      width - 38,
+      1,
+      0x6b303c,
+      0.64
+    );
+
+  /*
+   * FOOTER TELEMETRY
+   */
+  const telemetry =
+    this.add.text(
+      14,
+      59,
+      'SCAN ACTIVE  //  THREAT LINK',
+      {
+        fontFamily: 'DM Mono',
+        fontSize: '7px',
+        color: '#845964',
+        fontStyle: 'bold',
+        letterSpacing: 0.8
+      }
+    );
+
+  /*
+   * BUILD
+   */
   container.add([
+    aura,
+    shadow,
     plate,
+    inner,
+    scanBase,
+    scanHot,
+    threatRail,
+    threatGlow,
     title,
+    subtitle,
     status,
+    alertGlow,
+    alertDot,
     progressBack,
     progressFill,
-    progressText
+    progressHot,
+    progressText,
+    divider,
+    telemetry
   ]);
 
+  /*
+   * SCAN ANIMATION
+   */
+  this.tweens.add({
+    targets: scanHot,
+    x: {
+      from: width / 2 - 60,
+      to: width / 2 + 60
+    },
+    alpha: {
+      from: 0.18,
+      to: 0.95
+    },
+    duration: 1250,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+
+  /*
+   * ALERT PULSE
+   */
+  this.tweens.add({
+    targets: alertGlow,
+    scale: {
+      from: 0.8,
+      to: 1.65
+    },
+    alpha: {
+      from: 0.05,
+      to: 0.20
+    },
+    duration: 700,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+
+  this.tweens.add({
+    targets: alertDot,
+    alpha: {
+      from: 0.45,
+      to: 1
+    },
+    duration: 500,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.inOut'
+  });
+
+  /*
+   * GAMEPLAY REFERENCES
+   */
   this.detectionHUD =
     container;
 
@@ -35730,19 +35988,21 @@ if (!body) {
 
 const left =
   this.cursors.left.isDown ||
-  this.cursors.down.isDown ||
   this.keys.A.isDown ||
-  this.keys.S.isDown ||
   this.mobileDirection ===
     'left';
 
 const right =
   this.cursors.right.isDown ||
-  this.cursors.up.isDown ||
   this.keys.D.isDown ||
-  this.keys.W.isDown ||
   this.mobileDirection ===
     'right';
+
+const forward =
+  this.keys.W.isDown;
+
+const backward =
+  this.keys.S.isDown;
 
 /*
  * MOBILE AIR STEERING
@@ -35995,33 +36255,43 @@ const wetDeceleration =
     ? RUNNER_TUNING.groundDeceleration * 0.16
     : RUNNER_TUNING.groundDeceleration;
 
-if (left) {
-  body
-    .setAccelerationX(
-      -wetAcceleration
-    )
-    .setDragX(
-      this.wetSurfaceActive
-        ? wetGrip
-        : 0
-    );
+const moveX =
+  (right ? 1 : 0) -
+  (left ? 1 : 0);
 
-  this.player.setFlipX(
-    true
+const moveY =
+  (forward ? -1 : 0) +
+  (backward ? 1 : 0);
+
+const hasVerticalKeyboardMove =
+  forward || backward;
+
+/*
+ * ============================================================
+ * KEYBOARD 4-WAY MOVEMENT
+ *
+ * W = forward / up
+ * S = backward / down
+ * A = left
+ * D = right
+ *
+ * Mobile joystick remains independent.
+ * ============================================================
+ */
+
+if (moveX !== 0) {
+  body.setAccelerationX(
+    moveX * wetAcceleration
   );
-} else if (right) {
-  body
-    .setAccelerationX(
-      wetAcceleration
-    )
-    .setDragX(
-      this.wetSurfaceActive
-        ? wetGrip
-        : 0
-    );
+
+  body.setDragX(
+    this.wetSurfaceActive
+      ? wetGrip
+      : 0
+  );
 
   this.player.setFlipX(
-    false
+    moveX < 0
   );
 } else {
   body
@@ -36032,11 +36302,6 @@ if (left) {
         : RUNNER_TUNING.airDeceleration
     );
 
-  /*
-   * AIR MOMENTUM
-   * Zadrži horizontalni momentum u zraku,
-   * ali ga normalizuj prema frame-timeu.
-   */
   if (
     !onGround &&
     Math.abs(body.velocity.x) > 1
@@ -36052,6 +36317,27 @@ if (left) {
       retention
     );
   }
+}
+
+/*
+ * W/S work even when FLIGHT is OFF.
+ * We temporarily suppress gravity while a vertical
+ * keyboard direction is actively held, so gravity
+ * cannot cancel the requested movement.
+ */
+if (
+  hasVerticalKeyboardMove &&
+  !this.flightMode
+) {
+  body.setGravityY(0);
+
+  body.setVelocityY(
+    Phaser.Math.Clamp(
+      moveY * 330,
+      -330,
+      330
+    )
+  );
 }
 
 if (
@@ -36083,6 +36369,36 @@ body.setMaxVelocityX(
       : 1
   )
 );
+
+const flightPressed =
+  Phaser.Input.Keyboard.JustDown(
+    this.keys.F
+  );
+
+if (flightPressed) {
+  this.flightMode =
+    !this.flightMode;
+
+  if (this.flightMode) {
+    body.setVelocityY(0);
+    body.setGravityY(0);
+
+    this.playerCue(
+      'FLIGHT ACTIVE',
+      '#8df4ff'
+    );
+
+    this.game.events.emit(
+      'feedback',
+      'flight'
+    );
+  } else {
+    this.playerCue(
+      'FLIGHT OFF',
+      '#8ba0b8'
+    );
+  }
+}
 
 const gravityMultiplier =
   this.mission.gravityMode === 'low'
@@ -36136,11 +36452,46 @@ if (
     fallRamp;
 }
 
-body.setGravityY(
-  verticalGravity *
-  gravityMultiplier
-);
-body.setMaxVelocityY(RUNNER_TUNING.maxFallSpeed);
+if (this.flightMode) {
+  body.setGravityY(0);
+
+  body.setMaxVelocityY(
+    this.flightSpeed
+  );
+
+  if (
+    !forward &&
+    !backward
+  ) {
+    body.setVelocityY(
+      Phaser.Math.Linear(
+        body.velocity.y,
+        0,
+        0.18
+      )
+    );
+  }
+} else if (
+  !hasVerticalKeyboardMove
+) {
+  body.setGravityY(
+    verticalGravity *
+    gravityMultiplier
+  );
+
+  body.setMaxVelocityY(
+    RUNNER_TUNING.maxFallSpeed
+  );
+} else {
+  /*
+   * W/S trenutno upravljaju Y osom.
+   * Gravity ostaje ugašen samo dok je
+   * vertical keyboard input aktivan.
+   */
+  body.setGravityY(0);
+
+  body.setMaxVelocityY(330);
+}
 
 if (onGround) {
   this.coyote =
@@ -36692,9 +37043,8 @@ const applyPlayerCollider =
 
     body.updateFromGameObject();
   };
-
+  
 const crouchHeld =
-  this.keys.S.isDown ||
   this.mobileActions.crouch;
 
 const fastEnoughForSlide =
