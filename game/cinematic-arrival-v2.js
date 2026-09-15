@@ -2,6 +2,9 @@ import './cinematic-arrival-v2.css';
 
 /* Cinematic Arrival V5 — keep the mission card visible long enough to actually read. */
 (() => {
+  // splash-loader-v2.js is the production owner of #relaySplash.
+  // Do not let this legacy/secondary controller race it on mobile or portrait.
+  if (window.__relaySplashV3) return;
   if (window.__relayCinematicArrivalV5) return;
   window.__relayCinematicArrivalV5 = true;
 
