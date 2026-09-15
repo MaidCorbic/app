@@ -56,7 +56,6 @@
     );
 
     runtime.progress = next;
-
     if (runtime.bar) runtime.bar.style.width = `${next}%`;
     if (runtime.percent) runtime.percent.textContent = `${next}%`;
 
@@ -107,12 +106,10 @@
 
         const t = Math.min(1, (now - started) / duration);
         const eased = t * (2 - t);
-
         setProgress(from + (end - from) * eased);
 
-        if (t < 1) {
-          runtime.raf = requestAnimationFrame(frame);
-        } else {
+        if (t < 1) runtime.raf = requestAnimationFrame(frame);
+        else {
           runtime.raf = 0;
           resolve();
         }
@@ -128,7 +125,6 @@
     runtime.releasing = true;
 
     const elapsed = performance.now() - runtime.startedAt;
-
     if (
       elapsed < LIMITS.minimumMs &&
       reason !== 'timeout' &&
@@ -214,20 +210,12 @@
     if (!splash) return;
 
     runtime.splash = splash;
-    runtime.image = qs(
-      splash,
-      '#relaySplashArt, .relay-splash-art',
-    );
+    runtime.image = qs(splash, '#relaySplashArt, .relay-splash-art');
     runtime.bar = qs(splash, '.relay-splash-progress');
     runtime.percent = qs(splash, '.relay-splash-percent');
     runtime.status = qs(splash, '.relay-splash-status');
 
-    if (
-      !runtime.image ||
-      !runtime.bar ||
-      !runtime.percent ||
-      !runtime.status
-    ) {
+    if (!runtime.image || !runtime.bar || !runtime.percent || !runtime.status) {
       try { splash.remove(); } catch {}
       return;
     }
@@ -265,25 +253,16 @@
       updateReadiness();
     };
 
-    if (
-      runtime.image.complete &&
-      runtime.image.naturalWidth > 0
-    ) {
+    if (runtime.image.complete && runtime.image.naturalWidth > 0) {
       onImageReady();
     } else {
-      runtime.image.addEventListener(
-        'load',
-        onImageReady,
-        { once: true },
-      );
+      runtime.image.addEventListener('load', onImageReady, { once: true });
     }
 
     runtime.image.addEventListener(
       'error',
       () => {
-        console.warn(
-          '[Relay Runner] Splash artwork failed; continuing boot.',
-        );
+        console.warn('[Relay Runner] Splash artwork failed; continuing boot.');
         runtime.imageReady = true;
         setProgress(18);
         updateReadiness();
@@ -294,16 +273,8 @@
     if (runtime.pageReady) {
       setProgress(48);
     } else {
-      document.addEventListener(
-        'DOMContentLoaded',
-        markPageReady,
-        { once: true },
-      );
-      window.addEventListener(
-        'load',
-        markPageReady,
-        { once: true },
-      );
+      document.addEventListener('DOMContentLoaded', markPageReady, { once: true });
+      window.addEventListener('load', markPageReady, { once: true });
     }
 
     // Any real uncaught application error must not leave the user trapped behind the splash.
