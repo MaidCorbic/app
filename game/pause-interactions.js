@@ -170,38 +170,60 @@
 
     document.body.append(rotatePrompt);
 
-    const openPause = (tabName = null) => {
-      if (pauseMenu.classList.contains('hidden')) {
-        pause.click();
-      }
+    /*
+     * IMPORTANT:
+     * Do not call pause.click() from the mobile HUD.
+     * The canonical #pause button is handled by the global cinematic UI
+     * click router and by the P1 pause observer. Calling it synthetically
+     * from another click handler can create a second pause path and leave
+     * the mobile UI looking frozen.
+     *
+     * Prefer the already-installed unified UI API. The fallback only
+     * changes the DOM state and lets the P1 MutationObserver own Phaser's
+     * pause/resume state.
+     */
+    const openPause = (tabName = 'resume') => {
+      try {
+        const api = window.relayUnifiedCinematicUI;
 
-      if (!tabName) return;
-
-      const deadline = performance.now() + 750;
-
-      const selectTab = () => {
-        if (pauseMenu.classList.contains('hidden')) {
-          if (performance.now() < deadline) {
-            requestAnimationFrame(selectTab);
-          }
+        if (api?.openPause) {
+          api.openPause(tabName);
           return;
         }
 
-        const tab = pauseMenu.querySelector(
-          `[data-tab="${tabName}"]`
-        );
+        pauseMenu.classList.remove('hidden');
+        pauseMenu.setAttribute('aria-hidden', 'false');
 
-        if (tab) {
-          tab.click();
-          return;
-        }
+        if (tabName) {
+          const deadline = performance.now() + 750;
 
-        if (performance.now() < deadline) {
+          const selectTab = () => {
+            if (pauseMenu.classList.contains('hidden')) {
+              if (performance.now() < deadline) {
+                requestAnimationFrame(selectTab);
+              }
+              return;
+            }
+
+            const tab = pauseMenu.querySelector(
+              `[data-pause-tab="${tabName}"], [data-tab="${tabName}"]`
+            );
+
+            if (tab) {
+              tab.click();
+              return;
+            }
+
+            if (performance.now() < deadline) {
+              requestAnimationFrame(selectTab);
+            }
+          };
+
           requestAnimationFrame(selectTab);
         }
-      };
-
-      requestAnimationFrame(selectTab);
+      } catch (error) {
+        console.error('[RelayRunner] Mobile pause open failed:', error);
+      }
     };
 
     hud
@@ -209,7 +231,7 @@
       ?.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
-        openPause();
+        openPause('resume');
       });
 
     hud
