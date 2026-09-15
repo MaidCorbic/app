@@ -23,6 +23,7 @@
     imageReady: false,
     pageReady: document.readyState === 'complete',
     engineReady: false,
+    releasing: false,
     done: false,
     raf: 0,
     finishTimer: 0,
@@ -66,6 +67,7 @@
 
   const animateTo = target => {
     if (runtime.done) return Promise.resolve();
+
     const end = Math.max(runtime.progress, Math.min(100, Number(target) || 0));
     if (end <= runtime.progress) {
       setProgress(end);
@@ -82,33 +84,54 @@
           resolve();
           return;
         }
+
         const t = Math.min(1, (now - started) / duration);
         const eased = t * (2 - t);
         setProgress(from + (end - from) * eased);
-        if (t < 1) runtime.raf = requestAnimationFrame(frame);
-        else resolve();
+
+        if (t < 1) {
+          runtime.raf = requestAnimationFrame(frame);
+        } else {
+          runtime.raf = 0;
+          resolve();
+        }
       };
+
       runtime.raf = requestAnimationFrame(frame);
     });
   };
 
   const release = async reason => {
-    if (runtime.done) return;
+    if (runtime.done || runtime.releasing) return;
+
+    runtime.releasing = true;
+
     const elapsed = performance.now() - runtime.startedAt;
     if (elapsed < LIMITS.minimumMs && reason !== 'timeout') {
       window.clearTimeout(runtime.finishTimer);
-      runtime.finishTimer = window.setTimeout(() => release(reason), LIMITS.minimumMs - elapsed);
+      runtime.finishTimer = window.setTimeout(() => {
+        runtime.releasing = false;
+        release(reason);
+      }, LIMITS.minimumMs - elapsed);
       return;
     }
 
-    runtime.done = true;
     window.clearTimeout(runtime.finishTimer);
     window.clearTimeout(runtime.pollTimer);
-    if (runtime.raf) cancelAnimationFrame(runtime.raf);
 
     try {
       await animateTo(100);
-    } catch {}
+    } catch (error) {
+      console.warn('[Relay Runner] Splash final animation skipped.', error);
+      setProgress(100);
+    }
+
+    runtime.done = true;
+
+    if (runtime.raf) {
+      cancelAnimationFrame(runtime.raf);
+      runtime.raf = 0;
+    }
 
     const splash = runtime.splash;
     if (!splash) return;
@@ -124,14 +147,17 @@
   };
 
   const checkReady = () => {
-    if (runtime.done) return;
+    if (runtime.done || runtime.releasing) return;
 
     const canvas = qs(document, '#phaser-game canvas');
     if (canvas) runtime.engineReady = true;
 
-    if (runtime.imageReady) animateTo(24);
-    if (runtime.pageReady) animateTo(48);
-    if (runtime.engineReady) animateTo(88);
+    let target = 6;
+    if (runtime.imageReady) target = 24;
+    if (runtime.pageReady) target = 48;
+    if (runtime.engineReady) target = 88;
+
+    setProgress(target);
 
     if (runtime.imageReady && runtime.pageReady && runtime.engineReady) {
       release('ready');
@@ -139,7 +165,6 @@
     }
 
     if (performance.now() - runtime.startedAt >= LIMITS.maximumMs) {
-      setStatus('READY');
       setProgress(100);
       release('timeout');
       return;
@@ -185,7 +210,7 @@
       if (!runtime.image?.naturalWidth) return;
       runtime.imageReady = true;
       resizeArtwork();
-      animateTo(24);
+      setProgress(24);
     };
 
     if (runtime.image.complete && runtime.image.naturalWidth > 0) onImageReady();
@@ -194,12 +219,12 @@
     runtime.image.addEventListener('error', () => {
       console.warn('[Relay Runner] Splash artwork failed; continuing boot.');
       runtime.imageReady = true;
-      animateTo(18);
+      setProgress(18);
     }, { once: true });
 
     const markPageReady = () => {
       runtime.pageReady = true;
-      animateTo(48);
+      setProgress(48);
     };
 
     if (document.readyState === 'complete') markPageReady();
