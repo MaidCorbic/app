@@ -68,29 +68,18 @@
   const animateTo = target => {
     if (runtime.done) return Promise.resolve();
     const end = Math.max(runtime.progress, Math.min(100, Number(target) || 0));
-    if (end <= runtime.progress) {
-      setProgress(end);
-      return Promise.resolve();
-    }
+    if (end <= runtime.progress) { setProgress(end); return Promise.resolve(); }
     stopAnimation();
     const from = runtime.progress;
     const started = performance.now();
     const duration = Math.max(180, Math.min(720, (end - from) * 10));
     return new Promise(resolve => {
       const frame = now => {
-        if (runtime.done) {
-          runtime.raf = 0;
-          resolve();
-          return;
-        }
+        if (runtime.done) { runtime.raf = 0; resolve(); return; }
         const t = Math.min(1, (now - started) / duration);
-        const eased = t * (2 - t);
-        setProgress(from + (end - from) * eased);
+        setProgress(from + (end - from) * (t * (2 - t)));
         if (t < 1) runtime.raf = requestAnimationFrame(frame);
-        else {
-          runtime.raf = 0;
-          resolve();
-        }
+        else { runtime.raf = 0; resolve(); }
       };
       runtime.raf = requestAnimationFrame(frame);
     });
@@ -105,17 +94,17 @@
       window.clearTimeout(runtime.finishTimer);
       runtime.finishTimer = window.setTimeout(() => {
         runtime.releasing = false;
-        release(reason);
+        void release(reason);
       }, LIMITS.minimumMs - elapsed);
       return;
     }
 
     window.clearTimeout(runtime.finishTimer);
     window.clearTimeout(runtime.pollTimer);
+    stopAnimation();
 
-    try {
-      await animateTo(100);
-    } catch (error) {
+    try { await animateTo(100); }
+    catch (error) {
       console.warn('[Relay Runner] Splash final animation skipped.', error);
       setProgress(100);
     }
@@ -132,9 +121,7 @@
     splash.setAttribute('aria-busy', 'false');
     splash.dataset.relaySplashRelease = reason || 'ready';
 
-    window.setTimeout(() => {
-      try { splash.remove(); } catch {}
-    }, LIMITS.fadeMs);
+    window.setTimeout(() => { try { splash.remove(); } catch {} }, LIMITS.fadeMs);
   };
 
   const updateReadiness = () => {
@@ -191,9 +178,7 @@
     const resizeArtwork = () => {
       if (!runtime.image) return;
       let portrait = false;
-      try {
-        portrait = window.matchMedia('(max-width:700px) and (orientation:portrait)').matches;
-      } catch {}
+      try { portrait = window.matchMedia('(max-width:700px) and (orientation:portrait)').matches; } catch {}
       runtime.image.style.width = '100dvw';
       runtime.image.style.height = '100dvh';
       runtime.image.style.maxWidth = 'none';
