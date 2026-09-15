@@ -320,26 +320,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     }
   }
 
-  function installFavicon() {
-    const head = document.head;
-    if (!head) return;
-
-    const existing = head.querySelector('link[data-relay-gameplay-favicon]');
-    if (existing) return;
-
-    const links = [
-      { rel: 'icon', type: 'image/x-icon', href: './assets/favicon.ico' },
-      { rel: 'icon', type: 'image/png', sizes: '32x32', href: './assets/favicon-32x32.png' },
-      { rel: 'apple-touch-icon', sizes: '180x180', href: './assets/apple-touch-icon.png' },
-    ];
-
-    for (const spec of links) {
-      const link = document.createElement('link');
-      Object.assign(link, spec);
-      link.dataset.relayGameplayFavicon = '1';
-      head.appendChild(link);
-    }
-  }
+ function installFavicon() {
+  // Favicon is defined centrally in index.html.
+  // Do not inject additional /assets/* favicon paths here.
+}
 
   installFavicon();
   installSceneHooks();
