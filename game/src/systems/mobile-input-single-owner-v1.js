@@ -1,5 +1,6 @@
-// MOBILE INPUT SINGLE OWNER V9
-// Replace legacy-bound DOM nodes before attaching the single mobile input owner.
+// MOBILE INPUT SINGLE OWNER V10
+// One touch owner. Joystick movement is applied through Phaser postupdate so
+// gameplay cannot overwrite the mobile axis before the player moves.
 const ACTION_KEYS = Object.freeze({
   jump: [32, ' ', 'Space'], fire: [69, 'e', 'KeyE'], sword: [81, 'q', 'KeyQ'],
   dash: [16, 'Shift', 'ShiftLeft'], build1: [49, '1', 'Digit1'], gadget1: [51, '3', 'Digit3'],
@@ -17,9 +18,6 @@ const keyEvent = (code, key, type, keyCode) => {
 const emit = ([keyCode, key, code], type) => window.dispatchEvent(keyEvent(code, key, type, keyCode));
 const replaceNode = node => { const clone = node.cloneNode(true); node.replaceWith(clone); return clone; };
 
-// RunnerScene kept legacy event listeners for backward compatibility. They are no
-// longer an input owner: V9 drives Phaser key/cursor state directly. Detach the old
-// listeners when the scene becomes available so there is exactly one mobile owner.
 const detachLegacyRunnerInput = scene => {
   const events = scene?.game?.events;
   if (!events) return;
@@ -29,14 +27,55 @@ const detachLegacyRunnerInput = scene => {
   scene.mobileMoveHandler = null;
 };
 
-window.addEventListener('relay:runner-scene-ready', event => {
-  detachLegacyRunnerInput(event?.detail?.scene || window.__relayRunnerScene);
-});
-if (window.__relayRunnerScene) detachLegacyRunnerInput(window.__relayRunnerScene);
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-// Legacy boot code can temporarily add an action button before this single-owner
-// module runs. Normalize that DOM on every device so duplicate actions never remain
-// in the page, even when touch controls are hidden on desktop.
+// The previous owner only changed keyboard flags. On touch browsers those flags
+// can be consumed/reset during the same frame. The canonical owner now applies
+// the active horizontal axis in Phaser's postupdate phase, after RunnerScene has
+// completed its movement pass.
+const installRunnerMovementBridge = scene => {
+  if (!scene?.events || scene.__relayMobileMovementBridgeV10) return;
+  scene.__relayMobileMovementBridgeV10 = true;
+  scene.__relayMobileAxis = 0;
+
+  const apply = () => {
+    const axis = Number(scene.__relayMobileAxis) || 0;
+    if (!axis || !scene.player?.body || scene.finished || scene.respawning) return;
+    const body = scene.player.body;
+    if (body.enable === false || body.moves === false) return;
+
+    const maxSpeed = Number(scene.__relayMobileRunSpeed) > 0
+      ? Number(scene.__relayMobileRunSpeed)
+      : 475;
+    const target = axis * maxSpeed;
+    const current = Number(body.velocity?.x) || 0;
+    const next = current + (target - current) * 0.55;
+    body.setVelocityX?.(clamp(next, -maxSpeed, maxSpeed));
+  };
+
+  scene.events.on('postupdate', apply);
+  scene.events.once('shutdown', () => {
+    scene.events.off('postupdate', apply);
+    scene.__relayMobileMovementBridgeV10 = false;
+    scene.__relayMobileAxis = 0;
+  });
+};
+
+const attachSceneWhenReady = () => {
+  const scene = window.__relayRunnerScene;
+  if (!scene) return false;
+  detachLegacyRunnerInput(scene);
+  installRunnerMovementBridge(scene);
+  return true;
+};
+
+window.addEventListener('relay:runner-scene-ready', event => {
+  const scene = event?.detail?.scene || window.__relayRunnerScene;
+  if (!scene) return;
+  detachLegacyRunnerInput(scene);
+  installRunnerMovementBridge(scene);
+});
+
 const normalizeActionButtons = root => {
   const seen = new Set();
   root.querySelectorAll('[data-mobile-action]').forEach(node => {
@@ -50,7 +89,7 @@ const install = () => {
   const root = document.querySelector('.mobile-controls');
   if (!root) return;
   normalizeActionButtons(root);
-  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV9) return;
+  if (!isTouchDevice() || window.__relayMobileInputSingleOwnerV10) return;
 
   const actionButtons = [];
   root.querySelectorAll('[data-mobile-action]').forEach(node => actionButtons.push(replaceNode(node)));
@@ -60,8 +99,16 @@ const install = () => {
   const thumb = joystick?.querySelector('.mobile-joystick-thumb');
   if (!joystick || !thumb) return;
 
-  window.__relayMobileInputSingleOwnerV9 = true;
-  root.dataset.mobileControlsOwner = 'single-owner-v9';
+  window.__relayMobileInputSingleOwnerV10 = true;
+  root.dataset.mobileControlsOwner = 'single-owner-v10';
+  attachSceneWhenReady();
+
+  let readyRaf = 0;
+  const waitForScene = () => {
+    if (attachSceneWhenReady()) return;
+    readyRaf = requestAnimationFrame(waitForScene);
+  };
+  waitForScene();
 
   const actionPointers = new Map();
   const pointerActions = new Map();
@@ -126,6 +173,7 @@ const install = () => {
     if (keys.D) keys.D.isDown = right;
     if (cursors.left) cursors.left.isDown = down;
     if (cursors.right) cursors.right.isDown = right;
+    scene.__relayMobileAxis = next === 'left' ? -1 : next === 'right' ? 1 : 0;
   };
 
   const setDirection = next => {
@@ -139,8 +187,16 @@ const install = () => {
   };
 
   const reset = () => {
-    setDirection(null); pointerId = null; joystick.classList.remove('is-active'); thumb.style.transform = 'translate(0,0)';
-    setPhaserDirection(null);
+    setDirection(null);
+    const scene = window.__relayRunnerScene;
+    if (scene) {
+      scene.__relayMobileAxis = 0;
+      const body = scene.player?.body;
+      if (body?.enable !== false && body?.moves !== false) body.setVelocityX?.(0);
+    }
+    pointerId = null;
+    joystick.classList.remove('is-active');
+    thumb.style.transform = 'translate(0,0)';
   };
 
   const move = (clientX, clientY) => {

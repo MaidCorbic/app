@@ -13,6 +13,17 @@
     touch-action: none !important;
   }
 
+  /* MOBILE HUD CLEANUP: keep the game surface clear of desktop-only mission chrome. */
+  html body.is-touch #play .hud-route,
+  html body.is-touch #play #detectionStatus,
+  html body.is-touch #play .hud-objective,
+  html body.is-touch #play [data-hud="objective"],
+  html body.is-touch #play [data-hud="detection"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
   html body.is-touch #play .mobile-controls {
     --hud-left: max(10px, env(safe-area-inset-left));
     --hud-right: max(10px, env(safe-area-inset-right));
@@ -37,7 +48,6 @@
     transform: none !important;
   }
 
-  /* LEFT: movement joystick */
   html body.is-touch #play .mobile-joystick {
     flex: 0 0 var(--joystick-size) !important;
     width: var(--joystick-size) !important;
@@ -67,7 +77,6 @@
     pointer-events: none !important;
   }
 
-  /* RIGHT: action grid */
   html body.is-touch #play .mobile-actions {
     flex: 0 1 auto !important;
     display: grid !important;
@@ -169,7 +178,6 @@
     box-shadow: 0 0 18px rgba(174,227,127,.24), 0 7px 18px rgba(0,0,0,.30) !important;
   }
 
-  /* Portrait: controls remain usable instead of being hidden. */
   @media (orientation: portrait) {
     html body.is-touch #play .mobile-controls {
       --button-size: clamp(52px, 15vw, 60px);
@@ -185,7 +193,6 @@
     }
   }
 
-  /* Very narrow phones: keep hit targets large but prevent horizontal overflow. */
   @media (max-width: 390px) {
     html body.is-touch #play .mobile-controls {
       --button-size: 52px;
@@ -200,7 +207,6 @@
     }
   }
 
-  /* Landscape phones: slightly larger play surface without crowding. */
   @media (orientation: landscape) and (max-height: 520px) {
     html body.is-touch #play .mobile-controls {
       --button-size: clamp(44px, 8.5vh, 56px);
