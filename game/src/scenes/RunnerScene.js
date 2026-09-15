@@ -36703,7 +36703,7 @@ const jumpHeld =
 this.mobileActions.jump = false;
 this.mobileActions.jumpReleased = false;
 
-if (pressed) {
+if (keyboardPressed) {
   this.jumpBuffer =
     RUNNER_TUNING.jumpBufferMs;
 } else {
@@ -37620,7 +37620,7 @@ this.tweens.add({
 }
 
 if (
-  released &&
+  keyboardReleased &&
   body.velocity.y <
     -180 &&
   this.jumpHeld
