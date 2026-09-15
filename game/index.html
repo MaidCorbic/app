@@ -242,6 +242,9 @@
     <div id="toast" class="toast" aria-live="polite"></div>
   </main>
 
+  <!-- FIRST-LOAD SPLASH MUST EXECUTE BEFORE ANY RUNTIME MODULE. -->
+  <script type="module" src="./splash-loader-v2.js"></script>
+
   <script type="module" src="./home-options.js"></script>
   <script type="module" src="./home-v3.js"></script>
   <script type="module" src="./home-v3-guard.js"></script>
@@ -252,7 +255,6 @@
   <script type="module" src="/src/systems/mobile-viewport-hardening.js"></script>
 
   <script type="module" src="/src/main.js"></script>
-  <script type="module" src="./splash-loader-v2.js"></script>
 
   <script type="module" src="/src/systems/mission-finish-recovery.js"></script>
   <script type="module" src="/src/systems/mission-results.js"></script>
