@@ -10,15 +10,223 @@
 (() => {
   'use strict';
 
+
   if (window.__relayHomeV4) return;
   window.__relayHomeV4 = true;
 
-  const $ = id => document.getElementById(id);
+   const $ = id => document.getElementById(id);
+  let homeProfileStateAPI = null;
+
+  const syncHomeProfile = async () => {
+    try {
+       const {
+        loadState,
+        getCourierRank,
+        getLevelProgress
+      } = homeProfileStateAPI || await import('./src/state.js');
+
+      homeProfileStateAPI = {
+        loadState,
+        getCourierRank,
+        getLevelProgress
+      };
+
+      const state = loadState();
+
+      const xp = Number(state.xp) || 0;
+      const signals = Number(state.signals) || 0;
+      const totalRuns = Number(state.totalRuns) || 0;
+      const bestRun = Number(state.bestRun) || 0;
+
+      const level = getLevelProgress(xp);
+      const rank = getCourierRank(xp);
+
+      const xpIntoLevel = Math.max(
+        0,
+        xp - Number(level.current || 0)
+      );
+
+      const xpNeeded = Math.max(
+        1,
+        Number(level.next || 100) -
+        Number(level.current || 0)
+      );
+
+      const xpProgress = Math.max(
+        0,
+        Math.min(
+          100,
+          Math.round(
+            (Number(level.progress) || 0) * 100
+          )
+        )
+      );
+
+      const rankEl = $('homeV4Rank');
+      const levelEl = $('homeV4Level');
+      const xpTextEl = $('homeV4XpText');
+      const xpFillEl = $('homeV4XpFill');
+      const bestRunEl = $('homeV4BestRun');
+      const runsEl = $('homeV4Runs');
+      const signalsEl = $('homeV4Signals');
+      const missionXpEl = $('homeV4MissionXp');
+      const bestRatingEl = $('homeV4BestRating');
+      const signalValueEl = $('homeV4SignalValue');
+      const signalFillEl = $('homeV4SignalFill');
+
+      if (rankEl) {
+        rankEl.textContent =
+          rank?.name || state.rank || 'ROOKIE';
+      }
+
+      if (levelEl) {
+        levelEl.textContent =
+          String(level.level || state.level || 1)
+            .padStart(2, '0');
+      }
+
+      if (xpTextEl) {
+        xpTextEl.textContent =
+          `${xpIntoLevel.toLocaleString()} / ${xpNeeded.toLocaleString()}`;
+      }
+
+      if (xpFillEl) {
+        xpFillEl.style.width =
+          `${xpProgress}%`;
+      }
+
+      if (bestRunEl) {
+        bestRunEl.textContent =
+          bestRun.toLocaleString();
+      }
+
+      if (runsEl) {
+        runsEl.textContent =
+          totalRuns.toLocaleString();
+      }
+
+      if (signalsEl) {
+        signalsEl.textContent =
+          signals.toLocaleString();
+      }
+
+        if (missionXpEl) {
+        const missionXp =
+          Number(state.lastXpBreakdown?.total) || 0;
+
+        missionXpEl.textContent =
+          missionXp > 0
+            ? `+${missionXp.toLocaleString()}`
+            : '—';
+      }
+
+             if (bestRatingEl) {
+        const firstMissionStats =
+          state.missionStats?.['first-delivery'];
+
+        const bestRating =
+          Number(firstMissionStats?.bestRating) || 0;
+
+        bestRatingEl.textContent =
+          bestRating > 0
+            ? '★'.repeat(Math.min(3, bestRating))
+            : '—';
+      }
+
+               /*
+       * Live signal progress for the active/last runner scene.
+       * The gameplay scene is the authoritative source for
+       * collected Signals during a run.
+       */
+    const activeScene =
+  window.__relayRunnerScene || null;
+
+const lastProgress =
+  window.__relayLastMissionProgress || null;
+
+const missionSignals =
+  activeScene
+    ? Math.max(
+        0,
+        Math.min(
+          Array.isArray(activeScene?.mission?.signals)
+            ? activeScene.mission.signals.length
+            : 10,
+          Number(activeScene?.collected) || 0
+        )
+      )
+    : Math.max(
+        0,
+        Number(lastProgress?.signals) || 0
+      );
+
+const missionSignalTarget =
+  activeScene && Array.isArray(activeScene?.mission?.signals)
+    ? activeScene.mission.signals.length
+    : Math.max(
+        1,
+        Number(lastProgress?.totalSignals) || 10
+      );
+
+      if (signalValueEl) {
+        signalValueEl.textContent =
+          `${String(missionSignals).padStart(2, '0')} / ${String(missionSignalTarget).padStart(2, '0')}`;
+      }
+
+      if (signalFillEl) {
+        const signalProgress =
+          missionSignalTarget > 0
+            ? Math.round(
+                (missionSignals / missionSignalTarget) * 100
+              )
+            : 0;
+
+        signalFillEl.style.width =
+          `${signalProgress}%`;
+      }
+
+    } catch (error) {
+      console.error(
+        '[RelayRunner] Home profile sync failed:',
+        error
+      );
+    }
+  };
+
+  window.addEventListener(
+    'storage',
+    event => {
+      if (
+        event.key === 'relay-runner-state'
+      ) {
+        syncHomeProfile();
+      }
+    }
+  );
+
+  window.addEventListener(
+    'relay:mission-complete',
+    () => {
+      syncHomeProfile();
+    }
+  );
 
   const introVisible = () => {
     const intro = $('intro');
     return !!intro && !intro.classList.contains('hidden');
   };
+
+  document.addEventListener(
+    'visibilitychange',
+    () => {
+      if (
+        document.visibilityState === 'visible' &&
+        introVisible()
+      ) {
+        syncHomeProfile();
+      }
+    }
+  );
 
   const forceStartVisible = start => {
     if (!(start instanceof HTMLElement)) return;
@@ -179,6 +387,8 @@
     return true;
   };
 
+  
+
   const setHomeState = () => {
     const intro = $('intro');
     const visible = introVisible();
@@ -198,6 +408,7 @@
     const start = intro?.querySelector('#start');
 
     forceStartVisible(start);
+    syncHomeProfile();
   };
 
   const bindOnce = (node, event, handler) => {
@@ -364,8 +575,8 @@
               <div class="home-v4-progress-meta">
                 <span>SIGNAL RECOVERY</span>
                 <strong id="homeV4SignalValue">
-                  02 / 08
-                </strong>
+  00 / 10
+</strong>
               </div>
 
               <div
@@ -380,21 +591,84 @@
             </div>
 
             <div class="home-v4-stat-grid">
-              <div class="home-v4-stat">
-                <small>MISSION XP</small>
-                <b>+120</b>
-              </div>
+          <div class="home-v4-stat">
+  <small>MISSION XP</small>
+  <b id="homeV4MissionXp">+0</b>
+</div>
 
-              <div class="home-v4-stat">
-                <small>BEST RATING</small>
-                <b>A</b>
-              </div>
+            <div class="home-v4-stat">
+  <small>BEST RATING</small>
+  <b id="homeV4BestRating">—</b>
+</div>
             </div>
           </article>
 
-          <div class="home-v4-badge">
-            LIVE RELAY CHANNEL // 01
-          </div>
+        <div class="home-v4-badge">
+  LIVE RELAY CHANNEL // 01
+</div>
+
+<aside class="home-v4-profile" aria-label="Runner profile">
+  <div class="home-v4-profile-head">
+    <div>
+      <span class="home-v4-profile-kicker">
+        RUNNER INTEL
+      </span>
+      <strong>COURIER PROFILE</strong>
+    </div>
+
+    <span class="home-v4-profile-live">
+      LIVE
+    </span>
+  </div>
+
+  <div class="home-v4-profile-rank">
+    <div>
+      <small>RANK</small>
+      <b id="homeV4Rank">ROOKIE</b>
+    </div>
+
+    <div>
+      <small>LEVEL</small>
+      <b id="homeV4Level">01</b>
+    </div>
+  </div>
+
+  <div class="home-v4-profile-xp">
+    <div class="home-v4-profile-xp-meta">
+      <span>XP PROGRESS</span>
+      <strong id="homeV4XpText">0 / 100</strong>
+    </div>
+
+    <div class="home-v4-profile-xp-track">
+      <i
+        id="homeV4XpFill"
+        style="width:0%"
+      ></i>
+    </div>
+  </div>
+
+  <div class="home-v4-profile-stats">
+    <div>
+      <small>BEST RUN</small>
+      <b id="homeV4BestRun">0</b>
+    </div>
+
+    <div>
+      <small>RUNS</small>
+      <b id="homeV4Runs">0</b>
+    </div>
+
+    <div>
+      <small>SIGNALS</small>
+      <b id="homeV4Signals">0</b>
+    </div>
+  </div>
+
+  <div class="home-v4-profile-footer">
+    <span>PROFILE STATUS</span>
+    <b>ONLINE</b>
+  </div>
+</aside>
         </section>
       </main>
 
@@ -442,6 +716,8 @@
     `;
 
     intro.append(scene, shell);
+
+    syncHomeProfile();
 
     bindOnce(
       shell.querySelector(
