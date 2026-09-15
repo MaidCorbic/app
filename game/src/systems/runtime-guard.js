@@ -85,10 +85,28 @@ const speech = window.speechSynthesis;
 if (speech && window.SpeechSynthesisUtterance) {
   const nativeSpeak = speech.speak.bind(speech);
   const nativeCancel = speech.cancel.bind(speech);
-  const queue = [];
-  let active = false;
-  let lastText = '';
-  let lastAt = 0;
+const queue = [];
+let active = false;
+let lastText = '';
+let lastAt = 0;
+let userActivated = false;
+
+const markUserActivation = () => {
+  userActivated = true;
+  pump();
+};
+
+window.addEventListener('pointerdown', markUserActivation, {
+  capture: true,
+  passive: true,
+  once: true
+});
+
+window.addEventListener('keydown', markUserActivation, {
+  capture: true,
+  passive: true,
+  once: true
+});
   const getVoices = () => speech.getVoices?.() || [];
   const pickVoice = text => {
     const available = getVoices();
@@ -98,13 +116,35 @@ if (speech && window.SpeechSynthesisUtterance) {
     return female[0] || english[0] || available[0] || null;
   };
   const isNoise = text => /^(Boost engaged\.|Barrier cleared\.|Wall jump\.|Signal secured\.|Taking fire\.|Relay linked\.)$/i.test(text.trim());
-  const pump = () => {
-    if (active || !queue.length) return;
-    const item = queue.shift(); active = true; item.utterance.voice = pickVoice(item.utterance.text);
-    item.utterance.onend = () => { active = false; setTimeout(pump, 90); };
-    item.utterance.onerror = () => { active = false; setTimeout(pump, 90); };
+  
+const pump = () => {
+  if (!userActivated || active || !queue.length) return;
+
+  const item = queue.shift();
+
+  if (!item?.utterance) {
+    pump();
+    return;
+  }
+
+  active = true;
+  item.utterance.voice = pickVoice(item.utterance.text);
+
+item.utterance.onend = () => {
+  active = false;
+};
+
+item.utterance.onerror = () => {
+  active = false;
+};
+  try {
     nativeSpeak(item.utterance);
-  };
+  } catch (error) {
+    active = false;
+    queue.unshift(item);
+    console.warn('[Relay Runner] Speech blocked:', error);
+  }
+};
   try {
     speech.cancel = () => {
       nativeCancel();
