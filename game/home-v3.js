@@ -98,11 +98,54 @@
     return true;
   };
 
-  const setHomeState = () => {
-    const visible = introVisible();
-    document.body.classList.toggle('home-v3-active', visible);
-    $('intro')?.classList.toggle('home-v3', visible);
-  };
+const setHomeState = () => {
+  const intro = $('intro');
+  const visible = introVisible();
+
+  document.body.classList.toggle(
+    'home-v3-active',
+    visible
+  );
+
+  intro?.classList.toggle(
+    'home-v3',
+    visible
+  );
+
+  if (visible) {
+    const start = intro?.querySelector('#start');
+
+    if (start instanceof HTMLElement) {
+      start.hidden = false;
+      start.removeAttribute('hidden');
+      start.classList.remove('hidden');
+
+      start.style.setProperty(
+        'display',
+        'flex',
+        'important'
+      );
+
+      start.style.setProperty(
+        'visibility',
+        'visible',
+        'important'
+      );
+
+      start.style.setProperty(
+        'opacity',
+        '1',
+        'important'
+      );
+
+      start.style.setProperty(
+        'pointer-events',
+        'auto',
+        'important'
+      );
+    }
+  }
+};
 
   const bindOnce = (node, event, handler) => {
     if (!(node instanceof HTMLElement)) return;
@@ -229,18 +272,28 @@
       openOptions();
     });
 
-    const start = shell.querySelector('#start');
+   const start = shell.querySelector('#start');
 
-    bindOnce(start, 'click', event => {
-      event.preventDefault();
+if (start instanceof HTMLElement) {
+  start.hidden = false;
+  start.removeAttribute('hidden');
+  start.classList.remove('hidden');
 
-      if (!(sourceStart instanceof HTMLElement)) return;
+  start.style.setProperty('display', 'flex', 'important');
+  start.style.setProperty('visibility', 'visible', 'important');
+  start.style.setProperty('opacity', '1', 'important');
+  start.style.setProperty('pointer-events', 'auto', 'important');
+}
 
-      try {
-        HTMLElement.prototype.click.call(sourceStart);
-      } catch {}
-    });
+bindOnce(start, 'click', event => {
+  event.preventDefault();
 
+  if (!(sourceStart instanceof HTMLElement)) return;
+
+  try {
+    HTMLElement.prototype.click.call(sourceStart);
+  } catch {}
+});
     const continueButton = shell.querySelector('#continue');
 
     const syncContinue = () => {
