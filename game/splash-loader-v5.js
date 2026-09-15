@@ -129,7 +129,11 @@
 
     const elapsed = performance.now() - runtime.startedAt;
 
-    if (elapsed < LIMITS.minimumMs && reason !== 'timeout' && reason !== 'error') {
+    if (
+      elapsed < LIMITS.minimumMs &&
+      reason !== 'timeout' &&
+      reason !== 'error'
+    ) {
       window.clearTimeout(runtime.finishTimer);
       runtime.finishTimer = window.setTimeout(() => {
         runtime.releasing = false;
@@ -188,7 +192,6 @@
     }
 
     if (performance.now() - runtime.startedAt >= LIMITS.maximumMs) {
-      setProgress(100);
       release('timeout');
       return;
     }
@@ -303,7 +306,7 @@
       );
     }
 
-    // Surface uncaught boot failures instead of leaving the user behind a loader.
+    // Any real uncaught application error must not leave the user trapped behind the splash.
     window.addEventListener(
       'error',
       event => {
