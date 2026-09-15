@@ -14,10 +14,19 @@
   window.__relayHomeV4 = true;
 
   const $ = id => document.getElementById(id);
-  const introVisible = () => {
-    const intro = $('intro');
-    return !!intro && !intro.classList.contains('hidden');
-  };
+const introVisible = () => {
+  const intro = $('intro');
+  if (!intro) return false;
+
+  intro.classList.remove('hidden');
+  intro.removeAttribute('hidden');
+  intro.style.setProperty('display', 'block', 'important');
+  intro.style.setProperty('visibility', 'visible', 'important');
+  intro.style.setProperty('opacity', '1', 'important');
+  intro.style.setProperty('pointer-events', 'auto', 'important');
+
+  return true;
+};
 
   const clickExisting = selector => {
     const target = document.querySelector(selector);
@@ -359,10 +368,23 @@ bindOnce(start, 'click', event => {
     });
   };
 
-  const boot = () => {
-    buildHome();
-    setHomeState();
-    installKeyboard();
+const boot = () => {
+  buildHome();
+
+  const intro = $('intro');
+
+  if (intro instanceof HTMLElement) {
+    intro.classList.remove('hidden');
+    intro.removeAttribute('hidden');
+
+    intro.style.setProperty('display', 'block', 'important');
+    intro.style.setProperty('visibility', 'visible', 'important');
+    intro.style.setProperty('opacity', '1', 'important');
+    intro.style.setProperty('pointer-events', 'auto', 'important');
+  }
+
+  setHomeState();
+  installKeyboard();
 
     const intro = $('intro');
     if (intro && intro.dataset.homeV4Observed !== '1') {
