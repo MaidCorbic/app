@@ -1,12 +1,8 @@
-<h1 align="center">RUNNER RELAY</h1>
+# RUNNER RELAY
 
-<p align="center">
-  <strong>RUN THE CITY. CARRY THE SIGNAL.</strong>
-</p>
+> **RUN THE CITY. CARRY THE SIGNAL.**
 
-<p align="center">
-  A rooftop running game built around movement, missions, XP and progression.
-</p>
+A fast-paced arcade rooftop runner built around movement, missions, signal recovery, combat, route choices, XP, progression and replayability.
 
 <p align="center">
   <a href="https://app-sooty-pi.vercel.app/">
@@ -23,6 +19,7 @@
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript">
   <img src="https://img.shields.io/badge/Phaser-3.90-6A1B9A?style=flat-square" alt="Phaser">
   <img src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/Node.js-24-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js">
 </p>
 
 ---
@@ -35,7 +32,7 @@
   </a>
 </p>
 
-Runner Relay is a game-first rooftop running experience built around movement, missions, signal recovery and player progression.
+Runner Relay is a game-first rooftop running experience focused on movement, mission objectives, signal recovery, route decisions, combat and long-term progression.
 
 > **RUN FARTHER. RECOVER THE SIGNAL. BUILD YOUR RUNNER.**
 
@@ -44,45 +41,51 @@ Runner Relay is a game-first rooftop running experience built around movement, m
 ## ⚡ CORE GAME LOOP
 
 ```text
-              ┌───────────────┐
-              │      RUN      │
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │    EXPLORE    │
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │ RECOVER SIGNAL│
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │    COMPLETE   │
-              │    MISSION    │
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │    EARN XP    │
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │    LEVEL UP   │
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │    UNLOCKS    │
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │    RUN AGAIN  │
-              └───────────────┘
+                 ┌───────────────┐
+                 │      RUN      │
+                 └───────┬───────┘
+                         │
+                         ▼
+                 ┌───────────────┐
+                 │    EXPLORE    │
+                 └───────┬───────┘
+                         │
+                         ▼
+                 ┌───────────────┐
+                 │ RECOVER SIGNAL│
+                 └───────┬───────┘
+                         │
+                         ▼
+                 ┌───────────────┐
+                 │    CHOOSE     │
+                 │     ROUTE     │
+                 └───────┬───────┘
+                         │
+                         ▼
+                 ┌───────────────┐
+                 │    COMPLETE   │
+                 │    MISSION    │
+                 └───────┬───────┘
+                         │
+                         ▼
+                 ┌───────────────┐
+                 │    EARN XP    │
+                 └───────┬───────┘
+                         │
+                         ▼
+                 ┌───────────────┐
+                 │    LEVEL UP   │
+                 └───────┬───────┘
+                         │
+                         ▼
+                 ┌───────────────┐
+                 │    UNLOCKS    │
+                 └───────┬───────┘
+                         │
+                         ▼
+                 ┌───────────────┐
+                 │    RUN AGAIN  │
+                 └───────────────┘
 ```
 
 ---
@@ -91,24 +94,27 @@ Runner Relay is a game-first rooftop running experience built around movement, m
 
 ## 🏃 ROOFTOP MOVEMENT
 
-Move through the city using fast-paced gameplay systems built around:
+Runner Relay is built around fast arcade movement.
+
+Core gameplay actions include:
 
 - Running
 - Jumping
 - Dash movement
-- Combat actions
-- Environmental interaction
-- Mobile touch controls
+- Shooting
+- Blade / sword combat
+- Environmental navigation
+- Touch-based mobile gameplay
 
-The game is designed around movement first, keeping the player constantly moving through the world.
+The movement system is designed to keep the player active and moving through the city.
 
 ---
 
 ## 📡 SIGNAL MISSIONS
 
-Every run has a purpose.
+The signal is at the center of the game's mission loop.
 
-Recover signals, complete objectives and push the relay farther through the city.
+Recover signals, complete objectives, survive the route and carry the relay farther through the city.
 
 ```text
 MISSION
@@ -119,48 +125,174 @@ MISSION
    │
    ├── DISTANCE
    │
+   ├── ROUTE
+   │
    └── COMPLETION
 ```
 
 ---
 
+## 🧭 ROUTE CHOICES
+
+Runner Relay contains gameplay systems for route selection and branching.
+
+Route systems include:
+
+- Route choices
+- Branching routes
+- Route score bonuses
+- Route mutations
+- Duplicate-event protection
+- Mutation coordination
+- Runtime route authority
+
+This allows individual runs to vary instead of following one completely fixed path.
+
+---
+
 ## ⭐ XP & PROGRESSION
 
-Your runs contribute to long-term progression.
+Runs contribute to long-term player progression.
 
 ```text
 RUN
  ↓
-MISSION XP
+MISSION
  ↓
-TOTAL XP
+XP
  ↓
 LEVEL
  ↓
 UNLOCKS
  ↓
-NEXT MISSION
+NEXT RUN
 ```
 
-Progression can be expanded with additional missions, rewards, challenges and player systems.
+Progression-related systems include:
+
+- XP
+- Levels
+- Missions
+- Challenges
+- Upgrades
+- Unlock reconciliation
+- Seasonal progression
+- Special event rewards
 
 ---
 
 ## 🎯 MISSION RESULTS
 
-When a mission is complete, the game presents the results of the run.
+Mission completion is handled as a dedicated end-of-run flow.
 
 ```text
 ┌────────────────────────────┐
 │      MISSION COMPLETE      │
 ├────────────────────────────┤
 │ SIGNALS      04 / 04       │
-│ RATING       S              │
 │ SCORE        12850          │
 │ TIME         02:41          │
 │ XP           +120           │
 └────────────────────────────┘
 ```
+
+The result flow is designed to connect gameplay completion with progression.
+
+---
+
+## ⚔️ COMBAT
+
+Runner Relay includes action-oriented combat mechanics.
+
+Current input actions include:
+
+```text
+E       FIRE
+Q       BLADE
+SHIFT   DASH
+```
+
+Combat is integrated into the movement-oriented gameplay loop rather than being a separate game mode.
+
+---
+
+## 👾 ENEMY & WORLD SYSTEMS
+
+The current codebase includes systems related to:
+
+- Enemy intelligence
+- Signal network
+- Cargo integrity
+- City response
+- Gameplay variety
+- Runtime authority
+- Level wiring
+- Campaign flow
+
+---
+
+# 📱 MOBILE GAMEPLAY
+
+Runner Relay contains a dedicated mobile gameplay layer.
+
+Mobile controls are designed around:
+
+```text
+┌──────────────────────────────────┐
+│                                  │
+│          GAMEPLAY AREA            │
+│                                  │
+│                                  │
+│   ◯                         ◉    │
+│ JOYSTICK                  ACTION │
+│                                  │
+│                JUMP   FIRE DASH  │
+│                                  │
+└──────────────────────────────────┘
+```
+
+Mobile-related systems include:
+
+- Virtual joystick
+- Touch action buttons
+- Mobile action layout
+- Gameplay touch locking
+- Pause access
+- Responsive control positioning
+- Mobile-specific UI polish
+- Single-owner input handling
+
+---
+
+# ⏸️ PAUSE & SETTINGS
+
+Runner Relay contains an in-game pause and options architecture.
+
+The game UI includes systems for:
+
+- Pause menu
+- Settings
+- Language selection
+- Game options
+- Modal overlays
+- Mobile pause behavior
+- Runtime pause handling
+- Centralized UI ownership
+
+The UI architecture is designed to reduce conflicting state handlers and duplicate ownership.
+
+---
+
+# 🌍 LOCALIZATION
+
+The project currently contains localization support for:
+
+- English
+- Ex-Yugoslav languages
+- Spanish
+- German
+
+The internal i18n system provides strings for menus, gameplay actions and interface elements.
 
 ---
 
@@ -175,6 +307,7 @@ When a mission is complete, the game presents the results of the run.
 │ E           FIRE            │
 │ Q           SWORD           │
 │ SHIFT       DASH            │
+│ PAUSE       IN-GAME MENU    │
 └─────────────────────────────┘
 ```
 
@@ -182,11 +315,11 @@ When a mission is complete, the game presents the results of the run.
 
 ```text
 ┌─────────────────────────────┐
-│        VIRTUAL JOYSTICK     │
+│     VIRTUAL JOYSTICK        │
 │                             │
-│   JUMP     FIRE     DASH    │
+│   JUMP    FIRE    DASH      │
 │                             │
-│   SWORD    BUILD    GEAR    │
+│   SWORD   ACTION   GEAR     │
 └─────────────────────────────┘
 ```
 
@@ -225,9 +358,9 @@ Recommended gameplay sequence:
 ```text
 BOOT
   ↓
-TITLE SCREEN
+TITLE
   ↓
-MISSION SELECT
+MISSION
   ↓
 GAMEPLAY
   ↓
@@ -235,67 +368,31 @@ MOVEMENT
   ↓
 SIGNAL RECOVERY
   ↓
+ROUTE CHOICE
+  ↓
 MISSION COMPLETE
   ↓
 RESULTS
   ↓
 XP / PROGRESSION
+  ↓
+NEXT RUN
 ```
 
 ---
 
-# 🧠 PROGRESSION SYSTEM
-
-Runner Relay is built around the idea that every run should matter.
-
-```text
-┌───────────────┐
-│      RUN      │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│    SIGNAL     │
-│    RECOVERY   │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│   MISSION     │
-│   COMPLETION  │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│      XP       │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│     LEVEL     │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│    UNLOCKS    │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│   NEXT RUN    │
-└───────────────┘
-```
-
----
-
-# 🧩 GAME ARCHITECTURE
+# 🧠 GAME ARCHITECTURE
 
 ```text
 RUNNER RELAY
 │
 ├── HOME / TITLE
 │
-├── MISSION SYSTEMS
+├── CAMPAIGN
+│
+├── MISSION SYSTEM
+│
+├── CHALLENGES
 │
 ├── PLAYER SYSTEMS
 │
@@ -303,21 +400,34 @@ RUNNER RELAY
 │   ├── Movement
 │   ├── Jump
 │   ├── Dash
-│   ├── Combat
+│   ├── Fire
+│   ├── Blade
+│   ├── Enemy Systems
 │   └── Touch Input
+│
+├── ROUTE SYSTEM
+│   ├── Route Choice
+│   ├── Branching
+│   ├── Route Scoring
+│   ├── Route Mutation
+│   └── Duplicate Event Guard
 │
 ├── PROGRESSION
 │   ├── XP
 │   ├── Levels
 │   ├── Unlocks
-│   └── Mission Results
+│   ├── Upgrades
+│   ├── Missions
+│   ├── Seasonal Progression
+│   └── Rewards
 │
-└── UI / PRESENTATION
+└── UI
     ├── HUD
-    ├── Menus
+    ├── Home
     ├── Pause
     ├── Settings
-    ├── Finish Screen
+    ├── Results
+    ├── Overlays
     └── Mobile UI
 ```
 
@@ -332,9 +442,11 @@ RUNNER RELAY
 | JavaScript | Game and application logic |
 | Phaser 3.90 | 2D game engine |
 | Vite 8 | Development and production build |
-| Supabase | Backend / persistence |
+| Node.js 24.x | Runtime and tooling |
+| Playwright | Automated testing |
+| Supabase | Repository/backend integration |
 | npm | Package management |
-| Docker | Containerized workflow |
+| Docker | Container workflow |
 | GitHub | Source control |
 | Vercel | Deployment |
 
@@ -346,24 +458,35 @@ RUNNER RELAY
 app/
 │
 ├── game/
-│   ├── gameplay/
-│   ├── systems/
-│   ├── missions/
-│   ├── progression/
-│   ├── UI/
-│   └── assets/
+│   ├── src/
+│   │   └── main.js
+│   │
+│   ├── index.html
+│   ├── package.json
+│   │
+│   ├── pause-interactions.js
+│   ├── pause-final-polish-v1.js
+│   ├── pause-mobile-polish.css
+│   ├── unified-options-ui-v1.js
+│   ├── home-world-ui-polish-v1.js
+│   ├── gameplay-touch-lock.js
+│   ├── runtime-authority-v1.js
+│   ├── campaign-v2.js
+│   ├── challenges-v1.js
+│   ├── p1-gameplay-correctness-v1.js
+│   └── ...
 │
 ├── supabase/
-│   └── backend / persistence
+│   └── ...
 │
 ├── docs/
 │   ├── screenshots/
+│   │   ├── intro.jpg
+│   │   ├── tutorial.jpg
+│   │   └── game.jpg
+│   │
 │   └── demo.gif
 │
-├── package.json
-├── package-lock.json
-├── Dockerfile
-├── diploi.yaml
 └── README.md
 ```
 
@@ -376,12 +499,12 @@ app/
 Install:
 
 ```text
-Node.js
+Node.js 24.x
 npm
 Git
 ```
 
-Docker is optional.
+Docker can be used for containerized workflows.
 
 ---
 
@@ -389,12 +512,12 @@ Docker is optional.
 
 ```bash
 git clone https://github.com/MaidCorbic/app.git
-cd app
+cd app/game
 ```
 
 ---
 
-## 📦 INSTALL
+## 📦 INSTALL DEPENDENCIES
 
 ```bash
 npm install
@@ -402,7 +525,7 @@ npm install
 
 ---
 
-## ▶️ DEVELOPMENT
+## ▶️ START DEVELOPMENT
 
 ```bash
 npm run dev
@@ -418,7 +541,7 @@ npm run build
 
 ---
 
-## 🌐 PREVIEW
+## 🌐 START
 
 ```bash
 npm start
@@ -428,19 +551,60 @@ npm start
 
 # 🧪 TESTING
 
-Runner Relay includes automated checks for gameplay, progression and release stability.
+The repository contains automated test coverage for gameplay, progression, runtime state, mobile controls, UI ownership and release stability.
 
-Run individual checks:
+Examples:
 
 ```bash
-npm run test:start-flow
-npm run test:missions
 npm run test:progression
+npm run test:missions
+npm run test:start-flow
+npm run test:upgrades
+npm run test:build-system
+npm run test:enemy-intel
+npm run test:signal-network
+npm run test:cargo-integrity
+npm run test:city-response
+npm run test:mobile-action-layout
+npm run test:mobile-input-single-owner
+npm run test:settings-state
+npm run test:seasonal-progression
+npm run test:gameplay-touch-lock
 npm run test:gameplay-smoke
 npm run test:final-stability
 ```
 
-Run release hardening:
+---
+
+# 🔒 RELEASE HARDENING
+
+The project contains a dedicated release-hardening suite intended to catch regressions before deployment.
+
+The hardening flow covers areas including:
+
+```text
+Gameplay
+Progression
+Mission flow
+Route choices
+Route scoring
+Route branching
+Route mutation
+Duplicate-event protection
+Runtime authority
+Mobile input ownership
+Pause behavior
+Settings state
+Respawn lifecycle
+Death / retry lifecycle
+Gameplay touch locking
+CSS ownership
+Runtime stability
+Build validation
+Release UX
+```
+
+Run the complete release-hardening command:
 
 ```bash
 npm run test:release-hardening
@@ -448,15 +612,43 @@ npm run test:release-hardening
 
 ---
 
+# 🧩 UI ARCHITECTURE
+
+Runner Relay uses a centralized approach to shared UI ownership.
+
+The architecture is intended to prevent:
+
+```text
+Duplicate event handlers
+Conflicting CSS
+Incorrect mobile positioning
+Multiple input owners
+Pause state conflicts
+Settings state conflicts
+Runtime/UI ownership collisions
+```
+
+Shared UI areas include:
+
+- HUD
+- Home
+- Pause
+- Settings
+- Overlays
+- Mobile controls
+- Gameplay touch interaction
+
+---
+
 # 🐳 DOCKER
 
-## BUILD
+Build the container:
 
 ```bash
 docker build -t runner-relay .
 ```
 
-## RUN
+Run the container:
 
 ```bash
 docker run -p 3000:3000 runner-relay
@@ -464,7 +656,7 @@ docker run -p 3000:3000 runner-relay
 
 ---
 
-# 🔐 ENVIRONMENT
+# 🔐 ENVIRONMENT VARIABLES
 
 Keep credentials outside the repository.
 
@@ -484,63 +676,101 @@ private keys
 service-role credentials
 ```
 
-Never expose Supabase service-role credentials in client-side code.
+Never expose server-side credentials in client-side code.
 
 ---
 
-# 🗺️ ROADMAP
+# 🌐 DEPLOYMENT
 
-## ✅ COMPLETED
+Runner Relay is built with Vite and deployed as a browser game.
 
-```text
-[x] Core Runner Relay experience
-[x] Rooftop gameplay
-[x] Mission system
-[x] XP progression
-[x] Level progression
-[x] Mission results
-[x] Pause / gameplay UI
-[x] Mobile controls
-[x] Production deployment
-[x] Release hardening
+Production build:
+
+```bash
+npm run build
 ```
 
-## 🚧 IN DEVELOPMENT
+Live deployment:
+
+https://app-sooty-pi.vercel.app/
+
+Repository:
+
+https://github.com/MaidCorbic/app
+
+Primary branch:
 
 ```text
-[ ] Player profiles
-[ ] Achievements
-[ ] Advanced statistics
-[ ] Additional mission content
-```
-
-## 🔮 PLANNED
-
-```text
-[ ] Daily challenges
-[ ] Weekly challenges
-[ ] Leaderboards
-[ ] Additional rewards
-[ ] Runner customization
-[ ] Competitive systems
-[ ] Social features
+main
 ```
 
 ---
 
-# 📊 DEVELOPMENT STATUS
+# 🗺️ DEVELOPMENT STATUS
 
 > 🚧 **RUNNER RELAY IS IN ACTIVE DEVELOPMENT**
 
-The project is playable and continues to evolve.
+The game is playable and the repository contains active gameplay, UI, runtime and release-hardening work.
 
-Gameplay systems, missions, UI and progression may change as new versions are introduced.
+Systems may continue to evolve as new versions are introduced.
+
+---
+
+# ✅ CURRENT DEVELOPMENT AREAS
+
+```text
+[x] Core Runner Relay gameplay
+[x] Rooftop movement
+[x] Jump / dash systems
+[x] Combat actions
+[x] Mission systems
+[x] XP progression
+[x] Route choice systems
+[x] Route scoring
+[x] Route branching
+[x] Checkpoint / respawn systems
+[x] Mobile gameplay controls
+[x] Pause system
+[x] Settings system
+[x] Localization support
+[x] Automated gameplay tests
+[x] Runtime stability checks
+[x] Release hardening
+[x] Production build
+[x] Vercel deployment
+```
+
+---
+
+# 🔮 ROADMAP
+
+Future development can expand the game with:
+
+```text
+[ ] Additional cities
+[ ] More mission content
+[ ] More route variations
+[ ] Additional enemy types
+[ ] More upgrades
+[ ] Additional seasonal content
+[ ] More special events
+[ ] Expanded statistics
+[ ] Achievements
+[ ] Player profiles
+[ ] Daily challenges
+[ ] Weekly challenges
+[ ] Leaderboards
+[ ] Runner customization
+[ ] Additional social systems
+```
 
 ---
 
 # 🤝 CONTRIBUTING
 
-Contributions, ideas and feedback are welcome.
+Contributions and feedback are welcome.
+
+Recommended workflow:
 
 ```text
 FORK
@@ -551,18 +781,20 @@ MAKE CHANGES
   ↓
 RUN TESTS
   ↓
+BUILD
+  ↓
 COMMIT
   ↓
 OPEN PULL REQUEST
 ```
 
-For bugs and feature requests, open an issue with enough information to reproduce the problem.
+Keep changes focused and avoid introducing duplicated UI or runtime ownership.
 
 ---
 
 # 🐛 BUG REPORTS
 
-Use the following format:
+When opening a bug report, include:
 
 ```md
 ### Description
@@ -586,20 +818,24 @@ What happened?
 ### Environment
 
 Browser:
-OS:
+Operating System:
 Device:
 Node.js version:
+
+### Additional information
+
+Console errors:
+Screenshots:
+Video:
 ```
 
-Screenshots and console errors are helpful when reporting UI or gameplay issues.
+For gameplay issues, include the relevant mission, route, checkpoint or action sequence when possible.
 
 ---
 
 # 💡 FEATURE REQUESTS
 
-Have an idea for Runner Relay?
-
-Open an issue and describe:
+When proposing a feature, describe:
 
 ```text
 WHAT
@@ -609,37 +845,42 @@ WHY
 Why would it improve the game?
 
 HOW
-How should the feature work?
+How should it work?
+
+WHERE
+Which part of the game should contain it?
 
 REFERENCE
-Screenshots / examples / inspiration
+Screenshots, examples or inspiration
 ```
 
 ---
 
 # 🎯 THE VISION
 
-Runner Relay brings together:
+Runner Relay combines:
 
 ```text
-        🏃 RUNNING
-             +
-        🎮 GAMEPLAY
-             +
-        📡 SIGNALS
-             +
+        🏃 FAST MOVEMENT
+               +
+        🎮 ARCADE GAMEPLAY
+               +
+        📡 SIGNAL RECOVERY
+               +
+        🧭 ROUTE CHOICES
+               +
+        ⚔️ COMBAT
+               +
         📈 PROGRESSION
-             +
-        🏆 COMPETITION
-             +
+               +
         🌃 THE CITY
 ```
 
-into one experience.
+into one connected experience.
 
-The goal isn't simply to run.
+The objective is not simply to run.
 
-The goal is to create a world where **every run moves the relay forward**.
+The objective is to keep the relay moving.
 
 > **RUN THE CITY. CARRY THE SIGNAL.**
 
@@ -667,4 +908,6 @@ See the repository license for the applicable terms.
   <strong>RUNNER RELAY</strong>
   <br>
   <sub>RUN THE CITY. CARRY THE SIGNAL.</sub>
+  <br><br>
+  <strong>RUN. JUMP. DASH. FIGHT. CHOOSE. CARRY THE SIGNAL.</strong>
 </p>
