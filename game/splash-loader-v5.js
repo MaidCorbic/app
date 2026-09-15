@@ -29,12 +29,7 @@
     pollTimer: 0,
   };
 
-  const LIMITS = Object.freeze({
-    minimumMs: 1800,
-    maximumMs: 6500,
-    pollMs: 60,
-    fadeMs: 520,
-  });
+  const LIMITS = Object.freeze({ minimumMs: 1800, maximumMs: 6500, pollMs: 60, fadeMs: 520 });
 
   const qs = (root, selector) => {
     if (!root || typeof root.querySelector !== 'function') return null;
@@ -88,8 +83,8 @@
   const release = async reason => {
     if (runtime.done || runtime.releasing) return;
     runtime.releasing = true;
-
     const elapsed = performance.now() - runtime.startedAt;
+
     if (elapsed < LIMITS.minimumMs && reason !== 'timeout' && reason !== 'error') {
       window.clearTimeout(runtime.finishTimer);
       runtime.finishTimer = window.setTimeout(() => {
@@ -121,7 +116,9 @@
     splash.setAttribute('aria-busy', 'false');
     splash.dataset.relaySplashRelease = reason || 'ready';
 
-    window.setTimeout(() => { try { splash.remove(); } catch {} }, LIMITS.fadeMs);
+    window.setTimeout(() => {
+      try { splash.remove(); } catch {}
+    }, LIMITS.fadeMs);
   };
 
   const updateReadiness = () => {
@@ -228,9 +225,6 @@
     updateReadiness();
   };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init, { once: true });
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  else init();
 })();
