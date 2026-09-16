@@ -1499,31 +1499,6 @@ body.is-touch #play .mobile-controls{
 
 
 /* ==========================================================================
-   19. MOBILE JOYSTICK
-   ========================================================================== */
-
-body.is-touch #play .mobile-joystick{
-
-  width:
-    clamp(82px,21vw,116px) !important;
-
-  height:
-    clamp(82px,21vw,116px) !important;
-
-  flex:
-    0 0 auto;
-
-  pointer-events:auto;
-
-  touch-action:none;
-
-  user-select:none;
-
-  -webkit-user-select:none;
-}
-
-
-/* ==========================================================================
    20. MOBILE ACTION GRID
    ========================================================================== */
 
@@ -2015,12 +1990,6 @@ body.is-touch #play .hud-actions>#pause{
     gap:8px;
   }
 
-  body.is-touch #play .mobile-joystick{
-
-    width:78px !important;
-
-    height:78px !important;
-  }
 
   body.is-touch #play .mobile-actions{
 
@@ -2270,8 +2239,11 @@ body.is-touch #play .world-marker{
    *
    *            GAME WORLD
    *
-   * joystick                 actions
+   *       FULL-SCREEN TOUCH
+   *               +
+   *         ACTION BUTTONS
    *
+   * No virtual joystick.
    * No Mission HUD.
    * No Cargo HUD.
    * No Progress HUD.
@@ -2283,9 +2255,8 @@ body.is-touch #play .world-marker{
     pointer-events:none !important;
   }
 
-  #play .mobile-joystick,
   #play .mobile-actions{
 
-    pointer-events:auto;
+    pointer-events:auto !important;
   }
 }
