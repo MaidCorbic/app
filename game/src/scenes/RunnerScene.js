@@ -8296,22 +8296,37 @@ this.blaster = this.add
   )
   .setDepth(11);
 
-this.input.keyboard.enabled = true;
+// ============================================================
+// DESKTOP KEYBOARD INPUT — SINGLE OWNER
+// ============================================================
 
-this.cursors = this.input.keyboard.createCursorKeys();
+const keyboard = this.input?.keyboard;
 
-this.keys = this.input.keyboard.addKeys(
-  'A,D,C,F,W,S,E,Q,R,X,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
-);
+if (!keyboard) {
+  console.error('[RELAY INPUT] Phaser keyboard plugin unavailable.');
+} else {
+  keyboard.enabled = true;
 
-this.keys.A.enabled = true;
-this.keys.D.enabled = true;
-this.keys.W.enabled = true;
-this.keys.S.enabled = true;
-this.keys.SPACE.enabled = true;
-this.keys.SHIFT.enabled = true;
-this.keys.E.enabled = true;
-this.keys.Q.enabled = true;
+  this.cursors = keyboard.createCursorKeys();
+
+  this.keys = keyboard.addKeys(
+    'A,D,C,F,W,S,E,Q,R,X,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
+  );
+
+  // Explicitly keep the gameplay keyboard active.
+  this.input.keyboard.enabled = true;
+}
+
+if (this.keys) {
+  this.keys.A.enabled = true;
+  this.keys.D.enabled = true;
+  this.keys.W.enabled = true;
+  this.keys.S.enabled = true;
+  this.keys.SPACE.enabled = true;
+  this.keys.SHIFT.enabled = true;
+  this.keys.E.enabled = true;
+  this.keys.Q.enabled = true;
+}
 
 this.flightMode = false;
 this.flightSpeed = 420;
@@ -8323,6 +8338,11 @@ this.flightSpeed = 420;
  * gameplay keyboard controls.
  * ============================================================
  */
+// ============================================================
+// DESKTOP KEYBOARD STATE
+// ============================================================
+this.input?.keyboard && (this.input.keyboard.enabled = true);
+
 this.rawKeyboardState = Object.create(null);
 
 this.rawKeyboardDownHandler = event => {
@@ -36180,26 +36200,24 @@ const rawKeyboard =
   {};
 
 const left =
-  this.cursors.left.isDown ||
-  this.keys.A.isDown ||
-  rawKeyboard.KeyA ||
-  this.mobileDirection ===
-    'left';
+  Boolean(this.cursors?.left?.isDown) ||
+  Boolean(this.keys?.A?.isDown) ||
+  Boolean(rawKeyboard?.KeyA) ||
+  this.mobileDirection === 'left';
 
 const right =
-  this.cursors.right.isDown ||
-  this.keys.D.isDown ||
-  rawKeyboard.KeyD ||
-  this.mobileDirection ===
-    'right';
+  Boolean(this.cursors?.right?.isDown) ||
+  Boolean(this.keys?.D?.isDown) ||
+  Boolean(rawKeyboard?.KeyD) ||
+  this.mobileDirection === 'right';
 
 const forward =
-  this.keys.W.isDown ||
-  rawKeyboard.KeyW;
+  Boolean(this.keys?.W?.isDown) ||
+  Boolean(rawKeyboard?.KeyW);
 
 const backward =
-  this.keys.S.isDown ||
-  rawKeyboard.KeyS;
+  Boolean(this.keys?.S?.isDown) ||
+  Boolean(rawKeyboard?.KeyS);
 
 /*
  * If AFK/cryostasis previously disabled movement,
