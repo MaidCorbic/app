@@ -207,7 +207,7 @@
 
           <div class="rv5-map-label bottom">
             <small>ROUTE ANALYSIS</small>
-            <strong>LIVE PHASER WORLD</strong>
+            <strong>RELAY TACTICAL WORLD</strong>
           </div>
 
           <div class="rv5-live-tag">
@@ -221,7 +221,7 @@
 
           <div>
             <small>MAP SOURCE</small>
-            <strong>LIVE PHASER</strong>
+           <strong>RELAY TACTICAL</strong>
           </div>
 
           <div>
@@ -1876,7 +1876,13 @@ style.textContent = `
   fill:none !important;
   stroke:var(--wz-amber-bright) !important;
   stroke-width:1.5 !important;
-  opacity:.72 !important;
+  opacity:.82 !important;
+
+  filter:
+    drop-shadow(
+      0 0 4px
+      rgba(240,207,105,.55)
+    ) !important;
 }
 
 #${ROOT_ID} .player-radius{
@@ -2021,8 +2027,12 @@ style.textContent = `
 
   filter:
     drop-shadow(
-      0 0 8px
-      rgba(240,207,105,.75)
+      0 0 6px
+      rgba(240,207,105,.82)
+    )
+    drop-shadow(
+      0 0 14px
+      rgba(213,181,83,.32)
     ) !important;
 }
 
@@ -2157,6 +2167,14 @@ style.textContent = `
    MAP TEXT
    ============================================================ */
 
+#${ROOT_ID} .checkpoint-label{
+  paint-order:stroke fill !important;
+  stroke-linejoin:round !important;
+  stroke-width:3px !important;
+  letter-spacing:.08em !important;
+  pointer-events:none !important;
+}
+
 #${ROOT_ID} .label{
   fill:
     #f1f3ec !important;
@@ -2192,7 +2210,37 @@ style.textContent = `
     0 2px 9px
     rgba(0,0,0,.96) !important;
 }
+#${ROOT_ID} .goal-label{
+  fill:
+    var(--wz-amber-bright) !important;
 
+  font-size:
+    11px !important;
+
+  font-weight:
+    950 !important;
+
+  letter-spacing:
+    .10em !important;
+
+  paint-order:
+    stroke fill !important;
+
+  stroke:
+    #030606 !important;
+
+  stroke-width:
+    4px !important;
+
+  pointer-events:
+    none !important;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(240,207,105,.55)
+    ) !important;
+}
 
 /* YOU */
 
@@ -2229,6 +2277,11 @@ style.textContent = `
 /* instructional labels */
 
 #${ROOT_ID} .guide{
+  paint-order:stroke fill !important;
+  stroke-linejoin:round !important;
+  stroke-width:2.5px !important;
+  letter-spacing:.045em !important;
+  pointer-events:none !important;
   fill:
     #d9dfd8 !important;
 
@@ -2494,6 +2547,8 @@ style.textContent = `
 #${ROOT_ID} .objective-text{
   display:block !important;
 
+  min-width:0 !important;
+
   max-width:
     min(
       70vw,
@@ -2501,10 +2556,12 @@ style.textContent = `
     ) !important;
 
   overflow:hidden !important;
+  overflow-wrap:anywhere !important;
+  word-break:break-word !important;
 
   text-overflow:ellipsis !important;
 
-  white-space:nowrap !important;
+  white-space:normal !important;
 
   color:
     #f0f2ec !important;
@@ -2522,6 +2579,10 @@ style.textContent = `
     .035em !important;
 }
 
+#${ROOT_ID} .rv5-objective > div:last-child{
+  min-width:0 !important;
+  max-width:100% !important;
+}
 
 /* ready */
 
@@ -3903,13 +3964,13 @@ const targetBottom = 490;
               class="checkpoint-line">
             </line>
 
-            <text
-              x="${p.x}"
-              y="${p.y-25}"
-              text-anchor="middle"
-              class="label checkpoint-label">
-              CP ${i+1}
-            </text>
+           <text
+  x="${p.x}"
+  y="${p.y-28}"
+  text-anchor="middle"
+  class="label checkpoint-label">
+  CP ${i+1}
+</text>
 
           </g>
         `;
@@ -4015,13 +4076,12 @@ const targetBottom = 490;
               class="enemy-cross">
             </line>
 
-            <text
-              x="${p.x+18}"
-              y="${p.y+4}"
-              class="label hostile-label">
-              HOSTILE
-            </text>
-
+        <text
+  x="${p.x+23}"
+  y="${p.y+4}"
+  class="label hostile-label">
+  HOSTILE
+</text>
           </g>
         `;
 
@@ -4044,21 +4104,21 @@ const targetBottom = 490;
         return `
           <g class="guide-group">
 
-            <line
-              x1="${p.x}"
-              y1="${p.y-5}"
-              x2="${p.x}"
-              y2="${p.y-16}"
-              class="guide-stem">
-            </line>
+         <line
+  x1="${p.x}"
+  y1="${p.y-5}"
+  x2="${p.x}"
+  y2="${p.y-18}"
+  class="guide-stem">
+</line>
 
-            <text
-              x="${p.x}"
-              y="${p.y-21}"
-              text-anchor="middle"
-              class="guide">
-              ${esc(item?.text || '')}
-            </text>
+<text
+  x="${p.x}"
+  y="${p.y-24}"
+  text-anchor="middle"
+  class="guide">
+  ${esc(item?.text || '')}
+</text>
 
           </g>
         `;
@@ -4239,12 +4299,12 @@ const targetBottom = 490;
         class="start">
       </circle>
 
-      <text
-        x="${d.points.start.x+18}"
-        y="${d.points.start.y+4}"
-        class="label start-label">
-        START
-      </text>
+    <text
+  x="${d.points.start.x+21}"
+  y="${d.points.start.y+4}"
+  class="label start-label">
+  START
+</text>
 
     </g>
 
@@ -4274,12 +4334,12 @@ const targetBottom = 490;
         class="goal">
       </circle>
 
-      <text
-        x="${d.points.goal.x+22}"
-        y="${d.points.goal.y+4}"
-        class="label goal-label">
-        OBJECTIVE
-      </text>
+ <text
+  x="${d.points.goal.x+25}"
+  y="${d.points.goal.y+4}"
+  class="label goal-label">
+  OBJECTIVE
+</text>
 
     </g>
 
@@ -4341,12 +4401,12 @@ const targetBottom = 490;
         class="player-cross">
       </line>
 
-      <text
-        x="${d.points.player.x+16}"
-        y="${d.points.player.y-15}"
-        class="label player-label">
-        YOU
-      </text>
+ <text
+  x="${d.points.player.x+19}"
+  y="${d.points.player.y-17}"
+  class="label player-label">
+  YOU
+</text>
 
     </g>
 
@@ -4384,35 +4444,38 @@ const targetBottom = 490;
     const label =
       player.querySelector('text');
 
-    circle?.setAttribute(
-      'cx',
-      d.points.player.x
-    );
+   const px = d.points.player.x;
+const py = d.points.player.y;
 
-    circle?.setAttribute(
-      'cy',
-      d.points.player.y
-    );
+circle?.setAttribute(
+  'cx',
+  px
+);
 
-    ring?.setAttribute(
-      'cx',
-      d.points.player.x
-    );
+circle?.setAttribute(
+  'cy',
+  py
+);
 
-    ring?.setAttribute(
-      'cy',
-      d.points.player.y
-    );
+ring?.setAttribute(
+  'cx',
+  px
+);
 
-    label?.setAttribute(
-      'x',
-      d.points.player.x + 13
-    );
+ring?.setAttribute(
+  'cy',
+  py
+);
 
-    label?.setAttribute(
-      'y',
-      d.points.player.y - 12
-    );
+label?.setAttribute(
+  'x',
+  px + 19
+);
+
+label?.setAttribute(
+  'y',
+  py - 17
+);
   }
 
   /*
@@ -4447,13 +4510,15 @@ const targetBottom = 490;
     );
   }
 
-  /*
-   * ============================================================
-   * TIMER
-   * ============================================================
-   */
+/*
+ * ============================================================
+ * TIMER
+ * ============================================================
+ */
 
-  function updateTimer(ms) {
+const BRIEFING_MS = 15000;
+
+function updateTimer(ms) {
 
     const seconds =
       Math.max(
@@ -4480,12 +4545,12 @@ const targetBottom = 490;
 
       const circumference = 270.18;
 
-      const ratio =
-        clamp(
-          ms / 10000,
-          0,
-          1
-        );
+     const ratio =
+  clamp(
+    ms / BRIEFING_MS,
+    0,
+    1
+  );
 
       progress.style.strokeDashoffset =
         String(
@@ -4569,38 +4634,36 @@ const targetBottom = 490;
 
     renderMap(data.scene);
 
-    const started =
-      performance.now();
+  const started =
+  performance.now();
 
-    updateTimer(10000);
+updateTimer(BRIEFING_MS);
 
-    timerId =
-      setInterval(
-        () => {
-
-          updateTimer(
-            10000 -
-            (
-              performance.now() -
-              started
-            )
-          );
-
-        },
-        100
+timerId =
+  setInterval(
+    () => {
+      updateTimer(
+        BRIEFING_MS -
+        (
+          performance.now() -
+          started
+        )
       );
+    },
+    100
+  );
 
-    playerId =
-      setInterval(
-        updatePlayer,
-        100
-      );
+playerId =
+  setInterval(
+    updatePlayer,
+    100
+  );
 
-    finishId =
-      setTimeout(
-        finish,
-        10000
-      );
+finishId =
+  setTimeout(
+    finish,
+    BRIEFING_MS
+  );
   }
 
   /*
