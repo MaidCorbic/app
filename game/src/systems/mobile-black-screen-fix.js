@@ -7,9 +7,6 @@ if (!window.__relayMobileBlackScreenFix) {
   window.__relayMobileBlackScreenFix = true;
   const isTouch = () => window.matchMedia?.('(pointer: coarse)').matches || Number(navigator.maxTouchPoints || 0) > 0 || /Android|iPhone|iPad|Mobile|Windows Phone|Silk|Kindle/i.test(navigator.userAgent || '');
 
-  // The boot flow creates mission 01 paused underneath the title screen.
-  // Stop that hidden instance before the title button's existing handler runs;
-  // main.js will then take its normal launch(0) path and create a fresh run.
   document.addEventListener('click', event => {
     const start = event.target.closest?.('#start');
     if (!start) return;
@@ -87,30 +84,12 @@ if (!window.__relayMobileBlackScreenFix) {
     }, { passive: true });
   }
 
-  // Q is a discrete combat action. The existing RunnerScene already owns the
-  // sword implementation; this listener guarantees the requested desktop key
-  // reaches that canonical method once per physical press.
-  if (!window.__relayDesktopSwordKeyV1) {
-    window.__relayDesktopSwordKeyV1 = true;
-    window.addEventListener('keydown', event => {
-      if (String(event.code || '').toLowerCase() !== 'keyq') return;
-      if (event.repeat) return;
-      const target = event.target;
-      const tag = String(target?.tagName || '').toLowerCase();
-      if (tag === 'input' || tag === 'textarea' || tag === 'select' || target?.isContentEditable === true) return;
-
-      const scene = window.__relayRunnerScene;
-      if (!scene?.scene?.isActive?.() || scene.finished || scene.respawning || scene.cinematicActive) return;
-      try {
-        if (typeof scene.useSword === 'function') scene.useSword();
-      } catch (error) {
-        console.warn('[Relay Runner] Q sword command skipped:', error);
-      }
-    }, true);
-  }
+  // Q is already a canonical RunnerScene sword binding. The bridge above keeps
+  // the key available to the same desktop input state without adding a second
+  // sword owner, which prevents duplicate sword swings.
 
   const originalUpdate = RunnerScene.prototype.update;
-  if (!RunnerScene.prototype.__relayPlayerMovementHotfixV5) {
+  if (!RunnerScene.prototype.__relayPlayerMovementHotfixV6) {
     RunnerScene.prototype.update = function relayKeyboardControlUpdate(time, delta, ...args) {
       const result = originalUpdate.apply(this, [time, delta, ...args]);
 
@@ -204,7 +183,7 @@ if (!window.__relayMobileBlackScreenFix) {
 
       return result;
     };
-    RunnerScene.prototype.__relayPlayerMovementHotfixV5 = true;
+    RunnerScene.prototype.__relayPlayerMovementHotfixV6 = true;
   }
 
   let lastSurfaceWidth = 0;
