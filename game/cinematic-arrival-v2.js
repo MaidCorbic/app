@@ -9,8 +9,9 @@ import './cinematic-arrival-v2.css';
     const splash = document.getElementById('relaySplash');
     if (!splash) return;
 
-    splash.classList.add('cinematic-arrival');
-    splash.setAttribute('aria-busy', 'true');
+  splash.classList.add('cinematic-arrival');
+splash.setAttribute('data-arrival-mode', 'relay');
+splash.setAttribute('aria-busy', 'true');
 
     const ui = splash.querySelector('.relay-splash-ui');
     const label = ui?.querySelector('.relay-splash-status');
@@ -21,11 +22,12 @@ import './cinematic-arrival-v2.css';
 
     const signal = document.createElement('div');
     signal.className = 'arrival-signal';
-    signal.innerHTML = '<i></i><i></i><i></i><span>SYNC</span>';
+signal.setAttribute('aria-label', 'Relay synchronization');
+signal.innerHTML = '<i></i><i></i><i></i><span>RELAY LINK</span>';
 
     const particles = document.createElement('div');
     particles.className = 'arrival-particles';
-    particles.innerHTML = '<i></i>'.repeat(10);
+particles.innerHTML = '<i></i>'.repeat(16);
 
     splash.append(signal, particles);
 
@@ -41,13 +43,14 @@ import './cinematic-arrival-v2.css';
     let progress = 0;
 
     const stateProgress = () => 25 * Number(imageReady) + 25 * Number(domReady) + 25 * Number(pageReady) + 25 * Number(engineReady);
-    const statusFor = p => p >= 100 ? 'READY' : p >= 75 ? 'PREPARING HOME' : p >= 50 ? 'CONNECTING WORLD' : p >= 25 ? 'LOADING GAME SYSTEMS' : 'INITIALIZING RELAY';
+    const statusFor = p => p >= 100 ? 'RELAY ONLINE' : p >= 75 ? 'HOME SYSTEMS READY' : p >= 50 ? 'WORLD NETWORK SYNCING' : p >= 25 ? 'GAME SYSTEMS LOADING' : 'RELAY CORE INITIALIZING';
 
     const setProgress = value => {
       progress = Math.max(progress, Math.min(100, Math.round(value)));
-      bar.style.width = `${progress}%`;
-      percent.textContent = `${progress}%`;
-      label.textContent = statusFor(progress);
+ bar.style.width = `${progress}%`;
+bar.setAttribute('aria-valuenow', String(progress));
+percent.textContent = `${progress}%`;
+label.textContent = statusFor(progress);
     };
 
     const release = reason => {
@@ -91,7 +94,7 @@ import './cinematic-arrival-v2.css';
 
     if (image) {
       if (!imageReady) image.addEventListener('load', () => { imageReady = true; tick(); }, { once: true });
-      image.addEventListener('error', () => { label.textContent = 'SAFE MODE'; setProgress(25); }, { once: true });
+      image.addEventListener('error', () => { label.textContent = 'RELAY SAFE MODE'; setProgress(25); }, { once: true });
     }
 
     if (!domReady) document.addEventListener('DOMContentLoaded', () => { domReady = true; tick(); }, { once: true });
