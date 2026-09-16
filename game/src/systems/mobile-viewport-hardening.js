@@ -1,4 +1,4 @@
-// MOBILE VIEWPORT HARDENING V3
+// MOBILE VIEWPORT HARDENING V4
 //
 // Responsibility:
 // - mobile/touch detection
@@ -8,21 +8,14 @@
 // - settled viewport event
 // - mobile splash fail-safe
 //
-// This file does NOT:
-// - own joystick input
-// - own mobile action buttons
-// - change player physics
-// - change velocity / acceleration / gravity
-// - resize the Phaser canvas directly
-//
-// Mobile input owner:
-//   mobile-input-single-owner-v1.js
-//
-// Gameplay authority:
-//   RunnerScene.js
-//
-// Canvas scaling authority:
-//   mobile-scale-policy.js
+// IMPORTANT:
+// - Never dispatch a synthetic window.resize event.
+// - Never create a resize feedback loop.
+// - Do not resize the Phaser canvas directly.
+// - Mobile gameplay input remains owned by
+//   mobile-input-single-owner-v1.js.
+
+'use strict';
 
 
 /* =========================================================
@@ -41,7 +34,11 @@ const isMobileDevice = () => {
       navigator.userAgent || ''
     );
 
-  return coarsePointer || touchPoints || mobileUserAgent;
+  return (
+    coarsePointer ||
+    touchPoints ||
+    mobileUserAgent
+  );
 };
 
 
@@ -53,10 +50,6 @@ const getViewport = () => {
   const root = document.documentElement;
   const vv = window.visualViewport;
 
-  /*
-   * Prefer visualViewport when available.
-   * Fall back to the normal layout viewport.
-   */
   const width = Math.max(
     1,
     Math.round(
@@ -143,14 +136,14 @@ if (isMobileDevice()) {
   let raf1 = 0;
   let raf2 = 0;
 
-  let syncing = false;
   let destroyed = false;
-
   let lastKey = '';
 
-  /*
-   * Keep the current viewport state in one place.
-   */
+
+  /* ---------------------------------------------------------
+     VIEWPORT KEY
+     --------------------------------------------------------- */
+
   const getViewportKey = ({
     width,
     height,
@@ -160,13 +153,16 @@ if (isMobileDevice()) {
   };
 
 
-  /*
-   * Apply a settled viewport state.
-   */
+  /* ---------------------------------------------------------
+     APPLY VIEWPORT
+     --------------------------------------------------------- */
+
   const applyViewport = (
     reason = 'resize'
   ) => {
-    if (destroyed) return;
+    if (destroyed) {
+      return;
+    }
 
     const viewport =
       getViewport();
@@ -181,12 +177,10 @@ if (isMobileDevice()) {
       getViewportKey(viewport);
 
     /*
-     * Prevent unnecessary resize cycles.
+     * Do nothing if the viewport has
+     * not actually changed.
      */
-    if (
-      key === lastKey &&
-      reason !== 'orientationchange'
-    ) {
+    if (key === lastKey) {
       return;
     }
 
@@ -215,29 +209,19 @@ if (isMobileDevice()) {
     root.dataset.relayOrientation =
       orientation;
 
-
     /*
-     * Notify existing systems that
-     * the viewport has settled.
+     * IMPORTANT:
+     *
+     * Do NOT dispatch window.resize here.
+     *
+     * The previous implementation did:
+     *
+     *   window.dispatchEvent(new Event('resize'))
+     *
+     * That can feed the viewport controller back
+     * into itself through other resize listeners.
      */
-    syncing = true;
 
-    window.dispatchEvent(
-      new Event('resize')
-    );
-
-    /*
-     * Release the resize guard on
-     * the next animation frame.
-     */
-    requestAnimationFrame(() => {
-      syncing = false;
-    });
-
-
-    /*
-     * Project-specific viewport event.
-     */
     document.dispatchEvent(
       new CustomEvent(
         'relay:viewport-settled',
@@ -254,13 +238,14 @@ if (isMobileDevice()) {
   };
 
 
-  /*
-   * Debounced viewport update.
-   */
+  /* ---------------------------------------------------------
+     DEBOUNCED VIEWPORT UPDATE
+     * --------------------------------------------------------- */
+
   const scheduleViewportSync = (
     reason = 'resize'
   ) => {
-    if (destroyed || syncing) {
+    if (destroyed) {
       return;
     }
 
@@ -270,7 +255,15 @@ if (isMobileDevice()) {
     cancelAnimationFrame(raf2);
 
     timer = window.setTimeout(() => {
+      if (destroyed) {
+        return;
+      }
+
       raf1 = requestAnimationFrame(() => {
+        if (destroyed) {
+          return;
+        }
+
         raf2 = requestAnimationFrame(() => {
           applyViewport(reason);
         });
@@ -279,13 +272,20 @@ if (isMobileDevice()) {
   };
 
 
+  /* ---------------------------------------------------------
+     INITIAL SYNCHRONOUS MEASUREMENT
+     --------------------------------------------------------- */
+
   /*
-   * Initial synchronous measurement.
+   * Establish CSS variables immediately.
    *
-   * This prevents the first mobile layout
-   * from using stale viewport variables.
+   * This happens before the first settled event.
    */
-  syncViewportNow();
+  const initialViewport =
+    syncViewportNow();
+
+  lastKey =
+    getViewportKey(initialViewport);
 
 
   /* ---------------------------------------------------------
@@ -299,7 +299,9 @@ if (isMobileDevice()) {
         'orientationchange'
       );
     },
-    { passive: true }
+    {
+      passive: true
+    }
   );
 
 
@@ -310,17 +312,13 @@ if (isMobileDevice()) {
   window.addEventListener(
     'resize',
     () => {
-      /*
-       * Ignore the synthetic resize generated
-       * by applyViewport().
-       */
-      if (syncing) return;
-
       scheduleViewportSync(
         'resize'
       );
     },
-    { passive: true }
+    {
+      passive: true
+    }
   );
 
 
@@ -336,7 +334,9 @@ if (isMobileDevice()) {
           'visualViewport.resize'
         );
       },
-      { passive: true }
+      {
+        passive: true
+      }
     );
   }
 
@@ -352,7 +352,9 @@ if (isMobileDevice()) {
         'pageshow'
       );
     },
-    { passive: true }
+    {
+      passive: true
+    }
   );
 
 
@@ -373,7 +375,9 @@ if (isMobileDevice()) {
     document.addEventListener(
       'DOMContentLoaded',
       initialSync,
-      { once: true }
+      {
+        once: true
+      }
     );
   } else {
     initialSync();
@@ -384,25 +388,6 @@ if (isMobileDevice()) {
 /* =========================================================
    MOBILE SPLASH FAIL-SAFE
    ========================================================= */
-
-/*
- * splash-loader-v2.js remains the
- * normal splash owner.
- *
- * This is ONLY a recovery mechanism.
- *
- * Conditions:
- *
- *   mobile device
- *   +
- *   splash exists
- *   +
- *   real Phaser canvas exists
- *   +
- *   minimum splash time elapsed
- *
- * Then the splash is safely released.
- */
 
 (() => {
   if (!isMobileDevice()) {
@@ -464,24 +449,18 @@ if (isMobileDevice()) {
     const canvas =
       findPhaserCanvas();
 
-
     /*
-     * Never hide the splash unless
+     * Never remove the splash until
      * Phaser has actually mounted.
      */
     if (!splash || !canvas) {
       return false;
     }
 
-
     const elapsed =
       performance.now() -
       bootStarted;
 
-
-    /*
-     * Preserve minimum splash time.
-     */
     if (
       elapsed <
       MIN_SPLASH_MS
@@ -489,52 +468,26 @@ if (isMobileDevice()) {
       return false;
     }
 
-
     closed = true;
 
-
-    /*
-     * Accessibility state.
-     */
     splash.setAttribute(
       'aria-busy',
       'false'
     );
 
-
-    /*
-     * Debug information.
-     */
     splash.dataset.relaySplashFailOpen =
       reason;
 
-
-    /*
-     * Start the normal visual
-     * hide transition.
-     */
     splash.classList.add(
       'is-hidden'
     );
 
-
-    /*
-     * Cancel polling.
-     */
     window.clearTimeout(
       timer
     );
 
-
-    /*
-     * Remove after transition.
-     */
     timer = window.setTimeout(
       () => {
-        /*
-         * Make sure the same splash
-         * element is still in the DOM.
-         */
         if (
           splash.isConnected
         ) {
@@ -543,7 +496,6 @@ if (isMobileDevice()) {
       },
       SPLASH_REMOVE_DELAY
     );
-
 
     return true;
   };
@@ -562,10 +514,11 @@ if (isMobileDevice()) {
       closeStuckSplash();
 
     if (!closedNow) {
-      timer = window.setTimeout(
-        checkSplash,
-        CHECK_INTERVAL
-      );
+      timer =
+        window.setTimeout(
+          checkSplash,
+          CHECK_INTERVAL
+        );
     }
   };
 
@@ -576,8 +529,9 @@ if (isMobileDevice()) {
 
   const startSplashSafetyNet = () => {
     /*
-     * Refresh viewport before
-     * starting splash checks.
+     * Refresh CSS viewport state.
+     *
+     * This does NOT emit resize.
      */
     syncViewportNow();
 
@@ -585,10 +539,11 @@ if (isMobileDevice()) {
       timer
     );
 
-    timer = window.setTimeout(
-      checkSplash,
-      MIN_SPLASH_MS
-    );
+    timer =
+      window.setTimeout(
+        checkSplash,
+        MIN_SPLASH_MS
+      );
   };
 
 
@@ -599,7 +554,9 @@ if (isMobileDevice()) {
     document.addEventListener(
       'DOMContentLoaded',
       startSplashSafetyNet,
-      { once: true }
+      {
+        once: true
+      }
     );
   } else {
     startSplashSafetyNet();
