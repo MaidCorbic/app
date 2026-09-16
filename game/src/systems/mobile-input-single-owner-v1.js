@@ -1,5 +1,13 @@
-// MOBILE INPUT SINGLE OWNER V12
-// One canonical touch owner for movement + gameplay actions.
+// MOBILE INPUT SINGLE OWNER V13
+// Canonical mobile input owner.
+// Movement is controlled directly from the gameplay screen.
+// No virtual joystick is used.
+//
+// Contract:
+// - Full-screen touch movement on mobile.
+// - Existing mobile action buttons remain functional.
+// - PAUSE / OPTIONS are excluded from gameplay touch input.
+// - Desktop keyboard input remains untouched.
 
 const ACTION_KEYS = Object.freeze({
   jump: [32, ' ', 'Space'],
@@ -10,14 +18,16 @@ const ACTION_KEYS = Object.freeze({
   gadget1: [51, '3', 'Digit3'],
 });
 
+const MOVE_KEYS = Object.freeze({
+  left: [65, 'a', 'KeyA'],
+  right: [68, 'd', 'KeyD'],
+});
+
 const isTouchDevice = () =>
   Number(navigator.maxTouchPoints || 0) > 0 ||
   'ontouchstart' in window ||
   window.matchMedia?.('(pointer: coarse)').matches === true ||
   window.matchMedia?.('(hover: none)').matches === true;
-
-const clamp = (value, min, max) =>
-  Math.max(min, Math.min(max, value));
 
 const createKeyEvent = (code, key, type, keyCode) => {
   const event = new KeyboardEvent(type, {
@@ -38,7 +48,7 @@ const createKeyEvent = (code, key, type, keyCode) => {
         get: () => value,
       });
     } catch {
-      // Older browsers may reject redefining legacy KeyboardEvent fields.
+      // Legacy browsers may reject these properties.
     }
   }
 
@@ -101,7 +111,6 @@ const detachLegacyRunnerInput = (scene) => {
   scene.mobileMoveHandler = null;
 };
 
-
 /* =========================================================
    SCENE CONNECTION
    ========================================================= */
@@ -131,30 +140,88 @@ window.addEventListener(
   }
 );
 
+/* =========================================================
+   PHASER MOVEMENT
+   ========================================================= */
+
+const getScene = () => {
+  const scene = window.__relayRunnerScene;
+
+  if (!scene) {
+    return null;
+  }
+
+  return scene;
+};
+
+const setPhaserDirection = (direction) => {
+  const scene = getScene();
+
+  if (!scene) {
+    return;
+  }
+
+  const left =
+    direction === 'left';
+
+  const right =
+    direction === 'right';
+
+  const keys =
+    scene.keys || {};
+
+  const cursors =
+    scene.cursors || {};
+
+  /*
+   * Keep compatibility with the existing
+   * RunnerScene keyboard-state model.
+   */
+  if (keys.A) {
+    keys.A.isDown = left;
+  }
+
+  if (keys.D) {
+    keys.D.isDown = right;
+  }
+
+  if (cursors.left) {
+    cursors.left.isDown = left;
+  }
+
+  if (cursors.right) {
+    cursors.right.isDown = right;
+  }
+};
 
 /* =========================================================
    INSTALL
    ========================================================= */
 
 const install = () => {
+  const play =
+    document.getElementById('play');
+
   const root =
     document.querySelector(
       '.mobile-controls'
     );
 
-  if (!root) return;
-
-  normalizeActionButtons(root);
+  if (!play || !root) {
+    return;
+  }
 
   if (!isTouchDevice()) {
     return;
   }
 
   if (
-    window.__relayMobileInputSingleOwnerV12
+    window.__relayMobileInputSingleOwnerV13
   ) {
     return;
   }
+
+  normalizeActionButtons(root);
 
   const actionButtons = [];
 
@@ -166,33 +233,25 @@ const install = () => {
       );
     });
 
-  const joystickNode =
-    root.querySelector(
-      '[data-mobile-joystick]'
-    );
-
-  const joystick =
-    joystickNode
-      ? replaceNode(joystickNode)
-      : null;
-
-  const thumb =
-    joystick?.querySelector(
-      '.mobile-joystick-thumb'
-    );
-
-  if (!joystick || !thumb) {
-    return;
-  }
-
-  window.__relayMobileInputSingleOwnerV12 =
+  window.__relayMobileInputSingleOwnerV13 =
     true;
 
   root.dataset.mobileControlsOwner =
-    'single-owner-v12';
+    'single-owner-v13';
+
+  play.dataset.mobileMovementOwner =
+    'touch-screen-v13';
+
+  /*
+   * The gameplay surface owns touch movement.
+   * Browser scrolling/gesture handling must not
+   * interfere with the game surface.
+   */
+  play.style.touchAction = 'none';
+  play.style.webkitUserSelect = 'none';
+  play.style.userSelect = 'none';
 
   attachSceneWhenReady();
-
 
   /* =========================================================
      ACTION BUTTONS
@@ -218,10 +277,6 @@ const install = () => {
     pointers.delete(pointerId);
     pointerActions.delete(pointerId);
 
-    /*
-     * Only release the keyboard action when
-     * no remaining pointer still holds it.
-     */
     if (pointers.size === 0) {
       actionPointers.delete(action);
 
@@ -278,6 +333,7 @@ const install = () => {
 
         if (!pointers) {
           pointers = new Set();
+
           actionPointers.set(
             action,
             pointers
@@ -350,7 +406,6 @@ const install = () => {
     );
   });
 
-
   const releaseAllActions = () => {
     for (
       const [
@@ -386,321 +441,266 @@ const install = () => {
     );
   };
 
-
   /* =========================================================
-     JOYSTICK
+     FULL SCREEN TOUCH MOVEMENT
      ========================================================= */
 
-  const maxDrag = 44;
-  const deadzone = 7;
+  let movementPointerId = null;
+  let movementDirection = null;
 
-  let joystickPointerId = null;
-  let direction = null;
+  let startX = 0;
+  let startY = 0;
 
+  const TAP_THRESHOLD = 18;
+  const SWIPE_THRESHOLD = 28;
 
-  const getScene = () => {
-    const scene =
-      window.__relayRunnerScene;
-
-    if (
-      !scene ||
-      !scene.input?.keyboard
-    ) {
-      return null;
+  const isExcludedTarget = (target) => {
+    if (!(target instanceof Element)) {
+      return false;
     }
-
-    return scene;
-  };
-
-
-  const setPhaserDirection = (
-    next
-  ) => {
-    const scene =
-      getScene();
-
-    if (!scene) {
-      return;
-    }
-
-    const left =
-      next === 'left';
-
-    const right =
-      next === 'right';
-
-    const keys =
-      scene.keys || {};
-
-    const cursors =
-      scene.cursors || {};
 
     /*
-     * Preserve compatibility with existing
-     * Phaser keyboard state.
+     * These controls must never become movement input.
      */
-    if (keys.A) {
-      keys.A.isDown = left;
-    }
-
-    if (keys.D) {
-      keys.D.isDown = right;
-    }
-
-    if (cursors.left) {
-      cursors.left.isDown = left;
-    }
-
-    if (cursors.right) {
-      cursors.right.isDown = right;
-    }
+    return Boolean(
+      target.closest(
+        [
+          '[data-mobile-action]',
+          '#pause',
+          '#pauseMenu',
+          '#titlePanel',
+          '#relayInfoPanel',
+          '.overlay',
+          'button',
+          'a',
+          'input',
+          'select',
+          'textarea',
+        ].join(',')
+      )
+    );
   };
 
-
-  const setDirection = (
-    next
-  ) => {
-    if (next === direction) {
+  const setDirection = (next) => {
+    if (next === movementDirection) {
       setPhaserDirection(next);
       return;
     }
 
-    /*
-     * Release the previous synthetic key.
-     */
-    if (direction === 'left') {
+    if (
+      movementDirection === 'left'
+    ) {
       emitKeyboard(
-        [65, 'a', 'KeyA'],
+        MOVE_KEYS.left,
         'keyup'
       );
     }
 
-    if (direction === 'right') {
+    if (
+      movementDirection === 'right'
+    ) {
       emitKeyboard(
-        [68, 'd', 'KeyD'],
+        MOVE_KEYS.right,
         'keyup'
       );
     }
 
+    movementDirection = next;
 
-    direction = next;
-
-
-    /*
-     * Press the new synthetic key.
-     */
     if (next === 'left') {
       emitKeyboard(
-        [65, 'a', 'KeyA'],
+        MOVE_KEYS.left,
         'keydown'
       );
     }
 
     if (next === 'right') {
       emitKeyboard(
-        [68, 'd', 'KeyD'],
+        MOVE_KEYS.right,
         'keydown'
       );
     }
 
-
-    setPhaserDirection(
-      next
-    );
+    setPhaserDirection(next);
   };
 
-
-  const resetJoystick = () => {
+  const resetMovement = () => {
     setDirection(null);
 
-    const scene =
-      window.__relayRunnerScene;
-
-    if (scene) {
-      setPhaserDirection(null);
-    }
-
-    joystickPointerId =
-      null;
-
-    joystick.classList.remove(
-      'is-active'
-    );
-
-    thumb.style.transform =
-      'translate(0, 0)';
+    movementPointerId = null;
+    startX = 0;
+    startY = 0;
   };
 
-
-  const moveJoystick = (
-    clientX,
-    clientY
-  ) => {
-    const rect =
-      joystick.getBoundingClientRect();
-
-    const centerX =
-      rect.left +
-      rect.width / 2;
-
-    const centerY =
-      rect.top +
-      rect.height / 2;
-
-    const dx =
-      clientX - centerX;
-
-    const dy =
-      clientY - centerY;
-
-    const rawDistance =
-      Math.hypot(
-        dx,
-        dy
-      );
-
-    const distance =
-      Math.min(
-        rawDistance,
-        maxDrag
-      );
-
-    const angle =
-      Math.atan2(
-        dy,
-        dx
-      );
-
-    const thumbX =
-      clamp(
-        Math.cos(angle) *
-          distance,
-        -maxDrag,
-        maxDrag
-      );
-
-    const thumbY =
-      clamp(
-        Math.sin(angle) *
-          distance,
-        -maxDrag,
-        maxDrag
-      );
-
-    thumb.style.transform =
-      `translate(${thumbX.toFixed(1)}px, ${thumbY.toFixed(1)}px)`;
-
+  const directionFromScreen = (clientX) => {
+    const width =
+      window.innerWidth || 1;
 
     /*
-     * Horizontal movement remains dominant
-     * because this is a side-scrolling runner.
+     * Invisible split:
+     *
+     * left  half -> LEFT
+     * right half -> RIGHT
      */
-    if (
-      Math.abs(dx) <
-      deadzone
-    ) {
-      setDirection(null);
-      return;
-    }
-
-    setDirection(
-      dx < 0
-        ? 'left'
-        : 'right'
-    );
+    return clientX < width / 2
+      ? 'left'
+      : 'right';
   };
 
-
-  joystick.addEventListener(
+  play.addEventListener(
     'pointerdown',
     (event) => {
-      event.preventDefault();
-      event.stopPropagation();
+      if (!isTouchDevice()) {
+        return;
+      }
 
       if (
-        joystickPointerId !== null
+        event.pointerType !== 'touch'
       ) {
         return;
       }
 
-      joystickPointerId =
+      if (
+        isExcludedTarget(
+          event.target
+        )
+      ) {
+        return;
+      }
+
+      if (
+        movementPointerId !== null
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      movementPointerId =
         event.pointerId;
 
-      joystick.setPointerCapture?.(
+      startX =
+        event.clientX;
+
+      startY =
+        event.clientY;
+
+      play.setPointerCapture?.(
         event.pointerId
       );
 
-      joystick.classList.add(
-        'is-active'
-      );
-
-      moveJoystick(
-        event.clientX,
-        event.clientY
+      /*
+       * Immediate tap movement:
+       * touch left half = LEFT
+       * touch right half = RIGHT
+       */
+      setDirection(
+        directionFromScreen(
+          event.clientX
+        )
       );
     },
     { passive: false }
   );
 
-
-  joystick.addEventListener(
+  play.addEventListener(
     'pointermove',
     (event) => {
       if (
         event.pointerId !==
-        joystickPointerId
+        movementPointerId
       ) {
         return;
       }
 
       event.preventDefault();
 
-      moveJoystick(
-        event.clientX,
-        event.clientY
-      );
+      const dx =
+        event.clientX -
+        startX;
+
+      const dy =
+        event.clientY -
+        startY;
+
+      const horizontalDistance =
+        Math.abs(dx);
+
+      const verticalDistance =
+        Math.abs(dy);
+
+      /*
+       * Horizontal swipe has priority.
+       */
+      if (
+        horizontalDistance >=
+          SWIPE_THRESHOLD &&
+        horizontalDistance >=
+          verticalDistance
+      ) {
+        setDirection(
+          dx < 0
+            ? 'left'
+            : 'right'
+        );
+
+        return;
+      }
+
+      /*
+       * Small movement remains controlled
+       * by the side of the screen that was touched.
+       */
+      if (
+        horizontalDistance <
+          TAP_THRESHOLD &&
+        verticalDistance <
+          TAP_THRESHOLD
+      ) {
+        setDirection(
+          directionFromScreen(
+            startX
+          )
+        );
+      }
     },
     { passive: false }
   );
 
+  const endMovement = (event) => {
+    if (
+      event &&
+      event.pointerId !==
+        movementPointerId
+    ) {
+      return;
+    }
 
-  const endJoystick =
-    (event) => {
-      if (
-        event &&
-        event.pointerId !==
-          joystickPointerId
-      ) {
-        return;
-      }
+    resetMovement();
+  };
 
-      resetJoystick();
-    };
-
-
-  joystick.addEventListener(
+  play.addEventListener(
     'pointerup',
-    endJoystick
+    endMovement
   );
 
-  joystick.addEventListener(
+  play.addEventListener(
     'pointercancel',
-    endJoystick
+    endMovement
   );
 
-  joystick.addEventListener(
+  play.addEventListener(
     'lostpointercapture',
-    endJoystick
+    endMovement
   );
-
 
   /* =========================================================
-     GLOBAL SAFETY RELEASES
+     GLOBAL SAFETY
      ========================================================= */
 
   const releaseEverything = () => {
     releaseAllActions();
-    resetJoystick();
+    resetMovement();
   };
 
   window.addEventListener(
@@ -723,7 +723,6 @@ const install = () => {
   );
 };
 
-
 /* =========================================================
    BOOT
    ========================================================= */
@@ -739,4 +738,4 @@ if (
   );
 } else {
   install();
-      }
+}
