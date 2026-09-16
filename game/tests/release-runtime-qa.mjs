@@ -120,7 +120,6 @@ async function runMobileViewport(browser, viewport) {
       pointerCoarse: matchMedia('(pointer:coarse)').matches,
       touchPoints: navigator.maxTouchPoints,
       touchControls: document.querySelectorAll('[data-mobile-action]').length,
-      joystickCount: document.querySelectorAll('[data-mobile-joystick]').length,
       pauseVisible: !document.querySelector('#pauseMenu')?.classList.contains('hidden'),
       mobileControlsVisible: (() => {
         const el = document.querySelector('.mobile-controls');
@@ -133,7 +132,6 @@ async function runMobileViewport(browser, viewport) {
     }));
 
     assert.equal(initial.touchControls, 6, `Expected exactly 6 mobile action buttons at ${viewport.width}x${viewport.height}`);
-    assert.equal(initial.joystickCount, 1, `Expected exactly 1 movement joystick at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.pointerCoarse, true, `Release QA requires a coarse primary pointer at ${viewport.width}x${viewport.height}`);
     assert(initial.touchPoints > 0, `Release QA requires touch points at ${viewport.width}x${viewport.height}`);
     assert(
@@ -158,10 +156,7 @@ async function runMobileViewport(browser, viewport) {
         const r = button.getBoundingClientRect();
         return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
       }),
-      joystick: (() => {
-        const r = document.querySelector('[data-mobile-joystick]')?.getBoundingClientRect();
-        return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height } : null;
-      })(),
+    
     }));
 
     controls.buttons.forEach((rect, index) => {
@@ -169,8 +164,51 @@ async function runMobileViewport(browser, viewport) {
       assert(rect.left >= -1 && rect.right <= controls.viewport.width + 1, `Mobile action ${index + 1} leaves viewport at ${viewport.width}x${viewport.height}`);
       assert(rect.bottom <= controls.viewport.height + 1, `Mobile action ${index + 1} falls below viewport at ${viewport.width}x${viewport.height}`);
     });
-    assert(controls.joystick, `Missing movement joystick at ${viewport.width}x${viewport.height}`);
-    assertNoPairwiseOverlap(controls.buttons, `Mobile action layout ${viewport.width}x${viewport.height}`);
+  const touchSurface = await page.evaluate(() => {
+  const el = document.querySelector('#play');
+
+  if (!el) {
+    return null;
+  }
+
+  const rect = el.getBoundingClientRect();
+  const style = getComputedStyle(el);
+
+  return {
+    width: rect.width,
+    height: rect.height,
+    touchAction: style.touchAction,
+    movementOwner: el.dataset.mobileMovementOwner || '',
+  };
+});
+
+assert(
+  touchSurface,
+  `Missing gameplay touch surface at ${viewport.width}x${viewport.height}`,
+);
+
+assert(
+  touchSurface.width > 0 &&
+  touchSurface.height > 0,
+  `Gameplay touch surface has zero size at ${viewport.width}x${viewport.height}`,
+);
+
+assert.equal(
+  touchSurface.touchAction,
+  'none',
+  `Gameplay touch surface must use touch-action:none at ${viewport.width}x${viewport.height}`,
+);
+
+assert.equal(
+  touchSurface.movementOwner,
+  'touch-screen-v13',
+  `Gameplay touch surface owner is incorrect at ${viewport.width}x${viewport.height}`,
+);
+
+assertNoPairwiseOverlap(
+  controls.buttons,
+  `Mobile action layout ${viewport.width}x${viewport.height}`,
+);
 
     // On mobile, the canonical Pause control is #mobilePauseButton. This keeps the
     // runtime QA aligned with the actual mobile HUD ownership instead of the legacy #pause node.
