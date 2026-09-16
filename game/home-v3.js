@@ -33,10 +33,31 @@
 
       const state = loadState();
 
-      const xp = Number(state.xp) || 0;
-      const signals = Number(state.signals) || 0;
-      const totalRuns = Number(state.totalRuns) || 0;
-      const bestRun = Number(state.bestRun) || 0;
+   const xp = Number(state.xp) || 0;
+const signals = Number(state.signals) || 0;
+const totalRuns = Number(state.totalRuns) || 0;
+const bestRun = Number(state.bestRun) || 0;
+
+const lastRunTime =
+        state.lastRun?.time ??
+        state.lastRunTime ??
+        state.lastMissionTime ??
+        null;
+
+      const lastRunSignals =
+        state.lastRun?.signals ??
+        state.lastMissionProgress?.signals ??
+        null;
+
+      const lastRunScore =
+        state.lastRun?.score ??
+        state.lastScore ??
+        null;
+
+      const lastRunRating =
+        state.lastRun?.rating ??
+        state.lastRating ??
+        null;
 
       const level = getLevelProgress(xp);
       const rank = getCourierRank(xp);
@@ -73,6 +94,46 @@
       const bestRatingEl = $('homeV4BestRating');
       const signalValueEl = $('homeV4SignalValue');
       const signalFillEl = $('homeV4SignalFill');
+            const lastRunFeedEl = $('homeV5LastRunFeed');
+      const runTimeEl = $('homeV5RunTime');
+      const runSignalsEl = $('homeV5RunSignals');
+      const runScoreEl = $('homeV5RunScore');
+      const runRatingEl = $('homeV5RunRating');
+
+    if (lastRunFeedEl) {
+  lastRunFeedEl.textContent =
+    totalRuns > 0
+      ? 'LAST RUN // RECORDED'
+      : 'LAST RUN // READY';
+}
+
+      if (runTimeEl) {
+        runTimeEl.textContent =
+          lastRunTime != null
+            ? String(lastRunTime)
+            : '—';
+      }
+
+      if (runSignalsEl) {
+        runSignalsEl.textContent =
+          lastRunSignals != null
+            ? String(lastRunSignals)
+            : '—';
+      }
+
+      if (runScoreEl) {
+        runScoreEl.textContent =
+          lastRunScore != null
+            ? Number(lastRunScore).toLocaleString()
+            : '—';
+      }
+
+      if (runRatingEl) {
+        runRatingEl.textContent =
+          lastRunRating != null && Number(lastRunRating) > 0
+            ? '★'.repeat(Math.min(3, Number(lastRunRating)))
+            : '—';
+      }
 
       if (rankEl) {
         rankEl.textContent =
@@ -451,10 +512,21 @@ const missionSignalTarget =
       <div class="home-v4-art"></div>
       <div class="home-v4-sky"></div>
       <div class="home-v4-vignette"></div>
-      <div class="home-v4-grid"></div>
+          <div class="home-v4-grid"></div>
       <div class="home-v4-scan"></div>
       <div class="home-v4-signal"></div>
       <div class="home-v4-float-line"></div>
+
+      <div class="home-v5-network" aria-hidden="true">
+        <span class="home-v5-node home-v5-node-a"></span>
+        <span class="home-v5-node home-v5-node-b"></span>
+        <span class="home-v5-node home-v5-node-c"></span>
+        <span class="home-v5-node home-v5-node-d"></span>
+
+        <span class="home-v5-link home-v5-link-a"></span>
+        <span class="home-v5-link home-v5-link-b"></span>
+        <span class="home-v5-link home-v5-link-c"></span>
+      </div>
     `;
 
     const shell = document.createElement('div');
@@ -510,19 +582,29 @@ const missionSignalTarget =
             class="home-v4-actions"
             aria-label="Main menu"
           >
-            <button
+             <button
               id="start"
-              class="home-v4-primary"
+              class="home-v4-primary home-v5-start"
               type="button"
+              aria-label="Start Run"
             >
+              <span
+                class="home-v5-start-scan"
+                aria-hidden="true"
+              ></span>
+
               <span class="home-v4-primary-content">
-                <span>START RUN</span>
+                <span class="home-v5-start-label">
+                  START RUN
+                </span>
+
                 <span
                   class="home-v4-arrow-key"
                   aria-hidden="true"
                 >
                   ENTER
                 </span>
+
                 <span
                   class="home-v4-primary-arrow"
                   aria-hidden="true"
@@ -530,8 +612,15 @@ const missionSignalTarget =
                   →
                 </span>
               </span>
-            </button>
 
+              <span
+                class="home-v5-start-ready"
+                aria-hidden="true"
+              >
+                READY
+              </span>
+            </button>
+            
             <button
               id="continue"
               class="home-v4-secondary hidden"
@@ -542,16 +631,72 @@ const missionSignalTarget =
             </button>
           </div>
 
-          <p class="home-v4-micro">
-            <b>DEPLOYMENT READY</b>
-            · PRESS ENTER TO BEGIN
-          </p>
+       <p class="home-v4-micro">
+  <b>DEPLOYMENT READY</b>
+  · PRESS ENTER TO BEGIN
+</p>
+
+<div class="home-v5-relay-status" aria-label="Relay deployment status">
+  <div class="home-v5-relay-status-head">
+    <span class="home-v5-relay-status-title">
+      &gt; RELAY STATUS
+    </span>
+
+    <span class="home-v5-relay-status-live">
+      <i aria-hidden="true"></i>
+      ONLINE
+    </span>
+  </div>
+
+  <div class="home-v5-relay-status-track" aria-hidden="true">
+    <span></span>
+  </div>
+
+  <div class="home-v5-relay-status-meta">
+    <span>
+      <small>CHANNEL</small>
+      <b>01</b>
+    </span>
+
+    <span>
+      <small>LINK</small>
+      <b>SECURE</b>
+    </span>
+
+    <span>
+      <small>STATUS</small>
+      <b>READY</b>
+    </span>
+  </div>
+</div>
         </section>
 
-        <section
+             <section
           class="home-v4-mission-wrap"
           aria-label="Current mission"
         >
+
+          <aside class="home-v5-live-feed" aria-label="Relay network status">
+            <div class="home-v5-panel-head">
+              <span>RELAY NETWORK</span>
+              <b><i></i> LIVE</b>
+            </div>
+
+            <div class="home-v5-feed-line">
+              <span>&gt;</span>
+              <strong>SIGNAL STABLE</strong>
+            </div>
+
+            <div class="home-v5-feed-line">
+              <span>&gt;</span>
+              <strong>03 NODES ONLINE</strong>
+            </div>
+
+            <div class="home-v5-feed-line">
+              <span>&gt;</span>
+              <strong id="homeV5LastRunFeed">LAST RUN // READY</strong>
+            </div>
+          </aside>
           <article class="home-v4-mission">
             <div class="home-v4-mission-head">
               <span class="home-v4-mission-label">
@@ -587,6 +732,35 @@ const missionSignalTarget =
                   id="homeV4SignalFill"
                   class="home-v4-progress-fill"
                 ></div>
+              </div>
+            </div>
+
+                    <div class="home-v5-last-run">
+              <div class="home-v5-last-run-head">
+                <span>LAST RUN</span>
+                <b>TELEMETRY</b>
+              </div>
+
+              <div class="home-v5-telemetry-grid">
+                <div>
+                  <small>TIME</small>
+                  <strong id="homeV5RunTime">—</strong>
+                </div>
+
+                <div>
+                  <small>SIGNALS</small>
+                  <strong id="homeV5RunSignals">—</strong>
+                </div>
+
+                <div>
+                  <small>SCORE</small>
+                  <strong id="homeV5RunScore">—</strong>
+                </div>
+
+                <div>
+                  <small>RATING</small>
+                  <strong id="homeV5RunRating">—</strong>
+                </div>
               </div>
             </div>
 
