@@ -61,10 +61,7 @@ if (play && !play.dataset.gameplayCoreV1) {
     button.addEventListener('pointerdown', () => actionPulse(button.dataset.mobileAction), { passive: true });
   });
 
-  const joystick = play.querySelector('[data-mobile-joystick]');
-  joystick?.addEventListener('pointerdown', () => play.classList.add('gameplay-moving'), { passive: true });
-  window.addEventListener('pointerup', () => play.classList.remove('gameplay-moving'), { passive: true });
-  window.addEventListener('pointercancel', () => play.classList.remove('gameplay-moving'), { passive: true });
+
   window.addEventListener('blur', () => { movingKeys = 0; clearPulse(); play.classList.remove('gameplay-moving'); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { movingKeys = 0; clearPulse(); play.classList.remove('gameplay-moving'); } });
 
