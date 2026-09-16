@@ -46,9 +46,9 @@ if (!window.__relayMobileBlackScreenFix) {
    *   E = existing fire + interaction command
    *   Q = sword
    *
-   * Arrow movement remains available as an alias for the existing controls.
-   * Relay Runner is a 2D side-scrolling runner, so W/S project onto the same
-   * horizontal travel axis used by A/D.
+   * Arrow movement remains available through the existing RunnerScene input
+   * owner. The custom movement feel is applied only while WASD is actually
+   * pressed, so it cannot continuously decelerate or fight arrow movement.
    */
 
   if (!window.__relayDesktopKeyboardBridge) {
@@ -84,12 +84,11 @@ if (!window.__relayMobileBlackScreenFix) {
     }, { passive: true });
   }
 
-  // Q is already a canonical RunnerScene sword binding. The bridge above keeps
-  // the key available to the same desktop input state without adding a second
-  // sword owner, which prevents duplicate sword swings.
+  // Q/E already have canonical action bindings in the existing input owner.
+  // The bridge only tracks them; it does not fire duplicate sword/fire actions.
 
   const originalUpdate = RunnerScene.prototype.update;
-  if (!RunnerScene.prototype.__relayPlayerMovementHotfixV6) {
+  if (!RunnerScene.prototype.__relayPlayerMovementHotfixV7) {
     RunnerScene.prototype.update = function relayKeyboardControlUpdate(time, delta, ...args) {
       const result = originalUpdate.apply(this, [time, delta, ...args]);
 
@@ -108,13 +107,13 @@ if (!window.__relayMobileBlackScreenFix) {
         const s = down(keys.S, 'keys');
         const a = down(keys.A, 'keya');
         const d = down(keys.D, 'keyd');
-        const leftArrow = down(cursors.left, 'arrowleft');
-        const rightArrow = down(cursors.right, 'arrowright');
 
-        // Preserve both control sets without allowing opposite aliases to fight.
-        const forward = w || d || rightArrow;
-        const backward = s || a || leftArrow;
+        // WASD owns custom movement feel. Arrow keys stay with the existing
+        // RunnerScene movement owner and are intentionally not re-applied here.
+        const forward = w || d;
+        const backward = s || a;
         const axis = (forward ? 1 : 0) - (backward ? 1 : 0);
+        const hasWASDMovement = axis !== 0;
 
         const dt = Number.isFinite(Number(delta)) && Number(delta) > 0
           ? Math.min(Number(delta), 50)
@@ -134,56 +133,52 @@ if (!window.__relayMobileBlackScreenFix) {
 
         const movementState = this.__relayKeyboardMovementState;
 
-        applyMovementFeel({
-          player,
-          axis,
-          jumpPressed: jumpJustPressed,
-          jumpReleased: jumpJustReleased,
-          now,
-          delta: dt,
-          state: movementState,
-        });
+        // Never pass axis=0 into the feel helper: that would intentionally
+        // decelerate the player every frame and can cause the reported stalls.
+        // Jump is still handled here even when there is no WASD input.
+        if (hasWASDMovement || jumpJustPressed || jumpJustReleased) {
+          applyMovementFeel({
+            player,
+            axis: hasWASDMovement ? axis : 0,
+            jumpPressed: jumpJustPressed,
+            jumpReleased: jumpJustReleased,
+            now,
+            delta: dt,
+            state: movementState,
+          });
+        }
 
-        // Responsive running: prevent an active direction from getting stuck
-        // at an almost-zero velocity after a landing, turn, or competing layer.
-        if (axis !== 0) {
+        // If WASD is actively pressed but another gameplay layer briefly leaves
+        // velocity almost zero, restore a small amount of momentum. This is a
+        // one-time floor, not a second acceleration loop.
+        if (hasWASDMovement) {
           const vx = Number(player.body.velocity.x) || 0;
           if (Math.abs(vx) < 90) player.body.setVelocityX(axis * 145);
         }
 
         /*
-         * JUMP ARC V2
+         * NATURAL JUMP ARC
          *
-         * The initial jump impulse remains centralized in MovementFeel. This
-         * small phase-based shaping adds a softer take-off and stronger fall,
-         * producing a visible game-like arc without replacing RunnerScene
-         * physics or jump state.
+         * Do not manually rewrite velocity.y after the jump impulse. Phaser's
+         * normal gravity is responsible for the rise -> apex -> fall curve.
+         * The previous frame-by-frame Y shaping could make the jump feel like
+         * a vertical snap and could also fight the scene's own air physics.
+         * MovementFeel supplies the single jump impulse, coyote time, buffer,
+         * and jump-cut behavior.
          */
-        if (jumpJustPressed) movementState.jumpStartedAt = now;
-
-        const jumpStartedAt = Number(movementState.jumpStartedAt);
-        const jumpAge = Number.isFinite(jumpStartedAt) ? now - jumpStartedAt : Infinity;
-        const body = player.body;
-        let vy = Number(body.velocity.y) || 0;
-
-        if (Number.isFinite(jumpStartedAt) && jumpAge <= 185 && jumpDown && vy < 0) {
-          vy = Math.max(-850, vy - (165 * dt / 1000));
-          body.setVelocityY(vy);
+        if (jumpJustPressed && !hasWASDMovement) {
+          // Preserve the player's existing horizontal momentum for a jump
+          // instead of forcing a vertical-only movement state.
+          const vx = Number(player.body.velocity.x) || 0;
+          if (Math.abs(vx) > 1) player.body.setVelocityX(vx);
         }
-
-        if (Number.isFinite(jumpStartedAt) && vy > 0) {
-          vy = Math.min(1180, vy + (105 * dt / 1000));
-          body.setVelocityY(vy);
-        }
-
-        if (Number.isFinite(jumpStartedAt) && vy >= 0) movementState.jumpStartedAt = -Infinity;
       } catch (error) {
         console.warn('[Relay Runner] keyboard controls skipped:', error);
       }
 
       return result;
     };
-    RunnerScene.prototype.__relayPlayerMovementHotfixV6 = true;
+    RunnerScene.prototype.__relayPlayerMovementHotfixV7 = true;
   }
 
   let lastSurfaceWidth = 0;
