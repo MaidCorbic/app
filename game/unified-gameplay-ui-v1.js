@@ -193,48 +193,115 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
      UPDATE
   ========================================================= */
 
-  const updateMarkup = () => `
-    <div class="relay-update-terminal">
+const updateMarkup = () => `
+  <div class="relay-update-terminal">
 
-      <div class="relay-update-meta">
-        LIVE CHANNEL · ${safeText(
-          LATEST_UPDATE.version || 'GAMEPLAY'
-        )}
+    <div class="relay-update-terminal-head">
+
+      <div class="relay-update-terminal-brand">
+        <span class="relay-update-terminal-prompt">&gt;</span>
+
+        <div>
+          <strong>RELAY // UPDATE TERMINAL</strong>
+          <small>SYSTEM PATCH INTERFACE</small>
+        </div>
       </div>
 
-      <div class="relay-update-list">
-
-        ${readUpdates().map((item, index) => `
-          <article
-            class="relay-update-item"
-            data-update-index="${index}"
-          >
-
-            <div class="relay-update-item-main">
-
-              <span class="relay-update-item-kicker">
-                ${safeText(item.version || 'LIVE')}
-                ·
-                ${safeText(item.date || '')}
-              </span>
-
-              <strong>
-                ${safeText(item.title || 'SYSTEM UPDATE')}
-              </strong>
-
-              <small>
-                ${safeText(item.detail || '')}
-              </small>
-
-            </div>
-
-          </article>
-        `).join('')}
-
+      <div class="relay-update-terminal-live">
+        <i></i>
+        LIVE
       </div>
 
     </div>
-  `;
+
+    <div class="relay-update-system-line">
+      <span>SYSTEM STATUS</span>
+      <b>OPERATIONAL</b>
+    </div>
+
+    <div class="relay-update-build-grid">
+
+      <div class="relay-update-build-card">
+        <span>BUILD</span>
+        <strong>
+          ${safeText(
+            LATEST_UPDATE.version || 'GAMEPLAY'
+          )}
+        </strong>
+      </div>
+
+      <div class="relay-update-build-card">
+        <span>CHANNEL</span>
+        <strong>STABLE</strong>
+      </div>
+
+      <div class="relay-update-build-card">
+        <span>STATUS</span>
+        <strong class="is-online">
+          ● ONLINE
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="relay-update-section-head">
+      <span>&gt; PATCH NOTES</span>
+      <small>
+        ${readUpdates().length} ENTRIES
+      </small>
+    </div>
+
+    <div class="relay-update-list">
+
+      ${readUpdates().map((item, index) => `
+        <article
+          class="relay-update-item"
+          data-update-index="${index}"
+        >
+
+          <div class="relay-update-index">
+            ${String(index + 1).padStart(2, '0')}
+          </div>
+
+          <div class="relay-update-item-main">
+
+            <span class="relay-update-item-kicker">
+              ${safeText(item.version || 'LIVE')}
+              <b>·</b>
+              ${safeText(item.date || '')}
+            </span>
+
+            <strong>
+              ${safeText(
+                item.title || 'SYSTEM UPDATE'
+              )}
+            </strong>
+
+            <small>
+              ${safeText(item.detail || '')}
+            </small>
+
+          </div>
+
+          <div class="relay-update-item-state">
+            <span>VERIFIED</span>
+            <b>✓</b>
+          </div>
+
+        </article>
+      `).join('')}
+
+    </div>
+
+    <div class="relay-update-console">
+
+      <span>&gt; SYSTEM READY</span>
+      <b>_</b>
+
+    </div>
+
+  </div>
+`;
 
   /* =========================================================
      INFO PANEL
