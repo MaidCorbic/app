@@ -8325,10 +8325,11 @@ this.rawKeyboardDownHandler = event => {
     code !== 'KeyS' &&
     code !== 'KeyD' &&
     code !== 'KeyE' &&
-    code !== 'KeyF' &&
-    code !== 'Space' &&
-    code !== 'ShiftLeft' &&
-    code !== 'ShiftRight'
+code !== 'KeyF' &&
+code !== 'KeyQ' &&
+code !== 'Space' &&
+code !== 'ShiftLeft' &&
+code !== 'ShiftRight'
   ) {
     return;
   }
@@ -8380,9 +8381,10 @@ this.rawKeyboardUpHandler = event => {
     code === 'KeyA' ||
     code === 'KeyS' ||
     code === 'KeyD' ||
-    code === 'KeyE' ||
-    code === 'KeyF' ||
-    code === 'Space' ||
+code === 'KeyE' ||
+code === 'KeyF' ||
+code === 'KeyQ' ||
+code === 'Space' ||
     code === 'ShiftLeft' ||
     code === 'ShiftRight'
   ) {
@@ -33835,8 +33837,9 @@ updateAfkSystem(delta) {
       rawKeyboard.Space ||
       rawKeyboard.ShiftLeft ||
       rawKeyboard.ShiftRight ||
-      rawKeyboard.KeyE ||
-      rawKeyboard.KeyF
+rawKeyboard.KeyE ||
+rawKeyboard.KeyF ||
+rawKeyboard.KeyQ
     );
 
   const mobileMovement =
