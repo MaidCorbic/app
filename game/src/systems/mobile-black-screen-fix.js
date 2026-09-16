@@ -53,20 +53,54 @@ if (!window.__relayMobileBlackScreenFix) {
   /*
    * RUNNER KEYBOARD CONTROL OWNER
    *
-   * Desktop controls:
-   *   W / D = forward/right
-   *   S / A = backward/left
-   *   SPACE = jump
-   *   E = fire + existing interaction systems
+   * Desktop aliases:
+   *   W / D / Right Arrow = forward/right travel
+   *   S / A / Left Arrow  = backward/left travel
+   *   SPACE / Up Arrow    = jump
+   *   E                   = fire + existing interaction systems
    *
-   * Relay Runner is a 2D side-scrolling runner, so W/S are mapped to the
-   * forward/backward horizontal direction while A/D remain left/right.
-   * E is intentionally not replaced: existing interaction/combat listeners
-   * already use the E keyboard event, so one E press can service either the
-   * nearest interaction or the existing fire system.
+   * Relay Runner is a 2D side-scrolling runner. "Forward/backward" therefore
+   * resolve to the horizontal travel axis. W/S are the requested forward /
+   * backward controls, while A/D are the requested left/right controls.
+   * Arrow controls remain available as aliases, so existing players do not
+   * lose the established keyboard scheme.
    */
+
+  // Phaser's keyboard objects are normally enough, but keep a tiny browser
+  // level key-state bridge as a reliability fallback. This prevents another
+  // input owner from replacing scene.keys and makes WASD deterministic on
+  // desktop without changing the mobile input owner.
+  if (!window.__relayDesktopKeyboardBridge) {
+    window.__relayDesktopKeyboardBridge = {
+      down: new Set(),
+      installed: true,
+    };
+
+    const normalize = event => String(event.code || event.key || '').toLowerCase();
+    const ignoredTarget = target => {
+      const tag = String(target?.tagName || '').toLowerCase();
+      return tag === 'input' || tag === 'textarea' || tag === 'select' || target?.isContentEditable === true;
+    };
+
+    window.addEventListener('keydown', event => {
+      if (ignoredTarget(event.target)) return;
+      const code = normalize(event);
+      if (['keyw', 'keys', 'keya', 'keyd', 'space', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'keye'].includes(code)) {
+        window.__relayDesktopKeyboardBridge.down.add(code);
+      }
+    }, true);
+
+    window.addEventListener('keyup', event => {
+      window.__relayDesktopKeyboardBridge.down.delete(normalize(event));
+    }, true);
+
+    window.addEventListener('blur', () => {
+      window.__relayDesktopKeyboardBridge.down.clear();
+    }, { passive: true });
+  }
+
   const originalUpdate = RunnerScene.prototype.update;
-  if (!RunnerScene.prototype.__relayPlayerMovementHotfixV3) {
+  if (!RunnerScene.prototype.__relayPlayerMovementHotfixV4) {
     RunnerScene.prototype.update = function relayKeyboardControlUpdate(time, delta, ...args) {
       const result = originalUpdate.apply(this, [time, delta, ...args]);
 
@@ -78,13 +112,22 @@ if (!window.__relayMobileBlackScreenFix) {
 
         const keys = this.keys || {};
         const cursors = this.cursors || {};
-        const down = key => Boolean(key?.isDown);
+        const bridge = window.__relayDesktopKeyboardBridge?.down;
+        const down = (key, ...codes) => Boolean(key?.isDown) || Boolean(bridge && codes.some(code => bridge.has(code)));
 
-        // W = forward, S = backward, A = left, D = right.
-        // In the current 2D runner world, forward/backward resolve to the
-        // horizontal travel axis; A/D remain the explicit left/right pair.
-        const forward = down(keys.W) || down(keys.D) || down(cursors.right);
-        const backward = down(keys.S) || down(keys.A) || down(cursors.left);
+        // Requested desktop layout + the existing arrow aliases.
+        const w = down(keys.W, 'keyw');
+        const s = down(keys.S, 'keys');
+        const a = down(keys.A, 'keya');
+        const d = down(keys.D, 'keyd');
+        const leftArrow = down(cursors.left, 'arrowleft');
+        const rightArrow = down(cursors.right, 'arrowright');
+
+        // 2D runner travel axis:
+        //   W / D / Right = forward/right
+        //   S / A / Left  = backward/left
+        const forward = w || d || rightArrow;
+        const backward = s || a || leftArrow;
         const axis = (forward ? 1 : 0) - (backward ? 1 : 0);
 
         const dt = Number.isFinite(Number(delta)) && Number(delta) > 0
@@ -92,22 +135,24 @@ if (!window.__relayMobileBlackScreenFix) {
           : 16.67;
         const now = Number.isFinite(Number(time)) ? Number(time) : (this.time?.now || performance.now());
 
-        const spaceDown = down(keys.SPACE);
-        const spaceJustPressed = spaceDown && !this.__relaySpaceWasDown;
-        const spaceJustReleased = !spaceDown && Boolean(this.__relaySpaceWasDown);
-        this.__relaySpaceWasDown = spaceDown;
+        // Space and Up Arrow are both jump. Up Arrow remains an alias for the
+        // existing arrow scheme; Space is the new primary jump key.
+        const spaceDown = down(keys.SPACE, 'space');
+        const upDown = down(cursors.up, 'arrowup');
+        const jumpDown = spaceDown || upDown;
+        const jumpJustPressed = jumpDown && !this.__relayJumpWasDown;
+        const jumpJustReleased = !jumpDown && Boolean(this.__relayJumpWasDown);
+        this.__relayJumpWasDown = jumpDown;
 
         if (!this.__relayKeyboardMovementState) {
           this.__relayKeyboardMovementState = createMovementFeelState(now);
         }
 
-        // Use the existing MovementFeel jump implementation so coyote time,
-        // jump buffering and fall-speed limits stay centralized.
         applyMovementFeel({
           player,
           axis,
-          jumpPressed: spaceJustPressed,
-          jumpReleased: spaceJustReleased,
+          jumpPressed: jumpJustPressed,
+          jumpReleased: jumpJustReleased,
           now,
           delta: dt,
           state: this.__relayKeyboardMovementState,
@@ -118,7 +163,7 @@ if (!window.__relayMobileBlackScreenFix) {
 
       return result;
     };
-    RunnerScene.prototype.__relayPlayerMovementHotfixV3 = true;
+    RunnerScene.prototype.__relayPlayerMovementHotfixV4 = true;
   }
 
   let lastSurfaceWidth = 0;
