@@ -3448,14 +3448,14 @@ this.graphicsSettings = {
   weather:
     this.graphicsLevel >= 1
 };
-this.firstTimeTutorial = firstTimeTutorial;
-
+  
 // ============================================================
-// OPENING CINEMATIC · MISSION 01 FIRST ENTRY ONLY
+// TUTORIAL DISABLED
+// Gameplay starts immediately.
+// No opening tutorial/cinematic may lock movement.
 // ============================================================
-this.cinematicActive =
-  this.mission.id === 'first-delivery' &&
-  firstTimeTutorial;
+this.firstTimeTutorial = false;
+this.cinematicActive = false;
 
 if (
   !this.cinematicActive &&
@@ -8296,13 +8296,22 @@ this.blaster = this.add
   )
   .setDepth(11);
 
-this.cursors =
-  this.input.keyboard.createCursorKeys();
+this.input.keyboard.enabled = true;
 
-this.keys =
-  this.input.keyboard.addKeys(
-    'A,D,C,F,W,S,E,Q,R,X,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
-  );
+this.cursors = this.input.keyboard.createCursorKeys();
+
+this.keys = this.input.keyboard.addKeys(
+  'A,D,C,F,W,S,E,Q,R,X,SPACE,SHIFT,ONE,TWO,THREE,FOUR,ESC'
+);
+
+this.keys.A.enabled = true;
+this.keys.D.enabled = true;
+this.keys.W.enabled = true;
+this.keys.S.enabled = true;
+this.keys.SPACE.enabled = true;
+this.keys.SHIFT.enabled = true;
+this.keys.E.enabled = true;
+this.keys.Q.enabled = true;
 
 this.flightMode = false;
 this.flightSpeed = 420;
