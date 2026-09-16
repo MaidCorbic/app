@@ -455,10 +455,6 @@
     filter:brightness(1.08) !important;
   }
 
-  #play .mobile-joystick{
-    filter:drop-shadow(0 0 18px rgba(120,233,255,.10)) !important;
-  }
-
   #pauseMenu.relay-options-unified .menu-grid{
     grid-template-columns:1fr !important;
   }
