@@ -171,19 +171,43 @@
 .relay-faq-header{
   position:relative;
   z-index:3;
-
   flex:0 0 auto;
 
-  padding:25px 30px 20px;
+  padding:18px 30px 16px;
 
-  border-bottom:1px solid var(--relay-line);
+  border-bottom:1px solid rgba(99,221,255,.10);
 
   background:
     linear-gradient(
       180deg,
-      rgba(8,22,34,.88),
-      rgba(3,10,17,.56)
+      rgba(8,22,34,.92),
+      rgba(3,10,17,.62)
     );
+
+  overflow:hidden;
+}
+
+.relay-faq-header::after{
+  content:"";
+  position:absolute;
+  left:30px;
+  right:30px;
+  bottom:0;
+  height:1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(99,221,255,0),
+      rgba(99,221,255,.42),
+      rgba(255,211,106,.28),
+      rgba(99,221,255,0)
+    );
+
+  box-shadow:
+    0 0 12px rgba(99,221,255,.18);
+
+  pointer-events:none;
 }
 
 /* =========================================================
@@ -278,11 +302,11 @@
     Arial,
     sans-serif;
 
-  font-size:clamp(34px,5vw,58px);
+  font-size:clamp(34px,4.2vw,52px);
   font-weight:900;
 
-  line-height:.98;
-  letter-spacing:-.045em;
+  line-height:.94;
+  letter-spacing:-.04em;
 
   text-shadow:
     0 4px 22px rgba(0,0,0,.45),
@@ -438,7 +462,7 @@
   align-items:center;
   gap:7px;
 
-  padding:9px 30px;
+padding:8px 30px;
 
   border-bottom:1px solid rgba(170,210,225,.075);
 
@@ -1810,3 +1834,67 @@
     transform:scale(1.08);
   }
    }
+
+/* =========================================================
+   FAQ HEADER POLISH — MOBILE
+   ========================================================= */
+
+@media(max-width:780px){
+
+  .relay-faq-header{
+    padding:16px 18px 14px;
+  }
+
+  .relay-faq-header::after{
+    left:18px;
+    right:18px;
+  }
+
+  .relay-faq-heading-row{
+    gap:14px;
+  }
+
+  .relay-info-card h2,
+  .relay-faq-card h2{
+    font-size:clamp(30px,9vw,46px);
+    line-height:.94;
+  }
+
+  .relay-faq-eyebrow{
+    margin-bottom:9px;
+    font-size:8px;
+  }
+
+  .relay-terminal-prompt{
+    padding:7px 18px;
+    font-size:7px;
+  }
+}
+
+@media(max-width:430px){
+
+  .relay-faq-header{
+    padding:14px 14px 12px;
+  }
+
+  .relay-faq-header::after{
+    left:14px;
+    right:14px;
+  }
+
+  .relay-info-card h2,
+  .relay-faq-card h2{
+    font-size:32px;
+    letter-spacing:-.035em;
+  }
+
+  .relay-faq-eyebrow{
+    font-size:7px;
+    letter-spacing:.12em;
+  }
+
+  .relay-terminal-prompt{
+    padding:7px 14px;
+    font-size:6.5px;
+  }
+}
