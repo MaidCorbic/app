@@ -102,6 +102,507 @@
 .relay-ui-key{display:inline-flex;align-items:center;gap:6px;color:#7e919d;font:700 7px/1 "DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace}.relay-ui-key kbd{min-width:28px;padding:6px 7px;border:1px solid rgba(56,189,248,.18);border-bottom-color:rgba(56,189,248,.4);border-radius:5px;background:#071118;color:#c8f1ff;text-align:center;font:900 7px/1 "DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
 .relay-ui-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:4px}.relay-ui-actions .relay-ui-button.primary{color:#031017;border-color:rgba(56,189,248,.9);background:linear-gradient(135deg,#a5edff,#38bdf8);box-shadow:0 0 28px rgba(56,189,248,.13)}.relay-ui-actions .relay-ui-button.danger{border-color:rgba(255,107,107,.36);color:#ffb8b8}
 
+/* =========================================================
+   UPDATE TERMINAL V2
+   RELAY SYSTEM PATCH CONSOLE
+   ========================================================= */
+
+.relay-update-terminal{
+  position:relative;
+  display:grid;
+  gap:14px;
+  min-width:0;
+  padding:2px;
+  color:var(--relay-ui-text);
+  font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+/* ---------------------------------------------------------
+   TERMINAL HEADER
+   --------------------------------------------------------- */
+
+.relay-update-terminal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  min-width:0;
+  padding:13px 14px;
+  border:1px solid rgba(56,189,248,.18);
+  border-radius:9px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(56,189,248,.065),
+      rgba(255,255,255,.018)
+    ),
+    rgba(3,10,15,.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 10px 30px rgba(0,0,0,.24);
+}
+
+.relay-update-terminal-brand{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-width:0;
+}
+
+.relay-update-terminal-prompt{
+  flex:0 0 auto;
+  color:var(--relay-ui-cyan);
+  font:900 18px/1 "DM Mono",monospace;
+  text-shadow:
+    0 0 14px rgba(56,189,248,.55);
+}
+
+.relay-update-terminal-brand strong{
+  display:block;
+  min-width:0;
+  color:#eaf8fd;
+  font:900 9px/1.25 "DM Mono",monospace;
+  letter-spacing:.13em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.relay-update-terminal-brand small{
+  display:block;
+  margin-top:4px;
+  color:#718895;
+  font:700 7px/1.2 "DM Mono",monospace;
+  letter-spacing:.09em;
+}
+
+.relay-update-terminal-live{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  flex:0 0 auto;
+  padding:7px 9px;
+  border:1px solid rgba(56,189,248,.25);
+  border-radius:999px;
+  color:#9be7ff;
+  background:rgba(56,189,248,.045);
+  font:900 7px/1 "DM Mono",monospace;
+  letter-spacing:.13em;
+}
+
+.relay-update-terminal-live i{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--relay-ui-cyan);
+  box-shadow:
+    0 0 8px rgba(56,189,248,.75),
+    0 0 18px rgba(56,189,248,.4);
+}
+
+/* ---------------------------------------------------------
+   SYSTEM STATUS
+   --------------------------------------------------------- */
+
+.relay-update-system-line{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+  padding:0 3px;
+  color:#6f8794;
+  font:800 7px/1.2 "DM Mono",monospace;
+  letter-spacing:.14em;
+}
+
+.relay-update-system-line::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(56,189,248,.18),
+      transparent
+    );
+}
+
+.relay-update-system-line span{
+  order:1;
+}
+
+.relay-update-system-line b{
+  order:3;
+  flex:0 0 auto;
+  color:#7ee8c1;
+  font-weight:900;
+}
+
+/* ---------------------------------------------------------
+   BUILD CARDS
+   --------------------------------------------------------- */
+
+.relay-update-build-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(3,minmax(0,1fr));
+  gap:9px;
+}
+
+.relay-update-build-card{
+  position:relative;
+  min-width:0;
+  padding:11px 12px;
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:8px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(8,20,28,.95),
+      rgba(3,9,14,.985)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 8px 22px rgba(0,0,0,.2);
+  overflow:hidden;
+}
+
+.relay-update-build-card::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:2px;
+  background:var(--relay-ui-cyan);
+  box-shadow:
+    0 0 14px rgba(56,189,248,.35);
+}
+
+.relay-update-build-card span{
+  display:block;
+  color:#657b88;
+  font:800 6px/1.2 "DM Mono",monospace;
+  letter-spacing:.16em;
+}
+
+.relay-update-build-card strong{
+  display:block;
+  margin-top:6px;
+  color:#dff7ff;
+  font:900 9px/1.15 "DM Mono",monospace;
+  letter-spacing:.08em;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.relay-update-build-card strong.is-online{
+  color:#7ee8c1;
+  text-shadow:
+    0 0 12px rgba(126,232,193,.2);
+}
+
+/* ---------------------------------------------------------
+   PATCH SECTION HEADER
+   --------------------------------------------------------- */
+
+.relay-update-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+  margin-top:3px;
+  padding:0 3px;
+}
+
+.relay-update-section-head span{
+  color:#8edfff;
+  font:900 8px/1.2 "DM Mono",monospace;
+  letter-spacing:.17em;
+}
+
+.relay-update-section-head small{
+  color:#526a78;
+  font:800 6px/1 "DM Mono",monospace;
+  letter-spacing:.12em;
+}
+
+/* ---------------------------------------------------------
+   UPDATE LIST
+   --------------------------------------------------------- */
+
+.relay-update-list{
+  display:grid;
+  gap:8px;
+  min-width:0;
+}
+
+.relay-update-item{
+  position:relative;
+  display:grid;
+  grid-template-columns:
+    34px minmax(0,1fr) auto;
+  align-items:center;
+  gap:11px;
+  min-width:0;
+  padding:11px 12px;
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:9px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(8,18,25,.96),
+      rgba(3,8,13,.99)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 8px 24px rgba(0,0,0,.2);
+  overflow:hidden;
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease;
+}
+
+.relay-update-item::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(56,189,248,.07),
+      transparent
+    );
+  transform:translateX(-100%);
+  transition:
+    opacity .16s ease,
+    transform .35s ease;
+}
+
+.relay-update-item:hover{
+  transform:translateX(3px);
+  border-color:rgba(56,189,248,.27);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(9,25,34,.98),
+      rgba(3,9,14,.99)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 12px 30px rgba(0,0,0,.28),
+    0 0 22px rgba(56,189,248,.045);
+}
+
+.relay-update-item:hover::after{
+  opacity:1;
+  transform:translateX(100%);
+}
+
+/* ---------------------------------------------------------
+   INDEX
+   --------------------------------------------------------- */
+
+.relay-update-index{
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  box-sizing:border-box;
+  border:1px solid rgba(56,189,248,.16);
+  border-radius:6px;
+  color:#62cbed;
+  background:rgba(56,189,248,.035);
+  font:900 7px/1 "DM Mono",monospace;
+}
+
+/* ---------------------------------------------------------
+   UPDATE CONTENT
+   --------------------------------------------------------- */
+
+.relay-update-item-main{
+  min-width:0;
+}
+
+.relay-update-item-kicker{
+  display:block;
+  color:#5f7886;
+  font:800 6px/1.25 "DM Mono",monospace;
+  letter-spacing:.1em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.relay-update-item-kicker b{
+  color:#38bdf8;
+  margin:0 3px;
+}
+
+.relay-update-item-main strong{
+  display:block;
+  margin-top:5px;
+  min-width:0;
+  color:#eaf6fa;
+  font:900 9px/1.25 "DM Mono",monospace;
+  letter-spacing:.045em;
+  overflow-wrap:anywhere;
+}
+
+.relay-update-item-main small{
+  display:block;
+  margin-top:5px;
+  color:#788e9a;
+  font:600 7px/1.55 "DM Mono",monospace;
+  letter-spacing:.015em;
+  overflow-wrap:anywhere;
+}
+
+/* ---------------------------------------------------------
+   VERIFIED STATE
+   --------------------------------------------------------- */
+
+.relay-update-item-state{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex:0 0 auto;
+}
+
+.relay-update-item-state span{
+  color:#526b78;
+  font:800 6px/1 "DM Mono",monospace;
+  letter-spacing:.1em;
+}
+
+.relay-update-item-state b{
+  display:grid;
+  place-items:center;
+  width:20px;
+  height:20px;
+  border:1px solid rgba(126,232,193,.28);
+  border-radius:50%;
+  color:#7ee8c1;
+  background:rgba(126,232,193,.035);
+  font:900 10px/1 Arial,sans-serif;
+}
+
+/* ---------------------------------------------------------
+   TERMINAL CONSOLE
+   --------------------------------------------------------- */
+
+.relay-update-console{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  min-height:31px;
+  padding:0 10px;
+  border-left:2px solid rgba(56,189,248,.4);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(56,189,248,.045),
+      transparent
+    );
+  color:#6f95a5;
+  font:800 7px/1 "DM Mono",monospace;
+  letter-spacing:.08em;
+}
+
+.relay-update-console b{
+  color:var(--relay-ui-cyan);
+  animation:relayUpdateCursor 1s steps(2,end) infinite;
+}
+
+@keyframes relayUpdateCursor{
+  50%{opacity:0}
+}
+
+/* ---------------------------------------------------------
+   UPDATE ACTIONS
+   --------------------------------------------------------- */
+
+.relay-update-actions{
+  margin-top:2px;
+}
+
+/* ---------------------------------------------------------
+   MOBILE
+   --------------------------------------------------------- */
+
+@media(max-width:700px){
+
+  .relay-update-build-grid{
+    grid-template-columns:1fr;
+  }
+
+  .relay-update-terminal-head{
+    align-items:flex-start;
+  }
+
+  .relay-update-terminal-brand strong{
+    font-size:8px;
+  }
+
+  .relay-update-item{
+    grid-template-columns:30px minmax(0,1fr);
+  }
+
+  .relay-update-item-state{
+    grid-column:2;
+    justify-content:flex-start;
+    margin-top:-2px;
+  }
+
+}
+
+@media(max-width:430px){
+
+  .relay-update-terminal{
+    gap:11px;
+  }
+
+  .relay-update-terminal-head{
+    padding:11px;
+  }
+
+  .relay-update-terminal-live{
+    padding:6px 7px;
+    font-size:6px;
+  }
+
+  .relay-update-build-card{
+    padding:10px;
+  }
+
+  .relay-update-item{
+    padding:10px;
+    gap:9px;
+  }
+
+  .relay-update-item-main strong{
+    font-size:8px;
+  }
+
+  .relay-update-item-main small{
+    font-size:7px;
+    line-height:1.5;
+  }
+
+  .relay-update-item-state span{
+    display:none;
+  }
+
+}
+
 /* FAQ */
 .relay-faq-grid{display:grid;gap:10px}.relay-faq-item{border:1px solid rgba(255,255,255,.07);border-radius:10px;background:linear-gradient(145deg,rgba(9,20,28,.95),rgba(3,9,14,.985));overflow:hidden}.relay-faq-question{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:15px 16px;border:0;background:none;color:#eaf4f8;text-align:left;font:900 9px/1.2 "DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.07em;cursor:pointer;touch-action:manipulation}.relay-faq-question:hover,.relay-faq-question:focus-visible{color:var(--relay-ui-cyan-bright);outline:none;background:rgba(56,189,248,.025)}.relay-faq-question b{color:var(--relay-ui-cyan);font-size:14px;font-family:Arial,sans-serif;transition:transform .16s ease}.relay-faq-item.is-open .relay-faq-question b{transform:rotate(45deg)}.relay-faq-answer{display:none;padding:0 16px 16px;color:#8da1ad;font:600 8px/1.65 "DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace}.relay-faq-item.is-open .relay-faq-answer{display:block}
 
