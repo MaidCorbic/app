@@ -29,17 +29,27 @@ assert.match(index, /data-mobile-action="dash"/, 'Touch controls must include a 
 assert.match(index, /data-mobile-action="build1"/, 'Touch controls must include build slot one');
 assert.match(index, /data-mobile-action="gadget1"/, 'Touch controls must include gadget slot one');
 assert.match(index, /data-mobile-action="jump"/, 'Touch controls must include a jump button');
-assert.match(index, /data-mobile-joystick/, 'Touch controls must include a drag joystick for movement');
-assert.match(index, /mobile-joystick-thumb/, 'The joystick must render a draggable thumb element');
 assert.match(mobileOwner, /ACTION_KEYS/, 'Single mobile owner must define gameplay action bindings');
-assert.match(mobileOwner, /emit\(ACTION_KEYS\[action\], 'keydown'\)/, 'Single mobile owner must send gameplay action keydown events');
-assert.match(mobileOwner, /emit\(ACTION_KEYS\[action\], 'keyup'\)/, 'Single mobile owner must send gameplay action keyup events');
-assert.match(mobileOwner, /window\.dispatchEvent\(keyEvent/, 'Single mobile owner must dispatch synthetic gameplay keyboard events');
+assert.match(
+  mobileOwner,
+  /emitKeyboard\(\s*key,\s*'keydown'\s*\)/,
+  'Single mobile owner must send gameplay action keydown events'
+);
+
+assert.match(
+  mobileOwner,
+  /emitKeyboard\(\s*key,\s*'keyup'\s*\)/,
+  'Single mobile owner must send gameplay action keyup events'
+);
+
+assert.match(
+  mobileOwner,
+  /window\.dispatchEvent\(event\)/,
+  'Single mobile owner must dispatch synthetic gameplay keyboard events'
+);
 assert.match(main, /function speakNarration\(text\)/, 'English browser narration must be available for cinematic subtitles');
 assert.match(main, /claimLoginReward/, 'The challenge board must provide persistent login rewards');
 assert.match(main, /WEEKLY/, 'The challenge board must explain and display weekly missions');
-assert.match(mobileOwner, /const joystickNode = root\.querySelector\('\[data-mobile-joystick\]'\)/, 'Single mobile owner must wire the joystick drag element');
-assert.match(mobileOwner, /mobile-move|setPhaserDirection/, 'Single mobile owner must route joystick movement');
 assert.match(mobileOwner, /setDirection\(null\)/, 'Single mobile owner must clear movement direction on release');
 assert.doesNotMatch(main, /data-mobile-joystick|mobile-move|activePointerId/, 'main.js must not own mobile joystick dispatch');
 assert.match(runner, /this\.mobileActions\.sword/, 'The runner must consume the mobile sword action');
@@ -52,7 +62,64 @@ assert.match(runner, /this\.cursors\.right\.isDown/, 'The runner must consume ri
 assert.match(runner, /this\.keys\.D\.isDown/, 'The runner must consume right movement through Phaser D-key state');
 assert.match(runner, /this\.mobileActions\.jump/, 'The runner must consume the touch jump action');
 assert.match(styles, /body #pauseMenu \.menu-grid\{grid-template-columns:1fr/, 'Pause settings must collapse to one column on touch screens');
-assert.match(styles, /body\.is-touch \.mobile-joystick\{/, 'Joystick styling must be scoped to detected touch devices');
+assert.doesNotMatch(
+  styles,
+  /\.mobile-joystick/,
+  'Canonical stylesheet must not contain legacy joystick styling'
+);
+
+assert.match(
+  styles,
+  /body\.is-touch[\s\S]{0,500}\.mobile-actions/,
+  'Touch styling must define the mobile action surface'
+);
 assert.match(main, /const detectTouchDevice = \(\) => \{/, 'App must detect touch capability using multiple redundant signals');
 assert.match(main, /hasTouchPoints \|\| hasTouchEvents \|\| coarsePointer \|\| mobileUA/, 'Touch detection must avoid showing touch controls on desktop based only on viewport size');
 assert.match(main, /document\.body\.classList\.toggle\('is-touch', detectTouchDevice\(\)\)/, 'App must apply the detected state as a body class driving all touch CSS');
+assert.doesNotMatch(
+  index,
+  /data-mobile-joystick|mobile-joystick-thumb/,
+  'Touch controls must not contain a legacy virtual joystick'
+);
+
+assert.match(
+  mobileOwner,
+  /touch-screen-v13/,
+  'Single mobile owner must install the full-screen touch movement surface'
+);
+
+assert.match(
+  mobileOwner,
+  /directionFromScreen/,
+  'Single mobile owner must map screen touch position to movement direction'
+);
+
+assert.match(
+  mobileOwner,
+  /SWIPE_THRESHOLD/,
+  'Single mobile owner must support horizontal swipe movement'
+);
+
+assert.match(
+  mobileOwner,
+  /movementPointerId/,
+  'Single mobile owner must track the active movement pointer'
+);
+
+assert.match(
+  mobileOwner,
+  /pointerdown[\s\S]{0,500}directionFromScreen/,
+  'Single mobile owner must route screen touch into movement direction'
+);
+
+assert.match(
+  mobileOwner,
+  /SWIPE_THRESHOLD/,
+  'Single mobile owner must support swipe movement'
+);
+
+assert.match(
+  mobileOwner,
+  /setDirection\(null\)/,
+  'Single mobile owner must clear movement direction on release'
+);
