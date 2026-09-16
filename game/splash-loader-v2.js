@@ -32,43 +32,69 @@
     const style = document.createElement('style');
     style.id = 'relay-premium-boot-style';
     style.textContent = `
-      .relay-splash .relay-splash-network-status{
-        position:absolute;
-        z-index:8;
-        top:max(24px,env(safe-area-inset-top));
-        right:max(24px,env(safe-area-inset-right));
-        display:flex;
-        align-items:center;
-        gap:8px;
-        padding:7px 10px;
-        border:1px solid rgba(0,234,255,.20);
-        background:rgba(0,12,20,.38);
-        color:rgba(141,250,255,.70);
-        font:800 8px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-        letter-spacing:.16em;
-        text-transform:uppercase;
-        text-shadow:0 2px 10px #000,0 0 12px rgba(0,234,255,.22);
-        box-shadow:inset 0 0 18px rgba(0,234,255,.03);
-      }
+ .relay-splash .relay-splash-network-status{
+  position:absolute;
+  z-index:8;
+  top:max(24px,env(safe-area-inset-top));
+  right:max(24px,env(safe-area-inset-right));
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:8px 12px;
+  border:1px solid rgba(0,234,255,.32);
+  border-left:2px solid var(--rr-cyan,#00eaff);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,234,255,.10),
+      rgba(0,12,20,.48)
+    );
+  color:rgba(184,251,255,.86);
+  font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  text-shadow:
+    0 2px 10px #000,
+    0 0 12px rgba(0,234,255,.32);
+  box-shadow:
+    0 0 18px rgba(0,234,255,.08),
+    inset 0 0 18px rgba(0,234,255,.04);
+}
       .relay-splash .relay-splash-network-status i{
-        width:6px;height:6px;flex:0 0 6px;border-radius:50%;
-        background:var(--rr-cyan,#00eaff);
-        box-shadow:0 0 7px var(--rr-cyan,#00eaff),0 0 16px rgba(0,234,255,.62);
-        animation:relayPremiumPulse .95s ease-in-out infinite;
-      }
+  width:6px;
+  height:6px;
+  flex:0 0 6px;
+  border-radius:50%;
+  background:var(--rr-cyan,#00eaff);
+  box-shadow:
+    0 0 6px var(--rr-cyan,#00eaff),
+    0 0 14px var(--rr-cyan,#00eaff),
+    0 0 26px rgba(0,234,255,.55);
+  animation:relayPremiumPulse .95s ease-in-out infinite;
+}
 
-      .relay-splash .relay-splash-ui{
-        width:min(900px,calc(100vw - 48px));
-        padding:12px 12px 11px;
-        gap:9px;
-        border:1px solid rgba(117,247,255,.19);
-        border-top-color:rgba(255,210,60,.18);
-        background:linear-gradient(180deg,rgba(1,9,16,.82),rgba(1,6,11,.64));
-        box-shadow:0 20px 50px rgba(0,0,0,.38),inset 0 0 28px rgba(0,234,255,.025);
-        backdrop-filter:blur(5px);
-      }
+    .relay-splash .relay-splash-ui{
+  width:min(900px,calc(100vw - 48px));
+  padding:12px 12px 11px;
+  gap:9px;
+  border:1px solid rgba(117,247,255,.22);
+  border-top-color:rgba(255,210,60,.30);
+  border-left-color:rgba(0,234,255,.30);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(1,9,16,.84),
+      rgba(1,6,11,.68)
+    );
+box-shadow:
+    0 20px 50px rgba(0,0,0,.48),
+    0 0 30px rgba(0,140,255,.10),
+    0 0 60px rgba(0,234,255,.045),
+    inset 0 0 28px rgba(0,234,255,.045);
+  backdrop-filter:blur(6px);
+}
       .relay-splash .relay-splash-ui::before{
-        content:"SYSTEM LINK  //  SECURE CHANNEL";
+        content:"SYSTEM LINK  //  SECURE CHANNEL  //  ENCRYPTED";
         margin-bottom:-1px;
         padding:5px 8px;
         border-left:2px solid var(--rr-cyan,#00eaff);
@@ -95,52 +121,86 @@
       .relay-splash .relay-splash-track::before{
         background:repeating-linear-gradient(90deg,rgba(141,250,255,.15) 0 1px,transparent 1px 24px);
       }
-      .relay-splash .relay-splash-progress{
-        background:linear-gradient(90deg,#006d8a 0%,var(--rr-blue,#168cff) 25%,var(--rr-cyan,#00eaff) 63%,var(--rr-cyan2,#8dfaff) 88%,#fff 100%);
-      }
+    .relay-splash .relay-splash-progress{
+  background:
+    linear-gradient(
+      90deg,
+      #006d8a 0%,
+      var(--rr-blue,#168cff) 24%,
+      var(--rr-cyan,#00eaff) 58%,
+      var(--rr-cyan2,#8dfaff) 84%,
+      #fff 100%
+    );
+  box-shadow:
+    0 0 8px rgba(0,234,255,.95),
+    0 0 20px rgba(0,234,255,.72),
+    0 0 42px rgba(0,140,255,.38);
+}
 
-      .relay-splash .relay-boot-status-grid{
+   .relay-splash .relay-boot-status-grid{
         display:grid;
         grid-template-columns:repeat(3,minmax(0,1fr));
         gap:1px;
-        border:1px solid rgba(117,247,255,.10);
-        background:rgba(117,247,255,.08);
+        border:1px solid rgba(117,247,255,.16);
+        background:rgba(117,247,255,.10);
+        box-shadow:
+          0 0 18px rgba(0,234,255,.04),
+          inset 0 0 18px rgba(0,234,255,.025);
       }
-      .relay-splash .relay-boot-status-cell{
-        min-width:0;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:10px;
-        padding:7px 8px;
-        background:rgba(0,8,13,.68);
-      }
+     .relay-splash .relay-boot-status-cell{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 9px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,12,20,.78),
+      rgba(0,7,12,.62)
+    );
+  box-shadow:
+    inset 0 0 18px rgba(0,234,255,.025);
+}
       .relay-splash .relay-boot-status-cell span{
         color:rgba(190,215,221,.46);
         font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
         letter-spacing:.14em;
         text-transform:uppercase;
       }
-      .relay-splash .relay-boot-status-cell b{
-        color:rgba(141,250,255,.80);
-        font:900 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-        letter-spacing:.10em;
-        text-transform:uppercase;
-        white-space:nowrap;
-      }
-
-      .relay-splash .relay-boot-log{
+    .relay-splash .relay-boot-status-cell b{
+  color:rgba(184,251,255,.90);
+  font:900 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  text-shadow:
+    0 0 8px rgba(0,234,255,.28);
+}
+.relay-splash .relay-boot-log{
         display:grid;
-        gap:3px;
-        min-height:24px;
-        padding:6px 8px 2px;
-        border-top:1px solid rgba(117,247,255,.07);
+        gap:4px;
+        min-height:26px;
+        padding:7px 9px 3px;
+        border-top:1px solid rgba(117,247,255,.10);
+        background:
+          linear-gradient(
+            90deg,
+            rgba(0,234,255,.035),
+            transparent 70%
+          );
         color:rgba(141,250,255,.43);
         font:700 7px/1.25 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
         letter-spacing:.12em;
         text-transform:uppercase;
       }
-      .relay-splash .relay-boot-log .is-live{color:rgba(141,250,255,.78);text-shadow:0 0 12px rgba(0,234,255,.22)}
+   .relay-splash .relay-boot-log .is-live{
+  color:rgba(184,251,255,.88);
+  text-shadow:
+    0 0 8px rgba(0,234,255,.34),
+    0 0 18px rgba(0,234,255,.14);
+}
       .relay-splash .relay-boot-log .is-muted{color:rgba(175,188,184,.28)}
       .relay-splash .relay-boot-complete{
         display:none;
@@ -150,17 +210,28 @@
         padding-top:3px;
       }
       .relay-splash .relay-boot-complete.is-visible{display:grid}
-      .relay-splash .relay-boot-complete b{
-        width:7px;height:7px;border-radius:50%;background:var(--rr-gold,#ffd23c);
-        box-shadow:0 0 9px var(--rr-gold,#ffd23c),0 0 18px rgba(255,210,60,.35)
+     .relay-splash .relay-boot-complete b{
+        width:8px;
+        height:8px;
+        border-radius:50%;
+        background:var(--rr-gold,#ffd23c);
+        box-shadow:
+          0 0 8px var(--rr-gold,#ffd23c),
+          0 0 18px var(--rr-gold,#ffd23c),
+          0 0 32px rgba(255,210,60,.28);
+        animation:relayBootCompletePulse 1.1s ease-in-out infinite;
       }
-      .relay-splash .relay-boot-complete strong{
-        display:block;
-        color:rgba(245,253,255,.94);
-        font:900 9px/1.1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-        letter-spacing:.18em;
-        text-transform:uppercase;
-      }
+.relay-splash .relay-boot-complete strong{
+  display:block;
+  color:rgba(245,253,255,.98);
+  font:900 9px/1.15 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  text-shadow:
+    0 0 8px rgba(0,234,255,.46),
+    0 0 18px rgba(0,234,255,.22),
+    0 0 32px rgba(0,140,255,.12);
+}
       .relay-splash .relay-boot-complete small{
         display:block;
         margin-top:3px;
@@ -169,6 +240,26 @@
         letter-spacing:.14em;
         text-transform:uppercase;
       }
+
+    @keyframes relayBootCompletePulse{
+  0%,100%{
+    opacity:.48;
+    transform:scale(.78);
+    box-shadow:
+      0 0 6px var(--rr-gold,#ffd23c),
+      0 0 14px var(--rr-gold,#ffd23c),
+      0 0 24px rgba(255,210,60,.22);
+  }
+
+  50%{
+    opacity:1;
+    transform:scale(1.16);
+    box-shadow:
+      0 0 10px var(--rr-gold,#ffd23c),
+      0 0 22px var(--rr-gold,#ffd23c),
+      0 0 38px rgba(255,210,60,.42);
+  }
+}
 
       @keyframes relayPremiumPulse{
         0%,100%{opacity:.35;transform:scale(.72)}
@@ -190,13 +281,33 @@
         }
         .relay-splash .relay-splash-ui::before{font-size:6px;letter-spacing:.12em;padding:4px 6px}
         .relay-splash .relay-splash-meta{padding:8px 9px 7px}
-        .relay-splash .relay-splash-status{font-size:7px;letter-spacing:.10em}
+   .relay-splash .relay-splash-status{
+          font-size:7px;
+          letter-spacing:.08em;
+          line-height:1.15;
+        }
         .relay-splash .relay-splash-percent{font-size:13px;min-width:48px}
         .relay-splash .relay-splash-track{height:7px}
-        .relay-splash .relay-boot-status-grid{grid-template-columns:1fr 1fr}
-        .relay-splash .relay-boot-status-cell{padding:6px 7px}
+      .relay-splash .relay-boot-status-grid{
+  grid-template-columns:1fr 1fr;
+}
+
+.relay-splash .relay-boot-status-cell:last-child{
+  grid-column:1 / -1;
+}
+.relay-splash .relay-boot-status-cell{
+  padding:7px 8px;
+  min-height:30px;
+  gap:8px;
+}
         .relay-splash .relay-boot-status-cell span,.relay-splash .relay-boot-status-cell b{font-size:6px}
-        .relay-splash .relay-boot-log{font-size:6px;letter-spacing:.09em}
+       .relay-splash .relay-boot-log{
+  font-size:6px;
+  line-height:1.35;
+  letter-spacing:.08em;
+  gap:3px;
+  min-height:28px;
+}
       }
       @media(max-width:700px) and (orientation:portrait){
         .relay-splash .relay-splash-network-status{display:none}
@@ -207,7 +318,8 @@
         .relay-splash .relay-boot-status-grid,.relay-splash .relay-boot-log{display:none}
       }
       @media(prefers-reduced-motion:reduce){
-        .relay-splash .relay-splash-network-status i{animation:none}
+.relay-splash .relay-splash-network-status i,
+        .relay-splash .relay-boot-complete b{animation:none}
       }
     `;
     document.head.appendChild(style);
@@ -222,30 +334,42 @@
 
     const network = document.createElement('div');
     network.className = 'relay-splash-network-status relay-premium-boot-mounted';
-    network.innerHTML = '<i></i><span>NETWORK // ONLINE</span>';
+    network.innerHTML = '<i></i><span>RELAY NETWORK // ONLINE</span>';
     splash.appendChild(network);
 
     const telemetry = document.createElement('div');
     telemetry.className = 'relay-boot-status-grid';
-    telemetry.innerHTML = `
-      <div class="relay-boot-status-cell"><span>NODE</span><b>04 // ONLINE</b></div>
-      <div class="relay-boot-status-cell"><span>SIGNAL</span><b>STABLE</b></div>
-      <div class="relay-boot-status-cell"><span>RELAY</span><b>SYNCED</b></div>
+telemetry.innerHTML = `
+      <div class="relay-boot-status-cell">
+        <span>NODE</span>
+        <b>04 // ONLINE</b>
+      </div>
+      <div class="relay-boot-status-cell">
+        <span>SIGNAL</span>
+        <b>STABLE // LOCKED</b>
+      </div>
+      <div class="relay-boot-status-cell">
+        <span>RELAY</span>
+        <b>SYNCED // READY</b>
+      </div>
     `;
 
     const log = document.createElement('div');
     log.className = 'relay-boot-log';
     log.setAttribute('aria-live', 'polite');
     log.innerHTML = `
-      <span class="is-live">→ ROUTE DATA RECEIVED</span>
-      <span class="is-muted">→ WORLD NODE ONLINE</span>
+<span class="is-live">→ ROUTE DATA RECEIVED // VERIFIED</span>
+<span class="is-muted">→ WORLD NODE STANDBY // AWAITING SYNC</span>
     `;
 
     const complete = document.createElement('div');
     complete.className = 'relay-boot-complete';
-    complete.innerHTML = `
+  complete.innerHTML = `
       <b aria-hidden="true"></b>
-      <div><strong>RELAY NETWORK ONLINE</strong><small>BOOT COMPLETE // HOME READY</small></div>
+      <div>
+        <strong>RELAY NETWORK ONLINE</strong>
+        <small>BOOT COMPLETE // HOME READY</small>
+      </div>
     `;
 
     ui.appendChild(telemetry);
@@ -281,7 +405,13 @@
       splash.appendChild(brand);
     }
 
-    const stages = [[8, 'INITIALIZING RELAY'], [26, 'LOADING INTERFACE'], [48, 'LOADING GAME SYSTEMS'], [68, 'CONNECTING WORLD'], [86, 'PREPARING HOME']];
+   const stages = [
+      [8, 'RELAY CORE INITIALIZING'],
+      [26, 'INTERFACE CORE ONLINE'],
+      [48, 'GAME SYSTEMS LOADING'],
+      [68, 'WORLD NETWORK CONNECTING'],
+      [86, 'HOME SYSTEMS READY']
+    ];
     let progress = 0;
     let imageReady = image.complete && image.naturalWidth > 0;
     let pageReady = document.readyState === 'complete';
@@ -297,8 +427,8 @@
       const first = premiumHud.log.querySelector('span:first-child');
       const second = premiumHud.log.querySelector('span:last-child');
       if (!first || !second) return;
-      if (current >= 68) {
-        first.textContent = '→ ROUTE DATA RECEIVED';
+if (current >= 68) {
+        first.textContent = '→ ROUTE DATA VERIFIED';
         first.className = 'is-live';
         second.textContent = '→ WORLD NODE ONLINE';
         second.className = 'is-live';
@@ -315,7 +445,7 @@
       } else {
         first.textContent = '→ RELAY CORE INITIALIZING';
         first.className = 'is-live';
-        second.textContent = '→ WORLD NODE OFFLINE';
+        second.textContent = '→ WORLD NODE STANDBY';
         second.className = 'is-muted';
       }
     };
@@ -350,10 +480,12 @@
       if (!forced && (!imageReady || !pageReady || !engineReady)) return;
       if (!forced && elapsed < MIN_SPLASH_MS) { window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed); return; }
       finishing = true;
-      await animateTo(100, 'READY');
+      await animateTo(100, 'RELAY ONLINE');
       premiumHud?.complete?.classList.add('is-visible');
       premiumHud?.log?.querySelectorAll('span').forEach(node => node.classList.add('is-live'));
-      if (premiumHud?.network) premiumHud.network.querySelector('span').textContent = 'RELAY NETWORK // ONLINE';
+     if (premiumHud?.network) {
+      premiumHud.network.querySelector('span').textContent = 'RELAY NETWORK // ONLINE // READY';
+    }
       splash.setAttribute('aria-busy', 'false');
       splash.classList.add('is-hidden');
       window.setTimeout(() => splash.remove(), 700);
@@ -368,7 +500,7 @@
     if (imageReady) setProgress(26, 'LOADING INTERFACE');
     else {
       image.addEventListener('load', markImageReady, { once: true });
-      image.addEventListener('error', () => { imageReady = true; setProgress(22, 'USING SAFE MODE'); finish(); }, { once: true });
+      image.addEventListener('error', () => { imageReady = true; setProgress(22, 'SAFE MODE // IMAGE FALLBACK'); finish(); }, { once: true });
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => animateTo(48, 'LOADING GAME SYSTEMS'), { once: true });
@@ -389,7 +521,7 @@
     orientation.addEventListener?.('change', onOrientation);
     window.addEventListener('resize', onOrientation, { passive: true });
 
-    window.setTimeout(() => { if (finishing || timedOut) return; timedOut = true; label.textContent = 'STARTING HOME'; finish(true); }, MAX_SPLASH_MS);
+    window.setTimeout(() => { if (finishing || timedOut) return; timedOut = true; label.textContent = 'ENTERING HOME'; finish(true); }, MAX_SPLASH_MS);
     stages.forEach(([value, text], index) => window.setTimeout(() => { if (!finishing && !timedOut) setProgress(value, text); }, 220 + index * 360));
   };
 
