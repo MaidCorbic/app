@@ -4409,3 +4409,219 @@ z-index:1;
   }
 
 }
+/* =========================================================
+   HOME V5 // CONTRACT + RECENT ACTIVITY FINAL LAYOUT
+   ========================================================= */
+
+#intro.home-v3 .home-v5-relay-status {
+  display:none !important;
+}
+
+/* ---------------- DESKTOP ---------------- */
+
+@media (min-width:781px) {
+
+  #intro.home-v3 .home-v5-contract-activity-grid {
+    display:grid;
+    grid-template-columns:
+      minmax(0,1.65fr)
+      minmax(220px,.85fr);
+    gap:12px;
+    width:100%;
+    min-width:0;
+    align-items:stretch;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  > .home-v4-contract,
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  > .home-v4-activity {
+    width:100%;
+    min-width:0;
+    height:100%;
+  }
+
+  /* ACTIVE CONTRACT — compact */
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract {
+    padding:16px;
+    border-radius:12px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-head {
+    margin-bottom:13px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-main {
+    min-width:0;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-title {
+    font-size:clamp(
+      18px,
+      1.45vw,
+      23px
+    );
+    line-height:1.08;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-description {
+    margin-top:7px;
+    font-size:9px;
+    line-height:1.45;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-meta {
+    grid-template-columns:
+      repeat(3,minmax(0,1fr));
+    gap:7px;
+    margin-top:14px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-meta > div {
+    padding:8px;
+    border-radius:7px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-meta small {
+    font-size:7px;
+    margin-bottom:4px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-meta b {
+    font-size:9px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-bottom {
+    margin-top:13px;
+    gap:10px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-bottom > span {
+    font-size:7px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-button {
+    min-height:34px;
+    padding:0 11px;
+    border-radius:7px;
+    font-size:8px;
+  }
+
+  /* RECENT ACTIVITY — compact companion panel */
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity {
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    gap:10px;
+    padding:13px;
+    border-radius:12px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity-head {
+    padding-bottom:8px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity-head span {
+    font-size:8px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity-head b {
+    font-size:7px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity-list {
+    gap:8px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity-item {
+    grid-template-columns:
+      6px minmax(0,1fr);
+    gap:8px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity-item strong {
+    font-size:8px;
+    line-height:1.25;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity-item small {
+    font-size:7px;
+    line-height:1.2;
+  }
+
+}
+
+/* ---------------- TABLET / MOBILE ---------------- */
+
+@media (max-width:780px) {
+
+  #intro.home-v3 .home-v5-contract-activity-grid {
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+    width:100%;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract,
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity {
+    width:100%;
+    max-width:100%;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract {
+    padding:15px;
+    border-radius:12px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-activity {
+    padding:13px;
+    border-radius:12px;
+  }
+
+}
+
+/* ---------------- SMALL PHONES ---------------- */
+
+@media (max-width:430px) {
+
+  #intro.home-v3 .home-v5-contract-activity-grid {
+    gap:8px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract {
+    padding:13px;
+  }
+
+  #intro.home-v3 .home-v5-contract-activity-grid
+  .home-v4-contract-meta {
+    grid-template-columns:
+      1fr;
+  }
+
+}
