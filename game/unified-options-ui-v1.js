@@ -115,6 +115,110 @@ import { loadState, saveState } from './src/state.js';
       #titlePanel.relay-options-unified .relay-options-shell,#pauseMenu.relay-options-unified .relay-options-shell{min-width:0;min-height:0;height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden}
       #titlePanel.relay-options-unified .relay-options-body,#pauseMenu.relay-options-unified .relay-options-body{min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
       #titlePanelContent.relay-legacy-cleared{display:block!important}
+            .relay-graphics-section{
+        position:relative;
+      }
+
+      .relay-graphics-card{
+        position:relative;
+        overflow:hidden;
+      }
+
+      .relay-graphics-quality{
+        display:grid;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:8px;
+        margin-top:14px;
+      }
+
+      .relay-graphics-button{
+        min-height:42px;
+        border:1px solid rgba(56,189,248,.28);
+        background:linear-gradient(180deg,rgba(10,28,45,.96),rgba(4,12,22,.98));
+        color:rgba(210,240,255,.72);
+        font:800 10px/1 Arial,sans-serif;
+        letter-spacing:.12em;
+        cursor:pointer;
+        transition:
+          border-color .18s ease,
+          background .18s ease,
+          color .18s ease,
+          box-shadow .18s ease,
+          transform .18s ease;
+      }
+
+      .relay-graphics-button:hover{
+        border-color:rgba(56,189,248,.72);
+        color:#dff8ff;
+        transform:translateY(-1px);
+      }
+
+      .relay-graphics-button.is-active{
+        border-color:rgba(56,189,248,.95);
+        background:linear-gradient(180deg,rgba(13,61,88,.98),rgba(5,24,39,.98));
+        color:#e8fbff;
+        box-shadow:
+          inset 0 0 20px rgba(56,189,248,.10),
+          0 0 16px rgba(56,189,248,.14);
+      }
+
+      .relay-graphics-current{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        margin-top:12px;
+        padding-top:11px;
+        border-top:1px solid rgba(255,255,255,.07);
+      }
+
+      .relay-graphics-current span{
+        font-size:8px;
+        font-weight:800;
+        letter-spacing:.14em;
+        color:rgba(203,213,225,.48);
+      }
+
+      .relay-graphics-current strong{
+        font-size:11px;
+        font-weight:900;
+        letter-spacing:.12em;
+        color:#7dd3fc;
+      }
+
+      .relay-graphics-info{
+        display:grid;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:7px;
+        margin-top:9px;
+      }
+
+      .relay-graphics-info span{
+        display:flex;
+        justify-content:space-between;
+        gap:6px;
+        padding:8px 9px;
+        border:1px solid rgba(255,255,255,.055);
+        background:rgba(255,255,255,.018);
+        font-size:7px;
+        font-weight:800;
+        letter-spacing:.08em;
+        color:rgba(203,213,225,.48);
+      }
+
+      .relay-graphics-info b{
+        color:#7dd3fc;
+      }
+
+      @media (max-width:780px){
+        .relay-graphics-quality{
+          grid-template-columns:repeat(2,minmax(0,1fr));
+        }
+
+        .relay-graphics-info{
+          grid-template-columns:repeat(2,minmax(0,1fr));
+        }
+      }
     `;
     document.head.appendChild(style);
   };
@@ -153,7 +257,49 @@ import { loadState, saveState } from './src/state.js';
           ${toggleMarkup('allyIntel','ALLY INTEL','Side intel panels',prefs.allyIntel)}
           ${toggleMarkup('eventPopups','EVENT POPUPS','Transient gameplay notices',prefs.eventPopups)}
           ${toggleMarkup('tutorialHints','TUTORIAL HINTS','Contextual onboarding hints',prefs.tutorialHints)}
-        </div></section>
+        </div>        </section>
+
+        <section class="relay-options-section full relay-graphics-section">
+          <div class="relay-section-title">GRAPHICS</div>
+
+          <article class="relay-option-card relay-graphics-card">
+            <div class="relay-option-copy">
+              <strong>RENDER QUALITY</strong>
+              <small>Runner Scene visual quality, particles, lighting and weather effects.</small>
+            </div>
+
+            <div class="relay-graphics-quality">
+              <button type="button" class="relay-graphics-button" data-runner-graphics-quality="LOW" aria-pressed="false">
+                LOW
+              </button>
+
+              <button type="button" class="relay-graphics-button" data-runner-graphics-quality="MEDIUM" aria-pressed="false">
+                MEDIUM
+              </button>
+
+              <button type="button" class="relay-graphics-button" data-runner-graphics-quality="HIGH" aria-pressed="false">
+                HIGH
+              </button>
+
+              <button type="button" class="relay-graphics-button" data-runner-graphics-quality="ULTRA" aria-pressed="false">
+                ULTRA
+              </button>
+            </div>
+
+            <div class="relay-graphics-current">
+              <span>CURRENT QUALITY</span>
+              <strong data-runner-graphics-current>HIGH</strong>
+            </div>
+
+            <div class="relay-graphics-info">
+              <span>EFFECTS <b data-runner-graphics-effects>ON</b></span>
+              <span>PARTICLES <b data-runner-graphics-particles>ON</b></span>
+              <span>LIGHTING <b data-runner-graphics-lighting>ON</b></span>
+              <span>WEATHER <b data-runner-graphics-weather>ON</b></span>
+            </div>
+          </article>
+        </section>
+
         <section class="relay-options-section full"><div class="relay-section-title">SYSTEM</div>
           <div class="relay-option-card relay-select"><div class="relay-option-copy"><strong>GAME LANGUAGE</strong><small>Interface and supported system language</small></div><button class="relay-toggle" type="button" data-unified-language aria-expanded="false" aria-haspopup="listbox">🌐 ${escapeHtml(current[1])}</button><div class="relay-language-menu hidden" data-unified-language-menu role="listbox">${LANGUAGES.map(([code,name])=>`<button type="button" data-unified-language-code="${escapeHtml(code)}" class="${code===current[0]?'active':''}" role="option" aria-selected="${code===current[0]}">${escapeHtml(name)}</button>`).join('')}</div></div>
           <div class="relay-action-row"><button class="relay-action" type="button" data-unified-fullscreen>FULLSCREEN</button><button class="relay-action" type="button" data-unified-reset>RESET OPTIONS</button><button class="relay-action" type="button" data-unified-controls aria-expanded="false">CONTROL REFERENCE</button></div>
@@ -162,6 +308,145 @@ import { loadState, saveState } from './src/state.js';
       </div></div></div>`;
   };
 
+    const getRunnerGraphicsSettings = () => {
+    const scene = window.__relayRunnerScene;
+
+    try {
+      if (scene && typeof scene.getGraphicsSettings === 'function') {
+        return scene.getGraphicsSettings();
+      }
+    } catch {}
+
+    let quality = 'HIGH';
+
+    try {
+      quality =
+        localStorage.getItem('runner_graphics_quality') ||
+        'HIGH';
+    } catch {}
+
+    quality = String(quality).toUpperCase();
+
+    const levelMap = {
+      LOW: 0,
+      MEDIUM: 1,
+      HIGH: 2,
+      ULTRA: 3,
+    };
+
+    const level = levelMap[quality] ?? 2;
+
+    return {
+      quality,
+      level,
+      effects: true,
+      particles: level >= 1,
+      lighting: level >= 2,
+      weather: level >= 1,
+    };
+  };
+
+  const syncRunnerGraphicsDom = host => {
+    if (!host) return;
+
+    const settings = getRunnerGraphicsSettings();
+
+    const quality =
+      String(settings.quality || 'HIGH').toUpperCase();
+
+    host
+      .querySelectorAll('[data-runner-graphics-quality]')
+      .forEach(button => {
+        const active =
+          button.dataset.runnerGraphicsQuality === quality;
+
+        button.classList.toggle('is-active', active);
+        button.setAttribute(
+          'aria-pressed',
+          String(active)
+        );
+      });
+
+    const current =
+      host.querySelector('[data-runner-graphics-current]');
+
+    if (current) {
+      current.textContent = quality;
+    }
+
+    const effects =
+      host.querySelector('[data-runner-graphics-effects]');
+
+    const particles =
+      host.querySelector('[data-runner-graphics-particles]');
+
+    const lighting =
+      host.querySelector('[data-runner-graphics-lighting]');
+
+    const weather =
+      host.querySelector('[data-runner-graphics-weather]');
+
+    if (effects) {
+      effects.textContent =
+        settings.effects === false ? 'OFF' : 'ON';
+    }
+
+    if (particles) {
+      particles.textContent =
+        settings.particles === false ? 'OFF' : 'ON';
+    }
+
+    if (lighting) {
+      lighting.textContent =
+        settings.lighting === false ? 'OFF' : 'ON';
+    }
+
+    if (weather) {
+      weather.textContent =
+        settings.weather === false ? 'OFF' : 'ON';
+    }
+  };
+
+  const setRunnerGraphicsQuality = (host, quality) => {
+    const safeQuality =
+      String(quality || '')
+        .trim()
+        .toUpperCase();
+
+    if (!['LOW', 'MEDIUM', 'HIGH', 'ULTRA'].includes(safeQuality)) {
+      return;
+    }
+
+    const scene = window.__relayRunnerScene;
+
+    if (
+      scene &&
+      typeof scene.setGraphicsQuality === 'function'
+    ) {
+      const result =
+        scene.setGraphicsQuality(safeQuality);
+
+      if (result === false) {
+        return;
+      }
+    } else {
+      try {
+        localStorage.setItem(
+          'runner_graphics_quality',
+          safeQuality
+        );
+      } catch {}
+    }
+
+    syncRunnerGraphicsDom(host);
+
+    emitSettingsChange({
+      key: 'graphicsQuality',
+      value: safeQuality,
+    });
+  };
+
+   
   const updateToggleDom = (host, key, enabled) => {
     const button = [...host.querySelectorAll('[data-unified-toggle]')].find(item => item.dataset.unifiedToggle === key);
     if (!button) return;
@@ -183,8 +468,9 @@ import { loadState, saveState } from './src/state.js';
 
     if (!boundRoots.has(root)) {
       boundRoots.add(root);
-      host.innerHTML = buildContent();
+         host.innerHTML = buildContent();
       host.classList.remove('relay-legacy-cleared');
+      syncRunnerGraphicsDom(host);
     }
     return true;
   };
@@ -207,16 +493,37 @@ import { loadState, saveState } from './src/state.js';
   const openHomeOptions = event => {
     const panel = document.getElementById('titlePanel');
     const heading = document.getElementById('titlePanelHeading');
+
     if (!panel) return false;
+
     event?.preventDefault?.();
+    event?.stopPropagation?.();
+    event?.stopImmediatePropagation?.();
+
     panel.classList.remove('hidden');
     panel.removeAttribute('hidden');
     panel.setAttribute('aria-hidden', 'false');
+
     if (heading) {
       heading.textContent = 'OPTIONS';
       heading.className = 'relay-options-title';
     }
-    return mount(panel, 'home');
+
+    const opened = mount(panel, 'home');
+
+    /*
+     * Keep the panel open after the same click
+     * that opened it. This prevents another
+     * global click handler from treating the
+     * opening click as a close request.
+     */
+    panel.dataset.relayOptionsJustOpened = '1';
+
+    window.setTimeout(() => {
+      delete panel.dataset.relayOptionsJustOpened;
+    }, 80);
+
+    return opened;
   };
 
   const openControls = host => {
@@ -304,6 +611,20 @@ import { loadState, saveState } from './src/state.js';
       if (!host) return;
       const root = host.closest('#titlePanel, #pauseMenu');
       if (!root?.classList.contains('relay-options-unified')) return;
+            const graphicsButton =
+        target.closest('[data-runner-graphics-quality]');
+
+      if (graphicsButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        setRunnerGraphicsQuality(
+          host,
+          graphicsButton.dataset.runnerGraphicsQuality
+        );
+
+        return;
+      }
 
       const toggle = target.closest('[data-unified-toggle]');
       if (toggle) {
