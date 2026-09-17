@@ -104,13 +104,6 @@ body.is-touch .mobile-actions button:nth-child(n+4){
 }
 
 body.is-touch .mobile-controls small{
-  display:block;
-  font-size:7px;
-  letter-spacing:1px;
-  color:#8ba0b8;
-}
-
-body.is-touch .mobile-controls small{
   display:none;
 }
 
@@ -292,20 +285,6 @@ body.is-touch .mobile-controls small{
   color:#8df4ff;
   font:900 11px/1 Arial,sans-serif;
   box-shadow:0 0 12px rgba(141,244,255,.16);
-}
-
-@keyframes rotate-hint{
-  0%,100%{
-    transform:rotate(0deg);
-  }
-
-  35%{
-    transform:rotate(0deg);
-  }
-
-  65%{
-    transform:rotate(90deg);
-  }
 }
 
 @keyframes rotate-hint{
@@ -1161,17 +1140,12 @@ body .hud-xp b{
 
 body .play #phaser-game{
   display:block;
-  width:100%;
-  height:100%;
+  position:absolute;
+  inset:0;
 }
 
 body .play #phaser-game canvas{
   display:block;
-}
-
-body .play #phaser-game{
-  position:absolute;
-  inset:0;
 }
 
 :root{
@@ -1204,10 +1178,6 @@ body{
 .overlay{
   position:fixed;
   inset:0;
-}
-
-.play canvas{
-  display:block;
 }
 
 .vignette{
