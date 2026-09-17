@@ -131,12 +131,6 @@
 }
 
     .relay-play-deployment .relay-splash-ui{
-    position:absolute !important;
-left:max(28px,env(safe-area-inset-left)) !important;
-right:max(28px,env(safe-area-inset-right)) !important;
-bottom:max(34px,calc(env(safe-area-inset-bottom) + 24px)) !important;
-top:auto !important;
-margin:auto !important;
   width:min(900px,calc(100vw - 48px));
   padding:13px 13px 12px;
   gap:9px;
@@ -237,12 +231,6 @@ margin:auto !important;
       }
 
       @media(max-width:700px) and (orientation:portrait){
-      .relay-play-deployment .relay-splash-ui{
-  top:auto !important;
-  bottom:max(16px,calc(env(safe-area-inset-bottom) + 10px)) !important;
-  left:max(10px,env(safe-area-inset-left)) !important;
-  right:max(10px,env(safe-area-inset-right)) !important;
-}
         .relay-play-deployment .relay-play-deployment-network{
           display:none !important;
         }
