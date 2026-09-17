@@ -1152,50 +1152,55 @@ window.addEventListener(
       'home-v4-shell';
 
     shell.innerHTML = `
-      <header class="home-v4-topbar">
-        <div
-          class="home-v4-brand"
-          aria-label="Relay Runner"
-        >
-          <span class="home-v4-brand-mark">
-            R/
-          </span>
+ 
+  <header class="home-v4-topbar">
 
-          <span>
-            RELAY RUNNER
-          </span>
-        </div>
-
-     <div
-  class="home-v4-status"
-  aria-label="System status"
->
   <div
-    class="home-v4-credits"
-    aria-label="Credits"
+    class="home-v4-brand"
+    aria-label="Relay Runner"
   >
-    <span
-      class="home-v4-credits-icon"
-      aria-hidden="true"
-    >
-      ◈
+    <span class="home-v4-brand-mark">
+      R/
     </span>
 
-    <span class="home-v4-credits-data">
-      <small>CREDITS</small>
-      <strong id="homeV4Credits">0</strong>
+    <span>
+      RELAY RUNNER
     </span>
   </div>
 
-  <div class="home-v4-status-divider"></div>
+  <div class="home-v4-topbar-right">
 
-  <span class="home-v4-status-dot"></span>
+    <div
+      class="home-v4-credits"
+      aria-label="Credits"
+    >
+      <span
+        class="home-v4-credits-icon"
+        aria-hidden="true"
+      >
+        ◈
+      </span>
 
-  <b>SYSTEM ONLINE</b>
+      <span class="home-v4-credits-data">
+        <small>CREDITS</small>
+        <strong id="homeV4Credits">0</strong>
+      </span>
+    </div>
 
-  <span>NIGHT SHIFT</span>
-</div>
-      </header>
+    <div
+      class="home-v4-status"
+      aria-label="System status"
+    >
+      <span class="home-v4-status-dot"></span>
+
+      <b>SYSTEM ONLINE</b>
+
+      <span>NIGHT SHIFT</span>
+    </div>
+
+  </div>
+
+</header>
 
       <main class="home-v4-main">
 
@@ -1364,6 +1369,128 @@ window.addEventListener(
               </span>
             </div>
           </div>
+            <!-- =================================================
+               ACTIVE CONTRACT
+               ================================================= -->
+
+          <article
+            class="home-v4-contract"
+            aria-label="Active contract"
+          >
+
+            <div
+              class="home-v4-contract-head"
+            >
+              <div>
+                <span
+                  class="home-v4-contract-kicker"
+                >
+                  ACTIVE CONTRACT
+                </span>
+
+                <strong
+                  id="homeV4ContractType"
+                >
+                  CONTRACT // ONLINE
+                </strong>
+              </div>
+
+              <span
+                id="homeV4ContractStatus"
+                class="home-v4-contract-status"
+              >
+                AVAILABLE
+              </span>
+            </div>
+
+            <div
+              class="home-v4-contract-main"
+            >
+              <span
+                id="homeV4ContractCode"
+                class="home-v4-contract-code"
+              >
+                CONTRACT // LOADING
+              </span>
+
+              <h3
+                id="homeV4ContractTitle"
+                class="home-v4-contract-title"
+              >
+                SCANNING CONTRACT NETWORK
+              </h3>
+
+              <p
+                id="homeV4ContractDescription"
+                class="home-v4-contract-description"
+              >
+                READING AVAILABLE CONTRACT DATA...
+              </p>
+            </div>
+
+            <div
+              class="home-v4-contract-meta"
+            >
+              <div>
+                <small>
+                  MISSION
+                </small>
+
+                <b
+                  id="homeV4ContractMission"
+                >
+                  —
+                </b>
+              </div>
+
+              <div>
+                <small>
+                  REWARD
+                </small>
+
+                <b
+                  id="homeV4ContractReward"
+                >
+                  +0 XP
+                </b>
+              </div>
+
+              <div>
+                <small>
+                  PAYLOAD
+                </small>
+
+                <b
+                  id="homeV4ContractCredits"
+                >
+                  +0 CREDITS
+                </b>
+              </div>
+            </div>
+
+            <div
+              class="home-v4-contract-bottom"
+            >
+              <span>
+                CONTRACT NETWORK // READY
+              </span>
+
+              <button
+                type="button"
+                class="home-v4-contract-button"
+                data-home-v4-action="contracts"
+              >
+                OPEN CONTRACTS
+
+                <span
+                  aria-hidden="true"
+                >
+                  →
+                </span>
+              </button>
+            </div>
+
+          </article>
 
         </section>
 
@@ -1712,128 +1839,7 @@ window.addEventListener(
           </article>
 
 
-          <!-- =================================================
-               ACTIVE CONTRACT
-               ================================================= -->
-
-          <article
-            class="home-v4-contract"
-            aria-label="Active contract"
-          >
-
-            <div
-              class="home-v4-contract-head"
-            >
-              <div>
-                <span
-                  class="home-v4-contract-kicker"
-                >
-                  ACTIVE CONTRACT
-                </span>
-
-                <strong
-                  id="homeV4ContractType"
-                >
-                  CONTRACT // ONLINE
-                </strong>
-              </div>
-
-              <span
-                id="homeV4ContractStatus"
-                class="home-v4-contract-status"
-              >
-                AVAILABLE
-              </span>
-            </div>
-
-            <div
-              class="home-v4-contract-main"
-            >
-              <span
-                id="homeV4ContractCode"
-                class="home-v4-contract-code"
-              >
-                CONTRACT // LOADING
-              </span>
-
-              <h3
-                id="homeV4ContractTitle"
-                class="home-v4-contract-title"
-              >
-                SCANNING CONTRACT NETWORK
-              </h3>
-
-              <p
-                id="homeV4ContractDescription"
-                class="home-v4-contract-description"
-              >
-                READING AVAILABLE CONTRACT DATA...
-              </p>
-            </div>
-
-            <div
-              class="home-v4-contract-meta"
-            >
-              <div>
-                <small>
-                  MISSION
-                </small>
-
-                <b
-                  id="homeV4ContractMission"
-                >
-                  —
-                </b>
-              </div>
-
-              <div>
-                <small>
-                  REWARD
-                </small>
-
-                <b
-                  id="homeV4ContractReward"
-                >
-                  +0 XP
-                </b>
-              </div>
-
-              <div>
-                <small>
-                  PAYLOAD
-                </small>
-
-                <b
-                  id="homeV4ContractCredits"
-                >
-                  +0 CREDITS
-                </b>
-              </div>
-            </div>
-
-            <div
-              class="home-v4-contract-bottom"
-            >
-              <span>
-                CONTRACT NETWORK // READY
-              </span>
-
-              <button
-                type="button"
-                class="home-v4-contract-button"
-                data-home-v4-action="contracts"
-              >
-                OPEN CONTRACTS
-
-                <span
-                  aria-hidden="true"
-                >
-                  →
-                </span>
-              </button>
-            </div>
-
-          </article>
+        
 
         <article
   class="home-v4-unlock"
@@ -2143,61 +2149,7 @@ window.addEventListener(
       );
     }
 
-    /*
-     * CREDITS + OPTIONS
-     *
-     * Reuse the existing Credits node and existing Options button.
-     * No duplicate IDs and no duplicate handlers.
-     */
-    const homeCredits =
-      shell.querySelector('.home-v4-credits');
-
-    const homeOptions =
-      shell.querySelector(
-        '[data-home-v4-action="options"]'
-      );
-
-    const homeFooterLeft =
-      shell.querySelector('.home-v4-bottom-left');
-
-    const homeStatusDivider =
-      shell.querySelector(
-        '.home-v4-status-divider'
-      );
-
-    if (
-      homeCredits instanceof HTMLElement &&
-      homeOptions instanceof HTMLElement &&
-      homeFooterLeft instanceof HTMLElement
-    ) {
-      const footerActions =
-        document.createElement('div');
-
-      footerActions.className =
-        'home-v5-footer-actions';
-
-      footerActions.setAttribute(
-        'aria-label',
-        'Credits and options'
-      );
-
-      homeFooterLeft.append(
-        footerActions
-      );
-
-      footerActions.append(
-        homeCredits,
-        homeOptions
-      );
-
-      /*
-       * Credits left the top status panel,
-       * so the old divider is no longer needed.
-       */
-      homeStatusDivider?.remove();
-    }
-
-    syncHomeProfile();
+     syncHomeProfile();
 
     bindOnce(
       shell.querySelector(
