@@ -1,0 +1,412 @@
+/*
+ * RUNNER RELAY — HOME V5 FINAL LAYOUT
+ * Final presentation pass for the Home V4 composition.
+ * Behavior remains owned by home-v3.js.
+ */
+
+/* =========================================================
+   01 — SYSTEM ONLINE // CENTER TOP
+   ========================================================= */
+
+#intro.home-v3 .home-v4-topbar{
+  position:relative;
+}
+
+#intro.home-v3 .home-v4-status{
+  position:absolute;
+  top:6px;
+  left:50%;
+  z-index:30;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+
+  min-height:30px;
+  padding:7px 12px;
+
+  transform:translateX(-50%);
+
+  border:1px solid rgba(125,211,252,.30);
+  border-radius:4px;
+
+  background:linear-gradient(
+    135deg,
+    rgba(7,24,38,.94),
+    rgba(2,8,15,.90)
+  );
+
+  box-shadow:
+    0 12px 32px rgba(0,0,0,.30),
+    0 0 26px rgba(56,189,248,.08),
+    inset 0 1px rgba(255,255,255,.07);
+
+  white-space:nowrap;
+}
+
+#intro.home-v3 .home-v4-status-dot{
+  width:5px;
+  height:5px;
+  flex:0 0 5px;
+  border-radius:50%;
+  background:#67e8b0;
+  box-shadow:
+    0 0 8px rgba(103,232,176,.85),
+    0 0 16px rgba(103,232,176,.28);
+}
+
+#intro.home-v3 .home-v4-status b{
+  color:#edf7fb;
+  font:
+    900 7px/1
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+  letter-spacing:.16em;
+}
+
+#intro.home-v3 .home-v4-status span:last-child{
+  color:#718896;
+  font:
+    800 6px/1
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+  letter-spacing:.12em;
+}
+
+/* =========================================================
+   02 — ACTIVE CONTRACT // CUSTOM LETTER DESIGN
+   ========================================================= */
+
+#intro.home-v3 .home-v4-contract-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+
+  position:relative;
+
+  padding:5px 9px 5px 10px;
+
+  border-left:2px solid #38bdf8;
+  border-bottom:1px solid rgba(125,211,252,.22);
+
+  background:linear-gradient(
+    90deg,
+    rgba(56,189,248,.13),
+    rgba(56,189,248,.035),
+    transparent
+  );
+
+  color:#f4fbff;
+
+  font:
+    950 8px/1
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  letter-spacing:.19em;
+  text-transform:uppercase;
+
+  text-shadow:
+    0 0 10px rgba(56,189,248,.42),
+    0 4px 14px rgba(0,0,0,.45);
+
+  box-shadow:
+    -8px 0 22px rgba(56,189,248,.07),
+    inset 0 1px rgba(255,255,255,.06);
+}
+
+#intro.home-v3 .home-v4-contract-kicker::before{
+  content:"01";
+  color:#38bdf8;
+  font-size:6px;
+  letter-spacing:.14em;
+  text-shadow:0 0 9px rgba(56,189,248,.65);
+}
+
+#intro.home-v3 .home-v4-contract-title{
+  position:relative;
+  width:max-content;
+  max-width:100%;
+
+  margin:8px 0 7px;
+
+  color:#f5fbff;
+
+  font:
+    950 clamp(18px,2vw,28px)/.95
+    Arial,
+    sans-serif;
+
+  letter-spacing:.025em;
+  text-transform:uppercase;
+
+  text-shadow:
+    0 0 18px rgba(56,189,248,.20),
+    0 10px 28px rgba(0,0,0,.46);
+}
+
+#intro.home-v3 .home-v4-contract-title::after{
+  content:"";
+  display:block;
+  width:72%;
+  height:2px;
+  margin-top:7px;
+  background:linear-gradient(
+    90deg,
+    #38bdf8,
+    #8b5cf6 62%,
+    transparent
+  );
+  box-shadow:0 0 12px rgba(56,189,248,.25);
+}
+
+/* =========================================================
+   03 — RELAY NETWORK + RECENT ACTIVITY // SAME ROW
+   ========================================================= */
+
+@media (min-width:781px){
+  #intro.home-v3 .home-v4-mission-wrap{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas:
+      "relay activity"
+      "mission mission"
+      "daily daily"
+      "unlock unlock"
+      "badge badge"
+      "profile profile";
+    align-content:start;
+    align-items:start;
+    gap:14px;
+  }
+
+  #intro.home-v3 .home-v5-live-feed{
+    grid-area:relay;
+    width:100%;
+    margin:0;
+  }
+
+  #intro.home-v3 .home-v4-activity{
+    grid-area:activity;
+    width:100%;
+    margin:0;
+    align-self:stretch;
+  }
+
+  #intro.home-v3 .home-v4-mission{
+    grid-area:mission;
+    width:100%;
+  }
+
+  #intro.home-v3 .home-v4-daily{
+    grid-area:daily;
+    width:100%;
+  }
+
+  #intro.home-v3 .home-v4-unlock{
+    grid-area:unlock;
+    width:100%;
+  }
+
+  #intro.home-v3 .home-v4-badge{
+    grid-area:badge;
+    justify-self:start;
+  }
+
+  #intro.home-v3 .home-v4-profile{
+    grid-area:profile;
+  }
+}
+
+/* Recent activity gets the same visual language as Relay Network. */
+#intro.home-v3 .home-v4-activity{
+  position:relative;
+  min-width:0;
+
+  padding:13px 14px;
+
+  border:1px solid rgba(125,211,252,.20);
+  border-radius:6px;
+
+  background:linear-gradient(
+    145deg,
+    rgba(7,23,38,.90),
+    rgba(2,9,17,.88)
+  );
+
+  box-shadow:
+    0 18px 48px rgba(0,0,0,.28),
+    0 0 25px rgba(56,189,248,.05),
+    inset 0 1px rgba(255,255,255,.05);
+
+  overflow:hidden;
+}
+
+#intro.home-v3 .home-v4-activity::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:2px;
+  height:100%;
+  background:linear-gradient(
+    180deg,
+    #38bdf8,
+    #8b5cf6,
+    transparent
+  );
+  box-shadow:0 0 12px rgba(56,189,248,.30);
+}
+
+#intro.home-v3 .home-v4-activity-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:9px;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(125,211,252,.11);
+}
+
+#intro.home-v3 .home-v4-activity-head span:first-child{
+  color:#edf7fb;
+  font:
+    950 7px/1
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+  letter-spacing:.17em;
+}
+
+#intro.home-v3 .home-v4-activity-head b{
+  color:#67e8b0;
+  font:
+    900 5px/1
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+  letter-spacing:.12em;
+}
+
+#intro.home-v3 .home-v4-activity-item{
+  min-width:0;
+}
+
+#intro.home-v3 .home-v4-activity-item strong{
+  color:#dcecf3;
+  font-size:7px;
+}
+
+#intro.home-v3 .home-v4-activity-item small{
+  color:#718896;
+  font-size:5px;
+}
+
+#intro.home-v3 .home-v4-activity-dot{
+  background:#38bdf8;
+  box-shadow:
+    0 0 7px rgba(56,189,248,.72),
+    0 0 13px rgba(56,189,248,.20);
+}
+
+/* =========================================================
+   04 — MOBILE
+   ========================================================= */
+
+@media (max-width:780px){
+  #intro.home-v3 .home-v4-status{
+    top:7px;
+    left:50%;
+    min-height:28px;
+    padding:6px 9px;
+  }
+
+  #intro.home-v3 .home-v4-status span:last-child{
+    display:none;
+  }
+
+  #intro.home-v3 .home-v4-contract-title{
+    font-size:clamp(17px,5.2vw,24px);
+    letter-spacing:.02em;
+  }
+
+  #intro.home-v3 .home-v4-contract-kicker{
+    font-size:7px;
+    letter-spacing:.16em;
+  }
+
+  #intro.home-v3 .home-v4-mission-wrap{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:
+      "relay"
+      "activity"
+      "mission"
+      "daily"
+      "unlock"
+      "badge"
+      "profile";
+    gap:12px;
+    align-content:start;
+  }
+
+  #intro.home-v3 .home-v5-live-feed{
+    grid-area:relay;
+    width:100%;
+  }
+
+  #intro.home-v3 .home-v4-activity{
+    grid-area:activity;
+    width:100%;
+    margin:0;
+  }
+
+  #intro.home-v3 .home-v4-mission{
+    grid-area:mission;
+  }
+
+  #intro.home-v3 .home-v4-daily{
+    grid-area:daily;
+  }
+
+  #intro.home-v3 .home-v4-unlock{
+    grid-area:unlock;
+  }
+
+  #intro.home-v3 .home-v4-badge{
+    grid-area:badge;
+  }
+
+  #intro.home-v3 .home-v4-profile{
+    grid-area:profile;
+  }
+}
+
+@media (max-width:430px){
+  #intro.home-v3 .home-v4-status{
+    padding:6px 8px;
+  }
+
+  #intro.home-v3 .home-v4-status b{
+    font-size:6px;
+  }
+}
