@@ -133,3 +133,72 @@
   #relay-gameplay-keyboard-hud .relay-keycap{width:34px !important;height:27px !important}
   #relay-gameplay-keyboard-hud .relay-key-label{width:48px !important;font-size:6px !important}
 }
+
+/* --------------------------------------------------------------------------
+   MOBILE ROTATION / VIEWPORT RECOVERY
+   The Android browser can report a stale dynamic viewport for one layout
+   frame immediately after portrait -> landscape. Do not size the primary
+   application shell from 100dvw/100dvh in that transition. Fixed/inset
+   geometry follows the actual containing viewport and prevents the page
+   from remaining trapped in the old portrait-width column.
+   -------------------------------------------------------------------------- */
+@media (pointer: coarse){
+  html,
+  body{
+    width:100% !important;
+    min-width:0 !important;
+    height:100% !important;
+    min-height:100% !important;
+    margin:0 !important;
+    overflow:hidden !important;
+    overscroll-behavior:none !important;
+  }
+
+  #game,
+  #play,
+  #phaser-game,
+  .relay-splash{
+    position:fixed !important;
+    inset:0 !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    height:100% !important;
+    min-height:0 !important;
+    max-height:none !important;
+    margin:0 !important;
+    overflow:hidden !important;
+  }
+
+  #phaser-game canvas{
+    display:block !important;
+    width:100% !important;
+    height:100% !important;
+    max-width:none !important;
+    max-height:none !important;
+    margin:0 !important;
+  }
+
+  .relay-splash picture,
+  .relay-splash-art{
+    position:absolute !important;
+    inset:0 !important;
+    display:block !important;
+    width:100% !important;
+    min-width:100% !important;
+    max-width:none !important;
+    height:100% !important;
+    min-height:100% !important;
+    max-height:none !important;
+  }
+
+  @media (orientation: landscape){
+    #game,
+    #play,
+    #phaser-game,
+    .relay-splash{
+      width:100% !important;
+      height:100% !important;
+    }
+  }
+}
