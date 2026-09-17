@@ -9,10 +9,15 @@
   >
 
   <meta name="format-detection" content="telephone=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#02050a">
 
   <title>Relay Runner | Rooftop Game</title>
 
   <link rel="icon" href="/favicon.ico">
+  <link rel="manifest" href="./manifest.json">
 
   <!-- SPLASH CSS MUST ARRIVE BEFORE THE MODULE BOOTSTRAP -->
   <link rel="stylesheet" href="splash-progress-visibility.css">
@@ -248,6 +253,7 @@
   <script type="module" src="/src/systems/runtime-guard.js"></script>
   <script type="module" src="/src/systems/core-stability.js"></script>
   <script type="module" src="/src/systems/mobile-viewport-hardening.js"></script>
+  <script type="module" src="/src/systems/mobile-auto-landscape-v1.js"></script>
 
   <script type="module" src="/src/main.js"></script>
   <script type="module" src="./splash-loader-v2.js"></script>
