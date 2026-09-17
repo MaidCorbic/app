@@ -1,0 +1,10 @@
+/* Mobile launch surface: no visual rotation hack. */
+@media (max-width: 900px) and (orientation: portrait) {
+  #relaySplash,
+  #relayAutoLandscapeGate {
+    width: 100vw;
+    height: 100dvh;
+    min-width: 100vw;
+    min-height: 100dvh;
+  }
+}
