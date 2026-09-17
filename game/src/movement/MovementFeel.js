@@ -14,14 +14,12 @@ export const MOVEMENT_FEEL = {
   airDeceleration: 900,
   coyoteMs: 135,
   jumpBufferMs: 145,
-  jumpVelocity: -735,
+  jumpVelocity: -800,
+  jumpForwardSpeed: 220,
   jumpCutMultiplier: 0.42,
   maxFallSpeed: 1180,
 };
 
-// Phaser.Math has no MoveTowards helper (that's a Unity API name), so we
-// implement the standard "move current towards target by at most maxDelta"
-// behavior locally.
 function moveTowards(current, target, maxDelta) {
   if (Math.abs(target - current) <= maxDelta) return target;
   return current + Math.sign(target - current) * maxDelta;
@@ -39,7 +37,6 @@ export function createMovementFeelState(now = 0) {
 
 export function applyHorizontalMovementFeel({ player, axis = 0, delta = 16, maxSpeed = null }) {
   if (!player?.body) return false;
-
   const body = player.body;
   const grounded = !!(body.blocked?.down || body.touching?.down);
   const configuredMax = Number.isFinite(maxSpeed) && maxSpeed > 0 ? maxSpeed : MOVEMENT_FEEL.maxRunSpeed;
@@ -75,6 +72,10 @@ export function applyMovementFeel({ player, axis = 0, jumpPressed = false, jumpR
   const coyoteJump = now <= s.coyoteUntil;
   if (bufferedJump && (grounded || coyoteJump)) {
     body.setVelocityY(MOVEMENT_FEEL.jumpVelocity);
+    if (Math.abs(body.velocity.x) < MOVEMENT_FEEL.jumpForwardSpeed * 0.75) {
+      const facing = player.flipX ? -1 : 1;
+      body.setVelocityX(facing * MOVEMENT_FEEL.jumpForwardSpeed);
+    }
     s.jumpPressedAt = -Infinity;
     s.coyoteUntil = -Infinity;
   }
