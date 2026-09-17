@@ -1,0 +1,11 @@
+{
+  "name": "Runner Relay",
+  "short_name": "Runner Relay",
+  "start_url": "/game/",
+  "scope": "/game/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#02050a",
+  "theme_color": "#02050a",
+  "description": "Runner Relay rooftop delivery game"
+}
