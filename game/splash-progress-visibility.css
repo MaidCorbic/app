@@ -1,3 +1,9 @@
+.relay-splash.is-hidden{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
 .relay-splash-status {
   display: inline-block;
   color: #f5f7fb;
