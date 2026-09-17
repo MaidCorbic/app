@@ -416,8 +416,10 @@
    ========================================================= */
 
 #intro.home-v3 .home-v5-start .home-v4-primary-content{
-  align-items:flex-start;
-  gap:4px;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  text-align:center;
 }
 
 #intro.home-v3 .home-v5-start .home-v4-primary-content > span:first-child{
@@ -425,17 +427,14 @@
   font-family:Arial,Helvetica,sans-serif;
   font-weight:900;
   letter-spacing:.14em;
+  text-align:center;
   text-shadow:
     0 0 12px rgba(56,189,248,.28),
     0 3px 10px rgba(0,0,0,.45);
 }
 
 #intro.home-v3 .home-v5-start .home-v5-start-ready{
-  color:#67e8b0;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  font-weight:800;
-  letter-spacing:.13em;
-  text-shadow:0 0 9px rgba(103,232,176,.34);
+  display:none !important;
 }
 
 #intro.home-v3 .home-v5-start .home-v4-primary-arrow{
