@@ -1153,7 +1153,7 @@ window.addEventListener(
 
     shell.innerHTML = `
  
- <header class="home-v4-topbar">
+  <header class="home-v4-topbar">
 
   <div
     class="home-v4-brand"
@@ -1185,6 +1185,17 @@ window.addEventListener(
         <small>CREDITS</small>
         <strong id="homeV4Credits">0</strong>
       </span>
+    </div>
+
+    <div
+      class="home-v4-status"
+      aria-label="System status"
+    >
+      <span class="home-v4-status-dot"></span>
+
+      <b>SYSTEM ONLINE</b>
+
+      <span>NIGHT SHIFT</span>
     </div>
 
   </div>
@@ -1311,7 +1322,54 @@ window.addEventListener(
             · PRESS ENTER TO BEGIN
           </p>
 
-              <!-- =================================================
+          <div
+            class="home-v5-relay-status"
+            aria-label="Relay deployment status"
+          >
+            <div
+              class="home-v5-relay-status-head"
+            >
+              <span
+                class="home-v5-relay-status-title"
+              >
+                &gt; RELAY STATUS
+              </span>
+
+              <span
+                class="home-v5-relay-status-live"
+              >
+                <i aria-hidden="true"></i>
+                ONLINE
+              </span>
+            </div>
+
+            <div
+              class="home-v5-relay-status-track"
+              aria-hidden="true"
+            >
+              <span></span>
+            </div>
+
+            <div
+              class="home-v5-relay-status-meta"
+            >
+              <span>
+                <small>CHANNEL</small>
+                <b>01</b>
+              </span>
+
+              <span>
+                <small>LINK</small>
+                <b>SECURE</b>
+              </span>
+
+              <span>
+                <small>STATUS</small>
+                <b>READY</b>
+              </span>
+            </div>
+          </div>
+            <!-- =================================================
                ACTIVE CONTRACT
                ================================================= -->
 
@@ -2061,50 +2119,6 @@ window.addEventListener(
 
     const homeDaily =
       shell.querySelector('.home-v4-daily');
-
-    const missionWraps =
-  [...shell.querySelectorAll('.home-v4-mission-wrap')];
-
-const contractZone =
-  missionWraps[0] || null;
-
-const homeContract =
-  shell.querySelector('.home-v4-contract');
-
-const homeActivity =
-  shell.querySelector('.home-v4-activity');
-
-const relayStatus =
-  shell.querySelector('.home-v5-relay-status');
-
-    /* =========================================================
-   HOME V5 // CONTRACT + RECENT ACTIVITY
-   Keep both as existing DOM nodes.
-   Presentation-only re-layout.
-   ========================================================= */
-
-relayStatus?.remove();
-
-if (
-  contractZone instanceof HTMLElement &&
-  homeContract instanceof HTMLElement &&
-  homeActivity instanceof HTMLElement
-) {
-  const contractActivityGrid =
-    document.createElement('div');
-
-  contractActivityGrid.className =
-    'home-v5-contract-activity-grid';
-
-  contractActivityGrid.append(
-    homeContract,
-    homeActivity
-  );
-
-  contractZone.replaceChildren(
-    contractActivityGrid
-  );
-}
 
     /*
      * START + DAILY OPERATION
