@@ -1,109 +1,173 @@
-.relay-splash-status{display:inline-block;color:#f5f7fb;font-weight:700;min-width:0}.relay-splash-meta{justify-content:space-between}.relay-splash-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:480px){.relay-splash-status{max-width:calc(100% - 56px)}}
+.relay-splash-status {
+  display: inline-block;
+  color: #f5f7fb;
+  font-weight: 700;
+  min-width: 0;
+}
+
+.relay-splash-meta {
+  justify-content: space-between;
+}
+
+.relay-splash-status {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .relay-splash-status {
+    max-width: calc(100% - 56px);
+  }
+}
 
 /* =========================================================
-   MOBILE LANDSCAPE CONTRACT
-   Keep the gameplay surface tied to the real mobile viewport.
-   Phaser remains the owner of canvas sizing; this layer only
-   prevents parent containers from clipping or creating scroll.
+   MOBILE VIEWPORT CONTRACT
+   Phaser owns canvas scaling.
+   This layer only controls the fullscreen containers.
    ========================================================= */
-@media (pointer: coarse){
-  html,body{
-    width:100%;
-    height:100%;
-    min-width:100%;
-    min-height:100%;
-    margin:0;
-    overflow:hidden!important;
-    overscroll-behavior:none;
+
+@media (pointer: coarse) {
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    margin: 0;
+    overflow: hidden !important;
+    overscroll-behavior: none;
   }
 
-  #game{
-    width:100dvw!important;
-    height:100dvh!important;
-    min-width:0!important;
-    min-height:0!important;
-    overflow:hidden!important;
+  #game {
+    width: 100dvw !important;
+    height: 100dvh !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
-  #play{
-    position:absolute!important;
-    inset:0!important;
-    width:100%!important;
-    height:100%!important;
-    min-width:0!important;
-    min-height:0!important;
-    overflow:hidden!important;
+  #play {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100dvw !important;
+    height: 100dvh !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
-  #phaser-game{
-    position:absolute!important;
-    inset:0!important;
-    width:100%!important;
-    height:100%!important;
-    min-width:0!important;
-    min-height:0!important;
-    overflow:hidden!important;
-    touch-action:none!important;
+  #phaser-game {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    touch-action: none !important;
   }
 
-  #phaser-game canvas{
-    display:block!important;
-    width:100%!important;
-    height:100%!important;
-    max-width:none!important;
-    max-height:none!important;
-    touch-action:none!important;
+  /*
+   * IMPORTANT:
+   * Do not force width/height on the Phaser canvas.
+   *
+   * Phaser.Scale.ENVELOP on mobile and
+   * Phaser.Scale.RESIZE on desktop must control
+   * the canvas dimensions.
+   */
+
+  #phaser-game canvas {
+    display: block !important;
+    max-width: none !important;
+    max-height: none !important;
+    touch-action: none !important;
   }
 
-  .mobile-controls{
-    position:fixed!important;
-    inset:0!important;
-    width:100dvw!important;
-    height:100dvh!important;
-    pointer-events:none!important;
-    z-index:120!important;
+  .mobile-controls {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100dvw !important;
+    height: 100dvh !important;
+    pointer-events: none !important;
+    z-index: 120 !important;
   }
 
-  .mobile-controls button{
-    pointer-events:auto;
-    touch-action:manipulation;
-  }
-}
-
-/* Portrait is not a gameplay layout. Do not squeeze a 16:9 run into
-   a portrait viewport; show a deterministic rotate-device gate instead. */
-@media (pointer: coarse) and (orientation: portrait){
-  #game{visibility:hidden!important}
-
-  body::after{
-    content:'ROTATE DEVICE  •  LANDSCAPE MODE REQUIRED';
-    position:fixed;
-    inset:0;
-    z-index:999998;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    box-sizing:border-box;
-    padding:24px;
-    background:radial-gradient(circle at 50% 42%,rgba(10,35,54,.98),rgba(1,5,10,.99) 68%);
-    border:1px solid rgba(0,234,255,.18);
-    color:#8dfaff;
-    font:900 clamp(10px,3vw,15px)/1.5 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-    letter-spacing:.14em;
-    text-align:center;
-    text-transform:uppercase;
-    text-shadow:0 0 18px rgba(0,234,255,.35);
-  }
-
-  /* Splash stays visible while the device is portrait, but its art uses
-     contain so it cannot be cropped or stretched. */
-  .relay-splash .relay-splash-art{
-    object-fit:contain!important;
-    object-position:center!important;
+  .mobile-controls button {
+    pointer-events: auto;
+    touch-action: manipulation;
   }
 }
 
-@media (pointer: coarse) and (orientation: landscape){
-  body::after{display:none!important}
-  #game{visibility:visible!important}
+/* =========================================================
+   PORTRAIT
+   Portrait is not a gameplay layout.
+   Show the rotate-device gate instead of squeezing 16:9.
+   ========================================================= */
+
+@media (pointer: coarse) and (orientation: portrait) {
+  #game {
+    visibility: hidden !important;
+  }
+
+  body::after {
+    content: 'ROTATE DEVICE  •  LANDSCAPE MODE REQUIRED';
+
+    position: fixed;
+    inset: 0;
+
+    z-index: 999998;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+    padding: 24px;
+
+    background:
+      radial-gradient(
+        circle at 50% 42%,
+        rgba(10, 35, 54, 0.98),
+        rgba(1, 5, 10, 0.99) 68%
+      );
+
+    border: 1px solid rgba(0, 234, 255, 0.18);
+
+    color: #8dfaff;
+
+    font:
+      900 clamp(10px, 3vw, 15px) / 1.5
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+
+    letter-spacing: 0.14em;
+    text-align: center;
+    text-transform: uppercase;
+
+    text-shadow: 0 0 18px rgba(0, 234, 255, 0.35);
+  }
+
+  .relay-splash .relay-splash-art {
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+}
+
+/* =========================================================
+   LANDSCAPE
+   ========================================================= */
+
+@media (pointer: coarse) and (orientation: landscape) {
+  body::after {
+    display: none !important;
+  }
+
+  #game {
+    visibility: visible !important;
+  }
 }
