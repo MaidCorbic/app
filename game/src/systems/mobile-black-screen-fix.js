@@ -1,7 +1,7 @@
 // Mobile black-screen recovery for the existing Relay Runner scene lifecycle.
 import './mobile-cinematic-bypass-v1.js';
 import { RunnerScene } from '../scenes/RunnerScene.js';
-import { applyMovementFeel, createMovementFeelState } from '../movement/MovementFeel.js';
+import { applyHorizontalMovementFeel } from '../movement/MovementFeel.js';
 
 if (!window.__relayMobileBlackScreenFix) {
   window.__relayMobileBlackScreenFix = true;
@@ -42,30 +42,14 @@ if (!window.__relayMobileBlackScreenFix) {
       const bridge = window.__relayDesktopKeyboardBridge;
       if (!bridge) return;
 
-      // E/Q are routed through RunnerScene.mobileActions when Phaser's native
-      // keyboard state is not receiving the physical desktop event. This keeps
-      // one action owner and avoids double fire/sword calls.
-      if ((code === 'keye' || code === 'keyq') && !event.__relaySyntheticAction) {
-        const scene = window.__relayRunnerScene;
-        const gameplayActive = !!scene?.scene?.isActive?.() && !scene.finished && !scene.respawning && !scene.cinematicActive;
-        if (gameplayActive) {
-          const nativeKey = code === 'keye' ? scene.keys?.E : scene.keys?.Q;
-          if (!nativeKey?.isDown) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            if (scene.mobileActions) {
-              if (code === 'keye') scene.mobileActions.fire = true;
-              if (code === 'keyq') scene.mobileActions.sword = true;
-            }
-          }
-        }
-      }
-
+      // Keep E/Q in Phaser's native keyboard pipeline. The gameplay systems
+      // already own fire/sword; intercepting them here caused missed actions.
       if ([
         'keyw', 'keys', 'keya', 'keyd',
-        'space', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright',
-        'keye', 'keyq'
-      ].includes(code)) bridge.down.add(code);
+        'space', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'
+      ].includes(code)) {
+        bridge.down.add(code);
+      }
     }, true);
 
     window.addEventListener('keyup', event => {
@@ -76,7 +60,7 @@ if (!window.__relayMobileBlackScreenFix) {
   }
 
   const originalUpdate = RunnerScene.prototype.update;
-  if (!RunnerScene.prototype.__relayPlayerMovementHotfixV8) {
+  if (!RunnerScene.prototype.__relayPlayerMovementHotfixV9) {
     RunnerScene.prototype.update = function relayKeyboardControlUpdate(time, delta, ...args) {
       const result = originalUpdate.apply(this, [time, delta, ...args]);
 
@@ -91,67 +75,57 @@ if (!window.__relayMobileBlackScreenFix) {
         const bridge = window.__relayDesktopKeyboardBridge?.down;
         const down = (key, ...codes) => Boolean(key?.isDown) || Boolean(bridge && codes.some(code => bridge.has(code)));
 
+        // 2D runner layout: W/D drive forward/right, S/A drive backward/left.
+        // Arrow keys remain native and are intentionally preserved.
         const w = down(keys.W, 'keyw');
         const s = down(keys.S, 'keys');
         const a = down(keys.A, 'keya');
         const d = down(keys.D, 'keyd');
-        const forward = w || d;
-        const backward = s || a;
-        const axis = (forward ? 1 : 0) - (backward ? 1 : 0);
+        const right = w || d;
+        const left = s || a;
+        const axis = (right ? 1 : 0) - (left ? 1 : 0);
         const hasWASDMovement = axis !== 0;
 
         const dt = Number.isFinite(Number(delta)) && Number(delta) > 0 ? Math.min(Number(delta), 50) : 16.67;
-        const now = Number.isFinite(Number(time)) ? Number(time) : (this.time?.now || performance.now());
 
-        const spaceDown = down(keys.SPACE, 'space');
-        const upDown = down(cursors.up, 'arrowup');
-        const jumpDown = spaceDown || upDown;
-        const jumpJustPressed = jumpDown && !this.__relayJumpWasDown;
-        const jumpJustReleased = !jumpDown && Boolean(this.__relayJumpWasDown);
+        // Movement hotfix owns only horizontal WASD steering. Vertical jump
+        // physics stays exclusively inside RunnerScene, preventing two jump
+        // controllers from fighting over velocity.y.
+        if (hasWASDMovement) {
+          applyHorizontalMovementFeel({
+            player,
+            axis,
+            delta: dt,
+            maxSpeed: 475,
+          });
+
+          // Give a jump launched while moving a clean horizontal carry so the
+          // player travels onto the next platform instead of hopping straight up.
+          const jumpDown = down(keys.SPACE, 'space') || down(cursors.up, 'arrowup');
+          const jumpJustPressed = jumpDown && !this.__relayJumpWasDown;
+          if (jumpJustPressed) {
+            const body = player.body;
+            const carry = Math.max(Math.abs(Number(body.velocity.x) || 0), 300);
+            body.setVelocityX(Math.sign(axis) * Math.min(carry, 475));
+          }
+        }
+
+        // Track jump state only for the horizontal carry above. Do NOT write
+        // velocity.y here; RunnerScene's native jump/coyote/buffer system is
+        // the single source of truth for Space/Up.
+        const jumpDown = down(keys.SPACE, 'space') || down(cursors.up, 'arrowup');
         this.__relayJumpWasDown = jumpDown;
 
-        if (!this.__relayKeyboardMovementState) this.__relayKeyboardMovementState = createMovementFeelState(now);
-        const movementState = this.__relayKeyboardMovementState;
-
-        if (hasWASDMovement || jumpJustPressed || jumpJustReleased) {
-          applyMovementFeel({
-            player,
-            axis: hasWASDMovement ? axis : 0,
-            jumpPressed: jumpJustPressed,
-            jumpReleased: jumpJustReleased,
-            now,
-            delta: dt,
-            state: movementState,
-          });
-        }
-
-        if (hasWASDMovement) {
-          const vx = Number(player.body.velocity.x) || 0;
-          if (Math.abs(vx) < 90) player.body.setVelocityX(axis * 145);
-        }
-
-        // Flight was already activating with F, but its old vertical speed was
-        // too weak. While flying, strengthen the actual flight controller and
-        // keep A/D as horizontal steering while W/S control vertical travel.
-        const flight = this.__flightHVG;
-        if (flight && (flight.state === 'flying' || flight.state === 'hover')) {
-          flight.verticalSpeed = 440;
-          if (flight.state === 'hover') {
-            player.body.setVelocityY(0);
-          } else {
-            const vertical = (w ? -1 : 0) + (s ? 1 : 0);
-            if (vertical !== 0) player.body.setVelocityY(vertical * flight.verticalSpeed);
-          }
-          const horizontal = (d ? 1 : 0) - (a ? 1 : 0);
-          if (horizontal !== 0) player.body.setVelocityX(horizontal * 560);
-        }
+        // Do not override flight velocities here. flight-hover-glide-v1 owns
+        // F, vertical flight, hover, gravity restoration and landing. Likewise,
+        // dash-dodge-v1 owns Shift/dash and must remain the sole dash authority.
       } catch (error) {
         console.warn('[Relay Runner] keyboard controls skipped:', error);
       }
 
       return result;
     };
-    RunnerScene.prototype.__relayPlayerMovementHotfixV8 = true;
+    RunnerScene.prototype.__relayPlayerMovementHotfixV9 = true;
   }
 
   let lastSurfaceWidth = 0;
