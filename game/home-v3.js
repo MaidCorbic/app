@@ -2094,10 +2094,108 @@ window.addEventListener(
       </button>
     `;
 
-    intro.append(
+      intro.append(
       scene,
       shell
     );
+
+    /* =========================================================
+       HOME V5 // FINAL COMMAND LAYOUT
+       Move existing presentation-only elements into their
+       final visual zones without duplicating state or handlers.
+       ========================================================= */
+
+    const homeCopy =
+      shell.querySelector('.home-v4-copy');
+
+    const homeActions =
+      shell.querySelector('.home-v4-actions');
+
+    const homeDaily =
+      shell.querySelector('.home-v4-daily');
+
+    /*
+     * START + DAILY OPERATION
+     *
+     * Daily Operation is already the canonical Home presentation
+     * of the existing daily challenge system. We only move its
+     * existing DOM node; no new state or handlers are created.
+     */
+    if (
+      homeCopy instanceof HTMLElement &&
+      homeActions instanceof HTMLElement &&
+      homeDaily instanceof HTMLElement
+    ) {
+      const commandRow =
+        document.createElement('div');
+
+      commandRow.className =
+        'home-v5-command-row';
+
+      homeCopy.insertBefore(
+        commandRow,
+        homeActions
+      );
+
+      commandRow.append(
+        homeActions,
+        homeDaily
+      );
+    }
+
+    /*
+     * CREDITS + OPTIONS
+     *
+     * Reuse the existing Credits node and existing Options button.
+     * No duplicate IDs and no duplicate handlers.
+     */
+    const homeCredits =
+      shell.querySelector('.home-v4-credits');
+
+    const homeOptions =
+      shell.querySelector(
+        '[data-home-v4-action="options"]'
+      );
+
+    const homeFooterLeft =
+      shell.querySelector('.home-v4-bottom-left');
+
+    const homeStatusDivider =
+      shell.querySelector(
+        '.home-v4-status-divider'
+      );
+
+    if (
+      homeCredits instanceof HTMLElement &&
+      homeOptions instanceof HTMLElement &&
+      homeFooterLeft instanceof HTMLElement
+    ) {
+      const footerActions =
+        document.createElement('div');
+
+      footerActions.className =
+        'home-v5-footer-actions';
+
+      footerActions.setAttribute(
+        'aria-label',
+        'Credits and options'
+      );
+
+      homeFooterLeft.append(
+        footerActions
+      );
+
+      footerActions.append(
+        homeCredits,
+        homeOptions
+      );
+
+      /*
+       * Credits left the top status panel,
+       * so the old divider is no longer needed.
+       */
+      homeStatusDivider?.remove();
+    }
 
     syncHomeProfile();
 
@@ -2448,3 +2546,4 @@ window.addEventListener(
     boot();
   }
 })();
+
