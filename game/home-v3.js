@@ -17,6 +17,243 @@
   const $ = id => document.getElementById(id);
 
   let homeProfileStateAPI = null;
+  let homeDailyChallengesAPI = null;
+  let homeContractsAPI = null;
+
+  /* =========================================================
+     DAILY OPERATION
+     ========================================================= */
+
+  const syncHomeDailyOperation = async () => {
+    try {
+      const {
+        dailyChallenges,
+        loadState
+      } =
+        homeDailyChallengesAPI ||
+        await import('./src/state.js');
+
+      homeDailyChallengesAPI = {
+        dailyChallenges,
+        loadState
+      };
+
+      const state = loadState();
+
+      const dailyState =
+        state?.daily || {
+          progress: {},
+          claimed: []
+        };
+
+      const challenges =
+        Array.isArray(dailyChallenges)
+          ? dailyChallenges
+          : [];
+
+      /*
+       * Home is presentation-only.
+       *
+       * The authoritative daily challenge
+       * definitions and progress remain in
+       * src/state.js.
+       */
+      const challenge =
+        challenges.find(item => {
+          const progress =
+            Number(
+              dailyState.progress?.[item.id]
+            ) || 0;
+
+          const target =
+            Math.max(
+              1,
+              Number(item.target) || 1
+            );
+
+          const claimed =
+            Array.isArray(dailyState.claimed) &&
+            dailyState.claimed.includes(
+              item.id
+            );
+
+          return !claimed && progress < target;
+        }) ||
+        challenges.find(item => {
+          const progress =
+            Number(
+              dailyState.progress?.[item.id]
+            ) || 0;
+
+          const target =
+            Math.max(
+              1,
+              Number(item.target) || 1
+            );
+
+          return progress < target;
+        }) ||
+        challenges[0];
+
+      const titleEl =
+        $('homeV4DailyTitle');
+
+      const descriptionEl =
+        $('homeV4DailyDescription');
+
+      const progressEl =
+        $('homeV4DailyProgress');
+
+      const fillEl =
+        $('homeV4DailyProgressFill');
+
+      const rewardEl =
+        $('homeV4DailyReward');
+
+      const creditsEl =
+        $('homeV4DailyCredits');
+
+      const statusEl =
+        $('homeV4DailyStatus');
+
+      if (!challenge) {
+        if (titleEl) {
+          titleEl.textContent =
+            'NO DAILY OPERATION';
+        }
+
+        if (descriptionEl) {
+          descriptionEl.textContent =
+            'NO ACTIVE DAILY OBJECTIVE AVAILABLE.';
+        }
+
+        if (progressEl) {
+          progressEl.textContent = '—';
+        }
+
+        if (fillEl) {
+          fillEl.style.width = '0%';
+        }
+
+        if (rewardEl) {
+          rewardEl.textContent = '+0 XP';
+        }
+
+        if (creditsEl) {
+          creditsEl.textContent = '+0 CREDITS';
+        }
+
+        if (statusEl) {
+          statusEl.textContent = 'STANDBY';
+        }
+
+        return;
+      }
+
+      const progress =
+        Math.max(
+          0,
+          Number(
+            dailyState.progress?.[challenge.id]
+          ) || 0
+        );
+
+      const target =
+        Math.max(
+          1,
+          Number(challenge.target) || 1
+        );
+
+      const claimed =
+        Array.isArray(dailyState.claimed) &&
+        dailyState.claimed.includes(
+          challenge.id
+        );
+
+      const complete =
+        progress >= target;
+
+      const percent =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            Math.round(
+              (progress / target) * 100
+            )
+          )
+        );
+
+      if (titleEl) {
+        titleEl.textContent =
+          String(
+            challenge.label ||
+            'DAILY OPERATION'
+          ).toUpperCase();
+      }
+
+      if (descriptionEl) {
+        descriptionEl.textContent =
+          'COMPLETE THIS OBJECTIVE DURING NORMAL PLAY.';
+      }
+
+      if (progressEl) {
+        progressEl.textContent =
+          `${progress.toLocaleString()} / ${target.toLocaleString()}`;
+      }
+
+      if (fillEl) {
+        fillEl.style.width =
+          `${percent}%`;
+      }
+
+      if (rewardEl) {
+        rewardEl.textContent =
+          `+${(
+            Number(challenge.xp) || 0
+          ).toLocaleString()} XP`;
+      }
+
+      if (creditsEl) {
+        creditsEl.textContent =
+          `+${(
+            Number(challenge.credits) || 0
+          ).toLocaleString()} CREDITS`;
+      }
+
+      if (statusEl) {
+        statusEl.textContent =
+          claimed
+            ? 'CLAIMED'
+            : complete
+              ? 'READY TO CLAIM'
+              : 'IN PROGRESS';
+      }
+
+      const dailyCard =
+        document.querySelector(
+          '.home-v4-daily'
+        );
+
+      if (dailyCard instanceof HTMLElement) {
+        dailyCard.classList.toggle(
+          'is-complete',
+          complete
+        );
+
+        dailyCard.classList.toggle(
+          'is-claimed',
+          claimed
+        );
+      }
+
+    } catch (error) {
+      console.error(
+        '[RelayRunner] Daily operation sync failed:',
+        error
+      );
+    }
+  };
 
   /* =========================================================
      HOME PROFILE
@@ -40,9 +277,19 @@
 
       const state = loadState();
 
+      /*
+       * Home only reads contract definitions.
+       * It does not create or own contract progression state.
+       */
+      if (!homeContractsAPI) {
+        homeContractsAPI =
+          await import('./src/contracts.js');
+      }
+
       const xp = Number(state.xp) || 0;
-      const signals = Number(state.signals) || 0;
-      const totalRuns = Number(state.totalRuns) || 0;
+    const signals = Number(state.signals) || 0;
+const credits = Number(state.credits) || 0;
+const totalRuns = Number(state.totalRuns) || 0;
       const bestRun = Number(state.bestRun) || 0;
 
       const lastRunTime =
@@ -96,11 +343,35 @@
       const xpFillEl = $('homeV4XpFill');
       const bestRunEl = $('homeV4BestRun');
       const runsEl = $('homeV4Runs');
-      const signalsEl = $('homeV4Signals');
-      const missionXpEl = $('homeV4MissionXp');
+   const signalsEl = $('homeV4Signals');
+const creditsEl = $('homeV4Credits');
+const missionXpEl = $('homeV4MissionXp');
       const bestRatingEl = $('homeV4BestRating');
       const signalValueEl = $('homeV4SignalValue');
-      const signalFillEl = $('homeV4SignalFill');
+     const signalFillEl = $('homeV4SignalFill');
+
+const unlockLevelEl = $('homeV4UnlockLevel');
+const unlockTitleEl = $('homeV4UnlockTitle');
+const unlockTextEl = $('homeV4UnlockText');
+const unlockFillEl = $('homeV4UnlockFill');
+
+const activityOneEl =
+  $('homeV4ActivityOne');
+
+const activityOneMetaEl =
+  $('homeV4ActivityOneMeta');
+
+const activityTwoEl =
+  $('homeV4ActivityTwo');
+
+const activityTwoMetaEl =
+  $('homeV4ActivityTwoMeta');
+
+const activityThreeEl =
+  $('homeV4ActivityThree');
+
+const activityThreeMetaEl =
+  $('homeV4ActivityThreeMeta');
 
       const lastRunFeedEl = $('homeV5LastRunFeed');
       const runTimeEl = $('homeV5RunTime');
@@ -108,12 +379,56 @@
       const runScoreEl = $('homeV5RunScore');
       const runRatingEl = $('homeV5RunRating');
 
-      if (lastRunFeedEl) {
-        lastRunFeedEl.textContent =
-          totalRuns > 0
-            ? 'LAST RUN // RECORDED'
-            : 'LAST RUN // READY';
-      }
+   if (lastRunFeedEl) {
+  lastRunFeedEl.textContent =
+    totalRuns > 0
+      ? 'LAST RUN // RECORDED'
+      : 'LAST RUN // READY';
+}
+
+/* RECENT ACTIVITY */
+
+if (activityOneEl) {
+  activityOneEl.textContent =
+    totalRuns > 0
+      ? 'RUN RECORDED'
+      : 'NETWORK READY';
+}
+
+if (activityOneMetaEl) {
+  activityOneMetaEl.textContent =
+    totalRuns > 0
+      ? `RUNS // ${totalRuns.toLocaleString()}`
+      : 'RELAY CHANNEL // 01';
+}
+
+if (activityTwoEl) {
+  activityTwoEl.textContent =
+    signals > 0
+      ? `${signals.toLocaleString()} SIGNALS RECOVERED`
+      : 'AWAITING FIRST SIGNAL';
+}
+
+if (activityTwoMetaEl) {
+  activityTwoMetaEl.textContent =
+    signals > 0
+      ? 'SIGNAL NETWORK // ACTIVE'
+      : 'SIGNAL NETWORK // STANDBY';
+}
+
+if (activityThreeEl) {
+  activityThreeEl.textContent =
+    xp > 0
+      ? `XP BALANCE // ${xp.toLocaleString()}`
+      : 'CONTRACT NETWORK READY';
+}
+
+if (activityThreeMetaEl) {
+  activityThreeMetaEl.textContent =
+    xp > 0
+      ? 'PROGRESSION // ACTIVE'
+      : 'CONTRACTS // ONLINE';
+}
 
       if (runTimeEl) {
         runTimeEl.textContent =
@@ -185,10 +500,15 @@
           totalRuns.toLocaleString();
       }
 
-      if (signalsEl) {
-        signalsEl.textContent =
-          signals.toLocaleString();
-      }
+   if (signalsEl) {
+  signalsEl.textContent =
+    signals.toLocaleString();
+}
+
+if (creditsEl) {
+  creditsEl.textContent =
+    credits.toLocaleString();
+}
 
       if (missionXpEl) {
         const missionXp =
@@ -272,20 +592,38 @@
           `${String(missionSignals).padStart(2, '0')} / ${String(missionSignalTarget).padStart(2, '0')}`;
       }
 
-      if (signalFillEl) {
-        const signalProgress =
-          missionSignalTarget > 0
-            ? Math.round(
-                (
-                  missionSignals /
-                  missionSignalTarget
-                ) * 100
-              )
-            : 0;
+if (signalFillEl) {
+  const signalProgress =
+    missionSignalTarget > 0
+      ? Math.round(
+          (missionSignals / missionSignalTarget) * 100
+        )
+      : 0;
 
-        signalFillEl.style.width =
-          `${signalProgress}%`;
-      }
+  signalFillEl.style.width = `${signalProgress}%`;
+}
+
+/* NEXT UNLOCK */
+const nextLevel = (level.level || 1) + 1;
+const unlockProgress = xpProgress;
+
+if (unlockLevelEl) {
+  unlockLevelEl.textContent = `LV ${String(nextLevel).padStart(2, '0')}`;
+}
+
+if (unlockTitleEl) {
+  unlockTitleEl.textContent = `SECTOR ${String(nextLevel).padStart(2, '0')} // SKYLINE`;
+}
+
+if (unlockTextEl) {
+  unlockTextEl.textContent = `${unlockProgress}%`;
+}
+
+if (unlockFillEl) {
+  unlockFillEl.style.width = `${unlockProgress}%`;
+}
+
+      await syncHomeContract();
 
     } catch (error) {
       console.error(
@@ -293,6 +631,8 @@
         error
       );
     }
+
+      void syncHomeDailyOperation();
   };
 
   window.addEventListener(
@@ -306,13 +646,12 @@
     }
   );
 
-  window.addEventListener(
-    'relay:mission-complete',
-    () => {
-      syncHomeProfile();
-    }
-  );
-
+window.addEventListener(
+  'relay:mission-complete',
+  () => {
+    void syncHomeProfile();
+  }
+);
   const introVisible = () => {
     const intro = $('intro');
 
@@ -524,6 +863,172 @@
     return true;
   };
 
+   /* =========================================================
+     ACTIVE CONTRACT
+     ========================================================= */
+
+  const syncHomeContract = async () => {
+    try {
+      const {
+        contracts
+      } =
+        homeContractsAPI ||
+        await import('./src/contracts.js');
+
+      homeContractsAPI = {
+        contracts
+      };
+
+      const list =
+        Array.isArray(contracts)
+          ? contracts
+          : [];
+
+      const contract =
+        list[0] || null;
+
+      const typeEl =
+        $('homeV4ContractType');
+
+      const statusEl =
+        $('homeV4ContractStatus');
+
+      const codeEl =
+        $('homeV4ContractCode');
+
+      const titleEl =
+        $('homeV4ContractTitle');
+
+      const descriptionEl =
+        $('homeV4ContractDescription');
+
+      const missionEl =
+        $('homeV4ContractMission');
+
+      const rewardEl =
+        $('homeV4ContractReward');
+
+      const creditsEl =
+        $('homeV4ContractCredits');
+
+      if (!contract) {
+        if (typeEl) {
+          typeEl.textContent =
+            'CONTRACT // OFFLINE';
+        }
+
+        if (statusEl) {
+          statusEl.textContent =
+            'STANDBY';
+        }
+
+        if (codeEl) {
+          codeEl.textContent =
+            'CONTRACT // NONE';
+        }
+
+        if (titleEl) {
+          titleEl.textContent =
+            'NO CONTRACT AVAILABLE';
+        }
+
+        if (descriptionEl) {
+          descriptionEl.textContent =
+            'NO ACTIVE CONTRACT DATA AVAILABLE.';
+        }
+
+        if (missionEl) {
+          missionEl.textContent = '—';
+        }
+
+        if (rewardEl) {
+          rewardEl.textContent = '+0 XP';
+        }
+
+        if (creditsEl) {
+          creditsEl.textContent = '+0 CREDITS';
+        }
+
+        return;
+      }
+
+      const type =
+        String(
+          contract.type ||
+          'CONTRACT'
+        ).toUpperCase();
+
+      const id =
+        String(
+          contract.id ||
+          'unknown'
+        ).toUpperCase();
+
+      const mission =
+        String(
+          contract.missionId ||
+          '—'
+        ).toUpperCase();
+
+      const label =
+        String(
+          contract.label ||
+          'CONTRACT OBJECTIVE'
+        ).toUpperCase();
+
+      const xp =
+        Number(contract.xp) || 0;
+
+      const credits =
+        Number(contract.credits) || 0;
+
+      if (typeEl) {
+        typeEl.textContent =
+          `${type} // CONTRACT`;
+      }
+
+      if (statusEl) {
+        statusEl.textContent =
+          'AVAILABLE';
+      }
+
+      if (codeEl) {
+        codeEl.textContent =
+          `CONTRACT // ${id}`;
+      }
+
+      if (titleEl) {
+        titleEl.textContent =
+          label;
+      }
+
+      if (descriptionEl) {
+        descriptionEl.textContent =
+          'COMPLETE THIS CONTRACT DURING NORMAL PLAY.';
+      }
+
+      if (missionEl) {
+        missionEl.textContent =
+          mission;
+      }
+
+      if (rewardEl) {
+        rewardEl.textContent =
+          `+${xp.toLocaleString()} XP`;
+      }
+
+      if (creditsEl) {
+        creditsEl.textContent =
+          `+${credits.toLocaleString()} CREDITS`;
+      }
+    } catch (error) {
+      console.error(
+        '[RelayRunner] Active contract sync failed:',
+        error
+      );
+    }
+  };
+
   /* =========================================================
      HOME STATE
      ========================================================= */
@@ -661,14 +1166,35 @@
           </span>
         </div>
 
-        <div
-          class="home-v4-status"
-          aria-label="System status"
-        >
-          <span class="home-v4-status-dot"></span>
-          <b>SYSTEM ONLINE</b>
-          <span>NIGHT SHIFT</span>
-        </div>
+     <div
+  class="home-v4-status"
+  aria-label="System status"
+>
+  <div
+    class="home-v4-credits"
+    aria-label="Credits"
+  >
+    <span
+      class="home-v4-credits-icon"
+      aria-hidden="true"
+    >
+      ◈
+    </span>
+
+    <span class="home-v4-credits-data">
+      <small>CREDITS</small>
+      <strong id="homeV4Credits">0</strong>
+    </span>
+  </div>
+
+  <div class="home-v4-status-divider"></div>
+
+  <span class="home-v4-status-dot"></span>
+
+  <b>SYSTEM ONLINE</b>
+
+  <span>NIGHT SHIFT</span>
+</div>
       </header>
 
       <main class="home-v4-main">
@@ -697,69 +1223,94 @@
             than anyone else can. Keep the line open.
           </p>
 
-          <div
-            class="home-v4-actions"
-            aria-label="Main menu"
-          >
+   <div
+  class="home-v4-actions"
+  aria-label="Main menu"
+>
 
-            <button
-              id="start"
-              class="home-v4-primary home-v5-start"
-              type="button"
-              aria-label="Start Run"
-            >
-              <span
-                class="home-v5-start-scan"
-                aria-hidden="true"
-              ></span>
+  <button
+    id="start"
+    class="home-v4-primary home-v5-start"
+    type="button"
+    aria-label="Start Run"
+  >
+    <span
+      class="home-v5-start-glow"
+      aria-hidden="true"
+    ></span>
 
-              <span
-                class="home-v4-primary-content"
-              >
-                <span
-                  class="home-v5-start-label"
-                >
-                  START RUN
-                </span>
+    <span
+      class="home-v5-start-scan"
+      aria-hidden="true"
+    ></span>
 
-                <span
-                  class="home-v4-arrow-key"
-                  aria-hidden="true"
-                >
-                  ENTER
-                </span>
+    <span
+      class="home-v4-primary-content"
+    >
+      <span class="home-v5-start-main">
+        <span
+          class="home-v5-start-label"
+        >
+          START RUN
+        </span>
 
-                <span
-                  class="home-v4-primary-arrow"
-                  aria-hidden="true"
-                >
-                  →
-                </span>
-              </span>
+        <small
+          class="home-v5-start-sub"
+        >
+          DEPLOY TO OLD QUARTER
+        </small>
+      </span>
 
-              <span
-                class="home-v5-start-ready"
-                aria-hidden="true"
-              >
-                READY
-              </span>
-            </button>
+      <span
+        class="home-v5-start-key"
+        aria-hidden="true"
+      >
+        ENTER
+      </span>
 
-            <button
-              id="continue"
-              class="home-v4-secondary hidden"
-              type="button"
-            >
-              <span>
-                CONTINUE
-              </span>
+      <span
+        class="home-v4-primary-arrow"
+        aria-hidden="true"
+      >
+        →
+      </span>
+    </span>
 
-              <small>
-                RESUME LAST RUN
-              </small>
-            </button>
+    <span
+      class="home-v5-start-ready"
+      aria-hidden="true"
+    >
+      READY
+    </span>
+  </button>
 
-          </div>
+  <button
+    id="continue"
+    class="home-v4-secondary hidden"
+    type="button"
+    aria-label="Continue last run"
+  >
+    <span class="home-v5-continue-icon">
+      ↻
+    </span>
+
+    <span class="home-v5-continue-copy">
+      <strong>CONTINUE</strong>
+
+      <small>
+        RESUME LAST RUN
+      </small>
+    </span>
+
+    <span
+      class="home-v5-continue-arrow"
+      aria-hidden="true"
+    >
+      →
+    </span>
+  </button>
+
+</div>
 
           <p class="home-v4-micro">
             <b>DEPLOYMENT READY</b>
@@ -821,42 +1372,62 @@
           aria-label="Current mission"
         >
 
-          <aside
-            class="home-v5-live-feed"
-            aria-label="Relay network status"
-          >
-            <div class="home-v5-panel-head">
-              <span>
-                RELAY NETWORK
-              </span>
+         <aside
+  class="home-v5-live-feed"
+  aria-label="Relay network status"
+>
+  <div class="home-v5-panel-head">
+    <span>RELAY NETWORK</span>
+    <b><i></i> LIVE</b>
+  </div>
 
-              <b>
-                <i></i>
-                LIVE
-              </b>
-            </div>
+  <div class="home-v5-network-status">
 
-            <div class="home-v5-feed-line">
-              <span>&gt;</span>
-              <strong>
-                SIGNAL STABLE
-              </strong>
-            </div>
+    <div class="home-v5-network-row">
+      <span>
+        <i></i>
+        CORE
+      </span>
 
-            <div class="home-v5-feed-line">
-              <span>&gt;</span>
-              <strong>
-                03 NODES ONLINE
-              </strong>
-            </div>
+      <strong>ONLINE</strong>
+    </div>
 
-            <div class="home-v5-feed-line">
-              <span>&gt;</span>
-              <strong id="homeV5LastRunFeed">
-                LAST RUN // READY
-              </strong>
-            </div>
-          </aside>
+    <div class="home-v5-network-row">
+      <span>
+        <i></i>
+        SIGNAL
+      </span>
+
+      <strong>STABLE</strong>
+    </div>
+
+    <div class="home-v5-network-row">
+      <span>
+        <i></i>
+        CONTRACTS
+      </span>
+
+      <strong>READY</strong>
+    </div>
+
+    <div class="home-v5-network-row">
+      <span>
+        <i></i>
+        CHANNEL
+      </span>
+
+      <strong>SECURE</strong>
+    </div>
+
+  </div>
+
+  <div class="home-v5-feed-line">
+    <span>&gt;</span>
+    <strong id="homeV5LastRunFeed">
+      LAST RUN // READY
+    </strong>
+  </div>
+</aside>
 
           <article
             class="home-v4-mission"
@@ -1006,13 +1577,348 @@
                 </b>
               </div>
             </div>
+                 </article>
+
+                   <!-- =================================================
+               DAILY OPERATION
+               ================================================= -->
+
+          <article
+            class="home-v4-daily"
+            aria-label="Daily operation"
+          >
+
+            <div
+              class="home-v4-daily-head"
+            >
+              <div>
+                <span
+                  class="home-v4-daily-kicker"
+                >
+                  DAILY OPERATION
+                </span>
+
+                <strong>
+                  CITY RELAY NETWORK
+                </strong>
+              </div>
+
+              <span
+                id="homeV4DailyStatus"
+                class="home-v4-daily-status"
+              >
+                IN PROGRESS
+              </span>
+            </div>
+
+            <div
+              class="home-v4-daily-main"
+            >
+              <span
+                class="home-v4-daily-code"
+              >
+                DAILY // ACTIVE OBJECTIVE
+              </span>
+
+              <h3
+                id="homeV4DailyTitle"
+                class="home-v4-daily-title"
+              >
+                LOADING OPERATION
+              </h3>
+
+              <p
+                id="homeV4DailyDescription"
+                class="home-v4-daily-description"
+              >
+                READING RELAY NETWORK OBJECTIVE...
+              </p>
+            </div>
+
+            <div
+              class="home-v4-daily-progress"
+            >
+              <div
+                class="home-v4-daily-progress-meta"
+              >
+                <span>
+                  PROGRESS
+                </span>
+
+                <strong
+                  id="homeV4DailyProgress"
+                >
+                  0 / 0
+                </strong>
+              </div>
+
+              <div
+                class="home-v4-daily-progress-track"
+                aria-hidden="true"
+              >
+                <i
+                  id="homeV4DailyProgressFill"
+                  style="width:0%"
+                ></i>
+              </div>
+            </div>
+
+            <div
+              class="home-v4-daily-bottom"
+            >
+              <div
+                class="home-v4-daily-rewards"
+              >
+                <div>
+                  <small>
+                    REWARD
+                  </small>
+
+                  <b
+                    id="homeV4DailyReward"
+                  >
+                    +0 XP
+                  </b>
+                </div>
+
+                <div>
+                  <small>
+                    PAYLOAD
+                  </small>
+
+                  <b
+                    id="homeV4DailyCredits"
+                  >
+                    +0 CREDITS
+                  </b>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="home-v4-daily-button"
+                data-home-v4-action="daily"
+              >
+                CHALLENGES
+
+                <span
+                  aria-hidden="true"
+                >
+                  →
+                </span>
+              </button>
+            </div>
+
           </article>
 
-          <div
-            class="home-v4-badge"
+
+          <!-- =================================================
+               ACTIVE CONTRACT
+               ================================================= -->
+
+          <article
+            class="home-v4-contract"
+            aria-label="Active contract"
           >
-            LIVE RELAY CHANNEL // 01
-          </div>
+
+            <div
+              class="home-v4-contract-head"
+            >
+              <div>
+                <span
+                  class="home-v4-contract-kicker"
+                >
+                  ACTIVE CONTRACT
+                </span>
+
+                <strong
+                  id="homeV4ContractType"
+                >
+                  CONTRACT // ONLINE
+                </strong>
+              </div>
+
+              <span
+                id="homeV4ContractStatus"
+                class="home-v4-contract-status"
+              >
+                AVAILABLE
+              </span>
+            </div>
+
+            <div
+              class="home-v4-contract-main"
+            >
+              <span
+                id="homeV4ContractCode"
+                class="home-v4-contract-code"
+              >
+                CONTRACT // LOADING
+              </span>
+
+              <h3
+                id="homeV4ContractTitle"
+                class="home-v4-contract-title"
+              >
+                SCANNING CONTRACT NETWORK
+              </h3>
+
+              <p
+                id="homeV4ContractDescription"
+                class="home-v4-contract-description"
+              >
+                READING AVAILABLE CONTRACT DATA...
+              </p>
+            </div>
+
+            <div
+              class="home-v4-contract-meta"
+            >
+              <div>
+                <small>
+                  MISSION
+                </small>
+
+                <b
+                  id="homeV4ContractMission"
+                >
+                  —
+                </b>
+              </div>
+
+              <div>
+                <small>
+                  REWARD
+                </small>
+
+                <b
+                  id="homeV4ContractReward"
+                >
+                  +0 XP
+                </b>
+              </div>
+
+              <div>
+                <small>
+                  PAYLOAD
+                </small>
+
+                <b
+                  id="homeV4ContractCredits"
+                >
+                  +0 CREDITS
+                </b>
+              </div>
+            </div>
+
+            <div
+              class="home-v4-contract-bottom"
+            >
+              <span>
+                CONTRACT NETWORK // READY
+              </span>
+
+              <button
+                type="button"
+                class="home-v4-contract-button"
+                data-home-v4-action="contracts"
+              >
+                OPEN CONTRACTS
+
+                <span
+                  aria-hidden="true"
+                >
+                  →
+                </span>
+              </button>
+            </div>
+
+          </article>
+
+        <article
+  class="home-v4-unlock"
+  aria-label="Next unlock"
+>
+  <div class="home-v4-unlock-head">
+    <span>NEXT UNLOCK</span>
+    <b id="homeV4UnlockLevel">LV 08</b>
+  </div>
+
+  <h3 id="homeV4UnlockTitle">
+    SECTOR 02 // SKYLINE
+  </h3>
+
+  <p id="homeV4UnlockDesc">
+    Reach the required level to unlock the next district.
+  </p>
+
+  <div class="home-v4-unlock-progress">
+    <div class="home-v4-unlock-meta">
+      <span>PROGRESS</span>
+      <strong id="homeV4UnlockText">0%</strong>
+    </div>
+
+    <div class="home-v4-unlock-bar">
+      <i id="homeV4UnlockFill" style="width:0%"></i>
+    </div>
+  </div>
+</article>
+
+<div
+  class="home-v4-activity"
+  aria-label="Recent activity"
+>
+  <div class="home-v4-activity-head">
+    <span>RECENT ACTIVITY</span>
+    <b>LIVE FEED</b>
+  </div>
+
+  <div class="home-v4-activity-list">
+
+    <div class="home-v4-activity-item">
+      <span class="home-v4-activity-dot"></span>
+      <div>
+        <strong id="homeV4ActivityOne">
+          NETWORK READY
+        </strong>
+        <small id="homeV4ActivityOneMeta">
+          RELAY CHANNEL // 01
+        </small>
+      </div>
+    </div>
+
+    <div class="home-v4-activity-item">
+      <span class="home-v4-activity-dot"></span>
+      <div>
+        <strong id="homeV4ActivityTwo">
+          AWAITING FIRST RUN
+        </strong>
+        <small id="homeV4ActivityTwoMeta">
+          TELEMETRY // STANDBY
+        </small>
+      </div>
+    </div>
+
+    <div class="home-v4-activity-item">
+      <span class="home-v4-activity-dot"></span>
+      <div>
+        <strong id="homeV4ActivityThree">
+          CONTRACT NETWORK READY
+        </strong>
+        <small id="homeV4ActivityThreeMeta">
+          CONTRACTS // ONLINE
+        </small>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div
+  class="home-v4-badge"
+>
+  LIVE RELAY CHANNEL // 01
+</div>
 
           <aside
             class="home-v4-profile"
@@ -1217,6 +2123,92 @@
       }
     );
 
+          bindOnce(
+      shell.querySelector(
+        '[data-home-v4-action="daily"]'
+      ),
+      'click',
+      event => {
+        event.preventDefault();
+
+        /*
+         * Open the existing Challenges system.
+         * Home does not create a duplicate challenge UI.
+         */
+        const target =
+          document.querySelector(
+            '#pauseMenu [data-tab="challenges"]'
+          );
+
+        if (
+          target instanceof HTMLElement
+        ) {
+          HTMLElement.prototype.click.call(
+            target
+          );
+
+          return;
+        }
+
+        const fallback =
+          document.querySelector(
+            '[data-relay-info="challenges"]'
+          );
+
+        if (
+          fallback instanceof HTMLElement
+        ) {
+          HTMLElement.prototype.click.call(
+            fallback
+          );
+        }
+      }
+    );
+
+    bindOnce(
+      shell.querySelector(
+        '[data-home-v4-action="contracts"]'
+      ),
+      'click',
+      event => {
+        event.preventDefault();
+
+        /*
+         * Contracts currently live inside the
+         * existing Challenges system.
+         *
+         * Do not create a second contracts screen.
+         */
+        const target =
+          document.querySelector(
+            '#pauseMenu [data-tab="challenges"]'
+          );
+
+        if (
+          target instanceof HTMLElement
+        ) {
+          HTMLElement.prototype.click.call(
+            target
+          );
+
+          return;
+        }
+
+        const fallback =
+          document.querySelector(
+            '[data-relay-info="challenges"]'
+          );
+
+        if (
+          fallback instanceof HTMLElement
+        ) {
+          HTMLElement.prototype.click.call(
+            fallback
+          );
+        }
+      }
+    );
+    
     bindOnce(
       shell.querySelector(
         '[data-home-v4-action="options"]'
