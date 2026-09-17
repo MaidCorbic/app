@@ -1,7 +1,10 @@
-/* Final mobile rotation guard: keep the Phaser host and game area truly full-screen. */
+/* Legacy compatibility layer. The active mobile viewport contract is
+   owned by splash-progress-visibility.css + mobile-viewport-hardening.js.
+   Keep this file free of dynamic viewport units so an accidental import
+   cannot reintroduce the Android rotation half-screen bug. */
 html, body, #game, #play {
   width: 100%;
-  min-width: 100%;
+  min-width: 0;
 }
 
 html, body {
@@ -12,7 +15,7 @@ html, body {
 
 #game, #play {
   height: 100%;
-  min-height: 100dvh;
+  min-height: 0;
 }
 
 #phaser-game {
@@ -33,22 +36,11 @@ html, body {
   max-height: none !important;
 }
 
-@media (orientation: landscape) and (pointer: coarse) {
+@media (orientation: landscape) and (pointer: coarse),
+       (orientation: portrait) and (pointer: coarse) {
   #play {
-    width: 100vw !important;
-    width: 100dvw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    min-height: 100svh !important;
-  }
-}
-
-@media (orientation: portrait) and (pointer: coarse) {
-  #play {
-    width: 100vw !important;
-    width: 100dvw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    min-height: 100svh !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
   }
 }
