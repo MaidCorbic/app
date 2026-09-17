@@ -1103,8 +1103,8 @@ window.addEventListener(
      * The existing game runtime owns their
      * actual gameplay behaviour.
      */
-    const sourceStart = $('start');
-    const sourceContinue = $('continue');
+const sourceStart = $('start');
+const sourceContinue = $('continue');
 
     intro.dataset.homeV4Built = '1';
     intro.classList.add('home-v3');
@@ -2281,25 +2281,28 @@ window.addEventListener(
 
     forceStartVisible(start);
 
-    bindOnce(
-      start,
-      'click',
-      event => {
-        event.preventDefault();
+   bindOnce(
+  start,
+  'click',
+  event => {
+    event.preventDefault();
 
-        if (
-          !(sourceStart instanceof HTMLElement)
-        ) {
-          return;
-        }
+    try {
+      const target = document.querySelector(
+        '#start:not(.home-v4-primary):not(.home-v5-start)'
+      );
 
-        try {
-          HTMLElement.prototype.click.call(
-            sourceStart
-          );
-        } catch {}
+      if (target instanceof HTMLElement) {
+        HTMLElement.prototype.click.call(target);
+        return;
       }
-    );
+
+      window.dispatchEvent(
+        new CustomEvent('relay:home-start')
+      );
+    } catch {}
+  }
+);
 
     /*
      * CONTINUE
