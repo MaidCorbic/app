@@ -3,15 +3,20 @@ import './cinematic-arrival-v2.css';
 /* Cinematic Arrival V5 — keep the mission card visible long enough to actually read. */
 (() => {
   if (window.__relayCinematicArrivalV5) return;
+
+  // splash-loader-v2.js is the single owner of #relaySplash lifecycle.
+  // Do not install a second release timer or remove the splash from here.
+  if (window.__relaySplashV3) return;
+
   window.__relayCinematicArrivalV5 = true;
 
   const start = () => {
     const splash = document.getElementById('relaySplash');
     if (!splash) return;
 
-  splash.classList.add('cinematic-arrival');
-splash.setAttribute('data-arrival-mode', 'relay');
-splash.setAttribute('aria-busy', 'true');
+    splash.classList.add('cinematic-arrival');
+    splash.setAttribute('data-arrival-mode', 'relay');
+    splash.setAttribute('aria-busy', 'true');
 
     const ui = splash.querySelector('.relay-splash-ui');
     const label = ui?.querySelector('.relay-splash-status');
@@ -22,12 +27,12 @@ splash.setAttribute('aria-busy', 'true');
 
     const signal = document.createElement('div');
     signal.className = 'arrival-signal';
-signal.setAttribute('aria-label', 'Relay synchronization');
-signal.innerHTML = '<i></i><i></i><i></i><span>RELAY LINK</span>';
+    signal.setAttribute('aria-label', 'Relay synchronization');
+    signal.innerHTML = '<i></i><i></i><i></i><span>RELAY LINK</span>';
 
     const particles = document.createElement('div');
     particles.className = 'arrival-particles';
-particles.innerHTML = '<i></i>'.repeat(16);
+    particles.innerHTML = '<i></i>'.repeat(16);
 
     splash.append(signal, particles);
 
@@ -47,10 +52,10 @@ particles.innerHTML = '<i></i>'.repeat(16);
 
     const setProgress = value => {
       progress = Math.max(progress, Math.min(100, Math.round(value)));
- bar.style.width = `${progress}%`;
-bar.setAttribute('aria-valuenow', String(progress));
-percent.textContent = `${progress}%`;
-label.textContent = statusFor(progress);
+      bar.style.width = `${progress}%`;
+      bar.setAttribute('aria-valuenow', String(progress));
+      percent.textContent = `${progress}%`;
+      label.textContent = statusFor(progress);
     };
 
     const release = reason => {
