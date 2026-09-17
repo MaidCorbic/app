@@ -1,54 +1,85 @@
-/* Final mobile rotation guard: keep the Phaser host and game area truly full-screen. */
-html, body, #game, #play {
+/* =========================================================
+   MOBILE VIEWPORT
+   Phaser owns the canvas scaling.
+   This file only controls the fullscreen containers.
+   ========================================================= */
+
+html,
+body,
+#game,
+#play {
   width: 100%;
   min-width: 100%;
 }
 
-html, body {
-  min-height: 100%;
+html,
+body {
   height: 100%;
+  min-height: 100%;
+  margin: 0;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
-#game, #play {
+#game,
+#play {
   height: 100%;
   min-height: 100dvh;
+  overflow: hidden;
 }
 
 #phaser-game {
   position: absolute !important;
   inset: 0 !important;
+
   width: 100% !important;
   height: 100% !important;
+
   min-width: 0 !important;
   min-height: 0 !important;
+
   overflow: hidden !important;
 }
 
+/*
+ * IMPORTANT:
+ * Do NOT force width/height on the Phaser canvas here.
+ *
+ * Phaser.Scale.ENVELOP / RESIZE must be allowed to control
+ * the actual canvas dimensions.
+ */
+
 #phaser-game > canvas {
   display: block !important;
-  width: 100% !important;
-  height: 100% !important;
   max-width: none !important;
   max-height: none !important;
+  touch-action: none;
 }
+
+/* =========================================================
+   LANDSCAPE
+   ========================================================= */
 
 @media (orientation: landscape) and (pointer: coarse) {
   #play {
-    width: 100vw !important;
     width: 100dvw !important;
-    height: 100vh !important;
     height: 100dvh !important;
+
+    min-width: 0 !important;
     min-height: 100svh !important;
   }
 }
 
+/* =========================================================
+   PORTRAIT
+   ========================================================= */
+
 @media (orientation: portrait) and (pointer: coarse) {
   #play {
-    width: 100vw !important;
     width: 100dvw !important;
-    height: 100vh !important;
     height: 100dvh !important;
+
+    min-width: 0 !important;
     min-height: 100svh !important;
   }
 }
