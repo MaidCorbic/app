@@ -42,8 +42,14 @@
     </div>
   </div>
 
-  <main id="game">
-    <section id="play" class="play">
+<main id="game">
+
+  <div hidden aria-hidden="true">
+    <button id="start" type="button"></button>
+    <button id="continue" type="button"></button>
+  </div>
+
+  <section id="play" class="play">
       <div id="phaser-game" aria-label="Relay Runner game world"></div>
       <div class="vignette"></div>
 
@@ -107,43 +113,8 @@
     </section>
 
     <section id="intro" class="overlay intro">
-      <div class="menu-backdrop" aria-hidden="true">
-        <span class="backdrop-moon"></span>
-        <span class="backdrop-orbit orbit-one"></span>
-        <span class="backdrop-orbit orbit-two"></span>
-        <span class="backdrop-city city-one"></span>
-        <span class="backdrop-city city-two"></span>
-        <span class="backdrop-rain"></span>
-      </div>
-
-      <div class="info-launcher">
-        <button class="faq-launcher" type="button" data-relay-info="faq"><span class="faq-glyph">?</span>FAQ</button>
-        <button class="info-circle" type="button" data-relay-info="update" aria-label="Latest update"><span class="info-glyph" aria-hidden="true"></span></button>
-      </div>
-
-      <div class="main-menu">
-        <header class="main-menu-header">
-          <div class="menu-brand"><span class="menu-mark">R</span><span>RELAY RUNNER</span></div>
-          <span class="menu-version">CHAPTER 01 / NIGHT SHIFT</span>
-        </header>
-        <main class="main-menu-body">
-          <section class="title-lockup">
-            <p class="eyebrow">A ROOFTOP DELIVERY GAME</p>
-            <h1>RELAY<br><em>RUNNER</em></h1>
-            <p class="menu-tagline">Run the sleeping city. Carry the signal farther than anyone else can.</p>
-            <div class="menu-actions">
-              <button id="start" class="play-button" type="button"><span>PLAY NOW</span><b aria-hidden="true">→</b></button>
-              <button id="continue" class="continue-button hidden" type="button">CONTINUE<span aria-hidden="true">→</span></button>
-              <p>PRESS <b>ENTER</b> TO BEGIN</p>
-            </div>
-            <nav class="title-secondary" aria-label="Title menu">
-              <button class="menu-option-button" type="button" data-title-panel="controls"><span>OPTIONS</span><small>SETTINGS &amp; CONTROLS</small></button>
-              <button id="exitTitle" class="menu-option-button exit-button" type="button"><span>EXIT</span><small>CLOSE SESSION</small></button>
-            </nav>
-          </section>
-        </main>
-      </div>
-    </section>
+  
+      </section>
 
     <section id="titlePanel" class="title-panel hidden" role="dialog" aria-modal="true" aria-labelledby="titlePanelHeading">
       <div class="title-panel-card">
