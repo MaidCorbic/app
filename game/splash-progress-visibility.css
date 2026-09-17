@@ -75,6 +75,11 @@
 @media (pointer: coarse) and (orientation: portrait){
   #game{visibility:hidden!important}
 
+  /* The splash used to sit at z-index:2147483647, so this gate existed
+     but could never be seen on a real phone. Put the portrait instruction
+     above the splash while keeping the splash available for landscape boot. */
+  .relay-splash{z-index:999997!important}
+
   body::after{
     content:'ROTATE DEVICE  •  LANDSCAPE MODE REQUIRED';
     position:fixed;
@@ -95,8 +100,8 @@
     text-shadow:0 0 18px rgba(0,234,255,.35);
   }
 
-  /* Splash stays visible while the device is portrait, but its art uses
-     contain so it cannot be cropped or stretched. */
+  /* Splash stays visible behind the gate while the device is portrait,
+     but its art uses contain so it cannot be cropped or stretched. */
   .relay-splash .relay-splash-art{
     object-fit:contain!important;
     object-position:center!important;
