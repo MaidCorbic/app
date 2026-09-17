@@ -4,6 +4,28 @@
   pointer-events:none !important;
 }
 
+/* =========================================================
+   ANDROID SPLASH EMERGENCY FAIL-OPEN
+   The JS loader has its own timeout, but this independent CSS
+   fallback guarantees that a stuck splash cannot remain forever.
+   ========================================================= */
+.relay-splash{
+  animation:relaySplashEmergencyDismiss 9s steps(1,end) forwards;
+}
+
+@keyframes relaySplashEmergencyDismiss{
+  0%,89%{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+  }
+  90%,100%{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+}
+
 .relay-splash-status {
   display: inline-block;
   color: #f5f7fb;
