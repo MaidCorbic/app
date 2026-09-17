@@ -137,6 +137,16 @@ if (isMobileDevice()) {
   let settleTimer = 0;
   let lastKey = '';
   let orientationEpoch = 0;
+  let syntheticResizeDepth = 0;
+
+  const dispatchPhaserResize = () => {
+    syntheticResizeDepth += 1;
+    try {
+      window.dispatchEvent(new Event('resize'));
+    } finally {
+      syntheticResizeDepth = Math.max(0, syntheticResizeDepth - 1);
+    }
+  };
 
   const settle = (reason = 'resize') => {
     cancelAnimationFrame(settleFrame);
@@ -154,7 +164,7 @@ if (isMobileDevice()) {
           // Phaser.Scale.RESIZE owns the canvas. Its documented browser resize
           // listener is the correct authority; we only trigger it after the
           // parent has settled instead of manually resizing the canvas.
-          window.dispatchEvent(new Event('resize'));
+          dispatchPhaserResize();
         }
       });
     });
@@ -186,7 +196,10 @@ if (isMobileDevice()) {
   observe(document.getElementById('play'));
   observe(document.getElementById('phaser-game'));
 
-  window.addEventListener('resize', () => settle('resize'), { passive: true });
+  window.addEventListener('resize', () => {
+    if (syntheticResizeDepth > 0) return;
+    settle('resize');
+  }, { passive: true });
   window.addEventListener('orientationchange', settleAfterRotation, { passive: true });
   window.addEventListener('pageshow', () => settle('pageshow'), { passive: true });
   window.visualViewport?.addEventListener('resize', () => settle('visual-viewport'), { passive: true });
