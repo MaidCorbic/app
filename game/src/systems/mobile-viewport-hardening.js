@@ -1,4 +1,3 @@
-// MOBILE VIEWPORT HARDENING V4
 //
 // Responsibility:
 // - mobile/touch detection
@@ -6,14 +5,16 @@
 // - portrait / landscape detection
 // - rotation handling
 // - settled viewport event
-// - mobile splash fail-safe
 //
 // IMPORTANT:
 // - Never dispatch a synthetic window.resize event.
 // - Never create a resize feedback loop.
 // - Do not resize the Phaser canvas directly.
+// - Do not control or remove the splash loader here.
+// - Splash lifecycle is owned by splash-loader-v2.js.
 // - Mobile gameplay input remains owned by
 //   mobile-input-single-owner-v1.js.
+//
 
 'use strict';
 
@@ -177,8 +178,8 @@ if (isMobileDevice()) {
       getViewportKey(viewport);
 
     /*
-     * Do nothing if the viewport has
-     * not actually changed.
+     * Do nothing if the viewport
+     * has not actually changed.
      */
     if (key === lastKey) {
       return;
@@ -212,14 +213,11 @@ if (isMobileDevice()) {
     /*
      * IMPORTANT:
      *
-     * Do NOT dispatch window.resize here.
+     * Never dispatch a synthetic
+     * window.resize event here.
      *
-     * The previous implementation did:
-     *
-     *   window.dispatchEvent(new Event('resize'))
-     *
-     * That can feed the viewport controller back
-     * into itself through other resize listeners.
+     * Other systems can listen to the
+     * native resize event independently.
      */
 
     document.dispatchEvent(
@@ -265,6 +263,10 @@ if (isMobileDevice()) {
         }
 
         raf2 = requestAnimationFrame(() => {
+          if (destroyed) {
+            return;
+          }
+
           applyViewport(reason);
         });
       });
@@ -386,179 +388,23 @@ if (isMobileDevice()) {
 
 
 /* =========================================================
-   MOBILE SPLASH FAIL-SAFE
+   END
    ========================================================= */
 
-(() => {
-  if (!isMobileDevice()) {
-    return;
-  }
-
-  const bootStarted =
-    performance.now();
-
-  const MIN_SPLASH_MS = 2200;
-  const SPLASH_REMOVE_DELAY = 700;
-  const CHECK_INTERVAL = 120;
-
-  let closed = false;
-  let timer = 0;
-
-
-  /* ---------------------------------------------------------
-     FIND SPLASH
-     --------------------------------------------------------- */
-
-  const findSplash = () => {
-    return (
-      document.getElementById(
-        'relaySplash'
-      ) ||
-      document.querySelector(
-        '.relay-splash'
-      )
-    );
-  };
-
-
-  /* ---------------------------------------------------------
-     FIND PHASER CANVAS
-     --------------------------------------------------------- */
-
-  const findPhaserCanvas = () => {
-    return document.querySelector(
-      '#phaser-game canvas'
-    );
-  };
-
-
-  /* ---------------------------------------------------------
-     CLOSE STUCK SPLASH
-     --------------------------------------------------------- */
-
-  const closeStuckSplash = (
-    reason = 'mobile-canvas-ready'
-  ) => {
-    if (closed) {
-      return true;
-    }
-
-    const splash =
-      findSplash();
-
-    const canvas =
-      findPhaserCanvas();
-
-    /*
-     * Never remove the splash until
-     * Phaser has actually mounted.
-     */
-    if (!splash || !canvas) {
-      return false;
-    }
-
-    const elapsed =
-      performance.now() -
-      bootStarted;
-
-    if (
-      elapsed <
-      MIN_SPLASH_MS
-    ) {
-      return false;
-    }
-
-    closed = true;
-
-    splash.setAttribute(
-      'aria-busy',
-      'false'
-    );
-
-    splash.dataset.relaySplashFailOpen =
-      reason;
-
-    splash.classList.add(
-      'is-hidden'
-    );
-
-    window.clearTimeout(
-      timer
-    );
-
-    timer = window.setTimeout(
-      () => {
-        if (
-          splash.isConnected
-        ) {
-          splash.remove();
-        }
-      },
-      SPLASH_REMOVE_DELAY
-    );
-
-    return true;
-  };
-
-
-  /* ---------------------------------------------------------
-     SPLASH CHECK LOOP
-     --------------------------------------------------------- */
-
-  const checkSplash = () => {
-    if (closed) {
-      return;
-    }
-
-    const closedNow =
-      closeStuckSplash();
-
-    if (!closedNow) {
-      timer =
-        window.setTimeout(
-          checkSplash,
-          CHECK_INTERVAL
-        );
-    }
-  };
-
-
-  /* ---------------------------------------------------------
-     START SAFETY NET
-     --------------------------------------------------------- */
-
-  const startSplashSafetyNet = () => {
-    /*
-     * Refresh CSS viewport state.
-     *
-     * This does NOT emit resize.
-     */
-    syncViewportNow();
-
-    window.clearTimeout(
-      timer
-    );
-
-    timer =
-      window.setTimeout(
-        checkSplash,
-        MIN_SPLASH_MS
-      );
-  };
-
-
-  if (
-    document.readyState ===
-    'loading'
-  ) {
-    document.addEventListener(
-      'DOMContentLoaded',
-      startSplashSafetyNet,
-      {
-        once: true
-      }
-    );
-  } else {
-    startSplashSafetyNet();
-  }
-})();
+/*
+ * IMPORTANT:
+ *
+ * Splash loader is intentionally NOT handled here.
+ *
+ * splash-loader-v2.js is the single owner of:
+ *
+ *   loader image
+ *   loader progress
+ *   Phaser readiness
+ *   splash completion
+ *   splash fade-out
+ *   splash removal
+ *
+ * This prevents two independent systems from trying
+ * to close/remove #relaySplash at the same time.
+ */
