@@ -69,17 +69,27 @@
 }
 
 #intro.home-v3 .home-v4-actions{
-  margin-top:27px;
-  max-width:560px;
+  display:flex;
+  align-items:stretch;
+
+  width:100%;
+  max-width:none;
+
+  margin:0;
   gap:10px;
+
+  min-width:0;
 }
 
 #intro.home-v3 .home-v4-primary{
-  flex:0 0 286px;
-  width:286px;
-  min-width:286px;
-  max-width:286px;
+  flex:0 0 250px;
+
+  width:250px;
+  min-width:250px;
+  max-width:250px;
+
   min-height:54px;
+  height:54px;
 }
 
 #intro.home-v3 .home-v4-secondary{
@@ -826,5 +836,503 @@
 
   #intro.home-v3 .home-v4-profile-xp-track i{
     transition:none;
+  }
+}
+/* =========================================================
+   HOME V5 // FINAL COMMAND COMPOSITION
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   DESKTOP COMMAND ROW
+   START + DAILY OPERATION
+   --------------------------------------------------------- */
+
+@media (min-width:781px){
+
+  #intro.home-v3 .home-v5-command-row{
+    display:grid;
+
+    grid-template-columns:
+      250px
+      minmax(250px,1fr);
+
+    align-items:stretch;
+
+    width:100%;
+    max-width:680px;
+
+    margin-top:27px;
+
+    gap:10px;
+
+    min-width:0;
+  }
+
+  /*
+   * START / CONTINUE command group
+   */
+  #intro.home-v3 .home-v5-command-row > .home-v4-actions{
+    grid-column:1;
+
+    width:100%;
+    max-width:none;
+
+    margin:0;
+
+    min-width:0;
+  }
+
+  #intro.home-v3 .home-v5-command-row .home-v4-primary{
+    flex:1 1 auto;
+
+    width:100%;
+    min-width:0;
+    max-width:none;
+
+    height:54px;
+    min-height:54px;
+  }
+
+  #intro.home-v3 .home-v5-command-row .home-v4-secondary{
+    flex:0 0 112px;
+
+    width:112px;
+    min-width:112px;
+    max-width:112px;
+
+    height:54px;
+    min-height:54px;
+  }
+
+
+  /* -------------------------------------------------------
+     DAILY OPERATION — compact command tile
+     ------------------------------------------------------- */
+
+  #intro.home-v3 .home-v5-command-row .home-v4-daily{
+    grid-column:2;
+
+    position:relative;
+
+    width:100%;
+    max-width:none;
+
+    min-width:0;
+    min-height:54px;
+    height:54px;
+
+    margin:0;
+
+    padding:0;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+
+    overflow:hidden;
+
+    box-sizing:border-box;
+  }
+
+  #intro.home-v3 .home-v5-command-row .home-v4-daily-head{
+    position:absolute;
+
+    top:7px;
+    left:11px;
+    right:11px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:8px;
+
+    margin:0;
+    padding:0;
+
+    min-width:0;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-kicker{
+    font-size:6px;
+    letter-spacing:.18em;
+  }
+
+  /*
+   * Hide the static CITY RELAY NETWORK line.
+   * The actual challenge title is more useful here.
+   */
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-head strong{
+    display:none;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-status{
+    flex:0 0 auto;
+
+    font-size:6px;
+    line-height:1;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-main{
+    width:100%;
+
+    margin:0;
+    padding:18px 11px 8px;
+
+    min-width:0;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-code{
+    display:none;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-title{
+    display:block;
+
+    width:100%;
+
+    margin:0;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+
+    font-size:11px;
+    line-height:1.1;
+    letter-spacing:.055em;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-description{
+    display:none;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-progress{
+    display:block;
+
+    width:100%;
+
+    margin:0;
+    padding:0 11px 7px;
+
+    box-sizing:border-box;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-progress-meta{
+    display:none;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-progress-track{
+    height:2px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-bottom{
+    display:none;
+  }
+
+
+  /* -------------------------------------------------------
+     RELAY STATUS
+     Slightly lower + full left-column width
+     ------------------------------------------------------- */
+
+  #intro.home-v3 .home-v5-relay-status{
+    width:100%;
+    max-width:680px;
+
+    margin-top:18px;
+  }
+
+
+  /* -------------------------------------------------------
+     FOOTER
+     FAQ / UPDATE / CREDITS / OPTIONS
+     ------------------------------------------------------- */
+
+  #intro.home-v3 .home-v4-bottom-left{
+    display:flex;
+
+    align-items:center;
+    flex-wrap:wrap;
+
+    gap:8px;
+
+    min-width:0;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions{
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    min-width:0;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-credits{
+    display:flex;
+
+    align-items:center;
+
+    min-height:34px;
+
+    padding:7px 10px;
+
+    box-sizing:border-box;
+
+    border:1px solid rgba(120,233,255,.10);
+
+    background:rgba(3,10,17,.42);
+
+    color:#89a7b6;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-credits-data{
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-credits-data small{
+    font-size:6px;
+    letter-spacing:.16em;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-credits-data strong{
+    font-size:9px;
+    color:#dffaff;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-credits-icon{
+    font-size:10px;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-utility{
+    min-height:34px;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (min-width:781px) and (max-width:1180px){
+
+  #intro.home-v3 .home-v5-command-row{
+    grid-template-columns:
+      220px
+      minmax(210px,1fr);
+
+    max-width:600px;
+
+    gap:8px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-primary{
+    width:100%;
+    min-width:0;
+    max-width:none;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-secondary{
+    flex-basis:100px;
+
+    width:100px;
+    min-width:100px;
+    max-width:100px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-title{
+    font-size:10px;
+  }
+
+  #intro.home-v3 .home-v5-relay-status{
+    max-width:600px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width:780px){
+
+  #intro.home-v3 .home-v5-command-row{
+    display:flex;
+
+    flex-direction:column;
+
+    width:100%;
+    max-width:100%;
+
+    margin-top:16px;
+
+    gap:7px;
+
+    min-width:0;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-actions{
+    display:flex;
+
+    width:100%;
+    max-width:100%;
+
+    margin:0;
+
+    gap:7px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-primary{
+    flex:1 1 auto;
+
+    width:auto;
+    min-width:0;
+    max-width:none;
+
+    height:52px;
+    min-height:52px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-secondary{
+    flex:0 0 112px;
+
+    width:112px;
+    min-width:112px;
+    max-width:112px;
+
+    height:52px;
+    min-height:52px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily{
+    width:100%;
+    max-width:100%;
+
+    min-height:58px;
+    height:58px;
+
+    margin:0;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-head{
+    top:7px;
+    left:10px;
+    right:10px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-main{
+    padding:19px 10px 8px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-title{
+    font-size:10px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-progress{
+    padding-left:10px;
+    padding-right:10px;
+    padding-bottom:7px;
+  }
+
+  #intro.home-v3 .home-v5-relay-status{
+    width:100%;
+    max-width:100%;
+
+    margin-top:14px;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions{
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-credits{
+    min-height:32px;
+
+    padding:6px 8px;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-credits-data small{
+    font-size:5px;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-credits-data strong{
+    font-size:8px;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width:430px){
+
+  #intro.home-v3 .home-v5-command-row{
+    gap:6px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-secondary{
+    flex-basis:94px;
+
+    width:94px;
+    min-width:94px;
+    max-width:94px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily{
+    min-height:56px;
+    height:56px;
+  }
+
+  #intro.home-v3 .home-v5-command-row
+  .home-v4-daily-title{
+    font-size:9px;
+  }
+
+  #intro.home-v3 .home-v5-footer-actions
+  .home-v4-credits{
+    padding:5px 7px;
   }
 }
