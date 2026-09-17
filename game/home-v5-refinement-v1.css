@@ -3961,14 +3961,14 @@ z-index:1;
   overflow: hidden;
 
   width: 100%;
-  min-height: 76px;
-  padding: 0 18px;
+  min-height: 58px;
+  padding: 0 14px;
 
   display: flex;
   align-items: center;
 
   border: 1px solid rgba(56, 189, 248, .58);
-  border-radius: 16px;
+  border-radius: 8px;
 
   background:
     linear-gradient(
