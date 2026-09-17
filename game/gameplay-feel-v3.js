@@ -1,4 +1,5 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
+import { applyHorizontalMovementFeel } from './src/movement/MovementFeel.js';
 
 (() => {
   'use strict';
@@ -66,8 +67,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const root = ensureRoot();
     const intro = document.getElementById('intro');
     const cinematic = document.getElementById('relayGameplayIntroFinalV1');
-    const gameplayVisible = !intro?.classList.contains('hidden') === false && !cinematic?.hidden;
-    const active = !!scene?.scene?.isActive?.() && !scene.finished && !scene.respawning && !scene.cinematicActive && !intro?.classList.contains('hidden') === false;
+    const active = !!scene?.scene?.isActive?.() && !scene.finished && !scene.respawning && !scene.cinematicActive && intro?.classList.contains('hidden');
     root.classList.toggle('hidden', !active);
     root.classList.toggle('active', active);
     if (!active) return;
@@ -91,6 +91,14 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     root.classList.toggle('threat', threats > 0);
     const threatText = root.querySelector('.gf-threat b');
     if (threatText) threatText.textContent = threats ? `${threats} HOSTILE ${threats === 1 ? 'SIGNAL' : 'SIGNALS'}` : 'ALL CLEAR';
+  };
+
+  const getMovementAxis = (scene) => {
+    const keys = scene?.keys || {};
+    const cursors = scene?.cursors || {};
+    const left = !!(keys.A?.isDown || cursors.left?.isDown);
+    const right = !!(keys.D?.isDown || cursors.right?.isDown);
+    return (right ? 1 : 0) - (left ? 1 : 0);
   };
 
   const attach = (scene) => {
@@ -134,6 +142,38 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       return result;
     };
     RunnerScene.prototype.__relayGameplayFeelV3Update = true;
+  }
+
+  /*
+   * MOVEMENT HOTFIX
+   *
+   * The canonical MovementFeel helper existed but was not consumed by
+   * the active RunnerScene update path. Read the already-created keyboard
+   * state and apply horizontal movement every frame. This preserves the
+   * existing RunnerScene jump/combat/checkpoint systems and adds no second
+   * input owner.
+   */
+  if (!RunnerScene.prototype.__relayMovementHotfixV1) {
+    const movementBaseUpdate = RunnerScene.prototype.update;
+    RunnerScene.prototype.update = function relayMovementHotfixV1(time, delta, ...args) {
+      const result = movementBaseUpdate.apply(this, [time, delta, ...args]);
+      try {
+        if (!this.player?.body || this.finished || this.respawning || this.relayPuzzleActive) return result;
+        if (this.__relayIntentionalBlock === true || this.cinematicActive || this.inputEnabled === false) return result;
+        const axis = getMovementAxis(this);
+        const dt = Number.isFinite(Number(delta)) && Number(delta) > 0 ? Math.min(Number(delta), 50) : 16.67;
+        applyHorizontalMovementFeel({
+          player: this.player,
+          axis,
+          delta: dt,
+          maxSpeed: Number(this.RUNNER_TUNING?.maxRunSpeed) || 475
+        });
+      } catch (error) {
+        console.warn('[Relay Runner] movement hotfix skipped:', error);
+      }
+      return result;
+    };
+    RunnerScene.prototype.__relayMovementHotfixV1 = true;
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureRoot, { once: true });
