@@ -135,10 +135,31 @@
 
         <div class="rv5-right">
 
-          <div class="rv5-status">
-            <small>ROUTE STATUS</small>
-            <strong>LOCKED</strong>
-            <i></i>
+         <div class="rv5-status">
+
+  <small>ROUTE STATUS</small>
+
+  <strong>LOCKED</strong>
+
+      <div class="rv5-telemetry">
+
+        <span>
+          NODE
+          <b>04</b>
+        </span>
+
+        <span>
+          SIGNAL
+          <b>98%</b>
+        </span>
+
+        <span>
+          LINK
+          <b>STABLE</b>
+        </span>
+
+      </div>
+
           </div>
 
           <div class="rv5-timer">
@@ -161,7 +182,7 @@
 
             </svg>
 
-            <strong>10</strong>
+            <strong>15</strong>
             <small>SEC</small>
 
           </div>
@@ -210,7 +231,17 @@
             <strong>RELAY TACTICAL WORLD</strong>
           </div>
 
-          <div class="rv5-live-tag">
+          <div class="rv5-map-legend">
+
+  <span><i class="you"></i>YOU</span>
+  <span><i class="start"></i>START</span>
+  <span><i class="cp"></i>CP</span>
+  <span><i class="objective"></i>GOAL</span>
+  <span><i class="hostile"></i>HOSTILE</span>
+
+</div>
+
+<div class="rv5-live-tag">
             <i></i>
             REAL LEVEL ROUTE
           </div>
@@ -225,20 +256,51 @@
           </div>
 
           <div>
-            <small>ROUTE</small>
-            <strong>CALCULATED</strong>
-          </div>
+          <small>ROUTE</small>
+          <strong class="rv5-route-distance">CALCULATING</strong>
+</div>
+         <div>
+  <small>THREAT</small>
+  <strong class="danger rv5-threat-status">ACTIVE</strong>
+</div>
 
-          <div>
-            <small>THREAT</small>
-            <strong class="danger">ACTIVE</strong>
-          </div>
+<div class="rv5-eta-stat">
+  <small>ETA</small>
+  <strong class="rv5-eta">--</strong>
+</div>
 
         </div>
 
       </main>
 
       <footer class="rv5-footer">
+
+  <div class="rv5-route-progress">
+
+    <div class="rv5-route-progress-head">
+      <span>ROUTE PROGRESS</span>
+      <strong class="rv5-route-progress-value">0%</strong>
+    </div>
+
+    <div class="rv5-route-progress-line">
+
+      <i class="done"></i>
+      <i></i>
+      <i></i>
+      <i></i>
+      <i class="goal"></i>
+
+    </div>
+
+    <div class="rv5-route-progress-labels">
+      <span>START</span>
+      <span>CP1</span>
+      <span>CP2</span>
+      <span>CP3</span>
+      <span>GOAL</span>
+    </div>
+
+  </div>
 
         <div class="rv5-objective">
 
@@ -247,7 +309,7 @@
           </div>
 
           <div>
-            <small>PRIMARY OBJECTIVE</small>
+            <small>PRIMARY OBJECTIVE // <b class="rv5-objective-status">PENDING</b></small>
             <strong class="objective-text">
               FOLLOW THE RELAY
             </strong>
@@ -278,6 +340,687 @@
   style.id = 'relay-gameplay-intro-v5-style';
 
 style.textContent = `
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&display=swap');
+
+/* ============================================================
+   RELAY RUNNER V6 — PREMIUM TACTICAL MAP REDESIGN
+   ============================================================ */
+
+/* ---------- GLOBAL ORBITRON ---------- */
+
+#${ROOT_ID},
+#${ROOT_ID} *,
+#${ROOT_ID} svg text{
+  font-family:"Orbitron",sans-serif !important;
+}
+
+
+/* ---------- MAIN SHELL ---------- */
+
+#${ROOT_ID} .rv5-shell{
+  border:1px solid rgba(116,220,229,.22) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(4,11,15,.98),
+      rgba(2,6,10,.99) 55%,
+      rgba(1,4,7,1)
+    ) !important;
+
+  box-shadow:
+    0 35px 110px rgba(0,0,0,.88),
+    0 0 80px rgba(0,190,255,.06),
+    inset 0 0 60px rgba(0,190,255,.025) !important;
+}
+
+
+/* ---------- HEADER ---------- */
+
+#${ROOT_ID} .rv5-header{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(4,13,19,.98),
+      rgba(3,8,12,.96)
+    ) !important;
+
+  border-bottom:1px solid rgba(116,220,229,.16) !important;
+}
+
+#${ROOT_ID} .rv5-live{
+  color:#8cecff !important;
+}
+
+#${ROOT_ID} .rv5-kicker{
+  color:#55dff0 !important;
+  font-size:10px !important;
+  letter-spacing:.20em !important;
+}
+
+#${ROOT_ID} h1{
+  font-family:"Orbitron",sans-serif !important;
+  font-weight:800 !important;
+  letter-spacing:.055em !important;
+  text-shadow:
+    0 0 18px rgba(0,220,255,.12),
+    0 4px 14px rgba(0,0,0,.95) !important;
+}
+
+#${ROOT_ID} h1 strong{
+  color:#7deaff !important;
+}
+
+
+/* ---------- ROUTE STATUS ---------- */
+
+#${ROOT_ID} .rv5-status{
+  border:1px solid rgba(116,220,229,.20) !important;
+  border-top:2px solid #39ff88 !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(5,18,22,.96),
+      rgba(3,8,12,.98)
+    ) !important;
+
+  box-shadow:
+    inset 0 0 24px rgba(0,220,255,.035),
+    0 12px 30px rgba(0,0,0,.45) !important;
+}
+
+#${ROOT_ID} .rv5-status strong{
+  color:#39ff88 !important;
+  font-family:"Orbitron",sans-serif !important;
+}
+
+
+/* ---------- DEPLOYMENT TIMER ---------- */
+
+#${ROOT_ID} .rv5-timer{
+  border:1px solid rgba(255,205,76,.62) !important;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255,205,76,.08),
+      rgba(6,12,15,.98) 65%
+    ) !important;
+
+  box-shadow:
+    0 0 25px rgba(255,205,76,.08),
+    inset 0 0 30px rgba(255,205,76,.035) !important;
+}
+
+#${ROOT_ID} .rv5-timer strong{
+  font-family:"Orbitron",sans-serif !important;
+  font-weight:800 !important;
+  color:#f7fbff !important;
+  text-shadow:
+    0 0 14px rgba(255,214,94,.25) !important;
+}
+
+
+/* ============================================================
+   MAP — NEW PREMIUM DISPLAY
+   ============================================================ */
+
+#${ROOT_ID} .rv5-map{
+  background:
+    radial-gradient(
+      ellipse at 50% 48%,
+      rgba(20,76,86,.24),
+      transparent 46%
+    ),
+    radial-gradient(
+      ellipse at 20% 80%,
+      rgba(0,160,190,.08),
+      transparent 35%
+    ),
+    linear-gradient(
+      145deg,
+      #061016,
+      #02080c 62%,
+      #010508
+    ) !important;
+
+  border-top:1px solid rgba(100,220,235,.14) !important;
+  border-bottom:1px solid rgba(100,220,235,.14) !important;
+
+  box-shadow:
+    inset 0 0 100px rgba(0,0,0,.82),
+    inset 0 0 30px rgba(0,190,255,.035) !important;
+}
+
+
+/* ---------- MAP GRID ---------- */
+
+#${ROOT_ID} .grid{
+  stroke:#24515b !important;
+  stroke-width:.8 !important;
+  opacity:.34 !important;
+}
+
+#${ROOT_ID} .grid-major{
+  stroke:#43818b !important;
+  stroke-width:1.2 !important;
+  opacity:.38 !important;
+}
+
+
+/* ---------- BUILDINGS ---------- */
+
+#${ROOT_ID} .platform{
+  fill:#102127 !important;
+  stroke:#5c8990 !important;
+  stroke-width:1.25 !important;
+
+  filter:
+    drop-shadow(0 2px 4px rgba(0,0,0,.65)) !important;
+}
+
+#${ROOT_ID} .building-inner{
+  fill:#172d33 !important;
+  stroke:#284a51 !important;
+  stroke-width:1px !important;
+  opacity:.98 !important;
+}
+
+#${ROOT_ID} .building-edge-bottom{
+  stroke:#73a8ad !important;
+  opacity:.22 !important;
+}
+
+
+/* ---------- BUILDING HIGHLIGHT ---------- */
+
+#${ROOT_ID} .tactical-building:hover .platform{
+  stroke:#7deaff !important;
+  filter:
+    drop-shadow(0 0 5px rgba(0,220,255,.25)) !important;
+}
+
+
+/* ---------- ROUTE ---------- */
+
+#${ROOT_ID} .route-halo{
+  stroke:#00d9ff !important;
+  stroke-width:25 !important;
+  opacity:.075 !important;
+
+  filter:
+    drop-shadow(0 0 12px rgba(0,220,255,.35)) !important;
+}
+
+#${ROOT_ID} .route{
+  stroke:#ffd75c !important;
+  stroke-width:4.5 !important;
+  stroke-dasharray:12 7 !important;
+
+  filter:
+    drop-shadow(0 0 5px rgba(255,210,80,.72))
+    drop-shadow(0 0 14px rgba(255,210,80,.18)) !important;
+}
+
+#${ROOT_ID} .route-core{
+  stroke:#fff8d7 !important;
+
+  stroke-width:1.15 !important;
+
+  stroke-linecap:round !important;
+
+  opacity:.82 !important;
+
+  filter:
+    drop-shadow(
+      0 0 4px rgba(255,248,215,.35)
+    ) !important;
+}
+
+/* ---------- START ---------- */
+
+#${ROOT_ID} .start{
+  fill:#39ff88 !important;
+  stroke:#dffff0 !important;
+  stroke-width:2.5 !important;
+
+  filter:
+    drop-shadow(0 0 7px rgba(57,255,136,.9))
+    drop-shadow(0 0 18px rgba(57,255,136,.35)) !important;
+}
+
+#${ROOT_ID} .start-ring{
+  stroke:#39ff88 !important;
+  stroke-width:1.7 !important;
+  opacity:.85 !important;
+}
+
+
+/* ---------- GOAL ---------- */
+
+#${ROOT_ID} .goal{
+  fill:#ffd34f !important;
+  stroke:#fff7cf !important;
+  stroke-width:2.5 !important;
+
+  filter:
+    drop-shadow(0 0 7px rgba(255,211,79,.95))
+    drop-shadow(0 0 20px rgba(255,190,40,.35)) !important;
+}
+
+#${ROOT_ID} .goal-ring{
+  stroke:#ffd34f !important;
+  stroke-width:1.8 !important;
+}
+
+
+/* ---------- PLAYER ---------- */
+
+#${ROOT_ID} .player{
+  fill:#f8ffff !important;
+  stroke:#00eaff !important;
+  stroke-width:2.8 !important;
+
+  filter:
+    drop-shadow(0 0 7px rgba(0,234,255,.95))
+    drop-shadow(0 0 18px rgba(0,180,255,.32)) !important;
+}
+
+#${ROOT_ID} .player-ring{
+  stroke:#00eaff !important;
+  stroke-width:2 !important;
+}
+
+
+/* ---------- CHECKPOINTS ---------- */
+
+#${ROOT_ID} .checkpoint{
+  fill:rgba(0,220,255,.075) !important;
+  stroke:#5eeaff !important;
+  stroke-width:2 !important;
+
+  filter:
+    drop-shadow(0 0 5px rgba(0,220,255,.42)) !important;
+}
+
+#${ROOT_ID} .checkpoint-dot{
+  fill:#eaffff !important;
+
+  filter:
+    drop-shadow(0 0 7px rgba(0,234,255,.95)) !important;
+}
+
+
+/* ---------- HOSTILE AREAS ---------- */
+
+#${ROOT_ID} .hostile-pulse{
+  stroke:#ff4058 !important;
+  stroke-width:1.5 !important;
+  opacity:.40 !important;
+}
+
+#${ROOT_ID} .danger-object{
+  fill:#32131a !important;
+  stroke:#ff4058 !important;
+
+  filter:
+    drop-shadow(0 0 7px rgba(255,50,80,.42)) !important;
+}
+
+#${ROOT_ID} .hostile-cross,
+#${ROOT_ID} .enemy-cross{
+  stroke:#ff7283 !important;
+}
+
+
+/* ---------- MAP LABELS ---------- */
+
+#${ROOT_ID} .label,
+#${ROOT_ID} .guide,
+#${ROOT_ID} .goal-label,
+#${ROOT_ID} #rv5-player text{
+  font-family:"Orbitron",sans-serif !important;
+  paint-order:stroke fill !important;
+}
+
+#${ROOT_ID} .label{
+  fill:#dffaff !important;
+  font-size:10px !important;
+  font-weight:700 !important;
+  letter-spacing:.055em !important;
+}
+
+#${ROOT_ID} .goal-label{
+  fill:#ffd85c !important;
+  font-weight:800 !important;
+}
+
+#${ROOT_ID} .guide{
+  fill:#a8dce2 !important;
+  font-size:9px !important;
+  font-weight:600 !important;
+}
+
+
+/* ============================================================
+   MAP HUD OVERLAY
+   ============================================================ */
+
+#${ROOT_ID} .rv5-map-label{
+  border-left:2px solid #00dfff !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,35,45,.82),
+      rgba(2,10,14,.72)
+    ) !important;
+
+  box-shadow:
+    0 8px 30px rgba(0,0,0,.48),
+    inset 0 0 20px rgba(0,220,255,.035) !important;
+
+  backdrop-filter:blur(8px) !important;
+}
+
+#${ROOT_ID} .rv5-map-label.bottom{
+  border-left:0 !important;
+  border-right:2px solid #00dfff !important;
+}
+
+#${ROOT_ID} .rv5-map-label small{
+  color:#5f9da6 !important;
+  font-family:"Orbitron",sans-serif !important;
+}
+
+#${ROOT_ID} .rv5-map-label strong{
+  color:#dffaff !important;
+  font-family:"Orbitron",sans-serif !important;
+}
+
+
+/* ---------- LIVE TAG ---------- */
+
+#${ROOT_ID} .rv5-map-legend{
+  position:absolute !important;
+  right:20px !important;
+  bottom:20px !important;
+  z-index:24 !important;
+
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+
+  padding:7px 10px !important;
+
+  border:1px solid rgba(190,198,188,.12) !important;
+  background:rgba(3,7,7,.78) !important;
+
+  backdrop-filter:blur(7px) !important;
+
+  font-family:"Orbitron",sans-serif !important;
+  font-size:6px !important;
+  font-weight:800 !important;
+  letter-spacing:.10em !important;
+  color:#7e8981 !important;
+}
+
+#${ROOT_ID} .rv5-map-legend span{
+  display:flex !important;
+  align-items:center !important;
+  gap:4px !important;
+}
+
+#${ROOT_ID} .rv5-map-legend i{
+  width:5px !important;
+  height:5px !important;
+  display:block !important;
+  border-radius:50% !important;
+}
+
+#${ROOT_ID} .rv5-map-legend .you{
+  background:#74dce5 !important;
+}
+
+#${ROOT_ID} .rv5-map-legend .start{
+  background:#78c879 !important;
+}
+
+#${ROOT_ID} .rv5-map-legend .cp{
+  background:#74dce5 !important;
+}
+
+#${ROOT_ID} .rv5-map-legend .objective{
+  background:#f0cf69 !important;
+}
+
+#${ROOT_ID} .rv5-map-legend .hostile{
+  background:#e45c63 !important;
+}
+
+#${ROOT_ID} .rv5-live-tag{
+  border:1px solid rgba(57,255,136,.25) !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5,30,22,.88),
+      rgba(3,11,10,.82)
+    ) !important;
+
+  color:#39ff88 !important;
+
+  box-shadow:
+    0 8px 28px rgba(0,0,0,.4),
+    0 0 18px rgba(57,255,136,.05) !important;
+}
+
+
+/* ============================================================
+   BOTTOM STATS
+   ============================================================ */
+
+#${ROOT_ID} .rv5-stats{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3,13,17,.98),
+      rgba(2,7,10,.99)
+    ) !important;
+
+  border-top:1px solid rgba(0,220,255,.13) !important;
+}
+
+#${ROOT_ID} .rv5-stats div{
+  border-right:1px solid rgba(100,220,235,.10) !important;
+}
+
+#${ROOT_ID} .rv5-stats small{
+  font-family:"Orbitron",sans-serif !important;
+  color:#56858d !important;
+}
+
+#${ROOT_ID} .rv5-stats strong{
+  font-family:"Orbitron",sans-serif !important;
+  color:#dffaff !important;
+}
+
+#${ROOT_ID} .rv5-stats .danger{
+  color:#ff596c !important;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+#${ROOT_ID} .rv5-route-progress{
+  min-width:220px !important;
+  width:28% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:6px !important;
+}
+
+#${ROOT_ID} .rv5-route-progress-head{
+  display:flex !important;
+  justify-content:space-between !important;
+  align-items:center !important;
+}
+
+#${ROOT_ID} .rv5-route-progress-head span{
+  color:#7f8982 !important;
+  font-size:7px !important;
+  font-weight:800 !important;
+  letter-spacing:.16em !important;
+}
+
+#${ROOT_ID} .rv5-route-progress-head strong{
+  color:#f0cf69 !important;
+  font-size:8px !important;
+  font-weight:900 !important;
+}
+
+#${ROOT_ID} .rv5-route-progress-line{
+  display:flex !important;
+  align-items:center !important;
+  gap:4px !important;
+}
+
+#${ROOT_ID} .rv5-route-progress-line i{
+  width:10px !important;
+  height:4px !important;
+  flex:1 !important;
+  background:rgba(120,200,121,.18) !important;
+  border:1px solid rgba(120,200,121,.20) !important;
+}
+
+#${ROOT_ID} .rv5-route-progress-line i.done{
+  background:#78c879 !important;
+  box-shadow:
+    0 0 7px rgba(120,200,121,.45),
+    0 0 14px rgba(120,200,121,.18) !important;
+}
+
+#${ROOT_ID} .rv5-route-progress-line i.goal{
+  background:#f0cf69 !important;
+  border-color:#f0cf69 !important;
+}
+
+#${ROOT_ID} .rv5-route-progress-labels{
+  display:flex !important;
+  justify-content:space-between !important;
+  color:#657068 !important;
+  font-size:6px !important;
+  font-weight:800 !important;
+  letter-spacing:.08em !important;
+}
+
+#${ROOT_ID} .rv5-footer{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(4,13,17,.98),
+      rgba(2,7,10,1)
+    ) !important;
+
+  border-top:1px solid rgba(0,220,255,.13) !important;
+}
+
+#${ROOT_ID} .rv5-objective{
+  border:1px solid rgba(0,220,255,.15) !important;
+  border-left:3px solid #ffd34f !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(12,27,31,.72),
+      rgba(4,10,13,.65)
+    ) !important;
+}
+
+#${ROOT_ID} .rv5-objective strong,
+#${ROOT_ID} .rv5-objective small,
+#${ROOT_ID} .rv5-ready{
+  font-family:"Orbitron",sans-serif !important;
+}
+
+#${ROOT_ID} .rv5-ready{
+  color:#39ff88 !important;
+}
+
+
+/* ============================================================
+   SCAN / HUD EFFECT
+   ============================================================ */
+
+#${ROOT_ID} .rv5-scan{
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(0,225,255,.075),
+      transparent
+    ) !important;
+
+  animation-duration:4.2s !important;
+}
+
+
+/* ============================================================
+   MOBILE SAFETY
+   ============================================================ */
+
+@media(max-width:780px){
+
+  #${ROOT_ID} .rv5-shell{
+    width:100% !important;
+    height:100dvh !important;
+    max-height:none !important;
+    border-radius:0 !important;
+  }
+
+  #${ROOT_ID} .rv5-header{
+    padding:14px !important;
+    gap:10px !important;
+  }
+
+  #${ROOT_ID} h1{
+    font-size:clamp(24px,8vw,38px) !important;
+  }
+
+  #${ROOT_ID} .rv5-status{
+    min-width:110px !important;
+    min-height:58px !important;
+  }
+
+  #${ROOT_ID} .rv5-timer{
+    width:82px !important;
+    height:82px !important;
+    min-width:82px !important;
+    min-height:82px !important;
+    flex-basis:82px !important;
+  }
+
+  #${ROOT_ID} .rv5-timer strong{
+    font-size:38px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-label{
+    transform:scale(.82);
+    transform-origin:top left;
+  }
+
+  #${ROOT_ID} .rv5-stats{
+    min-height:42px !important;
+  }
+
+  #${ROOT_ID} .rv5-footer{
+    min-height:64px !important;
+    padding:8px 12px !important;
+  }
+}
 
 /* ============================================================
    RELAY RUNNER V5
@@ -440,8 +1183,6 @@ style.textContent = `
   mix-blend-mode:
     screen !important;
 }
-
-
 /* ============================================================
    MAIN SHELL
    ============================================================ */
@@ -449,25 +1190,18 @@ style.textContent = `
 #${ROOT_ID} .rv5-shell{
   position:relative !important;
 
-  width:
-    min(
-      1520px,
-      98vw
-    ) !important;
-
-  height:
-    min(
-      920px,
-      96dvh
-    ) !important;
+  width:min(1560px,97vw) !important;
+  height:min(900px,94dvh) !important;
 
   min-width:0 !important;
   min-height:0 !important;
 
   display:grid !important;
 
+  grid-template-columns:1fr !important;
+
   grid-template-rows:
-    auto
+    178px
     minmax(0,1fr)
     auto !important;
 
@@ -475,36 +1209,18 @@ style.textContent = `
 
   background:
     linear-gradient(
-      150deg,
-      rgba(13,16,15,.98),
-      rgba(5,8,8,.985) 58%,
-      rgba(2,4,5,.995)
+      145deg,
+      rgba(16,21,20,.985) 0%,
+      rgba(7,11,11,.99) 45%,
+      rgba(2,5,6,1) 100%
     ) !important;
-
-  border:
-    1px solid
-    rgba(191,197,184,.20) !important;
-
-  border-radius:
-    3px !important;
-
-  box-shadow:
-    0 35px 110px
-      rgba(0,0,0,.82),
-
-    0 0 60px
-      rgba(213,181,83,.045),
-
-    inset 0 1px
-      rgba(255,255,255,.045) !important;
 }
-
 
 /* ============================================================
    TOP TACTICAL STRIP
    ============================================================ */
 
-#${ROOT_ID} .rv5-topline{
+   #${ROOT_ID} .rv5-topline{
   position:absolute !important;
 
   top:0 !important;
@@ -551,16 +1267,16 @@ style.textContent = `
 
   display:flex !important;
 
-  align-items:flex-start !important;
+  align-items:center !important;
 
   justify-content:space-between !important;
 
-  gap:30px !important;
+  gap:24px !important;
 
   padding:
+    18px
     22px
-    25px
-    17px !important;
+    16px !important;
 
   border-bottom:
     1px solid
@@ -585,7 +1301,7 @@ style.textContent = `
 
   flex-direction:column !important;
 
-  align-items:flex-start !important;
+  align-items:center !important;
 
   gap:5px !important;
 
@@ -699,45 +1415,44 @@ style.textContent = `
 /* title */
 
 #${ROOT_ID} h1{
-  margin:
-    2px
-    0
-    0 !important;
 
-  color:
-    var(--wz-white) !important;
+  margin:3px 0 0 !important;
 
-  font-size:
-    clamp(
-      32px,
-      4.4vw,
-      54px
-    ) !important;
+  width:100% !important;
 
-  line-height:
-    .90 !important;
+  text-align:center !important;
 
-  font-weight:
-    950 !important;
+  color:#f4f5ee !important;
 
-  letter-spacing:
-    .045em !important;
+  font-family:"Orbitron",sans-serif !important;
 
-  text-transform:
-    uppercase !important;
+ font-size:
+  clamp(
+    30px,
+    3.4vw,
+    46px
+  ) !important;
+
+  line-height:.94 !important;
+
+  font-weight:800 !important;
+
+  letter-spacing:.055em !important;
+
+  text-transform:uppercase !important;
 
   text-shadow:
-    0 3px 13px
-    rgba(0,0,0,.9) !important;
+    0 0 18px rgba(255,255,255,.035),
+    0 5px 16px rgba(0,0,0,.92) !important;
 }
 
-
 #${ROOT_ID} h1 strong{
-  color:
-    #f0eee3 !important;
+  color:#e8c75e !important;
+
+  font-weight:900 !important;
 
   text-shadow:
-    none !important;
+    0 0 14px rgba(213,181,83,.16) !important;
 }
 
 
@@ -783,14 +1498,20 @@ style.textContent = `
    ============================================================ */
 
 #${ROOT_ID} .rv5-right{
-  display:flex !important;
+    display:flex !important;
 
-  align-items:flex-start !important;
+  align-items:stretch !important;
 
-  gap:13px !important;
+  justify-content:flex-end !important;
+
+  gap:10px !important;
+
+  margin-left:auto !important;
 
   flex:
     0 0 auto !important;
+
+  position:relative !important;
 }
 
 
@@ -800,61 +1521,98 @@ style.textContent = `
   position:relative !important;
 
   min-width:
-    156px !important;
+    174px !important;
 
   min-height:
-    70px !important;
+    82px !important;
 
   padding:
-    11px 13px !important;
+    12px 14px !important;
 
   border:
     1px solid
-    rgba(196,202,192,.17) !important;
+    rgba(196,202,192,.15) !important;
 
   border-top:
     2px solid
     var(--wz-green) !important;
 
   border-radius:
-    2px !important;
+    1px !important;
 
   background:
     linear-gradient(
       145deg,
-      rgba(15,20,18,.95),
-      rgba(5,9,8,.97)
+      rgba(14,21,18,.98),
+      rgba(4,8,7,.99)
     ) !important;
 
   box-shadow:
     inset 0 0 24px
-      rgba(120,200,121,.02),
+      rgba(120,200,121,.035),
 
-    0 12px 30px
-      rgba(0,0,0,.36) !important;
+    inset 0 1px 0
+      rgba(255,255,255,.025),
+
+    0 10px 28px
+      rgba(0,0,0,.38) !important;
+
+  overflow:hidden !important;
 }
+#${ROOT_ID} .rv5-status::before{
+  content:"COMMAND // ROUTE CONTROL";
 
+  position:absolute !important;
+
+  top:5px !important;
+  left:12px !important;
+
+  color:
+    rgba(120,200,121,.34) !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    6px !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .16em !important;
+
+  pointer-events:none !important;
+}
 
 #${ROOT_ID} .rv5-status small{
   display:block !important;
+
+  margin-top:
+    9px !important;
 
   margin-bottom:
     8px !important;
 
   color:
-    #828a83 !important;
+    #7e8880 !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
 
   font-size:
-    8px !important;
+    7px !important;
 
   line-height:
     1 !important;
 
   font-weight:
-    900 !important;
+    800 !important;
 
   letter-spacing:
-    .17em !important;
+    .19em !important;
 
   text-transform:
     uppercase !important;
@@ -862,43 +1620,101 @@ style.textContent = `
 
 
 #${ROOT_ID} .rv5-status strong{
+  position:relative !important;
+
+  display:block !important;
+
   color:
-    var(--wz-green) !important;
+    #9ee7a1 !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
 
   font-size:
-    17px !important;
+    18px !important;
 
   line-height:
     1 !important;
 
   font-weight:
-    950 !important;
+    800 !important;
 
   letter-spacing:
-    .13em !important;
+    .12em !important;
+
+text-shadow:
+    0 0 10px rgba(120,200,121,.22) !important;
 }
 
+#${ROOT_ID} .rv5-telemetry{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:5px !important;
+  margin-top:9px !important;
+}
+
+#${ROOT_ID} .rv5-telemetry span{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:3px !important;
+  color:#647169 !important;
+  font-family:"Orbitron",sans-serif !important;
+  font-size:5px !important;
+  letter-spacing:.10em !important;
+}
+
+#${ROOT_ID} .rv5-telemetry b{
+  color:#a9c4b0 !important;
+  font-size:7px !important;
+  letter-spacing:.06em !important;
+}
 
 #${ROOT_ID} .rv5-status i{
   position:absolute !important;
 
   right:
-    11px !important;
+    12px !important;
 
   bottom:
-    11px !important;
+    12px !important;
 
-  width:7px !important;
-  height:7px !important;
+  width:
+    7px !important;
 
-  border-radius:50% !important;
+  height:
+    7px !important;
+
+  border-radius:
+    50% !important;
 
   background:
     var(--wz-green) !important;
 
   box-shadow:
-    0 0 10px
-    rgba(120,200,121,.72) !important;
+    0 0 6px
+      rgba(120,200,121,.95),
+
+    0 0 15px
+      rgba(120,200,121,.58) !important;
+
+  animation:
+    rv5StatusPulse
+    1.8s
+    ease-in-out
+    infinite !important;
+}
+
+@keyframes rv5StatusPulse{
+  0%,100%{
+    opacity:.65;
+    transform:scale(.9);
+  }
+
+  50%{
+    opacity:1;
+    transform:scale(1.15);
+  }
 }
 
 
@@ -910,19 +1726,19 @@ style.textContent = `
   position:relative !important;
 
   width:
-    108px !important;
+    118px !important;
 
   height:
-    108px !important;
+    82px !important;
 
   min-width:
-    108px !important;
+    118px !important;
 
   min-height:
-    108px !important;
+    82px !important;
 
   flex:
-    0 0 108px !important;
+    0 0 118px !important;
 
   display:flex !important;
 
@@ -935,24 +1751,27 @@ style.textContent = `
 
   border:
     1px solid
-    rgba(213,181,83,.58) !important;
+    rgba(213,181,83,.48) !important;
 
   border-radius:
-    2px !important;
+    1px !important;
 
   background:
     linear-gradient(
       145deg,
-      rgba(32,29,17,.97),
-      rgba(9,11,10,.98)
+      rgba(29,27,16,.98),
+      rgba(7,10,9,.99)
     ) !important;
 
   box-shadow:
-    0 0 30px
-      rgba(213,181,83,.07),
+    0 0 24px
+      rgba(213,181,83,.065),
 
-    inset 0 0 30px
-      rgba(213,181,83,.035) !important;
+    inset 0 0 28px
+      rgba(213,181,83,.045),
+
+    inset 0 1px 0
+      rgba(255,255,255,.025) !important;
 
   overflow:hidden !important;
 }
@@ -1076,12 +1895,12 @@ style.textContent = `
   z-index:5 !important;
 
   margin:
-    6px
+    7px
     0
     0 !important;
 
   color:
-    #f5f1df !important;
+    #fff8dc !important;
 
   font-family:
     "Arial Narrow",
@@ -1169,121 +1988,274 @@ style.textContent = `
 
   min-width:0 !important;
 
+  min-height:52px !important;
+
   display:flex !important;
 
   align-items:center !important;
 
   justify-content:space-between !important;
 
-  gap:14px !important;
+  gap:18px !important;
 
-  padding:
-    0
-    16px !important;
+  padding:0 18px !important;
 
   background:
     linear-gradient(
       180deg,
-      rgba(8,12,12,.98),
-      rgba(4,7,7,.98)
+      rgba(14,19,18,.99),
+      rgba(5,9,9,1)
     ) !important;
 
   border-top:
     1px solid
-    rgba(191,198,188,.08) !important;
+    rgba(213,181,83,.14) !important;
 
   border-bottom:
     1px solid
-    rgba(191,198,188,.12) !important;
+    rgba(116,220,229,.18) !important;
+
+  box-shadow:
+    inset 0 1px
+      rgba(255,255,255,.035),
+    inset 0 -10px 24px
+      rgba(0,0,0,.24),
+    0 5px 18px
+      rgba(0,0,0,.22) !important;
+
+  overflow:hidden !important;
 }
 
 
 #${ROOT_ID} .rv5-mapbar > div{
+  position:relative !important;
+
   display:flex !important;
 
   align-items:center !important;
 
-  gap:
-    7px !important;
+  gap:6px !important;
 
-  min-width:
-    0 !important;
+  min-width:0 !important;
+
+  height:100% !important;
+
+  overflow:hidden !important;
 }
 
 
 #${ROOT_ID} .rv5-mapbar span{
+  position:relative !important;
   display:inline-flex !important;
-
   align-items:center !important;
-
-  min-height:
-    28px !important;
-
-  padding:
-    5px 9px !important;
-
-  color:
-    #7f8982 !important;
-
-  font-size:
-    9px !important;
-
-  line-height:
-    1 !important;
-
-  font-weight:
-    900 !important;
-
-  letter-spacing:
-    .10em !important;
-
+  justify-content:center !important;
+  min-height:30px !important;
+  padding:0 11px !important;
+  color:#7d8881 !important;
+  font-family:"Orbitron",sans-serif !important;
+  font-size:8px !important;
+  line-height:1 !important;
+  font-weight:700 !important;
+  letter-spacing:.13em !important;
   border:
     1px solid
-    rgba(180,189,179,.11) !important;
-
+    rgba(190,200,190,.13) !important;
   background:
-    rgba(255,255,255,.018) !important;
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.028),
+      rgba(255,255,255,.006)
+    ) !important;
+  box-shadow:
+    inset 0 1px
+      rgba(255,255,255,.025),
+    inset 0 -5px 10px
+      rgba(0,0,0,.10) !important;
 
-  white-space:
-    nowrap !important;
+  white-space:nowrap !important;
+  cursor:default !important;
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    color .2s ease,
+    box-shadow .2s ease !important;
 }
 
-
-#${ROOT_ID} .rv5-mapbar span.active{
-  color:
-    var(--wz-green) !important;
+#${ROOT_ID} .rv5-mapbar span:hover{
+  color:#b9c9c0 !important;
 
   border-color:
-    rgba(120,200,121,.28) !important;
+    rgba(116,220,229,.28) !important;
 
   background:
-    rgba(120,200,121,.045) !important;
+    linear-gradient(
+      180deg,
+      rgba(116,220,229,.055),
+      rgba(116,220,229,.012)
+    ) !important;
+
+  box-shadow:
+    0 0 10px rgba(116,220,229,.045),
+    inset 0 0 10px rgba(116,220,229,.025) !important;
+}
+
+#${ROOT_ID} .rv5-mapbar span.active{
+  color:#a5e9a7 !important;
+
+  border-color:
+    rgba(120,200,121,.42) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(120,200,121,.12),
+      rgba(120,200,121,.025)
+    ) !important;
+
+  box-shadow:
+    0 0 14px
+      rgba(120,200,121,.075),
+    inset 0 0 14px
+      rgba(120,200,121,.04) !important;
+
+  text-shadow:
+    0 0 9px
+      rgba(120,200,121,.30) !important;
 }
 
 
 #${ROOT_ID} .rv5-mapbar b{
-  flex:
-    0 0 auto !important;
+  position:relative !important;
 
-  color:
-    var(--wz-amber) !important;
+  flex:0 0 auto !important;
 
-  font-size:
-    9px !important;
+  display:inline-flex !important;
 
-  line-height:
-    1 !important;
+  align-items:center !important;
 
-  font-weight:
-    950 !important;
+  min-height:30px !important;
 
-  letter-spacing:
-    .13em !important;
+  padding:0 12px 0 18px !important;
 
-  white-space:
-    nowrap !important;
+  color:#f0cf69 !important;
+
+  font-family:"Orbitron",sans-serif !important;
+
+  font-size:8px !important;
+
+  line-height:1 !important;
+
+  font-weight:800 !important;
+
+  letter-spacing:.14em !important;
+
+  white-space:nowrap !important;
+
+  border-left:
+    2px solid
+    #d5b553 !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(213,181,83,.095),
+      rgba(213,181,83,.018),
+      transparent
+    ) !important;
+
+  text-shadow:
+    0 0 10px
+      rgba(213,181,83,.22) !important;
+
+  box-shadow:
+    inset 0 1px
+      rgba(255,255,255,.02) !important;
 }
 
+#${ROOT_ID} .rv5-mapbar b::before{
+  content:"" !important;
+
+  position:absolute !important;
+
+  left:7px !important;
+
+  top:50% !important;
+
+  width:5px !important;
+
+  height:5px !important;
+
+  transform:translateY(-50%) !important;
+
+  border-radius:50% !important;
+
+  background:#f0cf69 !important;
+
+  box-shadow:
+    0 0 5px
+      rgba(240,207,105,.95),
+    0 0 12px
+      rgba(213,181,83,.55) !important;
+
+  animation:
+    rv5RouteStatusPulse
+    1.8s
+    ease-in-out
+    infinite !important;
+}
+
+@keyframes rv5RouteStatusPulse{
+  0%,100%{
+    opacity:.65;
+  }
+
+  50%{
+    opacity:1;
+  }
+}
+#${ROOT_ID} .rv5-mapbar::after{
+  content:"TACTICAL ROUTE FEED" !important;
+
+  position:absolute !important;
+  right:18px !important;
+  bottom:-1px !important;
+
+  width:92px !important;
+  height:1px !important;
+
+  padding:0 !important;
+
+  color:transparent !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(116,220,229,.42),
+      transparent
+    ) !important;
+
+  box-shadow:
+    0 0 8px rgba(116,220,229,.16) !important;
+
+  animation:rv5MapbarScan 3.2s linear infinite !important;
+}
+
+@keyframes rv5MapbarScan{
+  0%{
+    opacity:.25;
+    transform:translateX(-35px);
+  }
+
+  50%{
+    opacity:.9;
+  }
+
+  100%{
+    opacity:.25;
+    transform:translateX(35px);
+  }
+}
 
 /* ============================================================
    MAP FRAME
@@ -1299,27 +2271,30 @@ style.textContent = `
 
   background:
     radial-gradient(
-      ellipse at 50% 43%,
-      rgba(64,84,74,.18),
-      transparent 53%
+      ellipse at 50% 45%,
+      rgba(62,104,104,.24),
+      rgba(16,32,32,.10) 34%,
+      transparent 62%
     ),
     linear-gradient(
       180deg,
-      #0a0f0f,
-      #030707 70%
+      #0b1415 0%,
+      #071011 42%,
+      #030708 100%
     ) !important;
 
   border-top:
     1px solid
-    rgba(194,200,190,.10) !important;
+    rgba(116,220,229,.20) !important;
 
   border-bottom:
     1px solid
-    rgba(194,200,190,.10) !important;
+    rgba(116,220,229,.16) !important;
 
   box-shadow:
-    inset 0 0 90px
-      rgba(0,0,0,.72) !important;
+    inset 0 0 100px rgba(0,0,0,.82),
+    inset 0 0 35px rgba(40,150,160,.06),
+    0 0 30px rgba(0,0,0,.32) !important;
 }
 
 
@@ -1339,51 +2314,58 @@ style.textContent = `
   background:
     linear-gradient(
       90deg,
-      transparent 49.9%,
-      rgba(214,186,91,.09) 50%,
-      transparent 50.1%
+      transparent 49.94%,
+      rgba(116,220,229,.055) 50%,
+      transparent 50.06%
     ),
     linear-gradient(
       0deg,
-      transparent 49.9%,
-      rgba(214,186,91,.07) 50%,
-      transparent 50.1%
+      transparent 49.94%,
+      rgba(116,220,229,.045) 50%,
+      transparent 50.06%
     );
 
-  opacity:.7;
+  opacity:.45;
 }
-
 
 /* scan */
 
 #${ROOT_ID} .rv5-scan{
   position:absolute !important;
 
-  left:0 !important;
-  right:0 !important;
-
-  top:-130px !important;
+  inset:-20% 0 !important;
 
   z-index:8 !important;
-
-  height:
-    120px !important;
 
   pointer-events:none !important;
 
   background:
     linear-gradient(
       180deg,
-      transparent,
-      rgba(213,181,83,.05),
-      transparent
+      transparent 0%,
+      rgba(116,220,229,.00) 40%,
+      rgba(116,220,229,.045) 50%,
+      rgba(116,220,229,.00) 60%,
+      transparent 100%
     ) !important;
 
+  opacity:.72 !important;
+
+  mix-blend-mode:screen !important;
+
   animation:
-    rv5wzScan
-    5s
-    linear
-    infinite !important;
+    rv5PremiumScan 5.5s
+    linear infinite !important;
+}
+
+@keyframes rv5PremiumScan{
+  0%{
+    transform:translateY(-35%);
+  }
+
+  100%{
+    transform:translateY(35%);
+  }
 }
 
 
@@ -1851,54 +2833,111 @@ style.textContent = `
 
 #${ROOT_ID} .start-radius{
   fill:none !important;
-  stroke:var(--wz-green) !important;
+
+  stroke:#78c879 !important;
+
   stroke-width:1 !important;
-  stroke-dasharray:3 5 !important;
-  opacity:.25 !important;
+
+  stroke-dasharray:4 6 !important;
+
+  opacity:.28 !important;
+
+  filter:
+    drop-shadow(
+      0 0 4px rgba(120,200,121,.25)
+    ) !important;
 }
 
 #${ROOT_ID} .start-ring{
-  fill:none !important;
-  stroke:var(--wz-green) !important;
-  stroke-width:1.5 !important;
-  opacity:.70 !important;
+  fill:rgba(120,200,121,.035) !important;
+
+  stroke:#8bdd8b !important;
+
+  stroke-width:2 !important;
+
+  opacity:.88 !important;
+
+  filter:
+    drop-shadow(
+      0 0 5px rgba(120,200,121,.55)
+    ) !important;
 }
 
 #${ROOT_ID} .goal-radius{
   fill:none !important;
-  stroke:var(--wz-amber-bright) !important;
-  stroke-width:1 !important;
-  stroke-dasharray:4 6 !important;
-  opacity:.30 !important;
-}
 
-#${ROOT_ID} .goal-ring{
-  fill:none !important;
-  stroke:var(--wz-amber-bright) !important;
-  stroke-width:1.5 !important;
-  opacity:.82 !important;
+  stroke:#f0cf69 !important;
+
+  stroke-width:1 !important;
+
+  stroke-dasharray:5 7 !important;
+
+  opacity:.34 !important;
 
   filter:
     drop-shadow(
-      0 0 4px
-      rgba(240,207,105,.55)
+      0 0 5px rgba(240,207,105,.20)
+    ) !important;
+}
+
+#${ROOT_ID} .goal-ring{
+  fill:rgba(240,207,105,.045) !important;
+
+  stroke:#f5d86f !important;
+
+  stroke-width:2 !important;
+
+  opacity:.95 !important;
+
+  filter:
+    drop-shadow(
+      0 0 5px rgba(240,207,105,.65)
+    )
+    drop-shadow(
+      0 0 15px rgba(240,207,105,.22)
     ) !important;
 }
 
 #${ROOT_ID} .player-radius{
   fill:none !important;
-  stroke:var(--wz-cyan) !important;
+
+  stroke:#74dce5 !important;
+
   stroke-width:1 !important;
-  stroke-dasharray:3 5 !important;
-  opacity:.30 !important;
+
+  stroke-dasharray:4 6 !important;
+
+  opacity:.34 !important;
+
+  animation:
+    rv5PlayerPulse
+    2.2s
+    ease-in-out
+    infinite !important;
 }
 
 #${ROOT_ID} .player-cross{
-  stroke:var(--wz-cyan) !important;
+  stroke:#b9f8ff !important;
+
   stroke-width:1.5 !important;
-  opacity:.90 !important;
+
+  opacity:.92 !important;
+
+  filter:
+    drop-shadow(
+      0 0 4px rgba(116,220,229,.65)
+    ) !important;
 }
 
+@keyframes rv5PlayerPulse{
+  0%,100%{
+    opacity:.24;
+  }
+
+  50%{
+    opacity:.55;
+  }
+}
 
 #${ROOT_ID} .edge{
   stroke:
@@ -1935,24 +2974,16 @@ style.textContent = `
 /* route */
 
 #${ROOT_ID} .route{
-  fill:
-    none !important;
+  fill:none !important;
 
-  stroke:
-    var(--wz-amber-bright) !important;
+  stroke:#f0cf69 !important;
 
-  stroke-width:
-    4 !important;
+  stroke-width:3.8 !important;
 
-  stroke-linecap:
-    round !important;
+  stroke-linecap:round !important;
+  stroke-linejoin:round !important;
 
-  stroke-linejoin:
-    round !important;
-
-  stroke-dasharray:
-    14
-    8 !important;
+  stroke-dasharray:16 10 !important;
 
   animation:
     rv5wzRoute
@@ -1962,9 +2993,13 @@ style.textContent = `
 
   filter:
     drop-shadow(
-      0 0 5px
-      rgba(240,207,105,.60)
+      0 0 4px rgba(240,207,105,.62)
+    )
+    drop-shadow(
+      0 0 11px rgba(240,207,105,.20)
     ) !important;
+
+  opacity:.96 !important;
 }
 
 
@@ -1979,17 +3014,23 @@ style.textContent = `
 /* route core */
 
 #${ROOT_ID} .route-core{
-  fill:
-    none !important;
+  fill:none !important;
 
-  stroke:
-    #fffbea !important;
+  stroke:#fff9dc !important;
 
-  stroke-width:
-    1.2 !important;
+  stroke-width:1.25 !important;
 
-  opacity:
-    .78 !important;
+  stroke-linecap:round !important;
+  stroke-linejoin:round !important;
+
+  opacity:.82 !important;
+
+  filter:
+    drop-shadow(
+      0 0 3px rgba(255,249,220,.42)
+    ) !important;
+
+  pointer-events:none !important;
 }
 
 
@@ -1999,40 +3040,100 @@ style.textContent = `
 
 #${ROOT_ID} .start{
   fill:
-    var(--wz-green) !important;
+    #78c879 !important;
 
   stroke:
-    #edffe8 !important;
+    #eaffea !important;
 
   stroke-width:
-    2.5 !important;
+    2.2 !important;
 
   filter:
     drop-shadow(
-      0 0 7px
-      rgba(120,200,121,.75)
+      0 0 6px
+      rgba(120,200,121,.82)
+    )
+    drop-shadow(
+      0 0 14px
+      rgba(120,200,121,.28)
     ) !important;
+
+  opacity:.96 !important;
+}
+
+#${ROOT_ID} .start-ring{
+  fill:none !important;
+
+  stroke:#78c879 !important;
+
+  stroke-width:1.35 !important;
+
+  opacity:.72 !important;
+
+  filter:
+    drop-shadow(
+      0 0 6px
+      rgba(120,200,121,.42)
+    ) !important;
+
+  animation:
+    rv5StartPulse
+    2s
+    ease-in-out
+    infinite !important;
+}
+
+@keyframes rv5StartPulse{
+  0%,100%{
+    opacity:.42;
+    transform:scale(.96);
+    transform-origin:center;
+  }
+
+  50%{
+    opacity:.9;
+    transform:scale(1.04);
+    transform-origin:center;
+  }
 }
 
 
 #${ROOT_ID} .goal{
   fill:
-    var(--wz-amber-bright) !important;
+    #f0cf69 !important;
 
   stroke:
-    #fff4c9 !important;
+    #fff1b8 !important;
 
   stroke-width:
-    2.5 !important;
+    2.2 !important;
 
   filter:
     drop-shadow(
       0 0 6px
-      rgba(240,207,105,.82)
+      rgba(240,207,105,.78)
     )
     drop-shadow(
-      0 0 14px
-      rgba(213,181,83,.32)
+      0 0 15px
+      rgba(240,207,105,.25)
+    ) !important;
+
+  opacity:.97 !important;
+}
+
+#${ROOT_ID} .goal-ring{
+  fill:none !important;
+
+  stroke:#f0cf69 !important;
+
+  stroke-width:1.35 !important;
+
+  opacity:.68 !important;
+
+  filter:
+    drop-shadow(
+      0 0 6px
+      rgba(240,207,105,.42)
     ) !important;
 }
 
@@ -2100,35 +3201,58 @@ style.textContent = `
 /* checkpoints */
 
 #${ROOT_ID} .checkpoint{
-  fill:
-    rgba(116,220,229,.045) !important;
-
-  stroke:
-    var(--wz-cyan) !important;
-
-  stroke-width:
-    2 !important;
-
+  fill:rgba(116,220,229,.025) !important;
+  stroke:#74dce5 !important;
+  stroke-width:1.55 !important;
+  opacity:.88 !important;
   filter:
     drop-shadow(
-      0 0 4px
-      rgba(116,220,229,.38)
+      0 0 4px rgba(116,220,229,.42)
+    )
+    drop-shadow(
+      0 0 10px rgba(116,220,229,.14)
     ) !important;
 }
 
 
 #${ROOT_ID} .checkpoint-dot{
-  fill:
-    #eafcff !important;
-
+  fill:#f3ffff !important;
+  stroke:#74dce5 !important;
+  stroke-width:1.2 !important;
   filter:
     drop-shadow(
-      0 0 6px
-      rgba(116,220,229,.85)
+      0 0 5px rgba(116,220,229,.85)
+    )
+    drop-shadow(
+      0 0 12px rgba(116,220,229,.30)
     ) !important;
+
+  opacity:.96 !important;
 }
 
+#${ROOT_ID} .checkpoint-dot{
+  animation:
+    rv5CheckpointPulse
+    2.4s
+    ease-in-out
+    infinite !important;
+}
 
+@keyframes rv5CheckpointPulse{
+  0%,100%{
+    opacity:.72;
+    filter:
+      drop-shadow(0 0 4px rgba(116,220,229,.55))
+      drop-shadow(0 0 9px rgba(116,220,229,.16));
+  }
+
+  50%{
+    opacity:1;
+    filter:
+      drop-shadow(0 0 7px rgba(116,220,229,.95))
+      drop-shadow(0 0 15px rgba(116,220,229,.32));
+  }
+}
 /* hostile */
 
 #${ROOT_ID} .danger-object{
@@ -2319,47 +3443,117 @@ style.textContent = `
    ============================================================ */
 
 #${ROOT_ID} .rv5-stats{
+  position:relative !important;
+
   min-height:
-    48px !important;
+    56px !important;
 
   display:grid !important;
 
-  grid-template-columns:
+ grid-template-columns:
     repeat(
-      3,
+      4,
       minmax(0,1fr)
     ) !important;
 
   background:
-    rgba(4,7,7,.98) !important;
+    linear-gradient(
+      180deg,
+      rgba(10,15,15,.98),
+      rgba(3,6,6,1)
+    ) !important;
 
   border-top:
     1px solid
-    rgba(190,198,188,.10) !important;
+    rgba(213,181,83,.16) !important;
+
+  border-bottom:
+    1px solid
+    rgba(190,198,188,.08) !important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255,255,255,.025),
+    inset 0 -10px 24px
+      rgba(0,0,0,.30) !important;
+
+  overflow:hidden !important;
 }
 
-
 #${ROOT_ID} .rv5-stats div{
-  min-width:
-    0 !important;
+  position:relative !important;
+
+  min-width:0 !important;
 
   display:flex !important;
 
-  flex-direction:
-    column !important;
+  flex-direction:column !important;
 
-  align-items:
-    center !important;
+  align-items:center !important;
 
-  justify-content:
-    center !important;
+  justify-content:center !important;
 
-  gap:
-    4px !important;
+  gap:5px !important;
+
+  padding:6px 12px !important;
 
   border-right:
     1px solid
     rgba(190,198,188,.08) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      transparent
+    ) !important;
+
+  overflow:hidden !important;
+}
+
+#${ROOT_ID} .rv5-stats div::before{
+  content:"";
+
+  position:absolute !important;
+
+  left:14px !important;
+  right:14px !important;
+  top:0 !important;
+
+  height:1px !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(213,181,83,.30),
+      transparent
+    ) !important;
+
+  opacity:.7 !important;
+}
+
+#${ROOT_ID} .rv5-stats div::after{
+  content:"";
+
+  position:absolute !important;
+
+  width:3px !important;
+  height:3px !important;
+
+  right:10px !important;
+  bottom:8px !important;
+
+  border-radius:50% !important;
+
+  background:
+    var(--wz-green) !important;
+
+  box-shadow:
+    0 0 7px
+    rgba(120,200,121,.65) !important;
+
+  opacity:.8 !important;
 }
 
 
@@ -2370,11 +3564,13 @@ style.textContent = `
 
 
 #${ROOT_ID} .rv5-stats small{
+  display:block !important;
+
   color:
-    #737d75 !important;
+    #7f8982 !important;
 
   font-size:
-    7px !important;
+    8px !important;
 
   line-height:
     1 !important;
@@ -2383,30 +3579,43 @@ style.textContent = `
     900 !important;
 
   letter-spacing:
-    .13em !important;
+    .18em !important;
 
   text-transform:
     uppercase !important;
-}
 
+  text-shadow:
+    0 0 8px
+    rgba(255,255,255,.04) !important;
+}
 
 #${ROOT_ID} .rv5-stats strong{
   color:
-    #e4e9e2 !important;
+    #edf2ec !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
 
   font-size:
-    10px !important;
+    11px !important;
 
   line-height:
     1 !important;
 
   font-weight:
-    950 !important;
+    800 !important;
 
   letter-spacing:
-    .07em !important;
-}
+    .10em !important;
 
+  text-transform:
+    uppercase !important;
+
+  text-shadow:
+    0 0 10px
+    rgba(255,255,255,.06) !important;
+}
 
 #${ROOT_ID} .rv5-stats .danger{
   color:
@@ -2423,8 +3632,10 @@ style.textContent = `
    ============================================================ */
 
 #${ROOT_ID} .rv5-footer{
+  position:relative !important;
+
   min-height:
-    78px !important;
+    86px !important;
 
   display:flex !important;
 
@@ -2433,68 +3644,136 @@ style.textContent = `
   justify-content:space-between !important;
 
   gap:
-    18px !important;
+    20px !important;
 
   padding:
-    11px
+    12px
     20px !important;
 
   border-top:
     1px solid
-    rgba(190,198,188,.13) !important;
+    rgba(213,181,83,.18) !important;
 
   background:
     linear-gradient(
       180deg,
-      rgba(7,10,10,.96),
-      rgba(3,6,6,.995)
+      rgba(10,14,13,.99),
+      rgba(3,6,6,1)
     ) !important;
-}
 
+  box-shadow:
+    inset 0 1px 0
+      rgba(255,255,255,.025),
+    inset 0 12px 30px
+      rgba(0,0,0,.20) !important;
+
+  overflow:hidden !important;
+}
 
 /* objective */
 
 #${ROOT_ID} .rv5-objective{
-  min-width:
-    0 !important;
+  position:relative !important;
+
+  min-width:0 !important;
 
   display:flex !important;
+
+  text-align:center !important;
 
   align-items:center !important;
 
   gap:
-    12px !important;
+    14px !important;
 
   padding:
-    8px
-    12px !important;
+    10px
+    15px !important;
 
   border:
     1px solid
-    rgba(190,198,188,.13) !important;
+    rgba(190,198,188,.14) !important;
 
   border-left:
     3px solid
     var(--wz-amber) !important;
 
   background:
-    rgba(255,255,255,.018) !important;
+    linear-gradient(
+      90deg,
+      rgba(213,181,83,.055),
+      rgba(255,255,255,.018) 35%,
+      rgba(255,255,255,.008)
+    ) !important;
 
   box-shadow:
-    inset 0 0 18px
-    rgba(213,181,83,.02) !important;
+    inset 0 0 24px
+      rgba(213,181,83,.035),
+    0 0 18px
+      rgba(0,0,0,.20) !important;
+
+  overflow:hidden !important;
+}
+#${ROOT_ID} .rv5-objective::before{
+  content:"";
+
+  position:absolute !important;
+
+  top:0 !important;
+  left:12px !important;
+  right:12px !important;
+
+  height:1px !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--wz-amber),
+      rgba(240,207,105,.18),
+      transparent
+    ) !important;
+
+  opacity:.65 !important;
+}
+  
+#${ROOT_ID} .rv5-objective::after{
+  content:none !important;
+
+  position:absolute !important;
+
+  right:10px !important;
+  top:5px !important;
+
+  color:
+    rgba(240,207,105,.38) !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    6px !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .16em !important;
+
+  pointer-events:none !important;
 }
 
-
 #${ROOT_ID} .rv5-objective-icon{
+  position:relative !important;
+
   width:
-    32px !important;
+    36px !important;
 
   height:
-    32px !important;
+    36px !important;
 
   flex:
-    0 0 32px !important;
+    0 0 36px !important;
 
   display:grid !important;
 
@@ -2505,13 +3784,23 @@ style.textContent = `
 
   border:
     1px solid
-    rgba(213,181,83,.35) !important;
+    rgba(213,181,83,.42) !important;
 
   background:
-    rgba(213,181,83,.045) !important;
+    linear-gradient(
+      135deg,
+      rgba(213,181,83,.10),
+      rgba(213,181,83,.025)
+    ) !important;
 
   transform:
     rotate(45deg) !important;
+
+  box-shadow:
+    0 0 14px
+      rgba(213,181,83,.10),
+    inset 0 0 12px
+      rgba(213,181,83,.04) !important;
 }
 
 
@@ -2525,10 +3814,14 @@ style.textContent = `
   display:block !important;
 
   margin-bottom:
-    5px !important;
+    6px !important;
 
   color:
     var(--wz-amber) !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
 
   font-size:
     8px !important;
@@ -2537,10 +3830,17 @@ style.textContent = `
     1 !important;
 
   font-weight:
-    950 !important;
+    800 !important;
 
   letter-spacing:
-    .14em !important;
+    .19em !important;
+
+  text-transform:
+    uppercase !important;
+
+  text-shadow:
+    0 0 9px
+    rgba(240,207,105,.12) !important;
 }
 
 
@@ -2556,7 +3856,9 @@ style.textContent = `
     ) !important;
 
   overflow:hidden !important;
+
   overflow-wrap:anywhere !important;
+
   word-break:break-word !important;
 
   text-overflow:ellipsis !important;
@@ -2564,19 +3866,27 @@ style.textContent = `
   white-space:normal !important;
 
   color:
-    #f0f2ec !important;
+    #f4f7f2 !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
 
   font-size:
-    14px !important;
+    15px !important;
 
   line-height:
-    1.15 !important;
+    1.25 !important;
 
   font-weight:
-    950 !important;
+    700 !important;
 
   letter-spacing:
-    .035em !important;
+    .055em !important;
+
+  text-shadow:
+    0 0 12px
+    rgba(255,255,255,.07) !important;
 }
 
 #${ROOT_ID} .rv5-objective > div:last-child{
@@ -2587,18 +3897,30 @@ style.textContent = `
 /* ready */
 
 #${ROOT_ID} .rv5-ready{
+  position:relative !important;
+
   display:flex !important;
 
   align-items:center !important;
 
   gap:
-    8px !important;
+    9px !important;
 
   flex:
     0 0 auto !important;
 
+  min-height:
+    34px !important;
+
+  padding:
+    0 12px !important;
+
   color:
     var(--wz-green) !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
 
   font-size:
     9px !important;
@@ -2607,13 +3929,26 @@ style.textContent = `
     1 !important;
 
   font-weight:
-    950 !important;
+    800 !important;
 
   letter-spacing:
-    .13em !important;
+    .16em !important;
 
   white-space:
     nowrap !important;
+
+  border:
+    1px solid
+    rgba(120,200,121,.20) !important;
+
+  background:
+    rgba(120,200,121,.035) !important;
+
+  box-shadow:
+    inset 0 0 12px
+      rgba(120,200,121,.025),
+    0 0 12px
+      rgba(120,200,121,.05) !important;
 }
 
 
@@ -2634,10 +3969,29 @@ style.textContent = `
     var(--wz-green) !important;
 
   box-shadow:
-    0 0 10px
-    rgba(120,200,121,.74) !important;
+    0 0 6px
+      rgba(120,200,121,.90),
+    0 0 14px
+      rgba(120,200,121,.55) !important;
+
+  animation:
+    rv5ReadyPulse
+    1.6s
+    ease-in-out
+    infinite !important;
 }
 
+@keyframes rv5ReadyPulse{
+  0%,100%{
+    opacity:.65;
+    transform:scale(.90);
+  }
+
+  50%{
+    opacity:1;
+    transform:scale(1.12);
+  }
+}
 
 /* ============================================================
    OPEN ANIMATION
@@ -2929,6 +4283,12 @@ style.textContent = `
     width:24px !important;
     height:24px !important;
   }
+
+  #${ROOT_ID} .rv5-objective-status{
+  color:#78c879 !important;
+  font-weight:900 !important;
+   text-shadow:0 0 8px rgba(120,200,121,.22) !important;
+}
 
   #${ROOT_ID} .rv5-corner.tl{
     top:7px !important;
@@ -3259,7 +4619,133 @@ style.textContent = `
   }
 }
 
+/* ============================================================
+   TACTICAL MARKER PANEL
+   ============================================================ */
+
+#${ROOT_ID} .rv5-tactical-panel{
+  position:absolute !important;
+  right:24px !important;
+  top:120px !important;
+  z-index:100 !important;
+  width:260px !important;
+  padding:14px !important;
+
+  border:1px solid rgba(116,220,229,.22) !important;
+  border-left:2px solid var(--wz-amber) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(8,14,13,.97),
+      rgba(2,6,6,.98)
+    ) !important;
+
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.65),
+    inset 0 0 24px rgba(116,220,229,.025) !important;
+
+  backdrop-filter:blur(10px) !important;
+
+  opacity:0 !important;
+  visibility:hidden !important;
+  transform:translateX(12px) !important;
+  pointer-events:none !important;
+
+  transition:
+    opacity .22s ease,
+    transform .22s ease,
+    visibility .22s ease !important;
+}
+
+#${ROOT_ID} .rv5-tactical-panel.visible{
+  opacity:1 !important;
+  visibility:visible !important;
+  transform:translateX(0) !important;
+  pointer-events:auto !important;
+}
+
+#${ROOT_ID} .rv5-tactical-panel-head{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  margin-bottom:12px !important;
+}
+
+#${ROOT_ID} .rv5-tactical-panel-head span{
+  color:#6e8580 !important;
+  font-family:"Orbitron",sans-serif !important;
+  font-size:6px !important;
+  font-weight:800 !important;
+  letter-spacing:.16em !important;
+}
+
+#${ROOT_ID} .rv5-tactical-close{
+  width:22px !important;
+  height:22px !important;
+
+  border:1px solid rgba(190,198,188,.16) !important;
+  background:rgba(255,255,255,.025) !important;
+
+  color:#9da9a0 !important;
+  font-size:15px !important;
+  line-height:1 !important;
+
+  cursor:pointer !important;
+}
+
+#${ROOT_ID} .rv5-tactical-panel > strong{
+  display:block !important;
+
+  color:#f0f3ec !important;
+
+  font-family:"Orbitron",sans-serif !important;
+  font-size:15px !important;
+  font-weight:900 !important;
+  letter-spacing:.06em !important;
+}
+
+#${ROOT_ID} .rv5-tactical-panel > b{
+  display:block !important;
+
+  margin-top:7px !important;
+
+  color:#78c879 !important;
+
+  font-family:"Orbitron",sans-serif !important;
+  font-size:8px !important;
+  letter-spacing:.13em !important;
+}
+
+#${ROOT_ID} .rv5-tactical-panel > p{
+  margin:10px 0 0 !important;
+
+  color:#8e9b92 !important;
+
+  font-family:"Orbitron",sans-serif !important;
+  font-size:7px !important;
+  line-height:1.55 !important;
+  letter-spacing:.06em !important;
+}
+
+#${ROOT_ID} .rv5-marker-hit{
+  pointer-events:auto !important;
+}
+
+@media(max-width:600px){
+
+  #${ROOT_ID} .rv5-tactical-panel{
+    left:10px !important;
+    right:10px !important;
+    top:auto !important;
+    bottom:72px !important;
+    width:auto !important;
+  }
+
+}
+
 `;
+
 
   document.head.appendChild(style);
 
@@ -3964,13 +5450,28 @@ const targetBottom = 490;
               class="checkpoint-line">
             </line>
 
-           <text
+ <text
   x="${p.x}"
   y="${p.y-28}"
   text-anchor="middle"
   class="label checkpoint-label">
   CP ${i+1}
 </text>
+
+<g
+  class="rv5-marker-hit"
+  data-marker-type="checkpoint"
+  data-marker-index="${i+1}"
+  style="cursor:pointer">
+
+  <circle
+    cx="${p.x}"
+    cy="${p.y}"
+    r="25"
+    fill="transparent">
+  </circle>
+
+</g>
 
           </g>
         `;
@@ -4082,6 +5583,21 @@ const targetBottom = 490;
   class="label hostile-label">
   HOSTILE
 </text>
+
+<g
+  class="rv5-marker-hit"
+  data-marker-type="hostile"
+  data-marker-index="${d.enemies.indexOf(item)+1}"
+  style="cursor:pointer">
+
+  <circle
+    cx="${p.x}"
+    cy="${p.y}"
+    r="25"
+    fill="transparent">
+  </circle>
+
+</g>
           </g>
         `;
 
@@ -4411,72 +5927,306 @@ const targetBottom = 490;
     </g>
 
   `;
+
+  installMarkerInteractions();
 }
 
+
+function installMarkerInteractions() {
+
+  const svg =
+    root.querySelector('.rv5-svg');
+
+  if (!svg) return;
+
+  if (
+    svg.dataset.markerInteractions === '1'
+  ) {
+    return;
+  }
+
+  svg.dataset.markerInteractions = '1';
+
+  svg.addEventListener(
+    'click',
+    event => {
+
+      const target =
+        event.target instanceof Element
+          ? event.target.closest(
+              '.rv5-marker-hit'
+            )
+          : null;
+
+      if (!target) return;
+
+      const type =
+        target.dataset.markerType || '';
+
+      const index =
+        target.dataset.markerIndex || '';
+
+      let title = 'TACTICAL NODE';
+      let status = 'LOCKED';
+      let detail = 'ROUTE INFORMATION';
+
+      if (type === 'checkpoint') {
+
+        title =
+          `CHECKPOINT ${index}`;
+
+        status =
+          'ROUTE NODE';
+
+        detail =
+          'CHECKPOINT AHEAD // SYNC REQUIRED';
+
+      }
+
+      if (type === 'hostile') {
+
+        title =
+          `HOSTILE ZONE ${index}`;
+
+        status =
+          'THREAT ACTIVE';
+
+        detail =
+          'HIGH RISK AREA // AVOID EXPOSURE';
+
+      }
+
+      showTacticalPanel(
+        title,
+        status,
+        detail
+      );
+
+    }
+  );
+}
+
+
+function showTacticalPanel(
+  title,
+  status,
+  detail
+) {
+
+  let panel =
+    root.querySelector(
+      '.rv5-tactical-panel'
+    );
+
+  if (!panel) {
+
+    panel =
+      document.createElement('div');
+
+    panel.className =
+      'rv5-tactical-panel';
+
+    root.querySelector(
+      '.rv5-shell'
+    )?.appendChild(panel);
+  }
+
+  panel.innerHTML = `
+
+    <div class="rv5-tactical-panel-head">
+
+      <span>TACTICAL INTELLIGENCE</span>
+
+      <button
+        type="button"
+        class="rv5-tactical-close">
+        ×
+      </button>
+
+    </div>
+
+    <strong>${esc(title)}</strong>
+
+    <b>${esc(status)}</b>
+
+    <p>${esc(detail)}</p>
+
+   `;
+
+  panel.classList.add('visible');
+
+  panel
+    .querySelector(
+      '.rv5-tactical-close'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        panel.classList.remove(
+          'visible'
+        );
+
+      }
+    );
+}
   /*
    * ============================================================
    * PLAYER UPDATE
    * ============================================================
    */
 
-  function updatePlayer() {
+  function updateThreatStatus(scene) {
 
-    if (!active) return;
+  if (!scene) return;
 
-    const scene = runner();
+  const d = mapModel(scene);
 
-    const svg =
-      root.querySelector('.rv5-svg');
+  const threatEl =
+    root.querySelector('.rv5-threat-status');
 
-    const player =
-      svg?.querySelector('#rv5-player');
+  if (!threatEl) return;
 
-    if (!scene || !player) return;
+  const enemies =
+    d.enemies.length;
 
-    const d = mapModel(scene);
+  const hostile =
+    d.obstacles.length;
 
-    const circle =
-      player.querySelector('.player');
+  const total =
+    enemies + hostile;
 
-    const ring =
-      player.querySelector('.player-ring');
+  let status = 'LOW';
 
-    const label =
-      player.querySelector('text');
-
-   const px = d.points.player.x;
-const py = d.points.player.y;
-
-circle?.setAttribute(
-  'cx',
-  px
-);
-
-circle?.setAttribute(
-  'cy',
-  py
-);
-
-ring?.setAttribute(
-  'cx',
-  px
-);
-
-ring?.setAttribute(
-  'cy',
-  py
-);
-
-label?.setAttribute(
-  'x',
-  px + 19
-);
-
-label?.setAttribute(
-  'y',
-  py - 17
-);
+  if (total >= 6) {
+    status = 'CRITICAL';
+  } else if (total >= 4) {
+    status = 'HIGH';
+  } else if (total >= 2) {
+    status = 'MEDIUM';
   }
+
+  threatEl.textContent = status;
+
+  threatEl.dataset.threat = status;
+}
+
+
+function updateRouteTelemetry(scene) {
+
+  if (!scene) return;
+
+  const d = mapModel(scene);
+
+  const routePoints = [
+    d.points.start,
+    ...d.checkpoints.map(d.point),
+    d.points.goal
+  ];
+
+  let distance = 0;
+
+  for (let i = 1; i < routePoints.length; i++) {
+
+    const a = routePoints[i - 1];
+    const b = routePoints[i];
+
+    distance += Math.hypot(
+      b.x - a.x,
+      b.y - a.y
+    );
+  }
+
+  const distanceEl =
+    root.querySelector('.rv5-route-distance');
+
+  if (distanceEl) {
+    distanceEl.textContent =
+      `${Math.round(distance)}M`;
+  }
+}
+
+
+function updatePlayer() {
+
+  if (!active) return;
+
+  const scene = runner();
+
+  const svg =
+    root.querySelector('.rv5-svg');
+
+  const player =
+    svg?.querySelector('#rv5-player');
+
+  if (!scene || !player) return;
+
+  const d = mapModel(scene);
+
+  const px = d.points.player.x;
+  const py = d.points.player.y;
+
+  const circle =
+    player.querySelector('.player');
+
+  const ring =
+    player.querySelector('.player-ring');
+
+  const radius =
+    player.querySelector('.player-radius');
+
+  const label =
+    player.querySelector('text');
+
+  circle?.setAttribute('cx', px);
+  circle?.setAttribute('cy', py);
+
+  ring?.setAttribute('cx', px);
+  ring?.setAttribute('cy', py);
+
+  radius?.setAttribute('cx', px);
+  radius?.setAttribute('cy', py);
+
+  label?.setAttribute('x', px + 19);
+  label?.setAttribute('y', py - 17);
+
+  player.querySelectorAll('.player-cross').forEach(line => {
+
+    const x1 = Number(line.getAttribute('data-x1'));
+    const y1 = Number(line.getAttribute('data-y1'));
+    const x2 = Number(line.getAttribute('data-x2'));
+    const y2 = Number(line.getAttribute('data-y2'));
+
+    if (
+      Number.isFinite(x1) &&
+      Number.isFinite(y1) &&
+      Number.isFinite(x2) &&
+      Number.isFinite(y2)
+    ) {
+      line.setAttribute(
+        'x1',
+        px + (x1 - 500)
+      );
+
+      line.setAttribute(
+        'y1',
+        py + (y1 - 300)
+      );
+
+      line.setAttribute(
+        'x2',
+        px + (x2 - 500)
+      );
+
+      line.setAttribute(
+        'y2',
+        py + (y2 - 300)
+      );
+    }
+
+  });
+
+}
 
   /*
    * ============================================================
@@ -4655,7 +6405,19 @@ timerId =
 
 playerId =
   setInterval(
-    updatePlayer,
+    () => {
+
+      updatePlayer();
+
+      updateRouteTelemetry(
+        runner()
+      );
+
+      updateThreatStatus(
+        runner()
+      );
+
+    },
     100
   );
 

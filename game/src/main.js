@@ -675,21 +675,11 @@ game.events.on(
         );
     }
 
-    if (!$('routeIntel')) {
-      document
-        .querySelector('.hud-route div')
-        .insertAdjacentHTML(
-          'beforeend',
-          '<small id="routeIntel">ROUTE · ENTRY</small>'
-        );
-    }
+const intel = $('routeIntel');
 
-    const intel = $('routeIntel');
-
-    intel.textContent =
-      `ROUTE · 0/${game.scene.getScene('runner').mission.checkpoints.length} CHECKPOINTS`;
-
-    intel.classList.remove('is-chase');
+if (intel) {
+  intel.remove();
+}
   }
 );
 
@@ -2961,10 +2951,6 @@ game.events.on(
 
     $('signalProgress').style.width =
       `${count / total * 100}%`;
-
-    toast(
-      `SIGNAL CAPTURED · ${count}/${total}`
-    );
   }
 );
 
@@ -3020,26 +3006,8 @@ game.events.on(
 
     $('signalProgress').style.width =
       `${signals / missions[missionIndex].signals.length * 100}%`;
-
-    const intel =
-      $('routeIntel');
-
-    if (
-      intel &&
-      index !== undefined
-    ) {
-      intel.textContent =
-        `ROUTE · ${index + 1}/${missions[missionIndex].checkpoints.length} CHECKPOINTS`;
-    }
-
-    toast(
-      lost
-        ? `CHECKPOINT RESTORED · ${lost} PICKUP${lost === 1 ? '' : 'S'} LOST`
-        : 'CHECKPOINT SECURED'
-    );
   }
 );
-
 game.events.on(
   'chase',
   active => {
@@ -5149,3 +5117,41 @@ $('launchJob').onclick =
 
     selectedJob = null;
   };
+  const hideLegacyToast = () => {
+  const toastElement = document.getElementById('toast');
+
+  if (!toastElement) return;
+
+  toastElement.classList.remove('show');
+
+  toastElement.style.setProperty(
+    'display',
+    'none',
+    'important'
+  );
+
+  toastElement.style.setProperty(
+    'visibility',
+    'hidden',
+    'important'
+  );
+
+  toastElement.style.setProperty(
+    'opacity',
+    '0',
+    'important'
+  );
+
+  toastElement.style.setProperty(
+    'pointer-events',
+    'none',
+    'important'
+  );
+};
+
+hideLegacyToast();
+
+window.setInterval(
+  hideLegacyToast,
+  250
+);

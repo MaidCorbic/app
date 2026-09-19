@@ -218,8 +218,15 @@
     const bar = Math.floor((state.step % 64) / 16) % 4;
     const chord = progression[bar];
 
-    while (state.nextTime < horizon) {
+let scheduledSteps = 0;
+
+while (
+  state.nextTime < horizon &&
+  scheduledSteps < 4
+) {
       const i = state.step % 16;
+
+      scheduledSteps++;
       const when = state.nextTime;
       const melody = melodies[Math.floor(state.step / 64) % melodies.length];
 
@@ -253,10 +260,25 @@
     }
   };
 
-  const start = () => {
-    if (!state.enabled || !state.unlocked || !state.scene || state.paused) return false;
+const start = () => {
 
-    const ctx = createAudioGraph();
+    if (
+      state.running
+    ) {
+      return true;
+    }
+
+    if (
+      !state.enabled ||
+      !state.unlocked ||
+      !state.scene ||
+      state.paused
+    ) {
+      return false;
+    }
+
+    const ctx =
+      createAudioGraph();
     if (!ctx || ctx.state !== 'running') return false;
 
     if (!state.running) {
@@ -266,10 +288,22 @@
       rampMaster(state.volume, 0.35);
     }
 
-    window.clearInterval(state.timer);
-    state.timer = window.setInterval(schedule, 60);
-    schedule();
-    return true;
+   window.clearInterval(
+  state.timer
+);
+
+state.timer =
+  window.setInterval(
+    schedule,
+    80
+  );
+
+window.setTimeout(
+  schedule,
+  0
+);
+
+return true;
   };
 
   const stop = (fade = true) => {
@@ -279,7 +313,23 @@
     if (fade) rampMaster(0.0001, 0.18);
   };
 
-  const unlock = async () => {
+const unlock = async () => {
+
+    if (
+      state.unlocked &&
+      state.ctx?.state === 'running'
+    ) {
+      if (
+        state.scene &&
+        !state.paused &&
+        !state.running
+      ) {
+        start();
+      }
+
+      return true;
+    }
+
     try {
       state.unlocked = true;
       safeUnlockGuards();
@@ -380,12 +430,61 @@
     if (state.unlocked && state.scene && !state.paused) start();
   };
 
-  const gesture = () => { unlock(); };
-  document.addEventListener('pointerdown', gesture, { capture: true, passive: true });
-  document.addEventListener('touchstart', gesture, { capture: true, passive: true });
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Enter' || event.code === 'Space' || event.key === 'Shift') unlock();
-  }, { capture: true, passive: true });
+ let gestureUnlocked = false;
+
+const gesture = () => {
+  if (gestureUnlocked) return;
+
+  gestureUnlocked = true;
+
+  // Audio unlock samo jednom.
+  unlock();
+};
+
+document.addEventListener(
+  'pointerdown',
+  gesture,
+  {
+    capture: true,
+    passive: true,
+    once: true
+  }
+);
+
+document.addEventListener(
+  'touchstart',
+  gesture,
+  {
+    capture: true,
+    passive: true,
+    once: true
+  }
+);
+
+document.addEventListener(
+  'keydown',
+  event => {
+    if (
+      gestureUnlocked
+    ) {
+      return;
+    }
+
+    if (
+      event.key === 'Enter' ||
+      event.code === 'Space' ||
+      event.key === 'Shift'
+    ) {
+      gestureUnlocked = true;
+      unlock();
+    }
+  },
+  {
+    capture: true,
+    passive: true,
+    once: true
+  }
+);
 
   window.addEventListener('relay:runner-scene-ready', bindRunnerReady, { passive: true });
   if (window.__relayRunnerScene) bind(window.__relayRunnerScene);
@@ -408,8 +507,12 @@
 
     if (state.scene?.sys?.isActive?.() && !state.running) start();
 
-    const pauseMenu = document.querySelector('#pauseMenu');
-    const pauseVisible = !!pauseMenu && !pauseMenu.classList.contains('hidden') && getComputedStyle(pauseMenu).display !== 'none';
+    const pauseMenu =
+  document.getElementById('pauseMenu');
+
+const pauseVisible =
+  !!pauseMenu &&
+  !pauseMenu.classList.contains('hidden');
     if (pauseVisible && !state.paused) {
       state.paused = true;
       stop(true);

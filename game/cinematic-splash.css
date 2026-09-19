@@ -1,7 +1,14 @@
+
 /* =========================================================
    RELAY RUNNER — CINEMATIC TACTICAL SPLASH
    Loading presentation only. Runtime logic stays in splash-loader-v2.js.
    ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&display=swap');
+
+.relay-splash,
+.relay-splash *{
+  font-family:"Orbitron",sans-serif;
+}
 
 :root{
   --rr-bg:#02050a;
@@ -110,7 +117,7 @@
   align-items:center;
   gap:14px;
   color:var(--rr-white);
-  font:900 11px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+font:900 11px/1 "Orbitron",sans-serif;
   letter-spacing:.26em;
   text-transform:uppercase;
   text-shadow:
@@ -126,7 +133,7 @@
   border:1px solid rgba(0,234,255,.2);
   background:rgba(0,20,32,.42);
   color:rgba(141,250,255,.52);
-  font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+ font:700 12px/1 "Orbitron",sans-serif;
   letter-spacing:.16em;
 }
 
@@ -208,8 +215,9 @@ height:10px;
       rgba(0,234,255,.025),
       transparent
     );
-  color:rgba(184,251,255,.68);
-  font:800 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+color:rgba(184,251,255,.88);
+font:800 10px/1 "Orbitron",sans-serif;
+text-shadow:0 0 10px rgba(0,234,255,.25);
   letter-spacing:.20em;
 }
 
@@ -254,7 +262,7 @@ height:10px;
   align-items:center;
   gap:0;
   color:var(--rr-dim);
-font:900 10px/1.1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+font:900 10px/1.1 "Orbitron",sans-serif;
 letter-spacing:.22em;
   text-transform:uppercase;
   white-space:nowrap;
@@ -280,14 +288,14 @@ letter-spacing:.22em;
 .relay-splash-percent{
   min-width:68px;
   color:var(--rr-white);
-  font:900 20px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+font:900 20px/1 "Orbitron",sans-serif;
   font-variant-numeric:tabular-nums;
   letter-spacing:.08em;
   text-align:right;
-  text-shadow:
-    0 0 8px rgba(0,234,255,1),
-    0 0 20px rgba(0,234,255,.72),
-    0 0 38px rgba(0,140,255,.34);
+ text-shadow:
+  0 0 8px rgba(0,234,255,1),
+  0 0 18px rgba(0,234,255,.95),
+  0 0 34px rgba(0,168,255,.55);
 }
 
 /* =========================================================
@@ -296,8 +304,8 @@ letter-spacing:.22em;
 
 .relay-splash-track{
   position:relative;
-  height:11px;
-  border:1px solid rgba(117,247,255,.55);
+  height:12px;
+border:1px solid rgba(117,247,255,.78);
   background:
     repeating-linear-gradient(
       90deg,
@@ -337,19 +345,18 @@ letter-spacing:.22em;
   display:block;
   width:0;
   height:100%;
-  background:
-    linear-gradient(
-      90deg,
-      #006d8a 0%,
-      var(--rr-blue) 22%,
-      var(--rr-cyan) 58%,
-      var(--rr-cyan2) 84%,
-      #fff 100%
-    );
+background:linear-gradient(
+    90deg,
+    #00a8ff 0%,
+    #00d9ff 35%,
+    #00f6ff 70%,
+    #b8fbff 100%
+  );
+
   box-shadow:
-    0 0 9px rgba(0,234,255,1),
-    0 0 20px rgba(0,234,255,.86),
-    0 0 46px rgba(0,140,255,.52);
+    0 0 10px rgba(0,234,255,1),
+    0 0 24px rgba(0,234,255,.9),
+    0 0 48px rgba(0,168,255,.65);
   transition:width .16s cubic-bezier(.16,1,.3,1);
 }
 
@@ -395,7 +402,12 @@ letter-spacing:.22em;
    RESPONSIVE
    ========================================================= */
 
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
 @media(max-width:700px){
+
   .relay-splash-brand{
     left:max(14px,env(safe-area-inset-left));
     top:max(14px,env(safe-area-inset-top));
@@ -403,8 +415,17 @@ letter-spacing:.22em;
     font-size:8px;
     letter-spacing:.13em;
   }
-  .relay-splash-brand::after{display:none}
-  .relay-splash-brand b{width:29px;height:29px;font-size:11px}
+
+  .relay-splash-brand::after{
+    display:none;
+  }
+
+  .relay-splash-brand b{
+    width:29px;
+    height:29px;
+    font-size:11px;
+  }
+
   .relay-splash-ui{
     left:max(10px,env(safe-area-inset-left));
     right:max(10px,env(safe-area-inset-right));
@@ -412,18 +433,121 @@ letter-spacing:.22em;
     width:calc(100vw - 20px);
     gap:8px;
   }
-  .relay-splash-ui::before{font-size:6px;letter-spacing:.13em;padding:4px 6px}
-  .relay-splash-meta{gap:12px;padding:8px 9px 7px}
-  .relay-splash-status{font-size:7px;letter-spacing:.11em}
-  .relay-splash-status::before{width:5px;height:5px;flex-basis:5px;margin-right:7px}
-  .relay-splash-percent{min-width:46px;font-size:13px}
-  .relay-splash-track{height:7px}
+
+  /* SYSTEM LINK */
+.relay-splash-ui::before{
+  font-family:"Orbitron",sans-serif !important;
+  font-size:9px !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+  letter-spacing:.12em !important;
+  padding:7px 10px !important;
+  white-space:nowrap;
+  display:inline-block;
+  width:max-content;
+  max-width:100%;
+  box-sizing:border-box;
 }
 
-@media(max-width:700px) and (orientation:portrait){
-  .relay-splash-art{object-fit:cover!important;object-position:center!important}
-  .relay-splash-ui{width:calc(100vw - 20px)}
+  .relay-splash-meta{
+    gap:12px;
+    padding:8px 9px 7px;
+  }
+
+  .relay-splash-status{
+    font-family:"Orbitron",sans-serif !important;
+    font-size:7px !important;
+    letter-spacing:.11em !important;
+  }
+
+  .relay-splash-status::before{
+    width:5px;
+    height:5px;
+    flex-basis:5px;
+    margin-right:7px;
+  }
+
+  .relay-splash-percent{
+    font-family:"Orbitron",sans-serif !important;
+    min-width:46px;
+    font-size:13px !important;
+  }
+
+  .relay-splash-track{
+    height:7px;
+  }
 }
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media(max-width:420px){
+
+  .relay-splash-ui{
+    left:8px;
+    right:8px;
+    bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px));
+    width:calc(100vw - 16px);
+    padding:9px;
+    gap:7px;
+  }
+
+.relay-splash-ui::before{
+  font-family:"Orbitron",sans-serif !important;
+  font-size:8.5px !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+  letter-spacing:.10em !important;
+  padding:6px 8px !important;
+  white-space:nowrap;
+  display:inline-block;
+  width:max-content;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+  .relay-splash-meta{
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    padding:8px 9px 7px;
+  }
+
+  .relay-splash-status{
+    font-family:"Orbitron",sans-serif !important;
+    font-size:7px !important;
+    letter-spacing:.08em !important;
+  }
+
+  .relay-splash-percent{
+    font-family:"Orbitron",sans-serif !important;
+    font-size:13px !important;
+    min-width:42px;
+  }
+
+  .relay-splash-track{
+    height:7px;
+  }
+}
+
+
+/* =========================================================
+   PORTRAIT
+   ========================================================= */
+
+@media(max-width:700px) and (orientation:portrait){
+
+  .relay-splash-art{
+    object-fit:cover !important;
+    object-position:center !important;
+  }
+
+  .relay-splash-ui{
+    width:calc(100vw - 20px);
+  }
+}
+
 
 @media(orientation:landscape) and (max-height:520px){
   .relay-splash-brand{top:max(9px,calc(env(safe-area-inset-top) + 5px))}
@@ -491,4 +615,45 @@ letter-spacing:.22em;
 @keyframes rr-energy-scan{
   from{transform:translateX(0)}
   to{transform:translateX(1100px)}
+}
+@media(min-width:701px){
+
+  .relay-splash .relay-boot-status-cell span{
+    font-family:"Orbitron",sans-serif !important;
+    font-size:9px !important;
+    font-weight:700 !important;
+    letter-spacing:.16em !important;
+  }
+
+  .relay-splash .relay-boot-status-cell b{
+    font-family:"Orbitron",sans-serif !important;
+    font-size:12px !important;
+    font-weight:800 !important;
+    letter-spacing:.10em !important;
+  }
+
+}
+.relay-splash .relay-boot-log{
+  font-family:"Orbitron",sans-serif !important;
+  font-size:8px !important;
+  line-height:1.4 !important;
+  letter-spacing:.10em !important;
+}
+/* =========================================================
+   RELAY NETWORK — ONLINE INDICATOR
+   ========================================================= */
+
+.relay-splash .relay-splash-network-status i{
+  background:#39ff88 !important;
+  box-shadow:
+    0 0 6px #39ff88,
+    0 0 14px #39ff88,
+    0 0 28px rgba(57,255,136,.85) !important;
+}
+
+.relay-splash .relay-splash-network-status{
+  color:#39ff88 !important;
+  text-shadow:
+    0 0 8px rgba(57,255,136,.45),
+    0 0 18px rgba(57,255,136,.20);
 }

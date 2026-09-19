@@ -77,14 +77,62 @@ function saveDistrictRecord(record) {
 }
 
 function root() {
-  let node = document.getElementById(ROOT_ID);
-  if (node) return node;
-  node = document.createElement('section');
+  let node =
+    document.getElementById(
+      ROOT_ID
+    );
+
+if (node) {
+  node.__title ||= node.querySelector('.city-response-title');
+  node.__line ||= node.querySelector('.city-response-line');
+  node.__detail ||= node.querySelector('.city-response-detail');
+  return node;
+}
+
+  node =
+    document.createElement(
+      'section'
+    );
+
   node.id = ROOT_ID;
-  node.setAttribute('aria-live', 'polite');
-  node.setAttribute('role', 'status');
-  node.innerHTML = '<div class="city-response-card"><div class="city-response-kicker">CITY RESPONSE // LIVE</div><div class="city-response-title"></div><div class="city-response-line"></div><div class="city-response-detail"></div></div>';
+
+  node.setAttribute(
+    'aria-live',
+    'polite'
+  );
+
+  node.setAttribute(
+    'role',
+    'status'
+  );
+
+  node.innerHTML =
+    '<div class="city-response-card">' +
+      '<div class="city-response-kicker">' +
+        'CITY RESPONSE // LIVE' +
+      '</div>' +
+      '<div class="city-response-title"></div>' +
+      '<div class="city-response-line"></div>' +
+      '<div class="city-response-detail"></div>' +
+    '</div>';
+
   document.body.appendChild(node);
+
+  node.__title =
+    node.querySelector(
+      '.city-response-title'
+    );
+
+  node.__line =
+    node.querySelector(
+      '.city-response-line'
+    );
+
+  node.__detail =
+    node.querySelector(
+      '.city-response-detail'
+    );
+
   return node;
 }
 
@@ -93,13 +141,35 @@ function showResponse(response, mode = 'visit') {
   const node = root();
   node.style.setProperty('--city-response-accent', profile.accent);
   node.dataset.response = response;
-  node.querySelector('.city-response-title').textContent = mode === 'event' ? profile.event : profile.label;
-  node.querySelector('.city-response-line').textContent = profile.line;
-  node.querySelector('.city-response-detail').textContent = profile.detail;
-  node.classList.remove('is-visible', 'is-burst');
-  void node.offsetWidth;
-  node.classList.add('is-visible', 'is-burst');
-  window.clearTimeout(node.__hideTimer);
+node.__title.textContent =
+  mode === 'event'
+    ? profile.event
+    : profile.label;
+
+node.__line.textContent =
+  profile.line;
+
+node.__detail.textContent =
+  profile.detail;
+  node.classList.remove(
+  'is-visible',
+  'is-burst'
+);
+
+window.requestAnimationFrame(() => {
+  if (!node?.isConnected) {
+    return;
+  }
+
+  node.classList.add(
+    'is-visible',
+    'is-burst'
+  );
+});
+
+window.clearTimeout(
+  node.__hideTimer
+);
   node.__hideTimer = window.setTimeout(() => node.classList.remove('is-visible', 'is-burst'), mode === 'event' ? 2400 : 1900);
 }
 
@@ -183,12 +253,12 @@ function applyGameplayResponse(scene, record) {
     scene.events?.emit?.('feedback', 'signal');
   } else if (response === 'DAMAGED') {
     pulseOverlay(scene, 0xff6a4e, 900, .1);
-    spawnRelayPulse(scene, 0xff9d6e, 16, 3);
+   spawnRelayPulse(scene, 0xff9d6e, 16, 2);
     spawnRelayBars(scene, 0xff9d6e);
     scene.events?.emit?.('feedback', 'warning');
   } else {
     pulseOverlay(scene, 0xc8b5ff, 1000, .09);
-    spawnRelayPulse(scene, 0xc8b5ff, 18, 4);
+    spawnRelayPulse(scene, 0xc8b5ff, 18, 2);
     spawnRelayBars(scene, 0xc8b5ff);
     scene.events?.emit?.('feedback', 'signal');
   }
@@ -272,18 +342,64 @@ function bindScene(scene) {
     scene.__cityResponseActive = null;
   });
 }
+function bindCurrentRunnerScene() {
+  const scene =
+    window.__relayRunnerScene;
 
-function tick() {
-  const scene = window.__relayRunnerScene;
-  if (scene?.mission?.id) bindScene(scene);
+  if (
+    scene?.mission?.id
+  ) {
+    bindScene(scene);
+  }
 }
 
-if (typeof window !== 'undefined' && !window.__relayCityResponseV1) {
+if (
+  typeof window !== 'undefined' &&
+  !window.__relayCityResponseV1
+) {
   window.__relayCityResponseV1 = true;
-  window.addEventListener('relay:mission-complete', handleMissionComplete, { passive: true });
-  window.addEventListener('relay:signal-network-complete', () => {
-    const scene = window.__relayRunnerScene;
-    if (scene) scene.__signalNetworkStable = true;
-  }, { passive: true });
-  window.setInterval(tick, 300);
+
+  window.addEventListener(
+    'relay:mission-complete',
+    handleMissionComplete,
+    {
+      passive: true
+    }
+  );
+
+  window.addEventListener(
+    'relay:signal-network-complete',
+    () => {
+      const scene =
+        window.__relayRunnerScene;
+
+      if (scene) {
+        scene.__signalNetworkStable = true;
+      }
+    },
+    {
+      passive: true
+    }
+  );
+
+  window.addEventListener(
+    'relay:runner-scene-ready',
+    event => {
+      const scene =
+        event?.detail?.scene ||
+        window.__relayRunnerScene;
+
+      if (scene) {
+        window.__relayRunnerScene =
+          scene;
+
+        bindScene(scene);
+      }
+    },
+    {
+      passive: true
+    }
+  );
+
+  bindCurrentRunnerScene();
 }

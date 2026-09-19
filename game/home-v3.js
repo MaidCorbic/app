@@ -1056,6 +1056,70 @@ window.addEventListener(
     syncHomeProfile();
   };
 
+    /* =========================================================
+     HOME TYPEWRITER
+     ========================================================= */
+
+  
+     /* =========================================================
+     HOME TYPEWRITER LOOP
+     ========================================================= */
+
+  const startHomeTypewriter = () => {
+    const target = $('homeV4Typewriter');
+
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const text =
+      'RUN THE SLEEPING CITY. CARRY THE SIGNAL. KEEP THE LINE ALIVE. EVERY ROOFTOP IS PART OF THE NETWORK.';
+
+    let index = 0;
+    let deleting = false;
+
+    const typeSpeed = 22;
+    const deleteSpeed = 10;
+    const pauseAfterTyping = 1200;
+    const pauseAfterDeleting = 700;
+
+    const run = () => {
+      if (!deleting) {
+        if (index < text.length) {
+          target.textContent += text.charAt(index);
+          index += 1;
+
+          window.setTimeout(run, typeSpeed);
+          return;
+        }
+
+        deleting = true;
+
+        window.setTimeout(run, pauseAfterTyping);
+        return;
+      }
+
+      if (index > 0) {
+        index -= 1;
+        target.textContent = text.substring(0, index);
+
+        window.setTimeout(run, deleteSpeed);
+        return;
+      }
+
+      deleting = false;
+
+      window.setTimeout(run, pauseAfterDeleting);
+    };
+
+    target.textContent = '';
+    index = 0;
+    deleting = false;
+
+    run();
+  };
+
+
   const bindOnce = (
     node,
     event,
@@ -1223,10 +1287,10 @@ const sourceContinue = $('continue');
             ROOFTOP RELAY // LIVE NETWORK
           </p>
 
-          <p class="home-v4-description">
-            Run the sleeping city. Carry the signal farther
-            than anyone else can. Keep the line open.
-          </p>
+         <p class="home-v4-description home-v4-typewriter">
+  <span id="homeV4Typewriter"></span>
+  <span class="home-v4-cursor" aria-hidden="true">▌</span>
+</p>
 
    <div
   class="home-v4-actions"
@@ -1588,34 +1652,6 @@ const sourceContinue = $('continue');
               RECONNECT THE SIGNAL CHAIN
               ACROSS OLD QUARTER.
             </p>
-
-            <div
-              class="home-v4-mission-progress"
-            >
-              <div
-                class="home-v4-progress-meta"
-              >
-                <span>
-                  SIGNAL RECOVERY
-                </span>
-
-                <strong
-                  id="homeV4SignalValue"
-                >
-                  00 / 10
-                </strong>
-              </div>
-
-              <div
-                class="home-v4-progress-bar"
-                aria-hidden="true"
-              >
-                <div
-                  id="homeV4SignalFill"
-                  class="home-v4-progress-fill"
-                ></div>
-              </div>
-            </div>
 
             <div
               class="home-v5-last-run"
@@ -2149,7 +2185,9 @@ const sourceContinue = $('continue');
       );
     }
 
-     syncHomeProfile();
+  startHomeTypewriter();
+installHomeScrollStatus();
+syncHomeProfile();
 
     bindOnce(
       shell.querySelector(
@@ -2381,6 +2419,41 @@ const sourceContinue = $('continue');
       }
     );
   };
+
+    /* =========================================================
+     HOME SCROLL STATUS
+     ========================================================= */
+
+  const installHomeScrollStatus = () => {
+    if (document.documentElement.dataset.homeScrollStatus === '1') {
+      return;
+    }
+
+    document.documentElement.dataset.homeScrollStatus = '1';
+
+    let lastScrollY = window.scrollY;
+
+    window.addEventListener('scroll', () => {
+      const intro = $('intro');
+
+      if (!(intro instanceof HTMLElement)) {
+        return;
+      }
+
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY && currentScrollY > 10) {
+        intro.classList.add('is-scrolling');
+      }
+
+      if (currentScrollY < lastScrollY) {
+        intro.classList.remove('is-scrolling');
+      }
+
+      lastScrollY = currentScrollY;
+    }, { passive:true });
+  };
+
 
   /* =========================================================
      KEYBOARD

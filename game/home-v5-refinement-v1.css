@@ -4625,3 +4625,10 @@ z-index:1;
   }
 
 }
+#intro.home-v3 [class*="contract"]{
+  color:#fff !important;
+}
+
+#intro.home-v3 [class*="contract"] *{
+  color:#fff !important;
+}

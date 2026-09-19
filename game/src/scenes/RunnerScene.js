@@ -29,22 +29,22 @@ mobileAirSteerResponse: 0.22,
 mobileAirSteerDeadzone: 8,
 
   // JUMP
-  jumpVelocity: -750,
-  doubleJumpVelocity: -800,
-  jumpCutMultiplier: .44,
+  jumpVelocity: -820,
+  doubleJumpVelocity: -880,
+  jumpCutMultiplier: .58,
 
   coyoteMs: 135,
   jumpBufferMs: 145,
 
-  // VERTICAL AIR PHYSICS
-  riseGravity: 500,
-  fallGravity: 735,
-  fallGravityBoost: 1.16,
+    // VERTICAL AIR PHYSICS
+  riseGravity: 520,
+  fallGravity: 760,
+  fallGravityBoost: 1.12,
   maxFallSpeed: 1120,
 
-  // APEX FLOAT
-  apexVelocityThreshold: 85,
-  apexGravityMultiplier: 0.58,
+  // APEX CONTROL
+  apexVelocityThreshold: 70,
+  apexGravityMultiplier: 0.72,
 
   // FALL RAMP
   fallRampStart: 260,
@@ -52,9 +52,9 @@ mobileAirSteerDeadzone: 8,
   fallRampBonus: 1.18,
 
   // AIR DASH
-  dashSpeed: 720,
-  dashDurationMs: 155,
-  dashCooldownMs: 580,
+  dashSpeed: 780,
+  dashDurationMs: 165,
+  dashCooldownMs: 520,
 
   // AIR DASH RECOVERY
   airDashRecoveryVelocity: 90
@@ -3754,6 +3754,21 @@ this.checkpoint = {
   signals: new Set(),
   secrets: new Set()
 };
+
+// ============================================================
+// SAFE START ZONE
+// Player can move freely and observe enemy factions before
+// entering hostile territory.
+// ============================================================
+this.safeStartZone = {
+  x: this.mission.spawn.x,
+  y: this.mission.spawn.y,
+  width: 380,
+  height: 120
+};
+
+this.safeStartZoneActive = true;
+this.safeStartZoneWarned = false;
 
 this.checkpointArrow = null;
 this.platformEmergencyTarget = null;
@@ -7712,7 +7727,8 @@ const hologramX =
 
 const hologram = this.add.graphics()
   .setDepth(2)
-  .setScrollFactor(.20);
+  .setScrollFactor(.20)
+  .setVisible(false);
 
 // Outer field
 hologram
@@ -8326,6 +8342,8 @@ if (this.keys) {
   this.keys.SHIFT.enabled = true;
   this.keys.E.enabled = true;
   this.keys.Q.enabled = true;
+  this.keys.R.enabled = true;
+  this.keys.X.enabled = true;
 }
 
 this.flightMode = false;
@@ -8344,26 +8362,33 @@ this.flightSpeed = 420;
 this.input?.keyboard && (this.input.keyboard.enabled = true);
 
 this.rawKeyboardState = Object.create(null);
+this.rawKeyboardPressed = Object.create(null);
+this.rawKeyboardReleased = Object.create(null);
 
 this.rawKeyboardDownHandler = event => {
   const code = event?.code;
 
-  if (
-    code !== 'KeyW' &&
-    code !== 'KeyA' &&
-    code !== 'KeyS' &&
-    code !== 'KeyD' &&
-    code !== 'KeyE' &&
-code !== 'KeyF' &&
-code !== 'KeyQ' &&
-code !== 'Space' &&
-code !== 'ShiftLeft' &&
-code !== 'ShiftRight'
-  ) {
-    return;
-  }
-
+ if (
+  code !== 'KeyW' &&
+  code !== 'KeyA' &&
+  code !== 'KeyS' &&
+  code !== 'KeyD' &&
+  code !== 'KeyE' &&
+  code !== 'KeyF' &&
+  code !== 'KeyQ' &&
+  code !== 'KeyR' &&
+  code !== 'KeyX' &&
+  code !== 'Space' &&
+  code !== 'ShiftLeft' &&
+  code !== 'ShiftRight'
+) {
+  return;
+}
   this.rawKeyboardState[code] = true;
+
+if (!event.repeat) {
+  this.rawKeyboardPressed[code] = true;
+}
 
   /*
    * W/A/S/D must be able to release the opening cinematic
@@ -8405,19 +8430,22 @@ code !== 'ShiftRight'
 this.rawKeyboardUpHandler = event => {
   const code = event?.code;
 
-  if (
-    code === 'KeyW' ||
-    code === 'KeyA' ||
-    code === 'KeyS' ||
-    code === 'KeyD' ||
-code === 'KeyE' ||
-code === 'KeyF' ||
-code === 'KeyQ' ||
-code === 'Space' ||
-    code === 'ShiftLeft' ||
-    code === 'ShiftRight'
-  ) {
-    this.rawKeyboardState[code] = false;
+if (
+  code === 'KeyW' ||
+  code === 'KeyA' ||
+  code === 'KeyS' ||
+  code === 'KeyD' ||
+  code === 'KeyE' ||
+  code === 'KeyF' ||
+  code === 'KeyQ' ||
+  code === 'KeyR' ||
+  code === 'KeyX' ||
+  code === 'Space' ||
+  code === 'ShiftLeft' ||
+  code === 'ShiftRight'
+) {
+this.rawKeyboardState[code] = false;
+this.rawKeyboardReleased[code] = true;
   }
 };
 
@@ -8425,6 +8453,18 @@ this.rawKeyboardBlurHandler = () => {
   Object.keys(this.rawKeyboardState).forEach(
     code => {
       this.rawKeyboardState[code] = false;
+    }
+  );
+
+  Object.keys(this.rawKeyboardPressed).forEach(
+    code => {
+      this.rawKeyboardPressed[code] = false;
+    }
+  );
+
+  Object.keys(this.rawKeyboardReleased).forEach(
+    code => {
+      this.rawKeyboardReleased[code] = false;
     }
   );
 };
@@ -9275,23 +9315,36 @@ updateSurpriseCacheInteraction() {
     return;
   }
 
-  const keyboardPressed =
-    Phaser.Input.Keyboard.JustDown(
-      this.keys.R
-    );
+const keyboardPressed =
+  Phaser.Input.Keyboard.JustDown(
+    this.keys.R
+  );
 
-  const mobilePressed =
-    this.mobileActions.interact;
+const mobilePressed =
+  this.mobileActions.interact;
+
+if (
+  keyboardPressed ||
+  mobilePressed
+) {
+  this.mobileActions.interact =
+    false;
 
   if (
-    keyboardPressed ||
-    mobilePressed
+    this.surpriseCacheInteractionLocked ||
+    this.surpriseCacheCollected ||
+    this.surpriseCacheOpen ||
+    this.relayPuzzleActive ||
+    this.cinematicActive ||
+    this.afkCryostasisActive ||
+    this.finished ||
+    this.respawning
   ) {
-    this.mobileActions.interact =
-      false;
-
-    this.tryOpenSurpriseCache();
+    return;
   }
+
+  this.tryOpenSurpriseCache();
+}
 }
 
 tryOpenSurpriseCache() {
@@ -9299,7 +9352,14 @@ tryOpenSurpriseCache() {
     this.surpriseCacheInteractionLocked ||
     this.surpriseCacheCollected ||
     this.surpriseCacheOpen ||
-    !this.surpriseCache?.active
+    this.relayPuzzleActive ||
+    this.cinematicActive ||
+    this.afkCryostasisActive ||
+    this.finished ||
+    this.respawning ||
+    this.physics?.world?.isPaused ||
+    !this.surpriseCache?.active ||
+    !this.player?.active
   ) {
     return;
   }
@@ -9311,14 +9371,21 @@ openSurpriseCache() {
   const cache =
     this.surpriseCache;
 
-  if (
-    !cache ||
-    !cache.active ||
-    this.surpriseCacheOpen
-  ) {
-    return;
-  }
-
+if (
+  !cache ||
+  !cache.active ||
+  !this.player?.active ||
+  this.surpriseCacheOpen ||
+  this.surpriseCacheInteractionLocked ||
+  this.surpriseCacheCollected ||
+  this.relayPuzzleActive ||
+  this.cinematicActive ||
+  this.afkCryostasisActive ||
+  this.respawning ||
+  this.finished
+) {
+  return;
+}
   const distance =
     Phaser.Math.Distance.Between(
       this.player.x,
@@ -13239,7 +13306,12 @@ updateRelayGateInteraction() {
   if (
     !this.player?.active ||
     !this.relayGates ||
-    this.relayPuzzleActive
+    this.relayPuzzleActive ||
+    this.finished ||
+    this.respawning ||
+    this.cinematicActive ||
+    this.afkCryostasisActive ||
+    this.physics?.world?.isPaused
   ) {
     this.clearRelayInteractHint();
     return;
@@ -13289,9 +13361,6 @@ updateRelayGateInteraction() {
   );
 
 const interactPressed =
-  Phaser.Input.Keyboard.JustDown(
-    this.keys.E
-  ) ||
   this.mobileActions.interact;
 
 this.mobileActions.interact = false;
@@ -13358,11 +13427,11 @@ showRelayInteractHint(gate) {
 
     const keyText =
       this.add
-        .text(
-          -42,
-          0,
-          'F',
-          {
+       .text(
+  -42,
+  0,
+  'E',
+  {
             fontFamily: 'DM Mono',
             fontSize: '12px',
             color: '#8df4ff',
@@ -13446,8 +13515,15 @@ clearRelayInteractHint() {
 openRelayPuzzle(gate) {
   if (
     !gate ||
+    !gate.active ||
     gate.getData('solved') ||
-    this.relayPuzzleActive
+    this.relayPuzzleActive ||
+    this.finished ||
+    this.respawning ||
+    this.cinematicActive ||
+    this.afkCryostasisActive ||
+    !this.player?.active ||
+    this.physics?.world?.isPaused
   ) {
     return;
   }
@@ -18757,13 +18833,14 @@ if (!ui) {
   this.relayNearbyGate =
     null;
 
-  if (
-    !this.finished &&
-    !this.respawning
-  ) {
-    this.physics.resume();
-  }
-
+ if (
+  !this.finished &&
+  !this.respawning &&
+  !this.cinematicActive &&
+  !this.afkCryostasisActive
+) {
+  this.physics.resume();
+}
   return;
 }
 
@@ -18853,7 +18930,9 @@ Object.keys(
 
 if (
   !this.finished &&
-  !this.respawning
+  !this.respawning &&
+  !this.cinematicActive &&
+  !this.afkCryostasisActive
 ) {
   this.physics.resume();
 }
@@ -19154,19 +19233,42 @@ this.physics.add.group();
 
 this.mission.enemies.forEach(
   data => {
-    const enemy =
-      this.enemies
-        .create(
-          data.x,
-          data.y,
-          data.type
-        )
-        .setDepth(8)
-        .setImmovable(true);
-    enemy.setData(
-      'aiState',
-      'IDLE'
-    );
+   const enemy =
+  this.enemies
+    .create(
+      data.x,
+      data.y,
+      data.type
+    )
+    .setDepth(8)
+    .setImmovable(true);
+
+// ============================================================
+// ENEMY COMBAT DATA
+// Every normal enemy must have health.
+// This allows STOMP / SWORD / BLASTER to use
+// the same defeatEnemy() pipeline.
+// ============================================================
+
+enemy.setData(
+  'health',
+  1
+);
+
+enemy.setData(
+  'boss',
+  false
+);
+
+enemy.setData(
+  'combatDefeated',
+  false
+);
+
+enemy.setData(
+  'aiState',
+  'IDLE'
+);
 
     enemy.setData(
 
@@ -19562,27 +19664,116 @@ this.physics.add.overlap(
   this.player,
   this.enemies,
   (player, enemy) => {
-    const stomp =
-      player.body.velocity.y > 130 &&
-      player.y <
-        enemy.y - 12;
+
+    // ============================================================
+    // SAFETY GUARD
+    // Never process destroyed / invalid objects.
+    // ============================================================
+    if (
+      !player?.active ||
+      !enemy?.active ||
+      !player.body ||
+      !enemy.body
+    ) {
+      return;
+    }
+
+    // ============================================================
+    // SAFE START ZONE
+    // Enemies can be seen here but cannot hurt the player.
+    // ============================================================
+    if (this.safeStartZoneActive) {
+      const zone = this.safeStartZone;
+
+      const insideSafeZone =
+        player.x >= zone.x &&
+        player.x <= zone.x + zone.width &&
+        Math.abs(player.y - zone.y) <= zone.height;
+
+      if (insideSafeZone) {
+        return;
+      }
+
+      this.safeStartZoneActive = false;
+
+      if (!this.safeStartZoneWarned) {
+        this.safeStartZoneWarned = true;
+
+        this.playerCue(
+          'SAFE ZONE EXITED · HOSTILE TERRITORY',
+          '#ff826e'
+        );
+      }
+    }
+
+    // ============================================================
+    // STOMP KILL
+    //
+    // Do NOT rely only on velocity.y.
+    // Phaser can resolve the overlap before this callback and
+    // change the player's vertical velocity.
+    // ============================================================
+// ============================================================
+// ROBUST STOMP DETECTION
+// Use position + previous position + velocity.
+// Phaser may resolve the overlap before this callback,
+// so velocity alone is not reliable.
+// ============================================================
+
+const playerBottom =
+  player.body.bottom;
+
+const enemyTop =
+  enemy.body.top;
+
+const verticalContact =
+  playerBottom <=
+    enemyTop + 22;
+
+const verticalAboveEnemy =
+  player.y <
+  enemy.y - 10;
+
+const falling =
+  Number(
+    player.body.velocity?.y || 0
+  ) >= 0;
+
+const horizontalAlignment =
+  Math.abs(
+    player.x - enemy.x
+  ) <= 58;
+
+const stomp =
+  verticalContact &&
+  verticalAboveEnemy &&
+  falling &&
+  horizontalAlignment;
 
     if (stomp) {
       this.defeatEnemy(
         enemy,
-        'STOMP'
+        'STOMP',
+        999
       );
-    } else {
-    this.takeSciFiHit(
-  'An enemy attack knocked the courier down.',
-  enemy.x,
-  enemy.y
-);
+
+      return;
     }
+
+    // ============================================================
+    // NORMAL ENEMY CONTACT
+    // ============================================================
+
+    this.takeSciFiHit(
+      'An enemy attack knocked the courier down.',
+      enemy.x,
+      enemy.y
+    );
   },
   undefined,
   this
 );
+
 
 }
 
@@ -19748,16 +19939,28 @@ this.physics.add.overlap(
   this.plasma,
   this.enemies,
   (plasma, enemy) => {
+
+    if (
+      !plasma?.active ||
+      !enemy?.active
+    ) {
+      return;
+    }
+
     const power =
-      plasma.getData('power') ||
-      1;
+      Number(
+        plasma.getData('power')
+      ) || 1;
 
     plasma.destroy();
 
     this.defeatEnemy(
       enemy,
       'BLASTER',
-      power
+      Math.max(
+        999,
+        power
+      )
     );
   }
 );
@@ -20139,12 +20342,20 @@ if (
   }
 }
 
- this.game.events.emit(
-  'polarity',
-  this.polarity,
-  this.polarityMax,
-  'tick'
-);
+if (
+  this._lastEmittedPolarity !==
+  this.polarity
+) {
+  this._lastEmittedPolarity =
+    this.polarity;
+
+  this.game.events.emit(
+    'polarity',
+    this.polarity,
+    this.polarityMax,
+    'tick'
+  );
+}
 }
 
 activatePolarityOverdrive() {
@@ -20636,6 +20847,16 @@ if (id === 'turret') {
     0
   );
 
+  turret.setData(
+  'target',
+  null
+);
+
+turret.setData(
+  'nextTargetCheck',
+  0
+);
+
   this.playerCue(
     'ARC TURRET DEPLOYED',
     '#8df4ff'
@@ -20683,12 +20904,44 @@ enemy,
 method,
 power = 1
 ) {
-if (!enemy?.active) return;
 
-const fireFx =
-  enemy.getData(
-    'fireFx'
-  );
+  // ============================================================
+  // HARD COMBAT SAFETY GUARD
+  // Prevent double-kills / callbacks on destroyed enemies.
+  // ============================================================
+
+  if (
+  !enemy ||
+  !enemy.active ||
+  !this.scene?.isActive?.()
+) {
+  return;
+}
+
+if (
+  !this.player ||
+  !this.player.active
+) {
+  return;
+}
+
+// ============================================================
+// DEATH LOCK
+// Only blocks an enemy that has ALREADY reached 0 HP.
+// It does NOT block future hits on bosses.
+// ============================================================
+
+if (
+  enemy.getData('combatDefeated') === true
+) {
+  return;
+}
+
+
+  const fireFx =
+    enemy.getData(
+      'fireFx'
+    );
 
 if (fireFx) {
   fireFx.destroy();
@@ -20848,10 +21101,10 @@ this.tweens.add({
 });
   
 const health =
-  enemy.getData('health');
+  Number(enemy.getData('health')) || 1;
 
-if (health) {
-  const isBoss =
+const isBoss =
+  enemy.getData('boss') === true;
   enemy.getData('boss') === true;
 
 if (isBoss) {
@@ -21233,12 +21486,11 @@ this.game.events.emit(
 this.speakNarration(
   'BOSS PHASE TWO'
 );
-}
   
-  enemy.setData(
-    'health',
-    remaining
-  );
+enemy.setData(
+  'health',
+  remaining
+);
 
   enemy.setTint(
     0xff826e
@@ -21668,6 +21920,11 @@ this.tweens.add({
   onComplete: () =>
     burst.destroy()
 });
+
+enemy.setData(
+  'combatDefeated',
+  true
+);
 
 enemy.disableBody(
   true,
@@ -22168,23 +22425,30 @@ this.enemies
   .getChildren()
   .filter(
     enemy =>
-      enemy.active &&
+      enemy?.active &&
+      enemy.body &&
       Math.abs(
         enemy.x -
         this.player.x
-      ) < 92 &&
+      ) < 105 &&
       Math.abs(
         enemy.y -
         this.player.y
-      ) < 78
+      ) < 90
   )
   .forEach(
-    enemy =>
+    enemy => {
+
+      if (!enemy?.active) {
+        return;
+      }
+
       this.defeatEnemy(
         enemy,
         'SWORD',
-        2
-      )
+        999
+      );
+    }
   );
 
 this.swordCooldown = 450;
@@ -23440,10 +23704,7 @@ const skip =
 const visuals = [
   earth,
   earthCloud,
-  planetGlow,
-  ...stars,
-  atmosphere,
-  planet
+  ...stars
 ];
 
 const panelElements = [
@@ -27494,12 +27755,115 @@ return true;
 }
 
 updateEnemies(delta) {
-const signalHeat =
-  Phaser.Math.Clamp(
-    this.signalInterference || 0,
+
+  this.enemyAiTimer =
+  Math.max(
     0,
-    1
+    (this.enemyAiTimer || 0) - delta
   );
+
+if (this.enemyAiTimer > 0) {
+  return;
+}
+
+this.enemyAiTimer = 33;
+
+  // ============================================================
+  // SAFE START ZONE
+  // Enemies remain visible, but do not activate while the
+  // player is inside the starting safe area.
+  // ============================================================
+  if (this.safeStartZoneActive) {
+    const zone = this.safeStartZone;
+
+    const insideSafeZone =
+      this.player &&
+      this.player.x >= zone.x &&
+      this.player.x <= zone.x + zone.width &&
+      Math.abs(this.player.y - zone.y) <= zone.height;
+
+  if (insideSafeZone) {
+  this.enemies?.getChildren().forEach(enemy => {
+    if (!enemy?.active) return;
+
+    enemy.setData('aiState', 'SAFE_PATROL');
+    enemy.setData('lastKnownX', enemy.x);
+    enemy.setData('lastKnownY', enemy.y);
+
+    const route = enemy.getData('route');
+
+    if (!route || !enemy.body) {
+      enemy.getData('indicator')?.setAlpha(0.10);
+      return;
+    }
+
+    const direction =
+      Number(enemy.getData('patrolDirection')) || 1;
+
+    const patrolSpeed =
+      enemy.texture?.key === 'enemy-runner'
+        ? 55
+        : enemy.texture?.key === 'chicken'
+          ? 35
+          : 42;
+
+    enemy.body.setVelocityX(
+      patrolSpeed * direction
+    );
+
+    if (enemy.x >= route.max) {
+      enemy.setData(
+        'patrolDirection',
+        -1
+      );
+
+      enemy.body.setVelocityX(
+        -patrolSpeed
+      );
+    }
+
+    if (enemy.x <= route.min) {
+      enemy.setData(
+        'patrolDirection',
+        1
+      );
+
+      enemy.body.setVelocityX(
+        patrolSpeed
+      );
+    }
+
+    // Enemy is visible, but not alerted.
+    enemy.getData('indicator')?.setAlpha(0.12);
+  });
+
+  return;
+}
+
+    // Player has left the safe zone.
+    this.safeStartZoneActive = false;
+
+    if (!this.safeStartZoneWarned) {
+      this.safeStartZoneWarned = true;
+
+      this.playerCue(
+        'SAFE ZONE EXITED · HOSTILE TERRITORY',
+        '#ff826e'
+      );
+
+      this.game.events.emit(
+        'feedback',
+        'hostile_territory'
+      );
+    }
+  }
+
+  const signalHeat =
+    Phaser.Math.Clamp(
+      this.signalInterference || 0,
+      0,
+      1
+    );
 
 const signalTier =
   this.getSignalInterferenceTier(
@@ -28255,24 +28619,55 @@ detectionValue
   this.detectionProgressBar.scaleX =
     detectionPercent / 100;
 
-  this.detectionProgressText.setText(
-    `${detectionPercent}%`
-  );
+ const nextDetectionText =
+  `${detectionPercent}%`;
 
-  this.detectionStatusText.setText(
-    detectionPercent > 0
-      ? detectionPercent >= 75
-        ? 'ALERT'
-        : 'DETECTED'
-      : 'CLEAR'
+const nextDetectionStatus =
+  detectionPercent > 0
+    ? detectionPercent >= 75
+      ? 'ALERT'
+      : 'DETECTED'
+    : 'CLEAR';
+
+if (
+  this.detectionProgressText.text !==
+  nextDetectionText
+) {
+  this.detectionProgressText.setText(
+    nextDetectionText
   );
+}
+
+if (
+  this.detectionStatusText.text !==
+  nextDetectionStatus
+) {
+  this.detectionStatusText.setText(
+    nextDetectionStatus
+  );
+}
 }
 
 }
 
 updateSciFiThreats(delta) {
-const now =
-  this.elapsedMs;
+
+  this.scifiThreatTimer =
+    Math.max(
+      0,
+      (this.scifiThreatTimer || 0) - delta
+    );
+
+  if (
+    this.scifiThreatTimer > 0
+  ) {
+    return;
+  }
+
+  this.scifiThreatTimer = 33;
+
+  const now =
+    this.elapsedMs;
 
 if (
   this.empTimer > 0
@@ -29374,19 +29769,42 @@ if (this.turrets?.active) {
 
     if (!this.enemies?.active) return;
 
-  const target = this.enemies
+const nextTargetCheck =
+  Number(
+    turret.getData('nextTargetCheck')
+  ) || 0;
 
-.getChildren()
-.find(enemy =>
-enemy?.active &&
-Math.abs(enemy.x - turret.x) < 460 &&
-Math.abs(enemy.y - turret.y) < 220
-);
+let target =
+  turret.getData('target') || null;
 
-    const nextShot =
-      Number(
-        turret.getData('nextShot')
-      ) || 0;
+if (
+  now >= nextTargetCheck ||
+  !target?.active
+) {
+  target =
+    this.enemies
+      .getChildren()
+      .find(enemy =>
+        enemy?.active &&
+        Math.abs(enemy.x - turret.x) < 460 &&
+        Math.abs(enemy.y - turret.y) < 220
+      ) || null;
+
+  turret.setData(
+    'target',
+    target
+  );
+
+  turret.setData(
+    'nextTargetCheck',
+    now + 100
+  );
+}
+
+const nextShot =
+  Number(
+    turret.getData('nextShot')
+  ) || 0;
 
     if (
       !target ||
@@ -32553,6 +32971,15 @@ const body =
     return;
   }
 
+  if (
+  this.waterDynamicZoneTimer > 0
+) {
+  this.waterDynamicZoneTimer -= delta;
+  return;
+}
+
+this.waterDynamicZoneTimer = 50;
+
   const wetZone =
     this.waterZones
       .getChildren()
@@ -33596,13 +34023,29 @@ spawnSignalGhostEcho() {
   });
 }
 
-  updateSignalInterferenceEnemyFX(delta) {
+updateSignalInterferenceEnemyFX(delta) {
   if (
     !this.enemies ||
     this.motionReduced
   ) {
     return;
   }
+
+  // Ne obrađuj sve neprijatelje svaki frame.
+  this.signalEnemyFxTimer =
+    Math.max(
+      0,
+      (this.signalEnemyFxTimer || 0) - delta
+    );
+
+  if (
+    this.signalEnemyFxTimer > 0
+  ) {
+    return;
+  }
+
+  // 30 FPS za ovaj čisto vizuelni FX.
+  this.signalEnemyFxTimer = 33;
 
   const level =
     this.getSignalInterferenceLevel();
@@ -35121,9 +35564,6 @@ if (
   this.updateSignalInterferenceEnemyFX(delta);
 }
 
-this.updateSurpriseCacheInteraction();
-this.updateRelayGateInteraction();
-
 if (this.relayPuzzleActive) {
   this.elapsedMs +=
     delta;
@@ -35131,7 +35571,7 @@ if (this.relayPuzzleActive) {
   this.timeEmitTimer +=
     delta;
 
- if (
+  if (
     this.timeEmitTimer >=
     100
   ) {
@@ -35147,7 +35587,9 @@ if (this.relayPuzzleActive) {
   this.updateRelayPuzzleTimer();
   return;
 }
-  
+
+this.updateSurpriseCacheInteraction();
+this.updateRelayGateInteraction();
 // ============================================================
 // CELESTIAL · ORBIT UPDATE
 // ============================================================
@@ -36555,15 +36997,15 @@ if (moveX !== 0) {
  */
 if (
   hasVerticalKeyboardMove &&
-  !this.flightMode
+  this.flightMode
 ) {
   body.setGravityY(0);
 
   body.setVelocityY(
     Phaser.Math.Clamp(
-      moveY * 330,
-      -330,
-      330
+      moveY * this.flightSpeed,
+      -this.flightSpeed,
+      this.flightSpeed
     )
   );
 }
@@ -36699,9 +37141,7 @@ if (this.flightMode) {
       )
     );
   }
-} else if (
-  !hasVerticalKeyboardMove
-) {
+} else {
   body.setGravityY(
     verticalGravity *
     gravityMultiplier
@@ -36710,17 +37150,7 @@ if (this.flightMode) {
   body.setMaxVelocityY(
     RUNNER_TUNING.maxFallSpeed
   );
-} else {
-  /*
-   * W/S trenutno upravljaju Y osom.
-   * Gravity ostaje ugašen samo dok je
-   * vertical keyboard input aktivan.
-   */
-  body.setGravityY(0);
-
-  body.setMaxVelocityY(330);
 }
-
 if (onGround) {
   this.coyote =
     RUNNER_TUNING.coyoteMs;
@@ -36736,7 +37166,8 @@ if (onGround) {
     );
 }
 
-const keyboardPressed =
+const spacePressed =
+  Boolean(this.rawKeyboardPressed?.Space) ||
   Phaser.Input.Keyboard.JustDown(
     this.cursors.up
   ) ||
@@ -36744,18 +37175,25 @@ const keyboardPressed =
     this.keys.SPACE
   );
 
-const keyboardReleased =
+const spaceReleased =
+  Boolean(this.rawKeyboardReleased?.Space) ||
   Phaser.Input.Keyboard.JustUp(
     this.cursors.up
   ) ||
   Phaser.Input.Keyboard.JustUp(
     this.keys.SPACE
   );
+
+const keyboardPressed = spacePressed;
+const keyboardReleased = spaceReleased;
 
 const jumpHeld =
+  Boolean(this.rawKeyboardState?.Space) ||
   this.cursors.up.isDown ||
   this.keys.SPACE.isDown ||
   this.mobileActions.jumpHeld;
+
+// SPACE edge state is cleared after all SPACE gameplay checks.
 
 this.mobileActions.jump = false;
 this.mobileActions.jumpReleased = false;
@@ -36829,17 +37267,13 @@ if (
 let grabTriggered = false;
 
 const grabPressed =
-  Phaser.Input.Keyboard.JustDown(
-    this.keys.SPACE
-  ) &&
+  spacePressed &&
   this.abilities.has(
     'ledgeGrab'
   ) &&
   wallDirection &&
   !onGround &&
-  body.velocity.y >
-    0;
-
+  body.velocity.y > 0;
 if (
   grabPressed &&
   this.useEnergy(
@@ -36877,6 +37311,8 @@ if (
     -260
   );
 }
+this.rawKeyboardPressed.Space = false;
+this.rawKeyboardReleased.Space = false;
 
 const canWallJump =
   this.abilities.has(
@@ -37457,14 +37893,18 @@ this.slideTimer =
   );
 
 const dashPressed =
+  Boolean(this.rawKeyboardPressed?.ShiftLeft) ||
+  Boolean(this.rawKeyboardPressed?.ShiftRight) ||
   Phaser.Input.Keyboard.JustDown(
     this.keys.SHIFT
   ) ||
   this.mobileActions.dash;
 
+this.rawKeyboardPressed.ShiftLeft = false;
+this.rawKeyboardPressed.ShiftRight = false;
+
 this.mobileActions.dash =
   false;
-
 const canDash =
   modifier?.id !==
     'noDash' &&
@@ -38513,11 +38953,11 @@ if (
   }
 }
   });
-
-  this.speedTimer =
+  
+this.speedTimer =
     Phaser.Math.Linear(
-      52,
-      32,
+      85,
+      58,
       speedRatio
     );
 }
@@ -38600,17 +39040,16 @@ const speedRatio =
   if (
     this.kineticTrailTimer <= 0
   ) {
-    this.kineticTrailTimer =
-      Phaser.Math.Linear(
-        90,
-        42,
-        Phaser.Math.Clamp(
-          speedRatio - .72,
-          0,
-          1
-        )
-      );
-
+this.kineticTrailTimer =
+    Phaser.Math.Linear(
+      120,
+      72,
+      Phaser.Math.Clamp(
+        speedRatio - .72,
+        0,
+        1
+      )
+    );
     const direction =
       velocityX >= 0
         ? 1
