@@ -101,6 +101,7 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
     announce._timer = setTimeout(() => {
       toast.classList.remove('show');
     }, 1800);
+  
   };
 
   /* =========================================================
@@ -111,8 +112,14 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
     const panel = $('relayInfoPanel');
 
     panel?.classList.add('hidden');
-    panel?.classList.remove('relay-update-mode');
-    panel?.setAttribute('aria-hidden', 'true');
+    panel?.classList.remove(
+      'relay-update-mode',
+      'relay-faq-mode'
+    );
+    panel?.setAttribute(
+      'aria-hidden',
+      'true'
+    );
   };
 
   const closeAllOverlays = () => {
@@ -145,7 +152,7 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
 
         return `
           <article
-            class="relay-faq-item${isOpen ? ' open' : ''}"
+           class="relay-faq-item${isOpen ? ' open' : ''}"
             role="listitem"
           >
 
@@ -331,10 +338,15 @@ const updateMarkup = () => `
       'false'
     );
 
-    panel.classList.toggle(
-      'relay-update-mode',
-      kind === 'update'
-    );
+   panel.classList.toggle(
+  'relay-update-mode',
+  kind === 'update'
+);
+
+panel.classList.toggle(
+  'relay-faq-mode',
+  kind === 'faq'
+);
 
     if (kind === 'faq') {
 
@@ -957,40 +969,36 @@ const updateMarkup = () => `
         /* HOME V4 */
 
         const homeAction =
-          target.closest(
-            '[data-home-v4-action]'
-          );
+  target.closest('[data-home-v4-action]');
 
-        if (
-          homeAction &&
-          homeVisible()
-        ) {
+if (homeAction && homeVisible()) {
+  const action =
+    homeAction.dataset.homeV4Action;
 
-          event.preventDefault();
-          event.stopImmediatePropagation();
+  if (action === 'faq') {
+    event.preventDefault();
+    event.stopImmediatePropagation();
 
-          const action =
-            homeAction.dataset
-              .homeV4Action;
+    openInfoPanel('faq');
+    return;
+  }
 
-          if (action === 'faq') {
-            openInfoPanel('faq');
-          }
+  if (action === 'update') {
+    event.preventDefault();
+    event.stopImmediatePropagation();
 
-          else if (
-            action === 'update'
-          ) {
-            openInfoPanel('update');
-          }
+    openInfoPanel('update');
+    return;
+  }
 
-          else if (
-            action === 'options'
-          ) {
-            openOptions();
-          }
+  if (action === 'options') {
+    event.preventDefault();
+    event.stopImmediatePropagation();
 
-          return;
-        }
+    openOptions();
+    return;
+  }
+}
 
         /* INFO BUTTON */
 
@@ -1346,4 +1354,5 @@ const updateMarkup = () => `
 
   }
 
-})();
+}
+)();

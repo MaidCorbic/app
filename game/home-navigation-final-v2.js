@@ -8,18 +8,37 @@
     return !!intro && !intro.classList.contains('hidden');
   };
 
-  const getAction = button => {
-    if (!button) return null;
-    if (button.matches('[data-home-v4-action="options"],[data-v3-options]')) return 'options';
-    if (button.matches('[data-home-v4-action="faq"],[data-v3-faq]')) return 'faq';
-    if (button.matches('[data-home-v4-action="update"],[data-relay-info="update"],[data-v3-update]')) return 'update';
-    if (button.matches('[data-home-v4-action="exit"],[data-v3-exit]')) return 'exit';
-    return null;
-  };
+const getAction = button => {
+  if (!button) return null;
 
+  if (
+    button.matches(
+      '[data-home-v4-action="options"],[data-v3-options]'
+    )
+  ) {
+    return 'options';
+  }
+
+  if (
+    button.matches(
+      '[data-home-v4-action="exit"],[data-v3-exit]'
+    )
+  ) {
+    return 'exit';
+  }
+
+  return null;
+};
   const callRouter = (action, event) => {
-    if (typeof window.relayHomeInfoV1?.open === 'function' && (action === 'faq' || action === 'update')) {
-      return window.relayHomeInfoV1.open(action);
+
+    if (action === 'faq' || action === 'update') {
+      const openInfo =
+        window.relayHomeInfoV1?.open ||
+        window.relayOpenInfo;
+
+      if (typeof openInfo === 'function') {
+        return openInfo(action);
+      }
     }
 
     if (action === 'options') {
@@ -70,8 +89,10 @@
     callRouter(action, event);
   };
 
-  document.addEventListener('pointerup', route, { capture: true, passive: false });
-  document.addEventListener('click', route, { capture: true, passive: false });
+    document.addEventListener('click', route, {
+    capture: true,
+    passive: false
+  });
 
   document.addEventListener('keydown', event => {
     if (!homeVisible() || event.key !== 'Escape') return;

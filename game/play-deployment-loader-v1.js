@@ -22,11 +22,10 @@
   let active = false;
   let serial = 0;
 
-  const DEFAULT_ASSETS = Object.freeze({
-    desktop: '/game/assets/loadplay.jpg',
-    mobile: '/game/assets/loadplaymobile.jpg',
-  });
-
+const DEFAULT_ASSETS = Object.freeze({
+  desktop: './assets/loadplay.jpg',
+  mobile: './assets/loadplaymobile.jpg',
+});
   const normalizeConfig = config => ({
     missionNumber: Math.max(1, Number(config?.missionNumber) || 1),
     desktop: config?.desktop || DEFAULT_ASSETS.desktop,
@@ -229,7 +228,11 @@
         visibility:hidden !important;
         transition:opacity .28s ease,visibility .28s ease !important;
       }
-
+.relay-play-deployment:not(.is-closing){
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:none !important;
+}
       @media(max-width:700px) and (orientation:portrait){
         .relay-play-deployment .relay-play-deployment-network{
           display:none !important;
@@ -281,7 +284,9 @@
   };
 
   const runDeployment = async rawConfig => {
-    if (active) return false;
+  console.log('[RelayRunner] DEPLOYMENT LOADER STARTED');
+
+  if (active) return false;
 
     const config = normalizeConfig(rawConfig);
     active = true;
@@ -290,8 +295,23 @@
 
     try {
       installStyle();
-      overlay = makeOverlay(config);
-      document.body.appendChild(overlay);
+     overlay = makeOverlay(config);
+document.body.appendChild(overlay);
+
+console.log('[RelayRunner] OVERLAY ADDED:', overlay);
+console.log('[RelayRunner] CLASS BEFORE FRAME:', overlay.className);
+
+await new Promise(resolve => requestAnimationFrame(resolve));
+
+console.log('[RelayRunner] CLASS AFTER FRAME:', overlay.className);
+
+if (overlay.classList.contains('is-closing')) {
+  console.error('[RelayRunner] BUG: is-closing was added immediately after creation!');
+}
+console.log('[RelayRunner] OVERLAY DISPLAY:', getComputedStyle(overlay).display);
+console.log('[RelayRunner] OVERLAY VISIBILITY:', getComputedStyle(overlay).visibility);
+console.log('[RelayRunner] OVERLAY OPACITY:', getComputedStyle(overlay).opacity);
+console.log('[RelayRunner] OVERLAY ZINDEX:', getComputedStyle(overlay).zIndex);
 
       await new Promise(resolve => requestAnimationFrame(resolve));
       if (!active || token !== serial) return false;
@@ -348,10 +368,26 @@
     defaultAssets: DEFAULT_ASSETS,
   });
 
-  document.addEventListener('click', event => {
-    if (!introVisible() || active) return;
+   document.addEventListener('click', event => {
+    if (active) return;
+
     const button = event.target.closest('#start');
     if (!button) return;
-    void runDeployment({ missionNumber: 1 });
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    void runDeployment({
+      missionNumber: 1,
+      beforeRoute: async () => {
+        const originalStart = document.querySelector(
+          'body > #game > div[hidden] #start'
+        );
+
+        if (originalStart instanceof HTMLElement) {
+          originalStart.click();
+        }
+      },
+    });
   }, true);
 })();

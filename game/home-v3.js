@@ -8,6 +8,8 @@
  * - The intro surface is rebuilt once, without duplicating gameplay UI.
  */
 
+import { RELAY_FAQ } from './faq.js';
+
 (() => {
   'use strict';
 
@@ -748,26 +750,139 @@ window.addEventListener(
   };
 
   const openFaq = () => {
-    try {
-      if (
-        typeof window
-          .relayUnifiedCinematicUI
-          ?.openFAQ ===
-        'function'
-      ) {
-        window
-          .relayUnifiedCinematicUI
-          .openFAQ();
-
-        return true;
-      }
-    } catch {}
-
-    return clickExisting(
-      '[data-relay-info="faq"]'
+  const panel =
+    document.getElementById(
+      'relayInfoPanel'
     );
-  };
 
+  const eyebrow =
+    document.getElementById(
+      'relayInfoEyebrow'
+    );
+
+  const heading =
+    document.getElementById(
+      'relayInfoHeading'
+    );
+
+  const content =
+    document.getElementById(
+      'relayInfoContent'
+    );
+
+  if (
+    !(panel instanceof HTMLElement) ||
+    !(eyebrow instanceof HTMLElement) ||
+    !(heading instanceof HTMLElement) ||
+    !(content instanceof HTMLElement)
+  ) {
+    console.error(
+      '[RelayRunner] FAQ panel elements not found'
+    );
+
+    return false;
+  }
+
+  try {
+    panel.classList.remove('hidden');
+
+    panel.classList.remove(
+      'relay-update-mode'
+    );
+
+    panel.classList.add(
+      'relay-faq-mode'
+    );
+
+    panel.setAttribute(
+      'aria-hidden',
+      'false'
+    );
+
+    eyebrow.textContent =
+      'RELAY RUNNER // FIELD GUIDE';
+
+    heading.textContent =
+      'FAQ';
+
+    content.innerHTML = `
+      <div
+        class="relay-terminal-prompt"
+        aria-hidden="true"
+      >
+        SELECT A QUERY
+      </div>
+
+      <div
+        class="relay-faq-list"
+        role="list"
+      >
+        ${RELAY_FAQ.map(
+          ([question, answer], index) => {
+            const isOpen =
+              index === 0;
+
+            const number =
+              String(index + 1)
+                .padStart(2, '0');
+
+            return `
+              <article
+                class="relay-faq-item${isOpen ? ' open' : ''}"
+                role="listitem"
+              >
+                <button
+                  class="relay-faq-question"
+                  type="button"
+                  data-faq-question
+                  aria-expanded="${isOpen}"
+                >
+                  <span
+                    class="faq-index"
+                    aria-hidden="true"
+                  >
+                    ${number}
+                  </span>
+
+                  <span class="faq-question-text">
+                    ${String(question)}
+                  </span>
+
+                  <span
+                    class="faq-question-state"
+                    aria-hidden="true"
+                  >
+                    ${isOpen
+                      ? 'ACTIVE'
+                      : 'QUERY'}
+                  </span>
+                </button>
+
+                <div
+                  class="relay-faq-answer"
+                  ${isOpen ? '' : 'hidden'}
+                >
+                  ${String(answer)}
+                </div>
+              </article>
+            `;
+          }
+        ).join('')}
+      </div>
+    `;
+
+    return true;
+
+  } catch (error) {
+    console.error(
+      '[RelayRunner] FAQ open failed:',
+      error
+    );
+
+    return false;
+  }
+};
+  
   const openUpdate = () => {
     console.log(
       '[RelayRunner] UPDATE CLICKED'
@@ -859,6 +974,344 @@ window.addEventListener(
         </div>
       `;
     }
+
+     return true;
+  };
+
+  /* =========================================================
+     HOME PANEL // CREDITS
+     ========================================================= */
+
+  const openHomeCredits = () => {
+    const panel =
+      $('titlePanel');
+
+    const eyebrow =
+      $('titlePanelEyebrow');
+
+    const heading =
+      $('titlePanelHeading');
+
+    const content =
+      $('titlePanelContent');
+
+    if (
+      !(panel instanceof HTMLElement) ||
+      !(eyebrow instanceof HTMLElement) ||
+      !(heading instanceof HTMLElement) ||
+      !(content instanceof HTMLElement)
+    ) {
+      return false;
+    }
+
+    eyebrow.textContent =
+      'CREDITS';
+
+    heading.textContent =
+      'RELAY RUNNER';
+
+    content.innerHTML = `
+      <div class="home-info-panel-content">
+
+        <div class="home-info-panel-intro">
+          <span>RUNNER RELAY // NIGHT SHIFT</span>
+          <p>
+            A compact rooftop relay experience
+            built with Phaser 3.
+          </p>
+        </div>
+
+        <div class="home-info-panel-grid">
+
+          <div>
+            <small>ENGINE</small>
+            <strong>PHASER 3</strong>
+          </div>
+
+          <div>
+            <small>PROJECT</small>
+            <strong>RELAY RUNNER</strong>
+          </div>
+
+          <div>
+            <small>VERSION</small>
+            <strong>V1.1.0</strong>
+          </div>
+
+        </div>
+
+        <div class="home-info-panel-foot">
+          RELAY NETWORK // ONLINE
+        </div>
+
+      </div>
+    `;
+
+    panel.classList.remove('hidden');
+
+    return true;
+  };
+
+  /* =========================================================
+     HOME PANEL // TUTORIAL
+     ========================================================= */
+
+  const openHomeTutorial = () => {
+    const panel =
+      $('titlePanel');
+
+    const eyebrow =
+      $('titlePanelEyebrow');
+
+    const heading =
+      $('titlePanelHeading');
+
+    const content =
+      $('titlePanelContent');
+
+    if (
+      !(panel instanceof HTMLElement) ||
+      !(eyebrow instanceof HTMLElement) ||
+      !(heading instanceof HTMLElement) ||
+      !(content instanceof HTMLElement)
+    ) {
+      return false;
+    }
+
+    eyebrow.textContent =
+      'FIELD MANUAL';
+
+    heading.textContent =
+      'HOW TO RUN.';
+
+    content.innerHTML = `
+      <div class="home-tutorial-content">
+
+        <div class="tutorial-intro">
+          <span>TUTORIAL // RUNNER RELAY</span>
+
+          <p>
+            Learn the core movement,
+            combat and relay systems
+            before entering the route.
+          </p>
+          <div class="tutorial-keyboard">
+  <div class="tutorial-keyboard-label">
+    KEYBOARD PROTOCOL
+  </div>
+
+  <span class="tutorial-key">
+    A / D
+    <small>RUN</small>
+  </span>
+
+  <span class="tutorial-key">
+    SPACE
+    <small>JUMP</small>
+  </span>
+
+  <span class="tutorial-key">
+    E
+    <small>FIRE</small>
+  </span>
+
+  <span class="tutorial-key">
+    Q
+    <small>BLADE</small>
+  </span>
+
+  <span class="tutorial-key">
+    SHIFT
+    <small>DASH</small>
+  </span>
+
+  <span class="tutorial-key">
+    ESC
+    <small>PAUSE</small>
+  </span>
+</div>
+        </div>
+
+        <div class="tutorial-quick-grid">
+
+          <article class="tutorial-quick-card">
+            <small>01 // MOVE</small>
+            <strong>A / D</strong>
+            <span>RUN ACROSS THE ROOFTOPS</span>
+          </article>
+
+          <article class="tutorial-quick-card">
+            <small>02 // JUMP</small>
+            <strong>SPACE</strong>
+            <span>JUMP AND USE DOUBLE JUMP</span>
+          </article>
+
+          <article class="tutorial-quick-card">
+            <small>03 // DASH</small>
+            <strong>SHIFT</strong>
+            <span>BURST FORWARD THROUGH THE ROUTE</span>
+          </article>
+
+        </div>
+
+        <div class="tutorial-accordion">
+
+          <button
+            type="button"
+            class="tutorial-section"
+            data-tutorial-section
+            aria-expanded="false"
+          >
+            <span>
+              COMBAT
+              <small>E / Q</small>
+            </span>
+
+            <b>+</b>
+          </button>
+
+          <div
+            class="tutorial-panel"
+            hidden
+          >
+            <p>
+              <strong>E</strong>
+              FIRE YOUR WEAPON.
+            </p>
+
+            <p>
+              <strong>Q</strong>
+              USE YOUR BLADE.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="tutorial-accordion">
+
+          <button
+            type="button"
+            class="tutorial-section"
+            data-tutorial-section
+            aria-expanded="false"
+          >
+            <span>
+              OBJECTIVE
+              <small>RELAY SIGNAL</small>
+            </span>
+
+            <b>+</b>
+          </button>
+
+          <div
+            class="tutorial-panel"
+            hidden
+          >
+            <p>
+              FOLLOW THE RELAY ROUTE,
+              RECOVER SIGNALS AND REACH
+              THE END OF THE NETWORK.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="tutorial-accordion">
+
+          <button
+            type="button"
+            class="tutorial-section"
+            data-tutorial-section
+            aria-expanded="false"
+          >
+            <span>
+              MOBILE
+              <small>TOUCH CONTROL</small>
+            </span>
+
+            <b>+</b>
+          </button>
+
+          <div
+            class="tutorial-panel"
+            hidden
+          >
+            <p>
+              USE THE LEFT CONTROL AREA
+              TO MOVE AND TAP THE ACTION
+              BUTTONS FOR JUMP, FIRE,
+              BLADE AND DASH.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="tutorial-foot">
+          <span>MISSION CONTROL</span>
+          <strong>KEEP THE LINE ALIVE.</strong>
+        </div>
+
+      </div>
+    `;
+
+    panel.classList.remove('hidden');
+
+    content
+      .querySelectorAll(
+        '[data-tutorial-section]'
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            const open =
+              button.getAttribute(
+                'aria-expanded'
+              ) === 'true';
+
+            button.setAttribute(
+              'aria-expanded',
+              String(!open)
+            );
+
+            const article =
+              button.closest(
+                '.tutorial-accordion'
+              );
+
+            const panel =
+              article?.querySelector(
+                '.tutorial-panel'
+              );
+
+            const indicator =
+              button.querySelector('b');
+
+            if (
+              panel instanceof HTMLElement
+            ) {
+              panel.hidden = open;
+            }
+
+            if (
+              indicator instanceof HTMLElement
+            ) {
+              indicator.textContent =
+                open
+                  ? '+'
+                  : '−';
+            }
+
+            article?.classList.toggle(
+              'is-open',
+              !open
+            );
+          }
+        );
+
+      });
 
     return true;
   };
@@ -1234,27 +1687,31 @@ const sourceContinue = $('continue');
 
   <div class="home-v4-topbar-right">
 
-    <div
-      class="home-v4-credits"
-      aria-label="Credits"
-    >
-      <span
-        class="home-v4-credits-icon"
-        aria-hidden="true"
-      >
-        ◈
-      </span>
+    <!-- CREDITS MOVED TO HOME FOOTER -->
 
-      <span class="home-v4-credits-data">
-        <small>CREDITS</small>
-        <strong id="homeV4Credits">0</strong>
-      </span>
-    </div>
+   <div class="home-v4-topbar-right">
 
-    <div
-      class="home-v4-status"
-      aria-label="System status"
+  <div
+    class="home-v4-credits"
+    aria-label="Credits"
+  >
+    <span
+      class="home-v4-credits-icon"
+      aria-hidden="true"
     >
+      ◈
+    </span>
+
+    <span class="home-v4-credits-data">
+      <small>CREDITS</small>
+      <strong id="homeV4Credits">0</strong>
+    </span>
+  </div>
+
+  <div
+    class="home-v4-status"
+    aria-label="System status"
+  >
       <span class="home-v4-status-dot"></span>
 
       <b>SYSTEM ONLINE</b>
@@ -2085,45 +2542,61 @@ const sourceContinue = $('continue');
         </section>
       </main>
 
-      <footer
-        class="home-v4-bottom"
-      >
-        <div
-          class="home-v4-bottom-left"
-        >
-          <button
-            class="home-v4-utility"
-            type="button"
-            data-home-v4-action="faq"
-          >
-            ? &nbsp;FAQ
-          </button>
+   <footer
+  class="home-v4-bottom"
+>
+  <div
+    class="home-v4-bottom-left"
+  >
 
-          <button
-            class="home-v4-utility"
-            type="button"
-            data-home-v4-action="update"
-          >
-            ↗ &nbsp;UPDATE
-          </button>
+    <button
+      class="home-v4-utility"
+      type="button"
+      data-home-v4-action="faq"
+      aria-label="Open FAQ"
+    >
+      ? &nbsp;FAQ
+    </button>
 
-          <button
-            class="home-v4-utility"
-            type="button"
-            data-home-v4-action="options"
-          >
-            ⚙ &nbsp;OPTIONS
-          </button>
-        </div>
+    <button
+      class="home-v4-utility"
+      type="button"
+      data-home-v4-action="update"
+      aria-label="Open latest update"
+    >
+      ↗ &nbsp;UPDATE
+    </button>
 
-        <div
-          class="home-v4-bottom-meta"
-        >
-          RELAY NETWORK
-          <b>ONLINE</b>
-          · V1.1.0
-        </div>
-      </footer>
+  <!-- CREDITS REMAIN IN TOPBAR -->
+
+    <button
+      class="home-v4-utility home-v4-tutorial"
+      type="button"
+      data-home-v4-action="tutorial"
+      aria-label="Open tutorial"
+    >
+      ◉ &nbsp;TUTORIAL
+    </button>
+
+    <button
+      class="home-v4-utility"
+      type="button"
+      data-home-v4-action="options"
+      aria-label="Open options"
+    >
+      ⚙ &nbsp;OPTIONS
+    </button>
+
+  </div>
+
+  <div
+    class="home-v4-bottom-meta"
+  >
+    RELAY NETWORK
+    <b>ONLINE</b>
+    · V1.1.0
+  </div>
+</footer>
 
       <button
         id="exitTitle"
@@ -2297,6 +2770,19 @@ syncHomeProfile();
       }
     );
     
+       /* CREDITS IS DISPLAYED IN THE TOPBAR */
+
+    bindOnce(
+      shell.querySelector(
+        '[data-home-v4-action="tutorial"]'
+      ),
+      'click',
+      event => {
+        event.preventDefault();
+        openHomeTutorial();
+      }
+    );
+
     bindOnce(
       shell.querySelector(
         '[data-home-v4-action="options"]'
@@ -2307,7 +2793,6 @@ syncHomeProfile();
         openOptions();
       }
     );
-
     /*
      * START
      *
@@ -2319,26 +2804,49 @@ syncHomeProfile();
 
     forceStartVisible(start);
 
-   bindOnce(
+bindOnce(
   start,
   'click',
   event => {
     event.preventDefault();
+    event.stopImmediatePropagation();
 
     try {
+      const loader = window.relayPlayDeploymentV1;
+
+      if (loader && typeof loader.show === 'function') {
+        void loader.show({
+          missionNumber: 1,
+          desktop: './assets/loadplay.jpg',
+          mobile: './assets/loadplaymobile.jpg',
+
+          beforeRoute: async () => {
+            const target = document.querySelector(
+              'body > #game > div[hidden] #start'
+            );
+
+            if (target instanceof HTMLElement) {
+              HTMLElement.prototype.click.call(target);
+            }
+          }
+        });
+
+        return;
+      }
+
       const target = document.querySelector(
-        '#start:not(.home-v4-primary):not(.home-v5-start)'
+        'body > #game > div[hidden] #start'
       );
 
       if (target instanceof HTMLElement) {
         HTMLElement.prototype.click.call(target);
-        return;
       }
-
-      window.dispatchEvent(
-        new CustomEvent('relay:home-start')
+    } catch (error) {
+      console.error(
+        '[RelayRunner] Deployment loader error:',
+        error
       );
-    } catch {}
+    }
   }
 );
 
@@ -2349,30 +2857,38 @@ syncHomeProfile();
     const continueButton =
       shell.querySelector('#continue');
 
-    const syncContinue = () => {
-      if (
-        !(continueButton instanceof HTMLElement) ||
-        !(sourceContinue instanceof HTMLElement)
-      ) {
-        return;
-      }
+  const syncContinue = () => {
+  if (!(continueButton instanceof HTMLElement)) {
+    return;
+  }
 
-      const hidden =
-        sourceContinue.classList.contains(
-          'hidden'
-        ) ||
-        getComputedStyle(
-          sourceContinue
-        ).display === 'none' ||
-        sourceContinue.hasAttribute(
-          'hidden'
-        );
+  continueButton.classList.remove('hidden');
+  continueButton.removeAttribute('hidden');
 
-      continueButton.classList.toggle(
-        'hidden',
-        hidden
-      );
-    };
+  continueButton.style.setProperty(
+    'display',
+    'inline-flex',
+    'important'
+  );
+
+  continueButton.style.setProperty(
+    'visibility',
+    'visible',
+    'important'
+  );
+
+  continueButton.style.setProperty(
+    'opacity',
+    '1',
+    'important'
+  );
+
+  continueButton.style.setProperty(
+    'pointer-events',
+    'auto',
+    'important'
+  );
+};
 
     syncContinue();
 

@@ -1,530 +1,640 @@
-/* Production cinematic splash V3. Owns first-load presentation and fails open safely. */
-(() => {
-  if (window.__relaySplashV3) return;
-  window.__relaySplashV3 = true;
 
-  const applyFirstPaintHardening = () => {
-    const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
-    const image = splash?.querySelector('.relay-splash-art, #relaySplashArt');
-    if (!splash || !image) return;
-    const mobilePortrait = window.matchMedia('(max-width:700px) and (orientation:portrait)').matches;
+/* =========================================================
+   RELAY RUNNER — CINEMATIC SPLASH V6
+   First-load splash controller.
+   ONE controller.
+   0% -> 8% -> 26% -> 48% -> 68% -> 86% -> 100%
+   Then cinematic exit -> HOME.
+   ========================================================= */
+
+(() => {
+  if (window.__relaySplashV6) return;
+  window.__relaySplashV6 = true;
+
+  console.log('[RelaySplash V6] LOADED');
+
+  const sleep = ms =>
+    new Promise(resolve => setTimeout(resolve, ms));
+
+  /* ---------------------------------------------------------
+     FIND SPLASH
+     --------------------------------------------------------- */
+
+  const getSplash = () =>
+    document.querySelector('.relay-splash') ||
+    document.getElementById('relaySplash');
+
+  /* ---------------------------------------------------------
+     FIRST PAINT
+     --------------------------------------------------------- */
+
+  const hardenSplash = splash => {
+    if (!splash) return;
+
+    const image =
+      splash.querySelector('.relay-splash-art, #relaySplashArt');
+
+    splash.style.position = 'fixed';
+    splash.style.inset = '0';
+    splash.style.width = '100vw';
+    splash.style.height = '100vh';
     splash.style.width = '100dvw';
     splash.style.height = '100dvh';
-    image.style.display = 'block';
-    image.style.position = 'absolute';
-    image.style.inset = '0';
-    image.style.width = '100dvw';
-    image.style.height = '100dvh';
-    image.style.minWidth = '100%';
-    image.style.minHeight = '100%';
-    image.style.maxWidth = 'none';
-    image.style.maxHeight = 'none';
-    image.style.objectFit = mobilePortrait ? 'contain' : 'cover';
-    image.style.objectPosition = 'center';
-    image.style.transform = 'none';
-    image.style.animation = 'none';
-    image.style.opacity = '1';
+    splash.style.zIndex = '2147483647';
+    splash.style.display = 'grid';
+    splash.style.opacity = '1';
+    splash.style.visibility = 'visible';
+    splash.style.pointerEvents = 'auto';
+    splash.style.transform = 'scale(1)';
+    splash.style.filter = 'none';
+
+    splash.classList.remove('is-hidden');
+
+    if (image) {
+      const portrait =
+        window.matchMedia(
+          '(max-width:700px) and (orientation:portrait)'
+        ).matches;
+
+      image.style.display = 'block';
+      image.style.position = 'absolute';
+      image.style.inset = '0';
+      image.style.width = '100vw';
+      image.style.height = '100vh';
+      image.style.width = '100dvw';
+      image.style.height = '100dvh';
+      image.style.minWidth = '100%';
+      image.style.minHeight = '100%';
+      image.style.maxWidth = 'none';
+      image.style.maxHeight = 'none';
+      image.style.objectFit = portrait ? 'contain' : 'cover';
+      image.style.objectPosition = 'center';
+      image.style.opacity = '1';
+      image.style.transform = 'none';
+      image.style.animation = 'none';
+    }
   };
 
-  const installPremiumBootHud = () => {
-    if (document.getElementById('relay-premium-boot-style')) return;
+  /* ---------------------------------------------------------
+     PREMIUM HUD
+     --------------------------------------------------------- */
+
+  const installHud = () => {
+    if (document.getElementById('relay-v6-style')) return;
 
     const style = document.createElement('style');
-    style.id = 'relay-premium-boot-style';
+
+    style.id = 'relay-v6-style';
+
     style.textContent = `
- .relay-splash .relay-splash-network-status{
-  position:absolute;
-  z-index:8;
-  top:max(24px,env(safe-area-inset-top));
-  right:max(24px,env(safe-area-inset-right));
-  display:flex;
-  align-items:center;
-  gap:9px;
-  padding:8px 12px;
-  border:1px solid rgba(0,234,255,.32);
-  border-left:2px solid var(--rr-cyan,#00eaff);
-  background:
-    linear-gradient(
-      90deg,
-      rgba(0,234,255,.10),
-      rgba(0,12,20,.48)
-    );
-  color:rgba(184,251,255,.86);
-  font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  text-shadow:
-    0 2px 10px #000,
-    0 0 12px rgba(0,234,255,.32);
-  box-shadow:
-    0 0 18px rgba(0,234,255,.08),
-    inset 0 0 18px rgba(0,234,255,.04);
-}
-      .relay-splash .relay-splash-network-status i{
-  width:6px;
-  height:6px;
-  flex:0 0 6px;
-  border-radius:50%;
-  background:var(--rr-cyan,#00eaff);
-  box-shadow:
-    0 0 6px var(--rr-cyan,#00eaff),
-    0 0 14px var(--rr-cyan,#00eaff),
-    0 0 26px rgba(0,234,255,.55);
-  animation:relayPremiumPulse .95s ease-in-out infinite;
-}
+      .relay-splash{
+        isolation:isolate !important;
+        background:#000 !important;
+      }
 
-    .relay-splash .relay-splash-ui{
-  width:min(900px,calc(100vw - 48px));
-  padding:12px 12px 11px;
-  gap:9px;
-  border:1px solid rgba(117,247,255,.22);
-  border-top-color:rgba(255,210,60,.30);
-  border-left-color:rgba(0,234,255,.30);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(1,9,16,.84),
-      rgba(1,6,11,.68)
-    );
-box-shadow:
-    0 20px 50px rgba(0,0,0,.48),
-    0 0 30px rgba(0,140,255,.10),
-    0 0 60px rgba(0,234,255,.045),
-    inset 0 0 28px rgba(0,234,255,.045);
-  backdrop-filter:blur(6px);
-}
-      .relay-splash .relay-splash-ui::before{
-        content:"SYSTEM LINK  //  SECURE CHANNEL  //  ENCRYPTED";
-        margin-bottom:-1px;
-        padding:5px 8px;
-        border-left:2px solid var(--rr-cyan,#00eaff);
-        background:linear-gradient(90deg,rgba(0,234,255,.09),transparent);
-        color:rgba(141,250,255,.62);
-        font-size:7px;
-        letter-spacing:.18em;
+      .relay-splash .relay-v6-network{
+        position:absolute;
+        z-index:20;
+        top:max(20px,env(safe-area-inset-top));
+        right:max(20px,env(safe-area-inset-right));
+        display:flex;
+        align-items:center;
+        gap:8px;
+        padding:8px 12px;
+        border:1px solid rgba(0,234,255,.35);
+        border-left:2px solid #00eaff;
+        background:rgba(0,8,15,.72);
+        color:#b8fbff;
+        font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.16em;
+        text-transform:uppercase;
+        box-shadow:
+          0 0 18px rgba(0,234,255,.10),
+          inset 0 0 18px rgba(0,234,255,.04);
       }
-      .relay-splash .relay-splash-meta{
-        padding:11px 12px 10px;
-        border-color:rgba(117,247,255,.14);
-        border-bottom-color:rgba(117,247,255,.30);
-        background:rgba(0,7,12,.36);
-      }
-      .relay-splash .relay-splash-status{font-size:10px;letter-spacing:.17em}
-      .relay-splash .relay-splash-percent{font-size:19px;min-width:62px}
-      .relay-splash .relay-splash-track{
-        height:9px;
-        border-color:rgba(117,247,255,.40);
-        background:
-          repeating-linear-gradient(90deg,rgba(141,250,255,.05) 0 1px,transparent 1px 24px),
-          linear-gradient(180deg,rgba(0,18,29,.98),rgba(0,5,10,.99));
-      }
-      .relay-splash .relay-splash-track::before{
-        background:repeating-linear-gradient(90deg,rgba(141,250,255,.15) 0 1px,transparent 1px 24px);
-      }
-    .relay-splash .relay-splash-progress{
-  background:
-    linear-gradient(
-      90deg,
-      #006d8a 0%,
-      var(--rr-blue,#168cff) 24%,
-      var(--rr-cyan,#00eaff) 58%,
-      var(--rr-cyan2,#8dfaff) 84%,
-      #fff 100%
-    );
-  box-shadow:
-    0 0 8px rgba(0,234,255,.95),
-    0 0 20px rgba(0,234,255,.72),
-    0 0 42px rgba(0,140,255,.38);
-}
 
-   .relay-splash .relay-boot-status-grid{
+      .relay-splash .relay-v6-network i{
+        width:6px;
+        height:6px;
+        flex:0 0 6px;
+        border-radius:50%;
+        background:#00eaff;
+        box-shadow:
+          0 0 7px #00eaff,
+          0 0 18px #00eaff;
+        animation:relayV6Pulse 1s ease-in-out infinite;
+      }
+
+      .relay-splash .relay-splash-ui{
+        z-index:20;
+      }
+
+      .relay-splash .relay-v6-grid{
         display:grid;
         grid-template-columns:repeat(3,minmax(0,1fr));
         gap:1px;
+        margin-top:7px;
         border:1px solid rgba(117,247,255,.16);
         background:rgba(117,247,255,.10);
-        box-shadow:
-          0 0 18px rgba(0,234,255,.04),
-          inset 0 0 18px rgba(0,234,255,.025);
       }
-     .relay-splash .relay-boot-status-cell{
-  min-width:0;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:8px 9px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,12,20,.78),
-      rgba(0,7,12,.62)
-    );
-  box-shadow:
-    inset 0 0 18px rgba(0,234,255,.025);
-}
-      .relay-splash .relay-boot-status-cell span{
-        color:rgba(190,215,221,.46);
+
+      .relay-splash .relay-v6-cell{
+        min-width:0;
+        padding:8px;
+        display:flex;
+        justify-content:space-between;
+        gap:8px;
+        background:rgba(0,9,16,.76);
+      }
+
+      .relay-splash .relay-v6-cell span{
+        color:rgba(190,215,221,.45);
         font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-        letter-spacing:.14em;
-        text-transform:uppercase;
+        letter-spacing:.12em;
       }
-    .relay-splash .relay-boot-status-cell b{
-  color:rgba(184,251,255,.90);
-  font:900 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  letter-spacing:.11em;
-  text-transform:uppercase;
-  white-space:nowrap;
-  text-shadow:
-    0 0 8px rgba(0,234,255,.28);
-}
-.relay-splash .relay-boot-log{
+
+      .relay-splash .relay-v6-cell b{
+        color:#b8fbff;
+        font:900 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.08em;
+        white-space:nowrap;
+      }
+
+      .relay-splash .relay-v6-log{
         display:grid;
         gap:4px;
-        min-height:26px;
+        margin-top:7px;
         padding:7px 9px 3px;
-        border-top:1px solid rgba(117,247,255,.10);
-        background:
-          linear-gradient(
-            90deg,
-            rgba(0,234,255,.035),
-            transparent 70%
-          );
-        color:rgba(141,250,255,.43);
-        font:700 7px/1.25 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-        letter-spacing:.12em;
+        border-top:1px solid rgba(117,247,255,.12);
+        color:rgba(141,250,255,.48);
+        font:700 7px/1.3 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.10em;
         text-transform:uppercase;
       }
-   .relay-splash .relay-boot-log .is-live{
-  color:rgba(184,251,255,.88);
-  text-shadow:
-    0 0 8px rgba(0,234,255,.34),
-    0 0 18px rgba(0,234,255,.14);
-}
-      .relay-splash .relay-boot-log .is-muted{color:rgba(175,188,184,.28)}
-      .relay-splash .relay-boot-complete{
+
+      .relay-splash .relay-v6-log .live{
+        color:#b8fbff;
+        text-shadow:0 0 10px rgba(0,234,255,.35);
+      }
+
+      .relay-splash .relay-v6-complete{
         display:none;
-        grid-template-columns:auto minmax(0,1fr);
         align-items:center;
         gap:9px;
-        padding-top:3px;
+        margin-top:7px;
+        padding-top:6px;
+        border-top:1px solid rgba(255,210,60,.18);
       }
-      .relay-splash .relay-boot-complete.is-visible{display:grid}
-     .relay-splash .relay-boot-complete b{
+
+      .relay-splash .relay-v6-complete.show{
+        display:flex;
+      }
+
+      .relay-splash .relay-v6-complete i{
         width:8px;
         height:8px;
+        flex:0 0 8px;
         border-radius:50%;
-        background:var(--rr-gold,#ffd23c);
+        background:#ffd23c;
         box-shadow:
-          0 0 8px var(--rr-gold,#ffd23c),
-          0 0 18px var(--rr-gold,#ffd23c),
-          0 0 32px rgba(255,210,60,.28);
-        animation:relayBootCompletePulse 1.1s ease-in-out infinite;
+          0 0 8px #ffd23c,
+          0 0 20px #ffd23c;
       }
-.relay-splash .relay-boot-complete strong{
-  display:block;
-  color:rgba(245,253,255,.98);
-  font:900 9px/1.15 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  text-shadow:
-    0 0 8px rgba(0,234,255,.46),
-    0 0 18px rgba(0,234,255,.22),
-    0 0 32px rgba(0,140,255,.12);
-}
-      .relay-splash .relay-boot-complete small{
+
+      .relay-splash .relay-v6-complete strong{
+        display:block;
+        color:#f5fdff;
+        font:900 9px/1.1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.14em;
+      }
+
+      .relay-splash .relay-v6-complete small{
         display:block;
         margin-top:3px;
-        color:rgba(141,250,255,.48);
-        font:700 7px/1.1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-        letter-spacing:.14em;
-        text-transform:uppercase;
+        color:rgba(141,250,255,.50);
+        font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.12em;
       }
 
-    @keyframes relayBootCompletePulse{
-  0%,100%{
-    opacity:.48;
-    transform:scale(.78);
-    box-shadow:
-      0 0 6px var(--rr-gold,#ffd23c),
-      0 0 14px var(--rr-gold,#ffd23c),
-      0 0 24px rgba(255,210,60,.22);
-  }
-
-  50%{
-    opacity:1;
-    transform:scale(1.16);
-    box-shadow:
-      0 0 10px var(--rr-gold,#ffd23c),
-      0 0 22px var(--rr-gold,#ffd23c),
-      0 0 38px rgba(255,210,60,.42);
-  }
-}
-
-      @keyframes relayPremiumPulse{
-        0%,100%{opacity:.35;transform:scale(.72)}
-        50%{opacity:1;transform:scale(1.18)}
+      @keyframes relayV6Pulse{
+        0%,100%{
+          opacity:.35;
+          transform:scale(.75);
+        }
+        50%{
+          opacity:1;
+          transform:scale(1.2);
+        }
       }
 
       @media(max-width:700px){
-        .relay-splash .relay-splash-network-status{
-          top:max(14px,env(safe-area-inset-top));
-          right:max(14px,env(safe-area-inset-right));
+        .relay-splash .relay-v6-network{
+          top:12px;
+          right:12px;
           padding:6px 8px;
           font-size:6px;
-          letter-spacing:.10em;
         }
-        .relay-splash .relay-splash-ui{
-          width:calc(100vw - 20px);
-          padding:9px 9px 8px;
-          gap:7px;
-        }
-        .relay-splash .relay-splash-ui::before{font-size:6px;letter-spacing:.12em;padding:4px 6px}
-        .relay-splash .relay-splash-meta{padding:8px 9px 7px}
-   .relay-splash .relay-splash-status{
-          font-size:7px;
-          letter-spacing:.08em;
-          line-height:1.15;
-        }
-        .relay-splash .relay-splash-percent{font-size:13px;min-width:48px}
-        .relay-splash .relay-splash-track{height:7px}
-      .relay-splash .relay-boot-status-grid{
-  grid-template-columns:1fr 1fr;
-}
 
-.relay-splash .relay-boot-status-cell:last-child{
-  grid-column:1 / -1;
-}
-.relay-splash .relay-boot-status-cell{
-  padding:7px 8px;
-  min-height:30px;
-  gap:8px;
-}
-        .relay-splash .relay-boot-status-cell span,.relay-splash .relay-boot-status-cell b{font-size:6px}
-       .relay-splash .relay-boot-log{
-  font-size:6px;
-  line-height:1.35;
-  letter-spacing:.08em;
-  gap:3px;
-  min-height:28px;
-}
+        .relay-splash .relay-v6-grid{
+          grid-template-columns:1fr 1fr;
+        }
+
+        .relay-splash .relay-v6-cell:last-child{
+          grid-column:1 / -1;
+        }
+
+        .relay-splash .relay-v6-cell{
+          padding:7px;
+        }
+
+        .relay-splash .relay-v6-cell span,
+        .relay-splash .relay-v6-cell b{
+          font-size:6px;
+        }
+
+        .relay-splash .relay-v6-log{
+          font-size:6px;
+        }
       }
+
       @media(max-width:700px) and (orientation:portrait){
-        .relay-splash .relay-splash-network-status{display:none}
+        .relay-splash .relay-v6-network{
+          display:none;
+        }
       }
-      @media(orientation:landscape) and (max-height:520px){
-        .relay-splash .relay-splash-network-status{top:max(8px,calc(env(safe-area-inset-top) + 4px));right:max(8px,calc(env(safe-area-inset-right) + 4px))}
-        .relay-splash .relay-splash-ui{bottom:max(8px,calc(env(safe-area-inset-bottom) + 6px));padding:7px;gap:6px}
-        .relay-splash .relay-boot-status-grid,.relay-splash .relay-boot-log{display:none}
-      }
+
       @media(prefers-reduced-motion:reduce){
-.relay-splash .relay-splash-network-status i,
-        .relay-splash .relay-boot-complete b{animation:none}
+        .relay-splash .relay-v6-network i{
+          animation:none;
+        }
       }
     `;
+
     document.head.appendChild(style);
   };
 
-  const mountPremiumBootHud = splash => {
-    if (!splash || splash.querySelector('.relay-premium-boot-mounted')) return null;
+  /* ---------------------------------------------------------
+     HUD
+     --------------------------------------------------------- */
 
-    const brand = splash.querySelector('.relay-splash-brand');
+  const mountHud = splash => {
     const ui = splash.querySelector('.relay-splash-ui');
-    if (!brand || !ui) return null;
+
+    if (!ui) return null;
+
+    if (ui.querySelector('.relay-v6-grid')) {
+      return {
+        network: splash.querySelector('.relay-v6-network'),
+        grid: ui.querySelector('.relay-v6-grid'),
+        log: ui.querySelector('.relay-v6-log'),
+        complete: ui.querySelector('.relay-v6-complete')
+      };
+    }
 
     const network = document.createElement('div');
-    network.className = 'relay-splash-network-status relay-premium-boot-mounted';
-    network.innerHTML = '<i></i><span>RELAY NETWORK // ONLINE</span>';
+
+    network.className = 'relay-v6-network';
+
+    network.innerHTML =
+      '<i></i><span>RELAY NETWORK // ONLINE</span>';
+
     splash.appendChild(network);
 
-    const telemetry = document.createElement('div');
-    telemetry.className = 'relay-boot-status-grid';
-telemetry.innerHTML = `
-      <div class="relay-boot-status-cell">
+    const grid = document.createElement('div');
+
+    grid.className = 'relay-v6-grid';
+
+    grid.innerHTML = `
+      <div class="relay-v6-cell">
         <span>NODE</span>
         <b>04 // ONLINE</b>
       </div>
-      <div class="relay-boot-status-cell">
+
+      <div class="relay-v6-cell">
         <span>SIGNAL</span>
         <b>STABLE // LOCKED</b>
       </div>
-      <div class="relay-boot-status-cell">
+
+      <div class="relay-v6-cell">
         <span>RELAY</span>
         <b>SYNCED // READY</b>
       </div>
     `;
 
     const log = document.createElement('div');
-    log.className = 'relay-boot-log';
-    log.setAttribute('aria-live', 'polite');
+
+    log.className = 'relay-v6-log';
+
     log.innerHTML = `
-<span class="is-live">→ ROUTE DATA RECEIVED // VERIFIED</span>
-<span class="is-muted">→ WORLD NODE STANDBY // AWAITING SYNC</span>
+      <span class="live">→ RELAY CORE INITIALIZING</span>
+      <span>→ WORLD NODE STANDBY</span>
     `;
 
     const complete = document.createElement('div');
-    complete.className = 'relay-boot-complete';
-  complete.innerHTML = `
-      <b aria-hidden="true"></b>
+
+    complete.className = 'relay-v6-complete';
+
+    complete.innerHTML = `
+      <i></i>
       <div>
         <strong>RELAY NETWORK ONLINE</strong>
         <small>BOOT COMPLETE // HOME READY</small>
       </div>
     `;
 
-    ui.appendChild(telemetry);
+    ui.appendChild(grid);
     ui.appendChild(log);
     ui.appendChild(complete);
 
-    return { network, telemetry, log, complete };
+    return {
+      network,
+      grid,
+      log,
+      complete
+    };
   };
 
-  applyFirstPaintHardening();
+  /* ---------------------------------------------------------
+     PROGRESS
+     --------------------------------------------------------- */
 
-  const boot = () => {
-    applyFirstPaintHardening();
-    installPremiumBootHud();
-    document.getElementById('bootLoader')?.remove();
-    const splash = document.querySelector('.relay-splash') || document.getElementById('relaySplash');
-    if (!splash) return;
-    if (!splash.classList.contains('relay-splash')) splash.classList.add('relay-splash');
+  const run = async () => {
+    const splash = getSplash();
 
-    const image = splash.querySelector('.relay-splash-art, #relaySplashArt');
-    const bar = splash.querySelector('.relay-splash-progress');
-    const pct = splash.querySelector('.relay-splash-percent');
-    const label = splash.querySelector('.relay-splash-status');
-    if (!image || !bar || !pct || !label) return;
-    applyFirstPaintHardening();
-    installPremiumBootHud();
-    const premiumHud = mountPremiumBootHud(splash);
-
-    if (!splash.querySelector('.relay-splash-brand')) {
-      const brand = document.createElement('div');
-      brand.className = 'relay-splash-brand';
-      brand.innerHTML = '<b>R/</b><span>RELAY RUNNER</span>';
-      splash.appendChild(brand);
+    if (!splash) {
+      console.error('[RelaySplash V6] SPLASH NOT FOUND');
+      return;
     }
 
-   const stages = [
-      [8, 'RELAY CORE INITIALIZING'],
-      [26, 'INTERFACE CORE ONLINE'],
-      [48, 'GAME SYSTEMS LOADING'],
-      [68, 'WORLD NETWORK CONNECTING'],
-      [86, 'HOME SYSTEMS READY']
-    ];
-    let progress = 0;
-    let imageReady = image.complete && image.naturalWidth > 0;
-    let pageReady = document.readyState === 'complete';
-    let engineReady = false;
-    let finishing = false;
-    let timedOut = false;
-    const startedAt = performance.now();
-    const MIN_SPLASH_MS = 2200;
-    const MAX_SPLASH_MS = 7000;
+    hardenSplash(splash);
+    installHud();
 
-    const setBootLog = (current) => {
-      if (!premiumHud?.log) return;
-      const first = premiumHud.log.querySelector('span:first-child');
-      const second = premiumHud.log.querySelector('span:last-child');
-      if (!first || !second) return;
-if (current >= 68) {
-        first.textContent = '→ ROUTE DATA VERIFIED';
-        first.className = 'is-live';
-        second.textContent = '→ WORLD NODE ONLINE';
-        second.className = 'is-live';
-      } else if (current >= 48) {
-        first.textContent = '→ ROUTE DATA RECEIVED';
-        first.className = 'is-live';
-        second.textContent = '→ WORLD NODE SYNCING';
-        second.className = 'is-muted';
-      } else if (current >= 26) {
-        first.textContent = '→ INTERFACE CORE ONLINE';
-        first.className = 'is-live';
-        second.textContent = '→ ROUTE DATA AWAITING';
-        second.className = 'is-muted';
-      } else {
-        first.textContent = '→ RELAY CORE INITIALIZING';
-        first.className = 'is-live';
-        second.textContent = '→ WORLD NODE STANDBY';
-        second.className = 'is-muted';
-      }
-    };
+    const image =
+      splash.querySelector('.relay-splash-art, #relaySplashArt');
+
+    const bar =
+      splash.querySelector('.relay-splash-progress');
+
+    const pct =
+      splash.querySelector('.relay-splash-percent');
+
+    const label =
+      splash.querySelector('.relay-splash-status');
+
+    if (!image || !bar || !pct || !label) {
+      console.error('[RelaySplash V6] REQUIRED ELEMENT MISSING');
+      return;
+    }
+
+    const hud = mountHud(splash);
+
+    let progress = 0;
 
     const setProgress = (value, text) => {
-      progress = Math.max(progress, Math.min(100, Math.round(value)));
+      progress = Math.max(
+        progress,
+        Math.min(100, Math.round(value))
+      );
+
       bar.style.width = `${progress}%`;
+      bar.style.transform = 'translateZ(0)';
+
       pct.textContent = `${progress}%`;
-      if (text) label.textContent = text;
-      setBootLog(progress);
-      if (premiumHud?.network) premiumHud.network.classList.toggle('is-ready', progress >= 100);
+
+      if (text) {
+        label.textContent = text;
+      }
+
+      if (hud?.network) {
+        const textNode =
+          hud.network.querySelector('span');
+
+        if (textNode) {
+          textNode.textContent =
+            progress >= 100
+              ? 'RELAY NETWORK // ONLINE // READY'
+              : 'RELAY NETWORK // ONLINE';
+        }
+      }
+
+      if (hud?.log) {
+        const lines = hud.log.querySelectorAll('span');
+
+        if (lines[0]) {
+          lines[0].textContent =
+            progress >= 86
+              ? '→ HOME SYSTEMS VERIFIED'
+              : progress >= 68
+                ? '→ ROUTE DATA VERIFIED'
+                : progress >= 48
+                  ? '→ GAME SYSTEMS LOADING'
+                  : progress >= 26
+                    ? '→ INTERFACE CORE ONLINE'
+                    : '→ RELAY CORE INITIALIZING';
+
+          lines[0].className = 'live';
+        }
+
+        if (lines[1]) {
+          lines[1].textContent =
+            progress >= 86
+              ? '→ RELAY NETWORK READY'
+              : progress >= 68
+                ? '→ WORLD NODE ONLINE'
+                : progress >= 48
+                  ? '→ WORLD NODE SYNCING'
+                  : progress >= 26
+                    ? '→ ROUTE DATA AWAITING'
+                    : '→ WORLD NODE STANDBY';
+
+          lines[1].className =
+            progress >= 68 ? 'live' : '';
+        }
+      }
+
+      console.log(
+        '[RelaySplash V6] PROGRESS',
+        progress,
+        text || ''
+      );
     };
 
-    const animateTo = (target, text) => new Promise(resolve => {
-      if (target <= progress) { setProgress(target, text); resolve(); return; }
-      const from = progress;
-      const started = performance.now();
-      const duration = Math.max(180, Math.min(650, (target - from) * 10));
-      const step = () => {
-        const t = Math.min(1, (performance.now() - started) / duration);
-        const eased = t * (2 - t);
-        setProgress(from + (target - from) * eased, text);
-        if (t < 1) window.setTimeout(step, 32);
-        else resolve();
-      };
-      window.setTimeout(step, 0);
-    });
+    const animateTo = (target, text, duration) => {
+      return new Promise(resolve => {
+        const from = progress;
+        const to = Math.max(from, Math.min(100, target));
 
-    const finish = async (forced = false) => {
-      if (finishing) return;
-      const elapsed = performance.now() - startedAt;
-      if (!forced && (!imageReady || !pageReady || !engineReady)) return;
-      if (!forced && elapsed < MIN_SPLASH_MS) { window.setTimeout(() => finish(false), MIN_SPLASH_MS - elapsed); return; }
-      finishing = true;
-      await animateTo(100, 'RELAY ONLINE');
-      premiumHud?.complete?.classList.add('is-visible');
-      premiumHud?.log?.querySelectorAll('span').forEach(node => node.classList.add('is-live'));
-     if (premiumHud?.network) {
-      premiumHud.network.querySelector('span').textContent = 'RELAY NETWORK // ONLINE // READY';
+        const start = performance.now();
+
+        const frame = now => {
+          const t = Math.min(
+            1,
+            (now - start) / duration
+          );
+
+          const eased =
+            1 - Math.pow(1 - t, 3);
+
+          setProgress(
+            from + (to - from) * eased,
+            text
+          );
+
+          if (t < 1) {
+            requestAnimationFrame(frame);
+          } else {
+            setProgress(to, text);
+            resolve();
+          }
+        };
+
+        requestAnimationFrame(frame);
+      });
+    };
+
+    /* NEVER ALLOW ANOTHER CSS STATE TO HIDE THE SPLASH */
+
+    splash.classList.remove('is-hidden');
+
+    splash.style.opacity = '1';
+    splash.style.visibility = 'visible';
+    splash.style.pointerEvents = 'auto';
+    splash.style.transform = 'scale(1)';
+    splash.style.filter = 'none';
+    splash.setAttribute('aria-busy', 'true');
+
+    /* =====================================================
+       BOOT SEQUENCE
+       ===================================================== */
+
+    setProgress(0, 'INITIALIZING RELAY CORE');
+
+    await sleep(350);
+
+    await animateTo(
+      8,
+      'RELAY CORE INITIALIZING',
+      700
+    );
+
+    await sleep(300);
+
+    await animateTo(
+      26,
+      'INTERFACE CORE ONLINE',
+      850
+    );
+
+    console.log(
+      '[RelaySplash V6] 26% COMPLETE — CONTINUING'
+    );
+
+    await sleep(500);
+
+    await animateTo(
+      48,
+      'GAME SYSTEMS LOADING',
+      900
+    );
+
+    console.log(
+      '[RelaySplash V6] 48% COMPLETE — CONTINUING'
+    );
+
+    await sleep(500);
+
+    await animateTo(
+      68,
+      'WORLD NETWORK CONNECTING',
+      900
+    );
+
+    console.log(
+      '[RelaySplash V6] 68% COMPLETE — CONTINUING'
+    );
+
+    await sleep(500);
+
+    await animateTo(
+      86,
+      'HOME SYSTEMS READY',
+      800
+    );
+
+    console.log(
+      '[RelaySplash V6] 86% COMPLETE — CONTINUING'
+    );
+
+    await sleep(500);
+
+    await animateTo(
+      100,
+      'RELAY ONLINE',
+      1000
+    );
+
+    console.log(
+      '[RelaySplash V6] 100% COMPLETE'
+    );
+
+    /* =====================================================
+       100% HOLD
+       ===================================================== */
+
+    if (hud?.complete) {
+      hud.complete.classList.add('show');
     }
-      splash.setAttribute('aria-busy', 'false');
-      splash.classList.add('is-hidden');
-      window.setTimeout(() => splash.remove(), 700);
-    };
 
-    const markImageReady = () => {
-      if (imageReady) return;
-      imageReady = true;
-      animateTo(26, 'LOADING INTERFACE').then(() => finish());
-    };
+    await sleep(1200);
 
-    if (imageReady) setProgress(26, 'LOADING INTERFACE');
-    else {
-      image.addEventListener('load', markImageReady, { once: true });
-      image.addEventListener('error', () => { imageReady = true; setProgress(22, 'SAFE MODE // IMAGE FALLBACK'); finish(); }, { once: true });
-    }
+    /* =====================================================
+       CINEMATIC EXIT
+       ===================================================== */
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => animateTo(48, 'LOADING GAME SYSTEMS'), { once: true });
-    else animateTo(48, 'LOADING GAME SYSTEMS');
+    splash.setAttribute('aria-busy', 'false');
 
-    if (!pageReady) window.addEventListener('load', () => { pageReady = true; animateTo(68, 'CONNECTING WORLD').then(finish); }, { once: true });
-    else setProgress(68, 'CONNECTING WORLD');
+    splash.style.transition =
+      'opacity 1.2s cubic-bezier(.16,1,.3,1),' +
+      'transform 1.2s cubic-bezier(.16,1,.3,1),' +
+      'filter 1.2s ease';
 
-    const checkEngine = () => {
-      const canvas = document.querySelector('#phaser-game canvas');
-      if (canvas) { engineReady = true; animateTo(86, 'PREPARING HOME').then(finish); return; }
-      if (!finishing) window.setTimeout(checkEngine, 60);
-    };
-    checkEngine();
+    void splash.offsetWidth;
 
-    const orientation = window.matchMedia('(orientation: landscape)');
-    const onOrientation = () => { if (finishing) return; imageReady = image.complete && image.naturalWidth > 0; applyFirstPaintHardening(); };
-    orientation.addEventListener?.('change', onOrientation);
-    window.addEventListener('resize', onOrientation, { passive: true });
+    splash.style.opacity = '0';
+    splash.style.transform = 'scale(1.035)';
+    splash.style.filter =
+      'brightness(1.2) saturate(1.08)';
 
-    window.setTimeout(() => { if (finishing || timedOut) return; timedOut = true; label.textContent = 'ENTERING HOME'; finish(true); }, MAX_SPLASH_MS);
-    stages.forEach(([value, text], index) => window.setTimeout(() => { if (!finishing && !timedOut) setProgress(value, text); }, 220 + index * 360));
+    await sleep(1250);
+
+    splash.remove();
+
+    console.log(
+      '[RelaySplash V6] EXIT COMPLETE — HOME ACTIVE'
+    );
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-  else boot();
+  /* ---------------------------------------------------------
+     START IMMEDIATELY
+     --------------------------------------------------------- */
+
+  run().catch(error => {
+    console.error(
+      '[RelaySplash V6] FATAL ERROR',
+      error
+    );
+
+    /*
+      Emergency recovery:
+      If something unexpected breaks the cinematic sequence,
+      never leave the user stuck on the splash.
+    */
+
+    const splash = getSplash();
+
+    if (splash) {
+      splash.remove();
+    }
+  });
 })();
+

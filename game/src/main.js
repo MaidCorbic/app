@@ -978,14 +978,7 @@ function renderHomeProgress() {
       state.signals;
   }
 
-  $('continue').classList.toggle(
-    'hidden',
-    !(
-      state.xp ||
-      state.signals ||
-      state.completed.length
-    )
-  );
+$('continue').classList.remove('hidden');
 
   renderMissionPreview();
   renderStreak();
