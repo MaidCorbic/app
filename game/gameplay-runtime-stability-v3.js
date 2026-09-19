@@ -266,70 +266,385 @@
       visibility:hidden!important
     }
 
-    #game .relay-enemy-discovery{
-      background:rgba(2,5,13,.48)!important;
-      backdrop-filter:blur(6px)!important
-    }
+#game .relay-enemy-discovery{
+  position:fixed!important;
+  inset:0!important;
 
-    #game .relay-enemy-card{
-      border:1px solid rgba(255,208,110,.42)!important;
-      border-left:2px solid #ffd06e!important;
-      background:linear-gradient(
-        145deg,
-        rgba(7,10,15,.98),
-        rgba(2,3,5,.99)
-      )!important;
-      box-shadow:
-        0 0 38px rgba(255,208,110,.10),
-        0 24px 65px rgba(0,0,0,.52),
-        inset 0 1px rgba(255,255,255,.05)!important;
-      color:#f4f7fa!important
-    }
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
 
-    #game .relay-enemy-card .eyebrow{
-      color:#ffd06e!important
-    }
+  padding:24px!important;
+  box-sizing:border-box!important;
 
-    #game .relay-enemy-card h2{
-      color:#f4f7fa!important
-    }
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(18,42,58,.24),
+      rgba(1,4,9,.82) 58%,
+      rgba(0,2,6,.94) 100%
+    )!important;
 
-    #game .relay-enemy-card .enemy-level{
-      border-color:rgba(255,208,110,.58)!important;
-      background:rgba(255,208,110,.045)!important;
-      color:#ffd06e!important
-    }
+  backdrop-filter:blur(10px) saturate(125%)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(125%)!important;
 
-    #game .relay-enemy-card dt{
-      color:#8896a4!important
-    }
+  z-index:9999!important;
+}
 
-    #game .relay-enemy-card dd{
-      color:#edf1f3!important
-    }
 
-    #game .relay-enemy-card button{
-      border-color:rgba(255,208,110,.5)!important;
-      background:linear-gradient(
-        135deg,
-        rgba(255,208,110,.12),
-        rgba(255,208,110,.035)
-      )!important;
-      color:#ffe7a6!important;
-      box-shadow:
-        0 0 22px rgba(255,208,110,.06)!important
-    }
+#game .relay-enemy-card{
+  position:relative!important;
 
-    #game .relay-enemy-card button:hover,
-    #game .relay-enemy-card button:focus-visible{
-      border-color:#ffd06e!important;
-      background:linear-gradient(
-        135deg,
-        rgba(255,208,110,.18),
-        rgba(255,208,110,.055)
-      )!important;
-      outline:none!important
-    }
+  width:min(470px,calc(100vw - 40px))!important;
+  min-height:300px!important;
+
+  box-sizing:border-box!important;
+  padding:26px 28px 24px!important;
+
+  overflow:hidden!important;
+
+  border:
+    1px solid
+    rgba(96,214,255,.34)!important;
+
+  border-left:
+    3px solid
+    #38d9ff!important;
+
+  border-radius:4px!important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(5,13,22,.985) 0%,
+      rgba(7,18,30,.985) 48%,
+      rgba(2,7,14,.995) 100%
+    )!important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255,255,255,.07),
+
+    inset 0 0 45px
+      rgba(56,189,248,.025),
+
+    0 30px 80px
+      rgba(0,0,0,.72),
+
+    0 0 35px
+      rgba(56,189,248,.10)!important;
+
+  color:#eaf8ff!important;
+
+  clip-path:
+    polygon(
+      0 0,
+      calc(100% - 18px) 0,
+      100% 18px,
+      100% 100%,
+      18px 100%,
+      0 calc(100% - 18px)
+    )!important;
+
+  isolation:isolate!important;
+}
+
+
+/* TOP SCAN LINE */
+
+#game .relay-enemy-card::before{
+  content:""!important;
+
+  position:absolute!important;
+
+  top:0!important;
+  left:0!important;
+  right:0!important;
+
+  height:2px!important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(56,189,248,.55),
+      #8eeaff,
+      rgba(56,189,248,.55),
+      transparent
+    )!important;
+
+  box-shadow:
+    0 0 10px
+      rgba(56,189,248,.45)!important;
+
+  pointer-events:none!important;
+}
+
+
+/* TECH GRID */
+
+#game .relay-enemy-card::after{
+  content:""!important;
+
+  position:absolute!important;
+  inset:0!important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(56,189,248,.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      rgba(56,189,248,.035) 1px,
+      transparent 1px
+    )!important;
+
+  background-size:
+    22px 22px!important;
+
+  opacity:.38!important;
+
+  pointer-events:none!important;
+  z-index:0!important;
+}
+
+
+/* CONTENT ABOVE GRID */
+
+#game .relay-enemy-card > *{
+  position:relative!important;
+  z-index:2!important;
+}
+
+
+/* HEADER */
+
+#game .relay-enemy-card .eyebrow{
+  margin:0 0 10px!important;
+
+  color:
+    rgba(125,211,252,.78)!important;
+
+  font:
+    700 9px/1
+    "Orbitron",
+    sans-serif!important;
+
+  letter-spacing:
+    .24em!important;
+
+  text-transform:uppercase!important;
+
+  text-shadow:
+    0 0 12px
+      rgba(56,189,248,.22)!important;
+}
+
+
+/* ENEMY NAME */
+
+#game .relay-enemy-card h2{
+  margin:0 0 16px!important;
+
+  color:#f4fbff!important;
+
+  font:
+    800 28px/1.08
+    "Orbitron",
+    sans-serif!important;
+
+  letter-spacing:.055em!important;
+
+  text-transform:uppercase!important;
+
+  text-shadow:
+    0 0 16px
+      rgba(56,189,248,.12)!important;
+}
+
+
+/* LEVEL */
+
+#game .relay-enemy-card .enemy-level{
+  display:inline-flex!important;
+
+  align-items:center!important;
+
+  min-height:24px!important;
+
+  box-sizing:border-box!important;
+
+  padding:5px 9px!important;
+
+  margin:0 0 20px!important;
+
+  border:
+    1px solid
+    rgba(56,189,248,.32)!important;
+
+  border-radius:2px!important;
+
+  background:
+    rgba(56,189,248,.045)!important;
+
+  color:#7dd3fc!important;
+
+  font:
+    700 8px/1
+    "Orbitron",
+    sans-serif!important;
+
+  letter-spacing:.14em!important;
+
+  text-transform:uppercase!important;
+
+  box-shadow:
+    inset 0 0 12px
+      rgba(56,189,248,.035)!important;
+}
+
+
+/* STAT LABELS */
+
+#game .relay-enemy-card dl{
+  display:grid!important;
+
+  grid-template-columns:
+    1fr 1fr!important;
+
+  gap:1px!important;
+
+  margin:0 0 22px!important;
+
+  padding:1px!important;
+
+  background:
+    rgba(56,189,248,.10)!important;
+}
+
+
+#game .relay-enemy-card dt,
+#game .relay-enemy-card dd{
+  margin:0!important;
+
+  padding:9px 11px!important;
+
+  box-sizing:border-box!important;
+
+  background:
+    rgba(3,9,16,.94)!important;
+}
+
+
+#game .relay-enemy-card dt{
+  color:
+    rgba(160,184,198,.68)!important;
+
+  font:
+    600 7px/1
+    "Orbitron",
+    sans-serif!important;
+
+  letter-spacing:.16em!important;
+
+  text-transform:uppercase!important;
+}
+
+
+#game .relay-enemy-card dd{
+  color:#eaf8ff!important;
+
+  font:
+    700 9px/1.2
+    "Orbitron",
+    sans-serif!important;
+
+  letter-spacing:.08em!important;
+
+  text-transform:uppercase!important;
+}
+
+
+/* CONTINUE */
+
+#game .relay-enemy-card button{
+  position:relative!important;
+
+  width:100%!important;
+  min-height:44px!important;
+
+  box-sizing:border-box!important;
+
+  border:
+    1px solid
+    rgba(56,189,248,.42)!important;
+
+  border-radius:2px!important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(56,189,248,.11),
+      rgba(56,189,248,.025)
+    )!important;
+
+  color:#dff8ff!important;
+
+  font:
+    700 9px/1
+    "Orbitron",
+    sans-serif!important;
+
+  letter-spacing:.20em!important;
+
+  text-transform:uppercase!important;
+
+  cursor:pointer!important;
+
+  box-shadow:
+    inset 0 0 16px
+      rgba(56,189,248,.025),
+
+    0 0 18px
+      rgba(56,189,248,.045)!important;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease!important;
+}
+
+
+#game .relay-enemy-card button:hover,
+#game .relay-enemy-card button:focus-visible{
+  border-color:
+    rgba(125,211,252,.85)!important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(56,189,248,.18),
+      rgba(56,189,248,.055)
+    )!important;
+
+  box-shadow:
+    0 0 24px
+      rgba(56,189,248,.12),
+
+    inset 0 0 18px
+      rgba(56,189,248,.04)!important;
+
+  outline:none!important;
+
+  transform:translateY(-1px)!important;
+}
+
+
+#game .relay-enemy-card button:active{
+  transform:translateY(0)!important;
+}
 
     @media(max-width:760px){
       #intro .home-v3-side{
@@ -383,13 +698,29 @@
   overflow-wrap:anywhere!important
 }
 
-      #game .relay-enemy-card{
-        padding:18px!important
-      }
+    #game .relay-enemy-card{
+  width:min(390px,calc(100vw - 28px))!important;
+  min-height:0!important;
+  padding:20px 18px 18px!important;
+}
 
-      #game .relay-enemy-card h2{
-        font-size:23px!important
-      }
+#game .relay-enemy-card h2{
+  font-size:21px!important;
+  line-height:1.1!important;
+}
+
+#game .relay-enemy-card .eyebrow{
+  font-size:7px!important;
+  letter-spacing:.18em!important;
+}
+
+#game .relay-enemy-card dl{
+  grid-template-columns:1fr!important;
+}
+
+#game .relay-enemy-card button{
+  min-height:42px!important;
+}
     }
         @media(prefers-reduced-motion:reduce){
       #game .world-marker.is-runtime-typing,

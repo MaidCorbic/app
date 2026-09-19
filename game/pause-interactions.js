@@ -207,7 +207,6 @@
       }
     });
 
-
     /* =========================================================
        MOBILE BOTTOM HUD
        ========================================================= */
@@ -217,27 +216,13 @@
     hud.id = 'mobileBottomHud';
     hud.className = 'mobile-bottom-hud';
 
-    hud.innerHTML = `
-      <button
-        id="mobilePauseButton"
-        class="mobile-menu-button mobile-menu-pause"
-        type="button"
-        aria-label="Pause"
-      >
-        <span aria-hidden="true">Ⅱ</span>
-        <small>PAUSE</small>
-      </button>
-
-      <button
-        id="mobileSettingsButton"
-        class="mobile-menu-button mobile-menu-settings"
-        type="button"
-        aria-label="Settings"
-      >
-        <span aria-hidden="true">⚙</span>
-        <small>SETTINGS</small>
-      </button>
-    `;
+    /*
+     * Mobile PAUSE + SETTINGS buttons removed.
+     *
+     * Keep the HUD container alive because the rest of this
+     * module uses it for gameplay-state synchronisation.
+     */
+    hud.innerHTML = '';
 
     document.body.append(hud);
 
@@ -388,52 +373,13 @@
       }
     };
 
-
-    /* =========================================================
-       MOBILE PAUSE BUTTON
+        /* =========================================================
+       MOBILE PAUSE + SETTINGS BUTTONS
+       =========================================================
+       Removed from the mobile HUD.
+       Canonical pause/settings systems remain active.
        ========================================================= */
-
-    hud
-      .querySelector('#mobilePauseButton')
-      ?.addEventListener(
-        'click',
-        event => {
-          event.preventDefault();
-          event.stopPropagation();
-
-          /*
-           * Explicitly open the canonical pause UI.
-           *
-           * IMPORTANT:
-           * No pause.click().
-           */
-          openPause('resume');
-        }
-      );
-
-
-    /* =========================================================
-       MOBILE SETTINGS BUTTON
-       ========================================================= */
-
-    hud
-      .querySelector('#mobileSettingsButton')
-      ?.addEventListener(
-        'click',
-        event => {
-          event.preventDefault();
-          event.stopPropagation();
-
-          /*
-           * Open pause UI directly on SETTINGS.
-           *
-           * No synthetic #pause click.
-           */
-          openPause('settings');
-        }
-      );
-
-
+       
     /* =========================================================
        VISIBILITY HELPER
        ========================================================= */

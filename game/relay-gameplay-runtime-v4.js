@@ -1,9 +1,28 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
 
-/* Relay Gameplay Runtime V4
- * Single presentation/runtime hardening owner.
- * No ownership of gameplay state, progression, input mappings or audio settings.
- */
+/* =========================================================
+   RELAY GAMEPLAY RUNTIME V4
+   Single presentation/runtime hardening owner.
+
+   RESPONSIBILITIES:
+   - Home navigation
+   - Play bridge
+   - Cargo Integrity presentation
+   - Gameplay diagnostic cleanup
+   - Scene/runtime hardening
+   - Audio unlock bridge
+
+   NOT RESPONSIBLE FOR:
+   - Gameplay state
+   - Progression
+   - Input mappings
+   - Audio settings
+   - Main gameplay HUD visual styling
+
+   MAIN GAMEPLAY HUD VISUAL OWNER:
+   game/hud-v2.css
+   ========================================================= */
+
 (() => {
   'use strict';
 
@@ -18,8 +37,12 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     scene: null,
     sceneTimer: 0,
     observer: null,
-    booted: false,
+    booted: false
   };
+
+  /* =========================================================
+     NATIVE CLICK
+     ========================================================= */
 
   const nativeClick = selector => {
     const node = q(selector);
@@ -35,6 +58,12 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       return false;
     }
   };
+
+  /* =========================================================
+     AUDIO UNLOCK
+     Runtime bridge only.
+     Audio ownership stays elsewhere.
+     ========================================================= */
 
   const audioUnlock = () => {
     try {
@@ -56,6 +85,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       }
     } catch {}
   };
+
+  /* =========================================================
+     RUNTIME CSS
+     ========================================================= */
 
   const installCss = () => {
     if ($('relay-gameplay-runtime-v4-style')) {
@@ -89,23 +122,31 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         width:100%!important;
         min-height:56px!important;
         padding:13px 15px!important;
+
         display:flex!important;
         align-items:center!important;
         justify-content:space-between!important;
+
         gap:18px!important;
+
         border:1px solid rgba(255,208,110,.24)!important;
         border-left:2px solid rgba(255,208,110,.72)!important;
         border-radius:11px!important;
-        background:linear-gradient(
-          145deg,
-          rgba(7,10,15,.97),
-          rgba(2,3,5,.985)
-        )!important;
+
+        background:
+          linear-gradient(
+            145deg,
+            rgba(7,10,15,.97),
+            rgba(2,3,5,.985)
+          )!important;
+
         color:#f4f7fa!important;
+
         box-shadow:
           inset 0 1px rgba(255,255,255,.05),
           0 14px 30px rgba(0,0,0,.28),
           0 0 24px rgba(255,208,110,.035)!important;
+
         cursor:pointer!important;
         touch-action:manipulation!important;
         user-select:none!important;
@@ -115,11 +156,14 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       #intro.home-v3 .relay-v4-home-btn:hover,
       #intro.home-v3 .relay-v4-home-btn:focus-visible{
         transform:translateY(-1px)!important;
+
         border-color:rgba(255,208,110,.66)!important;
+
         box-shadow:
           inset 0 1px rgba(255,255,255,.07),
           0 18px 38px rgba(0,0,0,.34),
           0 0 28px rgba(255,208,110,.11)!important;
+
         outline:none!important;
       }
 
@@ -133,6 +177,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
           'DM Mono',
           ui-monospace,
           monospace!important;
+
         letter-spacing:1.25px!important;
         color:#f4f7fa!important;
       }
@@ -143,6 +188,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
           'DM Mono',
           ui-monospace,
           monospace!important;
+
         letter-spacing:.9px!important;
         color:#84909d!important;
         text-align:right!important;
@@ -167,196 +213,25 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
       /* =========================================================
          GAMEPLAY TOP HUD
+
+         IMPORTANT:
+         The main gameplay HUD is intentionally NOT styled here.
+
+         Visual ownership:
+         game/hud-v2.css
+
+         This prevents this runtime from overriding:
+         - HUD layout
+         - HUD background
+         - HUD borders
+         - HUD colors
+         - Route panel
+         - Signal panel
+         - XP panel
+         - Pause button
+         - HUD responsive behavior
          ========================================================= */
 
-   #play .hud{
-    position:absolute!important;
-    top:10px!important;
-    left:50%!important;
-    right:auto!important;
-    transform:translateX(-50%)!important;
-
-    width:min(1180px,calc(100vw - 24px))!important;
-    max-width:none!important;
-
-    padding:0!important;
-    margin:0!important;
-
-    display:grid!important;
-
-    /*
-      DESKTOP:
-      ROUTE | SIGNALS | XP + PAUSE
-    */
-    grid-template-columns:
-        minmax(300px, 1.10fr)
-        minmax(250px, .95fr)
-        minmax(210px, .55fr)!important;
-
-    gap:12px!important;
-
-    align-items:start!important;
-
-    z-index:300!important;
-    pointer-events:none!important;
-}
-
-      #play .hud>*{
-        pointer-events:auto!important;
-        min-width:0!important;
-      }
-
-      #play .hud-route,
-      #play .hud-progress,
-      #play .hud-xp,
-      #play .hud-actions>button{
-        box-sizing:border-box!important;
-        border:1px solid rgba(255,208,110,.25)!important;
-        background:linear-gradient(
-          145deg,
-          rgba(7,10,15,.96),
-          rgba(2,3,5,.985)
-        )!important;
-        box-shadow:
-          inset 0 1px rgba(255,255,255,.05),
-          0 14px 34px rgba(0,0,0,.28),
-          0 0 24px rgba(255,208,110,.035)!important;
-        backdrop-filter:blur(7px)!important;
-      }
-
-      #play .hud-route{
-        min-height:49px!important;
-        padding:8px 12px!important;
-        border-radius:12px!important;
-        display:flex!important;
-        align-items:center!important;
-        gap:9px!important;
-      }
-
-      #play .hud-route small{
-        color:#ffd06e!important;
-        font:900 7px/1 'DM Mono',monospace!important;
-        letter-spacing:1.25px!important;
-      }
-
-      #play .hud-route b{
-        color:#f4f7fa!important;
-        font:950 11px/1.1 'DM Mono',monospace!important;
-        letter-spacing:.45px!important;
-        white-space:nowrap!important;
-        overflow:hidden!important;
-        text-overflow:ellipsis!important;
-      }
-
-      #play .hud-progress{
-        min-height:49px!important;
-        padding:8px 10px!important;
-        border-radius:12px!important;
-        display:grid!important;
-        grid-template-columns:auto 1fr!important;
-        grid-template-rows:auto 5px!important;
-        grid-template-areas:
-          'count label'
-          'bar bar'!important;
-        align-items:center!important;
-        column-gap:8px!important;
-      }
-
-      #play .hud-progress>span{
-        grid-area:count!important;
-        color:#fff3bf!important;
-        font:950 13px/1 'DM Mono',monospace!important;
-        min-width:30px!important;
-        text-align:left!important;
-      }
-
-      #play .hud-progress>small{
-        grid-area:label!important;
-        justify-self:end!important;
-        color:#ffd06e!important;
-        font:900 7px/1 'DM Mono',monospace!important;
-        letter-spacing:1px!important;
-      }
-
-      #play .hud-progress>div{
-        grid-area:bar!important;
-        width:100%!important;
-        height:5px!important;
-        background:rgba(255,255,255,.05)!important;
-        border:1px solid rgba(255,208,110,.14)!important;
-        border-radius:99px!important;
-        overflow:hidden!important;
-      }
-
-      #play .hud-progress i{
-        display:block!important;
-        height:100%!important;
-        border-radius:99px!important;
-        background:
-          linear-gradient(
-            90deg,
-            #b47a1e,
-            #ffd06e,
-            #fff0b5
-          )!important;
-        box-shadow:
-          0 0 12px rgba(255,208,110,.32)!important;
-      }
-
-      #play .hud-actions{
-        display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    gap:8px!important;
-      }
-
-      @media(min-width:901px){
-    #play .hud-actions{
-        transform:translateX(-28px)!important;
-    }
-}
-
-      #play .hud-xp{
-        min-width:82px!important;
-        min-height:49px!important;
-        padding:7px 10px!important;
-        border-radius:12px!important;
-        display:flex!important;
-        flex-direction:column!important;
-        align-items:center!important;
-        justify-content:center!important;
-        text-align:center!important;
-      }
-
-      #play .hud-xp small{
-        color:#89949f!important;
-        font:900 7px/1 'DM Mono',monospace!important;
-        letter-spacing:1px!important;
-        text-align:center!important;
-      }
-
-      #play .hud-xp b{
-        margin-top:5px!important;
-        color:#ffe7a6!important;
-        font:950 14px/1 'DM Mono',monospace!important;
-        letter-spacing:.4px!important;
-        text-align:center!important;
-      }
-
-      #play #pause{
-        width:49px!important;
-        min-width:49px!important;
-        height:49px!important;
-        padding:0!important;
-        border-radius:12px!important;
-        color:#ffe7a6!important;
-        border-color:rgba(255,208,110,.46)!important;
-        font:900 19px/1 'DM Mono',monospace!important;
-        display:grid!important;
-        place-items:center!important;
-        cursor:pointer!important;
-        touch-action:manipulation!important;
-      }
 
       /* =========================================================
          CARGO INTEGRITY
@@ -372,8 +247,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         top:auto!important;
         bottom:84px!important;
 
-        width:min(332px,calc(100vw - 36px))!important;
-        max-width:332px!important;
+       width:min(350px,calc(100vw - 36px))!important;
+max-width:350px!important;
 
         margin:0!important;
         padding:0!important;
@@ -420,7 +295,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
       #play #cargoIntegrityV2 .cargo-card{
         position:relative!important;
-
+        overflow:hidden!important;
         width:100%!important;
         min-width:0!important;
 
@@ -546,92 +421,154 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
          GLASS / TECH GRID / SCAN LAYER
          ========================================================= */
 
-      #play #cargoIntegrityV2 .cargo-card::after{
-        content:""!important;
+      #play #cargoIntegrityV2 .cargo-telemetry-scan{
+  position:absolute!important;
 
-        position:absolute!important;
+  left:-25%!important;
+  top:0!important;
 
-        inset:0!important;
+  width:20%!important;
+  height:100%!important;
 
-        pointer-events:none!important;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,208,110,.10),
+      rgba(255,238,190,.18),
+      transparent
+    )!important;
 
-        z-index:2!important;
+  transform:skewX(-14deg)!important;
 
-        background:
-          linear-gradient(
-            90deg,
-            rgba(255,208,110,.020) 1px,
-            transparent 1px
-          ),
+  pointer-events:none!important;
+  z-index:5!important;
 
-          linear-gradient(
-            0deg,
-            rgba(255,208,110,.018) 1px,
-            transparent 1px
-          ),
-
-          repeating-linear-gradient(
-            180deg,
-            rgba(255,255,255,.010) 0,
-            rgba(255,255,255,.010) 1px,
-            transparent 1px,
-            transparent 4px
-          ),
-
-          radial-gradient(
-            circle at 93% 7%,
-            rgba(255,208,110,.095),
-            transparent 27%
-          ),
-
-          linear-gradient(
-            116deg,
-            transparent 34%,
-            rgba(255,255,255,.016) 43%,
-            rgba(255,255,255,.052) 49%,
-            rgba(255,255,255,.018) 55%,
-            transparent 67%
-          )!important;
-
-        background-size:
-          18px 18px,
-          18px 18px,
-          auto,
-          auto,
-          190% 100%!important;
-
-        background-position:
-          0 0,
-          0 0,
-          0 0,
-          0 0,
-          -75% 0!important;
-
-        opacity:.46!important;
-
-        mix-blend-mode:screen!important;
-
-        animation:
-          cargoHudScan
-          6.5s
-          ease-in-out
-          infinite!important;
-      }
-
+  animation:
+    cargoTelemetryScan
+    5.5s
+    ease-in-out
+    infinite!important;
+}
 
       /* =========================================================
          HUD CORNER DETAILS
          ========================================================= */
 
-      #play #cargoIntegrityV2 .cargo-card > *{
-        position:relative!important;
-        z-index:10!important;
+    #play #cargoIntegrityV2 .cargo-card > *{
+  position:relative!important;
+  z-index:10!important;
+}
+
+#play #cargoIntegrityV2 .cargo-card::after{
+  content:""!important;
+
+  position:absolute!important;
+  left:-25%!important;
+  top:0!important;
+
+  width:20%!important;
+  height:100%!important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,208,110,.10),
+      rgba(255,238,190,.18),
+      transparent
+    )!important;
+
+  transform:skewX(-14deg)!important;
+
+  pointer-events:none!important;
+  z-index:5!important;
+
+  animation:
+    cargoTelemetryScan
+    5.5s
+    ease-in-out
+    infinite!important;
+}
+
+@keyframes cargoTelemetryScan{
+  0%,45%{
+    left:-25%;
+    opacity:0;
+  }
+
+  52%{
+    opacity:1;
+  }
+
+  100%{
+    left:120%;
+    opacity:0;
+  }
+}
+      #play #cargoIntegrityV2 .cargo-card::marker{
+        display:none!important;
       }
 
+      #play #cargoIntegrityV2 .cargo-card{
+        isolation:isolate!important;
+      }
+
+      #play #cargoIntegrityV2 .cargo-card .cargo-head::after{
+        content:"TACTICAL // CARGO TELEMETRY"!important;
+
+        position:absolute!important;
+
+        right:0!important;
+        top:-1px!important;
+
+        color:rgba(255,208,110,.34)!important;
+
+        font:
+          700 5px/1
+          "DM Mono",
+          ui-monospace,
+          monospace!important;
+
+        letter-spacing:.16em!important;
+
+        pointer-events:none!important;
+      }
 
       #play #cargoIntegrityV2 .cargo-head,
       #play #cargoIntegrityV2 .cargo-row,
-      #play #cargoIntegrityV2 .cargo-foot{
+     #play #cargoIntegrityV2 .cargo-foot{
+        position:relative!important;
+
+        display:flex!important;
+        align-items:center!important;
+        justify-content:space-between!important;
+
+        gap:10px!important;
+
+        padding-top:8px!important;
+
+        border-top:
+          1px solid
+          rgba(255,208,110,.10)!important;
+      }
+
+#play #cargoIntegrityV2 .cargo-foot::before{
+        content:"INTEGRITY CHANNEL // ACTIVE"!important;
+
+        color:
+          rgba(255,208,110,.32)!important;
+
+        font:
+          700 5px/1
+          "DM Mono",
+          ui-monospace,
+          monospace!important;
+
+        letter-spacing:.15em!important;
+
+        white-space:nowrap!important;
+      }
         position:relative!important;
         z-index:10!important;
       }
@@ -668,6 +605,12 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
         flex:
           1 1 auto!important;
+
+        font-family:
+          "Orbitron",
+          "DM Mono",
+          ui-monospace,
+          monospace!important;
 
         min-width:0!important;
 
@@ -709,13 +652,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         flex:
           0 0 auto!important;
 
-        width:5px!important;
-        height:5px!important;
-
-        margin-right:7px!important;
-
+       width:6px!important;
+        height:6px!important;
+        margin-right:8px!important;
         border-radius:50%!important;
-
         background:
           #ffd06e!important;
 
@@ -741,9 +681,15 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
          CARGO TYPE
          ========================================================= */
 
-      #play #cargoIntegrityV2 .cargo-type{
+   #play #cargoIntegrityV2 .cargo-type{
         flex:
           0 1 auto!important;
+
+        font-family:
+          "Orbitron",
+          "DM Mono",
+          ui-monospace,
+          monospace!important;
 
         max-width:
           45%!important;
@@ -903,6 +849,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
       /* =========================================================
          FILL
+
          IMPORTANT:
          DO NOT SET WIDTH HERE.
          GAME RUNTIME OWNS THE VALUE.
@@ -1043,12 +990,18 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
          VALUE
          ========================================================= */
 
-      #play #cargoIntegrityV2 .cargo-value{
+   #play #cargoIntegrityV2 .cargo-value{
         flex:
           0 0 auto!important;
 
         min-width:
           54px!important;
+
+        font-family:
+          "Orbitron",
+          "DM Mono",
+          ui-monospace,
+          monospace!important;
 
         margin:0!important;
 
@@ -1415,9 +1368,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
           bottom:84px!important;
 
-          width:332px!important;
-          max-width:
-            calc(100vw - 36px)!important;
+      width:350px!important;
+
+        max-width:
+        calc(100vw - 36px)!important; 
         }
       }
 
@@ -1682,7 +1636,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         }
       }
 
-            /* =========================================================
+
+      /* =========================================================
          REMOVE SECONDARY WORLD MISSION CARD
          ========================================================= */
 
@@ -1692,6 +1647,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         opacity:0!important;
         pointer-events:none!important;
       }
+
 
       /* =========================================================
          FLOW / SIGNALS
@@ -1713,155 +1669,49 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       }
 
 
-               /* =========================================================
+      /* =========================================================
          DIAGNOSTICS / DEBUG — HARD HIDE
          ========================================================= */
 
-     #game #relayGameplayIntel,
-#game .relay-gameplay-intel,
-#game [data-relay-mission-intelligence],
-#game [data-mission-intelligence],
+      #game #relayGameplayIntel,
+      #game .relay-gameplay-intel,
+      #game [data-relay-mission-intelligence],
+      #game [data-mission-intelligence],
 
-#game .relay-debug-hud,
-#game [data-relay-debug-hud],
-#game [data-debug-hud],
-#game .gameplay-debug-hud,
+      #game .relay-debug-hud,
+      #game [data-relay-debug-hud],
+      #game [data-debug-hud],
+      #game .gameplay-debug-hud,
 
-#game [aria-label*="FEEDBACK"]{
+      #game [aria-label*="FEEDBACK"]{
         display:none!important;
         visibility:hidden!important;
         opacity:0!important;
         pointer-events:none!important;
+
         width:0!important;
         height:0!important;
+
         max-width:0!important;
         max-height:0!important;
+
         overflow:hidden!important;
       }
 
 
-         /* =========================================================
-         RESPONSIVE
+      /* =========================================================
+         GAMEPLAY HUD RESPONSIVE OWNERSHIP
+
+         IMPORTANT:
+         No #play .hud responsive styling is placed here.
+
+         game/hud-v2.css owns all HUD breakpoints.
          ========================================================= */
-
-      @media(max-width:900px){
-
-  #play .hud{
-    width:calc(100vw - 14px)!important;
-    grid-template-columns:
-      minmax(0,1fr)
-      minmax(154px,190px)
-      auto!important;
-    gap:6px!important;
-  }
-}
-
-      }
-
-
-      @media(max-width:760px){
-
-        #intro.home-v3 .relay-v4-home-btn{
-          min-height:54px!important;
-          padding:12px 13px!important;
-        }
-
-        #play .hud{
-          top:7px!important;
-          width:calc(100vw - 10px)!important;
-          grid-template-columns:
-            minmax(0,1fr)
-            minmax(106px,124px)
-            auto!important;
-          gap:5px!important;
-        }
-
-        #play .hud-route{
-          min-height:43px!important;
-          padding:6px 8px!important;
-        }
-
-        #play .hud-route small{
-          font-size:6px!important;
-        }
-
-        #play .hud-route b{
-          font-size:8px!important;
-        }
-
-        #play .hud-progress{
-          min-height:43px!important;
-          padding:6px 7px!important;
-        }
-
-        #play .hud-progress>span{
-          font-size:11px!important;
-        }
-
-        #play .hud-progress>small{
-          font-size:6px!important;
-        }
-
-        #play .hud-xp{
-          min-width:61px!important;
-          min-height:43px!important;
-          padding:6px 7px!important;
-        }
-
-        #play .hud-xp small{
-          font-size:6px!important;
-        }
-
-        #play .hud-xp b{
-          font-size:11px!important;
-          margin-top:4px!important;
-        }
-
-        #play #pause{
-          width:42px!important;
-          min-width:42px!important;
-          height:43px!important;
-          border-radius:10px!important;
-          font-size:17px!important;
-        }
-
-          #relay-gameplay-feel-v3 .gf-strip{
-          right:7px!important;
-          top:56px!important;
-          max-width:calc(100vw - 14px)!important;
-        }
-      }
-
-
-      @media(max-width:520px){
-
-        #play .hud{
-          grid-template-columns:
-            minmax(0,1fr)
-            96px
-            auto!important;
-        }
-
-        #play .hud-xp{
-          min-width:53px!important;
-          width:53px!important;
-        }
-
-      
-      }
-
-
-      @media(orientation:landscape) and (max-height:560px){
-
-        #play .hud{
-          top:6px!important;
-        }
-
-              }
-          `;
+    `;
 
     document.head.appendChild(style);
   };
+
 
   /* =========================================================
      CANONICAL HOME BUTTON
@@ -1891,7 +1741,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     button.addEventListener(
       'pointerup',
       activate,
-      { passive:false }
+      {
+        passive:false
+      }
     );
 
     button.addEventListener(
@@ -1906,97 +1758,125 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   /* =========================================================
      CANONICAL HOME NAVIGATION
      ========================================================= */
-function canonicalHomeButtons() {
-  const intro = $('intro');
-  const side = intro?.querySelector('.home-v3-side');
 
-  if (!intro || !side) {
-    return;
+  function canonicalHomeButtons() {
+    const intro = $('intro');
+    const side = intro?.querySelector('.home-v3-side');
+
+    if (!intro || !side) {
+      return;
+    }
+
+    /* ---------------------------------------------------------
+       Remove legacy Home navigation FIRST.
+       --------------------------------------------------------- */
+
+    side.querySelectorAll(
+      [
+        '[data-v3-faq]',
+        '[data-v3-update]',
+        '[data-v3-options]',
+        '[data-v3-exit]',
+        '[data-final-home]',
+        '[data-unified-home]',
+        '[data-unified-home-v3]',
+        '[data-final-home-v3]',
+        '[data-runtime-home]',
+        '.relay-v3-nav',
+        '.relay-home-nav-card'
+      ].join(',')
+    ).forEach(node => node.remove());
+
+
+    /* ---------------------------------------------------------
+       Info launcher is not part of canonical navigation.
+       --------------------------------------------------------- */
+
+    intro
+      .querySelector('.info-launcher')
+      ?.remove();
+
+
+    /* ---------------------------------------------------------
+       Keep V4 navigation if already correct.
+       --------------------------------------------------------- */
+
+    const canonical = qa(
+      '#intro .relay-v4-home-btn'
+    );
+
+    const uniqueTypes = new Set(
+      canonical.map(
+        node => node.dataset.v4
+      )
+    );
+
+    if (
+      canonical.length === 4 &&
+      uniqueTypes.size === 4 &&
+      [
+        'options',
+        'faq',
+        'update',
+        'exit'
+      ].every(
+        type => uniqueTypes.has(type)
+      )
+    ) {
+      return;
+    }
+
+
+    /* ---------------------------------------------------------
+       Rebuild if incomplete/corrupt.
+       --------------------------------------------------------- */
+
+    qa(
+      '#intro .relay-v4-home-btn'
+    ).forEach(
+      node => node.remove()
+    );
+
+
+    side.append(
+
+      homeButton(
+        'options',
+        'OPTIONS',
+        'SETTINGS · AUDIO · DISPLAY',
+        () =>
+          window.relayUnifiedCinematicUI?.openOptions?.() ||
+          nativeClick(
+            '[data-title-panel="controls"]'
+          )
+      ),
+
+      homeButton(
+        'faq',
+        'FAQ',
+        'HELP · GAME SYSTEMS',
+        () =>
+          window.relayOpenInfo?.('faq')
+      ),
+
+      homeButton(
+        'update',
+        'UPDATE',
+        'LATEST PATCHES · LIVE',
+        () =>
+          window.relayOpenInfo?.('update')
+      ),
+
+      homeButton(
+        'exit',
+        'EXIT',
+        'CLOSE SESSION',
+        () =>
+          nativeClick('#exitTitle')
+      )
+
+    );
   }
-
-  // Remove the legacy Home navigation FIRST.
-  // Do this before checking whether the V4 navigation already exists.
-  side.querySelectorAll(
-    [
-      '[data-v3-faq]',
-      '[data-v3-update]',
-      '[data-v3-options]',
-      '[data-v3-exit]',
-      '[data-final-home]',
-      '[data-unified-home]',
-      '[data-unified-home-v3]',
-      '[data-final-home-v3]',
-      '[data-runtime-home]',
-      '.relay-v3-nav',
-      '.relay-home-nav-card'
-    ].join(',')
-  ).forEach(node => node.remove());
-
-  // The info launcher is not part of the canonical Home navigation.
-  intro.querySelector('.info-launcher')?.remove();
-
-  // Keep the V4 navigation intact if it is already correct.
-  const canonical = qa(
-    '#intro .relay-v4-home-btn'
-  );
-
-  const uniqueTypes = new Set(
-    canonical.map(
-      node => node.dataset.v4
-    )
-  );
-
-  if (
-    canonical.length === 4 &&
-    uniqueTypes.size === 4 &&
-    ['options', 'faq', 'update', 'exit'].every(
-      type => uniqueTypes.has(type)
-    )
-  ) {
-    return;
-  }
-
-  // If V4 is incomplete/corrupt, rebuild it cleanly.
-  qa('#intro .relay-v4-home-btn')
-    .forEach(node => node.remove());
-
-  side.append(
-    homeButton(
-      'options',
-      'OPTIONS',
-      'SETTINGS · AUDIO · DISPLAY',
-      () =>
-        window.relayUnifiedCinematicUI?.openOptions?.() ||
-        nativeClick(
-          '[data-title-panel="controls"]'
-        )
-    ),
-
-    homeButton(
-      'faq',
-      'FAQ',
-      'HELP · GAME SYSTEMS',
-      () =>
-        window.relayOpenInfo?.('faq')
-    ),
-
-    homeButton(
-      'update',
-      'UPDATE',
-      'LATEST PATCHES · LIVE',
-      () =>
-        window.relayOpenInfo?.('update')
-    ),
-
-    homeButton(
-      'exit',
-      'EXIT',
-      'CLOSE SESSION',
-      () =>
-        nativeClick('#exitTitle')
-    )
-  );
-}
 
 
   /* =========================================================
@@ -2005,6 +1885,7 @@ function canonicalHomeButtons() {
 
   let playLock = false;
   let playTimer = 0;
+
 
   function reliablePlay(event) {
     if (event) {
@@ -2057,6 +1938,7 @@ function canonicalHomeButtons() {
 
     play.dataset.relayV4Play = '1';
 
+
     play.addEventListener(
       'pointerup',
       reliablePlay,
@@ -2065,6 +1947,7 @@ function canonicalHomeButtons() {
         passive:false
       }
     );
+
 
     play.addEventListener(
       'click',
@@ -2075,15 +1958,18 @@ function canonicalHomeButtons() {
       }
     );
 
+
     play.addEventListener(
       'keydown',
       event => {
+
         if (
           event.key === 'Enter' ||
           event.code === 'Space'
         ) {
           reliablePlay(event);
         }
+
       },
       {
         capture:true
@@ -2102,24 +1988,36 @@ function canonicalHomeButtons() {
 
     for (const node of list) {
 
+      /* -------------------------------------------------------
+         Direct text nodes.
+         ------------------------------------------------------- */
+
       if (typeof node?.text === 'string') {
+
         const text =
           node.text
             .trim()
             .toUpperCase();
 
-       if (
-  /DYNAMIC\s+CROWD/.test(text) ||
-  /^V10\b/.test(text) ||
-  /MISSION\s+INTELLIGENCE/.test(text) ||
-  /FEEDBACK/.test(text)
-) {
+        if (
+          /DYNAMIC\s+CROWD/.test(text) ||
+          /^V10\b/.test(text) ||
+          /MISSION\s+INTELLIGENCE/.test(text) ||
+          /FEEDBACK/.test(text)
+        ) {
+
           node.setVisible?.(false);
           node.setAlpha?.(0);
           node.disableInteractive?.();
           node.parentContainer?.setVisible?.(false);
+
         }
       }
+
+
+      /* -------------------------------------------------------
+         Container children.
+         ------------------------------------------------------- */
 
       if (
         node?.list?.some?.(
@@ -2132,9 +2030,11 @@ function canonicalHomeButtons() {
             )
         )
       ) {
+
         node.setVisible?.(false);
         node.setAlpha?.(0);
         node.disableInteractive?.();
+
       }
     }
   }
@@ -2156,6 +2056,7 @@ function canonicalHomeButtons() {
         '[data-debug-hud]'
       ].join(',')
     ).forEach(node => {
+
       node.style.setProperty(
         'display',
         'none',
@@ -2173,6 +2074,7 @@ function canonicalHomeButtons() {
         'none',
         'important'
       );
+
     });
   }
 
@@ -2182,6 +2084,7 @@ function canonicalHomeButtons() {
      ========================================================= */
 
   function installScene(scene) {
+
     if (
       !scene ||
       state.scene === scene
@@ -2195,18 +2098,24 @@ function canonicalHomeButtons() {
       state.sceneTimer
     );
 
+
     const tick = () => {
+
       hidePhaserDiagnostics(scene);
       hideDomDiagnostics();
+
 
       if (
         $('intro')?.classList.contains('hidden')
       ) {
         audioUnlock();
       }
+
     };
 
+
     tick();
+
 
     state.sceneTimer =
       window.setInterval(
@@ -2223,23 +2132,29 @@ function canonicalHomeButtons() {
   const originalCreate =
     RunnerScene.prototype.create;
 
+
   if (
     typeof originalCreate === 'function' &&
     !RunnerScene.prototype
       .__relayGameplayRuntimeV4Create
   ) {
+
     RunnerScene.prototype.create =
       function runtimeV4Create(...args) {
+
         const result =
           originalCreate.apply(
             this,
             args
           );
 
+
         installScene(this);
+
 
         return result;
       };
+
 
     RunnerScene.prototype
       .__relayGameplayRuntimeV4Create = true;
@@ -2251,20 +2166,51 @@ function canonicalHomeButtons() {
      ========================================================= */
 
   function boot() {
+
     if (state.booted) {
       return;
     }
 
     state.booted = true;
 
+
+    /* ---------------------------------------------------------
+       Install runtime CSS.
+       --------------------------------------------------------- */
+
     installCss();
+
+
+    /* ---------------------------------------------------------
+       Canonical Home.
+       --------------------------------------------------------- */
+
     canonicalHomeButtons();
+
+
+    /* ---------------------------------------------------------
+       PLAY bridge.
+       --------------------------------------------------------- */
+
     bindPlay();
+
+
+    /* ---------------------------------------------------------
+       Initial diagnostics cleanup.
+       --------------------------------------------------------- */
+
     hideDomDiagnostics();
+
+
+    /* ---------------------------------------------------------
+       DOM observer.
+       --------------------------------------------------------- */
 
     state.observer =
       new MutationObserver(() => {
+
         const intro = $('intro');
+
 
         if (
           intro &&
@@ -2273,10 +2219,13 @@ function canonicalHomeButtons() {
           return;
         }
 
+
         canonicalHomeButtons();
         bindPlay();
         hideDomDiagnostics();
+
       });
+
 
     state.observer.observe(
       document.body,
@@ -2291,6 +2240,11 @@ function canonicalHomeButtons() {
       }
     );
 
+
+    /* ---------------------------------------------------------
+       Audio unlock.
+       --------------------------------------------------------- */
+
     document.addEventListener(
       'pointerdown',
       audioUnlock,
@@ -2300,15 +2254,18 @@ function canonicalHomeButtons() {
       }
     );
 
+
     document.addEventListener(
       'keydown',
       event => {
+
         if (
           event.code === 'Space' ||
           event.code === 'Enter'
         ) {
           audioUnlock();
         }
+
       },
       {
         capture:true,
@@ -2318,9 +2275,14 @@ function canonicalHomeButtons() {
   }
 
 
+  /* =========================================================
+     DOM READY
+     ========================================================= */
+
   if (
     document.readyState === 'loading'
   ) {
+
     document.addEventListener(
       'DOMContentLoaded',
       boot,
@@ -2328,8 +2290,11 @@ function canonicalHomeButtons() {
         once:true
       }
     );
+
   } else {
+
     boot();
+
   }
 
 })();

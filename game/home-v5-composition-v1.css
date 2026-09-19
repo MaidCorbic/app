@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&display=swap');
+
 /*
  * RUNNER RELAY — HOME V5 COMPOSITION
  * Final composition layer for the Home launcher.
@@ -10,6 +12,12 @@
  * - footer utilities remain anchored to the bottom edge
  * - responsive collapse is explicit and safe
  */
+
+ /* GLOBAL GAMING FONT — HOME */
+#intro.home-v3,
+#intro.home-v3 *{
+  font-family:"Orbitron",sans-serif !important;
+}
 
 #intro.home-v3{
   --home-shell-max:1600px;
@@ -116,13 +124,20 @@
 /* Mission terminal lines up with the title block, not the vertical center. */
 #intro.home-v3 .home-v4-mission-wrap{
   width:100%;
-  max-width:560px;
-  justify-self:end;
+  max-width:none;
+  justify-self:stretch;
   padding-top:0;
+
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(280px,.72fr);
+  gap:14px;
+  align-items:start;
 }
 
 #intro.home-v3 .home-v4-mission{
-  padding:22px;
+  width:100%;
+  padding:16px;
+  box-sizing:border-box;
 }
 
 #intro.home-v3 .home-v4-mission-title{
@@ -686,7 +701,8 @@
 /* Desktop */
 @media (min-width:781px){
   #intro.home-v3 .home-v4-profile{
-    max-width:560px;
+    max-width:none;
+    margin-top:0;
   }
 }
 
@@ -1046,13 +1062,15 @@
      Slightly lower + full left-column width
      ------------------------------------------------------- */
 
-  #intro.home-v3 .home-v5-relay-status{
-    width:100%;
-    max-width:680px;
+#intro.home-v3 .home-v5-relay-status{
+  width:100%;
+  max-width:680px;
 
-    margin-top:18px;
-  }
+  margin-top:10px;
 
+  transform:scale(.78);
+  transform-origin:top left;
+}
 
   /* -------------------------------------------------------
      FOOTER
@@ -1146,8 +1164,12 @@
     max-width:600px;
 
     gap:8px;
+    
   }
-
+  #intro.home-v3 .home-v4-mission-wrap{
+    grid-template-columns:minmax(0,1fr) minmax(240px,.68fr);
+    gap:10px;
+  }
   #intro.home-v3 .home-v5-command-row
   .home-v4-primary{
     width:100%;
@@ -1335,4 +1357,375 @@
   .home-v4-credits{
     padding:5px 7px;
   }
+}
+/* REMOVE DAILY OPERATION */
+#intro.home-v3 .home-v4-daily{
+  display:none !important;
+}
+/* REMOVE LIVE RELAY CHANNEL BADGE */
+#intro.home-v3 .home-v4-badge{
+  display:none !important;
+}
+/* COMPACT NEXT UNLOCK */
+@media (min-width:781px){
+  #intro.home-v3 .home-v4-unlock{
+  border:1px solid rgba(255,255,255,.08) !important;
+  outline:none !important;
+  box-shadow:none !important;
+  background:rgba(5,12,20,.55) !important;
+}
+  }
+/* REMOVE RUNNER INTEL */
+#intro.home-v3 .home-v4-profile{
+  display:none !important;
+}
+/* COMPACT ACTIVE CONTRACT */
+@media (min-width:781px){
+  #intro.home-v3 .home-v4-contract{
+    max-width:560px !important;
+    padding:12px !important;
+   margin-top:24px !important;
+  }
+
+  #intro.home-v3 .home-v4-contract-title{
+    font-size:22px !important;
+    line-height:1.05 !important;
+  }
+
+  #intro.home-v3 .home-v4-contract-description{
+    font-size:10px !important;
+    line-height:1.4 !important;
+    margin-top:6px !important;
+    
+  }
+
+  #intro.home-v3 .home-v4-contract-meta{
+    gap:7px !important;
+    margin-top:10px !important;
+  }
+
+  #intro.home-v3 .home-v4-contract-bottom{
+    margin-top:9px !important;
+    padding-top:8px !important;
+  }
+/* CLEAN GAMING BORDER — ACTIVE CONTRACT */
+#intro.home-v3 .home-v4-contract{
+  border:1px solid rgba(56,189,248,.20) !important;
+  outline:none !important;
+  box-shadow:0 0 18px rgba(56,189,248,.04) !important;
+}
+/* REMOVE CYAN RECTANGLE — ACTIVE MISSION */
+#intro.home-v3 .home-v4-mission::before,
+#intro.home-v3 .home-v4-mission::after,
+#intro.home-v3 .home-v4-mission-head::before,
+#intro.home-v3 .home-v4-mission-head::after{
+  display:none !important;
+  content:none !important;
+}
+/* =========================================================
+   NEXT UNLOCK — GAMING FONT
+   ========================================================= */
+
+#intro.home-v3 .home-v4-unlock-title{
+  font-family:"Orbitron",sans-serif !important;
+  font-size:9px !important;
+  font-weight:600 !important;
+  letter-spacing:.24em !important;
+  line-height:1 !important;
+  text-transform:uppercase !important;
+  color:rgba(125,211,252,.72) !important;
+}
+
+#intro.home-v3 .home-v4-unlock-name{
+  font-family:"Orbitron",sans-serif !important;
+  font-size:17px !important;
+  font-weight:700 !important;
+  letter-spacing:.07em !important;
+  line-height:1.2 !important;
+  text-transform:uppercase !important;
+  color:#e8f7ff !important;
+  text-shadow:0 0 12px rgba(56,189,248,.12);
+}
+/* =========================================================
+   RECENT ACTIVITY — FORCE READABLE GAMING SIZE
+   ========================================================= */
+
+#intro.home-v3 .home-v4-activity{
+  font-family:"Orbitron",sans-serif !important;
+}
+
+#intro.home-v3 .home-v4-activity h3,
+#intro.home-v3 .home-v4-activity h4,
+#intro.home-v3 .home-v4-activity p,
+#intro.home-v3 .home-v4-activity span,
+#intro.home-v3 .home-v4-activity small,
+#intro.home-v3 .home-v4-activity strong,
+#intro.home-v3 .home-v4-activity b{
+  font-family:"Orbitron",sans-serif !important;
+  font-size:13px !important;
+  line-height:1.35 !important;
+}
+
+#intro.home-v3 .home-v4-activity h3{
+  font-size:15px !important;
+  font-weight:700 !important;
+  letter-spacing:.14em !important;
+  color:#e8f7ff !important;
+}
+
+#intro.home-v3 .home-v4-activity small{
+  font-size:10px !important;
+  letter-spacing:.08em !important;
+}
+
+#intro.home-v3 .home-v4-activity strong,
+#intro.home-v3 .home-v4-activity b{
+  font-size:9px !important;
+  font-weight:700 !important;
+}
+/* =========================================================
+   RELAY NETWORK — SAME GAMING TYPOGRAPHY
+   ========================================================= */
+
+#intro.home-v3 .home-v5-relay-status,
+#intro.home-v3 .home-v5-relay-status *{
+  font-family:"Orbitron",sans-serif !important;
+}
+
+#intro.home-v3 .home-v5-relay-status{
+  letter-spacing:.08em !important;
+}
+
+#intro.home-v3 .home-v5-relay-status strong{
+  font-size:11px !important;
+  font-weight:700 !important;
+  letter-spacing:.12em !important;
+}
+
+#intro.home-v3 .home-v5-relay-status span{
+  font-size:9px !important;
+  font-weight:600 !important;
+  letter-spacing:.10em !important;
+}
+
+/* =========================================================
+   RELAY NETWORK — GAMING FONT
+   ========================================================= */
+
+#intro.home-v3 .home-v5-relay-status,
+#intro.home-v3 .home-v5-relay-status *{
+  font-family:"Orbitron",sans-serif !important;
+}
+
+#intro.home-v3 .home-v5-relay-status strong{
+  font-size:11px !important;
+  font-weight:700 !important;
+  letter-spacing:.12em !important;
+}
+
+#intro.home-v3 .home-v5-relay-status span{
+  font-size:9px !important;
+  font-weight:600 !important;
+  letter-spacing:.10em !important;
+}
+
+}
+
+/* CLICK */
+#intro.home-v3 .home-v4-start:active{
+  transform:translateY(0) scale(.98) !important;
+}
+/* START RUN — FINAL OVERRIDE */
+
+#intro.home-v3 .home-v4-primary{
+  position:relative !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  width:250px !important;
+  min-width:250px !important;
+  max-width:250px !important;
+  height:58px !important;
+  min-height:58px !important;
+
+  border:1px solid rgba(56,189,248,.8) !important;
+  border-radius:2px !important;
+
+  background:#071521 !important;
+
+  color:#e8faff !important;
+
+  font-family:"Orbitron",sans-serif !important;
+  font-size:14px !important;
+  font-weight:800 !important;
+  letter-spacing:.18em !important;
+  text-transform:uppercase !important;
+
+  box-shadow:
+    0 0 0 1px rgba(56,189,248,.08),
+    0 0 25px rgba(56,189,248,.12),
+    inset 0 0 20px rgba(56,189,248,.06) !important;
+
+  overflow:hidden !important;
+
+  transition:all .2s ease !important;
+}
+
+
+/* CYAN TOP EDGE */
+
+#intro.home-v3 .home-v4-primary::before{
+  content:"" !important;
+
+  position:absolute !important;
+  top:0 !important;
+  left:18px !important;
+  right:18px !important;
+
+  height:1px !important;
+
+  background:#7dd3fc !important;
+
+  box-shadow:
+    0 0 12px #38bdf8 !important;
+}
+
+
+/* CYAN BOTTOM EDGE */
+
+#intro.home-v3 .home-v4-primary::after{
+  content:"" !important;
+
+  position:absolute !important;
+  bottom:4px !important;
+  left:18px !important;
+  right:18px !important;
+
+  height:1px !important;
+
+  background:#38bdf8 !important;
+
+  box-shadow:
+    0 0 10px rgba(56,189,248,.8) !important;
+}
+
+
+/* TEXT */
+
+#intro.home-v3 .home-v4-primary-content{
+  position:relative !important;
+  z-index:3 !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  padding:0 !important;
+
+  font-family:"Orbitron",sans-serif !important;
+  font-size:14px !important;
+  font-weight:800 !important;
+  letter-spacing:.18em !important;
+}
+
+
+/* ARROW */
+
+#intro.home-v3 .home-v4-primary-arrow{
+  position:absolute !important;
+  right:12px !important;
+
+  width:32px !important;
+  height:32px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  border:1px solid rgba(56,189,248,.35) !important;
+  background:rgba(56,189,248,.06) !important;
+
+  color:#7dd3fc !important;
+
+  z-index:4 !important;
+}
+
+
+/* HOVER */
+
+#intro.home-v3 .home-v4-primary:hover{
+  transform:translateY(-2px) !important;
+
+  border-color:#7dd3fc !important;
+
+  background:#0a2235 !important;
+
+  box-shadow:
+    0 0 0 1px rgba(56,189,248,.15),
+    0 0 35px rgba(56,189,248,.24),
+    inset 0 0 24px rgba(56,189,248,.09) !important;
+}
+
+
+/* CLICK */
+
+#intro.home-v3 .home-v4-primary:active{
+  transform:translateY(0) scale(.98) !important;
+}
+/* HIDE ENTER KEY LABEL */
+#intro.home-v3 .home-v5-start-key{
+  display:none !important;
+}
+/* HOME TYPEWRITER */
+#intro.home-v3 .home-v4-typewriter{
+  min-height:3.2em;
+}
+
+#intro.home-v3 .home-v4-cursor{
+  display:inline-block;
+  margin-left:3px;
+  color:#7dd3fc;
+  animation:homeTypewriterCursor 0.8s steps(1) infinite;
+}
+
+@keyframes homeTypewriterCursor{
+  0%, 49%{
+    opacity:1;
+  }
+
+  50%, 100%{
+    opacity:0;
+  }
+}
+/* BOTTOM RELAY NETWORK — SLIGHTLY LARGER */
+#intro.home-v3 .home-v4-bottom-meta{
+  font-size:11px !important;
+  letter-spacing:.12em !important;
+}
+
+#intro.home-v3 .home-v4-bottom-meta b{
+  font-size:12px !important;
+  letter-spacing:.10em !important;
+}
+/* HIDE TOP STATUS ON SCROLL */
+#intro.home-v3.is-scrolling .home-v4-status,
+#intro.home-v3.is-scrolling .home-v4-credits{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  transform:translateY(-12px);
+}
+/* TOP SYSTEM STATUS — SLIGHTLY LARGER */
+#intro.home-v3 .home-v4-status b{
+  font-size:11px !important;
+  letter-spacing:.10em !important;
+}
+
+#intro.home-v3 .home-v4-status > span:last-child{
+  font-size:11px !important;
+  letter-spacing:.12em !important;
 }

@@ -128,42 +128,224 @@
 }
 
 /* =========================================================
-   KEYBOARD HUD — QUIET / DISCREET
+   KEYBOARD HUD — MECHANICAL CYBER DECK
    ========================================================= */
 
 #play #relay-gameplay-keyboard-hud {
-  bottom:9px !important;
-  gap:4px !important;
-  padding:5px 7px 6px !important;
+  position:fixed !important;
+  left:50% !important;
+  bottom:12px !important;
+
+  display:flex !important;
+  align-items:flex-end !important;
+  justify-content:center !important;
+  gap:7px !important;
+
+  padding:8px 11px 9px !important;
+
+  border:1px solid rgba(141,244,255,.22) !important;
+  border-top-color:rgba(141,244,255,.34) !important;
   border-radius:10px !important;
-  opacity:.78 !important;
-  transform:translateX(-50%) scale(.88) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17,24,32,.97) 0%,
+      rgba(7,12,18,.985) 55%,
+      rgba(3,7,12,.99) 100%
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -2px 0 rgba(0,0,0,.72),
+    0 12px 30px rgba(0,0,0,.55),
+    0 0 24px rgba(141,244,255,.08) !important;
+
+  opacity:1 !important;
+  transform:translateX(-50%) !important;
   transform-origin:center bottom !important;
+
   z-index:235 !important;
 }
 
-#play #relay-gameplay-keyboard-hud .relay-keyboard-key {
-  min-width:39px !important;
-  gap:2px !important;
+/* Mechanical keyboard top plate */
+
+#play #relay-gameplay-keyboard-hud::before {
+  content:"" !important;
+
+  position:absolute !important;
+  left:8px !important;
+  right:8px !important;
+  top:3px !important;
+
+  height:1px !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(141,244,255,.42),
+      transparent
+    ) !important;
+
+  pointer-events:none !important;
 }
 
-#play #relay-gameplay-keyboard-hud .relay-keycap {
-  width:35px !important;
-  height:29px !important;
-  border-radius:7px !important;
-  font-size:12px !important;
+/* Individual key */
+
+#play #relay-gameplay-keyboard-hud .relay-keyboard-key {
+  min-width:43px !important;
+  gap:3px !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
 }
+
+/* Mechanical keycap */
+
+#play #relay-gameplay-keyboard-hud .relay-keycap {
+  position:relative !important;
+
+  width:40px !important;
+  height:32px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  border:1px solid rgba(141,244,255,.30) !important;
+  border-bottom:3px solid rgba(38,64,76,.95) !important;
+  border-radius:6px !important;
+
+  color:#dffcff !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      #25313a 0%,
+      #151f27 45%,
+      #0b1218 100%
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -4px 7px rgba(0,0,0,.42),
+    0 3px 0 #05090d,
+    0 0 8px rgba(141,244,255,.08) !important;
+
+  font:900 12px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;
+
+  text-shadow:
+    0 0 7px rgba(141,244,255,.45) !important;
+
+  transition:
+    transform 90ms ease,
+    box-shadow 90ms ease,
+    border-color 90ms ease !important;
+}
+
+/* Small mechanical highlight */
+
+#play #relay-gameplay-keyboard-hud .relay-keycap::before {
+  content:"" !important;
+
+  position:absolute !important;
+  left:5px !important;
+  right:5px !important;
+  top:4px !important;
+
+  height:1px !important;
+
+  background:rgba(255,255,255,.13) !important;
+
+  pointer-events:none !important;
+}
+
+/* Cyan underglow */
+
+#play #relay-gameplay-keyboard-hud .relay-keycap::after {
+  content:"" !important;
+
+  position:absolute !important;
+  left:6px !important;
+  right:6px !important;
+  bottom:-5px !important;
+
+  height:2px !important;
+
+  background:#8df4ff !important;
+
+  box-shadow:
+    0 0 6px rgba(141,244,255,.55),
+    0 0 12px rgba(141,244,255,.22) !important;
+
+  opacity:.72 !important;
+
+  pointer-events:none !important;
+}
+
+/* Key labels */
 
 #play #relay-gameplay-keyboard-hud .relay-key-label {
   width:50px !important;
-  font-size:6px !important;
+
+  color:rgba(141,244,255,.72) !important;
+
+  font:900 6px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;
+
+  letter-spacing:.10em !important;
+  text-align:center !important;
+
+  text-shadow:
+    0 0 6px rgba(141,244,255,.18) !important;
 }
 
+/* Wider SPACE key */
+
+#play #relay-gameplay-keyboard-hud .relay-keyboard-key:has(.relay-keycap[aria-label*="SPACE"]),
+#play #relay-gameplay-keyboard-hud .relay-keyboard-key:has(.relay-keycap[data-key="SPACE"]) {
+  min-width:66px !important;
+}
+
+#play #relay-gameplay-keyboard-hud .relay-keyboard-key:has(.relay-keycap[aria-label*="SPACE"]) .relay-keycap,
+#play #relay-gameplay-keyboard-hud .relay-keyboard-key:has(.relay-keycap[data-key="SPACE"]) .relay-keycap {
+  width:60px !important;
+}
+
+/* =========================================================
+   KEYBOARD HUD — RESPONSIVE
+   ========================================================= */
+
+@media (max-width:900px) and (min-width:761px) {
+  #play #relay-gameplay-keyboard-hud {
+    gap:5px !important;
+    padding:7px 9px 8px !important;
+  }
+
+  #play #relay-gameplay-keyboard-hud .relay-keycap {
+    width:36px !important;
+    height:29px !important;
+    font-size:11px !important;
+  }
+
+  #play #relay-gameplay-keyboard-hud .relay-keyboard-key {
+    min-width:39px !important;
+  }
+}
 /* =========================================================
    MOBILE — 3-COLUMN ACTION GRID
    ========================================================= */
 
 @media (max-width:760px){
+    #play #relay-gameplay-keyboard-hud,
+  #play .input-guide {
+    display:none !important;
+    visibility:hidden !important;
+    opacity:0 !important;
+    pointer-events:none !important;
+  }
   #play .mobile-controls {
     --mobile-pad-x:max(12px,env(safe-area-inset-left));
     --mobile-pad-bottom:max(12px,env(safe-area-inset-bottom));

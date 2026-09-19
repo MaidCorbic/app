@@ -1,282 +1,1423 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&display=swap');
+
 :root {
   --relay-faction-cyan: #8df4ff;
   --relay-faction-blue: #39b9ff;
-  --relay-faction-amber: #ffd06e;
+  --relay-faction-magenta: #ff00aa;
+  --relay-faction-amber: #7dd3fc;
   --relay-faction-white: #f5fbff;
   --relay-faction-muted: rgba(220, 238, 248, .68);
   --relay-faction-panel: rgba(4, 10, 20, .975);
 }
 
-/* Premium in-game faction encounter presentation.
- * The dialogue system owns markup/state; this file owns visual treatment.
- */
+/* =========================================================
+   RELAY RUNNER — FACTION DIALOGUE
+   CYBERPUNK TACTICAL PRESENTATION
+   ========================================================= */
+
 .relay-faction-dialogue {
   position: fixed !important;
+
   left: 50% !important;
   right: auto !important;
   top: auto !important;
-  bottom: max(22px, env(safe-area-inset-bottom) + 12px) !important;
-  transform: translateX(-50%) translateY(10px) !important;
-  width: min(660px, calc(100vw - 28px)) !important;
+
+  bottom:
+    max(
+      22px,
+      env(safe-area-inset-bottom) + 12px
+    ) !important;
+
+  transform:
+    translateX(-50%)
+    translateY(10px) !important;
+
+  width:
+    min(660px, calc(100vw - 28px)) !important;
+
   min-height: 0 !important;
+
   box-sizing: border-box !important;
-  padding: 17px 18px 15px !important;
+
+  padding:
+    21px 22px 18px !important;
+
   overflow: hidden !important;
+
   isolation: isolate;
-  border: 1px solid rgba(141, 244, 255, .44) !important;
-  border-radius: 14px !important;
+
+  border:
+    1px solid
+    rgba(56, 189, 248, .42) !important;
+
+  border-right:
+    2px solid
+    #38d9ff !important;
+
+  border-radius:
+    7px !important;
+
   background:
-    radial-gradient(circle at 88% 0%, rgba(57, 185, 255, .14), transparent 34%),
-    linear-gradient(150deg, rgba(3, 10, 20, .985), rgba(8, 25, 42, .975)) !important;
+    radial-gradient(
+      circle at 12% 18%,
+      rgba(255, 0, 170, .13),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 88% 78%,
+      rgba(0, 234, 255, .17),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(4, 2, 12, .998),
+      rgba(13, 4, 23, .995) 42%,
+      rgba(3, 13, 24, .998) 72%,
+      rgba(1, 4, 10, 1)
+    ) !important;
+
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .075),
-    inset 0 -1px 0 rgba(57, 185, 255, .08),
-    0 22px 70px rgba(0, 0, 0, .52),
-    0 0 0 1px rgba(57, 185, 255, .035),
-    0 0 36px rgba(57, 185, 255, .12) !important;
-  color: var(--relay-faction-white) !important;
-  font: 500 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    inset 0 1px 0
+      rgba(255, 255, 255, .065),
+
+    inset 0 0 38px
+      rgba(0, 234, 255, .025),
+
+    inset 20px 0 45px
+      rgba(255, 0, 170, .025),
+
+    inset -20px 0 45px
+      rgba(0, 234, 255, .035),
+
+    0 22px 70px
+      rgba(0, 0, 0, .68),
+
+    0 0 34px
+      rgba(0, 234, 255, .10),
+
+    0 0 60px
+      rgba(255, 0, 170, .035) !important;
+
+  color:
+    var(--relay-faction-white) !important;
+
+  font:
+    500 14px/1.45
+    "Orbitron",
+    sans-serif !important;
+
   opacity: 0;
+
   pointer-events: auto;
-  transition: opacity 180ms ease, transform 180ms ease, box-shadow 180ms ease !important;
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
 }
+
+
+/* =========================================================
+   ACTIVE
+   ========================================================= */
 
 .relay-faction-dialogue:not([hidden]) {
   opacity: 1;
-  transform: translateX(-50%) translateY(0) !important;
+
+  transform:
+    translateX(-50%)
+    translateY(0) !important;
 }
+
+
+/* =========================================================
+   CYBERPUNK SCANLINES
+   ========================================================= */
 
 .relay-faction-dialogue::before {
   content: "";
+
   position: absolute;
+
   inset: 0;
+
   z-index: -2;
+
   background:
     repeating-linear-gradient(
       0deg,
-      rgba(255, 255, 255, .018) 0,
-      rgba(255, 255, 255, .018) 1px,
+      rgba(255, 0, 170, .022) 0,
+      rgba(255, 0, 170, .022) 1px,
       transparent 1px,
       transparent 4px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 170, .018),
+      transparent 35%,
+      rgba(0, 234, 255, .022)
     );
-  opacity: .35;
+
+  opacity: .42;
+
   pointer-events: none;
 }
+
+
+/* =========================================================
+   TOP ENERGY LINE
+   ========================================================= */
 
 .relay-faction-dialogue::after {
   content: "";
+
   position: absolute;
+
   left: 0;
   right: 0;
   top: 0;
+
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--relay-faction-cyan), var(--relay-faction-blue), transparent);
-  box-shadow: 0 0 16px rgba(141, 244, 255, .5);
-  opacity: .9;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--relay-faction-magenta),
+      var(--relay-faction-cyan),
+      var(--relay-faction-blue),
+      var(--relay-faction-cyan),
+      transparent
+    );
+
+  box-shadow:
+    0 0 8px
+      rgba(255, 0, 170, .30),
+
+    0 0 18px
+      rgba(56, 189, 248, .55);
+
+  opacity: .95;
+
   pointer-events: none;
 }
+
+
+/* =========================================================
+   FACTION KICKER
+   ========================================================= */
 
 .relay-faction-dialogue .relay-faction-kicker {
   position: relative;
+
   display: flex;
+
   align-items: center;
-  gap: 8px;
-  margin: 0 0 6px !important;
-  color: var(--relay-faction-cyan) !important;
-  font: 900 9px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-  letter-spacing: .18em !important;
-  text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(141, 244, 255, .32);
+
+  justify-content: center;
+
+  gap: 9px;
+
+  margin:
+    0 0 18px !important;
+
+  color:
+    var(--relay-faction-cyan) !important;
+
+  font:
+    800 10px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .20em !important;
+
+  text-transform:
+    uppercase !important;
+
+  text-shadow:
+    0 0 8px
+      rgba(56, 189, 248, .35),
+
+    0 0 18px
+      rgba(255, 0, 170, .10);
 }
 
-.relay-faction-dialogue .relay-faction-kicker::before {
+
+/* =========================================================
+   GLOWING CYAN CIRCLE
+   ========================================================= */
+
+.relay-faction-dialogue
+.relay-faction-kicker::before {
+
   content: "";
-  width: 7px;
-  height: 7px;
-  flex: 0 0 7px;
-  border: 1px solid rgba(141, 244, 255, .9);
-  border-radius: 2px;
-  box-shadow: 0 0 10px rgba(141, 244, 255, .5);
-  animation: relay-faction-pulse 1.5s ease-in-out infinite;
+
+  display: block;
+
+  width: 8px;
+  height: 8px;
+
+  flex:
+    0 0 8px;
+
+  border:
+    1px solid
+    #7dd3fc;
+
+  border-radius:
+    50%;
+
+  background:
+    #38d9ff;
+
+  box-shadow:
+    0 0 5px
+      #38d9ff,
+
+    0 0 11px
+      #38d9ff,
+
+    0 0 20px
+      rgba(56, 189, 248, .75);
+
+  animation:
+    factionEncounterPulse
+    1.25s
+    ease-in-out
+    infinite;
 }
+
+
+/* =========================================================
+   INNER CORE OF CIRCLE
+   ========================================================= */
+
+.relay-faction-dialogue
+.relay-faction-kicker::after {
+
+  content: "";
+
+  position: absolute;
+
+  left:
+    calc(50% - 57px);
+
+  top:
+    50%;
+
+  width: 4px;
+  height: 4px;
+
+  border-radius:
+    50%;
+
+  background:
+    #e8fbff;
+
+  box-shadow:
+    0 0 6px
+      #ffffff;
+
+  transform:
+    translateY(-50%);
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   FACTION NAME
+   ========================================================= */
 
 .relay-faction-dialogue .relay-faction-name {
+
   display: block;
-  margin: 0 0 10px !important;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--relay-faction-amber) !important;
-  font: 900 11px/1.25 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-  letter-spacing: .11em !important;
-  text-transform: uppercase;
-  text-shadow: 0 0 14px rgba(255, 208, 110, .18);
+
+  position: relative;
+
+  margin:
+    0 0 20px !important;
+
+  padding:
+    0 0 11px !important;
+
+  max-width:
+    100%;
+
+  overflow:
+    hidden;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+
+  color:
+    #e8f7ff !important;
+
+  font:
+    800 14px/1.25
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .14em !important;
+
+  text-transform:
+    uppercase;
+
+  text-align:
+    center !important;
+
+   text-shadow:
+    0 0 8px
+      rgba(56, 189, 248, .24),
+
+    0 0 18px
+      rgba(255, 0, 170, .10);
 }
+
+.relay-faction-dialogue .relay-faction-name::before {
+  content: "FACTION // ENCOUNTER DETECTED";
+
+  display: block;
+
+  margin-bottom: 7px;
+
+  color:
+    rgba(125, 211, 252, .48);
+
+  font:
+    600 7px/1
+    "Orbitron",
+    sans-serif;
+
+  letter-spacing:
+    .16em;
+
+  text-align:
+    center;
+
+  text-shadow:
+    0 0 8px
+      rgba(56, 189, 248, .16);
+}
+
+
+/* =========================================================
+   CYBER LINE UNDER FACTION NAME
+   ========================================================= */
+
+.relay-faction-dialogue
+.relay-faction-name::after {
+
+  content: "";
+
+  display: block;
+
+  width:
+    100%;
+
+  height:
+    1px;
+
+  margin-top:
+    11px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 0, 170, .55),
+      rgba(56, 189, 248, .85),
+      rgba(255, 0, 170, .35),
+      transparent
+    );
+
+  box-shadow:
+    0 0 8px
+      rgba(56, 189, 248, .25);
+}
+
+
+/* =========================================================
+   DIALOGUE TEXT — TACTICAL DISPLAY
+   ========================================================= */
 
 .relay-faction-dialogue .relay-faction-text {
-  min-height: 47px !important;
-  margin: 0 !important;
-  max-width: 58ch;
-  color: #fff !important;
-  font: 650 clamp(15px, 2vw, 17px)/1.52 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-  letter-spacing: .005em;
-  text-wrap: pretty;
-  overflow-wrap: anywhere;
+
+  position: relative;
+
+  min-height:
+    47px !important;
+
+  margin:
+    0 auto !important;
+
+  padding:
+    14px 18px 12px !important;
+
+  max-width:
+    58ch;
+
+  box-sizing:
+    border-box;
+
+  color:
+    #e9faff !important;
+
+  font:
+    600 clamp(15px, 2vw, 17px)/1.52
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .025em !important;
+
+  text-align:
+    center !important;
+
+  text-wrap:
+    pretty;
+
+  overflow-wrap:
+    anywhere;
+
+  text-shadow:
+    0 0 12px
+      rgba(56, 189, 248, .07);
+
+  border-left:
+    1px solid
+    rgba(56, 189, 248, .16);
+
+  border-right:
+    1px solid
+    rgba(255, 0, 170, .10);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(56, 189, 248, .025),
+      rgba(0, 0, 0, .08),
+      rgba(255, 0, 170, .025)
+    );
 }
+
+
+/* =========================================================
+   TYPEWRITER STATE
+   ========================================================= */
+
+.relay-faction-dialogue
+.relay-faction-text.relay-faction-typing {
+
+  text-shadow:
+    0 0 10px
+      rgba(56, 189, 248, .10);
+}
+
+
+.relay-faction-dialogue
+.relay-faction-cursor {
+
+  display:
+    inline-block;
+
+  margin-left:
+    2px;
+
+  color:
+    #7dd3fc !important;
+
+  text-shadow:
+    0 0 8px
+      rgba(56, 189, 248, .65);
+
+  animation:
+    relay-faction-cursor
+    .7s
+    steps(1)
+    infinite;
+}
+
+
+/* =========================================================
+   KEYWORD HIGHLIGHT
+   ========================================================= */
+
+.relay-faction-dialogue
+.relay-faction-keyword {
+
+  color:
+    #7dd3fc !important;
+
+  font-weight:
+    800 !important;
+
+  text-shadow:
+    0 0 8px
+      rgba(56, 189, 248, .30),
+
+    0 0 16px
+      rgba(56, 189, 248, .12);
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
 
 .relay-faction-dialogue .relay-faction-footer {
+
   position: relative;
+
   display: grid !important;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 14px;
-  margin-top: 13px !important;
-  padding-top: 11px;
-  border-top: 1px solid rgba(141, 244, 255, .10);
+
+  grid-template-columns:
+    1fr auto;
+
+  align-items:
+    center;
+
+  gap:
+    14px;
+
+  margin-top:
+    18px !important;
+
+  padding-top:
+    13px;
+
+  border-top:
+    1px solid
+    rgba(56, 189, 248, .14);
 }
 
-.relay-faction-dialogue .relay-faction-hint {
-  margin: 0 !important;
-  color: var(--relay-faction-muted) !important;
-  font: 800 9px/1.25 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-  letter-spacing: .10em !important;
-  text-transform: uppercase;
+
+/* =========================================================
+   SIGNAL STATUS
+   ========================================================= */
+
+.relay-faction-dialogue
+.relay-faction-footer::before {
+
+  content:
+    "SIGNAL // ████████░░ // 82%";
+
+  display:
+    block;
+
+  margin-right:
+    auto;
+
+  color:
+    rgba(125, 211, 252, .62);
+
+  font:
+    700 7px/1
+    "Orbitron",
+    sans-serif;
+
+  letter-spacing:
+    .12em;
+
+  white-space:
+    nowrap;
+
+  text-shadow:
+    0 0 8px
+      rgba(56, 189, 248, .18);
 }
+
+
+/* =========================================================
+   HINT
+   ========================================================= */
+
+/* =========================================================
+   FACTION — ENTER INPUT HUD
+   ========================================================= */
+
+.relay-faction-dialogue .relay-faction-hint {
+
+  display:
+    inline-flex !important;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  margin:
+    0 !important;
+
+  padding:
+    6px 11px !important;
+
+  min-width:
+    92px;
+
+  border:
+    1px solid
+    rgba(56, 189, 248, .26);
+
+  border-radius:
+    3px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(56, 189, 248, .07),
+      rgba(3, 12, 22, .72)
+    );
+
+  color:
+    rgba(220, 245, 255, .78) !important;
+
+  font:
+    700 7px/1.25
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .13em !important;
+
+  text-transform:
+    uppercase;
+
+  text-align:
+    center !important;
+
+  white-space:
+    nowrap;
+
+  box-shadow:
+    inset 0 0 12px
+      rgba(56, 189, 248, .025),
+
+    0 0 10px
+      rgba(56, 189, 248, .045);
+
+  text-shadow:
+    0 0 7px
+      rgba(56, 189, 248, .18);
+
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.relay-faction-dialogue .relay-faction-hint::before {
+  content:
+    "ENTER";
+
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  margin-right:
+    7px;
+
+  min-width:
+    38px;
+
+  height:
+    17px;
+
+  padding:
+    0 5px;
+
+  border:
+    1px solid
+    rgba(125, 211, 252, .42);
+
+  border-radius:
+    2px;
+
+  background:
+    rgba(56, 189, 248, .10);
+
+  color:
+    #dffbff;
+
+  font:
+    800 7px/1
+    "Orbitron",
+    sans-serif;
+
+  letter-spacing:
+    .08em;
+
+  box-shadow:
+    0 0 8px
+      rgba(56, 189, 248, .10);
+
+  text-shadow:
+    0 0 6px
+      rgba(56, 189, 248, .35);
+}
+
+/* =========================================================
+   CONTINUE BUTTON
+   ========================================================= */
 
 .relay-faction-dialogue button {
   position: relative;
-  min-width: 116px !important;
-  min-height: 42px !important;
-  padding: 9px 15px !important;
-  border: 1px solid rgba(141, 244, 255, .52) !important;
-  border-radius: 9px !important;
+
+  min-width:
+    92px !important;
+
+  width:
+    auto !important;
+
+  min-height:
+    34px !important;
+
+  height:
+    34px !important;
+
+  padding:
+    7px 12px !important;
+
+  border:
+    1px solid
+    rgba(56, 189, 248, .52) !important;
+
+  border-radius:
+    3px !important;
+
   background:
-    linear-gradient(180deg, rgba(24, 62, 88, .98), rgba(7, 22, 35, .98)) !important;
-  color: #eaffff !important;
-  font: 900 10px/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-  letter-spacing: .13em !important;
-  text-transform: uppercase;
-  cursor: pointer;
+    linear-gradient(
+      135deg,
+      rgba(56, 189, 248, .13),
+      rgba(7, 22, 35, .98)
+    ) !important;
+
+  color:
+    #eaffff !important;
+
+  font:
+    700 8px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .14em !important;
+
+  text-transform:
+    uppercase;
+
+  cursor:
+    pointer;
+
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
-    0 6px 20px rgba(0, 0, 0, .24),
-    0 0 16px rgba(57, 185, 255, .08) !important;
-  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease, background 120ms ease !important;
+    inset 0 0 12px
+      rgba(56, 189, 248, .025),
+
+    0 0 14px
+      rgba(56, 189, 248, .055) !important;
+
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease !important;
 }
 
+
 .relay-faction-dialogue button::before {
+
   content: "";
+
   position: absolute;
-  inset: 1px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .08), transparent);
-  opacity: 0;
-  transform: translateX(-35%);
-  pointer-events: none;
+
+  inset:
+    1px;
+
+  border-radius:
+    2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, .08),
+      transparent
+    );
+
+  opacity:
+    0;
+
+  transform:
+    translateX(-35%);
+
+  pointer-events:
+    none;
 }
+
 
 .relay-faction-dialogue button:hover,
 .relay-faction-dialogue button:focus-visible {
-  border-color: rgba(141, 244, 255, .92) !important;
-  background: linear-gradient(180deg, rgba(30, 82, 114, .98), rgba(8, 28, 45, .98)) !important;
+
+  border-color:
+    rgba(125, 211, 252, .90) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(56, 189, 248, .20),
+      rgba(8, 28, 45, .98)
+    ) !important;
+
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .10),
-    0 8px 24px rgba(0, 0, 0, .3),
-    0 0 22px rgba(57, 185, 255, .18) !important;
-  outline: none;
-  transform: translateY(-1px);
+    0 0 24px
+      rgba(56, 189, 248, .14),
+
+    inset 0 0 18px
+      rgba(56, 189, 248, .04) !important;
+
+  outline:
+    none;
+
+  transform:
+    translateY(-1px);
 }
+
 
 .relay-faction-dialogue button:hover::before,
 .relay-faction-dialogue button:focus-visible::before {
-  opacity: 1;
-  animation: relay-faction-sweep 700ms ease-out forwards;
+
+  opacity:
+    1;
+
+  animation:
+    relay-faction-sweep
+    700ms
+    ease-out
+    forwards;
 }
+
 
 .relay-faction-dialogue button:active {
-  transform: translateY(0) scale(.985);
+
+  transform:
+    translateY(0)
+    scale(.985);
 }
+
 
 .relay-faction-dialogue button:disabled {
-  opacity: .65;
-  cursor: default;
-  transform: none;
+
+  opacity:
+    .65;
+
+  cursor:
+    default;
+
+  transform:
+    none;
 }
 
-@keyframes relay-faction-pulse {
-  0%, 100% { opacity: .55; box-shadow: 0 0 7px rgba(141, 244, 255, .25); }
-  50% { opacity: 1; box-shadow: 0 0 14px rgba(141, 244, 255, .7); }
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes factionEncounterPulse {
+
+  0% {
+
+    transform:
+      scale(.82);
+
+    opacity:
+      .65;
+
+    box-shadow:
+      0 0 4px
+        #38d9ff,
+
+      0 0 9px
+        #38d9ff,
+
+      0 0 15px
+        rgba(56,189,248,.45);
+  }
+
+  50% {
+
+    transform:
+      scale(1.12);
+
+    opacity:
+      1;
+
+    box-shadow:
+      0 0 6px
+        #38d9ff,
+
+      0 0 14px
+        #38d9ff,
+
+      0 0 26px
+        rgba(56,189,248,.85);
+  }
+
+  100% {
+
+    transform:
+      scale(.82);
+
+    opacity:
+      .65;
+
+    box-shadow:
+      0 0 4px
+        #38d9ff,
+
+      0 0 9px
+        #38d9ff,
+
+      0 0 15px
+        rgba(56,189,248,.45);
+  }
 }
+
 
 @keyframes relay-faction-sweep {
-  from { transform: translateX(-35%); }
-  to { transform: translateX(140%); }
+
+  from {
+    transform:
+      translateX(-35%);
+  }
+
+  to {
+    transform:
+      translateX(140%);
+  }
 }
+
+
+@keyframes relay-faction-cursor {
+
+  0%,
+  49% {
+    opacity:
+      1;
+  }
+
+  50%,
+  100% {
+    opacity:
+      0;
+  }
+}
+
+
+/* =========================================================
+   HIDE SCROLLBARS
+   ========================================================= */
+
+.relay-faction-dialogue {
+  scrollbar-width:
+    none !important;
+
+  -ms-overflow-style:
+    none !important;
+}
+
+.relay-faction-dialogue::-webkit-scrollbar {
+  width:
+    0 !important;
+
+  height:
+    0 !important;
+
+  display:
+    none !important;
+}
+
+.relay-faction-dialogue .relay-faction-text {
+  scrollbar-width:
+    none !important;
+
+  -ms-overflow-style:
+    none !important;
+}
+
+.relay-faction-dialogue
+.relay-faction-text::-webkit-scrollbar {
+  width:
+    0 !important;
+
+  height:
+    0 !important;
+
+  display:
+    none !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media (max-width: 700px) {
+
   .relay-faction-dialogue {
-    width: min(640px, calc(100vw - 20px)) !important;
-    bottom: max(10px, env(safe-area-inset-bottom) + 7px) !important;
-    padding: 15px 14px 13px !important;
-    border-radius: 12px !important;
+
+    width:
+      min(
+        640px,
+        calc(100vw - 20px)
+      ) !important;
+
+    bottom:
+      max(
+        10px,
+        env(safe-area-inset-bottom) + 7px
+      ) !important;
+
+    padding:
+      18px 15px 15px !important;
+
+    border-radius:
+      7px !important;
   }
 
-  .relay-faction-dialogue .relay-faction-text {
-    min-height: 56px !important;
-    font-size: 15px !important;
-    line-height: 1.5 !important;
+
+  .relay-faction-dialogue
+  .relay-faction-kicker {
+
+    margin-bottom:
+      15px !important;
+
+    font-size:
+      8px !important;
   }
 
-  .relay-faction-dialogue .relay-faction-footer {
-    grid-template-columns: 1fr !important;
-    gap: 9px !important;
-    margin-top: 11px !important;
-    padding-top: 10px;
+
+  .relay-faction-dialogue
+  .relay-faction-name {
+
+    margin-bottom:
+      16px !important;
+
+    font-size:
+      11px !important;
+
+    letter-spacing:
+      .10em !important;
   }
 
-  .relay-faction-dialogue .relay-faction-hint {
-    order: 2;
-    text-align: center;
-    font-size: 8px !important;
+
+  .relay-faction-dialogue
+  .relay-faction-text {
+
+    min-height:
+      56px !important;
+
+    padding:
+      0 7px !important;
+
+    font-size:
+      14px !important;
+
+    line-height:
+      1.55 !important;
   }
+
+
+  .relay-faction-dialogue
+  .relay-faction-footer {
+
+    grid-template-columns:
+      1fr !important;
+
+    gap:
+      9px !important;
+
+    margin-top:
+      15px !important;
+
+    padding-top:
+      11px;
+  }
+
+
+  .relay-faction-dialogue
+  .relay-faction-footer::before {
+
+    margin:
+      0 auto;
+
+    font-size:
+      6px;
+  }
+
+
+  .relay-faction-dialogue
+  .relay-faction-hint {
+
+    order:
+      2;
+
+    text-align:
+      center !important;
+
+    font-size:
+      8px !important;
+  }
+
 
   .relay-faction-dialogue button {
-    width: 100% !important;
-    min-height: 44px !important;
+
+    width:
+      100% !important;
+
+    min-height:
+      44px !important;
   }
 }
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
 
 @media (max-width: 390px) {
+
   .relay-faction-dialogue {
-    width: calc(100vw - 14px) !important;
-    padding: 13px 12px 12px !important;
+
+    width:
+      calc(100vw - 14px) !important;
+
+    padding:
+      16px 12px 13px !important;
   }
 
-  .relay-faction-dialogue .relay-faction-kicker {
-    font-size: 8px !important;
-    letter-spacing: .15em !important;
+
+  .relay-faction-dialogue
+  .relay-faction-kicker {
+
+    font-size:
+      7px !important;
+
+    letter-spacing:
+      .13em !important;
   }
 
-  .relay-faction-dialogue .relay-faction-name {
-    font-size: 10px !important;
-    letter-spacing: .08em !important;
+
+  .relay-faction-dialogue
+  .relay-faction-name {
+
+    font-size:
+      10px !important;
+
+    letter-spacing:
+      .07em !important;
   }
 
-  .relay-faction-dialogue .relay-faction-text {
-    font-size: 14px !important;
-    min-height: 61px !important;
+
+  .relay-faction-dialogue
+  .relay-faction-text {
+
+    font-size:
+      13px !important;
+
+    min-height:
+      61px !important;
   }
 }
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
+
   .relay-faction-dialogue,
   .relay-faction-dialogue button {
-    transition: none !important;
+
+    transition:
+      none !important;
   }
 
-  .relay-faction-dialogue .relay-faction-kicker::before,
-  .relay-faction-dialogue button::before {
-    animation: none !important;
+  .relay-faction-dialogue
+  .relay-faction-kicker::before,
+
+  .relay-faction-dialogue
+  button::before,
+
+  .relay-faction-dialogue
+  .relay-faction-cursor {
+
+    animation:
+      none !important;
   }
 }
+/* =========================================================
+   FINAL NEXT BUTTON SIZE OVERRIDE
+   ========================================================= */
+
+.relay-faction-dialogue .relay-faction-footer button,
+.relay-faction-dialogue button {
+  width: 92px !important;
+  min-width: 92px !important;
+  max-width: 92px !important;
+
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+
+  padding: 7px 10px !important;
+
+  flex: 0 0 92px !important;
+
+  box-sizing: border-box !important;
+}
+/* =========================================================
+   FACTION DIALOGUE — NO TEXT SELECTION
+   ========================================================= */
+
+.relay-faction-dialogue,
+.relay-faction-dialogue * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+.relay-faction-dialogue {
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+}
+/* =========================================================
+   HIDE NEXT BUTTON — ENTER ONLY
+   ========================================================= */
+
+.relay-faction-dialogue .relay-faction-footer button {
+  display: none !important;
+}
+
+/* =========================================================
+   FACTION — HOLOGRAPHIC PANEL SCAN
+   ========================================================= */
+
+.relay-faction-dialogue {
+  animation:
+    factionPanelScan
+    4.5s
+    ease-in-out
+    infinite;
+}
+
+@keyframes factionPanelScan {
+  0%, 100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.065),
+      inset 0 0 38px rgba(0,234,255,.025),
+      0 22px 70px rgba(0,0,0,.68),
+      0 0 34px rgba(0,234,255,.10);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.08),
+      inset 0 0 42px rgba(0,234,255,.055),
+      0 22px 70px rgba(0,0,0,.68),
+      0 0 42px rgba(0,234,255,.16),
+      0 0 60px rgba(255,0,170,.045);
+  }
+}
+/* =========================================================
+   FACTION — NEON IDENTITY
+   ========================================================= */
+
+.relay-faction-dialogue .relay-faction-name {
+  text-shadow:
+    0 0 6px rgba(56, 189, 248, .35),
+    0 0 14px rgba(56, 189, 248, .18),
+    0 0 22px rgba(255, 0, 170, .10) !important;
+}
+
+.relay-faction-dialogue .relay-faction-name::after {
+  height: 1px !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 0, 170, .15) 18%,
+      rgba(255, 0, 170, .75) 38%,
+      rgba(56, 217, 255, .95) 50%,
+      rgba(255, 0, 170, .75) 62%,
+      rgba(255, 0, 170, .15) 82%,
+      transparent 100%
+    ) !important;
+
+  box-shadow:
+    0 0 7px rgba(56, 217, 255, .35),
+    0 0 14px rgba(255, 0, 170, .16) !important;
+}
+/* =========================================================
+   FACTION — TACTICAL STATUS STRIP
+   ========================================================= */
+
+.relay-faction-dialogue .relay-faction-text::before {
+  content: "SECURE CHANNEL // ENCOUNTER LINKED";
+
+  display: block;
+
+  margin:
+    0 auto 11px;
+
+  padding:
+    4px 8px;
+
+  width:
+    fit-content;
+
+  border:
+    1px solid
+    rgba(56, 189, 248, .16);
+
+  background:
+    rgba(0, 18, 30, .34);
+
+  color:
+    rgba(125, 211, 252, .48);
+
+  font:
+    600 6px/1
+    "Orbitron",
+    sans-serif;
+
+  letter-spacing:
+    .15em;
+
+  text-align:
+    center;
+
+  white-space:
+    nowrap;
+
+  box-shadow:
+    inset 0 0 10px
+      rgba(56, 189, 248, .025);
+
+  text-shadow:
+    0 0 7px
+      rgba(56, 189, 248, .16);
+}
+
