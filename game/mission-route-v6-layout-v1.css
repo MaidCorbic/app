@@ -40,13 +40,28 @@
   min-width:0 !important;
   min-height:0 !important;
   overflow:hidden !important;
-  background:rgba(2,5,5,.82) !important;
+
+  background-image:
+    linear-gradient(
+      rgba(2,5,5,.35),
+      rgba(2,5,5,.35)
+    ),
+    url("./assets/homescreen.jpg") !important;
+
+  background-position:center center !important;
+  background-size:cover !important;
+  background-repeat:no-repeat !important;
 }
 
 #relayGameplayIntroFinalV5 .rv6-route-map-frame .rv5-map{
+  position:relative !important;
+  z-index:2 !important;
+
   width:100% !important;
   height:100% !important;
   border:0 !important;
+
+  background:transparent !important;
 }
 
 #relayGameplayIntroFinalV5 .rv6-route-map-frame .rv5-svg{
@@ -240,4 +255,30 @@
 @media(max-width:620px){
   #relayGameplayIntroFinalV5 .rv6-route-panel{padding:14px 12px !important;}
   #relayGameplayIntroFinalV5 .rv6-panel-row{padding:8px 0 !important;}
+}
+/* =========================================
+   PHOTO BEHIND MISSION MAP
+   ========================================= */
+
+#relayGameplayIntroFinalV5 .rv6-route-map-frame {
+  position: relative !important;
+  overflow: hidden !important;
+
+  background-image:
+    linear-gradient(
+      rgba(0, 0, 0, 0.45),
+      rgba(0, 0, 0, 0.45)
+    ),
+    url("./assets/homescreen.jpg") !important;
+
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+}
+
+/* EXISTING MAP — stays above the photograph */
+#relayGameplayIntroFinalV5 .rv6-route-map-frame > .rv5-map {
+  position: relative !important;
+  z-index: 2 !important;
+  background: transparent !important;
 }

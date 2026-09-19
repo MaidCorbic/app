@@ -15,11 +15,11 @@
   const WAIT = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   const ASSETS = Object.freeze({
-    1: Object.freeze({ desktop: '/game/assets/loadplay.jpg', mobile: '/game/assets/loadplaymobile.jpg' }),
-    2: Object.freeze({ desktop: '/game/assets/loadplay2.jpg', mobile: '/game/assets/loadplay2mobile.jpg' }),
-    3: Object.freeze({ desktop: '/game/assets/loadplay3.jpg', mobile: '/game/assets/loadplay3mobile.jpg' }),
-    4: Object.freeze({ desktop: '/game/assets/loadplay4.jpg', mobile: '/game/assets/loadplay4mobile.jpg' }),
-    5: Object.freeze({ desktop: '/game/assets/loadmobile5.jpg', mobile: '/game/assets/loadplay5mobile.jpg' }),
+    1: Object.freeze({ desktop: './assets/loadplay.jpg', mobile: './assets/loadplaymobile.jpg' }),
+    2: Object.freeze({ desktop: './assets/loadplay2.jpg', mobile: './assets/loadplay2mobile.jpg' }),
+    3: Object.freeze({ desktop: './assets/loadplay3.jpg', mobile: './assets/loadplay3mobile.jpg' }),
+    4: Object.freeze({ desktop: './assets/loadplay4.jpg', mobile: './assets/loadplay4mobile.jpg' }),
+    5: Object.freeze({ desktop: './assets/loadmobile5.jpg', mobile: './assets/loadplay5mobile.jpg' }),
   });
 
   const FALLBACK = ASSETS[5];

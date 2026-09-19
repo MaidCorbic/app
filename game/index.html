@@ -12,7 +12,7 @@
 
   <title>Relay Runner | Rooftop Game</title>
 
-  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" href="./favicon.ico">
 
   <!-- SPLASH CSS MUST ARRIVE BEFORE THE MODULE BOOTSTRAP -->
   <link rel="stylesheet" href="splash-progress-visibility.css">
@@ -24,12 +24,12 @@
 
   <div id="relaySplash" class="relay-splash" role="status" aria-live="polite" aria-busy="true">
     <picture id="relaySplashPicture">
-      <source media="(orientation: landscape)" srcset="/game/assets/loading-landscape.jpg">
-      <img id="relaySplashArt" class="relay-splash-art" src="/game/assets/loading.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high">
+      <source media="(orientation: landscape)" srcset="./assets/loading-landscape.jpg">
+      <img id="relaySplashArt" class="relay-splash-art" src="./assets/loading.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high">
     </picture>
     <div class="relay-splash-brand">
       <b>R/</b>
-      <span>RUNNER RELAY</span>
+      <span>RELAY RUNNER</span>
     </div>
     <div class="relay-splash-ui">
       <div class="relay-splash-meta">
@@ -211,17 +211,18 @@
     <div id="toast" class="toast" aria-live="polite"></div>
   </main>
 
-  <script type="module" src="./home-options.js"></script>
-  <script type="module" src="./home-v3.js"></script>
-  <script type="module" src="./home-v3-guard.js"></script>
-  <script type="module" src="./home-v3-interaction-fix.js"></script>
+ <script type="module" src="./splash-loader-v2.js"></script>
 
-  <script type="module" src="/src/systems/runtime-guard.js"></script>
-  <script type="module" src="/src/systems/core-stability.js"></script>
-  <script type="module" src="/src/systems/mobile-viewport-hardening.js"></script>
+<script type="module" src="./home-options.js"></script>
+<script type="module" src="./home-v3.js"></script>
+<script type="module" src="./home-v3-guard.js"></script>
+<script type="module" src="./home-v3-interaction-fix.js"></script>
 
-  <script type="module" src="/src/main.js"></script>
-  <script type="module" src="./splash-loader-v2.js"></script>
+<script type="module" src="/src/systems/runtime-guard.js"></script>
+<script type="module" src="/src/systems/core-stability.js"></script>
+<script type="module" src="/src/systems/mobile-viewport-hardening.js"></script>
+
+<script type="module" src="/src/main.js"></script>
 
   <script type="module" src="/src/systems/mission-finish-recovery.js"></script>
   <script type="module" src="/src/systems/mission-results.js"></script>

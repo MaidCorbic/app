@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap');
+
 /* =========================================================
-   RUNNER RELAY — FAQ TERMINAL V2
+   RUNNER RELAY — FAQ TERMINAL V3
    RELAY OS // KNOWLEDGE TERMINAL
    ========================================================= */
 
@@ -15,12 +17,14 @@
   --relay-panel:#06101a;
   --relay-panel-2:#081520;
 
-  --relay-text:#f2f7fa;
-  --relay-body:#b8c9d3;
-  --relay-muted:#6f8592;
+  --relay-text:#f4fbff;
+  --relay-body:#d2e1e8;
+  --relay-muted:#8ea5b2;
+  --relay-dim:#6f8592;
 
   --relay-line:rgba(170,210,225,.11);
 }
+
 
 /* =========================================================
    PANEL / TERMINAL OVERLAY
@@ -59,6 +63,7 @@
   display:none!important;
 }
 
+
 /* =========================================================
    MAIN TERMINAL
    ========================================================= */
@@ -94,6 +99,7 @@
   isolation:isolate;
 }
 
+
 /* =========================================================
    TERMINAL TOP BAR
    ========================================================= */
@@ -124,7 +130,10 @@
 
   box-shadow:
     0 0 14px rgba(99,221,255,.25);
+
+  pointer-events:none;
 }
+
 
 /* =========================================================
    SCANLINE / TERMINAL GRID
@@ -164,6 +173,7 @@
   opacity:.45;
 }
 
+
 /* =========================================================
    HEADER
    ========================================================= */
@@ -171,6 +181,7 @@
 .relay-faq-header{
   position:relative;
   z-index:3;
+
   flex:0 0 auto;
 
   padding:18px 30px 16px;
@@ -189,10 +200,12 @@
 
 .relay-faq-header::after{
   content:"";
+
   position:absolute;
   left:30px;
   right:30px;
   bottom:0;
+
   height:1px;
 
   background:
@@ -210,6 +223,7 @@
   pointer-events:none;
 }
 
+
 /* =========================================================
    EYEBROW
    ========================================================= */
@@ -221,9 +235,10 @@
 
   margin:0 0 13px;
 
-  color:var(--relay-cyan);
+  color:#73e2ff;
 
   font-family:
+    Orbitron,
     ui-monospace,
     SFMono-Regular,
     Menlo,
@@ -231,13 +246,16 @@
     Consolas,
     monospace;
 
-  font-size:9px;
-  font-weight:900;
+  font-size:8px;
+  font-weight:800;
 
-  line-height:1.2;
-  letter-spacing:.15em;
+  line-height:1.3;
+  letter-spacing:.14em;
 
   text-transform:uppercase;
+
+  text-shadow:
+    0 0 10px rgba(99,221,255,.18);
 }
 
 .relay-status-dot{
@@ -257,6 +275,7 @@
   animation:relayTerminalPulse 1.5s ease-in-out infinite;
 }
 
+
 /* =========================================================
    HEADING
    ========================================================= */
@@ -272,9 +291,10 @@
 .relay-faq-kicker{
   margin:0 0 7px;
 
-  color:rgba(255,211,106,.72);
+  color:rgba(255,211,106,.78);
 
   font-family:
+    Orbitron,
     ui-monospace,
     SFMono-Regular,
     Menlo,
@@ -282,11 +302,11 @@
     Consolas,
     monospace;
 
-  font-size:8px;
-  font-weight:900;
+  font-size:7px;
+  font-weight:800;
 
-  line-height:1.2;
-  letter-spacing:.16em;
+  line-height:1.3;
+  letter-spacing:.14em;
 
   text-transform:uppercase;
 }
@@ -295,22 +315,22 @@
 .relay-faq-card h2{
   margin:0;
 
-  color:var(--relay-text);
+  color:#f7fcff;
 
   font-family:
-    Manrope,
+    Orbitron,
     Arial,
     sans-serif;
 
   font-size:clamp(34px,4.2vw,52px);
   font-weight:900;
 
-  line-height:.94;
-  letter-spacing:-.04em;
+  line-height:.96;
+  letter-spacing:-.018em;
 
   text-shadow:
     0 4px 22px rgba(0,0,0,.45),
-    0 0 24px rgba(99,221,255,.055);
+    0 0 24px rgba(99,221,255,.065);
 }
 
 .relay-faq-intro{
@@ -318,7 +338,7 @@
 
   margin:12px 0 0;
 
-  color:var(--relay-body);
+  color:#d2e1e8;
 
   font-family:
     Manrope,
@@ -328,10 +348,11 @@
   font-size:13px;
   font-weight:500;
 
-  line-height:1.65;
+  line-height:1.68;
 
   overflow-wrap:anywhere;
 }
+
 
 /* =========================================================
    TERMINAL STATUS BOX
@@ -359,6 +380,7 @@
     inset 0 1px 0 rgba(255,255,255,.025);
 
   font-family:
+    Orbitron,
     ui-monospace,
     SFMono-Regular,
     Menlo,
@@ -370,38 +392,42 @@
 }
 
 .relay-faq-terminal span{
-  color:#6e8490;
+  color:#8ca3af;
 
   font-size:7px;
-  font-weight:800;
+  font-weight:700;
 
   line-height:1.25;
-  letter-spacing:.14em;
+  letter-spacing:.13em;
 }
 
 .relay-faq-terminal b{
-  color:var(--relay-cyan);
+  color:#78e4ff;
 
   font-size:10px;
   font-weight:900;
 
   line-height:1.25;
-  letter-spacing:.10em;
+  letter-spacing:.09em;
 
   overflow-wrap:anywhere;
+
+  text-shadow:
+    0 0 9px rgba(99,221,255,.16);
 }
 
 .relay-faq-terminal small{
-  color:rgba(255,211,106,.65);
+  color:rgba(255,211,106,.76);
 
   font-size:7px;
-  font-weight:800;
+  font-weight:700;
 
   line-height:1.25;
   letter-spacing:.09em;
 
   overflow-wrap:anywhere;
 }
+
 
 /* =========================================================
    COUNTERS / SYSTEM METADATA
@@ -410,6 +436,7 @@
 .relay-faq-counters{
   display:flex;
   flex-wrap:wrap;
+
   gap:6px;
 
   margin-top:17px;
@@ -427,9 +454,10 @@
 
   background:rgba(255,255,255,.014);
 
-  color:#718591;
+  color:#849ba7;
 
   font-family:
+    Orbitron,
     ui-monospace,
     SFMono-Regular,
     Menlo,
@@ -437,18 +465,19 @@
     Consolas,
     monospace;
 
-  font-size:7px;
+  font-size:6.5px;
   font-weight:800;
 
   line-height:1.2;
-  letter-spacing:.11em;
+  letter-spacing:.10em;
 
   white-space:nowrap;
 }
 
 .relay-faq-counters b{
-  color:var(--relay-cyan);
+  color:#73e2ff;
 }
+
 
 /* =========================================================
    TERMINAL PROMPT
@@ -456,21 +485,24 @@
 
 .relay-terminal-prompt{
   position:relative;
+
   z-index:3;
 
   display:flex;
   align-items:center;
+
   gap:7px;
 
-padding:8px 30px;
+  padding:8px 30px;
 
   border-bottom:1px solid rgba(170,210,225,.075);
 
   background:rgba(1,6,11,.76);
 
-  color:#718793;
+  color:#91a6b1;
 
   font-family:
+    Orbitron,
     ui-monospace,
     SFMono-Regular,
     Menlo,
@@ -479,12 +511,15 @@ padding:8px 30px;
     monospace;
 
   font-size:8px;
-  font-weight:800;
+  font-weight:700;
 
   line-height:1.4;
   letter-spacing:.10em;
 
   text-transform:uppercase;
+
+  text-shadow:
+    0 0 8px rgba(99,221,255,.06);
 }
 
 .relay-terminal-prompt::before{
@@ -492,11 +527,49 @@ padding:8px 30px;
 
   color:var(--relay-amber);
 
+  font-family:
+    Orbitron,
+    ui-monospace,
+    monospace;
+
   font-weight:900;
 
   text-shadow:
     0 0 10px rgba(255,211,106,.35);
 }
+
+
+/* =========================================================
+   CSS-ONLY MECHANICAL W A S D KEYBOARD
+   ========================================================= */
+
+.relay-terminal-prompt::after{
+  content:"";
+
+  position:absolute;
+
+  top:50%;
+  right:14px;
+
+  width:92px;
+  height:60px;
+
+  transform:translateY(-50%);
+
+  background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMjgwIDE4MCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJrIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMWUzYjRkIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMxMDIzMzAiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwNzEwMTgiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iZSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzYzZGRmZiIvPjxzdG9wIG9mZnNldD0iLjU1IiBzdG9wLWNvbG9yPSIjMzhyZGY4Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZkMzZhIi8+PC9saW5lYXJHcmFkaWVudD48ZmlsdGVyIGlkPSJnIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVHYXVzc2lhbkJsdXJTdGREZXZpYXRpb249IjMiLz48L2ZpbHRlcj48L2RlZnM+PHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjI3NiIgaGVpZ2h0PSIxNzYiIHJ4PSIxMiIgZmlsbD0iIzA1MGMxMyIgc3Ryb2tlPSIjMjM0OTViIiBzdHJva2Utd2lkdGg9IjIiLz48ZyBmaWx0ZXI9InVybCgjZykiIGZvbnQtZmFtaWx5PSJPcmJpdHJvbixBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjMwIiBmb250LXdlaWdodD0iOTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj48Zz48cmVjdCB4PSI5NyIgeT0iMTAiIHdpZHRoPSI4NiIgaGVpZ2h0PSI3MCIgcng9IjEwIiBmaWxsPSJ1cmwoI2spIiBzdHJva2U9InVybCgjZSkiIHN0cm9rZS13aWR0aD0iMyIvPjxwYXRoIGQ9Ik0xMDggMjFoNjQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4wNyIvPjxwYXRoIGQ9Ik0xMDggNjdIMTcyIiBzdHJva2U9IiMwMDAiIHN0cm9rZS1vcGFjaXR5PSIuMzUiIHN0cm9rZS13aWR0aD0iNCIvPjx0ZXh0IHg9IjE0MCIgeT0iNTciIGZpbGw9IiNlYWZhZmYiPlc8L3RleHQ+PC9nPjxnPjxyZWN0IHg9IjciIHk9IjkxIiB3aWR0aD0iODYiIGhlaWdodD0iNzAiIHJ4PSIxMCIgZmlsbD0idXJsKCNrKSIgc3Ryb2tlPSIjM2Y5M2FkIiBzdHJva2Utd2lkdGg9IjIuNSIvPjxwYXRoIGQ9Ik0xOCAxMDJoNjQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4wNiIvPjxwYXRoIGQ9Ik0xOCAxNDhoNjQiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLW9wYWNpdHk9Ii4zNSIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHRleHQgeD0iNTAiIHk9IjEzOCIgbGluZT0iIj48L3RleHQ+PHRleHQgeD0iNTAiIHk9IjEzOCIgc3R5bGU9ImZpbGw6I2VhZmNmZjtmb250LXNpemU6MzBweDtmb250LXdlaWdodDo5MDA7Ij5BPC90ZXh0PjwvZz48Zz48cmVjdCB4PSI5NyIgeT0iOTEiIHdpZHRoPSI4NiIgaGVpZ2h0PSI3MCIgcng9IjEwIiBmaWxsPSJ1cmwoI2spIiBzdHJva2U9IiNmZmQzNmEiIHN0cm9rZS1vcGFjaXR5PSIuNzUiIHN0cm9rZS13aWR0aD0iMi41Ii8+PHBhdGggZD0iTTEwOCAxMDJoNjQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4wNiIvPjxwYXRoIGQ9Ik0xMDggMTQ4aDY0IiBzdHJva2U9IiMwMDAiIHN0cm9rZS1vcGFjaXR5PSIuMzUiIHN0cm9rZS13aWR0aD0iNCIvPjx0ZXh0IHg9IjE0MCIgeT0iMTM4IiBmaWxsPSIjZmZmMGMyIj5TPC90ZXh0PjwvZz48Zz48cmVjdCB4PSIxODciIHk9IjkxIiB3aWR0aD0iODYiIGhlaWdodD0iNzAiIHJ4PSIxMCIgZmlsbD0idXJsKCNrKSIgc3Ryb2tlPSIjM2Y5M2FkIiBzdHJva2Utd2lkdGg9IjIuNSIvPjxwYXRoIGQ9Ik0xOTggMTAyaDY0IiBzdHJva2U9IiNmZmYiIHN0cm9rZS1vcGFjaXR5PSIuMDYiLz48cGF0aCBkPSJNMzk4IDE0OGg2NCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utb3BhY2l0eT0iLjM1IiBzdHJva2Utd2lkdGg9IjQiLz48dGV4dCB4PSIyMzAiIHk9IjEzOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCwwKSIgZmlsbD0iI2VhZmFmZiI+RDwvdGV4dD48L2c+PC9nPjwvc3ZnPg==");
+
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+
+  pointer-events:none;
+
+  filter:
+    drop-shadow(0 0 7px rgba(99,221,255,.16));
+
+  z-index:5;
+}
+
 
 /* =========================================================
    FILTER BAR
@@ -527,16 +600,17 @@ padding:8px 30px;
 
   margin-right:3px;
 
-  color:#536b78;
+  color:#718793;
 
   font-family:
+    Orbitron,
     ui-monospace,
     monospace;
 
-  font-size:7px;
-  font-weight:900;
+  font-size:6.5px;
+  font-weight:800;
 
-  letter-spacing:.12em;
+  letter-spacing:.11em;
 }
 
 .relay-faq-categories button{
@@ -550,22 +624,19 @@ padding:8px 30px;
   background:
     rgba(255,255,255,.014);
 
-  color:#7d919d;
+  color:#8297a3;
 
   font-family:
+    Orbitron,
     ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
     monospace;
 
-  font-size:7px;
-  font-weight:900;
+  font-size:6.5px;
+  font-weight:800;
 
   line-height:1;
 
-  letter-spacing:.09em;
+  letter-spacing:.07em;
 
   cursor:pointer;
 
@@ -579,7 +650,7 @@ padding:8px 30px;
 }
 
 .relay-faq-categories button:hover{
-  color:#e9f5f9;
+  color:#f0faff;
 
   border-color:rgba(99,221,255,.30);
 
@@ -606,8 +677,10 @@ padding:8px 30px;
     );
 
   box-shadow:
-    inset 0 -1px 0 rgba(255,211,106,.30);
+    inset 0 -1px 0 rgba(255,211,106,.30),
+    0 0 10px rgba(255,211,106,.04);
 }
+
 
 /* =========================================================
    FAQ LIST
@@ -621,20 +694,23 @@ padding:8px 30px;
 
   overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
+
   scrollbar-gutter:stable;
 
   scrollbar-width:thin;
+
   scrollbar-color:
-    rgba(99,221,255,.85)
+    rgba(99,221,255,.88)
     rgba(3,10,17,.72);
 }
 
+
 /* =========================================================
-   BRUTAL NEON SCROLLBAR
+   SINGLE FAQ SCROLLBAR
    ========================================================= */
 
 .relay-faq-list::-webkit-scrollbar{
-  width:9px;
+  width:8px;
 }
 
 .relay-faq-list::-webkit-scrollbar-track{
@@ -646,66 +722,12 @@ padding:8px 30px;
     linear-gradient(
       180deg,
       rgba(99,221,255,.035),
-      rgba(255,211,106,.025)
+      rgba(255,211,106,.020)
     );
 
   box-shadow:
-    inset 0 0 0 1px rgba(99,221,255,.06),
+    inset 0 0 0 1px rgba(99,221,255,.055),
     inset 0 0 12px rgba(0,0,0,.65);
-}
-
-.relay-faq-list::-webkit-scrollbar-thumb{
-  min-height:44px;
-
-  border:2px solid transparent;
-  border-radius:999px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #63ddff 0%,
-      #38bdf8 42%,
-      #ffd36a 100%
-    )
-    padding-box;
-
-  box-shadow:
-    0 0 5px rgba(99,221,255,.95),
-    0 0 12px rgba(99,221,255,.72),
-    0 0 22px rgba(99,221,255,.38),
-    0 0 32px rgba(255,211,106,.18);
-}
-
-.relay-faq-list::-webkit-scrollbar-thumb:hover{
-  background:
-    linear-gradient(
-      180deg,
-      #9aeaff 0%,
-      #63ddff 45%,
-      #ffe29a 100%
-    )
-    padding-box;
-
-  box-shadow:
-    0 0 7px rgba(99,221,255,1),
-    0 0 16px rgba(99,221,255,.9),
-    0 0 28px rgba(99,221,255,.58),
-    0 0 40px rgba(255,211,106,.32);
-}
-
-.relay-faq-list::-webkit-scrollbar-corner{
-  background:transparent;
-}
-
-/* Chrome / Edge / Safari */
-.relay-faq-list::-webkit-scrollbar{
-  width:8px;
-}
-
-.relay-faq-list::-webkit-scrollbar-track{
-  margin:8px 2px;
-  border-radius:999px;
-  background:rgba(255,255,255,.025);
 }
 
 .relay-faq-list::-webkit-scrollbar-thumb{
@@ -717,43 +739,38 @@ padding:8px 30px;
   background:
     linear-gradient(
       180deg,
-      rgba(99,221,255,.72),
-      rgba(255,211,106,.48)
+      #63ddff 0%,
+      #38bdf8 48%,
+      #ffd36a 100%
     )
     padding-box;
 
   box-shadow:
-    0 0 10px rgba(99,221,255,.16);
+    0 0 6px rgba(99,221,255,.90),
+    0 0 15px rgba(99,221,255,.45),
+    0 0 25px rgba(255,211,106,.15);
 }
 
 .relay-faq-list::-webkit-scrollbar-thumb:hover{
   background:
     linear-gradient(
       180deg,
-      rgba(99,221,255,.92),
-      rgba(255,211,106,.68)
+      #a9edff 0%,
+      #63ddff 46%,
+      #ffe29a 100%
     )
     padding-box;
+
+  box-shadow:
+    0 0 8px rgba(99,221,255,1),
+    0 0 18px rgba(99,221,255,.75),
+    0 0 28px rgba(255,211,106,.25);
 }
 
-.relay-faq-list::-webkit-scrollbar{
-  width:5px;
-}
-
-.relay-faq-list::-webkit-scrollbar-track{
+.relay-faq-list::-webkit-scrollbar-corner{
   background:transparent;
 }
 
-.relay-faq-list::-webkit-scrollbar-thumb{
-  border-radius:2px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(99,221,255,.50),
-      rgba(255,211,106,.30)
-    );
-}
 
 /* =========================================================
    FAQ ITEM
@@ -791,19 +808,26 @@ padding:8px 30px;
   content:"";
 
   position:absolute;
+
   left:0;
   top:0;
   bottom:0;
 
   width:2px;
 
-  background:var(--relay-cyan);
+  background:
+    linear-gradient(
+      180deg,
+      var(--relay-cyan),
+      var(--relay-amber),
+      var(--relay-cyan)
+    );
 
   opacity:.18;
 
   transition:
     opacity .16s ease,
-    background .16s ease;
+    box-shadow .16s ease;
 }
 
 .relay-faq-item:hover{
@@ -821,15 +845,24 @@ padding:8px 30px;
 
   box-shadow:
     0 10px 25px rgba(0,0,0,.20),
-    inset 0 1px 0 rgba(255,255,255,.025);
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 0 18px rgba(99,221,255,.025);
 }
 
 .relay-faq-item:hover::before{
   opacity:.72;
+
+  box-shadow:
+    0 0 12px rgba(99,221,255,.28);
 }
 
+
+/* =========================================================
+   OPEN / ACTIVE FAQ
+   ========================================================= */
+
 .relay-faq-item.open{
-  border-color:rgba(255,211,106,.25);
+  border-color:rgba(255,211,106,.30);
 
   background:
     linear-gradient(
@@ -841,20 +874,17 @@ padding:8px 30px;
 
   box-shadow:
     0 12px 28px rgba(0,0,0,.25),
-    inset 3px 0 0 rgba(99,221,255,.42);
+    inset 3px 0 0 rgba(99,221,255,.42),
+    0 0 22px rgba(99,221,255,.035);
 }
 
 .relay-faq-item.open::before{
-  background:
-    linear-gradient(
-      180deg,
-      var(--relay-cyan),
-      var(--relay-amber),
-      var(--relay-cyan)
-    );
-
   opacity:1;
+
+  box-shadow:
+    0 0 14px rgba(99,221,255,.25);
 }
+
 
 /* =========================================================
    QUESTION
@@ -866,6 +896,7 @@ padding:8px 30px;
   width:100%;
 
   min-width:0;
+
   min-height:70px;
 
   display:grid;
@@ -892,7 +923,7 @@ padding:8px 30px;
   cursor:pointer;
 
   font-family:
-    Manrope,
+    Orbitron,
     Arial,
     sans-serif;
 
@@ -904,17 +935,30 @@ padding:8px 30px;
 }
 
 .relay-faq-question:hover{
-  color:var(--relay-cyan);
+  color:#9aeaff;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(99,221,255,.018),
+      transparent 72%
+    );
 }
 
 .relay-faq-question:focus-visible{
-  outline:2px solid rgba(99,221,255,.60);
+  outline:2px solid rgba(99,221,255,.68);
+
   outline-offset:-2px;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(99,221,255,.12),
+    0 0 15px rgba(99,221,255,.07);
 }
 
 .relay-faq-item.open .relay-faq-question{
-  color:var(--relay-amber);
+  color:#ffe29a;
 }
+
 
 /* =========================================================
    INDEX
@@ -927,40 +971,56 @@ padding:8px 30px;
   display:grid;
   place-items:center;
 
-  border:1px solid rgba(99,221,255,.14);
-  border-radius:2px;
+  border:1px solid rgba(99,221,255,.18);
+  border-radius:3px;
 
-  background:rgba(99,221,255,.018);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(99,221,255,.032),
+      rgba(99,221,255,.008)
+    );
 
-  color:#6d8591;
+  color:#829aa6;
 
   font-family:
+    Orbitron,
     ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
     monospace;
 
   font-size:7px;
-  font-weight:900;
+  font-weight:800;
 
   line-height:1;
-  letter-spacing:.04em;
+  letter-spacing:.03em;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025);
 
   transition:
     color .16s ease,
     border-color .16s ease,
-    background .16s ease;
+    background .16s ease,
+    box-shadow .16s ease;
 }
 
 .relay-faq-item.open .faq-index{
   color:var(--relay-amber);
 
-  border-color:rgba(255,211,106,.28);
+  border-color:rgba(255,211,106,.38);
 
-  background:rgba(255,211,106,.045);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,211,106,.075),
+      rgba(255,211,106,.018)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 0 10px rgba(255,211,106,.09);
 }
+
 
 /* =========================================================
    QUESTION CONTENT
@@ -971,16 +1031,22 @@ padding:8px 30px;
 
   color:inherit;
 
+  font-family:
+    Orbitron,
+    Arial,
+    sans-serif;
+
   font-size:14px;
-  font-weight:800;
+  font-weight:700;
 
-  line-height:1.35;
+  line-height:1.40;
 
-  letter-spacing:-.008em;
+  letter-spacing:.004em;
 
   overflow-wrap:anywhere;
   word-break:normal;
 }
+
 
 /* =========================================================
    QUERY STATE
@@ -996,22 +1062,19 @@ padding:8px 30px;
 
   background:rgba(255,255,255,.012);
 
-  color:#5f7581;
+  color:#718894;
 
   font-family:
+    Orbitron,
     ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
     monospace;
 
   font-size:6px;
-  font-weight:900;
+  font-weight:800;
 
   line-height:1.1;
 
-  letter-spacing:.08em;
+  letter-spacing:.07em;
 
   text-align:center;
 
@@ -1020,16 +1083,24 @@ padding:8px 30px;
   transition:
     color .16s ease,
     border-color .16s ease,
-    background .16s ease;
+    background .16s ease,
+    box-shadow .16s ease;
 }
 
 .relay-faq-item.open .faq-question-state{
   color:var(--relay-cyan);
 
-  border-color:rgba(99,221,255,.24);
+  border-color:rgba(99,221,255,.28);
 
-  background:rgba(99,221,255,.04);
+  background:rgba(99,221,255,.045);
+
+  box-shadow:
+    0 0 10px rgba(99,221,255,.08);
+
+  text-shadow:
+    0 0 8px rgba(99,221,255,.20);
 }
+
 
 /* =========================================================
    ANSWER / QUERY OUTPUT
@@ -1050,7 +1121,7 @@ padding:8px 30px;
 
   border-top:1px solid rgba(170,210,225,.065);
 
-  color:#c4d2da;
+  color:#d2e1e8;
 
   font-family:
     Manrope,
@@ -1060,7 +1131,7 @@ padding:8px 30px;
   font-size:12.5px;
   font-weight:500;
 
-  line-height:1.72;
+  line-height:1.74;
 
   letter-spacing:.002em;
 
@@ -1080,19 +1151,19 @@ padding:8px 30px;
   color:var(--relay-cyan);
 
   font-family:
+    Orbitron,
     ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
     monospace;
 
-  font-size:7px;
-  font-weight:900;
+  font-size:6.5px;
+  font-weight:800;
 
   line-height:1.3;
 
-  letter-spacing:.11em;
+  letter-spacing:.10em;
+
+  text-shadow:
+    0 0 9px rgba(99,221,255,.18);
 }
 
 .relay-faq-answer::after{
@@ -1102,35 +1173,43 @@ padding:8px 30px;
 
   margin-top:13px;
 
-  color:rgba(255,211,106,.52);
+  color:rgba(255,211,106,.58);
 
   font-family:
+    Orbitron,
     ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
     monospace;
 
   font-size:6px;
-  font-weight:900;
+  font-weight:700;
 
   line-height:1.3;
 
-  letter-spacing:.10em;
+  letter-spacing:.09em;
 }
 
 .relay-faq-answer[hidden]{
   display:none;
 }
 
-/* Prevent accidental oversized content */
 .relay-faq-answer img,
 .relay-faq-answer video,
 .relay-faq-answer iframe{
   max-width:100%;
   height:auto;
 }
+
+
+/* =========================================================
+   TEXT SELECTION
+   ========================================================= */
+
+.relay-faq-answer::selection,
+.faq-question-text::selection{
+  background:rgba(99,221,255,.28);
+  color:#ffffff;
+}
+
 
 /* =========================================================
    FOOTER
@@ -1157,21 +1236,18 @@ padding:8px 30px;
   background:
     rgba(1,6,11,.88);
 
-  color:#607783;
+  color:#718894;
 
   font-family:
+    Orbitron,
     ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
     monospace;
 
   font-size:6px;
-  font-weight:800;
+  font-weight:700;
 
   line-height:1.4;
-  letter-spacing:.11em;
+  letter-spacing:.09em;
 
   text-transform:uppercase;
 }
@@ -1213,6 +1289,7 @@ padding:8px 30px;
     0 0 7px rgba(255,211,106,.65);
 }
 
+
 /* =========================================================
    FILTER HIDDEN
    ========================================================= */
@@ -1221,14 +1298,10 @@ padding:8px 30px;
   display:none!important;
 }
 
+
 /* =========================================================
    CLOSE BUTTON
    ========================================================= */
-
-/*
-   Existing HTML already contains .relay-info-close.
-   Keep it functional, but make it terminal-like.
-*/
 
 .relay-info-close{
   position:absolute;
@@ -1249,15 +1322,17 @@ padding:8px 30px;
   border:1px solid rgba(170,210,225,.11);
   border-radius:3px;
 
-  background:rgba(2,8,13,.72);
+  background:
+    rgba(2,8,13,.72);
 
-  color:#718793;
+  color:#8ba1ac;
 
   font-family:
+    Orbitron,
     ui-monospace,
     monospace;
 
-  font-size:15px;
+  font-size:14px;
   font-weight:700;
 
   line-height:1;
@@ -1268,23 +1343,28 @@ padding:8px 30px;
     color .16s ease,
     border-color .16s ease,
     background .16s ease,
-    transform .16s ease;
+    transform .16s ease,
+    box-shadow .16s ease;
 }
 
 .relay-info-close:hover{
-  color:var(--relay-cyan);
+  color:#9aeaff;
 
   border-color:rgba(99,221,255,.30);
 
   background:rgba(99,221,255,.055);
 
   transform:translateY(-1px);
+
+  box-shadow:
+    0 0 14px rgba(99,221,255,.10);
 }
 
 .relay-info-close:focus-visible{
   outline:2px solid rgba(99,221,255,.62);
   outline-offset:2px;
 }
+
 
 /* =========================================================
    MOBILE
@@ -1378,9 +1458,20 @@ padding:8px 30px;
   }
 
   .relay-terminal-prompt{
+    min-height:68px;
+
     padding:8px 14px;
 
+    padding-right:108px;
+
     font-size:7px;
+  }
+
+  .relay-terminal-prompt::after{
+    right:10px;
+
+    width:82px;
+    height:53px;
   }
 
   .relay-faq-categories{
@@ -1428,7 +1519,7 @@ padding:8px 30px;
 
     min-height:62px;
 
-    padding:11px 11px;
+    padding:11px;
   }
 
   .faq-index{
@@ -1480,6 +1571,7 @@ padding:8px 30px;
     font-size:5.5px;
   }
 }
+
 
 /* =========================================================
    SMALL PHONES
@@ -1551,9 +1643,20 @@ padding:8px 30px;
   }
 
   .relay-terminal-prompt{
+    min-height:58px;
+
     padding:7px 11px;
 
+    padding-right:94px;
+
     font-size:6px;
+  }
+
+  .relay-terminal-prompt::after{
+    right:7px;
+
+    width:72px;
+    height:47px;
   }
 
   .relay-faq-list{
@@ -1615,9 +1718,10 @@ padding:8px 30px;
     width:27px;
     height:27px;
 
-    font-size:14px;
+    font-size:13px;
   }
 }
+
 
 /* =========================================================
    LANDSCAPE MOBILE
@@ -1669,9 +1773,20 @@ padding:8px 30px;
   }
 
   .relay-terminal-prompt{
+    min-height:56px;
+
     padding:6px 18px;
 
+    padding-right:108px;
+
     font-size:6px;
+  }
+
+  .relay-terminal-prompt::after{
+    right:12px;
+
+    width:82px;
+    height:50px;
   }
 
   .relay-faq-categories{
@@ -1729,6 +1844,7 @@ padding:8px 30px;
   }
 }
 
+
 /* =========================================================
    TOUCH DEVICES
    ========================================================= */
@@ -1754,10 +1870,14 @@ padding:8px 30px;
 
   .relay-faq-item:hover::before{
     opacity:.18;
+
+    box-shadow:none;
   }
 
   .relay-faq-question:hover{
     color:var(--relay-text);
+
+    background:transparent;
   }
 
   .relay-faq-categories button:hover{
@@ -1774,6 +1894,7 @@ padding:8px 30px;
     color:var(--relay-amber);
   }
 }
+
 
 /* =========================================================
    REDUCED MOTION
@@ -1794,6 +1915,7 @@ padding:8px 30px;
     transition:none!important;
   }
 }
+
 
 /* =========================================================
    ANIMATIONS
@@ -1833,10 +1955,11 @@ padding:8px 30px;
     opacity:1;
     transform:scale(1.08);
   }
-   }
+}
+
 
 /* =========================================================
-   FAQ HEADER POLISH — MOBILE
+   FINAL MOBILE HEADER POLISH
    ========================================================= */
 
 @media(max-width:780px){
@@ -1862,14 +1985,16 @@ padding:8px 30px;
 
   .relay-faq-eyebrow{
     margin-bottom:9px;
+
     font-size:8px;
   }
 
   .relay-terminal-prompt{
-    padding:7px 18px;
-    font-size:7px;
+    padding-top:7px;
+    padding-bottom:7px;
   }
 }
+
 
 @media(max-width:430px){
 
@@ -1885,7 +2010,7 @@ padding:8px 30px;
   .relay-info-card h2,
   .relay-faq-card h2{
     font-size:32px;
-    letter-spacing:-.035em;
+    letter-spacing:-.03em;
   }
 
   .relay-faq-eyebrow{
@@ -1894,7 +2019,9 @@ padding:8px 30px;
   }
 
   .relay-terminal-prompt{
-    padding:7px 14px;
+    padding-left:14px;
+    padding-right:94px;
+
     font-size:6.5px;
   }
 }
