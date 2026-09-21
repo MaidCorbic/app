@@ -34,11 +34,20 @@
   <link rel="stylesheet" href="faq-terminal-polish-v1.css">
 
   <!-- Keep the legacy DOM from flashing before the current Home module mounts. -->
-  <style id="relay-critical-boot-style">
-    #game{visibility:hidden}
-    #game.relay-boot-ready{visibility:visible}
-    #relaySplash{visibility:visible}
-  </style>
+ <style id="relay-critical-boot-style">
+  /*
+   * The splash is the loading layer.
+   * The application itself must remain renderable so a delayed
+   * optional module or boot race cannot produce a permanent black screen.
+   */
+  #game{
+    visibility:visible;
+  }
+
+  #relaySplash{
+    visibility:visible;
+  }
+</style>
 </head>
 
 <body>

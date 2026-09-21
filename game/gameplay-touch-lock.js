@@ -9,15 +9,12 @@
     const root = gameplay();
     if (!root || !target || !root.contains(target)) return false;
 
-    /*
-     * Mobile bottom HUD + canonical pause menu remain interactive.
-     * The touch/selection lock must never interfere with their buttons,
-     * tabs, or overlays.
+        /*
+     * Canonical pause menu remains interactive.
+     * The touch/selection lock must never interfere with
+     * its buttons, tabs, or overlays.
      */
     if (
-      target.closest('#mobileBottomHud') ||
-      target.closest('#mobilePauseButton') ||
-      target.closest('#mobileSettingsButton') ||
       target.closest('#pauseMenu') ||
       target.closest('#pause') ||
       target.closest('[data-tab]')

@@ -94,18 +94,27 @@ const syncCanvasPresentation = () => {
 
   const host = document.getElementById('phaser-game');
   const canvas = host?.querySelector('canvas');
+
   if (!host || !canvas) return;
 
-  const width = Math.max(1, Math.round(host.clientWidth || getViewport().width));
-  const height = Math.max(1, Math.round(host.clientHeight || getViewport().height));
+  canvas.style.setProperty(
+    'display',
+    'block',
+    'important'
+  );
 
-  canvas.style.setProperty('display', 'block', 'important');
-  canvas.style.setProperty('width', `${width}px`, 'important');
-  canvas.style.setProperty('height', `${height}px`, 'important');
-  canvas.style.setProperty('max-width', 'none', 'important');
-  canvas.style.setProperty('max-height', 'none', 'important');
+  canvas.style.setProperty(
+    'max-width',
+    'none',
+    'important'
+  );
+
+  canvas.style.setProperty(
+    'max-height',
+    'none',
+    'important'
+  );
 };
-
 
 /* =========================================================
    CSS VIEWPORT SYNC

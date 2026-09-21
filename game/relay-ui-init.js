@@ -169,7 +169,9 @@ import './temporary-world-distortion-v1.js';
 
 import './player-shield-visual-cleanup-v1.js';
 
-import './tutorial-runtime-gate-v1.js';
+// Tutorial runtime gate retired.
+// Tutorial presentation/settings are already handled by
+// runtime-ai-tutorial-settings.js and Home/tutorial UI layers.
 
 import './home-tutorial-v1.js';
 
