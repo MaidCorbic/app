@@ -97,7 +97,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -L https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default -o /tmp/butler.zip
+          curl -L https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default -o /tmp/butler.zip
           unzip -q /tmp/butler.zip -d /tmp/butler
           install -m 0755 /tmp/butler/butler /usr/local/bin/butler
           butler --version
