@@ -53,8 +53,8 @@
 // Stable URLs backed by the real JPEGs in game/assets/.
   // vite.config.mjs copies these into dist/assets for production.
   const DEFAULT_ASSETS = Object.freeze({
-    desktop: '/assets/loadplay.jpg',
-    mobile: '/assets/loadplaymobile.jpg',
+    desktop: './assets/loadplay.jpg',
+    mobile: './assets/loadplaymobile.jpg',
   });
   const normalizeConfig = config => ({
     missionNumber: Math.max(1, Number(config?.missionNumber) || 1),
