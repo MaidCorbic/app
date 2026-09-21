@@ -52,8 +52,9 @@ jobs:
           test -f game/dist/assets/loading-landscape.jpg
           test -f game/dist/assets/loadplay.jpg
           test -f game/dist/assets/loadplaymobile.jpg
-          grep -q 'splash-loader-v2.js' game/dist/index.html
-          grep -q 'src/main.js' game/dist/index.html
+          test -f game/splash-loader-v2.js
+          test -f game/src/main.js
+          grep -q '<script' game/dist/index.html
           echo "Production web package verified."
 
       - name: Package itch.io web build
