@@ -45,6 +45,7 @@ import './play-intro-cinematic-v2.css';
   }
 
   window.__relayPlayIntroV5 = true;
+  window.__relayPlayCinematicActive = false;
 
 
 
@@ -1155,6 +1156,7 @@ import './play-intro-cinematic-v2.css';
 
     running =
       true;
+    window.__relayPlayCinematicActive = true;
 
 
     const state = {
