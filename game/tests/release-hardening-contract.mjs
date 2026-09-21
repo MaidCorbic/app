@@ -45,7 +45,7 @@ assert.doesNotMatch(config, /patch(DeathReason|InitialSpawnShield|CheckpointColl
 assert.doesNotMatch(config, /relay-(death-reason|initial-spawn-shield|checkpoint-collectibles|respawn-transient-state|cargo-state-import|runner-zoom-stability)-fix/);
 assert.doesNotMatch(config, /relayTransform\(/, 'Vite config must not rewrite gameplay source');
 assert.match(index, /<script type="module" src="\.\/src\/itch-boot\.js"><\/script>/);
-assert.doesNotMatch(index, /\\\\n<\\/body>/, 'index.html must not contain a literal escaped newline after the boot script');
+assert.doesNotMatch(index, /\\n<\\/body>/, 'index.html must not contain a literal escaped newline after the boot script');
 const boot = await read('src/itch-boot.js');
 assert.match(boot, /await import\\(['"]\\.\\/main\\.js['"]\\);/);
 assert.ok(boot.indexOf("await import('./main.js');") < boot.indexOf("optional('home-options'"), 'main.js must start before optional itch presentation modules');
