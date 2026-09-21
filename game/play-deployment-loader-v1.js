@@ -50,10 +50,12 @@
   let active = false;
   let serial = 0;
 
-const DEFAULT_ASSETS = Object.freeze({
-  desktop: './assets/loadplay.jpg',
-  mobile: './assets/loadplaymobile.jpg',
-});
+// Stable URLs backed by the real JPEGs in game/assets/.
+  // vite.config.mjs copies these into dist/assets for production.
+  const DEFAULT_ASSETS = Object.freeze({
+    desktop: '/assets/loadplay.jpg',
+    mobile: '/assets/loadplaymobile.jpg',
+  });
   const normalizeConfig = config => ({
     missionNumber: Math.max(1, Number(config?.missionNumber) || 1),
     desktop: config?.desktop || DEFAULT_ASSETS.desktop,
@@ -436,6 +438,10 @@ console.log('[RelayRunner] OVERLAY ZINDEX:', getComputedStyle(overlay).zIndex);
 
     const button = event.target.closest('#start');
     if (!button) return;
+
+    // The cinematic owns the first Play click.
+    // After the cinematic releases the button, this loader takes over.
+    if (window.__relayPlayCinematicActive === true) return;
 
     event.preventDefault();
     event.stopImmediatePropagation();

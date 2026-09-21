@@ -61,10 +61,10 @@ assert.match(main, /mobile-input-single-owner-v1/);
 
 // V9 is the only mobile input owner. Legacy RunnerScene listeners are detached
 // at runtime instead of being allowed to compete with Phaser key/cursor state.
-assert.match(mobileOwner, /window\.addEventListener\('relay:runner-scene-ready'/);
+assert.match(mobileOwner, /window\s*\.addEventListener\s*\(\s*['"]relay:runner-scene-ready['"]/);
 assert.match(mobileOwner, /detachLegacyRunnerInput/);
-assert.match(mobileOwner, /events\.off\('mobile-action'/);
-assert.match(mobileOwner, /events\.off\('mobile-move'/);
+assert.match(mobileOwner, /events\s*\.off\s*\(\s*['"]mobile-action['"]/);
+assert.match(mobileOwner, /events\s*\.off\s*\(\s*['"]mobile-move['"]/);
 assert.match(mobileOwner, /window\.\__relayMobileInputSingleOwnerV9/);
 
 // RunnerScene stability behavior is source-owned by the runtime authority.
