@@ -128,6 +128,8 @@ function relayExplicitRunnerSceneBinding() {
 }
 
 export default defineConfig({
+  // itch.io hosts the game inside a subdirectory, so production URLs must be relative.
+  base: './',
   server: {
     host: '0.0.0.0',
     port: 3000,
