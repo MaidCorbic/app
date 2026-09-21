@@ -75,6 +75,7 @@ jobs:
           zip -r ../relay-runner-web.zip .
 
       - name: Upload GitHub Actions artifact
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: relay-runner-web
