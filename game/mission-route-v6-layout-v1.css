@@ -46,7 +46,7 @@
       rgba(2,5,5,.35),
       rgba(2,5,5,.35)
     ),
-    url("./assets/homescreen.jpg") !important;
+    !important;
 
   background-position:center center !important;
   background-size:cover !important;
@@ -269,7 +269,7 @@
       rgba(0, 0, 0, 0.45),
       rgba(0, 0, 0, 0.45)
     ),
-    url("./assets/homescreen.jpg") !important;
+    !important;
 
   background-position: center !important;
   background-size: cover !important;

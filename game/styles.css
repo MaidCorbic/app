@@ -325,6 +325,7 @@ body.is-touch .mobile-controls small{
 }
 
 @media (max-width:880px),(hover:none) and (pointer:coarse){
+  body #pauseMenu .menu-grid{grid-template-columns:1fr !important;}
   body #pauseMenu{
     overflow-y:auto;
     background:#07101cf2;

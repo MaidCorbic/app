@@ -1363,6 +1363,60 @@ button:disabled{
     -.04em;
 }
 
+#worldMap header .eyebrow{
+  margin:0 0 10px;
+
+  color:
+    rgba(141,244,255,.72);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:10px;
+  font-weight:700;
+
+  letter-spacing:.18em;
+
+  text-transform:uppercase;
+}
+
+#worldMap h2{
+  margin:0;
+
+  color:
+    #f3f7fa;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    clamp(34px,5vw,60px);
+
+  font-weight:900;
+
+  line-height:.95;
+
+  letter-spacing:
+    -.025em;
+
+  text-transform:uppercase;
+
+  text-shadow:
+    0 0 24px rgba(141,244,255,.06);
+}
+
+#worldMap h2 em{
+  color:
+    var(--ui-gold);
+
+  font-style:normal;
+
+  text-shadow:
+    0 0 22px rgba(255,208,110,.10);
+}
+
 #worldMap .board-tabs{
 
   display:flex;
@@ -2269,4 +2323,2497 @@ body.is-touch #play .world-marker{
   visibility:hidden !important;
   opacity:0 !important;
   pointer-events:none !important;
+}
+
+/* ==========================================================================
+   CONTRACTS // PREMIUM BLACK-OPS BOARD
+   ========================================================================== */
+
+#worldMap .contract-card{
+#worldMap .mission-card{
+  position:relative;
+  overflow:hidden;
+
+  min-height:250px;
+
+  padding:
+    24px;
+
+  border:
+    1px solid
+    rgba(255,190,70,.28);
+
+  border-radius:
+    18px;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(255,190,70,.12),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      rgba(255,70,70,.07),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(17,20,27,.98),
+      rgba(5,8,13,.98)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 -1px 0 rgba(255,190,70,.05),
+    0 24px 60px rgba(0,0,0,.55),
+    0 0 35px rgba(255,170,40,.05);
+
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+}
+#worldMap .contract-card::before{
+#worldMap .mission-card::before{
+  content:"";
+  position:absolute;
+
+  top:0;
+  left:0;
+  right:0;
+
+  height:3px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,80,60,0),
+      rgba(255,190,70,.95),
+      rgba(255,80,60,0)
+    );
+
+  opacity:.85;
+}
+}
+#worldMap .contract-card::after{
+  content:"LIVE";
+
+  position:absolute;
+
+  top:18px;
+  right:18px;
+
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+
+  width:56px;
+  height:22px;
+
+  padding:
+    0 8px 0 20px;
+
+  border:
+    1px solid
+    rgba(92,255,132,.24);
+
+  border-radius:999px;
+
+  background:
+    radial-gradient(
+      circle at 9px 50%,
+      #69ff8b 0 3px,
+      rgba(105,255,139,.48) 3.5px,
+      rgba(105,255,139,0) 8px
+    ),
+    rgba(60,255,110,.035);
+
+  color:
+    rgba(151,255,176,.94);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:8px;
+
+  font-weight:800;
+
+  line-height:1;
+
+  letter-spacing:.12em;
+
+  white-space:nowrap;
+
+  box-shadow:
+    0 0 8px rgba(82,255,125,.15),
+    0 0 18px rgba(82,255,125,.06),
+    inset 0 1px 0 rgba(255,255,255,.04);
+
+  pointer-events:none;
+
+  animation:
+    contractLivePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes contractLivePulse{
+  0%,
+  100%{
+    opacity:.78;
+
+    box-shadow:
+      0 0 7px rgba(82,255,125,.10),
+      0 0 15px rgba(82,255,125,.04),
+      inset 0 1px 0 rgba(255,255,255,.04);
+  }
+
+  50%{
+    opacity:1;
+
+    box-shadow:
+      0 0 11px rgba(82,255,125,.26),
+      0 0 24px rgba(82,255,125,.10),
+      inset 0 1px 0 rgba(255,255,255,.06);
+  }
+}
+
+#worldMap .contract-card > span{
+  display:block;
+
+  margin-bottom:12px;
+  padding-right:76px;
+
+  color:
+    rgba(255,190,70,.82);
+
+  font:
+    700 10px/1.2
+    Orbitron,
+    sans-serif;
+
+  letter-spacing:
+    .16em;
+
+  text-transform:
+    uppercase;
+}
+
+#worldMap .contract-card h3{
+  margin:
+    0 0 12px;
+
+max-width:100%;
+
+  color:
+    #f5f7fa;
+
+  font:
+    800 clamp(20px,2vw,29px)/1
+    Orbitron,
+    sans-serif;
+
+  letter-spacing:
+    .02em;
+
+  text-transform:
+    uppercase;
+}
+
+#worldMap .contract-card p{
+  margin:
+    0 0 20px;
+
+  max-width:
+    90%;
+
+  color:
+    rgba(220,228,238,.72);
+
+  font:
+    500 13px/1.6
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .02em;
+}
+
+#worldMap .contract-card > b{
+  display:flex;
+  align-items:center;
+justify-content:center;
+
+  width:max-content;
+  min-height:30px;
+
+  margin:0 0 18px 0;
+
+  padding:
+    7px 11px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.20);
+
+  border-radius:
+    6px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(141,244,255,.065),
+      rgba(141,244,255,.025)
+    );
+
+  color:
+    rgba(141,244,255,.95);
+
+  font:
+    700 11px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .12em;
+
+  white-space:
+    nowrap;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 0 14px rgba(141,244,255,.035);
+
+  text-align:left;
+}
+
+#worldMap .contract-card button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:100%;
+  height:48px;
+  min-height:48px;
+  max-height:48px;
+
+  margin-top:auto;
+
+  padding:0 14px;
+
+  border:
+    1px solid
+    rgba(255,190,70,.30);
+
+  border-radius:8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,190,70,.10),
+      rgba(255,130,40,.035)
+    );
+
+  color:
+    #ffd36f;
+
+  font:
+    800 11px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.15em;
+
+  text-transform:uppercase;
+
+  white-space:nowrap;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 24px rgba(0,0,0,.28);
+
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+#worldMap .contract-card button:hover:not(:disabled){
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(255,208,110,.75);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,190,70,.18),
+      rgba(255,100,40,.06)
+    );
+
+  box-shadow:
+    0 0 24px rgba(255,190,70,.10),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+#worldMap .contract-card button:active:not(:disabled){
+  transform:
+    translateY(0);
+}
+
+/* LOCKED / COMPLETED */
+#worldMap .contract-card button:disabled{
+  opacity:.38;
+  cursor:not-allowed;
+
+  border-color:
+    rgba(255,255,255,.08);
+
+  background:
+    rgba(255,255,255,.025);
+
+  color:
+    rgba(255,255,255,.40);
+
+  box-shadow:none;
+}
+
+/* GRID: CONTRACTS */
+#worldMap .district-grid:has(.contract-card){
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(280px, 1fr)
+    );
+
+  gap:
+    16px;
+}
+
+/* MOBILE */
+@media (max-width: 768px){
+
+  #worldMap .contract-card{
+    min-height:0;
+
+    padding:
+      19px;
+  }
+
+  #worldMap .contract-card::after{
+    top:12px;
+    right:12px;
+
+    font-size:8px;
+  }
+
+#worldMap .contract-card h3{
+  max-width:
+    calc(100% - 120px);
+
+  font-size:
+    19px;
+}
+
+  #worldMap .contract-card p{
+    font-size:
+      12px;
+  }
+
+  #worldMap .district-grid:has(.contract-card){
+    grid-template-columns:
+      1fr;
+
+    gap:
+      12px;
+  }
+}
+#worldMap header{
+  position:relative;
+}
+
+#worldMapTitle{
+  position:absolute !important;
+
+  top:0 !important;
+  right:0 !important;
+
+  margin:0 !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  text-align:right !important;
+}
+/* ==========================================================================
+   WORLD MAP // TERMINAL INTERFACE
+   ========================================================================== */
+
+#worldMap{
+  position:fixed !important;
+  inset:0 !important;
+
+  display:block;
+
+  isolation:isolate;
+
+  overflow:auto;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(141,244,255,.055),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(2,8,15,.97),
+      rgba(1,4,9,.985)
+    ) !important;
+
+  border:
+    1px solid
+    rgba(141,244,255,.18);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(141,244,255,.035),
+    inset 0 0 80px rgba(0,0,0,.55),
+    0 0 70px rgba(0,0,0,.42);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+}
+
+/* TECHNICAL GRID */
+#worldMap::before{
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  z-index:-1;
+
+  pointer-events:none;
+
+  background:
+    linear-gradient(
+      rgba(141,244,255,.026) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(141,244,255,.026) 1px,
+      transparent 1px
+    );
+
+  background-size:
+    42px 42px;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,.85),
+      rgba(0,0,0,.18)
+    );
+}
+
+/* TERMINAL SCAN */
+#worldMap::after{
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  z-index:8;
+
+  pointer-events:none;
+
+  opacity:.16;
+
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255,255,255,.028) 0,
+      rgba(255,255,255,.028) 1px,
+      transparent 1px,
+      transparent 5px
+    );
+
+  mix-blend-mode:
+    screen;
+}
+
+/* HEADER TERMINAL */
+#worldMap header{
+  position:relative;
+
+  width:
+    min(1180px,100%);
+
+  margin-inline:auto;
+
+  padding:
+    22px 24px 20px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.16);
+
+  border-radius:
+    14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(8,20,34,.92),
+      rgba(3,9,17,.96)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 18px 45px rgba(0,0,0,.34);
+
+  overflow:hidden;
+}
+
+/* HEADER TOP EDGE */
+#worldMap header::before{
+  content:"RELAY TERMINAL // WORLD NETWORK";
+
+  display:block;
+
+  margin-bottom:16px;
+
+  padding-bottom:9px;
+
+  border-bottom:
+    1px solid
+    rgba(141,244,255,.10);
+
+  color:
+    rgba(141,244,255,.46);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:8px;
+
+  font-weight:700;
+
+  letter-spacing:.18em;
+
+  text-transform:uppercase;
+}
+
+/* HEADER CORNER LIGHT */
+#worldMap header::after{
+  content:"";
+
+  position:absolute;
+
+  top:0;
+  left:0;
+
+  width:85px;
+  height:2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--ui-cyan),
+      transparent
+    );
+
+  box-shadow:
+    0 0 12px rgba(141,244,255,.40);
+}
+
+/* NETWORK LABEL */
+#worldMap header .eyebrow{
+  margin:
+    0 0 9px;
+
+  color:
+    rgba(141,244,255,.74);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:9px;
+
+  font-weight:700;
+
+  letter-spacing:.20em;
+
+  text-transform:uppercase;
+}
+
+/* MAIN TERMINAL TITLE */
+#worldMap header h2{
+  margin:0;
+
+  padding-right:180px;
+
+  color:
+    #f5f8fa;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    clamp(30px,5vw,58px);
+
+  font-weight:900;
+
+  line-height:.92;
+
+  letter-spacing:
+    -.025em;
+
+  text-transform:uppercase;
+
+  text-shadow:
+    0 0 24px rgba(141,244,255,.07);
+}
+
+#worldMap header h2 em{
+  color:
+    var(--ui-gold);
+
+  font-style:normal;
+
+  text-shadow:
+    0 0 20px rgba(255,208,110,.10);
+}
+
+/* RETURN TO BRIEFING — TERMINAL CONTROL */
+#worldMap #worldMapTitle{
+  position:absolute !important;
+
+  top:22px !important;
+  right:22px !important;
+
+  margin:0 !important;
+
+  min-height:38px;
+
+  padding:
+    0 13px;
+
+  display:inline-flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  border:
+    1px solid
+    rgba(141,244,255,.22);
+
+  border-radius:
+    7px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(141,244,255,.07),
+      rgba(141,244,255,.025)
+    );
+
+  color:
+    rgba(141,244,255,.86);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:8px;
+
+  font-weight:800;
+
+  letter-spacing:.12em;
+
+  text-transform:uppercase;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 0 18px rgba(141,244,255,.035);
+
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    color .18s ease,
+    box-shadow .18s ease;
+}
+
+#worldMap #worldMapTitle:hover{
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(141,244,255,.58);
+
+  color:
+    #d8fbff;
+
+  box-shadow:
+    0 0 20px rgba(141,244,255,.10),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+/* TERMINAL TAB BAR */
+#worldMap .board-tabs{
+  display:flex;
+
+  align-items:center;
+
+  gap:6px;
+
+  margin-top:20px;
+
+  padding:
+    7px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.11);
+
+  border-radius:
+    9px;
+
+  background:
+    rgba(2,8,15,.66);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+#worldMap .board-tabs button{
+  min-height:38px;
+
+  padding:
+    0 12px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.08);
+
+  border-radius:
+    6px;
+
+  background:
+    rgba(8,20,34,.58);
+
+  color:
+    rgba(173,193,207,.72);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:8px;
+
+  font-weight:700;
+
+  letter-spacing:.10em;
+
+  text-transform:uppercase;
+}
+
+#worldMap .board-tabs button:hover,
+#worldMap .board-tabs button:focus-visible{
+  border-color:
+    rgba(141,244,255,.42);
+
+  background:
+    rgba(10,31,47,.84);
+
+  color:
+    var(--ui-cyan);
+}
+
+/* CONTRACT GRID TERMINAL SPACE */
+#worldMap .district-grid{
+  position:relative;
+
+  width:
+    min(1180px,100%);
+
+  margin:
+    16px auto 0;
+
+  padding:
+    2px;
+}
+
+/* TERMINAL STATUS LINE */
+#worldMap .district-grid::before{
+  content:"";
+
+  position:absolute;
+
+  top:-18px;
+  left:2px;
+
+  color:
+    rgba(141,244,255,.38);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:7px;
+
+  font-weight:700;
+
+  letter-spacing:.16em;
+
+  text-transform:uppercase;
+
+  pointer-events:none;
+}
+
+/* MOBILE */
+@media (max-width:760px){
+
+  #worldMap header{
+    padding:
+      18px 16px 16px;
+  }
+
+  #worldMap header h2{
+    padding-right:0;
+
+    font-size:
+      clamp(28px,9vw,44px);
+  }
+
+  #worldMap #worldMapTitle{
+    position:relative !important;
+
+    top:auto !important;
+    right:auto !important;
+
+    margin-top:14px !important;
+
+    width:100%;
+
+    min-height:40px;
+  }
+
+  #worldMap .board-tabs{
+    overflow-x:auto;
+
+    scrollbar-width:none;
+  }
+
+  #worldMap .board-tabs::-webkit-scrollbar{
+    display:none;
+  }
+
+  #worldMap .board-tabs button{
+    flex:
+      0 0 auto;
+  }
+}
+/* ==========================================================================
+   CONTRACT TERMINAL // CONTROL CARD
+   ========================================================================== */
+
+#worldMap .contract-terminal-card{
+  position:relative;
+
+  display:flex;
+  flex-direction:column;
+
+  min-height:250px;
+
+  padding:24px;
+
+  overflow:hidden;
+
+  border:
+    1px solid
+    rgba(141,244,255,.20);
+
+  border-radius:
+    18px;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(141,244,255,.10),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(8,20,34,.98),
+      rgba(3,8,15,.99)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 24px 60px rgba(0,0,0,.48),
+    0 0 30px rgba(141,244,255,.035);
+}
+
+#worldMap .contract-terminal-card::before{
+  content:"";
+
+  position:absolute;
+
+  top:0;
+  left:0;
+  right:0;
+
+  height:3px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(141,244,255,.90),
+      transparent
+    );
+
+  box-shadow:
+    0 0 14px rgba(141,244,255,.28);
+}
+
+#worldMap .contract-terminal-card > span{
+  color:
+    rgba(141,244,255,.66);
+
+  font:
+    700 9px/1.2
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .16em;
+
+  text-transform:
+    uppercase;
+}
+
+#worldMap .contract-terminal-card h3{
+  margin:
+    18px 0 14px;
+
+  color:
+    #f3f7fa;
+
+  font:
+    900 clamp(22px,2vw,30px)/.96
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .02em;
+
+  text-transform:
+    uppercase;
+}
+
+#worldMap .contract-terminal-card h3 em{
+  color:
+    var(--ui-gold);
+
+  font-style:normal;
+}
+
+#worldMap .contract-terminal-card p{
+  margin:
+    0 0 20px;
+
+  color:
+    rgba(173,193,207,.68);
+
+  font:
+    600 9px/1.7
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .10em;
+}
+
+#worldMap .contract-terminal-stats{
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:8px;
+
+  margin-top:auto;
+}
+
+#worldMap .contract-terminal-stats b{
+  display:flex;
+  flex-direction:column;
+
+  min-height:58px;
+
+  padding:
+    10px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.12);
+
+  border-radius:
+    7px;
+
+  background:
+    rgba(141,244,255,.025);
+
+  color:
+    var(--ui-cyan);
+
+  font:
+    800 13px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .05em;
+}
+
+#worldMap .contract-terminal-stats small{
+  margin-bottom:7px;
+
+  color:
+    rgba(139,160,184,.65);
+
+  font:
+    700 7px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .12em;
+}
+
+#worldMap .contract-terminal-line{
+  width:100%;
+
+  height:1px;
+
+  margin:
+    14px 0 10px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(141,244,255,.20),
+      transparent
+    );
+}
+
+#worldMap .contract-terminal-footer{
+  color:
+    rgba(141,244,255,.36);
+
+  font:
+    700 7px/1.2
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:
+    .12em;
+
+  text-transform:
+    uppercase;
+}
+
+@media (max-width:760px){
+
+  #worldMap .contract-terminal-card{
+    min-height:220px;
+
+    padding:19px;
+  }
+
+  #worldMap .contract-terminal-card h3{
+    font-size:22px;
+  }
+
+}
+/* ==========================================================================
+   PRE-FLIGHT // PREMIUM TERMINAL
+   ========================================================================== */
+
+#preflight{
+  background:
+    radial-gradient(
+      circle at 50% 15%,
+      rgba(141,244,255,.055),
+      transparent 38%
+    ),
+    rgba(2,6,15,.94) !important;
+}
+
+#preflight .preflight-card{
+  position:relative;
+
+  width:
+    min(680px,calc(100vw - 28px));
+
+  max-height:
+    90dvh;
+
+  display:flex;
+  flex-direction:column;
+
+  gap:0;
+
+  padding:
+    30px;
+
+  overflow:auto;
+
+  border:
+    1px solid
+    rgba(141,244,255,.20);
+
+  border-radius:
+    18px;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(141,244,255,.08),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(8,20,34,.98),
+      rgba(3,8,15,.99)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 30px 80px rgba(0,0,0,.62),
+    0 0 40px rgba(141,244,255,.055) !important;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  isolation:isolate;
+}
+
+/* TOP TERMINAL STRIP */
+#preflight .preflight-card::before{
+  content:"FLIGHT CONTROL // PRE-FLIGHT";
+
+  display:block;
+
+  margin:
+    -30px -30px 24px;
+
+  padding:
+    10px 30px;
+
+  border-bottom:
+    1px solid
+    rgba(141,244,255,.11);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(141,244,255,.07),
+      rgba(141,244,255,.025),
+      transparent
+    );
+
+  color:
+    rgba(141,244,255,.46);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    8px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    .17em;
+
+  text-transform:
+    uppercase;
+}
+
+/* CYAN TOP EDGE */
+#preflight .preflight-card::after{
+  content:"";
+
+  position:absolute;
+
+  top:0;
+  left:0;
+
+  width:110px;
+  height:2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--ui-cyan),
+      transparent
+    );
+
+  box-shadow:
+    0 0 16px rgba(141,244,255,.38);
+}
+
+/* EYEBROW */
+#preflight .preflight-card .eyebrow{
+  margin:
+    0 0 10px;
+
+  color:
+    rgba(141,244,255,.76);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    9px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    .20em;
+
+  text-transform:
+    uppercase;
+}
+
+/* PRE-FLIGHT TITLE */
+#preflight #preflightTitle{
+  margin:
+    0 0 14px;
+
+  color:
+    #f4f8fb;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    clamp(24px,4vw,38px);
+
+  font-weight:
+    900;
+
+  line-height:
+    .98;
+
+  letter-spacing:
+    -.01em;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    0 0 22px rgba(141,244,255,.07);
+}
+
+/* MISSION BRIEF */
+#preflight #preflightBrief{
+  margin:
+    0 0 22px;
+
+  padding:
+    13px 15px;
+
+  border-left:
+    2px solid
+    var(--ui-gold);
+
+  border-top:
+    1px solid
+    rgba(255,255,255,.045);
+
+  border-right:
+    1px solid
+    rgba(255,255,255,.035);
+
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.035);
+
+  background:
+    rgba(255,208,110,.035);
+
+  color:
+    rgba(224,233,240,.76);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    10px;
+
+  font-weight:
+    500;
+
+  line-height:
+    1.65;
+
+  letter-spacing:
+    .04em;
+}
+
+/* LOADOUT SECTION LABELS */
+#preflight .preflight-card > small{
+  display:block;
+
+  margin:
+    8px 0 8px;
+
+  color:
+    rgba(141,244,255,.48);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    8px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    .14em;
+
+  text-transform:
+    uppercase;
+}
+
+/* OPTION GRID */
+#preflight .preflight-options{
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:
+    8px;
+
+  margin:
+    0 0 18px;
+
+  padding:
+    10px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.10);
+
+  border-radius:
+    10px;
+
+  background:
+    rgba(2,8,15,.50);
+}
+
+/* OPTION */
+#preflight .preflight-options label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  min-height:
+    44px;
+
+  padding:
+    10px 12px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.12);
+
+  border-radius:
+    8px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(9,22,37,.88),
+      rgba(4,11,20,.94)
+    );
+
+  color:
+    rgba(228,237,243,.84);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    9px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    .06em;
+
+  line-height:
+    1.2;
+
+  white-space:
+    nowrap;
+
+  overflow:hidden;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 6px 16px rgba(0,0,0,.18);
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease,
+    color .18s ease;
+}
+
+#preflight .preflight-options label:hover{
+  border-color:
+    rgba(141,244,255,.34);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10,29,46,.94),
+      rgba(4,12,22,.96)
+    );
+
+  color:
+    #d8fbff;
+
+  box-shadow:
+    0 0 18px rgba(141,244,255,.055);
+}
+
+#preflight .preflight-options label input{
+  flex:
+    0 0 auto;
+
+  width:
+    14px;
+
+  height:
+    14px;
+
+  margin:
+    0;
+
+  accent-color:
+    var(--ui-cyan);
+}
+
+#preflight .preflight-options label{
+  text-overflow:
+    ellipsis;
+}
+
+#preflight .preflight-options label:hover{
+  border-color:
+    rgba(141,244,255,.36);
+
+  background:
+    rgba(10,28,44,.84);
+
+  color:
+    #d8fbff;
+
+  box-shadow:
+    0 0 16px rgba(141,244,255,.045);
+}
+
+/* CHECKBOX */
+#preflight .preflight-options input{
+  accent-color:
+    var(--ui-cyan);
+
+  margin-right:
+    9px;
+}
+
+/* SELECT */
+#preflight #flightPassive{
+  width:
+    100%;
+
+  min-height:
+    44px;
+
+  margin:
+    0 0 18px;
+
+  padding:
+    0 12px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.14);
+
+  border-radius:
+    8px;
+
+  background:
+    rgba(4,12,22,.94);
+
+  color:
+    var(--ui-paper);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    9px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    .08em;
+
+  outline:none;
+}
+
+#preflight #flightPassive:focus{
+  border-color:
+    rgba(141,244,255,.48);
+
+  box-shadow:
+    0 0 20px rgba(141,244,255,.07);
+}
+
+/* START DELIVERY */
+#preflight #launchJob{
+  width:
+    100%;
+
+  min-height:
+    52px;
+
+  margin-top:
+    auto;
+
+  padding:
+    0 18px;
+
+  border:
+    1px solid
+    rgba(255,190,70,.36);
+
+  border-radius:
+    9px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,190,70,.13),
+      rgba(255,120,40,.045)
+    );
+
+  color:
+    #ffd36f;
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    10px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    .16em;
+
+  text-transform:
+    uppercase;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 10px 28px rgba(0,0,0,.28);
+
+  cursor:pointer;
+
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
+#preflight #launchJob:hover{
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(255,208,110,.76);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,190,70,.20),
+      rgba(255,120,40,.065)
+    );
+
+  box-shadow:
+    0 0 28px rgba(255,190,70,.10),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+/* CLOSE */
+#preflight .preflight-card .close{
+  z-index:3;
+
+  top:12px;
+  right:14px;
+
+  width:
+    32px;
+
+  height:
+    32px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.14);
+
+  border-radius:
+    6px;
+
+  background:
+    rgba(3,10,19,.72);
+
+  color:
+    rgba(141,244,255,.72);
+
+  font-family:
+    "Orbitron",
+    sans-serif !important;
+
+  font-size:
+    18px;
+
+  line-height:
+    1;
+
+  transition:
+    border-color .18s ease,
+    color .18s ease,
+    box-shadow .18s ease;
+}
+
+#preflight .preflight-card .close:hover{
+  border-color:
+    rgba(255,130,110,.55);
+
+  color:
+    #ff826e;
+
+  box-shadow:
+    0 0 18px rgba(255,130,110,.08);
+}
+
+/* MOBILE */
+@media (max-width:760px){
+
+  #preflight .preflight-card{
+    width:
+      calc(100vw - 18px);
+
+    padding:
+      22px 18px;
+  }
+
+  #preflight .preflight-card::before{
+    margin:
+      -22px -18px 20px;
+
+    padding:
+      9px 18px;
+
+    font-size:
+      7px;
+  }
+
+  #preflight #preflightTitle{
+    font-size:
+      clamp(22px,7vw,32px);
+
+    padding-right:
+      34px;
+  }
+
+  #preflight .preflight-options{
+    grid-template-columns:
+      1fr;
+  }
+
+  #preflight #launchJob{
+    min-height:
+      50px;
+  }
+}
+/* ==========================================================================
+   MAIN MISSIONS // SAME PREMIUM TERMINAL DESIGN
+   ========================================================================== */
+
+#worldMap .mission-card{
+  display:flex;
+  flex-direction:column;
+
+  position:relative;
+  overflow:hidden;
+
+  min-height:250px;
+
+  padding:24px;
+
+  border:
+    1px solid
+    rgba(255,190,70,.28);
+
+  border-radius:18px;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(255,190,70,.12),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      rgba(255,70,70,.07),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(17,20,27,.98),
+      rgba(5,8,13,.98)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 -1px 0 rgba(255,190,70,.05),
+    0 24px 60px rgba(0,0,0,.55),
+    0 0 35px rgba(255,170,40,.05);
+
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+
+
+/* TOP GOLD TERMINAL LINE */
+#worldMap .mission-card::before{
+  content:"";
+
+  position:absolute;
+
+  top:0;
+  left:0;
+  right:0;
+
+  height:3px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,80,60,0),
+      rgba(255,190,70,.95),
+      rgba(255,80,60,0)
+    );
+
+  opacity:.85;
+}
+
+
+/* HOVER */
+#worldMap .mission-card:hover{
+  transform:
+    translateY(-4px);
+
+  border-color:
+    rgba(255,190,70,.58);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 30px 70px rgba(0,0,0,.62),
+    0 0 35px rgba(255,180,60,.10);
+}
+
+
+/* META */
+#worldMap .mission-card > span{
+  display:block;
+
+  margin-bottom:12px;
+
+  padding-right:0;
+
+  color:
+    rgba(255,190,70,.82);
+
+  font:
+    700 10px/1.2
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.16em;
+
+  text-transform:uppercase;
+}
+
+
+/* TITLE */
+#worldMap .mission-card h3{
+  margin:
+    0 0 12px;
+
+  max-width:100%;
+
+  color:
+    #f5f7fa;
+
+  font:
+    800 clamp(20px,2vw,29px)/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.02em;
+
+  text-transform:uppercase;
+}
+
+
+/* DESCRIPTION */
+#worldMap .mission-card p{
+  margin:
+    0 0 20px;
+
+  max-width:90%;
+
+  color:
+    rgba(220,228,238,.72);
+
+  font:
+    500 13px/1.6
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.02em;
+}
+
+
+/* REWARD */
+#worldMap .mission-card > b{
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  width:max-content;
+
+  min-height:30px;
+
+  margin:
+    0 0 18px;
+
+  padding:
+    7px 11px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.20);
+
+  border-radius:6px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(141,244,255,.065),
+      rgba(141,244,255,.025)
+    );
+
+  color:
+    rgba(141,244,255,.95);
+
+  font:
+    700 11px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.12em;
+
+  white-space:nowrap;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 0 14px rgba(141,244,255,.035);
+
+  text-align:center;
+}
+
+
+/* BUTTON */
+#worldMap .mission-card button{
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  width:100%;
+
+  height:48px;
+  min-height:48px;
+  max-height:48px;
+
+  margin-top:auto;
+
+  padding:
+    0 14px;
+
+  border:
+    1px solid
+    rgba(255,190,70,.30);
+
+  border-radius:8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,190,70,.10),
+      rgba(255,130,40,.035)
+    );
+
+  color:
+    #ffd36f;
+
+  font:
+    800 11px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.15em;
+
+  text-transform:uppercase;
+
+  white-space:nowrap;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 24px rgba(0,0,0,.28);
+
+  cursor:pointer;
+
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+
+/* BUTTON HOVER */
+#worldMap .mission-card button:hover:not(:disabled){
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(255,208,110,.75);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,190,70,.18),
+      rgba(255,100,40,.06)
+    );
+
+  box-shadow:
+    0 0 24px rgba(255,190,70,.10),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+
+/* BUTTON ACTIVE */
+#worldMap .mission-card button:active:not(:disabled){
+  transform:
+    translateY(0);
+}
+
+
+/* LOCKED */
+#worldMap .mission-card button:disabled{
+  opacity:.38;
+
+  cursor:not-allowed;
+
+  border-color:
+    rgba(255,255,255,.08);
+
+  background:
+    rgba(255,255,255,.025);
+
+  color:
+    rgba(255,255,255,.40);
+
+  box-shadow:none;
+}
+
+
+/* SAME GRID AS CONTRACTS */
+#worldMap .district-grid:has(.mission-card){
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(280px,1fr)
+    );
+
+  gap:16px;
+}
+
+
+/* MOBILE */
+@media (max-width:760px){
+
+  #worldMap .mission-card{
+    min-height:0;
+
+    padding:19px;
+  }
+
+  #worldMap .mission-card h3{
+    font-size:19px;
+  }
+
+  #worldMap .mission-card p{
+    font-size:12px;
+  }
+
+  #worldMap .district-grid:has(.mission-card){
+    grid-template-columns:1fr;
+
+    gap:12px;
+  }
+}
+/* ==========================================================================
+   WORLD MAP // SHARED TERMINAL CARD SYSTEM
+   CONTRACTS + MISSIONS + CHALLENGES + SPECIAL EVENTS
+   ========================================================================== */
+
+#worldMap .contract-card,
+#worldMap .mission-card,
+#worldMap .challenge-card,
+#worldMap .job-card.special-event{
+  display:flex;
+  flex-direction:column;
+
+  position:relative;
+  overflow:hidden;
+
+  min-height:250px;
+
+  padding:24px;
+
+  border:
+    1px solid
+    rgba(255,190,70,.28);
+
+  border-radius:18px;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(255,190,70,.12),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      rgba(255,70,70,.07),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(17,20,27,.98),
+      rgba(5,8,13,.98)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 -1px 0 rgba(255,190,70,.05),
+    0 24px 60px rgba(0,0,0,.55),
+    0 0 35px rgba(255,170,40,.05);
+
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+
+
+/* TOP GOLD LINE */
+
+#worldMap .mission-card::before,
+#worldMap .challenge-card::before,
+#worldMap .job-card.special-event::before{
+  content:"";
+
+  position:absolute;
+
+  top:0;
+  left:0;
+  right:0;
+
+  height:3px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,80,60,0),
+      rgba(255,190,70,.95),
+      rgba(255,80,60,0)
+    );
+
+  opacity:.85;
+}
+
+
+/* HOVER */
+
+#worldMap .mission-card:hover,
+#worldMap .challenge-card:hover,
+#worldMap .job-card.special-event:hover{
+  transform:
+    translateY(-4px);
+
+  border-color:
+    rgba(255,190,70,.58);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 30px 70px rgba(0,0,0,.62),
+    0 0 35px rgba(255,180,60,.10);
+}
+
+
+/* META */
+
+#worldMap .mission-card > span,
+#worldMap .challenge-card > span,
+#worldMap .job-card.special-event > span{
+  display:block;
+
+  margin-bottom:12px;
+
+  padding-right:0;
+
+  color:
+    rgba(255,190,70,.82);
+
+  font:
+    700 10px/1.2
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.16em;
+
+  text-transform:uppercase;
+}
+
+
+/* TITLES */
+
+#worldMap .mission-card h3,
+#worldMap .challenge-card h3,
+#worldMap .job-card.special-event h3{
+  margin:
+    0 0 12px;
+
+  max-width:100%;
+
+  color:
+    #f5f7fa;
+
+  font:
+    800 clamp(20px,2vw,29px)/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.02em;
+
+  text-transform:uppercase;
+}
+
+
+/* DESCRIPTION */
+
+#worldMap .mission-card p,
+#worldMap .challenge-card p,
+#worldMap .job-card.special-event p{
+  margin:
+    0 0 20px;
+
+  max-width:90%;
+
+  color:
+    rgba(220,228,238,.72);
+
+  font:
+    500 13px/1.6
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.02em;
+}
+
+
+/* REWARD */
+
+#worldMap .mission-card > b,
+#worldMap .challenge-card > b,
+#worldMap .job-card.special-event > b{
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  width:max-content;
+
+  min-height:30px;
+
+  margin:
+    0 0 18px;
+
+  padding:
+    7px 11px;
+
+  border:
+    1px solid
+    rgba(141,244,255,.20);
+
+  border-radius:6px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(141,244,255,.065),
+      rgba(141,244,255,.025)
+    );
+
+  color:
+    rgba(141,244,255,.95);
+
+  font:
+    700 11px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.12em;
+
+  white-space:nowrap;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 0 14px rgba(141,244,255,.035);
+
+  text-align:center;
+}
+
+
+/* BUTTONS */
+
+#worldMap .mission-card button,
+#worldMap .challenge-card button,
+#worldMap .job-card.special-event button{
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  width:100%;
+
+  height:48px;
+  min-height:48px;
+  max-height:48px;
+
+  margin-top:auto;
+
+  padding:
+    0 14px;
+
+  border:
+    1px solid
+    rgba(255,190,70,.30);
+
+  border-radius:8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,190,70,.10),
+      rgba(255,130,40,.035)
+    );
+
+  color:
+    #ffd36f;
+
+  font:
+    800 11px/1
+    "Orbitron",
+    sans-serif !important;
+
+  letter-spacing:.15em;
+
+  text-transform:uppercase;
+
+  white-space:nowrap;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 24px rgba(0,0,0,.28);
+
+  cursor:pointer;
+
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+
+/* BUTTON HOVER */
+
+#worldMap .mission-card button:hover:not(:disabled),
+#worldMap .challenge-card button:hover:not(:disabled),
+#worldMap .job-card.special-event button:hover:not(:disabled){
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(255,208,110,.75);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,190,70,.18),
+      rgba(255,100,40,.06)
+    );
+
+  box-shadow:
+    0 0 24px rgba(255,190,70,.10),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+
+/* BUTTON ACTIVE */
+
+#worldMap .mission-card button:active:not(:disabled),
+#worldMap .challenge-card button:active:not(:disabled),
+#worldMap .job-card.special-event button:active:not(:disabled){
+  transform:
+    translateY(0);
+}
+
+
+/* DISABLED */
+
+#worldMap .mission-card button:disabled,
+#worldMap .challenge-card button:disabled,
+#worldMap .job-card.special-event button:disabled{
+  opacity:.38;
+
+  cursor:not-allowed;
+
+  border-color:
+    rgba(255,255,255,.08);
+
+  background:
+    rgba(255,255,255,.025);
+
+  color:
+    rgba(255,255,255,.40);
+
+  box-shadow:none;
+}
+
+
+/* SAME GRID */
+
+#worldMap .district-grid:has(.mission-card),
+#worldMap .district-grid:has(.challenge-card),
+#worldMap .district-grid:has(.job-card.special-event){
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(280px,1fr)
+    );
+
+  gap:16px;
+}
+
+
+/* MOBILE */
+
+@media (max-width:760px){
+
+  #worldMap .mission-card,
+  #worldMap .challenge-card,
+  #worldMap .job-card.special-event{
+    min-height:0;
+
+    padding:19px;
+  }
+
+  #worldMap .mission-card h3,
+  #worldMap .challenge-card h3,
+  #worldMap .job-card.special-event h3{
+    font-size:19px;
+  }
+
+  #worldMap .mission-card p,
+  #worldMap .challenge-card p,
+  #worldMap .job-card.special-event p{
+    font-size:12px;
+  }
+
+  #worldMap .district-grid:has(.mission-card),
+  #worldMap .district-grid:has(.challenge-card),
+  #worldMap .district-grid:has(.job-card.special-event){
+    grid-template-columns:1fr;
+
+    gap:12px;
+  }
 }

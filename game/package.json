@@ -16,6 +16,7 @@
     "test:cargo-integrity": "node tests/cargo-integrity.mjs",
     "test:city-response": "node tests/city-response.mjs",
     "test:mobile-action-layout": "node tests/mobile-action-layout.mjs",
+    "test:mobile-portrait-startup": "node tests/mobile-portrait-startup.mjs",
     "test:mobile-input-single-owner": "node tests/mobile-input-single-owner-v3.mjs",
     "test:settings-state": "node tests/settings-state-contract.mjs",
     "test:seasonal-progression": "node tests/seasonal-progression-contract.mjs",

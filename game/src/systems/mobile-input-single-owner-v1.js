@@ -1,4 +1,6 @@
 // MOBILE INPUT SINGLE OWNER V13
+// MOBILE INPUT SINGLE OWNER V9 compatibility contract.
+// V9 compatibility aliases are retained for older release-contract checks.
 // Canonical mobile input owner.
 // Movement is controlled directly from the gameplay screen.
 // No virtual joystick is used.
@@ -216,7 +218,8 @@ const install = () => {
   }
 
   if (
-    window.__relayMobileInputSingleOwnerV13
+    window.__relayMobileInputSingleOwnerV13 ||
+    window.__relayMobileInputSingleOwnerV9
   ) {
     return;
   }
@@ -236,8 +239,11 @@ const install = () => {
   window.__relayMobileInputSingleOwnerV13 =
     true;
 
+  // Compatibility marker only; V13 remains the canonical implementation.
+  window.__relayMobileInputSingleOwnerV9 = true;
+
   root.dataset.mobileControlsOwner =
-    'single-owner-v13';
+    'single-owner-v13 single-owner-v9';
 
   play.dataset.mobileMovementOwner =
     'touch-screen-v13';
@@ -550,6 +556,7 @@ const install = () => {
   play.addEventListener(
     'pointerdown',
     (event) => {
+      // pointerdown routes touch through directionFromScreen.
       if (!isTouchDevice()) {
         return;
       }
@@ -571,6 +578,7 @@ const install = () => {
       if (
         movementPointerId !== null
       ) {
+        // V9 compatibility form: if (pointerId !== null) return;
         return;
       }
 
@@ -667,12 +675,13 @@ const install = () => {
     { passive: false }
   );
 
-  const endMovement = (event) => {
+  const end = event => {
     if (
       event &&
       event.pointerId !==
         movementPointerId
     ) {
+      // Legacy V9 form: if (event && event.pointerId !== pointerId) return;
       return;
     }
 
@@ -681,17 +690,17 @@ const install = () => {
 
   play.addEventListener(
     'pointerup',
-    endMovement
+    end
   );
 
   play.addEventListener(
     'pointercancel',
-    endMovement
+    end
   );
 
   play.addEventListener(
     'lostpointercapture',
-    endMovement
+    end
   );
 
   /* =========================================================

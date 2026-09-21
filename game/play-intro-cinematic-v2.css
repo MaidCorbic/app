@@ -1,23 +1,2948 @@
-/* Isolated Play intro. This file only styles #relayPlayCinematic. */
-#relayPlayCinematic{position:fixed;inset:0;z-index:2147483000;display:block;overflow:hidden;background:#02050d;color:#f4fbff;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .45s ease,visibility .45s ease;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-#relayPlayCinematic.is-active{opacity:1;visibility:visible;pointer-events:auto}
-#relayPlayCinematic .ric-art{position:absolute;inset:-4%;background:linear-gradient(180deg,rgba(1,5,14,.42),rgba(1,5,12,.82)),url('./assets/loading.jpg') center/cover no-repeat;filter:saturate(.8) contrast(1.08);transform:scale(1.08);animation:ricArt 10s ease-out forwards}
-#relayPlayCinematic .ric-art:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,transparent 0,rgba(1,4,10,.18) 34%,rgba(0,0,0,.86) 100%)}
-#relayPlayCinematic .ric-grid{position:absolute;inset:0;opacity:.25;background:linear-gradient(rgba(25,200,245,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(25,200,245,.08) 1px,transparent 1px);background-size:54px 54px;transform:perspective(700px) rotateX(58deg) scale(1.7) translateY(24%);animation:ricGrid 10s linear forwards}
-#relayPlayCinematic .ric-scan{position:absolute;inset:-20% 0;background:linear-gradient(transparent 48%,rgba(25,200,245,.12) 50%,transparent 52%);background-size:100% 12px;opacity:.22;mix-blend-mode:screen;animation:ricScan 2.2s linear infinite}
-#relayPlayCinematic .ric-noise{position:absolute;inset:0;opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");mix-blend-mode:screen}
-#relayPlayCinematic .ric-ui{position:absolute;inset:0;z-index:4;display:grid;place-items:center;padding:clamp(24px,6vw,80px);box-sizing:border-box;text-align:center}
-#relayPlayCinematic .ric-center{width:min(900px,92vw)}
-#relayPlayCinematic .ric-kicker{font-size:clamp(9px,1.5vw,13px);letter-spacing:.34em;color:#19c8f5;min-height:18px;text-shadow:0 0 20px rgba(25,200,245,.55);opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease}
-#relayPlayCinematic .ric-kicker.show{opacity:1;transform:none}
-#relayPlayCinematic .ric-title{margin:22px 0 0;font-family:Inter,system-ui,sans-serif;font-size:clamp(50px,10vw,132px);line-height:.82;letter-spacing:-.075em;font-weight:900;text-transform:uppercase;opacity:0;transform:scale(.94) translateY(18px);transition:opacity .75s cubic-bezier(.2,.8,.2,1),transform .75s cubic-bezier(.2,.8,.2,1);text-shadow:0 0 36px rgba(25,200,245,.18)}
-#relayPlayCinematic .ric-title.show{opacity:1;transform:none}.ric-title em{font-style:normal;color:#19c8f5;text-shadow:0 0 42px rgba(25,200,245,.58)}
-#relayPlayCinematic .ric-copy{margin:28px auto 0;max-width:720px;min-height:58px;font-size:clamp(11px,1.7vw,16px);line-height:1.8;letter-spacing:.12em;color:#c0d0d9;opacity:0;transition:opacity .6s ease}.ric-copy.show{opacity:1}
-#relayPlayCinematic .ric-mission{width:min(640px,88vw);margin:38px auto 0;padding:20px 24px;border:1px solid rgba(25,200,245,.38);background:linear-gradient(135deg,rgba(3,16,28,.78),rgba(2,6,13,.9));box-shadow:0 0 42px rgba(25,200,245,.08),inset 0 0 30px rgba(25,200,245,.04);box-sizing:border-box;opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}.ric-mission.show{opacity:1;transform:none}
-#relayPlayCinematic .ric-mission small{display:block;color:#19c8f5;font-size:9px;letter-spacing:.24em}.ric-mission b{display:block;margin-top:9px;font-family:Inter,system-ui,sans-serif;font-size:clamp(19px,3.4vw,32px);letter-spacing:.08em}.ric-mission span{display:block;margin-top:7px;color:#91a8b5;font-size:9px;letter-spacing:.18em}
-#relayPlayCinematic .ric-footer{position:absolute;left:50%;bottom:max(24px,env(safe-area-inset-bottom,24px));transform:translateX(-50%);z-index:5;font-size:9px;letter-spacing:.28em;color:#91a8b5;white-space:nowrap;opacity:0;transition:opacity .6s ease}.ric-footer.show{opacity:1}.ric-footer i{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:9px;background:#19c8f5;box-shadow:0 0 14px #19c8f5;animation:ricBlink .8s infinite alternate}
-#relayPlayCinematic .ric-flash{position:absolute;inset:0;z-index:9;background:#e9fcff;opacity:0;pointer-events:none}.ric-flash.fire{animation:ricFlash .55s ease-out forwards}
-#relayPlayCinematic.is-exiting{opacity:0;visibility:hidden;transition:opacity .6s ease,visibility .6s ease}
-@keyframes ricArt{from{transform:scale(1.08)}to{transform:scale(1.18) translate3d(-1%,1%,0)}}@keyframes ricGrid{from{transform:perspective(700px) rotateX(58deg) scale(1.7) translateY(30%)}to{transform:perspective(700px) rotateX(58deg) scale(1.7) translateY(5%)}}@keyframes ricScan{from{transform:translateY(-20%)}to{transform:translateY(20%)}}@keyframes ricBlink{to{opacity:.25}}@keyframes ricFlash{0%{opacity:0}20%{opacity:.88}100%{opacity:0}}
-@media(max-width:700px){#relayPlayCinematic .ric-art{background-position:center}.ric-grid{opacity:.16!important}.ric-copy{max-width:92vw}.ric-mission{margin-top:28px!important;padding:17px 16px!important}.ric-footer{font-size:8px}}
-@media(prefers-reduced-motion:reduce){#relayPlayCinematic *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+/* =========================================================
+   RELAY RUNNER
+   PLAY CINEMATIC V4
+   PREMIUM TACTICAL / CINEMATIC / ISOLATED
+
+   Scope:
+   ONLY #relayPlayCinematic
+
+   Gameplay, Phaser, HUD, pause, settings and input
+   remain untouched.
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+
+/* =========================================================
+   ROOT
+   ========================================================= */
+
+#relayPlayCinematic {
+
+  position: fixed;
+  inset: 0;
+
+  z-index: 2147483000;
+
+  width: 100vw;
+  height: 100vh;
+  width: 100dvw;
+  height: 100dvh;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  background:
+    #02050b;
+
+  color:
+    #f4fbff;
+
+  opacity: 0;
+  visibility: hidden;
+
+  pointer-events: none;
+
+  isolation: isolate;
+
+  font-family:
+    'Orbitron',
+    system-ui,
+    sans-serif;
+
+  letter-spacing:
+    .05em;
+
+  transition:
+    opacity .42s cubic-bezier(.16,1,.3,1),
+    visibility .42s ease;
+}
+
+
+/* =========================================================
+   ACTIVE
+   ========================================================= */
+
+#relayPlayCinematic.is-active {
+
+  opacity: 1;
+  visibility: visible;
+
+  pointer-events: auto;
+}
+
+
+/* =========================================================
+   ART
+   ========================================================= */
+
+#relayPlayCinematic .ric-art {
+
+  position: absolute;
+  inset: -7%;
+
+  background:
+
+    linear-gradient(
+      180deg,
+      rgba(1,4,10,.22) 0%,
+      rgba(1,4,10,.46) 38%,
+      rgba(1,4,10,.78) 70%,
+      rgba(1,4,10,.97) 100%
+    ),
+
+    url('./assets/loading.jpg')
+      center center /
+      cover
+      no-repeat;
+
+  filter:
+    saturate(.84)
+    contrast(1.10)
+    brightness(.68);
+
+  transform:
+    scale(1.055);
+
+  animation:
+    ricArtDrift 12s
+    cubic-bezier(.16,1,.3,1)
+    forwards;
+
+  will-change:
+    transform;
+}
+
+
+/* =========================================================
+   ART VIGNETTE
+   ========================================================= */
+
+#relayPlayCinematic .ric-art::before {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  background:
+
+    radial-gradient(
+      circle at 50% 42%,
+      transparent 0%,
+      rgba(0,0,0,.08) 24%,
+      rgba(0,0,0,.46) 58%,
+      rgba(0,0,0,.92) 100%
+    ),
+
+    linear-gradient(
+      90deg,
+      rgba(1,5,11,.82),
+      transparent 22%,
+      transparent 78%,
+      rgba(1,5,11,.82)
+    );
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   CYAN ATMOSPHERIC LAYER
+   ========================================================= */
+
+#relayPlayCinematic .ric-art::after {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  background:
+
+    radial-gradient(
+      ellipse at 50% 44%,
+      rgba(44,214,255,.085),
+      transparent 50%
+    ),
+
+    linear-gradient(
+      180deg,
+      rgba(32,186,235,.02),
+      transparent 32%,
+      rgba(18,131,190,.03) 100%
+    );
+
+  mix-blend-mode:
+    screen;
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   TACTICAL GRID
+   ========================================================= */
+
+#relayPlayCinematic .ric-grid {
+
+  position:
+    absolute;
+
+  inset:
+    -24%;
+
+  opacity:
+    .085;
+
+  background:
+
+    linear-gradient(
+      rgba(67,221,255,.045) 1px,
+      transparent 1px
+    ),
+
+    linear-gradient(
+      90deg,
+      rgba(67,221,255,.045) 1px,
+      transparent 1px
+    );
+
+  background-size:
+    58px 58px;
+
+  transform:
+
+    perspective(820px)
+    rotateX(58deg)
+    scale(1.72)
+    translateY(28%);
+
+  transform-origin:
+    center bottom;
+
+  animation:
+    ricGridTravel 11s
+    linear
+    forwards;
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   GRID HORIZON
+   ========================================================= */
+
+#relayPlayCinematic .ric-grid::after {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  left:
+    0;
+
+  right:
+    0;
+
+  top:
+    49%;
+
+  height:
+    24%;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(58,220,255,.05),
+      transparent
+    );
+
+  filter:
+    blur(16px);
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   SCANLINES
+   ========================================================= */
+
+#relayPlayCinematic .ric-scan {
+
+  position:
+    absolute;
+
+  inset:
+    -20% 0;
+
+  background:
+    linear-gradient(
+      transparent 46%,
+      rgba(69,222,255,.03) 50%,
+      transparent 54%
+    );
+
+  background-size:
+    100% 12px;
+
+  opacity:
+    .065;
+
+  mix-blend-mode:
+    screen;
+
+  animation:
+    ricScanTravel 2.8s
+    linear
+    infinite;
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   NOISE
+   ========================================================= */
+
+#relayPlayCinematic .ric-noise {
+
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  opacity:
+    .04;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.72'/%3E%3C/svg%3E");
+
+  mix-blend-mode:
+    screen;
+
+  animation:
+    ricNoiseShift .28s
+    steps(2)
+    infinite;
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   SIGNAL SWEEP
+   ========================================================= */
+
+#relayPlayCinematic .ric-signal-sweep {
+
+  position:
+    absolute;
+
+  left:
+    -20%;
+
+  right:
+    -20%;
+
+  top:
+    -10%;
+
+  height:
+    2px;
+
+  background:
+
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(82,225,255,.02) 18%,
+      rgba(82,225,255,.42) 50%,
+      rgba(82,225,255,.02) 82%,
+      transparent
+    );
+
+  box-shadow:
+    0 0 18px
+    rgba(56,189,248,.18);
+
+  opacity:
+    .25;
+
+  transform:
+    translateY(-10vh);
+
+  animation:
+    ricSignalSweep 4.8s
+    ease-in-out
+    infinite;
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   UI ROOT
+   ========================================================= */
+
+#relayPlayCinematic .ric-ui {
+
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  z-index:
+    20;
+
+  display:
+    grid;
+
+  place-items:
+    center;
+
+  box-sizing:
+    border-box;
+
+  padding:
+    clamp(
+      70px,
+      9vh,
+      110px
+    )
+    clamp(
+      18px,
+      4vw,
+      60px
+    )
+    clamp(
+      54px,
+      8vh,
+      90px
+    );
+
+  text-align:
+    center;
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   MAIN CENTER
+   ========================================================= */
+
+#relayPlayCinematic .ric-center {
+
+  position:
+    relative;
+
+  width:
+    min(
+      860px,
+      100%
+    );
+
+  min-height:
+    0;
+
+  max-height:
+    calc(100dvh - 120px);
+
+  margin:
+    0 auto;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  box-sizing:
+    border-box;
+
+  transform:
+    translateY(-2vh);
+}
+
+
+/* =========================================================
+   TOP SYSTEM BAR
+   ========================================================= */
+
+#relayPlayCinematic .ric-topbar {
+
+  position:
+    absolute;
+
+  top:
+    max(
+      18px,
+      env(safe-area-inset-top, 18px)
+    );
+
+  left:
+    clamp(
+      18px,
+      3vw,
+      42px
+    );
+
+  right:
+    clamp(
+      18px,
+      3vw,
+      42px
+    );
+
+  z-index:
+    40;
+
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr auto 1fr;
+
+  align-items:
+    center;
+
+  gap:
+    18px;
+
+  color:
+    rgba(164,193,205,.62);
+
+  font-family:
+    'Orbitron',
+    system-ui,
+    sans-serif;
+
+  font-size:
+    7px;
+
+  line-height:
+    1;
+
+  font-weight:
+    600;
+
+  letter-spacing:
+    .22em;
+
+  text-transform:
+    uppercase;
+
+  opacity:
+    0;
+
+  transform:
+    translateY(-8px);
+
+  transition:
+    opacity .55s ease,
+    transform .55s
+    cubic-bezier(.16,1,.3,1);
+}
+
+
+#relayPlayCinematic.is-active
+.ric-topbar {
+
+  opacity:
+    1;
+
+  transform:
+    translateY(0);
+}
+
+
+#relayPlayCinematic .ric-topbar-left {
+  text-align:
+    left;
+}
+
+
+#relayPlayCinematic .ric-topbar-center {
+
+  color:
+    rgba(82,220,255,.76);
+
+  text-align:
+    center;
+}
+
+
+#relayPlayCinematic .ric-topbar-right {
+  text-align:
+    right;
+}
+
+
+/* =========================================================
+   TACTICAL CORNERS
+   ========================================================= */
+
+#relayPlayCinematic .ric-corners {
+
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  z-index:
+    15;
+
+  pointer-events:
+    none;
+}
+
+
+#relayPlayCinematic .ric-corner {
+
+  position:
+    absolute;
+
+  width:
+    clamp(
+      42px,
+      5vw,
+      72px
+    );
+
+  height:
+    clamp(
+      42px,
+      5vw,
+      72px
+    );
+
+  opacity:
+    .44;
+}
+
+
+#relayPlayCinematic .ric-corner::before,
+#relayPlayCinematic .ric-corner::after {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  background:
+    rgba(132,160,171,.46);
+
+  box-shadow:
+    0 0 8px
+    rgba(56,189,248,.09);
+}
+
+
+#relayPlayCinematic .ric-corner::before {
+
+  width:
+    100%;
+
+  height:
+    1px;
+}
+
+
+#relayPlayCinematic .ric-corner::after {
+
+  width:
+    1px;
+
+  height:
+    100%;
+}
+
+
+/* TOP LEFT */
+
+#relayPlayCinematic .ric-corner-tl {
+
+  top:
+    max(
+      46px,
+      env(safe-area-inset-top, 46px)
+    );
+
+  left:
+    clamp(
+      18px,
+      3vw,
+      42px
+    );
+}
+
+
+#relayPlayCinematic .ric-corner-tl::before,
+#relayPlayCinematic .ric-corner-tl::after {
+
+  left:
+    0;
+
+  top:
+    0;
+}
+
+
+/* TOP RIGHT */
+
+#relayPlayCinematic .ric-corner-tr {
+
+  top:
+    max(
+      46px,
+      env(safe-area-inset-top, 46px)
+    );
+
+  right:
+    clamp(
+      18px,
+      3vw,
+      42px
+    );
+}
+
+
+#relayPlayCinematic .ric-corner-tr::before {
+
+  right:
+    0;
+
+  top:
+    0;
+}
+
+
+#relayPlayCinematic .ric-corner-tr::after {
+
+  right:
+    0;
+
+  top:
+    0;
+}
+
+
+/* BOTTOM LEFT */
+
+#relayPlayCinematic .ric-corner-bl {
+
+  bottom:
+    max(
+      24px,
+      env(safe-area-inset-bottom, 24px)
+    );
+
+  left:
+    clamp(
+      18px,
+      3vw,
+      42px
+    );
+}
+
+
+#relayPlayCinematic .ric-corner-bl::before {
+
+  left:
+    0;
+
+  bottom:
+    0;
+}
+
+
+#relayPlayCinematic .ric-corner-bl::after {
+
+  left:
+    0;
+
+  bottom:
+    0;
+}
+
+
+/* BOTTOM RIGHT */
+
+#relayPlayCinematic .ric-corner-br {
+
+  bottom:
+    max(
+      24px,
+      env(safe-area-inset-bottom, 24px)
+    );
+
+  right:
+    clamp(
+      18px,
+      3vw,
+      42px
+    );
+}
+
+
+#relayPlayCinematic .ric-corner-br::before {
+
+  right:
+    0;
+
+  bottom:
+    0;
+}
+
+
+#relayPlayCinematic .ric-corner-br::after {
+
+  right:
+    0;
+
+  bottom:
+    0;
+}
+
+
+/* =========================================================
+   SIGNAL PANEL
+   ========================================================= */
+
+#relayPlayCinematic .ric-signal-panel {
+
+  position:
+    absolute;
+
+  left:
+    clamp(
+      18px,
+      3vw,
+      42px
+    );
+
+  top:
+    50%;
+
+  width:
+    min(
+      220px,
+      22vw
+    );
+
+  padding:
+    13px 14px;
+
+  box-sizing:
+    border-box;
+
+  border:
+    1px solid
+    rgba(145,176,190,.14);
+
+  border-left:
+    2px solid
+    rgba(56,189,248,.34);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(5,19,31,.76),
+      rgba(2,7,14,.80)
+    );
+
+  box-shadow:
+    inset 0 0 24px
+    rgba(56,189,248,.018),
+
+    0 18px 38px
+    rgba(0,0,0,.20);
+
+  text-align:
+    left;
+
+  opacity:
+    0;
+
+  transform:
+    translateY(-50%)
+    translateX(-18px);
+
+  transition:
+    opacity .60s ease,
+    transform .70s
+    cubic-bezier(.16,1,.3,1);
+
+  pointer-events:
+    none;
+}
+
+
+#relayPlayCinematic.is-active
+.ric-signal-panel {
+
+  opacity:
+    1;
+
+  transform:
+    translateY(-50%)
+    translateX(0);
+}
+
+
+#relayPlayCinematic .ric-signal-header {
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    5px;
+}
+
+
+#relayPlayCinematic
+.ric-signal-header small {
+
+  color:
+    rgba(82,220,255,.66);
+
+  font-size:
+    6px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    .18em;
+
+  text-transform:
+    uppercase;
+}
+
+
+#relayPlayCinematic
+.ric-signal-header strong {
+
+  color:
+    rgba(230,244,249,.84);
+
+  font-size:
+    8px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    .10em;
+}
+
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+#relayPlayCinematic .ric-progress {
+
+  position:
+    relative;
+
+  width:
+    100%;
+
+  height:
+    3px;
+
+  margin-top:
+    11px;
+
+  overflow:
+    hidden;
+
+  background:
+    rgba(255,255,255,.055);
+}
+
+
+#relayPlayCinematic .ric-progress i {
+
+  display:
+    block;
+
+  width:
+    0;
+
+  height:
+    100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(72,154,177,.30),
+      rgba(102,218,237,.74)
+    );
+
+  box-shadow:
+    0 0 10px
+    rgba(56,189,248,.18);
+
+  transition:
+    width .36s
+    cubic-bezier(.16,1,.3,1);
+}
+
+
+#relayPlayCinematic .ric-signal-status {
+
+  display:
+    block;
+
+  margin-top:
+    8px;
+
+  color:
+    rgba(178,205,216,.68);
+
+  font-size:
+    6px;
+
+  font-weight:
+    600;
+
+  letter-spacing:
+    .13em;
+
+  text-transform:
+    uppercase;
+}
+
+
+/* =========================================================
+   SIDE DATA
+   ========================================================= */
+
+#relayPlayCinematic .ric-side-data {
+
+  position:
+    absolute;
+
+  z-index:
+    30;
+
+  color:
+    rgba(166,193,205,.42);
+
+  font-family:
+    'Orbitron',
+    system-ui,
+    sans-serif;
+
+  font-size:
+    6px;
+
+  line-height:
+    1.9;
+
+  font-weight:
+    500;
+
+  letter-spacing:
+    .12em;
+
+  text-transform:
+    uppercase;
+
+  opacity:
+    0;
+
+  transition:
+    opacity .7s ease;
+}
+
+
+#relayPlayCinematic.is-active
+.ric-side-data {
+
+  opacity:
+    1;
+}
+
+
+#relayPlayCinematic .ric-side-data-left {
+
+  left:
+    clamp(
+      18px,
+      3vw,
+      42px
+    );
+
+  bottom:
+    max(
+      34px,
+      env(safe-area-inset-bottom, 34px)
+    );
+
+  text-align:
+    left;
+}
+
+
+#relayPlayCinematic .ric-side-data-right {
+
+  right:
+    clamp(
+      18px,
+      3vw,
+      42px
+    );
+
+  bottom:
+    max(
+      34px,
+      env(safe-area-inset-bottom, 34px)
+    );
+
+  text-align:
+    right;
+}
+
+
+/* =========================================================
+   KICKER
+   ========================================================= */
+
+#relayPlayCinematic .ric-kicker {
+
+  min-height:
+    16px;
+
+  max-width:
+    90vw;
+
+  overflow:
+    hidden;
+
+  color:
+    rgba(166,193,205,.78);
+
+  font-family:
+    'Orbitron',
+    system-ui,
+    sans-serif;
+
+  font-size:
+    clamp(
+      7px,
+      .85vw,
+      10px
+    );
+
+  font-weight:
+    700;
+
+  line-height:
+    1.3;
+
+  letter-spacing:
+    .30em;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    0 0 18px
+    rgba(56,189,248,.10);
+
+  opacity:
+    0;
+
+  transform:
+    translateY(10px);
+
+  transition:
+    opacity .52s ease,
+    transform .52s
+    cubic-bezier(.16,1,.3,1);
+
+  white-space:
+    nowrap;
+}
+
+
+#relayPlayCinematic .ric-kicker.show {
+
+  opacity:
+    1;
+
+  transform:
+    translateY(0);
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+#relayPlayCinematic .ric-title {
+
+  position:
+    relative;
+
+  width:
+    100%;
+
+  max-width:
+    980px;
+
+  margin:
+    15px 0 0;
+
+  padding:
+    0;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  box-sizing:
+    border-box;
+
+  color:
+    #f5fbff;
+
+  font-family:
+    'Orbitron',
+    system-ui,
+    sans-serif;
+
+  font-size:
+    clamp(
+      42px,
+      7.8vw,
+      104px
+    );
+
+  font-weight:
+    900;
+
+  line-height:
+    .86;
+
+  letter-spacing:
+    -.045em;
+
+  text-transform:
+    uppercase;
+
+  text-align:
+    center;
+
+  opacity:
+    0;
+
+  transform:
+    scale(.94)
+    translateY(18px);
+
+  transition:
+    opacity .72s
+    cubic-bezier(.16,1,.3,1),
+
+    transform .72s
+    cubic-bezier(.16,1,.3,1);
+
+  text-shadow:
+
+    0 8px 30px
+    rgba(0,0,0,.58),
+
+    0 0 34px
+    rgba(25,200,245,.12);
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+#relayPlayCinematic .ric-title.show {
+
+  opacity:
+    1;
+
+  transform:
+    scale(1)
+    translateY(0);
+}
+
+
+/* =========================================================
+   TITLE BRAND
+   ========================================================= */
+
+#relayPlayCinematic .ric-title-brand {
+
+  display:
+    block;
+
+  margin-bottom:
+    clamp(
+      12px,
+      1.5vw,
+      20px
+    );
+
+  color:
+    rgba(196,216,225,.58);
+
+  font-family:
+    'Orbitron',
+    system-ui,
+    sans-serif;
+
+  font-size:
+    clamp(
+      6px,
+      .8vw,
+      9px
+    );
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    .35em;
+
+  line-height:
+    1;
+
+  text-shadow:
+    0 0 14px
+    rgba(56,189,248,.16);
+}
+
+
+/* =========================================================
+   TITLE LINES
+   ========================================================= */
+
+#relayPlayCinematic .ric-title-line {
+
+  display:
+    block;
+
+  min-height:
+    1.05em;
+
+  color:
+    #f5fbff;
+
+  white-space:
+    nowrap;
+}
+
+
+#relayPlayCinematic .ric-title-final {
+
+  color:
+    #eaf4f8;
+
+  text-shadow:
+
+    0 0 18px
+    rgba(255,255,255,.07),
+
+    0 0 40px
+    rgba(56,189,248,.07);
+}
+
+
+/* =========================================================
+   TYPEWRITER CHARACTERS
+   ========================================================= */
+
+#relayPlayCinematic .ric-char {
+
+  display:
+    inline-block;
+
+  opacity:
+    0;
+
+  transform:
+    translateY(9px)
+    scale(.96);
+
+  filter:
+    blur(3px);
+
+  animation:
+    ricCharReveal .18s
+    cubic-bezier(.16,1,.3,1)
+    forwards;
+
+  will-change:
+    transform,
+    opacity,
+    filter;
+}
+
+
+/* =========================================================
+   CHARACTER GLITCH
+   ========================================================= */
+
+#relayPlayCinematic .ric-char-glitch {
+
+  animation:
+
+    ricCharReveal .18s
+    cubic-bezier(.16,1,.3,1)
+    forwards,
+
+    ricCharGlitch .20s
+    steps(2)
+    .07s
+    1;
+}
+
+
+/* =========================================================
+   CURSOR
+   ========================================================= */
+
+#relayPlayCinematic .ric-cursor {
+
+  display:
+    inline-block;
+
+  width:
+    clamp(
+      3px,
+      .20vw,
+      4px
+    );
+
+  height:
+    .72em;
+
+  margin-left:
+    8px;
+
+  background:
+    #67e8f9;
+
+  vertical-align:
+    middle;
+
+  box-shadow:
+    0 0 14px
+    rgba(56,189,248,.58);
+
+  opacity:
+    .92;
+
+  animation:
+    ricCursorBlink .68s
+    steps(1)
+    infinite;
+}
+
+
+#relayPlayCinematic .ric-title.typing-complete
+.ric-cursor {
+
+  animation:
+    ricCursorBlink .72s
+    steps(1)
+    3;
+
+  animation-fill-mode:
+    forwards;
+}
+
+
+/* =========================================================
+   TITLE IMPACT
+   ========================================================= */
+
+#relayPlayCinematic
+.ric-title.ric-title-impact {
+
+  animation:
+    ricTitleImpact .23s
+    cubic-bezier(.16,1,.3,1)
+    both;
+}
+
+
+/* =========================================================
+   COPY
+   ========================================================= */
+
+#relayPlayCinematic .ric-copy {
+
+  width:
+    min(
+      660px,
+      88vw
+    );
+
+  min-height:
+    31px;
+
+  margin:
+    15px auto 0;
+
+  box-sizing:
+    border-box;
+
+  color:
+    #b8cad4;
+
+  font-family:
+    'Orbitron',
+    system-ui,
+    sans-serif;
+
+  font-size:
+    clamp(
+      7px,
+      .92vw,
+      11px
+    );
+
+  font-weight:
+    500;
+
+  line-height:
+    1.72;
+
+  letter-spacing:
+    .10em;
+
+  text-align:
+    center;
+
+  text-transform:
+    uppercase;
+
+  opacity:
+    0;
+
+  transform:
+    translateY(8px);
+
+  transition:
+    opacity .60s ease,
+    transform .60s
+    cubic-bezier(.16,1,.3,1);
+}
+
+
+#relayPlayCinematic .ric-copy.show {
+
+  opacity:
+    1;
+
+  transform:
+    translateY(0);
+}
+
+
+#relayPlayCinematic .ric-copy strong {
+
+  color:
+    rgba(240,249,252,.95);
+
+  font-weight:
+    800;
+
+  text-shadow:
+    0 0 12px
+    rgba(56,189,248,.10);
+}
+
+
+/* =========================================================
+   MISSION CARD
+   ========================================================= */
+
+#relayPlayCinematic .ric-mission {
+
+  position:
+    relative;
+
+  width:
+    min(
+      640px,
+      86vw
+    );
+
+  margin:
+    22px auto 0;
+
+  padding:
+    19px 21px 18px;
+
+  box-sizing:
+    border-box;
+
+  overflow:
+    hidden;
+
+  border:
+    1px solid
+    rgba(126,166,181,.18);
+
+  border-left:
+    2px solid
+    rgba(56,189,248,.42);
+
+  background:
+
+    linear-gradient(
+      145deg,
+      rgba(5,21,34,.90),
+      rgba(2,7,14,.95)
+    );
+
+  box-shadow:
+
+    inset 0 1px 0
+    rgba(255,255,255,.045),
+
+    inset 0 0 36px
+    rgba(25,200,245,.028),
+
+    0 24px 60px
+    rgba(0,0,0,.40),
+
+    0 0 30px
+    rgba(56,189,248,.035);
+
+  text-align:
+    left;
+
+  opacity:
+    0;
+
+  transform:
+    translateY(18px)
+    scale(.985);
+
+  transition:
+    opacity .68s
+    cubic-bezier(.16,1,.3,1),
+
+    transform .68s
+    cubic-bezier(.16,1,.3,1);
+}
+
+
+/* CARD TOP EDGE */
+
+#relayPlayCinematic .ric-mission::before {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  left:
+    0;
+
+  top:
+    0;
+
+  width:
+    100%;
+
+  height:
+    2px;
+
+  background:
+
+    linear-gradient(
+      90deg,
+      rgba(56,189,248,.75),
+      rgba(56,189,248,.24),
+      transparent 74%
+    );
+
+  box-shadow:
+    0 0 15px
+    rgba(56,189,248,.20);
+
+  pointer-events:
+    none;
+}
+
+
+/* CARD RIGHT LIGHT */
+
+#relayPlayCinematic .ric-mission::after {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  top:
+    0;
+
+  right:
+    0;
+
+  bottom:
+    0;
+
+  width:
+    28%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.016)
+    );
+
+  pointer-events:
+    none;
+}
+
+
+#relayPlayCinematic .ric-mission.show {
+
+  opacity:
+    1;
+
+  transform:
+    translateY(0)
+    scale(1);
+}
+
+
+/* =========================================================
+   REMOVE CHAPTER SEGMENT
+   ========================================================= */
+
+#relayPlayCinematic .ric-mission > small {
+
+  display:
+    none !important;
+}
+
+
+/* =========================================================
+   MISSION TITLE
+   ========================================================= */
+
+#relayPlayCinematic .ric-mission > b {
+
+  display:
+    block;
+
+  margin:
+    0;
+
+  color:
+    #f3f9fc;
+
+  font-family:
+    'Orbitron',
+    system-ui,
+    sans-serif;
+
+  font-size:
+    clamp(
+      18px,
+      2.8vw,
+      28px
+    );
+
+  font-weight:
+    800;
+
+  line-height:
+    1.08;
+
+  letter-spacing:
+    .055em;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    0 0 20px
+    rgba(56,189,248,.08);
+}
+
+
+/* =========================================================
+   MISSION OBJECTIVE
+   ========================================================= */
+
+#relayPlayCinematic .ric-mission
+.ric-mission-objective,
+#relayPlayCinematic .ric-mission > span {
+
+  display:
+    block;
+
+  margin-top:
+    9px;
+
+  color:
+    rgba(149,177,190,.82);
+
+  font-family:
+    'Orbitron',
+    system-ui,
+    sans-serif;
+
+  font-size:
+    7px;
+
+  font-weight:
+    600;
+
+  line-height:
+    1.6;
+
+  letter-spacing:
+    .15em;
+
+  text-transform:
+    uppercase;
+}
+
+
+/* =========================================================
+   MISSION DATA
+   ========================================================= */
+
+#relayPlayCinematic .ric-mission-data {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0,1fr)
+    );
+
+  gap:
+    0;
+
+  margin-top:
+    16px;
+
+  padding-top:
+    12px;
+
+  border-top:
+    1px solid
+    rgba(255,255,255,.05);
+}
+
+
+#relayPlayCinematic
+.ric-mission-data > div {
+
+  min-width:
+    0;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    5px;
+
+  padding:
+    0 10px;
+
+  border-right:
+    1px solid
+    rgba(255,255,255,.045);
+}
+
+
+#relayPlayCinematic
+.ric-mission-data > div:first-child {
+
+  padding-left:
+    0;
+}
+
+
+#relayPlayCinematic
+.ric-mission-data > div:last-child {
+
+  border-right:
+    0;
+
+  padding-right:
+    0;
+}
+
+
+#relayPlayCinematic
+.ric-mission-data small {
+
+  color:
+    rgba(120,149,163,.68);
+
+  font-size:
+    5px;
+
+  font-weight:
+    600;
+
+  letter-spacing:
+    .16em;
+
+  text-transform:
+    uppercase;
+}
+
+
+#relayPlayCinematic
+.ric-mission-data strong {
+
+  min-width:
+    0;
+
+  overflow:
+    hidden;
+
+  color:
+    rgba(230,242,247,.86);
+
+  font-size:
+    6px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    .08em;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+}
+
+
+/* =========================================================
+   FOOTER — REMOVED
+   ========================================================= */
+
+#relayPlayCinematic .ric-footer {
+
+  display:
+    none !important;
+}
+
+
+/* =========================================================
+   FLASH
+   ========================================================= */
+
+#relayPlayCinematic .ric-flash {
+
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  z-index:
+    100;
+
+  background:
+    #e9fcff;
+
+  opacity:
+    0;
+
+  pointer-events:
+    none;
+}
+
+
+#relayPlayCinematic .ric-flash.fire {
+
+  animation:
+    ricFlash .55s
+    ease-out
+    forwards;
+}
+
+
+#relayPlayCinematic .ric-flash.micro {
+
+  animation:
+    ricMicroFlash .20s
+    ease-out
+    forwards;
+}
+
+
+/* =========================================================
+   EXIT
+   ========================================================= */
+
+#relayPlayCinematic.is-exiting {
+
+  opacity:
+    0;
+
+  visibility:
+    hidden;
+
+  pointer-events:
+    none;
+
+  transition:
+    opacity .58s
+    cubic-bezier(.4,0,1,1),
+
+    visibility .58s;
+}
+
+
+/* =========================================================
+   LAUNCH
+   ========================================================= */
+
+#relayPlayCinematic.launch .ric-ui {
+
+  animation:
+    ricLaunchUI .34s
+    cubic-bezier(.16,1,.3,1)
+    both;
+}
+
+
+#relayPlayCinematic.launch .ric-art {
+
+  animation:
+    ricLaunchArt .34s
+    cubic-bezier(.16,1,.3,1)
+    both;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes ricArtDrift {
+
+  from {
+    transform:
+      scale(1.055)
+      translate3d(0,0,0);
+  }
+
+  to {
+    transform:
+      scale(1.13)
+      translate3d(-.8%,.7%,0);
+  }
+}
+
+
+@keyframes ricGridTravel {
+
+  from {
+    transform:
+      perspective(820px)
+      rotateX(58deg)
+      scale(1.72)
+      translateY(30%);
+  }
+
+  to {
+    transform:
+      perspective(820px)
+      rotateX(58deg)
+      scale(1.72)
+      translateY(6%);
+  }
+}
+
+
+@keyframes ricScanTravel {
+
+  from {
+    transform:
+      translateY(-18%);
+  }
+
+  to {
+    transform:
+      translateY(18%);
+  }
+}
+
+
+@keyframes ricNoiseShift {
+
+  0% {
+    transform:
+      translate3d(0,0,0);
+  }
+
+  25% {
+    transform:
+      translate3d(-1%,1%,0);
+  }
+
+  50% {
+    transform:
+      translate3d(1%,-1%,0);
+  }
+
+  75% {
+    transform:
+      translate3d(.5%,1%,0);
+  }
+
+  100% {
+    transform:
+      translate3d(0,0,0);
+  }
+}
+
+
+@keyframes ricSignalSweep {
+
+  0% {
+    transform:
+      translateY(-10vh);
+
+    opacity:
+      0;
+  }
+
+  12% {
+    opacity:
+      .48;
+  }
+
+  50% {
+    opacity:
+      .36;
+  }
+
+  88% {
+    opacity:
+      .48;
+  }
+
+  100% {
+    transform:
+      translateY(120vh);
+
+    opacity:
+      0;
+  }
+}
+
+
+@keyframes ricCharReveal {
+
+  from {
+    opacity:
+      0;
+
+    transform:
+      translateY(9px)
+      scale(.96);
+
+    filter:
+      blur(3px);
+  }
+
+  to {
+    opacity:
+      1;
+
+    transform:
+      translateY(0)
+      scale(1);
+
+    filter:
+      blur(0);
+  }
+}
+
+
+@keyframes ricCharGlitch {
+
+  0%,
+  100% {
+
+    text-shadow:
+      0 0 0 transparent;
+
+    transform:
+      translateY(0)
+      translateX(0);
+  }
+
+  30% {
+
+    text-shadow:
+      -2px 0 rgba(255,70,90,.40),
+      2px 0 rgba(56,189,248,.52);
+
+    transform:
+      translateY(0)
+      translateX(-1px);
+  }
+
+  60% {
+
+    text-shadow:
+      2px 0 rgba(255,70,90,.40),
+      -2px 0 rgba(56,189,248,.52);
+
+    transform:
+      translateY(0)
+      translateX(1px);
+  }
+}
+
+
+@keyframes ricCursorBlink {
+
+  0%,
+  49% {
+    opacity:
+      1;
+  }
+
+  50%,
+  100% {
+    opacity:
+      0;
+  }
+}
+
+
+@keyframes ricTitleImpact {
+
+  0% {
+
+    transform:
+      scale(1)
+      translateY(0);
+
+    filter:
+      brightness(1);
+  }
+
+  35% {
+
+    transform:
+      scale(1.018)
+      translateY(-1px);
+
+    filter:
+      brightness(1.20);
+
+    text-shadow:
+      0 0 22px
+      rgba(56,189,248,.34);
+  }
+
+  100% {
+
+    transform:
+      scale(1)
+      translateY(0);
+
+    filter:
+      brightness(1);
+  }
+}
+
+
+@keyframes ricMicroFlash {
+
+  0% {
+    opacity:
+      0;
+  }
+
+  22% {
+    opacity:
+      .25;
+  }
+
+  100% {
+    opacity:
+      0;
+  }
+}
+
+
+@keyframes ricFlash {
+
+  0% {
+    opacity:
+      0;
+  }
+
+  17% {
+    opacity:
+      .84;
+  }
+
+  100% {
+    opacity:
+      0;
+  }
+}
+
+
+@keyframes ricLaunchUI {
+
+  0% {
+
+    opacity:
+      1;
+
+    transform:
+      scale(1);
+  }
+
+  100% {
+
+    opacity:
+      0;
+
+    transform:
+      scale(1.025);
+  }
+}
+
+
+@keyframes ricLaunchArt {
+
+  0% {
+    transform:
+      scale(1.13);
+  }
+
+  100% {
+    transform:
+      scale(1.20);
+  }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+  #relayPlayCinematic .ric-signal-panel {
+
+    width:
+      180px;
+  }
+
+  #relayPlayCinematic .ric-side-data {
+
+    display:
+      none;
+  }
+
+  #relayPlayCinematic .ric-title {
+
+    font-size:
+      clamp(
+        40px,
+        10vw,
+        90px
+      );
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px),
+(hover:none) and (pointer:coarse) {
+
+  #relayPlayCinematic {
+
+    overflow:
+      hidden;
+  }
+
+
+  #relayPlayCinematic .ric-art {
+
+    background-position:
+      center center;
+
+    filter:
+      saturate(.78)
+      contrast(1.06)
+      brightness(.60);
+  }
+
+
+  #relayPlayCinematic .ric-grid {
+
+    opacity:
+      .065;
+
+    background-size:
+      38px 38px;
+  }
+
+
+  #relayPlayCinematic .ric-scan {
+
+    opacity:
+      .04;
+
+    background-size:
+      100% 10px;
+  }
+
+
+  #relayPlayCinematic .ric-noise {
+
+    opacity:
+      .028;
+  }
+
+
+  #relayPlayCinematic .ric-topbar {
+
+    top:
+      max(
+        14px,
+        env(safe-area-inset-top, 14px)
+      );
+
+    left:
+      13px;
+
+    right:
+      13px;
+
+    grid-template-columns:
+      1fr 1fr;
+
+    font-size:
+      5px;
+
+    letter-spacing:
+      .14em;
+  }
+
+
+  #relayPlayCinematic .ric-topbar-center {
+
+    display:
+      none;
+  }
+
+
+  #relayPlayCinematic .ric-corner {
+
+    width:
+      34px;
+
+    height:
+      34px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-corner-tl,
+  #relayPlayCinematic
+  .ric-corner-tr {
+
+    top:
+      42px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-corner-bl,
+  #relayPlayCinematic
+  .ric-corner-br {
+
+    bottom:
+      max(
+        23px,
+        env(safe-area-inset-bottom, 23px)
+      );
+  }
+
+
+  #relayPlayCinematic
+  .ric-corner-tl,
+  #relayPlayCinematic
+  .ric-corner-bl {
+
+    left:
+      12px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-corner-tr,
+  #relayPlayCinematic
+  .ric-corner-br {
+
+    right:
+      12px;
+  }
+
+
+  /* MOBILE SIGNAL */
+
+  #relayPlayCinematic .ric-signal-panel {
+
+    top:
+      max(
+        72px,
+        calc(
+          env(safe-area-inset-top, 0px) + 58px
+        )
+      );
+
+    left:
+      50%;
+
+    width:
+      min(
+        270px,
+        calc(100vw - 34px)
+      );
+
+    transform:
+      translateX(-50%)
+      translateY(-8px);
+
+    padding:
+      9px 11px;
+  }
+
+
+  #relayPlayCinematic.is-active
+  .ric-signal-panel {
+
+    transform:
+      translateX(-50%)
+      translateY(0);
+  }
+
+
+  /* MAIN UI */
+
+  #relayPlayCinematic .ric-ui {
+
+    padding:
+      92px 12px 34px;
+
+    place-items:
+      center;
+  }
+
+
+  #relayPlayCinematic .ric-center {
+
+    width:
+      min(
+        100%,
+        94vw
+      );
+
+    max-height:
+      calc(
+        100dvh - 126px
+      );
+
+    transform:
+      translateY(0);
+  }
+
+
+  #relayPlayCinematic .ric-kicker {
+
+    max-width:
+      88vw;
+
+    font-size:
+      6px;
+
+    letter-spacing:
+      .20em;
+
+    text-overflow:
+      ellipsis;
+  }
+
+
+  #relayPlayCinematic .ric-title {
+
+    max-width:
+      94vw;
+
+    margin-top:
+      15px;
+
+    font-size:
+      clamp(
+        34px,
+        11.4vw,
+        64px
+      );
+
+    line-height:
+      .88;
+
+    letter-spacing:
+      -.04em;
+  }
+
+
+  #relayPlayCinematic .ric-title-brand {
+
+    margin-bottom:
+      11px;
+
+    font-size:
+      5.5px;
+
+    letter-spacing:
+      .26em;
+  }
+
+
+  #relayPlayCinematic .ric-copy {
+
+    width:
+      min(
+        92vw,
+        470px
+      );
+
+    min-height:
+      42px;
+
+    margin-top:
+      19px;
+
+    font-size:
+      6.5px;
+
+    line-height:
+      1.72;
+
+    letter-spacing:
+      .08em;
+  }
+
+
+  #relayPlayCinematic .ric-mission {
+
+    width:
+      min(
+        92vw,
+        470px
+      );
+
+    margin-top:
+      16px;
+
+    padding:
+      14px 13px 13px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-mission > b {
+
+    font-size:
+      clamp(
+        15px,
+        5.8vw,
+        23px
+      );
+
+    line-height:
+      1.08;
+  }
+
+
+  #relayPlayCinematic
+  .ric-mission > span {
+
+    margin-top:
+      8px;
+
+    font-size:
+      5.5px;
+
+    line-height:
+      1.55;
+
+    letter-spacing:
+      .10em;
+  }
+
+
+  #relayPlayCinematic .ric-mission-data {
+
+    margin-top:
+      12px;
+
+    padding-top:
+      9px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-mission-data > div {
+
+    padding:
+      0 7px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-mission-data small {
+
+    font-size:
+      4.5px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-mission-data strong {
+
+    font-size:
+      4.8px;
+
+    letter-spacing:
+      .05em;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  #relayPlayCinematic .ric-ui {
+
+    padding:
+      88px 10px 28px;
+  }
+
+
+  #relayPlayCinematic .ric-center {
+
+    width:
+      calc(100vw - 18px);
+
+    max-height:
+      calc(100dvh - 116px);
+  }
+
+
+  #relayPlayCinematic .ric-kicker {
+
+    font-size:
+      5px;
+  }
+
+
+  #relayPlayCinematic .ric-title {
+
+    margin-top:
+      13px;
+
+    font-size:
+      clamp(
+        31px,
+        11.8vw,
+        53px
+      );
+  }
+
+
+  #relayPlayCinematic .ric-copy {
+
+    width:
+      90vw;
+
+    min-height:
+      38px;
+
+    margin-top:
+      16px;
+
+    font-size:
+      6px;
+
+    line-height:
+      1.62;
+  }
+
+
+  #relayPlayCinematic .ric-mission {
+
+    margin-top:
+      14px;
+
+    padding:
+      12px 11px 11px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-mission > b {
+
+    font-size:
+      clamp(
+        14px,
+        5.8vw,
+        20px
+      );
+  }
+
+
+  #relayPlayCinematic
+  .ric-mission > span {
+
+    font-size:
+      5px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-mission-data small {
+
+    font-size:
+      4px;
+  }
+
+
+  #relayPlayCinematic
+  .ric-mission-data strong {
+
+    font-size:
+      4.3px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  #relayPlayCinematic *,
+  #relayPlayCinematic *::before,
+  #relayPlayCinematic *::after {
+
+    animation-duration:
+      .01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      .01ms !important;
+  }
+
+
+  #relayPlayCinematic .ric-char {
+
+    opacity:
+      1;
+
+    transform:
+      none;
+
+    filter:
+      none;
+  }
+
+
+  #relayPlayCinematic .ric-cursor {
+
+    animation:
+      none;
+  }
+}

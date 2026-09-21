@@ -327,7 +327,7 @@
             if (
               performance.now() < deadline
             ) {
-              requestAnimationFrame(selectTab);
+              window.setTimeout(selectTab, 16);
             }
 
             return;
@@ -358,12 +358,12 @@
           if (
             performance.now() < deadline
           ) {
-            requestAnimationFrame(selectTab);
+            window.setTimeout(selectTab, 16);
           }
         };
 
 
-        requestAnimationFrame(selectTab);
+        window.setTimeout(selectTab, 16);
 
       } catch (error) {
         console.error(

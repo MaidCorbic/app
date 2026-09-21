@@ -61,12 +61,18 @@ body {
    ========================================================= */
 
 @media (orientation: landscape) and (pointer: coarse) {
-  #play {
+  #play,
+  #phaser-game {
     width: 100dvw !important;
     height: 100dvh !important;
 
     min-width: 0 !important;
     min-height: 100svh !important;
+  }
+
+  #phaser-game > canvas {
+    width: 100% !important;
+    height: 100% !important;
   }
 }
 

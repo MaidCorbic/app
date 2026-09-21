@@ -50,3 +50,10 @@
     text-overflow:ellipsis !important;
   }
 }
+
+/* Touch-safe responsive boundary for the canonical gameplay HUD. */
+@media (pointer: coarse){
+  #play #cargoIntegrityV2{
+    max-width:calc(100vw - 20px);
+  }
+}

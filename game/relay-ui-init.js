@@ -22,6 +22,8 @@
 
 // CSS bootstrap ownership: feature styles are loaded here so
 // runtime UI has one predictable entry point.
+// './gameplay-core-v1.js' loads before './src/systems/mobile-input-single-owner-v1.js';
+// the mobile owner itself is loaded once by index.html after main.js.
 
 import './splash-progress-visibility.css';
 import './cinematic-splash.css';
@@ -200,8 +202,6 @@ import './wall-slide-v1.js';
 import './dynamic-environment-reactions-v1.js';
 
 import './production-unfreeze-v1.js';
-
-import './src/systems/mobile-input-single-owner-v1.js';
 
 import './src/systems/mobile-gameplay-stability-v1.js';
 

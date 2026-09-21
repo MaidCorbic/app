@@ -816,6 +816,1536 @@ style.textContent = `
     0 0 18px rgba(57,255,136,.05) !important;
 }
 
+/* ============================================================
+   PREMIUM TACTICAL HUD — FINAL POLISH
+   Does NOT change SVG / route / gameplay
+   ============================================================ */
+
+
+/* ============================================================
+   01 — HEADER: CLEANER + MORE COMPACT
+   ============================================================ */
+
+#${ROOT_ID} .rv5-shell{
+  grid-template-rows:
+    150px
+    minmax(0,1fr)
+    auto !important;
+}
+
+
+/* Header */
+#${ROOT_ID} .rv5-header{
+  padding:16px 22px 14px !important;
+  gap:20px !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(7,13,15,.99),
+      rgba(4,9,11,.97),
+      rgba(2,6,8,.92)
+    ) !important;
+
+  border-bottom:
+    1px solid
+    rgba(116,220,229,.18) !important;
+
+  box-shadow:
+    inset 0 -1px 0 rgba(213,181,83,.05),
+    0 12px 35px rgba(0,0,0,.35) !important;
+}
+
+
+/* Left header block */
+#${ROOT_ID} .rv5-brand{
+  gap:6px !important;
+  max-width:calc(100% - 350px) !important;
+}
+
+
+/* LIVE */
+#${ROOT_ID} .rv5-live{
+  color:#91e9ee !important;
+  font-size:8px !important;
+  letter-spacing:.20em !important;
+}
+
+#${ROOT_ID} .rv5-live b{
+  width:6px !important;
+  height:6px !important;
+  flex-basis:6px !important;
+
+  box-shadow:
+    0 0 7px rgba(57,255,136,.9),
+    0 0 16px rgba(57,255,136,.35) !important;
+}
+
+
+/* Small tactical kicker */
+#${ROOT_ID} .rv5-kicker{
+  margin-top:6px !important;
+
+  color:#63dbe6 !important;
+
+  font-size:8px !important;
+  letter-spacing:.22em !important;
+
+  text-shadow:
+    0 0 10px rgba(0,220,255,.16) !important;
+}
+
+
+/* ============================================================
+   02 — MISSION ROUTE TITLE
+   ============================================================ */
+
+#${ROOT_ID} h1{
+  margin:5px 0 0 !important;
+
+  font-size:
+    clamp(28px,3.1vw,42px) !important;
+
+  line-height:.94 !important;
+
+  letter-spacing:.075em !important;
+
+  text-shadow:
+    0 0 22px rgba(0,220,255,.08),
+    0 5px 18px rgba(0,0,0,.95) !important;
+}
+
+
+#${ROOT_ID} h1 strong{
+  color:#7deaff !important;
+
+  text-shadow:
+    0 0 16px rgba(0,220,255,.22),
+    0 0 30px rgba(0,220,255,.08) !important;
+}
+
+
+/* Mission subtitle */
+#${ROOT_ID} .rv5-meta{
+  margin:8px 0 0 !important;
+
+  color:#b7c4bd !important;
+
+  font-size:9px !important;
+  font-weight:800 !important;
+
+  letter-spacing:.15em !important;
+
+  text-shadow:
+    0 2px 8px rgba(0,0,0,.8) !important;
+}
+
+
+/* ============================================================
+   03 — RIGHT COMMAND HUD
+   ============================================================ */
+
+#${ROOT_ID} .rv5-right{
+  gap:8px !important;
+}
+
+
+/* Route status */
+#${ROOT_ID} .rv5-status{
+  min-width:165px !important;
+  min-height:76px !important;
+
+  padding:11px 13px !important;
+
+  border:
+    1px solid
+    rgba(116,220,229,.18) !important;
+
+  border-top:
+    2px solid
+    #39ff88 !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(8,19,21,.98),
+      rgba(3,8,10,.99)
+    ) !important;
+
+  box-shadow:
+    inset 0 0 25px rgba(0,220,255,.035),
+    0 12px 30px rgba(0,0,0,.42) !important;
+}
+
+
+/* Status title */
+#${ROOT_ID} .rv5-status small{
+  font-size:6px !important;
+  letter-spacing:.21em !important;
+}
+
+
+/* LOCKED */
+#${ROOT_ID} .rv5-status strong{
+  color:#7cff9c !important;
+  font-size:16px !important;
+
+  text-shadow:
+    0 0 12px rgba(57,255,136,.20) !important;
+}
+
+
+/* ============================================================
+   04 — MAP TOP BAR
+   ============================================================ */
+
+#${ROOT_ID} .rv5-mapbar{
+  min-height:44px !important;
+
+  padding:0 16px !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10,17,18,.99),
+      rgba(4,9,10,1)
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(213,181,83,.16) !important;
+
+  border-bottom:
+    1px solid
+    rgba(116,220,229,.20) !important;
+}
+
+
+/* MAP BAR BUTTONS */
+#${ROOT_ID} .rv5-mapbar span{
+  min-height:27px !important;
+
+  padding:0 10px !important;
+
+  font-size:7px !important;
+
+  letter-spacing:.15em !important;
+
+  border:
+    1px solid
+    rgba(190,200,190,.12) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.025),
+      rgba(255,255,255,.005)
+    ) !important;
+}
+
+
+/* ACTIVE */
+#${ROOT_ID} .rv5-mapbar span.active{
+  color:#9ee7a1 !important;
+
+  border-color:
+    rgba(57,255,136,.38) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(57,255,136,.11),
+      rgba(57,255,136,.018)
+    ) !important;
+
+  box-shadow:
+    0 0 15px rgba(57,255,136,.06),
+    inset 0 0 12px rgba(57,255,136,.035) !important;
+}
+
+
+/* ROUTE ACTIVE */
+#${ROOT_ID} .rv5-mapbar b{
+  min-height:27px !important;
+
+  font-size:7px !important;
+
+  letter-spacing:.16em !important;
+
+  border-left:
+    2px solid
+    #e8c75e !important;
+
+  color:#f0cf69 !important;
+}
+
+
+/* ============================================================
+   05 — TACTICAL MAP LABELS
+   ============================================================ */
+
+#${ROOT_ID} .rv5-map-label{
+  border-left:
+    2px solid
+    #00dfff !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,32,42,.88),
+      rgba(2,9,13,.74)
+    ) !important;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.52),
+    inset 0 0 18px rgba(0,220,255,.035) !important;
+
+  backdrop-filter:blur(9px) !important;
+}
+
+
+/* Top label */
+#${ROOT_ID} .rv5-map-label.top{
+  padding:8px 11px !important;
+}
+
+
+/* Bottom label */
+#${ROOT_ID} .rv5-map-label.bottom{
+  padding:8px 11px !important;
+}
+
+
+/* Small label */
+#${ROOT_ID} .rv5-map-label small{
+  color:#5fa6b0 !important;
+
+  font-size:6px !important;
+  letter-spacing:.18em !important;
+}
+
+
+/* Main label */
+#${ROOT_ID} .rv5-map-label strong{
+  color:#e7fbff !important;
+
+  font-size:8px !important;
+  letter-spacing:.12em !important;
+}
+
+
+/* ============================================================
+   06 — LEGEND
+   YOU / START / CP / GOAL / HOSTILE
+   ============================================================ */
+
+#${ROOT_ID} .rv5-map-legend{
+  position:absolute !important;
+
+  right:16px !important;
+  bottom:16px !important;
+
+  z-index:24 !important;
+
+  display:flex !important;
+
+  align-items:center !important;
+  justify-content:center !important;
+
+  gap:6px !important;
+
+  padding:7px 8px !important;
+
+  border:
+    1px solid
+    rgba(116,220,229,.18) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5,13,15,.94),
+      rgba(2,7,9,.90)
+    ) !important;
+
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.025),
+    inset 0 0 18px rgba(0,220,255,.025) !important;
+
+  backdrop-filter:blur(10px) !important;
+
+  font-family:"Orbitron",sans-serif !important;
+}
+
+
+/* Small LEGEND title using pseudo element */
+#${ROOT_ID} .rv5-map-legend::before{
+  content:"LEGEND" !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+
+  margin-right:4px !important;
+  padding-right:8px !important;
+
+  border-right:
+    1px solid
+    rgba(190,198,188,.13) !important;
+
+  color:#667d82 !important;
+
+  font-size:5px !important;
+  font-weight:900 !important;
+
+  letter-spacing:.18em !important;
+}
+
+
+/* Individual items */
+#${ROOT_ID} .rv5-map-legend span{
+  display:flex !important;
+
+  align-items:center !important;
+
+  gap:5px !important;
+
+  min-height:20px !important;
+
+  padding:0 6px !important;
+
+  color:#9ba9a5 !important;
+
+  font-size:6px !important;
+  font-weight:900 !important;
+
+  letter-spacing:.10em !important;
+
+  border:
+    1px solid
+    rgba(190,198,188,.07) !important;
+
+  background:
+    rgba(255,255,255,.018) !important;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    color .18s ease !important;
+}
+
+
+/* Legend marker */
+#${ROOT_ID} .rv5-map-legend i{
+  width:6px !important;
+  height:6px !important;
+
+  min-width:6px !important;
+
+  display:block !important;
+
+  border-radius:50% !important;
+}
+
+
+/* YOU */
+#${ROOT_ID} .rv5-map-legend .you{
+  background:#00eaff !important;
+
+  box-shadow:
+    0 0 6px rgba(0,234,255,.85) !important;
+}
+
+
+/* START */
+#${ROOT_ID} .rv5-map-legend .start{
+  background:#39ff88 !important;
+
+  box-shadow:
+    0 0 6px rgba(57,255,136,.85) !important;
+}
+
+
+/* CP */
+#${ROOT_ID} .rv5-map-legend .cp{
+  background:#5eeaff !important;
+
+  box-shadow:
+    0 0 6px rgba(94,234,255,.75) !important;
+}
+
+
+/* GOAL */
+#${ROOT_ID} .rv5-map-legend .objective{
+  background:#ffd34f !important;
+
+  box-shadow:
+    0 0 7px rgba(255,211,79,.90) !important;
+}
+
+
+/* HOSTILE */
+#${ROOT_ID} .rv5-map-legend .hostile{
+  background:#ff4058 !important;
+
+  box-shadow:
+    0 0 7px rgba(255,64,88,.85) !important;
+}
+
+
+/* ============================================================
+   07 — MAP CORNERS
+   ============================================================ */
+
+#${ROOT_ID} .rv5-corner{
+  opacity:.85 !important;
+}
+
+
+/* ============================================================
+   08 — BOTTOM STATS
+   ============================================================ */
+
+#${ROOT_ID} .rv5-stats{
+  min-height:48px !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5,13,16,.99),
+      rgba(2,7,9,1)
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(0,220,255,.15) !important;
+}
+
+
+#${ROOT_ID} .rv5-stats div{
+  border-right:
+    1px solid
+    rgba(100,220,235,.09) !important;
+}
+
+
+#${ROOT_ID} .rv5-stats small{
+  color:#568c95 !important;
+
+  font-size:6px !important;
+  letter-spacing:.15em !important;
+}
+
+
+#${ROOT_ID} .rv5-stats strong{
+  color:#e2faff !important;
+
+  font-size:9px !important;
+  letter-spacing:.07em !important;
+}
+
+
+#${ROOT_ID} .rv5-stats .danger{
+  color:#ff596c !important;
+
+  text-shadow:
+    0 0 8px rgba(255,64,88,.16) !important;
+}
+
+
+/* ============================================================
+   09 — FOOTER
+   ============================================================ */
+
+#${ROOT_ID} .rv5-footer{
+  min-height:74px !important;
+
+  padding:
+    10px 16px !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5,13,17,.99),
+      rgba(2,7,10,1)
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(0,220,255,.14) !important;
+}
+
+
+/* Route progress */
+#${ROOT_ID} .rv5-route-progress{
+  min-width:240px !important;
+
+  width:30% !important;
+}
+
+
+#${ROOT_ID} .rv5-route-progress-head span{
+  color:#789098 !important;
+
+  font-size:6px !important;
+  letter-spacing:.18em !important;
+}
+
+
+#${ROOT_ID} .rv5-route-progress-head strong{
+  color:#f0cf69 !important;
+
+  font-size:8px !important;
+}
+
+
+/* Progress line */
+#${ROOT_ID} .rv5-route-progress-line{
+  gap:4px !important;
+}
+
+
+#${ROOT_ID} .rv5-route-progress-line i{
+  height:4px !important;
+
+  background:
+    rgba(120,200,121,.13) !important;
+
+  border:
+    1px solid
+    rgba(120,200,121,.18) !important;
+}
+
+
+/* Completed */
+#${ROOT_ID} .rv5-route-progress-line i.done{
+  background:#39ff88 !important;
+
+  box-shadow:
+    0 0 8px rgba(57,255,136,.45) !important;
+}
+
+
+/* Goal */
+#${ROOT_ID} .rv5-route-progress-line i.goal{
+  background:#ffd34f !important;
+
+  border-color:#ffd34f !important;
+
+  box-shadow:
+    0 0 8px rgba(255,211,79,.50) !important;
+}
+
+
+/* Labels */
+#${ROOT_ID} .rv5-route-progress-labels{
+  color:#64747a !important;
+
+  font-size:5px !important;
+  letter-spacing:.12em !important;
+}
+
+
+/* ============================================================
+   10 — PRIMARY OBJECTIVE
+   ============================================================ */
+
+#${ROOT_ID} .rv5-objective{
+  border:
+    1px solid
+    rgba(0,220,255,.16) !important;
+
+  border-left:
+    3px solid
+    #ffd34f !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(12,28,32,.82),
+      rgba(4,10,13,.68)
+    ) !important;
+
+  box-shadow:
+    inset 0 0 18px rgba(0,220,255,.025),
+    0 8px 22px rgba(0,0,0,.25) !important;
+}
+
+
+#${ROOT_ID} .rv5-objective-icon{
+  color:#ffd34f !important;
+
+  text-shadow:
+    0 0 10px rgba(255,211,79,.45) !important;
+}
+
+
+#${ROOT_ID} .rv5-objective small{
+  color:#68828a !important;
+
+  font-size:6px !important;
+  letter-spacing:.14em !important;
+}
+
+
+#${ROOT_ID} .rv5-objective strong{
+  color:#ecfbff !important;
+
+  font-size:9px !important;
+  letter-spacing:.08em !important;
+}
+
+
+/* Deployment ready */
+#${ROOT_ID} .rv5-ready{
+  color:#39ff88 !important;
+
+  font-size:7px !important;
+  letter-spacing:.14em !important;
+
+  text-shadow:
+    0 0 9px rgba(57,255,136,.18) !important;
+}
+
+
+/* ============================================================
+   11 — MOBILE
+   ============================================================ */
+
+@media(max-width:780px){
+
+  #${ROOT_ID} .rv5-shell{
+    grid-template-rows:
+      125px
+      minmax(0,1fr)
+      auto !important;
+  }
+
+  #${ROOT_ID} .rv5-header{
+    padding:12px !important;
+    gap:10px !important;
+  }
+
+  #${ROOT_ID} .rv5-brand{
+    max-width:calc(100% - 210px) !important;
+  }
+
+  #${ROOT_ID} .rv5-kicker{
+    font-size:6px !important;
+  }
+
+  #${ROOT_ID} h1{
+    font-size:
+      clamp(22px,7vw,32px) !important;
+  }
+
+  #${ROOT_ID} .rv5-meta{
+    font-size:7px !important;
+  }
+
+  #${ROOT_ID} .rv5-status{
+    min-width:105px !important;
+    min-height:58px !important;
+  }
+
+  #${ROOT_ID} .rv5-status strong{
+    font-size:12px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-legend{
+    right:8px !important;
+    bottom:8px !important;
+
+    gap:3px !important;
+
+    padding:5px 6px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-legend::before{
+    display:none !important;
+  }
+
+  #${ROOT_ID} .rv5-map-legend span{
+    min-height:17px !important;
+
+    padding:0 4px !important;
+
+    font-size:5px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-legend i{
+    width:5px !important;
+    height:5px !important;
+    min-width:5px !important;
+  }
+
+  #${ROOT_ID} .rv5-footer{
+    min-height:64px !important;
+
+    padding:7px 10px !important;
+  }
+}
+
+
+/* ============================================================
+   12 — VERY SMALL MOBILE
+   ============================================================ */
+
+@media(max-width:520px){
+
+  #${ROOT_ID} .rv5-shell{
+    grid-template-rows:
+      112px
+      minmax(0,1fr)
+      auto !important;
+  }
+
+  #${ROOT_ID} .rv5-right{
+    gap:5px !important;
+  }
+
+  #${ROOT_ID} .rv5-timer{
+    width:72px !important;
+    height:58px !important;
+    min-width:72px !important;
+    min-height:58px !important;
+    flex-basis:72px !important;
+  }
+
+  #${ROOT_ID} .rv5-timer strong{
+    font-size:32px !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar{
+    padding:0 8px !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar span{
+    padding:0 6px !important;
+    font-size:5px !important;
+  }
+
+  #${ROOT_ID} .rv5-mapbar b{
+    font-size:5px !important;
+    padding-left:8px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-legend span{
+    font-size:4.5px !important;
+  }
+}
+
+/* ============================================================
+   FINAL MAP REWORK
+   FULL SVG / CLEAN TACTICAL FRAME / NO UGLY BACKGROUND
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   MAP CONTAINER
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-map{
+  position:relative !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+
+  overflow:hidden !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  isolation:isolate !important;
+
+  /* CLEAN DARK TACTICAL BACKGROUND */
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(12,42,49,.34) 0%,
+      rgba(5,18,23,.18) 42%,
+      rgba(1,5,8,.92) 100%
+    ) !important;
+
+  border:
+    1px solid
+    rgba(94,220,235,.18) !important;
+
+  box-shadow:
+    inset 0 0 80px rgba(0,0,0,.72),
+    inset 0 0 2px rgba(100,230,245,.25),
+    0 18px 45px rgba(0,0,0,.55) !important;
+}
+
+
+/* ------------------------------------------------------------
+   SVG — FORCE FULL MAP TO BE VISIBLE
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg{
+  position:relative !important;
+
+  z-index:2 !important;
+
+  display:block !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  max-width:100% !important;
+  max-height:100% !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+
+  margin:0 !important;
+
+  overflow:visible !important;
+
+  /*
+     IMPORTANT:
+     preserve complete 1000x560 map
+     instead of cropping/stretching it
+  */
+  preserveAspectRatio:xMidYMid meet !important;
+
+  background:transparent !important;
+
+  filter:
+    drop-shadow(0 0 18px rgba(0,210,235,.08))
+    drop-shadow(0 12px 28px rgba(0,0,0,.42)) !important;
+}
+
+
+/* ------------------------------------------------------------
+   MAP INNER FRAME
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-map::before{
+  content:"" !important;
+
+  position:absolute !important;
+  inset:12px !important;
+
+  z-index:1 !important;
+
+  pointer-events:none !important;
+
+  border:
+    1px solid
+    rgba(83,210,225,.09) !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 49.9%,
+      rgba(0,220,255,.035) 50%,
+      transparent 50.1%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 49.9%,
+      rgba(0,220,255,.035) 50%,
+      transparent 50.1%
+    ) !important;
+
+  box-shadow:
+    inset 0 0 45px rgba(0,180,210,.025) !important;
+}
+
+
+/* ------------------------------------------------------------
+   OUTER MAP GLOW
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-map::after{
+  content:"" !important;
+
+  position:absolute !important;
+
+  inset:0 !important;
+
+  z-index:0 !important;
+
+  pointer-events:none !important;
+
+  background:
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 42%,
+      rgba(0,220,255,.025) 65%,
+      rgba(0,0,0,.28) 100%
+    ) !important;
+
+  box-shadow:
+    inset 0 0 100px rgba(0,0,0,.55) !important;
+}
+
+
+/* ------------------------------------------------------------
+   MAP SVG CONTENT
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg > *{
+  vector-effect:non-scaling-stroke;
+}
+
+
+/* ------------------------------------------------------------
+   GRID — CLEANER
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg .grid{
+  stroke:#24535d !important;
+  stroke-width:.65 !important;
+  opacity:.24 !important;
+}
+
+#${ROOT_ID} .rv5-svg .grid-major{
+  stroke:#4c8992 !important;
+  stroke-width:1 !important;
+  opacity:.34 !important;
+}
+
+
+/* ------------------------------------------------------------
+   BUILDINGS — MORE DEPTH
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg .platform{
+  fill:#0d2027 !important;
+
+  stroke:#4b747c !important;
+
+  stroke-width:1.1 !important;
+
+  filter:
+    drop-shadow(0 2px 3px rgba(0,0,0,.72)) !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .building-inner{
+  fill:#142c34 !important;
+
+  stroke:#31535a !important;
+
+  stroke-width:.8 !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .building-edge-bottom{
+  stroke:#7baeb3 !important;
+
+  opacity:.18 !important;
+}
+
+
+/* ------------------------------------------------------------
+   ROUTE — BRIGHTER / MORE PROFESSIONAL
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg .route-halo{
+  stroke:#00d9ff !important;
+
+  stroke-width:22 !important;
+
+  opacity:.07 !important;
+
+  filter:
+    blur(.5px)
+    drop-shadow(0 0 14px rgba(0,220,255,.35)) !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .route{
+  stroke:#ffd45a !important;
+
+  stroke-width:4 !important;
+
+  stroke-linecap:round !important;
+
+  stroke-linejoin:round !important;
+
+  stroke-dasharray:11 7 !important;
+
+  filter:
+    drop-shadow(0 0 5px rgba(255,210,80,.85))
+    drop-shadow(0 0 15px rgba(255,190,40,.20)) !important;
+
+  animation:
+    rv5RouteFlow 2.4s linear infinite !important;
+}
+
+
+@keyframes rv5RouteFlow{
+  to{
+    stroke-dashoffset:-36;
+  }
+}
+
+
+#${ROOT_ID} .rv5-svg .route-core{
+  stroke:#fffbe5 !important;
+
+  stroke-width:1.1 !important;
+
+  opacity:.9 !important;
+
+  stroke-linecap:round !important;
+}
+
+
+/* ------------------------------------------------------------
+   PLAYER
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg .player{
+  fill:#f7ffff !important;
+
+  stroke:#00eaff !important;
+
+  stroke-width:2.7 !important;
+
+  filter:
+    drop-shadow(0 0 6px rgba(0,234,255,1))
+    drop-shadow(0 0 16px rgba(0,200,255,.38)) !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .player-ring{
+  stroke:#00eaff !important;
+
+  stroke-width:1.8 !important;
+
+  opacity:.85 !important;
+
+  animation:
+    rv5PlayerPulse 1.8s ease-in-out infinite !important;
+}
+
+
+@keyframes rv5PlayerPulse{
+  0%,100%{
+    opacity:.45;
+    transform-origin:center;
+  }
+
+  50%{
+    opacity:1;
+  }
+}
+
+
+/* ------------------------------------------------------------
+   START
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg .start{
+  fill:#39ff88 !important;
+
+  stroke:#eafff1 !important;
+
+  stroke-width:2.4 !important;
+
+  filter:
+    drop-shadow(0 0 7px rgba(57,255,136,.95))
+    drop-shadow(0 0 18px rgba(57,255,136,.35)) !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .start-ring{
+  stroke:#39ff88 !important;
+
+  stroke-width:1.5 !important;
+
+  opacity:.75 !important;
+}
+
+
+/* ------------------------------------------------------------
+   CHECKPOINTS
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg .checkpoint{
+  fill:rgba(0,225,255,.08) !important;
+
+  stroke:#63edff !important;
+
+  stroke-width:1.8 !important;
+
+  filter:
+    drop-shadow(0 0 5px rgba(0,225,255,.45)) !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .checkpoint-dot{
+  fill:#f1ffff !important;
+
+  filter:
+    drop-shadow(0 0 7px rgba(0,234,255,.95)) !important;
+}
+
+
+/* ------------------------------------------------------------
+   GOAL
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg .goal{
+  fill:#ffd34f !important;
+
+  stroke:#fff7d1 !important;
+
+  stroke-width:2.5 !important;
+
+  filter:
+    drop-shadow(0 0 8px rgba(255,211,79,1))
+    drop-shadow(0 0 20px rgba(255,190,40,.42)) !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .goal-ring{
+  stroke:#ffd34f !important;
+
+  stroke-width:1.7 !important;
+
+  opacity:.9 !important;
+}
+
+
+/* ------------------------------------------------------------
+   HOSTILE
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg .danger-object{
+  fill:#281016 !important;
+
+  stroke:#ff4058 !important;
+
+  stroke-width:1.3 !important;
+
+  filter:
+    drop-shadow(0 0 7px rgba(255,50,80,.55)) !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .hostile-cross,
+#${ROOT_ID} .rv5-svg .enemy-cross{
+  stroke:#ff5369 !important;
+
+  stroke-width:1.4 !important;
+}
+
+
+/* ------------------------------------------------------------
+   MAP TEXT
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-svg .label{
+  fill:#e5fbff !important;
+
+  font-size:10px !important;
+
+  font-weight:800 !important;
+
+  letter-spacing:.06em !important;
+
+  paint-order:stroke fill !important;
+
+  stroke:#020708 !important;
+
+  stroke-width:2.5px !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .goal-label{
+  fill:#ffd65b !important;
+
+  font-weight:900 !important;
+
+  paint-order:stroke fill !important;
+
+  stroke:#05090a !important;
+
+  stroke-width:2.5px !important;
+}
+
+
+#${ROOT_ID} .rv5-svg .guide{
+  fill:#83b8bf !important;
+
+  font-size:8px !important;
+
+  font-weight:600 !important;
+
+  opacity:.78 !important;
+}
+
+
+/* ------------------------------------------------------------
+   MAP CORNERS — STRONGER HUD
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-corner{
+  z-index:20 !important;
+
+  width:30px !important;
+  height:30px !important;
+
+  opacity:.95 !important;
+
+  filter:
+    drop-shadow(0 0 5px rgba(0,220,255,.20)) !important;
+}
+
+
+#${ROOT_ID} .rv5-corner::before,
+#${ROOT_ID} .rv5-corner::after{
+  background:#5cecff !important;
+}
+
+
+/* ------------------------------------------------------------
+   MAP LABELS — FIT THEM TO MAP
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-map-label{
+  z-index:20 !important;
+
+  padding:7px 10px !important;
+
+  border:
+    1px solid
+    rgba(93,220,235,.16) !important;
+
+  border-left:
+    2px solid
+    #00eaff !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2,18,23,.92),
+      rgba(2,8,11,.72)
+    ) !important;
+
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.45),
+    inset 0 0 15px rgba(0,220,255,.025) !important;
+
+  backdrop-filter:blur(8px) !important;
+}
+
+
+#${ROOT_ID} .rv5-map-label.bottom{
+  border-left:1px solid rgba(93,220,235,.16) !important;
+
+  border-right:
+    2px solid
+    #00eaff !important;
+}
+
+
+/* ------------------------------------------------------------
+   LEGEND — NORMAL SIZE, NOT FLOATING UGLY
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-map-legend{
+  z-index:30 !important;
+
+  right:14px !important;
+  bottom:14px !important;
+
+  display:flex !important;
+
+  align-items:center !important;
+
+  gap:4px !important;
+
+  padding:5px !important;
+
+  border:
+    1px solid
+    rgba(91,214,229,.18) !important;
+
+  background:
+    rgba(2,8,10,.88) !important;
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.55),
+    inset 0 0 15px rgba(0,220,255,.025) !important;
+
+  backdrop-filter:blur(10px) !important;
+}
+
+
+#${ROOT_ID} .rv5-map-legend span{
+  min-height:18px !important;
+
+  padding:0 5px !important;
+
+  gap:4px !important;
+
+  font-size:5.5px !important;
+
+  border:
+    1px solid
+    rgba(190,220,220,.07) !important;
+}
+
+
+#${ROOT_ID} .rv5-map-legend i{
+  width:5px !important;
+  height:5px !important;
+
+  min-width:5px !important;
+}
+
+
+/* ------------------------------------------------------------
+   LIVE ROUTE TAG
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-live-tag{
+  z-index:30 !important;
+
+  padding:6px 9px !important;
+
+  border:
+    1px solid
+    rgba(57,255,136,.24) !important;
+
+  background:
+    rgba(2,12,9,.88) !important;
+
+  color:#6cff9a !important;
+
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.45),
+    0 0 18px rgba(57,255,136,.05) !important;
+
+  backdrop-filter:blur(8px) !important;
+}
+
+
+/* ------------------------------------------------------------
+   MAP SCAN
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-scan{
+  z-index:8 !important;
+
+  pointer-events:none !important;
+
+  opacity:.55 !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0,234,255,.00) 38%,
+      rgba(0,234,255,.10) 50%,
+      rgba(0,234,255,.00) 62%,
+      transparent 100%
+    ) !important;
+
+  animation:
+    rv5MapSweep 5.5s linear infinite !important;
+}
+
+
+@keyframes rv5MapSweep{
+  from{
+    transform:translateY(-100%);
+  }
+
+  to{
+    transform:translateY(100%);
+  }
+}
+
+
+/* ------------------------------------------------------------
+   REMOVE ANY POSSIBLE PHOTO / IMAGE BACKGROUND
+   ------------------------------------------------------------ */
+
+#${ROOT_ID} .rv5-map,
+#${ROOT_ID} .rv5-map-frame,
+#${ROOT_ID} .rv5-map-container{
+  background-image:none !important;
+}
+
+
+/* ------------------------------------------------------------
+   DESKTOP — GIVE MAP MORE SPACE
+   ------------------------------------------------------------ */
+
+@media(min-width:900px){
+
+  #${ROOT_ID} .rv5-main{
+    grid-template-rows:
+      42px
+      minmax(0,1fr)
+      52px !important;
+  }
+
+
+  #${ROOT_ID} .rv5-map{
+    padding:10px !important;
+  }
+
+
+  #${ROOT_ID} .rv5-svg{
+    width:100% !important;
+    height:100% !important;
+  }
+}
+
+
+/* ------------------------------------------------------------
+   MOBILE
+   ------------------------------------------------------------ */
+
+@media(max-width:780px){
+
+  #${ROOT_ID} .rv5-map{
+    padding:4px !important;
+  }
+
+  #${ROOT_ID} .rv5-svg{
+    width:100% !important;
+    height:100% !important;
+  }
+
+  #${ROOT_ID} .rv5-map-label{
+    transform:scale(.82) !important;
+    transform-origin:left center !important;
+  }
+
+  #${ROOT_ID} .rv5-map-label.bottom{
+    transform-origin:right center !important;
+  }
+
+  #${ROOT_ID} .rv5-map-legend{
+    right:7px !important;
+    bottom:7px !important;
+
+    gap:2px !important;
+  }
+
+  #${ROOT_ID} .rv5-map-legend span{
+    padding:0 3px !important;
+
+    font-size:4.5px !important;
+  }
+
+  #${ROOT_ID} .rv5-corner{
+    width:22px !important;
+    height:22px !important;
+  }
+}
 
 /* ============================================================
    BOTTOM STATS
