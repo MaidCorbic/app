@@ -49,42 +49,15 @@
      CSS
      ========================================================= */
 
-  const CSS_HREF =
-    './play-intro-cinematic-v2.css';
-
-  if (
-    !document.querySelector(
-      'link[data-relay-play-intro-v5="true"]'
-    )
-  ) {
-
-    const css =
-      document.createElement('link');
-
-    css.rel =
-      'stylesheet';
-
-    css.href =
-      CSS_HREF;
-
-    css.dataset.relayPlayIntroV5 =
-      'true';
-
-    css.addEventListener(
-      'error',
-      () => {
-        console.warn(
-          '[Relay Play Cinematic V5] CSS could not be loaded:',
-          CSS_HREF
-        );
-      },
-      {
-        once: true
-      }
-    );
-
-    document.head.appendChild(css);
-  }
+  /*
+   * Let Vite own this CSS dependency.
+   *
+   * This is important for production builds:
+   * a runtime "./play-intro-cinematic-v2.css" URL can
+   * bypass Vite's hashed asset pipeline and become a 404
+   * on the deployed site.
+   */
+  import './play-intro-cinematic-v2.css';
 
 
   /* =========================================================
