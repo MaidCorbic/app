@@ -1,38 +1,118 @@
-name: Build Runner Relay itch.io package
+name: Build and publish Relay Runner to itch.io
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
-      - 'game/**'
-      - '.github/workflows/itch-build.yml'
+      - "game/**"
+      - ".github/workflows/itch-build.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build-itch:
+  build-and-publish:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: game
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: game/package-lock.json
+
       - name: Install dependencies
         run: npm ci
-      - name: Build production game
+
+      - name: Run release hardening checks
+        run: npm run test:release-hardening
+
+      - name: Build production web game
         run: npm run build
-      - name: Verify browser entrypoint
-        run: test -f dist/index.html
-      - name: Upload itch.io-ready files
+
+      - name: Verify production package
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f game/dist/index.html
+          test -f game/dist/favicon.ico
+          test -f game/dist/assets/loading.jpg
+          test -f game/dist/assets/loading-landscape.jpg
+          test -f game/dist/assets/loadplay.jpg
+          test -f game/dist/assets/loadplaymobile.jpg
+          grep -q 'splash-loader-v2.js' game/dist/index.html
+          grep -q 'src/main.js' game/dist/index.html
+          echo "Production web package verified."
+
+      - name: Package itch.io web build
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf release
+          mkdir -p release
+          cp -R game/dist/. release/
+          cat > release/ITCH_BUILD_README.txt <<'EOF'
+          RELAY RUNNER — ITCH.IO BUILD
+
+          This folder is the production web build.
+          Upload the CONTENTS of this folder to an itch.io HTML game project.
+          EOF
+          cd release
+          zip -r ../relay-runner-web.zip .
+
+      - name: Upload GitHub Actions artifact
         uses: actions/upload-artifact@v4
         with:
-          name: runner-relay-public-beta
-          path: game/dist
+          name: relay-runner-web
+          path: relay-runner-web.zip
           if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: itch-${{ github.run_number }}
+          name: Relay Runner itch.io build ${{ github.run_number }}
+          generate_release_notes: false
+          files: relay-runner-web.zip
+          fail_on_unmatched_files: true
+
+      - name: Install Butler
+        if: ${{ secrets.BUTLER_API_KEY != '' && secrets.ITCH_TARGET != '' }}
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default -o /tmp/butler.zip
+          unzip -q /tmp/butler.zip -d /tmp/butler
+          install -m 0755 /tmp/butler/butler /usr/local/bin/butler
+          butler --version
+
+      - name: Push web build to itch.io
+        if: ${{ secrets.BUTLER_API_KEY != '' && secrets.ITCH_TARGET != '' }}
+        working-directory: .
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_TARGET: ${{ secrets.ITCH_TARGET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          butler login --with-token <<< "$BUTLER_API_KEY"
+          butler push game/dist "$ITCH_TARGET:web"
+
+      - name: itch.io publishing status
+        if: ${{ secrets.BUTLER_API_KEY == '' || secrets.ITCH_TARGET == '' }}
+        shell: bash
+        run: |
+          echo "GitHub build/package is ready."
+          echo "Automatic itch.io upload is disabled until BUTLER_API_KEY and ITCH_TARGET secrets are configured."
