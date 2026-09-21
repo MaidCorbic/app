@@ -108,7 +108,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          butler login --with-token <<< "$BUTLER_API_KEY"
           butler push game/dist "$ITCH_TARGET:web"
 
       - name: itch.io publishing status
