@@ -47,6 +47,12 @@ function relayLegacyAssetAliases() {
         const destination = path.join(legacyDir, relativePath);
         fs.mkdirSync(path.dirname(destination), { recursive: true });
         fs.copyFileSync(source, destination);
+
+        // Dynamic runtime loaders use stable /assets/... URLs.
+        // Keep the real source image available there too instead of relying
+        // on Vite to discover a string URL at runtime.
+        const stableAssetDestination = path.join(bundleAssetsDir, path.basename(relativePath));
+        fs.copyFileSync(source, stableAssetDestination);
       }
       const favicon = Buffer.from(FAVICON_ICO_BASE64, 'base64');
       fs.writeFileSync(path.join(outDir, 'favicon.ico'), favicon);
