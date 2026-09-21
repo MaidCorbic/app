@@ -437,6 +437,10 @@ console.log('[RelayRunner] OVERLAY ZINDEX:', getComputedStyle(overlay).zIndex);
     const button = event.target.closest('#start');
     if (!button) return;
 
+    // The cinematic owns the first Play click.
+    // After the cinematic releases the button, this loader takes over.
+    if (window.__relayPlayCinematicActive === true) return;
+
     event.preventDefault();
     event.stopImmediatePropagation();
 
