@@ -14,6 +14,9 @@ permissions:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    env:
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      ITCH_TARGET: ${{ secrets.ITCH_TARGET }}
     defaults:
       run:
         working-directory: game
@@ -88,7 +91,7 @@ jobs:
           fail_on_unmatched_files: true
 
       - name: Install Butler
-        if: ${{ secrets.BUTLER_API_KEY != '' && secrets.ITCH_TARGET != '' }}
+        if: ${{ env.BUTLER_API_KEY != '' && env.ITCH_TARGET != '' }}
         working-directory: .
         shell: bash
         run: |
@@ -99,11 +102,8 @@ jobs:
           butler --version
 
       - name: Push web build to itch.io
-        if: ${{ secrets.BUTLER_API_KEY != '' && secrets.ITCH_TARGET != '' }}
+        if: ${{ env.BUTLER_API_KEY != '' && env.ITCH_TARGET != '' }}
         working-directory: .
-        env:
-          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-          ITCH_TARGET: ${{ secrets.ITCH_TARGET }}
         shell: bash
         run: |
           set -euo pipefail
@@ -111,7 +111,7 @@ jobs:
           butler push game/dist "$ITCH_TARGET:web"
 
       - name: itch.io publishing status
-        if: ${{ secrets.BUTLER_API_KEY == '' || secrets.ITCH_TARGET == '' }}
+        if: ${{ env.BUTLER_API_KEY == '' || env.ITCH_TARGET == '' }}
         shell: bash
         run: |
           echo "GitHub build/package is ready."
