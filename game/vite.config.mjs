@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const LEGACY_TEXT_ASSETS = ['campaign-v2.css', 'gameplay-core-v1.css', 'world-atmosphere.css'];
+const LEGACY_TEXT_ASSETS = ['campaign-v2.css', 'gameplay-core-v1.css', 'world-atmosphere.css', 'splash-loader-v2.js'];
 const LEGACY_BINARY_ASSETS = [
   'assets/loading.jpg',
   'assets/loading-landscape.jpg',
