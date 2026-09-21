@@ -96,28 +96,11 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     return result;
   };
 
-  const makeHud = () => {
-    const play = document.getElementById('play');
-    if (!play) return null;
-    const style = document.createElement('style');
-    style.dataset.relayTimeV6 = '1';
-    style.textContent = `
-      #relayTimeIndicator{position:absolute;top:88px;right:18px;z-index:120;min-width:170px;padding:8px 11px;border:1px solid rgba(141,244,255,.38);border-radius:9px;background:rgba(5,12,24,.88);box-shadow:0 0 18px rgba(25,200,245,.08),inset 0 0 14px rgba(141,244,255,.04);color:#f4fbff;font:700 10px/1.15 "DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.11em;text-align:right;pointer-events:none;text-transform:uppercase;backdrop-filter:blur(7px)}
-      #relayTimeIndicator .name{display:block;font-size:11px;letter-spacing:.16em}
-      #relayTimeIndicator .clock{display:block;margin-top:4px;opacity:.8;font-size:9px}
-      #relayTimeIndicator .weather{display:block;margin-top:4px;color:#8df4ff;font-size:9px;letter-spacing:.08em}
-      @media(max-width:900px){#relayTimeIndicator{top:82px;right:12px;min-width:150px}}
-      @media(max-width:700px){#relayTimeIndicator{top:74px;right:9px;min-width:136px;padding:7px 9px}}
-      @media(max-width:420px){#relayTimeIndicator{top:70px;right:7px;min-width:126px;font-size:9px}}
-    `;
-    document.head.appendChild(style);
-    document.querySelectorAll('#relayTimeIndicator').forEach(node => node.remove());
-    const el = document.createElement('div');
-    el.id = 'relayTimeIndicator';
-    el.innerHTML = '<span class="name"><span data-time-icon>◐</span> <span data-time-name>DAWN</span></span><span class="clock" data-time-clock>06:00 · CYCLE 01</span><span class="weather" data-time-weather>DAWN MIST</span>';
-    play.appendChild(el);
-    return el;
-  };
+  /*
+   * Gameplay time/weather simulation remains active.
+   * The DOM time HUD (DAWN / CLOCK / WEATHER) is intentionally disabled.
+   */
+  const makeHud = () => null;
 
   const hideLegacyLabels = scene => {
     scene.weatherLabel?.setVisible(false);
