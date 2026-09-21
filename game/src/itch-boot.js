@@ -1,24 +1,36 @@
-/* Relay Runner // itch.io single-entry boot */
+/* Relay Runner // itch.io single-entry boot
+ *
+ * The Phaser/game entry is the only required startup dependency.
+ * Optional presentation modules load after the engine so one broken
+ * enhancement can never keep the itch.io splash at 0%.
+ */
+
+const report = (label, error) => {
+  console.error('[RelayBoot] ' + label + ' failed', error);
+  window.__relayBootErrors ||= [];
+  window.__relayBootErrors.push({
+    label,
+    error: String(error?.stack || error),
+  });
+};
+
 const optional = async (label, loader) => {
-  try { await loader(); }
-  catch (error) {
-    console.error('[RelayBoot] ' + label + ' failed', error);
-    window.__relayBootErrors ||= [];
-    window.__relayBootErrors.push({ label, error: String(error?.stack || error) });
+  try {
+    await loader();
+  } catch (error) {
+    report(label, error);
   }
 };
 
 const boot = async () => {
+  // Start the actual game first. This must never wait for cosmetic/UI extras.
+  await import('./main.js');
+
+  // Presentation and enhancement layers are fail-soft by design.
   await optional('home-options', () => import('../home-options.js'));
   await optional('home-v4', () => import('../home-v3.js'));
   await optional('home-v4-guard', () => import('../home-v3-guard.js'));
   await optional('home-v4-interaction', () => import('../home-v3-interaction-fix.js'));
-  await import('./main.js');
-  await optional('mobile-input', () => import('./systems/mobile-input-single-owner-v1.js'));
-  await optional('mission-finish-recovery', () => import('./systems/mission-finish-recovery.js'));
-  await optional('mission-results', () => import('./systems/mission-results.js'));
-  await optional('mission-mastery', () => import('./systems/mission-mastery.js'));
-  await optional('enemy-alert', () => import('./systems/enemy-alert.js'));
   await optional('play-intro', () => import('../play-intro-cinematic-v2.js'));
   await optional('deployment-loader', () => import('../play-deployment-loader-v1.js'));
   await optional('menu-music', () => import('../menu-music.js'));
@@ -31,13 +43,16 @@ const boot = async () => {
   await optional('cinematic-arrival', () => import('../cinematic-arrival-v2.js'));
   await optional('premium-finishing', () => import('../premium-finishing-pass-v1.js'));
   await optional('gameplay-core', () => import('../gameplay-core-v1.js'));
+
   document.documentElement.dataset.relayBootComplete = '1';
-  window.dispatchEvent(new CustomEvent('relay:boot-complete', { detail: { errors: window.__relayBootErrors || [] } }));
+  window.dispatchEvent(new CustomEvent('relay:boot-complete', {
+    detail: { errors: window.__relayBootErrors || [] },
+  }));
 };
 
 boot().catch(error => {
-  console.error('[RelayBoot] FATAL BOOT ERROR', error);
-  window.__relayBootErrors ||= [];
-  window.__relayBootErrors.push({ label: 'fatal', error: String(error?.stack || error) });
-  window.dispatchEvent(new CustomEvent('relay:boot-failed', { detail: { error: String(error?.stack || error) } }));
+  report('fatal', error);
+  window.dispatchEvent(new CustomEvent('relay:boot-failed', {
+    detail: { error: String(error?.stack || error) },
+  }));
 });
