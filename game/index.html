@@ -241,7 +241,8 @@
     <div id="toast" class="toast" aria-live="polite"></div>
   </main>
 
- <script type="module" src="./splash-loader-v2.js"></script>
+ <!-- Keep the first-load splash as a plain static script so itch.io can start it before the Vite module graph. -->
+ <script src="./splash-loader-v2.js"></script>
 
 <script type="module" src="./play-intro-cinematic-v2.js"></script>
 
