@@ -500,23 +500,6 @@
     pointer-events: auto !important;
   }
 
-
-  /* ==========================================================
-     REMOVE BOTTOM MOBILE HUD IN LANDSCAPE
-     ========================================================== */
-
-  html body.is-touch #game #mobileBottomHud {
-
-    display: none !important;
-
-    visibility: hidden !important;
-
-    opacity: 0 !important;
-
-    pointer-events: none !important;
-  }
-
-
   /* ==========================================================
      MISSION INTELLIGENCE PANEL
      ========================================================== */

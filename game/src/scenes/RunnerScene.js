@@ -52814,14 +52814,27 @@ const landmarkRingA =
   // Prevents stomp / defeat / combat state changes.
   // ============================================================
 
-  if (
+   if (
     this.afkCryostasisActive
   ) {
     return;
   }
 
-      // ============================================================
-      // SAFE START ZONE
+  // ============================================================
+  // DASH / INVULNERABILITY
+  // The authoritative dash system grants a short i-frame window.
+  // Enemy contact must respect that state.
+  // ============================================================
+
+  if (
+    player.getData?.('invulnerable') === true ||
+    player.getData?.('dashing') === true
+  ) {
+    return;
+  }
+
+  // ============================================================
+  // SAFE START ZONE
       // Enemies can be seen here but cannot hurt the player.
       // ============================================================
       if (this.safeStartZoneActive) {
@@ -53096,11 +53109,11 @@ const landmarkRingA =
 
       plasma.destroy();
 
-      this.defeatEnemy(
+          this.defeatEnemy(
         enemy,
         'BLASTER',
         Math.max(
-          999,
+          1,
           power
         )
       );
@@ -53604,15 +53617,24 @@ const landmarkRingA =
         ? 12
         : 8;
 
-  this.addPolarity(
+    this.addPolarity(
     -polarityLoss,
     'damage'
   );
 
+  // Apply the actual health damage here.
+  // takeSciFiHit() is the direct damage entry point for
+  // enemies, eggs and comets.
+  this.health =
+    Math.max(
+      0,
+      this.health - 1
+    );
+
   // ============================================================
   // LOW HP · CRITICAL STATE
   // ============================================================
-    
+
   if (
     this.health === 1 &&
     !this.motionReduced
@@ -55361,165 +55383,167 @@ const landmarkRingA =
     '#8df4ff'
   );
 
-  if (
-    this.blasterCooldown > 0 ||
-    this.cinematicActive ||
-    this.finished ||
-    this.respawning ||
-    this.relayPuzzleActive ||
-    !this.player?.active ||
-    !this.player?.body
-  ) {
-    return;
   }
 
-  if (!this.ammo) {
-    const reloadPulse =
-      this.add
-        .circle(
-          this.player.x,
-          this.player.y,
-          13,
-          0xffcf82,
-          .28
-        )
-        .setDepth(12);
+  useBlaster() {
+    if (
+      this.blasterCooldown > 0 ||
+      this.cinematicActive ||
+      this.finished ||
+      this.respawning ||
+      this.relayPuzzleActive ||
+      !this.player?.active ||
+      !this.player?.body
+    ) {
+      return;
+    }
 
-    this.tweens.add({
-      targets: reloadPulse,
-      scale: 3.8,
-      alpha: 0,
-      duration: 300,
-      onComplete: () =>
-        reloadPulse.destroy()
-    });
+    if (!this.ammo) {
+      const reloadPulse =
+        this.add
+          .circle(
+            this.player.x,
+            this.player.y,
+            13,
+            0xffcf82,
+            .28
+          )
+          .setDepth(12);
 
-    this.playerCue(
-      'PLASMA RECHARGING',
-      '#ffcf82'
+      this.tweens.add({
+        targets: reloadPulse,
+        scale: 3.8,
+        alpha: 0,
+        duration: 300,
+        onComplete: () =>
+          reloadPulse.destroy()
+      });
+
+      this.playerCue(
+        'PLASMA RECHARGING',
+        '#ffcf82'
+      );
+
+      this.gadgetPulse(
+        0xffcf82,
+        9,
+        300
+      );
+
+      this.game.events.emit(
+        'feedback',
+        'empty'
+      );
+
+      return;
+    }
+
+    const direction =
+      this.player.flipX
+        ? -1
+        : 1;
+
+    const weapon =
+      this.loadout.weapon ||
+      'sidearm';
+
+    const spread =
+      weapon === 'scattergun'
+        ? [-150, 0, 150]
+        : [0];
+
+    spread.forEach(
+      vertical => {
+        const plasma =
+          this.plasma
+            .create(
+              this.player.x +
+                direction * 30,
+              this.player.y - 4,
+              'plasma'
+            )
+            .setDepth(12)
+            .setFlipX(
+              direction < 0
+            );
+
+        plasma.body
+          .setAllowGravity(false)
+          .setVelocity(
+            direction *
+              (
+                weapon ===
+                'pulse-rifle'
+                  ? 980
+                  : 840
+              ),
+            vertical
+          );
+
+        plasma.setData(
+          'power',
+          weapon ===
+          'pulse-rifle'
+            ? 2
+            : 1
+        );
+
+        this.time.delayedCall(
+          900,
+          () => plasma.destroy()
+        );
+      }
     );
 
-    this.gadgetPulse(
-    0xffcf82,
-    9,
-    300
-  );
+    this.ammo--;
+
+    this.game.events.emit(
+      'ammo',
+      this.ammo /
+        this.ammoMax *
+        100
+    );
+
+    this.blasterCooldown =
+      weapon === 'scattergun'
+        ? 420
+        : 240;
+
+    this.playerCue(
+      weapon === 'sidearm'
+        ? 'PLASMA FIRE'
+        : weapon.toUpperCase(),
+      '#8df4ff'
+    );
+
+    if (!this.motionReduced) {
+      const muzzleFlash =
+        this.add
+          .circle(
+            this.player.x +
+              (this.player.flipX ? -30 : 30),
+            this.player.y - 4,
+            7,
+            0x8df4ff,
+            .34
+          )
+          .setDepth(13);
+
+      this.tweens.add({
+        targets: muzzleFlash,
+        scale: 2.6,
+        alpha: 0,
+        duration: 110,
+        ease: 'Quad.out',
+        onComplete: () =>
+          muzzleFlash.destroy()
+      });
+    }
 
     this.game.events.emit(
       'feedback',
-      'empty'
+      'blaster_fire'
     );
-
-    return;
-  }
-
-  const direction =
-    this.player.flipX
-      ? -1
-      : 1;
-
-  const weapon =
-    this.loadout.weapon ||
-    'sidearm';
-
-  const spread =
-    weapon === 'scattergun'
-      ? [-150, 0, 150]
-      : [0];
-
-  spread.forEach(
-    vertical => {
-      const plasma =
-        this.plasma
-          .create(
-            this.player.x +
-              direction * 30,
-            this.player.y - 4,
-            'plasma'
-          )
-          .setDepth(12)
-          .setFlipX(
-            direction < 0
-          );
-
-      plasma.body
-        .setAllowGravity(false)
-        .setVelocity(
-          direction *
-            (
-              weapon ===
-              'pulse-rifle'
-                ? 980
-                : 840
-            ),
-          vertical
-        );
-
-      plasma.setData(
-        'power',
-        weapon ===
-        'pulse-rifle'
-          ? 2
-          : 1
-      );
-
-      this.time.delayedCall(
-        900,
-        () => plasma.destroy()
-      );
-    }
-  );
-
-  this.ammo--;
-
-  this.game.events.emit(
-    'ammo',
-    this.ammo /
-      this.ammoMax *
-      100
-  );
-
-  this.blasterCooldown =
-    weapon === 'scattergun'
-      ? 420
-      : 240;
-
-  this.playerCue(
-    weapon === 'sidearm'
-      ? 'PLASMA FIRE'
-      : weapon.toUpperCase(),
-    '#8df4ff'
-  );
-
-    if (!this.motionReduced) {
-    const muzzleFlash =
-      this.add
-        .circle(
-          this.player.x +
-            (this.player.flipX ? -30 : 30),
-          this.player.y - 4,
-          7,
-          0x8df4ff,
-          .34
-        )
-        .setDepth(13);
-
-    this.tweens.add({
-      targets: muzzleFlash,
-      scale: 2.6,
-      alpha: 0,
-      duration: 110,
-      ease: 'Quad.out',
-      onComplete: () =>
-        muzzleFlash.destroy()
-    });
-  }
-    
-  this.game.events.emit(
-    'feedback',
-    'blaster_fire'
-  );
-
   }
 
   useSword() {
@@ -71810,7 +71834,7 @@ if (wasWaterDeath) {
     );
   }
 
-  if (
+   if (
     onGround &&
     (
       upgrades.includes(
@@ -72368,9 +72392,12 @@ if (wasWaterDeath) {
         
       }
 
-  const isDoubleJump =
-    !onGround &&
-    this.jumpsUsed >= 1;
+const isDoubleJump =
+  !canWallJump &&
+  !onGround &&
+  this.jumpsUsed >= 1;
+
+if (isDoubleJump) {
 
   if (isDoubleJump) {
     body.setVelocityY(
@@ -74331,3 +74358,4 @@ if (wasWaterDeath) {
   }
       }
     }
+  }

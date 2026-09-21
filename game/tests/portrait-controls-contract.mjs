@@ -16,7 +16,7 @@ assert.match(js,/ROTATE YOUR DEVICE/);
 assert.match(js,/#cargoIntegrityV2/);
 assert.match(js,/#play \.hud-xp/);
 assert.match(js,/#play #pause/);
-assert.match(js,/#mobileBottomHud \.mobile-menu-pause/);
+assert.doesNotMatch(js,/mobileBottomHud|mobile-menu-pause|mobile-menu-settings/);
 assert.match(js,/orientation: portrait/);
 
 assert.doesNotMatch(featureDock,/data-feature=\\?['\"]flight/);

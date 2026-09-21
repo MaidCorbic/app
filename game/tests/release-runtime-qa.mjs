@@ -111,7 +111,7 @@ async function runMobileViewport(browser, viewport) {
     if (viewport.orientation === 'landscape') {
       await waitForGameplayBriefingRelease(page);
       await waitForVisible(page, '.mobile-controls');
-      await waitForVisible(page, '#mobilePauseButton');
+      await waitForVisible(page, '#play #pause');
     }
 
     const initial = await page.evaluate(() => ({
@@ -128,7 +128,8 @@ async function runMobileViewport(browser, viewport) {
         const rect = el.getBoundingClientRect();
         return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0' && rect.width > 0 && rect.height > 0;
       })(),
-      briefingLock: document.querySelector('#play')?.classList.contains('relay-map-briefing-lock') || false,
+           briefingLock: document.querySelector('#play')?.classList.contains('relay-map-briefing-lock') || false,
+      legacyMobileHud: Boolean(document.querySelector('#mobileBottomHud, #mobilePauseButton, #mobileSettingsButton')),
     }));
 
     assert.equal(initial.touchControls, 6, `Expected exactly 6 mobile action buttons at ${viewport.width}x${viewport.height}`);
@@ -148,7 +149,8 @@ async function runMobileViewport(browser, viewport) {
 
     assert.equal(initial.briefingLock, false, `Gameplay briefing lock remained active at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height}`);
-    assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
+        assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.legacyMobileHud, false, `Legacy bottom PAUSE/SETTINGS HUD must not exist at ${viewport.width}x${viewport.height}`);
 
     const controls = await page.evaluate(() => ({
       viewport: { width: window.innerWidth, height: window.innerHeight },
@@ -210,9 +212,9 @@ assertNoPairwiseOverlap(
   `Mobile action layout ${viewport.width}x${viewport.height}`,
 );
 
-    // On mobile, the canonical Pause control is #mobilePauseButton. This keeps the
-    // runtime QA aligned with the actual mobile HUD ownership instead of the legacy #pause node.
-    await clickDom(page, '#mobilePauseButton');
+    // The canonical in-game Pause control is #play #pause.
+    // There is no mobile bottom PAUSE/SETTINGS HUD.
+    await clickDom(page, '#play #pause');
     await waitForVisible(page, '#pauseMenu');
     await waitForVisible(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-pause-tab="settings"]');

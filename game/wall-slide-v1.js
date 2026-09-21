@@ -25,6 +25,12 @@ function detectWall(body) {
   return 0;
 }
 function wallJump(scene, state) {
+  // RunnerScene is authoritative when it already performed a wall jump.
+  // Prevent the wrapper from executing the same jump a second time.
+  if (Number(scene?.wallJumpTimer) > 0) {
+    return false;
+  }
+
   const body = scene?.player?.body;
   if (!body || !state.sliding || !state.jumpPressed || state.jumped || state.lock > 0) return false;
   const direction = -state.side;

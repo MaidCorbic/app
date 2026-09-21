@@ -1748,11 +1748,10 @@ import {
        PAUSE
        ------------------------------------------------------- */
 
-    const pauseButton =
+       const pauseButton =
       target.closest(
-        '#pause, #mobilePauseButton'
+        '#pause'
       );
-
     if (pauseButton) {
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -1769,28 +1768,6 @@ import {
 
       return;
     }
-
-
-    /* -------------------------------------------------------
-       MOBILE SETTINGS
-       ------------------------------------------------------- */
-
-    const settingsMobile =
-      target.closest(
-        '#mobileSettingsButton'
-      );
-
-    if (settingsMobile) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      openPause(
-        'settings'
-      );
-
-      return;
-    }
-
 
     /* -------------------------------------------------------
        CLOSE

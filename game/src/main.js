@@ -816,7 +816,11 @@ game.events.on(
 function toast(text) {
   const element = $('toast');
 
-  element.textContent = text;
+  if (!element) {
+    return;
+  }
+
+  element.textContent = String(text ?? '');
   element.classList.add('show');
 
   window.clearTimeout(toastTimer);
@@ -826,6 +830,14 @@ function toast(text) {
     1700
   );
 }
+
+  window.clearTimeout(toastTimer);
+
+  toastTimer = window.setTimeout(
+    () => element.classList.remove('show'),
+    1700
+  );
+
 
 function nextMissionIndex() {
   const index =
