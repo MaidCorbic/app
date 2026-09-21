@@ -1,0 +1,42 @@
+name: Build Runner Relay itch.io package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'game/**'
+      - '.github/workflows/itch-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-itch:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: game
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: game/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build production game
+        run: npm run build
+      - name: Verify browser entrypoint
+        run: test -f dist/index.html
+      - name: Package itch.io build
+        run: |
+          cd dist
+          zip -r ../runner-relay-public-beta.zip .
+      - name: Upload itch.io package
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-relay-public-beta
+          path: game/runner-relay-public-beta.zip
+          if-no-files-found: error
