@@ -46,7 +46,7 @@ assert.doesNotMatch(config, /relay-(death-reason|initial-spawn-shield|checkpoint
 assert.doesNotMatch(config, /relayTransform\(/, 'Vite config must not rewrite gameplay source');
 assert.match(index, /<script type="module" src="\.\/cinematic-arrival-v2\.js"><\/script>/);
 assert.doesNotMatch(index, /<script src=["']\.\/cinematic-arrival-v2\.js["']/);
-assert.match(index, /<script src=["']\.\/splash-loader-v2\.js["']><\/script>/, 'itch splash bootstrap must load as a plain static script');
+assert.match(index, /<script(?:\s+defer)? src=["']\.\/splash-loader-v2\.js["']><\/script>/, 'itch splash bootstrap must load as a plain static script');
 assert.match(config, /splash-loader-v2\.js/, 'Vite build must copy the splash bootstrap into dist');
 assert.doesNotMatch(index, /href=["']mobile-viewport\.css["']/);
 assert.doesNotMatch(arrival, /^import ['"]\.\/canonical-ui-v1\.css['"];?$/m, 'cinematic arrival must not own canonical UI CSS');
