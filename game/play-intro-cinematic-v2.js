@@ -30,6 +30,8 @@
    - no gameplay ownership
    ========================================================= */
 
+import './play-intro-cinematic-v2.css';
+
 (() => {
   'use strict';
 
@@ -44,20 +46,6 @@
 
   window.__relayPlayIntroV5 = true;
 
-
-  /* =========================================================
-     CSS
-     ========================================================= */
-
-  /*
-   * Let Vite own this CSS dependency.
-   *
-   * This is important for production builds:
-   * a runtime "./play-intro-cinematic-v2.css" URL can
-   * bypass Vite's hashed asset pipeline and become a 404
-   * on the deployed site.
-   */
-  import './play-intro-cinematic-v2.css';
 
 
   /* =========================================================
