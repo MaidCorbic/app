@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - itchio-action-zip
     paths:
       - 'game/**'
       - '.github/workflows/itch-build.yml'
@@ -30,9 +31,16 @@ jobs:
         run: npm run build
       - name: Verify browser entrypoint
         run: test -f dist/index.html
-      - name: Upload itch.io-ready files
+      - name: Package itch.io ZIP
+        run: |
+          cd dist
+          zip -r ../runner-relay-itchio.zip .
+          cd ..
+          test -f runner-relay-itchio.zip
+          unzip -l runner-relay-itchio.zip | grep -E '(^|/)index.html$'
+      - name: Upload itch.io ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: runner-relay-public-beta
-          path: game/dist
+          name: runner-relay-itchio
+          path: game/runner-relay-itchio.zip
           if-no-files-found: error
