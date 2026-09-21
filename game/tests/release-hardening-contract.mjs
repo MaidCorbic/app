@@ -45,12 +45,12 @@ assert.doesNotMatch(config, /patch(DeathReason|InitialSpawnShield|CheckpointColl
 assert.doesNotMatch(config, /relay-(death-reason|initial-spawn-shield|checkpoint-collectibles|respawn-transient-state|cargo-state-import|runner-zoom-stability)-fix/);
 assert.doesNotMatch(config, /relayTransform\(/, 'Vite config must not rewrite gameplay source');
 assert.match(index, /<script type="module" src="\.\/src\/itch-boot\.js"><\/script>/);
-assert.doesNotMatch(index, /\\n<\\/body>/, 'index.html must not contain a literal escaped newline after the boot script');
+assert.doesNotMatch(index, /\\n<\/body>/, 'index.html must not contain a literal escaped newline after the boot script');
 const boot = await read('src/itch-boot.js');
-assert.match(boot, /await import\\(['"]\\.\\/main\\.js['"]\\);/);
+assert.match(boot, /await import\(['"]\.\/main\.js['"]\);/);
 assert.ok(boot.indexOf("await import('./main.js');") < boot.indexOf("optional('home-options'"), 'main.js must start before optional itch presentation modules');
 assert.match(boot, /const optional = async/);
-assert.match(boot, /report\\('fatal'/);
+assert.match(boot, /report\('fatal'/);
 assert.doesNotMatch(index, /<script[^>]+src=["']\/src\//, 'itch HTML must not contain root-absolute module URLs');
 assert.match(index, /<script(?:\s+defer)? src=["']\.\/splash-loader-v2\.js["']><\/script>/, 'itch splash bootstrap must load as a plain static script');
 assert.match(config, /splash-loader-v2\.js/, 'Vite build must copy the splash bootstrap into dist');
