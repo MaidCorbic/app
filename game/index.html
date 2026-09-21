@@ -9,7 +9,21 @@
   >
 
   <meta name="format-detection" content="telephone=no">
+<link
+  rel="preconnect"
+  href="https://fonts.googleapis.com"
+>
 
+<link
+  rel="preconnect"
+  href="https://fonts.gstatic.com"
+  crossorigin
+>
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
   <title>Relay Runner | Rooftop Game</title>
 
   <link rel="icon" href="./favicon.ico">
@@ -18,6 +32,13 @@
   <link rel="stylesheet" href="splash-progress-visibility.css">
   <link rel="stylesheet" href="cinematic-splash.css">
   <link rel="stylesheet" href="faq-terminal-polish-v1.css">
+
+  <!-- Keep the legacy DOM from flashing before the current Home module mounts. -->
+  <style id="relay-critical-boot-style">
+    #game{visibility:hidden}
+    #game.relay-boot-ready{visibility:visible}
+    #relaySplash{visibility:visible}
+  </style>
 </head>
 
 <body>
@@ -218,11 +239,14 @@
 <script type="module" src="./home-v3-guard.js"></script>
 <script type="module" src="./home-v3-interaction-fix.js"></script>
 
+<script type="module" src="./play-intro-cinematic-v2.js"></script>
+
 <script type="module" src="/src/systems/runtime-guard.js"></script>
 <script type="module" src="/src/systems/core-stability.js"></script>
 <script type="module" src="/src/systems/mobile-viewport-hardening.js"></script>
 
 <script type="module" src="/src/main.js"></script>
+<script type="module" src="/src/systems/mobile-input-single-owner-v1.js"></script>
 
   <script type="module" src="/src/systems/mission-finish-recovery.js"></script>
   <script type="module" src="/src/systems/mission-results.js"></script>
@@ -240,5 +264,6 @@
   <script type="module" src="./gameplay-touch-lock.js"></script>
   <script type="module" src="./cinematic-arrival-v2.js"></script>
   <script type="module" src="./premium-finishing-pass-v1.js"></script>
+  <script type="module" src="./game/gameplay-core-v1.js"></script>
 </body>
 </html>

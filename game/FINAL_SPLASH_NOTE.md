@@ -1,1 +1,0 @@
-Cinematic splash implementation is being finalized on this branch.

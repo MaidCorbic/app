@@ -1,3 +1,4 @@
+
 /* ============================================================
    RUNNER RELAY — PREMIUM FINISHING PASS V1
    Visual-only final layer. Gameplay, input, progression and
@@ -514,4 +515,796 @@
 @keyframes rrHomeGridFlow{
   from{background-position:0 0,0 0;}
   to{background-position:58px 58px,58px 58px;}
+}
+/* ============================================================
+   RUNNER RELAY — GAME OVER // PREMIUM EMERGENCY SYSTEM
+   SIGNAL LOST / RUN INTERRUPTED
+   ============================================================ */
+
+@keyframes rrGameOverPulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.05),
+      0 35px 90px rgba(0,0,0,.72),
+      0 0 0 rgba(255,130,110,0);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.065),
+      0 38px 96px rgba(0,0,0,.76),
+      0 0 32px rgba(255,130,110,.055);
+  }
+}
+
+/* ============================================================
+   OVERLAY
+   ============================================================ */
+
+#gameOver.overlay {
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(255,130,110,.035),
+      transparent 34%
+    ),
+    rgba(1,4,8,.72) !important;
+
+  backdrop-filter:
+    blur(7px) !important;
+
+  -webkit-backdrop-filter:
+    blur(7px) !important;
+}
+
+/* ============================================================
+   MAIN EMERGENCY CARD
+   ============================================================ */
+
+#gameOver .outcome.fail {
+  position: relative !important;
+
+  width:
+       min(570px, calc(100vw - 28px)) !important;
+
+  max-height:
+    calc(100dvh - 28px) !important;
+
+  box-sizing:
+    border-box !important;
+
+  padding:
+    clamp(24px, 4vw, 34px)
+    clamp(20px, 4vw, 34px)
+    24px !important;
+
+  overflow:
+    hidden !important;
+
+  border:
+    1px solid rgba(255,130,110,.44) !important;
+
+  border-radius:
+    14px !important;
+
+  background:
+    radial-gradient(
+      circle at 92% 8%,
+      rgba(255,130,110,.10),
+      transparent 27%
+    ),
+    radial-gradient(
+      circle at 8% 92%,
+      rgba(120,233,255,.045),
+      transparent 28%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(10,18,29,.985) 0%,
+      rgba(5,11,19,.99) 58%,
+      rgba(2,6,12,.995) 100%
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    inset 0 0 0 1px rgba(255,130,110,.025),
+    0 35px 90px rgba(0,0,0,.72),
+    0 0 45px rgba(255,130,110,.075) !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace !important;
+
+  animation:
+    rrGameOverPulse 3.8s ease-in-out infinite;
+}
+
+/* ============================================================
+   TACTICAL TOP BAR
+   ============================================================ */
+
+#gameOver .outcome.fail::before {
+  content: "";
+
+  position:
+    absolute;
+
+  left: 0;
+  right: 0;
+  top: 0;
+
+  height: 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(120,233,255,.65) 18%,
+      #ff826e 50%,
+      rgba(120,233,255,.65) 82%,
+      transparent 100%
+    ) !important;
+
+  box-shadow:
+    0 0 14px rgba(255,130,110,.30),
+    0 0 26px rgba(120,233,255,.10);
+
+  pointer-events:
+    none !important;
+}
+
+/* ============================================================
+   CORNER SYSTEM MARKERS
+   ============================================================ */
+
+#gameOver .outcome.fail::after {
+  content: "";
+
+  position:
+    absolute;
+
+  inset:
+    10px;
+
+  border:
+    1px solid rgba(120,233,255,.055);
+
+  border-radius:
+    9px;
+
+  pointer-events:
+    none;
+
+  box-shadow:
+    inset 0 0 28px rgba(120,233,255,.018);
+}
+
+/* ============================================================
+   ERROR ICON
+   ============================================================ */
+
+#gameOver .fail .outcome-mark {
+  position:
+    relative;
+
+  display:
+    grid !important;
+
+  place-items:
+    center !important;
+
+  width:
+    56px !important;
+
+  height:
+    56px !important;
+
+  margin:
+    0 auto 16px !important;
+
+  box-sizing:
+    border-box;
+
+  border:
+    1px solid rgba(255,130,110,.70) !important;
+
+  border-radius:
+    10px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,130,110,.18),
+      rgba(255,130,110,.055)
+    ) !important;
+
+  color:
+    #ff9a88 !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace !important;
+
+  font-size:
+    25px !important;
+
+  font-weight:
+    800 !important;
+
+  line-height:
+    1 !important;
+
+  box-shadow:
+    0 0 26px rgba(255,130,110,.12),
+    inset 0 1px 0 rgba(255,255,255,.055) !important;
+
+  text-shadow:
+    0 0 14px rgba(255,130,110,.28) !important;
+}
+
+/* ICON CORNER ACCENTS */
+
+#gameOver .fail .outcome-mark::before,
+#gameOver .fail .outcome-mark::after {
+  content:
+    "";
+
+  position:
+    absolute;
+
+  width:
+    9px;
+
+  height:
+    9px;
+
+  border:
+    1px solid rgba(120,233,255,.55);
+
+  pointer-events:
+    none;
+}
+
+#gameOver .fail .outcome-mark::before {
+  left:
+    -4px;
+
+  top:
+    -4px;
+
+  border-right:
+    0;
+
+  border-bottom:
+    0;
+}
+
+#gameOver .fail .outcome-mark::after {
+  right:
+    -4px;
+
+  bottom:
+    -4px;
+
+  border-left:
+    0;
+
+  border-top:
+    0;
+}
+
+/* ============================================================
+   SIGNAL LOST
+   ============================================================ */
+
+#gameOver .fail .eyebrow {
+  position:
+    relative;
+
+  margin:
+    0 0 9px !important;
+
+  color:
+    #ff826e !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace !important;
+
+  font-size:
+    10px !important;
+
+  font-weight:
+    800 !important;
+
+  line-height:
+    1.2 !important;
+
+  letter-spacing:
+    .22em !important;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    0 0 12px rgba(255,130,110,.22) !important;
+}
+
+#gameOver .fail .eyebrow::before {
+  content:
+    "SYSTEM // ";
+
+  color:
+    #6f8e9c;
+
+  opacity:
+    .72;
+}
+
+/* ============================================================
+   RUN / INTERRUPTED TITLE
+   ============================================================ */
+
+#gameOver .fail h2 {
+  margin:
+    7px 0 15px !important;
+
+  color:
+    #f4fbff !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace !important;
+
+  font-size:
+    clamp(34px, 7vw, 54px) !important;
+
+  font-weight:
+    800 !important;
+
+  line-height:
+    .94 !important;
+
+  letter-spacing:
+    .075em !important;
+
+  text-align:
+    center !important;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    0 7px 28px rgba(0,0,0,.54),
+    0 0 18px rgba(120,233,255,.055) !important;
+}
+
+#gameOver .fail h2 em {
+  display:
+    inline-block;
+
+  color:
+    #ff826e !important;
+
+  font-style:
+    normal !important;
+
+  text-shadow:
+    0 0 10px rgba(255,130,110,.20),
+    0 0 26px rgba(255,130,110,.085) !important;
+}
+
+/* ============================================================
+   DESCRIPTION
+   ============================================================ */
+
+#gameOver #failLine {
+  width:
+    min(100%, 390px) !important;
+
+  margin:
+    0 auto 21px !important;
+
+  color:
+    #9eafb9 !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace !important;
+
+  font-size:
+    9px !important;
+
+  font-weight:
+    500 !important;
+
+  line-height:
+    1.65 !important;
+
+  letter-spacing:
+    .055em !important;
+
+  text-align:
+    center !important;
+
+  text-wrap:
+    balance;
+}
+
+/* ============================================================
+   EMERGENCY DIVIDER
+   ============================================================ */
+
+#gameOver #failLine::after {
+  content:
+    "";
+
+  display:
+    block;
+
+  width:
+    min(180px, 55%);
+
+  height:
+    1px;
+
+  margin:
+    15px auto 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,130,110,.42),
+      rgba(120,233,255,.32),
+      transparent
+    );
+
+  box-shadow:
+    0 0 9px rgba(255,130,110,.15);
+}
+
+/* ============================================================
+   TRY AGAIN
+   ============================================================ */
+
+#gameOver #retry {
+  position:
+    relative !important;
+
+  width:
+    min(100%, 390px) !important;
+
+  min-height:
+    52px !important;
+
+  margin:
+    0 auto !important;
+
+  padding:
+    10px 18px !important;
+
+  display:
+    inline-flex !important;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    9px;
+
+  box-sizing:
+    border-box;
+
+  border:
+    1px solid rgba(255,130,110,.56) !important;
+
+  border-radius:
+    6px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,130,110,.16),
+      rgba(120,233,255,.035)
+    ) !important;
+
+  color:
+    #fff2ee !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace !important;
+
+  font-size:
+    9px !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .13em !important;
+
+  text-transform:
+    uppercase;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 13px 30px rgba(0,0,0,.32),
+    0 0 24px rgba(255,130,110,.065) !important;
+
+  cursor:
+    pointer;
+
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease,
+    filter .16s ease !important;
+}
+
+/* ============================================================
+   HIDE RETRY SPINNER / ICONS
+   ============================================================ */
+
+#gameOver #retry b,
+#gameOver #retry::after {
+  display:none !important;
+  content:none !important;
+}
+
+/* RETRY HOVER */
+
+#gameOver #retry:hover,
+#gameOver #retry:focus-visible {
+  transform:
+    translateY(-2px) !important;
+
+  border-color:
+    #ff826e !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,130,110,.24),
+      rgba(120,233,255,.055)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 17px 38px rgba(0,0,0,.38),
+    0 0 34px rgba(255,130,110,.13),
+    0 0 14px rgba(120,233,255,.045) !important;
+
+  filter:
+    brightness(1.045);
+
+  outline:
+    none !important;
+}
+
+/* RETRY PRESS */
+
+#gameOver #retry:active {
+  transform:
+    translateY(0) scale(.985) !important;
+}
+
+/* ============================================================
+   RETURN TO BRIEFING
+   ============================================================ */
+
+#gameOver #failTitle {
+  position:
+    relative;
+
+  margin:
+    13px auto 0 !important;
+
+  padding:
+    8px 11px !important;
+
+  color:
+    #657d8a !important;
+
+  background:
+    transparent !important;
+
+  border:
+    0 !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace !important;
+
+  font-size:
+    7px !important;
+
+  font-weight:
+    700 !important;
+
+  letter-spacing:
+    .15em !important;
+
+  text-transform:
+    uppercase;
+
+  transition:
+    color .16s ease,
+    transform .16s ease !important;
+}
+
+#gameOver #failTitle::before {
+  content:
+    "// ";
+
+  color:
+    rgba(120,233,255,.46);
+}
+
+#gameOver #failTitle:hover,
+#gameOver #failTitle:focus-visible {
+  color:
+    #b9d1da !important;
+
+  transform:
+    translateY(-1px);
+
+  outline:
+    none !important;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 760px) {
+
+  #gameOver .outcome.fail {
+    width:
+      min(94vw, 540px) !important;
+    max-height:
+      90svh !important;
+
+    padding:
+      22px 16px 19px !important;
+  }
+
+  #gameOver .fail .outcome-mark {
+    width:
+      49px !important;
+
+    height:
+      49px !important;
+
+    margin-bottom:
+      13px !important;
+
+    font-size:
+      22px !important;
+  }
+
+  #gameOver .fail .eyebrow {
+    font-size:
+      8px !important;
+
+    letter-spacing:
+      .17em !important;
+  }
+
+  #gameOver .fail h2 {
+    font-size:
+      clamp(29px, 9vw, 44px) !important;
+
+    letter-spacing:
+      .05em !important;
+  }
+
+  #gameOver #failLine {
+    font-size:
+      8px !important;
+
+    line-height:
+      1.55 !important;
+  }
+
+  #gameOver #retry {
+    min-height:
+      48px !important;
+
+    font-size:
+      8px !important;
+  }
+}
+
+@media (max-width: 430px) {
+
+  #gameOver .outcome.fail {
+    width:
+      calc(100vw - 16px) !important;
+
+    max-height:
+      92svh !important;
+
+    padding:
+      19px 12px 16px !important;
+  }
+
+  #gameOver .fail .outcome-mark {
+    width:
+      44px !important;
+
+    height:
+      44px !important;
+
+    margin-bottom:
+      11px !important;
+
+    font-size:
+      20px !important;
+  }
+
+  #gameOver .fail .eyebrow {
+    font-size:
+      7px !important;
+  }
+
+  #gameOver .fail h2 {
+    font-size:
+      clamp(26px, 9.8vw, 37px) !important;
+  }
+
+  #gameOver #failLine {
+    font-size:
+      7px !important;
+  }
+
+  #gameOver #retry {
+    min-height:
+      46px !important;
+
+    padding:
+      8px 13px !important;
+
+    font-size:
+      7px !important;
+  }
+
+  #gameOver #failTitle {
+    font-size:
+      6px !important;
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  #gameOver .outcome.fail {
+    animation:
+      none !important;
+  }
+
+  #gameOver #retry,
+  #gameOver #failTitle {
+    transition:
+      none !important;
+  }
 }

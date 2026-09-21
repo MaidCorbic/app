@@ -14,6 +14,34 @@
   window.__relayPlayDeploymentV1 = true;
 
   const WAIT = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const runBounded = async (callback, timeoutMs, label) => {
+    if (typeof callback !== 'function') return;
+
+    let timer;
+    try {
+      await Promise.race([
+        Promise.resolve().then(callback),
+        new Promise(resolve => {
+          timer = window.setTimeout(() => {
+            console.warn(`[RelayRunner] ${label} timed out; continuing`);
+            resolve();
+          }, timeoutMs);
+        }),
+      ]);
+    } finally {
+      window.clearTimeout(timer);
+    }
+  };
+  const NEXT_FRAME = callback => {
+    if (typeof window.requestAnimationFrame === 'function') {
+      return window.requestAnimationFrame(callback);
+    }
+
+    return window.setTimeout(
+      () => callback(performance.now()),
+      16
+    );
+  };
   const introVisible = () => {
     const intro = document.getElementById('intro');
     return !!intro && !intro.classList.contains('hidden');
@@ -43,6 +71,10 @@ const DEFAULT_ASSETS = Object.freeze({
 
     overlay.innerHTML = `
       <picture class="relay-splash-picture">
+        <source
+          media="(pointer: coarse)"
+          srcset="${mobile}"
+        >
         <source
           media="(max-width:700px)"
           srcset="${mobile}"
@@ -274,7 +306,7 @@ const DEFAULT_ASSETS = Object.freeze({
     if (api && typeof api.close === 'function' && typeof api.show === 'function') {
       if (typeof api.isVisible === 'function' && api.isVisible()) api.close();
       api.show();
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise(resolve => NEXT_FRAME(() => NEXT_FRAME(resolve)));
     }
 
     overlay.classList.add('is-closing');
@@ -292,16 +324,35 @@ const DEFAULT_ASSETS = Object.freeze({
     active = true;
     const token = ++serial;
     let overlay;
+    let watchdog;
+    let handoffStarted = false;
 
     try {
       installStyle();
      overlay = makeOverlay(config);
 document.body.appendChild(overlay);
 
+watchdog = window.setTimeout(async () => {
+  if (!active || handoffStarted || !overlay?.isConnected) return;
+
+  console.warn('[RelayRunner] deployment watchdog recovery; launching normally');
+  handoffStarted = true;
+  setStage(overlay, 100, 'DEPLOYMENT READY', '→ MOBILE SAFE MODE', '→ CONTINUING TO GAME');
+
+  try {
+    await runBounded(config.beforeRoute, 1500, 'Deployment watchdog handoff');
+  } finally {
+    overlay.classList.add('is-closing');
+    await WAIT(320);
+    overlay.remove();
+    active = false;
+  }
+}, 15000);
+
 console.log('[RelayRunner] OVERLAY ADDED:', overlay);
 console.log('[RelayRunner] CLASS BEFORE FRAME:', overlay.className);
 
-await new Promise(resolve => requestAnimationFrame(resolve));
+await new Promise(resolve => NEXT_FRAME(resolve));
 
 console.log('[RelayRunner] CLASS AFTER FRAME:', overlay.className);
 
@@ -313,7 +364,7 @@ console.log('[RelayRunner] OVERLAY VISIBILITY:', getComputedStyle(overlay).visib
 console.log('[RelayRunner] OVERLAY OPACITY:', getComputedStyle(overlay).opacity);
 console.log('[RelayRunner] OVERLAY ZINDEX:', getComputedStyle(overlay).zIndex);
 
-      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise(resolve => NEXT_FRAME(resolve));
       if (!active || token !== serial) return false;
 
       const started = performance.now();
@@ -337,9 +388,18 @@ console.log('[RelayRunner] OVERLAY ZINDEX:', getComputedStyle(overlay).zIndex);
 
       setStage(overlay, 91, 'FINALIZING DEPLOYMENT', '→ ROUTE LOCK CONFIRMED // VERIFIED', '→ WORLD NODE ONLINE // READY');
 
-      while (performance.now() - started < minimumMs || !getMissionReady()) {
+      const readinessDeadline = started + 5000;
+
+      while (
+        performance.now() - started < minimumMs ||
+        (!getMissionReady() && performance.now() < readinessDeadline)
+      ) {
         await WAIT(50);
         if (!active || token !== serial) return false;
+      }
+
+      if (!getMissionReady()) {
+        console.warn('[RelayRunner] Mission briefing API timed out; continuing with normal launch');
       }
 
       setStage(overlay, 100, 'DEPLOYMENT READY', '→ MISSION DATA LOADED // VERIFIED', '→ RELAY CHANNEL STABLE // LOCKED');
@@ -349,13 +409,16 @@ console.log('[RelayRunner] OVERLAY ZINDEX:', getComputedStyle(overlay).zIndex);
       await WAIT(240);
       if (!active || token !== serial) return false;
 
-      await config.beforeRoute?.();
+      handoffStarted = true;
+      await runBounded(config.beforeRoute, 2500, 'Mission route handoff');
       if (!active || token !== serial) return false;
 
       await revealMissionRoute(overlay);
+      window.clearTimeout(watchdog);
       return true;
     } catch (error) {
       console.error('[RelayRunner] deployment loader failed', error);
+      window.clearTimeout(watchdog);
       overlay?.remove();
       active = false;
       return false;

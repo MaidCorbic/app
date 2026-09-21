@@ -1,1 +1,0 @@
-P3 options polish adds larger readable type, visible desktop/mobile scrollbars, and live relay-settings-change feedback for existing option controls.

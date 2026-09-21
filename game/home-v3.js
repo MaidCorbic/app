@@ -2726,50 +2726,28 @@ syncHomeProfile();
       }
     );
 
-    bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="contracts"]'
-      ),
-      'click',
-      event => {
-        event.preventDefault();
+ bindOnce(
+  shell.querySelector(
+    '[data-home-v4-action="contracts"]'
+  ),
+  'click',
+  event => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
 
-        /*
-         * Contracts currently live inside the
-         * existing Challenges system.
-         *
-         * Do not create a second contracts screen.
-         */
-        const target =
-          document.querySelector(
-            '#pauseMenu [data-tab="challenges"]'
-          );
+    if (
+      typeof window.relayOpenContracts !==
+      'function'
+    ) {
+      console.error(
+        '[RelayRunner] Contracts API not ready'
+      );
+      return;
+    }
 
-        if (
-          target instanceof HTMLElement
-        ) {
-          HTMLElement.prototype.click.call(
-            target
-          );
-
-          return;
-        }
-
-        const fallback =
-          document.querySelector(
-            '[data-relay-info="challenges"]'
-          );
-
-        if (
-          fallback instanceof HTMLElement
-        ) {
-          HTMLElement.prototype.click.call(
-            fallback
-          );
-        }
-      }
-    );
-    
+    window.relayOpenContracts();
+  }
+);
        /* CREDITS IS DISPLAYED IN THE TOPBAR */
 
     bindOnce(

@@ -149,6 +149,7 @@ document.addEventListener(
 // Mobile input ownership lives exclusively in
 // src/systems/mobile-input-single-owner-v1.js.
 // Do not create a second action dispatcher or inject duplicate buttons here.
+// The static controls use [data-mobile-action] and are owned by that module.
 
 document
   .querySelector('[data-rotate-dismiss]')
@@ -1096,6 +1097,7 @@ function districtProgress(district) {
 }
 
 function openWorldMap() {
+  window.relayOpenWorldMap = openWorldMap;
   game.scene.stop('runner');
 
   $('pauseMenu').classList.add('hidden');
@@ -1221,6 +1223,7 @@ function openWorldMap() {
   $('worldMap')
     .classList.remove('hidden');
 }
+window.relayOpenWorldMap = openWorldMap;
 
 let selectedJob;
 
@@ -1480,10 +1483,49 @@ function renderJobBoard(kind) {
               })
             );
 
-  grid.innerHTML =
-    cards
-      .map(
-        (card, index) => {
+grid.innerHTML =
+  (
+    kind === 'contracts'
+      ? `
+        <article class="contract-terminal-card">
+          <span>RELAY CONTRACT SYSTEM</span>
+
+          <h3>CONTRACT<br><em>TERMINAL.</em></h3>
+
+          <p>
+            ACTIVE JOBS // ${contracts.length}<br>
+            NETWORK STATUS // ONLINE
+          </p>
+
+          <div class="contract-terminal-stats">
+            <b>
+              <small>AVAILABLE</small>
+              ${contracts.length}
+            </b>
+
+            <b>
+              <small>REWARD POOL</small>
+              ${contracts.reduce(
+                (total, contract) =>
+                  total + contract.credits,
+                0
+              )}
+              CR
+            </b>
+          </div>
+
+          <div class="contract-terminal-line"></div>
+
+          <small class="contract-terminal-footer">
+            SELECT A CONTRACT NODE TO DEPLOY
+          </small>
+        </article>
+      `
+      : ''
+  ) +
+  cards
+    .map(
+      (card, index) => {
           const available =
             card.missionIndex ===
               undefined ||
@@ -1500,7 +1542,15 @@ function renderJobBoard(kind) {
             );
 
           return `
-            <article class="job-card">
+    <article class="job-card ${
+  kind === 'contracts'
+    ? 'contract-card'
+    : kind === 'missions'
+      ? 'mission-card'
+      : kind === 'challenges'
+        ? 'challenge-card'
+        : ''
+}">
               <span>${card.meta}</span>
               <h3>${card.title}</h3>
               <p>${card.body}</p>
@@ -1572,6 +1622,11 @@ function renderJobBoard(kind) {
         }
     );
 }
+
+window.relayOpenContracts = () => {
+  openWorldMap();
+  renderJobBoard('contracts');
+};
 
 function renderSpecialEvent() {
   const event =
@@ -4936,39 +4991,60 @@ $('failTitle').onclick =
     launch(0, true);
   };
 
-document
-  .querySelectorAll(
-    '[data-board]'
-  )
-  .forEach(
-    button =>
-      button.onclick = () => {
-        if (
-          button.dataset.board ===
-          'districts'
-        ) {
-          return openWorldMap();
-        }
+document.addEventListener(
+  'click',
+  event => {
+    const button =
+      event.target.closest(
+        '#worldMap [data-board]'
+      );
 
-        if (
-          button.dataset.board ===
-          'events'
-        ) {
-          return renderSpecialEvent();
-        }
+    if (!button) {
+      return;
+    }
 
-        if (
-          button.dataset.board ===
-          'npcs'
-        ) {
-          return renderContacts();
-        }
+    event.preventDefault();
+    event.stopPropagation();
 
-        renderJobBoard(
-          button.dataset.board
-        );
-      }
-  );
+    const board =
+      button.dataset.board;
+
+    if (!board) {
+      return;
+    }
+
+    if (board === 'districts') {
+      openWorldMap();
+      return;
+    }
+
+    if (board === 'missions') {
+      renderJobBoard('missions');
+      return;
+    }
+
+    if (board === 'contracts') {
+      renderJobBoard('contracts');
+      return;
+    }
+
+    if (board === 'challenges') {
+      renderJobBoard('challenges');
+      return;
+    }
+
+    if (board === 'events') {
+      renderSpecialEvent();
+      return;
+    }
+
+    if (board === 'npcs') {
+      renderContacts();
+      return;
+    }
+  },
+  true
+);
 
 document.addEventListener(
   'click',

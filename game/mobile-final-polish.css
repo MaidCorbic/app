@@ -495,3 +495,86 @@
     }
   }
      }
+
+/* =========================================================
+   MOBILE VIEWPORT / SCROLL CONTRACT
+   Gameplay itself stays gesture-locked, while home and menus
+   remain vertically scrollable on small screens.
+   ========================================================= */
+
+@media (pointer: coarse) {
+  html,
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-x: none;
+  }
+
+  #game {
+    min-height: 100dvh;
+    height: auto;
+    overflow: visible !important;
+  }
+
+  #intro,
+  #pauseMenu,
+  #titlePanel,
+  #relayInfoPanel {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  #intro {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  html body.is-touch #intro {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    touch-action: pan-y !important;
+  }
+
+  #pauseMenu,
+  #titlePanel,
+  #relayInfoPanel {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Explicit orientation contract used by mobile runtime and QA. */
+@media (orientation:portrait) and (pointer:coarse){.mobile-controls{display:none!important}body.is-touch .mobile-controls{display:none!important}html body.is-touch #play .mobile-controls{display:none!important}}
+@media (orientation:landscape) and (pointer:coarse){.mobile-controls{display:flex!important}body.is-touch .mobile-controls{display:flex!important}html body.is-touch #play .mobile-controls{display:flex!important}}
+
+@media (pointer:coarse){.mobile-controls{user-select:none;-webkit-user-select:none}}
+
+/* Landscape must occupy the complete physical viewport. Phaser still owns
+   the world scale; these rules only prevent the canvas from rendering at a
+   smaller intrinsic size and exposing the blue host behind it. */
+@media (orientation:landscape) and (pointer:coarse) {
+  html,
+  body,
+  #game,
+  #play,
+  #phaser-game {
+    width: 100dvw !important;
+    max-width: 100dvw !important;
+    min-width: 0 !important;
+  }
+
+  #game,
+  #play,
+  #phaser-game {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 0 !important;
+  }
+
+  #phaser-game > canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+  }
+}

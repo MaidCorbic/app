@@ -9,7 +9,7 @@
 // IMPORTANT:
 // - Never dispatch a synthetic window.resize event.
 // - Never create a resize feedback loop.
-// - Do not resize the Phaser canvas directly.
+// - Do not resize the Phaser game/world directly.
 // - Do not control or remove the splash loader here.
 // - Splash lifecycle is owned by splash-loader-v2.js.
 // - Mobile gameplay input remains owned by
@@ -79,6 +79,31 @@ const getViewport = () => {
         ? 'landscape'
         : 'portrait'
   };
+};
+
+
+/* =========================================================
+   CANVAS PRESENTATION FIT
+   Phaser owns the internal game/world scale. Mobile browser
+   chrome and rotation can nevertheless leave an inline canvas
+   presentation size behind, so update only its CSS box here.
+   ========================================================= */
+
+const syncCanvasPresentation = () => {
+  if (!isMobileDevice()) return;
+
+  const host = document.getElementById('phaser-game');
+  const canvas = host?.querySelector('canvas');
+  if (!host || !canvas) return;
+
+  const width = Math.max(1, Math.round(host.clientWidth || getViewport().width));
+  const height = Math.max(1, Math.round(host.clientHeight || getViewport().height));
+
+  canvas.style.setProperty('display', 'block', 'important');
+  canvas.style.setProperty('width', `${width}px`, 'important');
+  canvas.style.setProperty('height', `${height}px`, 'important');
+  canvas.style.setProperty('max-width', 'none', 'important');
+  canvas.style.setProperty('max-height', 'none', 'important');
 };
 
 
@@ -233,6 +258,8 @@ if (isMobileDevice()) {
         }
       )
     );
+
+    syncCanvasPresentation();
   };
 
 
@@ -285,6 +312,8 @@ if (isMobileDevice()) {
    */
   const initialViewport =
     syncViewportNow();
+
+  syncCanvasPresentation();
 
   lastKey =
     getViewportKey(initialViewport);
@@ -383,6 +412,13 @@ if (isMobileDevice()) {
     );
   } else {
     initialSync();
+  }
+
+  const canvasHost = document.getElementById('phaser-game');
+  if (canvasHost && 'MutationObserver' in window) {
+    new MutationObserver(syncCanvasPresentation).observe(canvasHost, {
+      childList: true,
+    });
   }
 }
 

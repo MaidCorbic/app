@@ -6,7 +6,8 @@ import './cinematic-arrival-v2.css';
 
   // splash-loader-v2.js is the single owner of #relaySplash lifecycle.
   // Do not install a second release timer or remove the splash from here.
-  if (window.__relaySplashV3) return;
+  // V6 is the active splash owner. Do not run a second progress/removal loop.
+  if (window.__relaySplashV6 || window.__relaySplashV3) return;
 
   window.__relayCinematicArrivalV5 = true;
 

@@ -5,26 +5,10 @@
 }
 
 /* =========================================================
-   ANDROID SPLASH EMERGENCY FAIL-OPEN
-   The JS loader has its own timeout, but this independent CSS
-   fallback guarantees that a stuck splash cannot remain forever.
+   SPLASH LIFECYCLE
+   splash-loader-v2.js owns dismissal after the home screen is mounted.
+   A CSS timer can expose an empty page on a slower phone.
    ========================================================= */
-.relay-splash{
-  animation:relaySplashEmergencyDismiss 9s steps(1,end) forwards;
-}
-
-@keyframes relaySplashEmergencyDismiss{
-  0%,89%{
-    opacity:1;
-    visibility:visible;
-    pointer-events:auto;
-  }
-  90%,100%{
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-  }
-}
 
 .relay-splash-status {
   display: inline-block;
@@ -135,10 +119,10 @@
 
 @media (pointer: coarse) and (orientation: portrait) {
   #game {
-    visibility: hidden !important;
+    visibility: visible !important;
   }
 
-  body::after {
+  .relay-orientation-gate::after {
     content: 'ROTATE DEVICE  •  LANDSCAPE MODE REQUIRED';
 
     position: fixed;

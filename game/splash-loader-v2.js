@@ -13,8 +13,69 @@
 
   console.log('[RelaySplash V6] LOADED');
 
-  const sleep = ms =>
-    new Promise(resolve => setTimeout(resolve, ms));
+  const isCoarseDevice = () =>
+    window.matchMedia?.('(pointer: coarse)').matches === true ||
+    Number(navigator.maxTouchPoints || 0) > 0;
+
+  const sleep = ms => new Promise(resolve => setTimeout(
+    resolve,
+    isCoarseDevice() ? Math.max(40, ms * .3) : ms
+  ));
+
+  const homeIsReady = () => {
+    const home = document.getElementById('intro');
+    const start = home?.querySelector('#start');
+
+    return Boolean(
+      home?.dataset.homeV4Built === '1' &&
+      start
+    );
+  };
+
+  const revealHomeForRecovery = () => {
+    const home = document.getElementById('intro');
+    if (!home) return;
+
+    home.classList.remove('hidden');
+    home.removeAttribute('hidden');
+    home.style.setProperty('visibility', 'visible', 'important');
+    home.style.setProperty('opacity', '1', 'important');
+    home.style.setProperty('pointer-events', 'auto', 'important');
+    document.getElementById('game')?.classList.add('relay-boot-ready');
+  };
+
+  const waitForHomeReady = ({ timeoutMs } = {}) => new Promise(resolve => {
+    const effectiveTimeout = timeoutMs ?? (
+      window.matchMedia?.('(pointer: coarse)').matches === true
+        ? 1200
+        : 4000
+    );
+    const startedAt = performance.now();
+
+    const check = () => {
+      if (homeIsReady()) {
+        resolve(true);
+        return;
+      }
+
+      /*
+       * Do not leave mobile users behind an opaque splash forever. A slow
+       * device or a blocked optional module must not prevent the already
+       * mounted app from becoming visible. The normal path still waits for
+       * the home screen; this is only a bounded fail-open recovery path.
+       */
+      if (performance.now() - startedAt >= effectiveTimeout) {
+        revealHomeForRecovery();
+        console.warn('[RelaySplash V6] Home readiness timeout; opening app');
+        resolve(false);
+        return;
+      }
+
+      window.setTimeout(check, 50);
+    };
+
+    check();
+  });
 
   /* ---------------------------------------------------------
      FIND SPLASH
@@ -366,6 +427,23 @@
       return;
     }
 
+    /*
+     * Last-resort mobile recovery. This is deliberately longer than the
+     * normal boot sequence, but guarantees that a browser lifecycle pause or
+     * optional module failure cannot leave the first screen blocking Home.
+     */
+    const failOpenTimer = window.setTimeout(() => {
+      if (!document.body.contains(splash)) return;
+
+      console.warn('[RelaySplash V6] watchdog recovery; opening Home');
+      revealHomeForRecovery();
+      splash.setAttribute('aria-busy', 'false');
+      splash.remove();
+    }, 10000);
+
+    const clearFailOpenTimer = () =>
+      window.clearTimeout(failOpenTimer);
+
     hardenSplash(splash);
     installHud();
 
@@ -383,6 +461,9 @@
 
     if (!image || !bar || !pct || !label) {
       console.error('[RelaySplash V6] REQUIRED ELEMENT MISSING');
+      clearFailOpenTimer();
+      revealHomeForRecovery();
+      splash.remove();
       return;
     }
 
@@ -465,11 +546,14 @@
         const to = Math.max(from, Math.min(100, target));
 
         const start = performance.now();
+        const effectiveDuration = isCoarseDevice()
+          ? Math.max(120, duration * .3)
+          : duration;
 
         const frame = now => {
           const t = Math.min(
             1,
-            (now - start) / duration
+            (now - start) / effectiveDuration
           );
 
           const eased =
@@ -481,14 +565,20 @@
           );
 
           if (t < 1) {
-            requestAnimationFrame(frame);
+            window.setTimeout(
+              () => frame(performance.now()),
+              16
+            );
           } else {
             setProgress(to, text);
             resolve();
           }
         };
 
-        requestAnimationFrame(frame);
+        window.setTimeout(
+          () => frame(performance.now()),
+          16
+        );
       });
     };
 
@@ -577,6 +667,10 @@
       '[RelaySplash V6] 100% COMPLETE'
     );
 
+    /* Do not reveal an empty background while slower mobile devices are
+       still evaluating the home modules. */
+    await waitForHomeReady();
+
     /* =====================================================
        100% HOLD
        ===================================================== */
@@ -585,7 +679,10 @@
       hud.complete.classList.add('show');
     }
 
-    await sleep(1200);
+    const isMobileBoot =
+      window.matchMedia?.('(pointer: coarse)').matches === true;
+
+    await sleep(isMobileBoot ? 250 : 1200);
 
     /* =====================================================
        CINEMATIC EXIT
@@ -593,10 +690,12 @@
 
     splash.setAttribute('aria-busy', 'false');
 
+    const exitDuration = isMobileBoot ? '0.45s' : '1.2s';
+
     splash.style.transition =
-      'opacity 1.2s cubic-bezier(.16,1,.3,1),' +
-      'transform 1.2s cubic-bezier(.16,1,.3,1),' +
-      'filter 1.2s ease';
+      `opacity ${exitDuration} cubic-bezier(.16,1,.3,1),` +
+      `transform ${exitDuration} cubic-bezier(.16,1,.3,1),` +
+      `filter ${exitDuration} ease`;
 
     void splash.offsetWidth;
 
@@ -605,9 +704,11 @@
     splash.style.filter =
       'brightness(1.2) saturate(1.08)';
 
-    await sleep(1250);
+    await sleep(isMobileBoot ? 500 : 1250);
 
     splash.remove();
+    document.getElementById('game')?.classList.add('relay-boot-ready');
+    clearFailOpenTimer();
 
     console.log(
       '[RelaySplash V6] EXIT COMPLETE — HOME ACTIVE'
@@ -633,6 +734,7 @@
     const splash = getSplash();
 
     if (splash) {
+      document.getElementById('game')?.classList.add('relay-boot-ready');
       splash.remove();
     }
   });
