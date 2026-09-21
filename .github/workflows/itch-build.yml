@@ -30,13 +30,9 @@ jobs:
         run: npm run build
       - name: Verify browser entrypoint
         run: test -f dist/index.html
-      - name: Package itch.io build
-        run: |
-          cd dist
-          zip -r ../runner-relay-public-beta.zip .
-      - name: Upload itch.io package
+      - name: Upload itch.io-ready files
         uses: actions/upload-artifact@v4
         with:
           name: runner-relay-public-beta
-          path: game/runner-relay-public-beta.zip
+          path: game/dist
           if-no-files-found: error
