@@ -921,3 +921,25 @@
   #game .gameplay-action-dock { display: none !important; }
   #game #settings { display: none !important; }
 }
+
+
+/* CANONICAL ACTION OVERRIDE — outrank legacy HUD positioning */
+@media (max-width: 760px) {
+  html body.is-touch #game #play .hud .hud-actions > #pause {
+    position: fixed !important;
+    left: max(10px, env(safe-area-inset-left, 0px)) !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: max(10px, env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 501 !important;
+  }
+  html body.is-touch #game #play .gameplay-action-dock #settings,
+  html body.is-touch #game #settings {
+    position: fixed !important;
+    left: auto !important;
+    right: max(10px, env(safe-area-inset-right, 0px)) !important;
+    top: auto !important;
+    bottom: max(10px, env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 501 !important;
+  }
+}
