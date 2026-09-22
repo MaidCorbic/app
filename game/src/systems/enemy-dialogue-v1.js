@@ -2097,21 +2097,6 @@ box-shadow:
   /* Keep the authored faction panel, but remove a visibility/compositing trap
      that can hide it behind later mobile/desktop CSS layers. */
   style.textContent += `
-    #play .relay-faction-dialogue[hidden]{display:none!important;}
-    #play .relay-faction-dialogue:not([hidden]){
-      display:grid!important;
-      visibility:visible!important;
-      opacity:1!important;
-    }
-    #play .relay-faction-dialogue .relay-faction-dialogue-core,
-    #play .relay-faction-dialogue .relay-faction-header,
-    #play .relay-faction-dialogue .relay-faction-tactical{
-      min-width:0!important;
-      min-height:0!important;
-    }
-  `;
-
-  style.textContent += `
 #play .relay-faction-dialogue[hidden]{display:none!important;}
 #play .relay-faction-dialogue:not([hidden]){
   display:grid!important;
