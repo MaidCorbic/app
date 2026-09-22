@@ -15,6 +15,9 @@ import { loadState, saveState } from './src/state.js';
   const GRAPHICS_QUALITY_DEFAULT =
     'LOW';
 
+  const GRAPHICS_DEFAULT_MIGRATION_KEY =
+    'runner_graphics_default_v2';
+
   const GRAPHICS_QUALITIES =
     Object.freeze([
       'LOW',
@@ -2341,6 +2344,30 @@ import { loadState, saveState } from './src/state.js';
 
   const ensureDefaultGraphicsQuality = () => {
     try {
+      const migrated =
+        localStorage.getItem(
+          GRAPHICS_DEFAULT_MIGRATION_KEY
+        );
+
+      /*
+       * First launch of this final settings contract:
+       * explicitly start at LOW, including existing saves.
+       * After that, the player's selected quality persists.
+       */
+      if (migrated !== '1') {
+        localStorage.setItem(
+          GRAPHICS_QUALITY_KEY,
+          GRAPHICS_QUALITY_DEFAULT
+        );
+
+        localStorage.setItem(
+          GRAPHICS_DEFAULT_MIGRATION_KEY,
+          '1'
+        );
+
+        return;
+      }
+
       const saved =
         String(
           localStorage.getItem(
