@@ -1424,6 +1424,12 @@ import {
 
   const openPause = tab => {
     try {
+      /* Never allow the gameplay pause overlay to open while Home is active. */
+      const intro = $('intro');
+      if (intro instanceof HTMLElement && !intro.classList.contains('hidden')) {
+        return false;
+      }
+
       closeAllOverlays();
 
       ensurePauseShell();
