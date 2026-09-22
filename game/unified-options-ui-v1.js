@@ -9,6 +9,20 @@ import { loadState, saveState } from './src/state.js';
   const LANGUAGE_KEY =
     'relay-runner-language';
 
+  const GRAPHICS_QUALITY_KEY =
+    'runner_graphics_quality';
+
+  const GRAPHICS_QUALITY_DEFAULT =
+    'LOW';
+
+  const GRAPHICS_QUALITIES =
+    Object.freeze([
+      'LOW',
+      'MEDIUM',
+      'HIGH',
+      'ULTRA'
+    ]);
+
   const PRESENTATION_KEY =
     'relay.runner.ui.preferences.v1';
 
@@ -380,14 +394,14 @@ import { loadState, saveState } from './src/state.js';
     } catch {}
 
     let quality =
-      'HIGH';
+      GRAPHICS_QUALITY_DEFAULT;
 
     try {
       quality =
         localStorage.getItem(
-          'runner_graphics_quality'
+          GRAPHICS_QUALITY_KEY
         ) ||
-        'HIGH';
+        GRAPHICS_QUALITY_DEFAULT;
     } catch {}
 
     quality =
@@ -408,7 +422,7 @@ import { loadState, saveState } from './src/state.js';
         quality
       )
     ) {
-      quality = 'HIGH';
+      quality = GRAPHICS_QUALITY_DEFAULT;
     }
 
     const level =
@@ -568,7 +582,7 @@ import { loadState, saveState } from './src/state.js';
     } else {
       try {
         localStorage.setItem(
-          'runner_graphics_quality',
+          GRAPHICS_QUALITY_KEY,
           safeQuality
         );
       } catch {}
@@ -1960,8 +1974,8 @@ import { loadState, saveState } from './src/state.js';
 
     try {
       localStorage.setItem(
-        'runner_graphics_quality',
-        'HIGH'
+        GRAPHICS_QUALITY_KEY,
+        GRAPHICS_QUALITY_DEFAULT
       );
 
       localStorage.setItem(
@@ -2322,10 +2336,37 @@ import { loadState, saveState } from './src/state.js';
   };
 
   /* =========================================================
+     DEFAULT GRAPHICS MIGRATION
+  ========================================================= */
+
+  const ensureDefaultGraphicsQuality = () => {
+    try {
+      const saved =
+        String(
+          localStorage.getItem(
+            GRAPHICS_QUALITY_KEY
+          ) || ''
+        ).toUpperCase();
+
+      if (
+        !GRAPHICS_QUALITIES.includes(
+          saved
+        )
+      ) {
+        localStorage.setItem(
+          GRAPHICS_QUALITY_KEY,
+          GRAPHICS_QUALITY_DEFAULT
+        );
+      }
+    } catch {}
+  };
+
+  /* =========================================================
      INIT
   ========================================================= */
 
   const init = () => {
+    ensureDefaultGraphicsQuality();
     injectStyles();
 
     syncPresentationClasses(
