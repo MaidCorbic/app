@@ -40,6 +40,13 @@
    * The application itself must remain renderable so a delayed
    * optional module or boot race cannot produce a permanent black screen.
    */
+  /* HOME IS THE INITIAL BOOT STATE.  The gameplay HUD must not flash above Home. */
+  body.home-v3-active #play{
+    visibility:hidden !important;
+    opacity:0 !important;
+    pointer-events:none !important;
+  }
+
   #game{
     visibility:visible;
   }
@@ -50,7 +57,7 @@
 </style>
 </head>
 
-<body>
+<body class="home-v3-active">
 
   <div id="relaySplash" class="relay-splash" role="status" aria-live="polite" aria-busy="true">
     <picture id="relaySplashPicture">
