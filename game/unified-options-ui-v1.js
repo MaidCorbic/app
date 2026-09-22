@@ -2367,7 +2367,7 @@ import { loadState, saveState } from './src/state.js';
 
         const pauseSettings =
           target.closest(
-            '#pauseMenu [data-tab="settings"]'
+            '#pauseMenu [data-pause-tab="settings"], #pauseMenu [data-tab="settings"]'
           );
 
         if (
