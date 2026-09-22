@@ -1695,17 +1695,14 @@ import './play-intro-cinematic-v2.css';
 
 
     /*
-     * Do not intercept a deployment
-     * loader handoff.
+     * Deployment loader owns the Home Start cinematic.
+     * Do not install a second capture-phase owner for the
+     * same #start button. The synthetic authoritative click
+     * fired by the deployment handoff is also allowed through.
      */
     if (
       window.relayPlayDeploymentV1 &&
-      typeof
-        window.relayPlayDeploymentV1
-          .isActive ===
-        'function' &&
-      window.relayPlayDeploymentV1
-        .isActive()
+      typeof window.relayPlayDeploymentV1.show === 'function'
     ) {
       return;
     }
