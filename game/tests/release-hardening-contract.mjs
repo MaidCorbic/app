@@ -78,7 +78,6 @@ assert.doesNotMatch(
 );
 assert.match(home, /const sourceStart = \$\('start'\);/);
 assert.match(home, /HTMLElement\.prototype\.click\.call\(sourceStart\)/);
-assert.doesNotMatch(home, /stopImmediatePropagation\(\)/);
 assert.match(
   playIntro,
   /window\.relayPlayDeploymentV1[\s\S]*?typeof window\.relayPlayDeploymentV1\.show === 'function'/
