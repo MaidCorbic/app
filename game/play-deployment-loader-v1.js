@@ -2,62 +2,38 @@
  * Runner Relay — PLAY NOW / MISSION deployment sequence.
  *
  * Purpose:
- * - Cinematic full-screen deployment loader.
- * - Uses supplied desktop/mobile artwork.
- * - Keeps actual mission launching owned by the existing UI handlers.
- * - Keeps Mission Route V5/V6 briefing ownership unchanged.
+ * - Reuse one cinematic deployment loader for Home and mission-to-mission flow.
+ * - Select the supplied desktop/mobile artwork for the requested mission.
+ * - Keep actual mission launching owned by the existing UI handlers.
+ * - Keep Mission Route V5/V6 briefing ownership unchanged.
  */
-
 (() => {
   'use strict';
 
   if (window.__relayPlayDeploymentV1) return;
   window.__relayPlayDeploymentV1 = true;
 
-  /* =========================================================
-     CORE HELPERS
-     ========================================================= */
-
-  const WAIT = ms =>
-    new Promise(resolve =>
-      window.setTimeout(resolve, ms)
-    );
-
-  const runBounded = async (
-    callback,
-    timeoutMs,
-    label
-  ) => {
-    if (typeof callback !== 'function') {
-      return;
-    }
+  const WAIT = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const runBounded = async (callback, timeoutMs, label) => {
+    if (typeof callback !== 'function') return;
 
     let timer;
-
     try {
       await Promise.race([
         Promise.resolve().then(callback),
-
         new Promise(resolve => {
           timer = window.setTimeout(() => {
-            console.warn(
-              `[RelayRunner] ${label} timed out; continuing`
-            );
-
+            console.warn(`[RelayRunner] ${label} timed out; continuing`);
             resolve();
           }, timeoutMs);
-        })
+        }),
       ]);
     } finally {
       window.clearTimeout(timer);
     }
   };
-
   const NEXT_FRAME = callback => {
-    if (
-      typeof window.requestAnimationFrame ===
-      'function'
-    ) {
+    if (typeof window.requestAnimationFrame === 'function') {
       return window.requestAnimationFrame(callback);
     }
 
@@ -66,82 +42,34 @@
       16
     );
   };
-
   const introVisible = () => {
-    const intro =
-      document.getElementById('intro');
-
-    return (
-      !!intro &&
-      !intro.classList.contains('hidden')
-    );
+    const intro = document.getElementById('intro');
+    return !!intro && !intro.classList.contains('hidden');
   };
-
-  /* =========================================================
-     STATE
-     ========================================================= */
 
   let active = false;
   let serial = 0;
 
+// Stable URLs backed by the real JPEGs in game/assets/.
+  // vite.config.mjs copies these into dist/assets for production.
   const DEFAULT_ASSETS = Object.freeze({
     desktop: './assets/loadplay.jpg',
-    mobile: './assets/loadplaymobile.jpg'
+    mobile: './assets/loadplaymobile.jpg',
   });
-
   const normalizeConfig = config => ({
-    missionNumber: Math.max(
-      1,
-      Number(config?.missionNumber) || 1
-    ),
-
-    desktop:
-      config?.desktop ||
-      DEFAULT_ASSETS.desktop,
-
-    mobile:
-      config?.mobile ||
-      DEFAULT_ASSETS.mobile,
-
-    beforeRoute:
-      typeof config?.beforeRoute ===
-      'function'
-        ? config.beforeRoute
-        : null
+    missionNumber: Math.max(1, Number(config?.missionNumber) || 1),
+    desktop: config?.desktop || DEFAULT_ASSETS.desktop,
+    mobile: config?.mobile || DEFAULT_ASSETS.mobile,
+    beforeRoute: typeof config?.beforeRoute === 'function' ? config.beforeRoute : null,
   });
 
-  /* =========================================================
-     OVERLAY HTML
-     ========================================================= */
-
-  const makeOverlay = ({
-    missionNumber,
-    desktop,
-    mobile
-  }) => {
-    const overlay =
-      document.createElement('section');
-
-    overlay.id =
-      'relayPlayDeployment';
-
-    overlay.className =
-      'relay-splash relay-play-deployment';
-
-    overlay.setAttribute(
-      'role',
-      'status'
-    );
-
-    overlay.setAttribute(
-      'aria-live',
-      'polite'
-    );
-
-    overlay.setAttribute(
-      'aria-busy',
-      'true'
-    );
+  const makeOverlay = ({ missionNumber, desktop, mobile }) => {
+    const overlay = document.createElement('section');
+    overlay.id = 'relayPlayDeployment';
+    overlay.className = 'relay-splash relay-play-deployment';
+    overlay.setAttribute('role', 'status');
+    overlay.setAttribute('aria-live', 'polite');
+    overlay.setAttribute('aria-busy', 'true');
 
     overlay.innerHTML = `
       <picture class="relay-splash-picture">
@@ -149,12 +77,10 @@
           media="(pointer: coarse)"
           srcset="${mobile}"
         >
-
         <source
           media="(max-width:700px)"
           srcset="${mobile}"
         >
-
         <img
           class="relay-splash-art"
           src="${desktop}"
@@ -164,10 +90,6 @@
         >
       </picture>
 
-      <div class="relay-play-vignette"></div>
-      <div class="relay-play-scanlines"></div>
-      <div class="relay-play-grid"></div>
-
       <div class="relay-splash-brand relay-play-deployment-brand">
         <b>R/</b>
         <span>RELAY RUNNER</span>
@@ -175,415 +97,341 @@
 
       <div class="relay-splash-network-status relay-play-deployment-network">
         <i></i>
-        <span>
-          RELAY NETWORK // ONLINE // SECURE
-        </span>
-      </div>
-
-      <div class="relay-play-deployment-center">
-
-        <div class="relay-play-mission-label">
-          MISSION
-          ${String(missionNumber).padStart(2, '0')}
-          //
-          DEPLOYMENT
-        </div>
-
-        <div class="relay-play-main-title">
-          DEPLOYMENT
-        </div>
-
-        <div class="relay-play-subtitle">
-          ROOFTOP RELAY // WORLD NODE INITIALIZATION
-        </div>
-
+        <span>RELAY NETWORK // ONLINE // SECURE</span>
       </div>
 
       <div class="relay-splash-ui relay-play-deployment-ui">
-
         <div class="relay-splash-meta">
-
-          <span class="relay-splash-status">
-            PREPARING MISSION
-            ${String(missionNumber).padStart(2, '0')}
-            // DEPLOYMENT
-          </span>
-
-          <span class="relay-splash-percent">
-            00%
-          </span>
-
+          <span class="relay-splash-status">PREPARING MISSION ${String(missionNumber).padStart(2, '0')} // DEPLOYMENT</span>
+          <span class="relay-splash-percent">00%</span>
         </div>
 
-        <div
-          class="relay-splash-track"
-          aria-hidden="true"
-        >
+        <div class="relay-splash-track" aria-hidden="true">
           <i class="relay-splash-progress"></i>
         </div>
 
         <div class="relay-boot-status-grid">
-
-          <div class="relay-boot-status-cell">
-            <span>NODE</span>
-            <b>04 // ONLINE</b>
-          </div>
-
-          <div class="relay-boot-status-cell">
-            <span>SIGNAL</span>
-            <b>STABLE // LOCKED</b>
-          </div>
-
-          <div class="relay-boot-status-cell">
-            <span>RELAY</span>
-            <b>SYNCED // READY</b>
-          </div>
-
+          <div class="relay-boot-status-cell"><span>NODE</span><b>04 // ONLINE</b></div>
+          <div class="relay-boot-status-cell"><span>SIGNAL</span><b>STABLE // LOCKED</b></div>
+          <div class="relay-boot-status-cell"><span>RELAY</span><b>SYNCED // READY</b></div>
         </div>
 
-        <div
-          class="relay-boot-log"
-          aria-live="polite"
-        >
-          <span class="is-live">
-            → ROUTE DATA INITIALIZING // SECURE
-          </span>
-
-          <span class="is-muted">
-            → WORLD NODE AWAITING // SYNC
-          </span>
+        <div class="relay-boot-log" aria-live="polite">
+       <span class="is-live">→ ROUTE DATA INITIALIZING // SECURE</span>
+<span class="is-muted">→ WORLD NODE AWAITING // SYNC</span>
         </div>
 
         <div class="relay-boot-complete">
-
           <b aria-hidden="true"></b>
-
           <div>
-            <strong>
-              DEPLOYMENT READY
-            </strong>
-
-            <small>
-              MISSION
-              ${String(missionNumber).padStart(2, '0')}
-              // ROUTE LOCKED // VERIFIED
-            </small>
+       <strong>DEPLOYMENT READY</strong>
+<small>MISSION ${String(missionNumber).padStart(2, '0')} // ROUTE LOCKED // VERIFIED</small>
           </div>
-
         </div>
-
-      </div>
-
-      <div class="relay-play-corner relay-play-corner-left">
-        SYSTEM // RELAY CORE
-      </div>
-
-      <div class="relay-play-corner relay-play-corner-right">
-        CHANNEL 01 // SECURE
       </div>
     `;
 
     return overlay;
   };
 
-  /* =========================================================
-     DEPLOYMENT CSS
-     ========================================================= */
-
   const installStyle = () => {
-    if (
-      document.getElementById(
-        'relay-play-deployment-style'
-      )
-    ) {
-      return;
+    if (document.getElementById('relay-play-deployment-style')) return;
+
+    const style = document.createElement('style');
+    style.id = 'relay-play-deployment-style';
+    style.textContent = `
+      .relay-play-deployment{
+        z-index:2147483647 !important;
+        pointer-events:none !important;
+      }
+
+      .relay-play-deployment .relay-splash-picture{
+        position:absolute;
+        inset:0;
+        display:block;
+      }
+
+.relay-play-deployment .relay-splash-art{
+  object-position:center !important;
+  filter:
+    saturate(.94)
+    contrast(1.12)
+    brightness(.78);
+}
+
+  .relay-play-deployment .relay-splash-brand::after{
+  content:"DEPLOYMENT SEQUENCE  //  MISSION LINK" !important;
+}
+
+    .relay-play-deployment .relay-splash-ui{
+  width:min(900px,calc(100vw - 48px));
+  padding:13px 13px 12px;
+  gap:9px;
+  border:1px solid rgba(117,247,255,.24);
+  border-top-color:rgba(255,210,60,.34);
+  border-left-color:rgba(0,234,255,.38);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(1,9,16,.88),
+      rgba(1,6,11,.72)
+    );
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.52),
+    0 0 32px rgba(0,140,255,.11),
+    0 0 70px rgba(0,234,255,.05),
+    inset 0 0 30px rgba(0,234,255,.045);
+  backdrop-filter:blur(7px);
+}
+
+.relay-play-deployment .relay-splash-meta{
+  border-color:rgba(117,247,255,.18);
+  border-bottom-color:rgba(117,247,255,.34);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,234,255,.045),
+      rgba(0,7,12,.34)
+    );
+}
+
+.relay-play-deployment .relay-splash-status{
+  text-shadow:
+    0 0 8px rgba(0,234,255,.20);
+}
+
+.relay-play-deployment .relay-splash-percent{
+  text-shadow:
+    0 0 10px rgba(0,234,255,.42),
+    0 0 22px rgba(0,140,255,.18);
+}
+
+.relay-play-deployment .relay-splash-progress{
+  transition:
+    width .18s cubic-bezier(.16,1,.3,1),
+    filter .18s ease,
+    box-shadow .18s ease;
+
+  filter:brightness(1.08);
+
+  box-shadow:
+    0 0 8px rgba(0,234,255,.90),
+    0 0 18px rgba(0,234,255,.62),
+    0 0 34px rgba(0,140,255,.28);
+}
+
+.relay-play-deployment .relay-play-deployment-network{
+  display:flex !important;
+  padding:8px 12px;
+  border:1px solid rgba(0,234,255,.32);
+  border-left:2px solid var(--rr-cyan,#00eaff);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,234,255,.12),
+      rgba(0,12,20,.48)
+    );
+  box-shadow:
+    0 0 12px rgba(0,234,255,.10),
+    0 0 26px rgba(0,140,255,.06),
+    inset 0 0 18px rgba(0,234,255,.045);
+  text-shadow:
+    0 0 10px rgba(0,234,255,.30);
+}
+  .relay-play-deployment .relay-boot-complete{
+  opacity:0;
+  transform:translateY(6px) scale(.98);
+  filter:brightness(.92);
+  transition:
+    opacity .28s ease,
+    transform .28s cubic-bezier(.16,1,.3,1),
+    filter .28s ease;
+}
+
+      .relay-play-deployment .relay-boot-complete.is-visible{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  filter:brightness(1.08);
+  text-shadow:
+    0 0 10px rgba(0,234,255,.28),
+    0 0 22px rgba(0,234,255,.12);
+}
+
+      .relay-play-deployment.is-closing{
+        opacity:0 !important;
+        visibility:hidden !important;
+        transition:opacity .28s ease,visibility .28s ease !important;
+      }
+.relay-play-deployment:not(.is-closing){
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:none !important;
+}
+      @media(max-width:700px) and (orientation:portrait){
+        .relay-play-deployment .relay-play-deployment-network{
+          display:none !important;
+        }
+
+  .relay-play-deployment .relay-splash-ui{
+  width:min(92vw,620px);
+  max-width:calc(100vw - 20px);
+  padding:9px;
+  gap:7px;
+}
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
+  const setStage = (overlay, percent, label, firstLog, secondLog) => {
+    const pct = overlay.querySelector('.relay-splash-percent');
+    const status = overlay.querySelector('.relay-splash-status');
+    const bar = overlay.querySelector('.relay-splash-progress');
+    const first = overlay.querySelector('.relay-boot-log span:first-child');
+    const second = overlay.querySelector('.relay-boot-log span:last-child');
+
+    if (pct) pct.textContent = `${Math.round(percent)}%`;
+    if (status) status.textContent = label;
+    if (bar) bar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+    if (first && firstLog) first.textContent = firstLog;
+    if (second && secondLog) second.textContent = secondLog;
+  };
+
+  const getMissionReady = () => {
+    const api = window.relayGameplayIntroV5;
+    return !!api && typeof api.show === 'function';
+  };
+
+  const revealMissionRoute = async overlay => {
+    const api = window.relayGameplayIntroV5;
+
+    if (api && typeof api.close === 'function' && typeof api.show === 'function') {
+      if (typeof api.isVisible === 'function' && api.isVisible()) api.close();
+      api.show();
+      await new Promise(resolve => NEXT_FRAME(() => NEXT_FRAME(resolve)));
     }
 
-    const style =
-      document.createElement('style');
+    overlay.classList.add('is-closing');
+    await WAIT(320);
+    overlay.remove();
+    active = false;
+  };
 
-    style.id =
-      'relay-play-deployment-style';
+  const runDeployment = async rawConfig => {
+  console.log('[RelayRunner] DEPLOYMENT LOADER STARTED');
 
-    style.textContent = `
+  if (active) return false;
 
-      /* =====================================================
-         ROOT OVERLAY
-         ===================================================== */
+    const config = normalizeConfig(rawConfig);
+    active = true;
+    const token = ++serial;
+    let overlay;
+    let watchdog;
+    let handoffStarted = false;
 
-      #relayPlayDeployment.relay-play-deployment {
-        position: fixed !important;
-        inset: 0 !important;
+    try {
+      installStyle();
+     overlay = makeOverlay(config);
+document.body.appendChild(overlay);
 
-        width: 100vw !important;
-        height: 100vh !important;
+watchdog = window.setTimeout(async () => {
+  if (!active || handoffStarted || !overlay?.isConnected) return;
 
-        min-width: 100vw !important;
-        min-height: 100vh !important;
+  console.warn('[RelayRunner] deployment watchdog recovery; launching normally');
+  handoffStarted = true;
+  setStage(overlay, 100, 'DEPLOYMENT READY', '→ MOBILE SAFE MODE', '→ CONTINUING TO GAME');
 
-        overflow: hidden !important;
+  try {
+    await runBounded(config.beforeRoute, 1500, 'Deployment watchdog handoff');
+  } finally {
+    overlay.classList.add('is-closing');
+    await WAIT(320);
+    overlay.remove();
+    active = false;
+  }
+}, 15000);
 
-        display: block !important;
+console.log('[RelayRunner] OVERLAY ADDED:', overlay);
+console.log('[RelayRunner] CLASS BEFORE FRAME:', overlay.className);
 
-        z-index: 2147483647 !important;
+await new Promise(resolve => NEXT_FRAME(resolve));
 
-        margin: 0 !important;
-        padding: 0 !important;
+console.log('[RelayRunner] CLASS AFTER FRAME:', overlay.className);
 
-        background:
-          #02060b !important;
+if (overlay.classList.contains('is-closing')) {
+  console.error('[RelayRunner] BUG: is-closing was added immediately after creation!');
+}
+console.log('[RelayRunner] OVERLAY DISPLAY:', getComputedStyle(overlay).display);
+console.log('[RelayRunner] OVERLAY VISIBILITY:', getComputedStyle(overlay).visibility);
+console.log('[RelayRunner] OVERLAY OPACITY:', getComputedStyle(overlay).opacity);
+console.log('[RelayRunner] OVERLAY ZINDEX:', getComputedStyle(overlay).zIndex);
 
-        color: #eafcff !important;
+      await new Promise(resolve => NEXT_FRAME(resolve));
+      if (!active || token !== serial) return false;
 
-        pointer-events: none !important;
+      const started = performance.now();
+      const minimumMs = 1550;
 
-        opacity: 1 !important;
-        visibility: visible !important;
+      setStage(overlay, 8, `INITIALIZING MISSION ${config.missionNumber}`, '→ RELAY CORE READY', '→ WORLD NODE CONNECTING // SECURE');
+      await WAIT(220);
+      if (!active || token !== serial) return false;
 
-        isolation: isolate !important;
+      setStage(overlay, 27, 'LOADING ROUTE DATA', '→ ROUTE DATA RECEIVED // VERIFIED', '→ CHECKPOINT MATRIX ONLINE');
+      await WAIT(230);
+      if (!active || token !== serial) return false;
 
-        font-family:
-          "Orbitron",
-          "Roboto Condensed",
-          Arial,
-          sans-serif !important;
+      setStage(overlay, 49, 'SYNCING WORLD', '→ WORLD NODE SYNCING', '→ SIGNAL CHANNEL STABLE // LOCKED');
+      await WAIT(250);
+      if (!active || token !== serial) return false;
+
+      setStage(overlay, 72, 'INITIALIZING PHASER', '→ PHASER CORE ONLINE', '→ MISSION SCENE PREPARING // READY');
+      await WAIT(250);
+      if (!active || token !== serial) return false;
+
+      setStage(overlay, 91, 'FINALIZING DEPLOYMENT', '→ ROUTE LOCK CONFIRMED // VERIFIED', '→ WORLD NODE ONLINE // READY');
+
+      const readinessDeadline = started + 5000;
+
+      while (
+        performance.now() - started < minimumMs ||
+        (!getMissionReady() && performance.now() < readinessDeadline)
+      ) {
+        await WAIT(50);
+        if (!active || token !== serial) return false;
       }
 
-      /* =====================================================
-         IMAGE
-         ===================================================== */
-
-      #relayPlayDeployment
-      .relay-splash-picture {
-        position: absolute !important;
-
-        inset: 0 !important;
-
-        width: 100% !important;
-        height: 100% !important;
-
-        display: block !important;
-
-        overflow: hidden !important;
-
-        z-index: 0 !important;
+      if (!getMissionReady()) {
+        console.warn('[RelayRunner] Mission briefing API timed out; continuing with normal launch');
       }
 
-      #relayPlayDeployment
-      .relay-splash-art {
-        position: absolute !important;
+      setStage(overlay, 100, 'DEPLOYMENT READY', '→ MISSION DATA LOADED // VERIFIED', '→ RELAY CHANNEL STABLE // LOCKED');
+      overlay.querySelector('.relay-boot-complete')?.classList.add('is-visible');
+      overlay.setAttribute('aria-busy', 'false');
 
-        inset: 0 !important;
+      await WAIT(240);
+      if (!active || token !== serial) return false;
 
-        width: 100% !important;
-        height: 100% !important;
+      handoffStarted = true;
+      await runBounded(config.beforeRoute, 2500, 'Mission route handoff');
+      if (!active || token !== serial) return false;
 
-        display: block !important;
+      await revealMissionRoute(overlay);
+      window.clearTimeout(watchdog);
+      return true;
+    } catch (error) {
+      console.error('[RelayRunner] deployment loader failed', error);
+      window.clearTimeout(watchdog);
+      overlay?.remove();
+      active = false;
+      return false;
+    }
+  };
 
-        object-fit: cover !important;
-        object-position: center center !important;
-
-        max-width: none !important;
-        max-height: none !important;
-
-        margin: 0 !important;
-        padding: 0 !important;
-
-        opacity: 1 !important;
-
-        filter:
-          brightness(.68)
-          contrast(1.14)
-          saturate(.92) !important;
-
-        transform:
-          scale(1.025) !important;
-
-        user-select: none !important;
-
-        -webkit-user-drag: none !important;
-      }
-
-      /* =====================================================
-         CINEMATIC DARK LAYERS
-         ===================================================== */
-
-      #relayPlayDeployment
-      .relay-play-vignette {
-        position: absolute !important;
-
-        inset: 0 !important;
-
-        z-index: 1 !important;
-
-        pointer-events: none !important;
-
-        background:
-          radial-gradient(
-            ellipse at center,
-            rgba(2,12,22,.08) 0%,
-            rgba(1,7,14,.28) 42%,
-            rgba(0,3,8,.88) 100%
-          ) !important;
-      }
-
-      #relayPlayDeployment
-      .relay-play-vignette::before {
-        content: "" !important;
-
-        position: absolute !important;
-
-        inset: 0 !important;
-
-        background:
-          linear-gradient(
-            180deg,
-            rgba(0,0,0,.55) 0%,
-            rgba(0,0,0,.08) 32%,
-            rgba(0,0,0,.10) 60%,
-            rgba(0,0,0,.72) 100%
-          ) !important;
-      }
-
-      #relayPlayDeployment
-      .relay-play-grid {
-        position: absolute !important;
-
-        inset: 0 !important;
-
-        z-index: 2 !important;
-
-        pointer-events: none !important;
-
-        opacity: .14 !important;
-
-        background-image:
-          linear-gradient(
-            rgba(0,234,255,.16) 1px,
-            transparent 1px
-          ),
-          linear-gradient(
-            90deg,
-            rgba(0,234,255,.16) 1px,
-            transparent 1px
-          ) !important;
-
-        background-size:
-          80px 80px !important;
-
-        mask-image:
-          linear-gradient(
-            to bottom,
-            transparent,
-            black 25%,
-            black 75%,
-            transparent
-          ) !important;
-      }
-
-      #relayPlayDeployment
-      .relay-play-scanlines {
-        position: absolute !important;
-
-        inset: 0 !important;
-
-        z-index: 3 !important;
-
-        pointer-events: none !important;
-
-        opacity: .13 !important;
-
-        background:
-          repeating-linear-gradient(
-            to bottom,
-            rgba(255,255,255,.045) 0,
-            rgba(255,255,255,.045) 1px,
-            transparent 1px,
-            transparent 4px
-          ) !important;
-
-        mix-blend-mode: screen !important;
-      }
-
-      /* =====================================================
-         BRAND
-         ===================================================== */
-
-      #relayPlayDeployment
-      .relay-play-deployment-brand {
-        position: absolute !important;
-
-        top: 34px !important;
-        left: 42px !important;
-
-        z-index: 20 !important;
-
-        display: flex !important;
-
-        align-items: center !important;
-
-        gap: 12px !important;
-
-        color: #eaffff !important;
-
-        text-transform: uppercase !important;
-
-        letter-spacing: .18em !important;
-
-        text-shadow:
-          0 0 12px rgba(0,234,255,.35) !important;
-      }
-
-      #relayPlayDeployment
-      .relay-play-deployment-brand b {
-        display: inline-flex !important;
-
-        align-items: center !important;
-        justify-content: center !important;
-
-        min-width: 42px !important;
-        height: 30px !important;
-
-        padding: 0 8px !important;
-
-        color: #001016 !important;
-
-        background:
-          linear-gradient(
-            135deg,
-            #75f7ff,
-            #00b7ff
-          ) !important;
-
-        font-size: 16px !important;
-
-        letter-spacing: .08em !important;
-
-        box-shadow:
-          0 0 18px rgba(0,234,255,.32) !important;
-      }
-
-      #relayPlayDeployment
-      .relay-play-deployment-brand span {
-        font-size: 13px !important;
-
-        font-weight: 800 !important;
-      }
-
-      #relayPlayDeployment
-      .relay-play-deployment-brand::after {
-        content:
-          "DEPLOYMENT SEQUENCE // MISSION LINK" !important;
-
-        position: absolute !important;
-
-        left: 54px !important;
-        top: 25px !important;
-
-        white-space: nowrap !important;
-
-        color:
-          rgba(117,247,255,.52) !important;
+  window.relayPlayDeploymentV1 = Object.freeze({
+    show: runDeployment,
+    isActive: () => active,
+    defaultAssets: DEFAULT_ASSETS,
+  });
 
   // Home owns the visible Start button click.
   // This module exposes the cinematic API only; it must not install a
