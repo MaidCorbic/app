@@ -11,7 +11,7 @@ const checks = [
   ['Pause/Intel freeze owner exists', p1.includes("freeze(this, 'enemy-intel')") && p1.includes("freeze(scene, 'pause-menu')")],
   ['Dash breakable integration exists', p1.includes("'breakable-destroyed'") && p1.includes("dash-start")],
   ['Momentum uses authoritative game events', p1.includes("events.on?.('feedback'") && p1.includes("events.on?.('dash-start'")],
-    ['No mobile bottom settings shortcut remains', !p1.includes('mobile-menu-settings') && !p1.includes('mobileSettingsButton')],
+  ['Mobile settings shortcut can be hidden', p1.includes('mobile-menu-settings{display:none!important}')],
   ['Pause panel scroll is bounded on mobile', p1.includes('max-height:62dvh') && p1.includes('overflow-y:auto')],
 ];
 

@@ -630,24 +630,23 @@ card.innerHTML = `
     if (!intel || !card) return;
     card.querySelector('[data-enemy-name]').textContent = intel.name;
     card.querySelector('[data-enemy-level]').textContent = `THREAT LEVEL ${enemyLevel(this, key)}`;
+  const typeRight = (element, value, delay = 32) => {
+  if (!element) return;
 
-    const typeRight = (element, value, delay = 32) => {
-      if (!element) return;
+  const text = String(value ?? '');
+  let index = 0;
 
-      const text = String(value ?? '');
-      let index = 0;
+  element.textContent = '';
 
-      element.textContent = '';
+  const timer = window.setInterval(() => {
+    element.textContent = text.slice(0, index + 1);
+    index += 1;
 
-      const timer = window.setInterval(() => {
-        element.textContent = text.slice(0, index + 1);
-        index += 1;
-
-        if (index >= text.length) {
-          window.clearInterval(timer);
-        }
-      }, delay);
-    };
+    if (index >= text.length) {
+      window.clearInterval(timer);
+    }
+  }, delay);
+};
 
 typeRight(
   card.querySelector('[data-enemy-attack]'),

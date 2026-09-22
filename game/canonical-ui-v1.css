@@ -1720,6 +1720,19 @@ body.is-touch #play .mobile-actions small{
   }
 
   /*
+   * Existing lower cargo/mobile HUD compatibility surface.
+   * Keep it hidden on phone as well.
+   */
+  body.is-touch #play .mobile-bottom-hud{
+
+    display:none !important;
+
+    visibility:hidden !important;
+
+    pointer-events:none !important;
+  }
+
+  /*
    * Prevent any legacy cargo/mission presentation from stealing
    * mobile gameplay space.
    */
@@ -1778,12 +1791,12 @@ body.is-touch #play .hud-actions{
 }
 
 
-/* XP remains visible during mobile gameplay */
+/* XP is not useful enough to consume mobile HUD space */
 body.is-touch #play .hud-xp{
-  display:flex !important;
-  visibility:visible !important;
-  opacity:1 !important;
+
+  display:none !important;
 }
+
 
 /* Compact system buttons */
 body.is-touch #play .hud-actions>button{
@@ -2235,6 +2248,21 @@ body.is-touch #play .mobile-actions button:focus-visible{
   outline-offset:
     2px;
 }
+
+
+/* ==========================================================================
+   31. MOBILE LEGACY SURFACES — HARD HIDE
+   ========================================================================== */
+
+body.is-touch #play .mobile-bottom-hud{
+
+  display:none !important;
+
+  visibility:hidden !important;
+
+  pointer-events:none !important;
+}
+
 
 /*
  * Mission/Cargo are intentionally NOT mobile HUD surfaces.

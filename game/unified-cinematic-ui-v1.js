@@ -242,7 +242,6 @@ import {
         type="button"
         class="relay-ui-toggle ${enabled ? 'is-on' : ''}"
         data-unified-setting="${key}"
-        data-unified-toggle="${key}"
         aria-pressed="${enabled}"
       >
         ${enabled ? 'ON' : 'OFF'}
@@ -1749,10 +1748,11 @@ import {
        PAUSE
        ------------------------------------------------------- */
 
-       const pauseButton =
+    const pauseButton =
       target.closest(
-        '#pause'
+        '#pause, #mobilePauseButton'
       );
+
     if (pauseButton) {
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -1769,6 +1769,28 @@ import {
 
       return;
     }
+
+
+    /* -------------------------------------------------------
+       MOBILE SETTINGS
+       ------------------------------------------------------- */
+
+    const settingsMobile =
+      target.closest(
+        '#mobileSettingsButton'
+      );
+
+    if (settingsMobile) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      openPause(
+        'settings'
+      );
+
+      return;
+    }
+
 
     /* -------------------------------------------------------
        CLOSE
@@ -1923,7 +1945,7 @@ import {
 
     const setting =
       target.closest(
-        '[data-unified-setting],[data-unified-toggle]'
+        '[data-unified-setting]'
       );
 
     if (setting) {

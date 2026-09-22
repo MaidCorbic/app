@@ -1,4 +1,4 @@
-/* Mobile gameplay orientation guard + canonical pause interaction support. */
+/* Mobile in-game HUD: PAUSE + SETTINGS only during active gameplay. */
 (() => {
   const PORTRAIT_GUARD_STYLE_ID = 'mobile-portrait-hud-rotate-style';
 
@@ -19,7 +19,23 @@
          MOBILE PORTRAIT GUARD
          ========================================================= */
 
-      /* Portrait phones are fully playable now; no forced rotate lock. */
+      @media (pointer: coarse) and (orientation: portrait) {
+        html body.is-touch #cargoIntegrityV2,
+        html body.is-touch #play .hud-xp,
+        html body.is-touch #play #pause,
+        html body.is-touch #mobileBottomHud .mobile-menu-pause {
+          display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+
+        html body.is-touch .mobile-rotate-prompt.is-active {
+          display: flex !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+      }
 
 
       /* =========================================================
@@ -162,10 +178,11 @@
      * Do not create the mobile HUD until the canonical pause
      * elements exist.
      */
-        if (
+    if (
       !pause ||
       !pauseMenu ||
-      !panel
+      !panel ||
+      document.getElementById('mobileBottomHud')
     ) {
       return false;
     }
@@ -189,6 +206,26 @@
         event.stopPropagation();
       }
     });
+
+    /* =========================================================
+       MOBILE BOTTOM HUD
+       ========================================================= */
+
+    const hud = document.createElement('div');
+
+    hud.id = 'mobileBottomHud';
+    hud.className = 'mobile-bottom-hud';
+
+    /*
+     * Mobile PAUSE + SETTINGS buttons removed.
+     *
+     * Keep the HUD container alive because the rest of this
+     * module uses it for gameplay-state synchronisation.
+     */
+    hud.innerHTML = '';
+
+    document.body.append(hud);
+
 
     /* =========================================================
        ROTATE PROMPT
@@ -371,14 +408,25 @@
         !visible('gameOver') &&
         pauseMenu.classList.contains('hidden');
 
+
+      /*
+       * HUD is visible only during active gameplay.
+       */
+      hud.classList.toggle(
+        'is-active',
+        active
+      );
+
+
       /*
        * Rotate prompt uses the same gameplay state.
        *
        * CSS decides whether it is visible in portrait.
        */
-      // Portrait and landscape are both supported. Keep the rotate prompt
-      // permanently inactive so it never blocks touch gameplay.
-      rotatePrompt.classList.remove('is-active');
+      rotatePrompt.classList.toggle(
+        'is-active',
+        active
+      );
     };
 
 

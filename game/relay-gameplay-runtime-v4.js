@@ -1775,6 +1775,7 @@ max-width:350px!important;
       [
         '[data-v3-faq]',
         '[data-v3-update]',
+        '[data-v3-options]',
         '[data-v3-exit]',
         '[data-final-home]',
         '[data-unified-home]',
@@ -1810,9 +1811,21 @@ max-width:350px!important;
       )
     );
 
-    if (canonical.length === 3 && uniqueTypes.size === 3 && ['faq','update','exit'].every(type => uniqueTypes.has(type))) {
+    if (
+      canonical.length === 4 &&
+      uniqueTypes.size === 4 &&
+      [
+        'options',
+        'faq',
+        'update',
+        'exit'
+      ].every(
+        type => uniqueTypes.has(type)
+      )
+    ) {
       return;
     }
+
 
     /* ---------------------------------------------------------
        Rebuild if incomplete/corrupt.
@@ -1826,6 +1839,17 @@ max-width:350px!important;
 
 
     side.append(
+
+      homeButton(
+        'options',
+        'OPTIONS',
+        'SETTINGS · AUDIO · DISPLAY',
+        () =>
+          window.relayUnifiedCinematicUI?.openOptions?.() ||
+          nativeClick(
+            '[data-title-panel="controls"]'
+          )
+      ),
 
       homeButton(
         'faq',

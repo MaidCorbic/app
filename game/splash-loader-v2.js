@@ -1,2095 +1,742 @@
+
 /* =========================================================
-   RELAY RUNNER — CINEMATIC SPLASH V9
-   ---------------------------------------------------------
-   BOOT FLOW:
-
-   FIRST PAINT
-       ↓
-   SPLASH ONLY
-       ↓
-   0% → 8% → 26% → 48% → 68% → 86% → 100%
-       ↓
-   SOFT FADE
-       ↓
-   HOME ONLY
-       ↓
-   USER STARTS GAME
-       ↓
-   GAME
-
-   IMPORTANT:
-   - No black cinematic transition.
-   - No zoom transition.
-   - No brightness flash.
-   - No heavy blur.
-   - Splash gently fades into Home.
+   RELAY RUNNER — CINEMATIC SPLASH V6
+   First-load splash controller.
+   ONE controller.
+   0% -> 8% -> 26% -> 48% -> 68% -> 86% -> 100%
+   Then cinematic exit -> HOME.
    ========================================================= */
 
 (() => {
+  if (window.__relaySplashV6) return;
+  window.__relaySplashV6 = true;
 
-  /* =======================================================
-     SINGLE INSTANCE GUARD
-     ======================================================= */
-
-  if (window.__relaySplashV9) {
-    return;
-  }
-
-  window.__relaySplashV9 = true;
-
-
-  /* =======================================================
-     ROOT BOOT STATE
-     ======================================================= */
-
-  const html =
-    document.documentElement;
-
-  html.classList.add(
-    'relay-booting'
-  );
-
-  html.classList.remove(
-    'relay-boot-ready'
-  );
-
-
-  /* =======================================================
-     DEVICE
-     ======================================================= */
+  console.log('[RelaySplash V6] LOADED');
 
   const isCoarseDevice = () =>
-    window.matchMedia?.(
-      '(pointer: coarse)'
-    ).matches === true ||
-    Number(
-      navigator.maxTouchPoints || 0
-    ) > 0;
+    window.matchMedia?.('(pointer: coarse)').matches === true ||
+    Number(navigator.maxTouchPoints || 0) > 0;
 
+  const sleep = ms => new Promise(resolve => setTimeout(
+    resolve,
+    isCoarseDevice() ? Math.max(40, ms * .3) : ms
+  ));
 
-  /* =======================================================
-     SLEEP
-     ======================================================= */
+  const homeIsReady = () => {
+    const home = document.getElementById('intro');
+    const start = home?.querySelector('#start');
 
-  const sleep = ms =>
-    new Promise(resolve => {
-
-      setTimeout(
-        resolve,
-        isCoarseDevice()
-          ? Math.max(
-              40,
-              ms * 0.3
-            )
-          : ms
-      );
-
-    });
-
-
-  /* =======================================================
-     SELECTORS
-     ======================================================= */
-
-  const getSplash = () =>
-    document.querySelector(
-      '.relay-splash'
-    ) ||
-    document.getElementById(
-      'relaySplash'
+    return Boolean(
+      home?.dataset.homeV4Built === '1' &&
+      start
     );
-
-
-  const getHome = () =>
-    document.getElementById(
-      'intro'
-    );
-
-
-  const getGame = () =>
-    document.getElementById(
-      'game'
-    );
-
-
-  /* =======================================================
-     FORCE NON-HOME SCREENS CLOSED
-     ======================================================= */
-
-  const closeNonHomeScreens = () => {
-
-    const selectors = [
-
-      '#play',
-      '#pauseMenu',
-      '#titlePanel',
-      '#relayInfoPanel',
-      '#finish',
-      '#gameOver',
-      '#levelUp',
-      '#abilityUnlock'
-
-    ];
-
-
-    selectors.forEach(
-      selector => {
-
-        const element =
-          document.querySelector(
-            selector
-          );
-
-
-        if (!element) {
-          return;
-        }
-
-
-        element.classList.add(
-          'hidden'
-        );
-
-
-        element.setAttribute(
-          'aria-hidden',
-          'true'
-        );
-
-
-        element.style.setProperty(
-          'visibility',
-          'hidden',
-          'important'
-        );
-
-
-        element.style.setProperty(
-          'pointer-events',
-          'none',
-          'important'
-        );
-
-      }
-    );
-
   };
-
-
-  /* =======================================================
-     OPEN HOME ONLY
-     ======================================================= */
-
-  const openHomeOnly = () => {
-
-    const home =
-      getHome();
-
-    const game =
-      getGame();
-
-
-    /*
-     * Close every game/modal screen.
-     */
-    closeNonHomeScreens();
-
-
-    /* -----------------------------------------------------
-       HOME
-       ----------------------------------------------------- */
-
-    if (home) {
-
-      home.classList.remove(
-        'hidden'
-      );
-
-
-      home.removeAttribute(
-        'hidden'
-      );
-
-
-      home.removeAttribute(
-        'aria-hidden'
-      );
-
-
-      home.classList.add(
-        'relay-home-active'
-      );
-
-
-      home.style.setProperty(
-        'display',
-        'block',
-        'important'
-      );
-
-
-      home.style.setProperty(
-        'visibility',
-        'visible',
-        'important'
-      );
-
-
-      home.style.setProperty(
-        'opacity',
-        '1',
-        'important'
-      );
-
-
-      home.style.setProperty(
-        'transform',
-        'translateY(0) scale(1)',
-        'important'
-      );
-
-
-      /*
-       * IMPORTANT:
-       * No blur after loader.
-       */
-      home.style.setProperty(
-        'filter',
-        'none',
-        'important'
-      );
-
-
-      home.style.setProperty(
-        'pointer-events',
-        'auto',
-        'important'
-      );
-
-    }
-
-
-    /* -----------------------------------------------------
-       GAME CONTAINER
-       ----------------------------------------------------- */
-
-    if (game) {
-
-      game.classList.add(
-        'relay-boot-ready'
-      );
-
-
-      game.style.setProperty(
-        'visibility',
-        'visible',
-        'important'
-      );
-
-
-      game.style.setProperty(
-        'opacity',
-        '1',
-        'important'
-      );
-
-
-      game.style.setProperty(
-        'pointer-events',
-        'auto',
-        'important'
-      );
-
-    }
-
-
-    /* -----------------------------------------------------
-       RELEASE FIRST PAINT LOCK
-       ----------------------------------------------------- */
-
-    html.classList.remove(
-      'relay-booting'
-    );
-
-
-    html.classList.add(
-      'relay-boot-ready'
-    );
-
-  };
-
-
-  /* =======================================================
-     RECOVERY
-     ======================================================= */
 
   const revealHomeForRecovery = () => {
+    const home = document.getElementById('intro');
+    if (!home) return;
 
-    const splash =
-      getSplash();
-
-
-    /*
-     * Kill any splash transition immediately.
-     */
-    if (splash) {
-
-      splash.style.setProperty(
-        'transition',
-        'none',
-        'important'
-      );
-
-
-      splash.style.setProperty(
-        'animation',
-        'none',
-        'important'
-      );
-
-    }
-
-
-    openHomeOnly();
-
+    home.classList.remove('hidden');
+    home.removeAttribute('hidden');
+    home.style.setProperty('visibility', 'visible', 'important');
+    home.style.setProperty('opacity', '1', 'important');
+    home.style.setProperty('pointer-events', 'auto', 'important');
+    document.getElementById('game')?.classList.add('relay-boot-ready');
   };
 
+  const waitForHomeReady = ({ timeoutMs } = {}) => new Promise(resolve => {
+    const effectiveTimeout = timeoutMs ?? (
+      window.matchMedia?.('(pointer: coarse)').matches === true
+        ? 1200
+        : 4000
+    );
+    const startedAt = performance.now();
 
-  /* =======================================================
-     CINEMATIC EFFECTS
-     ======================================================= */
-
-  const installCinematicEffects =
-    splash => {
-
-      if (!splash) {
+    const check = () => {
+      if (homeIsReady()) {
+        resolve(true);
         return;
       }
 
-
-      if (
-        document.getElementById(
-          'relay-v9-cinematic-style'
-        )
-      ) {
-        return;
-      }
-
-
-      const style =
-        document.createElement(
-          'style'
-        );
-
-
-      style.id =
-        'relay-v9-cinematic-style';
-
-
-      style.textContent = `
-
-        /* =================================================
-           SPLASH BASE
-           ================================================= */
-
-        .relay-splash {
-
-          isolation: isolate !important;
-
-          overflow: hidden !important;
-
-          /*
-           * Keep the splash dark internally,
-           * but NEVER create a separate black
-           * transition layer over Home.
-           */
-          background: #02060a !important;
-
-        }
-
-
-        /* =================================================
-           AMBIENT
-           ================================================= */
-
-        .relay-splash
-        .relay-v9-ambient {
-
-          position: absolute;
-
-          inset: 0;
-
-          z-index: 0;
-
-          overflow: hidden;
-
-          pointer-events: none;
-
-          background:
-            radial-gradient(
-              circle at 50% 45%,
-              rgba(0,220,255,.09),
-              transparent 38%
-            ),
-            radial-gradient(
-              circle at 20% 80%,
-              rgba(0,130,255,.06),
-              transparent 34%
-            ),
-            #02060a;
-
-        }
-
-
-        /* =================================================
-           SPLASH ART
-           ================================================= */
-
-        .relay-splash
-        .relay-splash-art,
-
-        .relay-splash
-        #relaySplashArt {
-
-          position: absolute !important;
-
-          z-index: 1 !important;
-
-        }
-
-
-        /* =================================================
-           SOFT VEIL
-           ================================================= */
-
-        .relay-splash
-        .relay-v9-veil {
-
-          position: absolute;
-
-          inset: -10%;
-
-          z-index: 2;
-
-          pointer-events: none;
-
-          background:
-            radial-gradient(
-              circle at 50% 50%,
-              transparent 0%,
-              rgba(0,0,0,.06) 42%,
-              rgba(0,0,0,.22) 100%
-            );
-
-          mix-blend-mode: screen;
-
-          opacity: .35;
-
-          animation:
-            relayV9Veil
-            5s
-            ease-in-out
-            infinite;
-
-        }
-
-
-        /* =================================================
-           SCAN
-           ================================================= */
-
-        .relay-splash
-        .relay-v9-scan {
-
-          position: absolute;
-
-          left: 0;
-          right: 0;
-
-          top: -18%;
-
-          height: 18%;
-
-          z-index: 3;
-
-          pointer-events: none;
-
-          background:
-            linear-gradient(
-              to bottom,
-              transparent 0%,
-              rgba(0,229,255,.025) 25%,
-              rgba(0,229,255,.10) 50%,
-              rgba(0,229,255,.025) 75%,
-              transparent 100%
-            );
-
-          filter:
-            blur(2px)
-            drop-shadow(
-              0 0 18px
-              rgba(0,229,255,.10)
-            );
-
-          animation:
-            relayV9Scan
-            5.5s
-            linear
-            infinite;
-
-        }
-
-
-        /* =================================================
-           ORBS
-           ================================================= */
-
-        .relay-splash
-        .relay-v9-orb {
-
-          position: absolute;
-
-          border-radius: 50%;
-
-          pointer-events: none;
-
-          filter: blur(35px);
-
-          mix-blend-mode: screen;
-
-        }
-
-
-        .relay-splash
-        .relay-v9-orb-a {
-
-          width: 38vw;
-          height: 38vw;
-
-          min-width: 220px;
-          min-height: 220px;
-
-          top: -12%;
-          left: -8%;
-
-          background:
-            radial-gradient(
-              circle,
-              rgba(0,220,255,.16),
-              rgba(0,220,255,0) 70%
-            );
-
-          animation:
-            relayV9OrbA
-            8s
-            ease-in-out
-            infinite;
-
-        }
-
-
-        .relay-splash
-        .relay-v9-orb-b {
-
-          width: 34vw;
-          height: 34vw;
-
-          min-width: 200px;
-          min-height: 200px;
-
-          right: -8%;
-          bottom: -12%;
-
-          background:
-            radial-gradient(
-              circle,
-              rgba(0,120,255,.14),
-              rgba(0,120,255,0) 70%
-            );
-
-          animation:
-            relayV9OrbB
-            10s
-            ease-in-out
-            infinite;
-
-        }
-
-
-        .relay-splash
-        .relay-v9-orb-c {
-
-          width: 24vw;
-          height: 24vw;
-
-          min-width: 160px;
-          min-height: 160px;
-
-          left: 38%;
-          top: 32%;
-
-          background:
-            radial-gradient(
-              circle,
-              rgba(0,238,255,.07),
-              rgba(0,238,255,0) 70%
-            );
-
-          animation:
-            relayV9OrbC
-            6s
-            ease-in-out
-            infinite;
-
-        }
-
-
-        /* =================================================
-           GRID
-           ================================================= */
-
-        .relay-splash
-        .relay-v9-grid {
-
-          position: absolute;
-
-          inset: 0;
-
-          z-index: 2;
-
-          pointer-events: none;
-
-          opacity: .10;
-
-          background-image:
-            linear-gradient(
-              rgba(0,220,255,.08) 1px,
-              transparent 1px
-            ),
-            linear-gradient(
-              90deg,
-              rgba(0,220,255,.08) 1px,
-              transparent 1px
-            );
-
-          background-size:
-            80px 80px,
-            80px 80px;
-
-          mask-image:
-            radial-gradient(
-              circle at center,
-              black 20%,
-              transparent 82%
-            );
-
-          animation:
-            relayV9Grid
-            16s
-            linear
-            infinite;
-
-        }
-
-
-        /* =================================================
-           VIGNETTE
-           ================================================= */
-
-        .relay-splash::after {
-
-          content: "";
-
-          position: absolute;
-
-          inset: 0;
-
-          z-index: 4;
-
-          pointer-events: none;
-
-          background:
-            radial-gradient(
-              ellipse at center,
-              transparent 42%,
-              rgba(0,0,0,.06) 58%,
-              rgba(0,0,0,.18) 78%,
-              rgba(0,0,0,.32) 100%
-            );
-
-          box-shadow:
-            inset
-            0 0
-            120px
-            rgba(0,0,0,.25);
-
-          opacity: .70;
-
-        }
-
-
-        /* =================================================
-           ENERGY BORDER
-           ================================================= */
-
-        .relay-splash
-        .relay-v9-energy {
-
-          position: absolute;
-
-          inset: 0;
-
-          z-index: 3;
-
-          pointer-events: none;
-
-          border:
-            1px solid
-            rgba(0,225,255,.08);
-
-          box-shadow:
-            inset
-            0 0
-            80px
-            rgba(0,190,255,.025);
-
-          animation:
-            relayV9Energy
-            2.8s
-            ease-in-out
-            infinite;
-
-        }
-
-
-        /* =================================================
-           SPLASH UI
-           ================================================= */
-
-        .relay-splash
-        .relay-splash-ui {
-
-          position: absolute !important;
-
-          z-index: 10 !important;
-
-          left: 50% !important;
-
-          right: auto !important;
-
-          bottom:
-            max(
-              28px,
-              env(safe-area-inset-bottom) + 18px
-            ) !important;
-
-          width:
-            min(
-              520px,
-              calc(100vw - 40px)
-            ) !important;
-
-          margin: 0 !important;
-
-          transform:
-            translateX(-50%) !important;
-
-        }
-
-
-        /* =================================================
-           ANIMATIONS
-           ================================================= */
-
-        @keyframes relayV9Veil {
-
-          0%,100% {
-            opacity: .28;
-          }
-
-          50% {
-            opacity: .42;
-          }
-
-        }
-
-
-        @keyframes relayV9OrbA {
-
-          0%,100% {
-            transform:
-              translate3d(0,0,0)
-              scale(1);
-
-            opacity: .50;
-          }
-
-          50% {
-            transform:
-              translate3d(10vw,8vh,0)
-              scale(1.12);
-
-            opacity: .72;
-          }
-
-        }
-
-
-        @keyframes relayV9OrbB {
-
-          0%,100% {
-            transform:
-              translate3d(0,0,0)
-              scale(1);
-
-            opacity: .40;
-          }
-
-          50% {
-            transform:
-              translate3d(-9vw,-7vh,0)
-              scale(1.14);
-
-            opacity: .65;
-          }
-
-        }
-
-
-        @keyframes relayV9OrbC {
-
-          0%,100% {
-            transform:
-              scale(.88);
-
-            opacity: .20;
-          }
-
-          50% {
-            transform:
-              scale(1.20);
-
-            opacity: .42;
-          }
-
-        }
-
-
-        @keyframes relayV9Scan {
-
-          0% {
-            transform:
-              translateY(-20vh);
-          }
-
-          100% {
-            transform:
-              translateY(720vh);
-          }
-
-        }
-
-
-        @keyframes relayV9Grid {
-
-          0% {
-            transform:
-              translate3d(0,0,0);
-          }
-
-          100% {
-            transform:
-              translate3d(80px,80px,0);
-          }
-
-        }
-
-
-        @keyframes relayV9Energy {
-
-          0%,100% {
-            opacity: .35;
-          }
-
-          50% {
-            opacity: .65;
-          }
-
-        }
-
-
-        /* =================================================
-           MOBILE
-           ================================================= */
-
-        @media(max-width:700px) {
-
-          .relay-splash
-          .relay-splash-ui {
-
-            position: absolute !important;
-
-            left: 50% !important;
-
-            bottom:
-              max(
-                18px,
-                env(safe-area-inset-bottom) + 12px
-              ) !important;
-
-            width:
-              calc(
-                100vw - 28px
-              ) !important;
-
-            margin: 0 !important;
-
-            transform:
-              translateX(-50%) !important;
-
-          }
-
-
-          .relay-splash
-          .relay-v9-grid {
-
-            background-size:
-              55px 55px,
-              55px 55px;
-
-          }
-
-
-          .relay-splash
-          .relay-v9-orb-a {
-
-            width: 60vw;
-            height: 60vw;
-
-          }
-
-
-          .relay-splash
-          .relay-v9-orb-b {
-
-            width: 54vw;
-            height: 54vw;
-
-          }
-
-
-          .relay-splash
-          .relay-v9-orb-c {
-
-            width: 42vw;
-            height: 42vw;
-
-          }
-
-
-          .relay-splash
-          .relay-v9-scan {
-
-            animation-duration:
-              4.5s;
-
-          }
-
-        }
-
-
-        /* =================================================
-           REDUCED MOTION
-           ================================================= */
-
-        @media(prefers-reduced-motion:reduce) {
-
-          .relay-splash
-          .relay-v9-orb,
-
-          .relay-splash
-          .relay-v9-scan,
-
-          .relay-splash
-          .relay-v9-grid,
-
-          .relay-splash
-          .relay-v9-veil,
-
-          .relay-splash
-          .relay-v9-energy {
-
-            animation:
-              none !important;
-
-          }
-
-        }
-
-      `;
-
-
-      document.head.appendChild(
-        style
-      );
-
-
-      /* =================================================
-         AMBIENT
-         ================================================= */
-
-      if (
-        !splash.querySelector(
-          '.relay-v9-ambient'
-        )
-      ) {
-
-        const ambient =
-          document.createElement(
-            'div'
-          );
-
-
-        ambient.className =
-          'relay-v9-ambient';
-
-
-        ambient.innerHTML = `
-
-          <div
-            class="relay-v9-orb relay-v9-orb-a"
-          ></div>
-
-          <div
-            class="relay-v9-orb relay-v9-orb-b"
-          ></div>
-
-          <div
-            class="relay-v9-orb relay-v9-orb-c"
-          ></div>
-
-        `;
-
-
-        splash.prepend(
-          ambient
-        );
-
-      }
-
-
-      /* =================================================
-         GRID
-         ================================================= */
-
-      if (
-        !splash.querySelector(
-          '.relay-v9-grid'
-        )
-      ) {
-
-        const grid =
-          document.createElement(
-            'div'
-          );
-
-
-        grid.className =
-          'relay-v9-grid';
-
-
-        splash.appendChild(
-          grid
-        );
-
-      }
-
-
-      /* =================================================
-         VEIL
-         ================================================= */
-
-      if (
-        !splash.querySelector(
-          '.relay-v9-veil'
-        )
-      ) {
-
-        const veil =
-          document.createElement(
-            'div'
-          );
-
-
-        veil.className =
-          'relay-v9-veil';
-
-
-        splash.appendChild(
-          veil
-        );
-
-      }
-
-
-      /* =================================================
-         SCAN
-         ================================================= */
-
-      if (
-        !splash.querySelector(
-          '.relay-v9-scan'
-        )
-      ) {
-
-        const scan =
-          document.createElement(
-            'div'
-          );
-
-
-        scan.className =
-          'relay-v9-scan';
-
-
-        splash.appendChild(
-          scan
-        );
-
-      }
-
-
-      /* =================================================
-         ENERGY
-         ================================================= */
-
-      if (
-        !splash.querySelector(
-          '.relay-v9-energy'
-        )
-      ) {
-
-        const energy =
-          document.createElement(
-            'div'
-          );
-
-
-        energy.className =
-          'relay-v9-energy';
-
-
-        splash.appendChild(
-          energy
-        );
-
-      }
-
-    };
-
-
-  /* =======================================================
-     HARDEN SPLASH
-     ======================================================= */
-
-  const hardenSplash =
-    splash => {
-
-      if (!splash) {
-        return;
-      }
-
-
-      const image =
-        splash.querySelector(
-          '.relay-splash-art, #relaySplashArt'
-        );
-
-
-      splash.style.position =
-        'fixed';
-
-
-      splash.style.inset =
-        '0';
-
-
-      splash.style.width =
-        '100dvw';
-
-
-      splash.style.height =
-        '100dvh';
-
-
-      splash.style.zIndex =
-        '2147483647';
-
-
-      splash.style.display =
-        'grid';
-
-
-      splash.style.opacity =
-        '1';
-
-
-      splash.style.visibility =
-        'visible';
-
-
-      splash.style.pointerEvents =
-        'auto';
-
-
-      splash.style.transform =
-        'none';
-
-
-      splash.style.filter =
-        'none';
-
-
-      splash.classList.remove(
-        'is-hidden'
-      );
-
-
-      if (image) {
-
-        const portrait =
-          window.matchMedia(
-            '(max-width:700px) and (orientation:portrait)'
-          ).matches;
-
-
-        image.style.display =
-          'block';
-
-
-        image.style.position =
-          'absolute';
-
-
-        image.style.inset =
-          '0';
-
-
-        image.style.width =
-          '100dvw';
-
-
-        image.style.height =
-          '100dvh';
-
-
-        image.style.minWidth =
-          '100%';
-
-
-        image.style.minHeight =
-          '100%';
-
-
-        image.style.maxWidth =
-          'none';
-
-
-        image.style.maxHeight =
-          'none';
-
-
-        image.style.objectFit =
-          portrait
-            ? 'contain'
-            : 'cover';
-
-
-        image.style.objectPosition =
-          'center';
-
-
-        image.style.opacity =
-          '1';
-
-
-        image.style.transform =
-          'none';
-
-
-        image.style.animation =
-          'none';
-
-
-        image.style.zIndex =
-          '1';
-
-      }
-
-    };
-
-
-  /* =======================================================
-     RUN
-     ======================================================= */
-
-  const run =
-    async () => {
-
-      const splash =
-        getSplash();
-
-
-      /* -----------------------------------------------------
-         NO SPLASH
-         ----------------------------------------------------- */
-
-      if (!splash) {
-
+      /*
+       * Do not leave mobile users behind an opaque splash forever. A slow
+       * device or a blocked optional module must not prevent the already
+       * mounted app from becoming visible. The normal path still waits for
+       * the home screen; this is only a bounded fail-open recovery path.
+       */
+      if (performance.now() - startedAt >= effectiveTimeout) {
         revealHomeForRecovery();
-
+        console.warn('[RelaySplash V6] Home readiness timeout; opening app');
+        resolve(false);
         return;
-
       }
 
-
-      /* =====================================================
-         FAIL SAFE
-         ===================================================== */
-
-      const failOpenTimer =
-        window.setTimeout(
-          () => {
-
-            if (
-              !document.body.contains(
-                splash
-              )
-            ) {
-              return;
-            }
-
-
-            revealHomeForRecovery();
-
-
-            splash.setAttribute(
-              'aria-busy',
-              'false'
-            );
-
-
-            splash.remove();
-
-          },
-          20000
-        );
-
-
-      const clearFailOpenTimer =
-        () =>
-          window.clearTimeout(
-            failOpenTimer
-          );
-
-
-      /* =====================================================
-         INIT
-         ===================================================== */
-
-      hardenSplash(
-        splash
-      );
-
-
-      installCinematicEffects(
-        splash
-      );
-
-
-      const image =
-        splash.querySelector(
-          '.relay-splash-art, #relaySplashArt'
-        );
-
-
-      const bar =
-        splash.querySelector(
-          '.relay-splash-progress'
-        );
-
-
-      const pct =
-        splash.querySelector(
-          '.relay-splash-percent'
-        );
-
-
-      const label =
-        splash.querySelector(
-          '.relay-splash-status'
-        );
-
-
-      /* =====================================================
-         REQUIRED ELEMENT CHECK
-         ===================================================== */
-
-      if (
-        !image ||
-        !bar ||
-        !pct ||
-        !label
-      ) {
-
-        clearFailOpenTimer();
-
-
-        revealHomeForRecovery();
-
-
-        splash.remove();
-
-
-        return;
-
-      }
-
-
-      let progress = 0;
-
-
-      /* =====================================================
-         PROGRESS BAR
-         ===================================================== */
-
-      bar.style.transition =
-        'none';
-
-
-      bar.style.willChange =
-        'width, transform';
-
-
-      /* =====================================================
-         SET PROGRESS
-         ===================================================== */
-
-      const setProgress =
-        (value, text) => {
-
-          progress =
-            Math.max(
-              progress,
-              Math.min(
-                100,
-                Math.round(value)
-              )
-            );
-
-
-          bar.style.width =
-            `${progress}%`;
-
-
-          bar.style.transform =
-            'translateZ(0)';
-
-
-          pct.textContent =
-            `${progress}%`;
-
-
-          if (text) {
-
-            label.textContent =
-              text;
-
-          }
-
-        };
-
-
-      /* =====================================================
-         FORCE 100%
-         ===================================================== */
-
-      const force100 =
-        async () => {
-
-          progress =
-            100;
-
-
-          bar.style.transition =
-            'none';
-
-
-          bar.style.width =
-            '100%';
-
-
-          bar.style.transform =
-            'translateZ(0)';
-
-
-          pct.textContent =
-            '100%';
-
-
-          label.textContent =
-            'RELAY ONLINE';
-
-
-          void bar.offsetWidth;
-
-
-          await new Promise(
-            resolve =>
-              requestAnimationFrame(
-                () =>
-                  requestAnimationFrame(
-                    resolve
-                  )
-              )
-          );
-
-
-          bar.style.width =
-            '100%';
-
-
-          pct.textContent =
-            '100%';
-
-
-          label.textContent =
-            'RELAY ONLINE';
-
-        };
-
-
-      /* =====================================================
-         ANIMATE PROGRESS
-         ===================================================== */
-
-      const animateTo =
-        (
-          target,
-          text,
-          duration
-        ) => {
-
-          return new Promise(
-            resolve => {
-
-              const from =
-                progress;
-
-
-              const to =
-                Math.max(
-                  from,
-                  Math.min(
-                    100,
-                    target
-                  )
-                );
-
-
-              const start =
-                performance.now();
-
-
-              const effectiveDuration =
-                isCoarseDevice()
-                  ? Math.max(
-                      120,
-                      duration * 0.3
-                    )
-                  : duration;
-
-
-              const frame =
-                now => {
-
-                  const t =
-                    Math.min(
-                      1,
-                      (
-                        now - start
-                      ) /
-                      effectiveDuration
-                    );
-
-
-                  const eased =
-                    1 -
-                    Math.pow(
-                      1 - t,
-                      3
-                    );
-
-
-                  setProgress(
-                    from +
-                      (
-                        to - from
-                      ) *
-                      eased,
-                    text
-                  );
-
-
-                  if (
-                    t < 1
-                  ) {
-
-                    window.setTimeout(
-                      () =>
-                        frame(
-                          performance.now()
-                        ),
-                      16
-                    );
-
-                    return;
-
-                  }
-
-
-                  setProgress(
-                    to,
-                    text
-                  );
-
-
-                  resolve();
-
-                };
-
-
-              window.setTimeout(
-                () =>
-                  frame(
-                    performance.now()
-                  ),
-                16
-              );
-
-            }
-          );
-
-        };
-
-
-      /* =====================================================
-         FORCE SPLASH VISIBLE
-         ===================================================== */
-
-      splash.classList.remove(
-        'is-hidden'
-      );
-
-
-      splash.style.opacity =
-        '1';
-
-
-      splash.style.visibility =
-        'visible';
-
-
-      splash.style.pointerEvents =
-        'auto';
-
-
-      splash.style.transform =
-        'none';
-
-
-      splash.style.filter =
-        'none';
-
-
-      splash.setAttribute(
-        'aria-busy',
-        'true'
-      );
-
-
-      /* =====================================================
-         BOOT SEQUENCE
-         ===================================================== */
-
-      setProgress(
-        0,
-        'INITIALIZING RELAY CORE'
-      );
-
-
-      await sleep(
-        350
-      );
-
-
-      await animateTo(
-        8,
-        'RELAY CORE INITIALIZING',
-        700
-      );
-
-
-      await sleep(
-        300
-      );
-
-
-      await animateTo(
-        26,
-        'INTERFACE CORE ONLINE',
-        850
-      );
-
-
-      await sleep(
-        500
-      );
-
-
-      await animateTo(
-        48,
-        'GAME SYSTEMS LOADING',
-        900
-      );
-
-
-      await sleep(
-        500
-      );
-
-
-      await animateTo(
-        68,
-        'WORLD NETWORK CONNECTING',
-        900
-      );
-
-
-      await sleep(
-        500
-      );
-
-
-      await animateTo(
-        86,
-        'HOME SYSTEMS READY',
-        800
-      );
-
-
-      await sleep(
-        500
-      );
-
-
-      await animateTo(
-        100,
-        'RELAY ONLINE',
-        1000
-      );
-
-
-      await force100();
-
-
-      /* =====================================================
-         HOLD 100%
-         ===================================================== */
-
-      const isMobileBoot =
-        window.matchMedia?.(
-          '(pointer: coarse)'
-        ).matches === true;
-
-
-      await sleep(
-        isMobileBoot
-          ? 500
-          : 850
-      );
-
-
-      /* =====================================================
-         PREPARE HOME
-         ===================================================== */
-
-      const home =
-        getHome();
-
-
-      if (home) {
-
-        /*
-         * Home sits underneath the splash.
-         *
-         * IMPORTANT:
-         * We no longer use 12px blur.
-         * We no longer move the page 18px.
-         *
-         * This creates a clean app-like fade.
-         */
-
-        home.classList.remove(
-          'hidden'
-        );
-
-
-        home.removeAttribute(
-          'hidden'
-        );
-
-
-        home.style.setProperty(
-          'display',
-          'block',
-          'important'
-        );
-
-
-        home.style.setProperty(
-          'visibility',
-          'visible',
-          'important'
-        );
-
-
-        home.style.setProperty(
-          'pointer-events',
-          'none',
-          'important'
-        );
-
-
-        home.style.setProperty(
-          'opacity',
-          '0',
-          'important'
-        );
-
-
-        home.style.setProperty(
-          'transform',
-          'none',
-          'important'
-        );
-
-
-        home.style.setProperty(
-          'filter',
-          'none',
-          'important'
-        );
-
-      }
-
-
-      /* =====================================================
-         SOFT HOME FADE
-         ===================================================== */
-
-      splash.setAttribute(
-        'aria-busy',
-        'false'
-      );
-
-
-      /*
-       * Short and soft.
-       *
-       * Desktop:
-       * 0.65s
-       *
-       * Mobile:
-       * 0.45s
-       */
-
-      const exitDuration =
-        isMobileBoot
-          ? '0.45s'
-          : '0.65s';
-
-
-      /* =====================================================
-         HOME TRANSITION
-         ===================================================== */
-
-      if (home) {
-
-        home.style.setProperty(
-          'transition',
-          [
-            `opacity ${exitDuration} ease-out`
-          ].join(','),
-          'important'
-        );
-
-      }
-
-
-      /* =====================================================
-         SPLASH TRANSITION
-         ===================================================== */
-
-      splash.style.transition =
-        [
-          `opacity ${exitDuration} ease-out`
-        ].join(',');
-
-
-      /*
-       * Force browser to register the initial state.
-       */
-      void splash.offsetWidth;
-
-
-      /* =====================================================
-         START FADE
-         ===================================================== */
-
-      splash.style.opacity =
-        '0';
-
-
-      /*
-       * IMPORTANT:
-       *
-       * NO:
-       * scale()
-       * brightness()
-       * saturate()
-       * blur()
-       * black overlay
-       *
-       * Only opacity changes.
-       */
-
-
-      /* =====================================================
-         REVEAL HOME
-         ===================================================== */
-
-      if (home) {
-
-        requestAnimationFrame(
-          () => {
-
-            home.style.setProperty(
-              'opacity',
-              '1',
-              'important'
-            );
-
-          }
-        );
-
-      }
-
-
-      /* =====================================================
-         WAIT FOR FADE
-         ===================================================== */
-
-      await sleep(
-        isMobileBoot
-          ? 500
-          : 700
-      );
-
-
-      /* =====================================================
-         REMOVE SPLASH
-         ===================================================== */
-
-      if (
-        splash &&
-        document.body.contains(
-          splash
-        )
-      ) {
-
-        splash.remove();
-
-      }
-
-
-      /* =====================================================
-         FINAL STATE
-         HOME ONLY
-         ===================================================== */
-
-      openHomeOnly();
-
-
-      clearFailOpenTimer();
-
+      window.setTimeout(check, 50);
     };
 
+    check();
+  });
 
-  /* =======================================================
-     START
-     ======================================================= */
+  /* ---------------------------------------------------------
+     FIND SPLASH
+     --------------------------------------------------------- */
 
-  run().catch(
-    error => {
+  const getSplash = () =>
+    document.querySelector('.relay-splash') ||
+    document.getElementById('relaySplash');
 
-      console.error(
-        '[Relay Runner] Splash boot failed:',
-        error
-      );
+  /* ---------------------------------------------------------
+     FIRST PAINT
+     --------------------------------------------------------- */
 
+  const hardenSplash = splash => {
+    if (!splash) return;
 
-      const splash =
-        getSplash();
+    const image =
+      splash.querySelector('.relay-splash-art, #relaySplashArt');
 
+    splash.style.position = 'fixed';
+    splash.style.inset = '0';
+    splash.style.width = '100vw';
+    splash.style.height = '100vh';
+    splash.style.width = '100dvw';
+    splash.style.height = '100dvh';
+    splash.style.zIndex = '2147483647';
+    splash.style.display = 'grid';
+    splash.style.opacity = '1';
+    splash.style.visibility = 'visible';
+    splash.style.pointerEvents = 'auto';
+    splash.style.transform = 'scale(1)';
+    splash.style.filter = 'none';
 
-      /*
-       * Recovery:
-       *
-       * Immediately show Home.
-       * No black transition.
-       */
+    splash.classList.remove('is-hidden');
 
-      revealHomeForRecovery();
+    if (image) {
+      const portrait =
+        window.matchMedia(
+          '(max-width:700px) and (orientation:portrait)'
+        ).matches;
 
-
-      if (splash) {
-
-        splash.setAttribute(
-          'aria-busy',
-          'false'
-        );
-
-
-        splash.style.setProperty(
-          'transition',
-          'none',
-          'important'
-        );
-
-
-        splash.style.setProperty(
-          'opacity',
-          '0',
-          'important'
-        );
-
-
-        splash.remove();
-
-      }
-
+      image.style.display = 'block';
+      image.style.position = 'absolute';
+      image.style.inset = '0';
+      image.style.width = '100vw';
+      image.style.height = '100vh';
+      image.style.width = '100dvw';
+      image.style.height = '100dvh';
+      image.style.minWidth = '100%';
+      image.style.minHeight = '100%';
+      image.style.maxWidth = 'none';
+      image.style.maxHeight = 'none';
+      image.style.objectFit = portrait ? 'contain' : 'cover';
+      image.style.objectPosition = 'center';
+      image.style.opacity = '1';
+      image.style.transform = 'none';
+      image.style.animation = 'none';
     }
-  );
+  };
 
+  /* ---------------------------------------------------------
+     PREMIUM HUD
+     --------------------------------------------------------- */
+
+  const installHud = () => {
+    if (document.getElementById('relay-v6-style')) return;
+
+    const style = document.createElement('style');
+
+    style.id = 'relay-v6-style';
+
+    style.textContent = `
+      .relay-splash{
+        isolation:isolate !important;
+        background:#000 !important;
+      }
+
+      .relay-splash .relay-v6-network{
+        position:absolute;
+        z-index:20;
+        top:max(20px,env(safe-area-inset-top));
+        right:max(20px,env(safe-area-inset-right));
+        display:flex;
+        align-items:center;
+        gap:8px;
+        padding:8px 12px;
+        border:1px solid rgba(0,234,255,.35);
+        border-left:2px solid #00eaff;
+        background:rgba(0,8,15,.72);
+        color:#b8fbff;
+        font:900 8px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.16em;
+        text-transform:uppercase;
+        box-shadow:
+          0 0 18px rgba(0,234,255,.10),
+          inset 0 0 18px rgba(0,234,255,.04);
+      }
+
+      .relay-splash .relay-v6-network i{
+        width:6px;
+        height:6px;
+        flex:0 0 6px;
+        border-radius:50%;
+        background:#00eaff;
+        box-shadow:
+          0 0 7px #00eaff,
+          0 0 18px #00eaff;
+        animation:relayV6Pulse 1s ease-in-out infinite;
+      }
+
+      .relay-splash .relay-splash-ui{
+        z-index:20;
+      }
+
+      .relay-splash .relay-v6-grid{
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:1px;
+        margin-top:7px;
+        border:1px solid rgba(117,247,255,.16);
+        background:rgba(117,247,255,.10);
+      }
+
+      .relay-splash .relay-v6-cell{
+        min-width:0;
+        padding:8px;
+        display:flex;
+        justify-content:space-between;
+        gap:8px;
+        background:rgba(0,9,16,.76);
+      }
+
+      .relay-splash .relay-v6-cell span{
+        color:rgba(190,215,221,.45);
+        font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.12em;
+      }
+
+      .relay-splash .relay-v6-cell b{
+        color:#b8fbff;
+        font:900 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.08em;
+        white-space:nowrap;
+      }
+
+      .relay-splash .relay-v6-log{
+        display:grid;
+        gap:4px;
+        margin-top:7px;
+        padding:7px 9px 3px;
+        border-top:1px solid rgba(117,247,255,.12);
+        color:rgba(141,250,255,.48);
+        font:700 7px/1.3 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.10em;
+        text-transform:uppercase;
+      }
+
+      .relay-splash .relay-v6-log .live{
+        color:#b8fbff;
+        text-shadow:0 0 10px rgba(0,234,255,.35);
+      }
+
+      .relay-splash .relay-v6-complete{
+        display:none;
+        align-items:center;
+        gap:9px;
+        margin-top:7px;
+        padding-top:6px;
+        border-top:1px solid rgba(255,210,60,.18);
+      }
+
+      .relay-splash .relay-v6-complete.show{
+        display:flex;
+      }
+
+      .relay-splash .relay-v6-complete i{
+        width:8px;
+        height:8px;
+        flex:0 0 8px;
+        border-radius:50%;
+        background:#ffd23c;
+        box-shadow:
+          0 0 8px #ffd23c,
+          0 0 20px #ffd23c;
+      }
+
+      .relay-splash .relay-v6-complete strong{
+        display:block;
+        color:#f5fdff;
+        font:900 9px/1.1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.14em;
+      }
+
+      .relay-splash .relay-v6-complete small{
+        display:block;
+        margin-top:3px;
+        color:rgba(141,250,255,.50);
+        font:700 7px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+        letter-spacing:.12em;
+      }
+
+      @keyframes relayV6Pulse{
+        0%,100%{
+          opacity:.35;
+          transform:scale(.75);
+        }
+        50%{
+          opacity:1;
+          transform:scale(1.2);
+        }
+      }
+
+      @media(max-width:700px){
+        .relay-splash .relay-v6-network{
+          top:12px;
+          right:12px;
+          padding:6px 8px;
+          font-size:6px;
+        }
+
+        .relay-splash .relay-v6-grid{
+          grid-template-columns:1fr 1fr;
+        }
+
+        .relay-splash .relay-v6-cell:last-child{
+          grid-column:1 / -1;
+        }
+
+        .relay-splash .relay-v6-cell{
+          padding:7px;
+        }
+
+        .relay-splash .relay-v6-cell span,
+        .relay-splash .relay-v6-cell b{
+          font-size:6px;
+        }
+
+        .relay-splash .relay-v6-log{
+          font-size:6px;
+        }
+      }
+
+      @media(max-width:700px) and (orientation:portrait){
+        .relay-splash .relay-v6-network{
+          display:none;
+        }
+      }
+
+      @media(prefers-reduced-motion:reduce){
+        .relay-splash .relay-v6-network i{
+          animation:none;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  };
+
+  /* ---------------------------------------------------------
+     HUD
+     --------------------------------------------------------- */
+
+  const mountHud = splash => {
+    const ui = splash.querySelector('.relay-splash-ui');
+
+    if (!ui) return null;
+
+    if (ui.querySelector('.relay-v6-grid')) {
+      return {
+        network: splash.querySelector('.relay-v6-network'),
+        grid: ui.querySelector('.relay-v6-grid'),
+        log: ui.querySelector('.relay-v6-log'),
+        complete: ui.querySelector('.relay-v6-complete')
+      };
+    }
+
+    const network = document.createElement('div');
+
+    network.className = 'relay-v6-network';
+
+    network.innerHTML =
+      '<i></i><span>RELAY NETWORK // ONLINE</span>';
+
+    splash.appendChild(network);
+
+    const grid = document.createElement('div');
+
+    grid.className = 'relay-v6-grid';
+
+    grid.innerHTML = `
+      <div class="relay-v6-cell">
+        <span>NODE</span>
+        <b>04 // ONLINE</b>
+      </div>
+
+      <div class="relay-v6-cell">
+        <span>SIGNAL</span>
+        <b>STABLE // LOCKED</b>
+      </div>
+
+      <div class="relay-v6-cell">
+        <span>RELAY</span>
+        <b>SYNCED // READY</b>
+      </div>
+    `;
+
+    const log = document.createElement('div');
+
+    log.className = 'relay-v6-log';
+
+    log.innerHTML = `
+      <span class="live">→ RELAY CORE INITIALIZING</span>
+      <span>→ WORLD NODE STANDBY</span>
+    `;
+
+    const complete = document.createElement('div');
+
+    complete.className = 'relay-v6-complete';
+
+    complete.innerHTML = `
+      <i></i>
+      <div>
+        <strong>RELAY NETWORK ONLINE</strong>
+        <small>BOOT COMPLETE // HOME READY</small>
+      </div>
+    `;
+
+    ui.appendChild(grid);
+    ui.appendChild(log);
+    ui.appendChild(complete);
+
+    return {
+      network,
+      grid,
+      log,
+      complete
+    };
+  };
+
+  /* ---------------------------------------------------------
+     PROGRESS
+     --------------------------------------------------------- */
+
+  const run = async () => {
+    const splash = getSplash();
+
+    if (!splash) {
+      console.error('[RelaySplash V6] SPLASH NOT FOUND');
+      return;
+    }
+
+    /*
+     * Last-resort mobile recovery. This is deliberately longer than the
+     * normal boot sequence, but guarantees that a browser lifecycle pause or
+     * optional module failure cannot leave the first screen blocking Home.
+     */
+    const failOpenTimer = window.setTimeout(() => {
+      if (!document.body.contains(splash)) return;
+
+      console.warn('[RelaySplash V6] watchdog recovery; opening Home');
+      revealHomeForRecovery();
+      splash.setAttribute('aria-busy', 'false');
+      splash.remove();
+    }, 10000);
+
+    const clearFailOpenTimer = () =>
+      window.clearTimeout(failOpenTimer);
+
+    hardenSplash(splash);
+    installHud();
+
+    const image =
+      splash.querySelector('.relay-splash-art, #relaySplashArt');
+
+    const bar =
+      splash.querySelector('.relay-splash-progress');
+
+    const pct =
+      splash.querySelector('.relay-splash-percent');
+
+    const label =
+      splash.querySelector('.relay-splash-status');
+
+    if (!image || !bar || !pct || !label) {
+      console.error('[RelaySplash V6] REQUIRED ELEMENT MISSING');
+      clearFailOpenTimer();
+      revealHomeForRecovery();
+      splash.remove();
+      return;
+    }
+
+    const hud = mountHud(splash);
+
+    let progress = 0;
+
+    const setProgress = (value, text) => {
+      progress = Math.max(
+        progress,
+        Math.min(100, Math.round(value))
+      );
+
+      bar.style.width = `${progress}%`;
+      bar.style.transform = 'translateZ(0)';
+
+      pct.textContent = `${progress}%`;
+
+      if (text) {
+        label.textContent = text;
+      }
+
+      if (hud?.network) {
+        const textNode =
+          hud.network.querySelector('span');
+
+        if (textNode) {
+          textNode.textContent =
+            progress >= 100
+              ? 'RELAY NETWORK // ONLINE // READY'
+              : 'RELAY NETWORK // ONLINE';
+        }
+      }
+
+      if (hud?.log) {
+        const lines = hud.log.querySelectorAll('span');
+
+        if (lines[0]) {
+          lines[0].textContent =
+            progress >= 86
+              ? '→ HOME SYSTEMS VERIFIED'
+              : progress >= 68
+                ? '→ ROUTE DATA VERIFIED'
+                : progress >= 48
+                  ? '→ GAME SYSTEMS LOADING'
+                  : progress >= 26
+                    ? '→ INTERFACE CORE ONLINE'
+                    : '→ RELAY CORE INITIALIZING';
+
+          lines[0].className = 'live';
+        }
+
+        if (lines[1]) {
+          lines[1].textContent =
+            progress >= 86
+              ? '→ RELAY NETWORK READY'
+              : progress >= 68
+                ? '→ WORLD NODE ONLINE'
+                : progress >= 48
+                  ? '→ WORLD NODE SYNCING'
+                  : progress >= 26
+                    ? '→ ROUTE DATA AWAITING'
+                    : '→ WORLD NODE STANDBY';
+
+          lines[1].className =
+            progress >= 68 ? 'live' : '';
+        }
+      }
+
+      console.log(
+        '[RelaySplash V6] PROGRESS',
+        progress,
+        text || ''
+      );
+    };
+
+    const animateTo = (target, text, duration) => {
+      return new Promise(resolve => {
+        const from = progress;
+        const to = Math.max(from, Math.min(100, target));
+
+        const start = performance.now();
+        const effectiveDuration = isCoarseDevice()
+          ? Math.max(120, duration * .3)
+          : duration;
+
+        const frame = now => {
+          const t = Math.min(
+            1,
+            (now - start) / effectiveDuration
+          );
+
+          const eased =
+            1 - Math.pow(1 - t, 3);
+
+          setProgress(
+            from + (to - from) * eased,
+            text
+          );
+
+          if (t < 1) {
+            window.setTimeout(
+              () => frame(performance.now()),
+              16
+            );
+          } else {
+            setProgress(to, text);
+            resolve();
+          }
+        };
+
+        window.setTimeout(
+          () => frame(performance.now()),
+          16
+        );
+      });
+    };
+
+    /* NEVER ALLOW ANOTHER CSS STATE TO HIDE THE SPLASH */
+
+    splash.classList.remove('is-hidden');
+
+    splash.style.opacity = '1';
+    splash.style.visibility = 'visible';
+    splash.style.pointerEvents = 'auto';
+    splash.style.transform = 'scale(1)';
+    splash.style.filter = 'none';
+    splash.setAttribute('aria-busy', 'true');
+
+    /* =====================================================
+       BOOT SEQUENCE
+       ===================================================== */
+
+    setProgress(0, 'INITIALIZING RELAY CORE');
+
+    await sleep(350);
+
+    await animateTo(
+      8,
+      'RELAY CORE INITIALIZING',
+      700
+    );
+
+    await sleep(300);
+
+    await animateTo(
+      26,
+      'INTERFACE CORE ONLINE',
+      850
+    );
+
+    console.log(
+      '[RelaySplash V6] 26% COMPLETE — CONTINUING'
+    );
+
+    await sleep(500);
+
+    await animateTo(
+      48,
+      'GAME SYSTEMS LOADING',
+      900
+    );
+
+    console.log(
+      '[RelaySplash V6] 48% COMPLETE — CONTINUING'
+    );
+
+    await sleep(500);
+
+    await animateTo(
+      68,
+      'WORLD NETWORK CONNECTING',
+      900
+    );
+
+    console.log(
+      '[RelaySplash V6] 68% COMPLETE — CONTINUING'
+    );
+
+    await sleep(500);
+
+    await animateTo(
+      86,
+      'HOME SYSTEMS READY',
+      800
+    );
+
+    console.log(
+      '[RelaySplash V6] 86% COMPLETE — CONTINUING'
+    );
+
+    await sleep(500);
+
+    await animateTo(
+      100,
+      'RELAY ONLINE',
+      1000
+    );
+
+    console.log(
+      '[RelaySplash V6] 100% COMPLETE'
+    );
+
+    /* Do not reveal an empty background while slower mobile devices are
+       still evaluating the home modules. */
+    await waitForHomeReady();
+
+    /* =====================================================
+       100% HOLD
+       ===================================================== */
+
+    if (hud?.complete) {
+      hud.complete.classList.add('show');
+    }
+
+    const isMobileBoot =
+      window.matchMedia?.('(pointer: coarse)').matches === true;
+
+    await sleep(isMobileBoot ? 250 : 1200);
+
+    /* =====================================================
+       CINEMATIC EXIT
+       ===================================================== */
+
+    splash.setAttribute('aria-busy', 'false');
+
+    const exitDuration = isMobileBoot ? '0.45s' : '1.2s';
+
+    splash.style.transition =
+      `opacity ${exitDuration} cubic-bezier(.16,1,.3,1),` +
+      `transform ${exitDuration} cubic-bezier(.16,1,.3,1),` +
+      `filter ${exitDuration} ease`;
+
+    void splash.offsetWidth;
+
+    splash.style.opacity = '0';
+    splash.style.transform = 'scale(1.035)';
+    splash.style.filter =
+      'brightness(1.2) saturate(1.08)';
+
+    await sleep(isMobileBoot ? 500 : 1250);
+
+    splash.remove();
+    document.getElementById('game')?.classList.add('relay-boot-ready');
+    clearFailOpenTimer();
+
+    console.log(
+      '[RelaySplash V6] EXIT COMPLETE — HOME ACTIVE'
+    );
+  };
+
+  /* ---------------------------------------------------------
+     START IMMEDIATELY
+     --------------------------------------------------------- */
+
+  run().catch(error => {
+    console.error(
+      '[RelaySplash V6] FATAL ERROR',
+      error
+    );
+
+    /*
+      Emergency recovery:
+      If something unexpected breaks the cinematic sequence,
+      never leave the user stuck on the splash.
+    */
+
+    const splash = getSplash();
+
+    if (splash) {
+      document.getElementById('game')?.classList.add('relay-boot-ready');
+      splash.remove();
+    }
+  });
 })();
+
