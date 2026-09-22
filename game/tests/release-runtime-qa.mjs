@@ -224,6 +224,7 @@ assertNoPairwiseOverlap(
 
     await clickDom(page, '[data-pause-tab="settings"]');
     await page.waitForFunction(() => document.querySelector('.relay-cinematic-title')?.textContent?.trim() === 'OPTIONS');
+    await page.waitForFunction(() => document.querySelectorAll('[data-unified-toggle]').length >= 4);
     const settings = await page.evaluate(() => ({
       title: document.querySelector('.relay-cinematic-title')?.textContent?.trim() || '',
       toggleCount: document.querySelectorAll('[data-unified-toggle]').length,
