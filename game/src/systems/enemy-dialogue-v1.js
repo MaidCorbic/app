@@ -2112,6 +2112,15 @@ box-shadow:
 }
 `;
 
+  style.textContent += `
+#play .relay-faction-dialogue[hidden]{display:none!important;}
+#play .relay-faction-dialogue:not([hidden]){
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+`;
+
   document.head.appendChild(style);
 }
 
