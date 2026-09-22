@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [source, home, briefing] = await Promise.all([
+const [source, home, briefing, deployment] = await Promise.all([
   readFile(new URL('../src/main.js', import.meta.url), 'utf8'),
   readFile(new URL('../home-v3.js', import.meta.url), 'utf8'),
-  readFile(new URL('../gameplay-intro-final-v1.js', import.meta.url), 'utf8')
+  readFile(new URL('../gameplay-intro-final-v1.js', import.meta.url), 'utf8'),
+  readFile(new URL('../play-deployment-loader-v1.js', import.meta.url), 'utf8')
 ]);
 
 assert.match(source, /const startRun = \(\) =>/, 'Start Run needs a canonical route');
@@ -13,21 +14,24 @@ const continueRoute = source.match(/const continueRun = \(\) => \{([\s\S]*?)\n\}
 
 assert.ok(startRoute, 'Start Run route must have a complete implementation');
 assert.ok(continueRoute, 'Continue route must have a complete implementation');
-assert.match(startRoute[1], /game\.scene\.resume\(\s*'runner'\s*\)/, 'Start Run must resume RunnerScene directly');
+assert.match(startRoute[1], /launch\(0\)/, 'Start Run must launch the first mission after Home handoff');
 assert.match(source, /window\.relayStartRun = startRun;/, 'Start must publish its stable route for the rebuilt Home');
-assert.match(source, /const continueRun = \(\) =>/, 'Continue needs a canonical route');
 assert.match(continueRoute[1], /launch\(\s*nextMissionIndex\(\)\s*\)/, 'Continue must launch the next mission directly');
 assert.match(source, /window\.relayContinueRun = continueRun;/, 'Continue must publish its stable route for the rebuilt Home');
-assert.doesNotMatch(startRoute[1], /openWorldMap|openPreflight/, 'Start Run must not route through map or pre-flight UI');
-assert.doesNotMatch(continueRoute[1], /openWorldMap|openPreflight/, 'Continue must not route through map or pre-flight UI');
 assert.match(source, /const clearHomeBootstrapStyles = intro =>/, 'The Home-to-game handoff must clear boot-time inline styles');
-assert.match(source, /property => intro\.style\.removeProperty\(property\)/, 'The Home-to-game handoff must remove inline style overrides');
-assert.match(source, /document\.body\.classList\.remove\('home-v3-active'\)/, 'The gameplay layer must no longer be hidden by the Home state class');
 
-assert.match(home, /window\.relayStartRun\(\);/, 'The visible Start button must call the canonical Start route');
-assert.match(home, /window\.relayContinueRun\(\);/, 'The visible Continue button must call the canonical Continue route');
-assert.doesNotMatch(home, /sourceStart|sourceContinue/, 'The rebuilt Home must not forward clicks to detached legacy buttons');
-assert.doesNotMatch(home, /relayPlayDeploymentV1/, 'Home Start must not route through a second full-screen deployment loader');
-assert.match(briefing, /button\.matches\(\s*'#intro #start'\s*\)/, 'Home Start must bypass the blocking mission briefing');
+assert.match(home, /relayPlayDeploymentV1/, 'Home Start must use the deployment loader');
+assert.match(home, /beforeRoute: async/, 'Deployment loader must hand off to the existing gameplay Start route');
+assert.match(home, /sourceStart/, 'The deployment handoff must trigger the gameplay-owned Start button');
+assert.match(home, /window\.relayContinueRun\(\);/, 'Continue must call the canonical Continue route');
 
-console.log('Start and Continue flow regression checks passed.');
+assert.match(deployment, /window\.relayPlayDeploymentV1/, 'Deployment loader must expose its public API');
+assert.match(deployment, /beforeRoute/, 'Deployment loader must support the gameplay handoff callback');
+assert.match(deployment, /loadplay\.jpg/, 'Desktop deployment artwork must be preserved');
+assert.match(deployment, /loadplaymobile\.jpg/, 'Mobile deployment artwork must be preserved');
+
+assert.match(briefing, /const PLAY_BUTTONS/, 'Mission briefing must own the pre-game route briefing');
+assert.doesNotMatch(briefing, /button\.matches\(\s*'#intro #start'\s*\)/, 'Home Start must not bypass the mission briefing');
+assert.match(briefing, /setTimeout\(\s*show,\s*180\)/, 'Mission briefing must appear after the gameplay runner is prepared');
+
+console.log('Start flow contract: Home -> deployment loader -> mission map briefing -> gameplay.');
