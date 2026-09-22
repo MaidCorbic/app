@@ -7997,6 +7997,19 @@ finishId =
       if (!button || active) return;
 
       /*
+       * Home Start is the direct entry into the runner.  Do not cover it
+       * with the full-screen route briefing; the briefing is reserved for
+       * in-game transitions such as retry and next mission.
+       */
+      if (
+        button.matches(
+          '#intro #start'
+        )
+      ) {
+        return;
+      }
+
+      /*
        * VAŽNO:
        * originalni Play handler ide prvi.
        * Tek nakon toga čekamo Phaser runner.

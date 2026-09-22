@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="relay-booting">
 <head>
   <meta charset="UTF-8">
 
@@ -9,120 +9,406 @@
   >
 
   <meta name="format-detection" content="telephone=no">
-<link
-  rel="preconnect"
-  href="https://fonts.googleapis.com"
->
 
-<link
-  rel="preconnect"
-  href="https://fonts.gstatic.com"
-  crossorigin
->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
 
-<link
-  href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap"
-  rel="stylesheet"
->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+
   <title>Relay Runner | Rooftop Game</title>
 
-  <link rel="icon" href="./favicon.ico">
+  <link
+    rel="icon"
+    type="image/x-icon"
+    href="/assets/favicon.ico"
+  >
 
-  <!-- SPLASH CSS MUST ARRIVE BEFORE THE MODULE BOOTSTRAP -->
-  <link rel="stylesheet" href="splash-progress-visibility.css">
-  <link rel="stylesheet" href="cinematic-splash.css">
-  <link rel="stylesheet" href="faq-terminal-polish-v1.css">
+  <!-- =====================================================
+       FIRST PAINT BOOT LOCK
+       Loader is the ONLY visible thing during boot.
+       ===================================================== -->
 
-  <!-- Keep the legacy DOM from flashing before the current Home module mounts. -->
- <style id="relay-critical-boot-style">
-  /*
-   * CLEAN HOME BOOT
-   * Home is the only visible surface on first paint.
-   * Gameplay and gameplay overlays become visible only after PLAY.
-   */
-  body.home-v3-active #play,
-  body.home-v3-active #pauseMenu,
-  body.home-v3-active #titlePanel,
-  body.home-v3-active #relayInfoPanel,
-  body.home-v3-active #finish,
-  body.home-v3-active #gameOver,
-  body.home-v3-active #levelUp,
-  body.home-v3-active #abilityUnlock,
-  body.home-v3-active #toast,
-  body.home-v3-active #worldMap,
-  body.home-v3-active #preflight {
-    display:none !important;
-    visibility:hidden !important;
-    opacity:0 !important;
-    pointer-events:none !important;
-  }
+  <style id="relay-first-paint-lock">
 
-  body.home-v3-active #intro {
-    display:block !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    pointer-events:auto !important;
-  }
+    html.relay-booting,
+    html.relay-booting body {
+      margin: 0 !important;
+      width: 100% !important;
+      min-height: 100% !important;
+      background: #02060a !important;
+      overflow: hidden !important;
+    }
 
-  #relaySplash{
-    visibility:visible;
-  }
-</style>
+    /*
+     * While booting, everything except the splash is hidden.
+     * This happens before the first paint.
+     */
+    html.relay-booting body > *:not(#relaySplash) {
+      visibility: hidden !important;
+    }
+
+    html.relay-booting #game {
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /*
+     * Home must not appear underneath the splash.
+     */
+    html.relay-booting #intro {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /*
+     * Boot-ready state.
+     */
+    html.relay-boot-ready,
+    html.relay-boot-ready body {
+      background: #02060a !important;
+    }
+
+    html.relay-boot-ready #game {
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    /*
+     * Home is the only application screen opened after boot.
+     */
+    #intro.relay-home-active {
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    /*
+     * These screens must NEVER appear automatically after boot.
+     * Their own game scripts can remove .hidden later when needed.
+     */
+    #play,
+    #pauseMenu,
+    #titlePanel,
+    #relayInfoPanel,
+    #finish,
+    #gameOver,
+    #levelUp,
+    #abilityUnlock,
+    #toast {
+      visibility: hidden;
+    }
+
+    /*
+     * Hidden state gets display:none so there cannot be
+     * transparent/clickable panels underneath Home.
+     */
+    #play.hidden,
+    #pauseMenu.hidden,
+    #titlePanel.hidden,
+    #relayInfoPanel.hidden,
+    #finish.hidden,
+    #gameOver.hidden,
+    #levelUp.hidden,
+    #abilityUnlock.hidden {
+      display: none !important;
+    }
+
+  </style>
+
+
+  <!-- =====================================================
+       SPLASH
+       ===================================================== -->
+
+  <link
+    rel="stylesheet"
+    href="splash-progress-visibility.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="cinematic-splash.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="faq-terminal-polish-v1.css"
+  >
+
+
+  <style id="relay-critical-boot-style">
+
+    #relaySplash {
+      visibility: visible;
+    }
+
+    /*
+     * Critical splash loader position.
+     * Prevents first-frame jump.
+     */
+    #relaySplash .relay-splash-ui {
+      position: absolute !important;
+
+      left: 50% !important;
+      right: auto !important;
+
+      bottom: max(
+        34px,
+        env(safe-area-inset-bottom) + 24px
+      ) !important;
+
+      width: min(
+        920px,
+        calc(100vw - 56px)
+      ) !important;
+
+      margin: 0 !important;
+
+      transform: translateX(-50%) !important;
+
+      z-index: 10 !important;
+    }
+
+    @media (max-width: 700px) {
+
+      #relaySplash .relay-splash-ui {
+        left: 50% !important;
+        right: auto !important;
+
+        bottom: max(
+          16px,
+          env(safe-area-inset-bottom) + 10px
+        ) !important;
+
+        width: calc(100vw - 20px) !important;
+
+        transform: translateX(-50%) !important;
+      }
+
+    }
+
+    @media (max-width: 420px) {
+
+      #relaySplash .relay-splash-ui {
+        left: 50% !important;
+        right: auto !important;
+
+        bottom: max(
+          12px,
+          env(safe-area-inset-bottom) + 8px
+        ) !important;
+
+        width: calc(100vw - 16px) !important;
+
+        transform: translateX(-50%) !important;
+      }
+
+    }
+
+  </style>
+
 </head>
 
-<body class="home-v3-active">
 
-  <div id="relaySplash" class="relay-splash" role="status" aria-live="polite" aria-busy="true">
+<body>
+
+  <!-- =====================================================
+       SPLASH
+       ===================================================== -->
+
+  <div
+    id="relaySplash"
+    class="relay-splash"
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+  >
+
     <picture id="relaySplashPicture">
-      <source media="(orientation: landscape)" srcset="./assets/loading-landscape.jpg">
-      <img id="relaySplashArt" class="relay-splash-art" src="./assets/loading.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high">
+
+      <source
+        media="(orientation: landscape)"
+        srcset="/assets/loading-landscape.jpg"
+      >
+
+      <img
+        id="relaySplashArt"
+        class="relay-splash-art"
+        src="/assets/loading.jpg"
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        fetchpriority="high"
+      >
+
     </picture>
+
+
     <div class="relay-splash-brand">
       <b>R/</b>
       <span>RELAY RUNNER</span>
     </div>
+
+
     <div class="relay-splash-ui">
+
       <div class="relay-splash-meta">
-        <span class="relay-splash-status">LOADING</span>
-        <span class="relay-splash-percent">0%</span>
+
+        <span class="relay-splash-status">
+          LOADING
+        </span>
+
+        <span class="relay-splash-percent">
+          0%
+        </span>
+
       </div>
+
+
       <div class="relay-splash-track">
         <i class="relay-splash-progress"></i>
       </div>
+
     </div>
+
   </div>
 
-<main id="game">
 
-  <div hidden aria-hidden="true">
-    <button id="start" type="button"></button>
-    <button id="continue" type="button"></button>
-  </div>
+  <!-- =====================================================
+       APPLICATION
+       ===================================================== -->
 
-  <section id="play" class="play">
-      <div id="phaser-game" aria-label="Relay Runner game world"></div>
+  <main id="game">
+
+    <!-- ===================================================
+         NEW HOME
+         home-v3.js mounts the new design here
+         =================================================== -->
+
+    <section
+      id="intro"
+      class="overlay intro"
+    ></section>
+
+
+    <!-- ===================================================
+         COMPATIBILITY BUTTONS
+         =================================================== -->
+
+    <div
+      hidden
+      aria-hidden="true"
+    >
+
+      <button
+        id="start"
+        type="button"
+      ></button>
+
+      <button
+        id="continue"
+        type="button"
+      ></button>
+
+    </div>
+
+
+    <!-- ===================================================
+         GAME
+         =================================================== -->
+
+    <section
+      id="play"
+      class="play hidden"
+      aria-hidden="true"
+    >
+
+      <div
+        id="phaser-game"
+        aria-label="Relay Runner game world"
+      ></div>
+
+
       <div class="vignette"></div>
 
+
+      <!-- GAME HUD -->
+
       <header class="hud">
+
         <div class="hud-route">
+
           <span class="route-dot"></span>
+
           <div>
-            <small id="district">OLD QUARTER</small>
-            <b id="objective">ROOFTOP RELAY</b>
+
+            <small id="district">
+              OLD QUARTER
+            </small>
+
+            <b id="objective">
+              ROOFTOP RELAY
+            </b>
+
           </div>
+
         </div>
+
+
         <div class="hud-progress hud-run">
-          <span id="signalCount">00</span>
-          <small>SIGNALS</small>
-          <div><i id="progress"></i></div>
-        </div>
-        <div class="hud-actions">
-          <div class="hud-xp">
-            <small>XP</small>
-            <b id="hudXp">0000</b>
+
+          <span id="signalCount">
+            00
+          </span>
+
+          <small>
+            SIGNALS
+          </small>
+
+          <div>
+            <i id="progress"></i>
           </div>
-          <button id="pause" class="pause-button" type="button" aria-label="Open game menu">☰</button>
+
         </div>
+
+
+        <div class="hud-actions">
+
+          <div class="hud-xp">
+
+            <small>
+              XP
+            </small>
+
+            <b id="hudXp">
+              0000
+            </b>
+
+          </div>
+
+
+          <button
+            id="pause"
+            class="pause-button"
+            type="button"
+            aria-label="Open game menu"
+          >
+            ☰
+          </button>
+
+        </div>
+
       </header>
 
       <div id="gameplayActionDock" class="gameplay-action-dock" aria-label="Gameplay actions">
@@ -130,33 +416,112 @@
       </div>
 
       <div class="world-marker">
-        <span id="worldMissionLabel">MISSION 01</span>
-        <b id="worldGoal">FOLLOW THE RELAY</b>
+
+        <span id="worldMissionLabel">
+          MISSION 01
+        </span>
+
+        <b id="worldGoal">
+          FOLLOW THE RELAY
+        </b>
+
       </div>
+
+
+      <!-- INPUT GUIDE -->
 
       <div class="input-guide">
-        <kbd>A</kbd><kbd>D</kbd> RUN
+
+        <kbd>A</kbd>
+        <kbd>D</kbd>
+        RUN
+
         <i></i>
-        <kbd>SPACE</kbd> JUMP
+
+        <kbd>SPACE</kbd>
+        JUMP
+
         <i></i>
-        <kbd>E</kbd> FIRE
+
+        <kbd>E</kbd>
+        FIRE
+
         <i></i>
-        <kbd>Q</kbd> BLADE
+
+        <kbd>Q</kbd>
+        BLADE
+
         <i></i>
-        <kbd>SHIFT</kbd> DASH
+
+        <kbd>SHIFT</kbd>
+        DASH
+
       </div>
 
-      <div class="mobile-controls" aria-label="Touch game controls">
-      
+
+      <!-- MOBILE CONTROLS -->
+
+      <div
+        class="mobile-controls"
+        aria-label="Touch game controls"
+      >
+
         <div class="mobile-actions">
-          <button type="button" data-mobile-action="jump">JUMP<small>SPACE</small></button>
-          <button type="button" data-mobile-action="fire">FIRE<small>E</small></button>
-          <button type="button" data-mobile-action="sword">SWORD<small>Q</small></button>
-          <button type="button" data-mobile-action="dash">DASH<small>SHIFT</small></button>
-          <button type="button" data-mobile-action="build1">BUILD<small>1</small></button>
-          <button type="button" data-mobile-action="gadget1">GEAR<small>3</small></button>
+
+          <button
+            type="button"
+            data-mobile-action="jump"
+          >
+            JUMP
+            <small>SPACE</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="fire"
+          >
+            FIRE
+            <small>E</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="sword"
+          >
+            SWORD
+            <small>Q</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="dash"
+          >
+            DASH
+            <small>SHIFT</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="build1"
+          >
+            BUILD
+            <small>1</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="gadget1"
+          >
+            GEAR
+            <small>3</small>
+          </button>
+
         </div>
+
       </div>
+
+
+      <!-- INTERNAL GAME VALUES -->
 
       <span id="signalTotal" hidden></span>
       <i id="signalProgress" hidden></i>
@@ -164,105 +529,426 @@
       <span id="runTime" hidden></span>
       <span id="progressValue" hidden></span>
       <span id="missionNumber" hidden></span>
+
     </section>
 
-    <section id="intro" class="overlay intro">
-  
-      </section>
 
-    <section id="titlePanel" class="title-panel hidden" role="dialog" aria-modal="true" aria-labelledby="titlePanelHeading">
-      <div class="title-panel-card">
-        <button id="closeTitlePanel" class="title-panel-close" type="button" aria-label="Close panel">×</button>
-        <p id="titlePanelEyebrow" class="eyebrow"></p>
-        <h2 id="titlePanelHeading"></h2>
-        <div id="titlePanelContent"></div>
-      </div>
-    </section>
+    <!-- ===================================================
+         PAUSE MENU
+         =================================================== -->
 
-    <section id="relayInfoPanel" class="relay-info-panel hidden" role="dialog" aria-modal="true" aria-labelledby="relayInfoHeading">
-      <div class="relay-info-card">
-        <button class="relay-info-close" type="button" data-relay-close aria-label="Close">×</button>
-        <p id="relayInfoEyebrow" class="relay-info-eyebrow"></p>
-        <h2 id="relayInfoHeading"></h2>
-        <div id="relayInfoContent"></div>
-      </div>
-    </section>
+    <section
+      id="pauseMenu"
+      class="overlay hidden"
+      aria-hidden="true"
+    >
 
-    <section id="pauseMenu" class="overlay hidden">
       <div class="menu">
-        <header><span class="logo">R/</span><button class="close" type="button" data-close aria-label="Close game menu">×</button></header>
+
+        <header>
+
+          <span class="logo">
+            R/
+          </span>
+
+          <button
+            class="close"
+            type="button"
+            data-close
+            aria-label="Close game menu"
+          >
+            ×
+          </button>
+
+        </header>
+
+
         <div class="menu-grid">
+
           <aside>
-            <p class="eyebrow">COURIER TERMINAL</p>
-            <h2>KEEP THE<br><em>LINE OPEN.</em></h2>
+
+            <p class="eyebrow">
+              COURIER TERMINAL
+            </p>
+
+            <h2>
+              KEEP THE
+              <br>
+              <em>LINE OPEN.</em>
+            </h2>
+
             <nav>
-              <button class="tab active" type="button" data-tab="resume">RESUME</button>
-              <button class="tab" type="button" data-tab="missions">MISSIONS</button>
-              <button class="tab" type="button" data-tab="progress">PROGRESS</button>
-              <button class="tab" type="button" data-tab="settings">SETTINGS</button>
+
+              <button
+                class="tab active"
+                type="button"
+                data-tab="resume"
+              >
+                RESUME
+              </button>
+
+              <button
+                class="tab"
+                type="button"
+                data-tab="missions"
+              >
+                MISSIONS
+              </button>
+
+              <button
+                class="tab"
+                type="button"
+                data-tab="progress"
+              >
+                PROGRESS
+              </button>
+
+              <button
+                class="tab"
+                type="button"
+                data-tab="settings"
+              >
+                SETTINGS
+              </button>
+
             </nav>
+
           </aside>
+
+
           <section id="panelContent"></section>
+
         </div>
-        <footer><button id="returnTitle" class="secondary" type="button">RESTART BRIEFING</button></footer>
+
+
+        <footer>
+
+          <button
+            id="returnTitle"
+            class="secondary"
+            type="button"
+          >
+            RESTART BRIEFING
+          </button>
+
+        </footer>
+
       </div>
+
     </section>
 
-    <section id="finish" class="overlay hidden">
+
+    <!-- ===================================================
+         TITLE PANEL
+         =================================================== -->
+
+    <section
+      id="titlePanel"
+      class="title-panel hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titlePanelHeading"
+    >
+
+      <div class="title-panel-card">
+
+        <button
+          id="closeTitlePanel"
+          class="title-panel-close"
+          type="button"
+          aria-label="Close panel"
+        >
+          ×
+        </button>
+
+        <p
+          id="titlePanelEyebrow"
+          class="eyebrow"
+        ></p>
+
+        <h2 id="titlePanelHeading"></h2>
+
+        <div id="titlePanelContent"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         RELAY INFO PANEL
+         =================================================== -->
+
+    <section
+      id="relayInfoPanel"
+      class="relay-info-panel hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="relayInfoHeading"
+    >
+
+      <div class="relay-info-card">
+
+        <button
+          class="relay-info-close"
+          type="button"
+          data-relay-close
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+        <p
+          id="relayInfoEyebrow"
+          class="relay-info-eyebrow"
+        ></p>
+
+        <h2 id="relayInfoHeading"></h2>
+
+        <div id="relayInfoContent"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         FINISH
+         =================================================== -->
+
+    <section
+      id="finish"
+      class="overlay hidden"
+      aria-hidden="true"
+    >
+
       <div class="outcome">
-        <span class="outcome-mark">✓</span>
-        <p class="eyebrow">MISSION COMPLETE</p>
-        <h2>LINE<br><em>RESTORED.</em></h2>
-        <p id="finishLine">Awaiting relay status.</p>
+
+        <span class="outcome-mark">
+          ✓
+        </span>
+
+        <p class="eyebrow">
+          MISSION COMPLETE
+        </p>
+
+        <h2>
+          LINE
+          <br>
+          <em>RESTORED.</em>
+        </h2>
+
+        <p id="finishLine">
+          Awaiting relay status.
+        </p>
+
+
         <div class="reward">
-          <b id="finishXp">+120</b>
-          <span>MISSION XP EARNED</span>
+
+          <b id="finishXp">
+            +120
+          </b>
+
+          <span>
+            MISSION XP EARNED
+          </span>
+
+
           <div class="finish-summary">
-            <div class="finish-summary-line"><strong>SIGNALS</strong><i id="finishSignals">00 / 00 SIGNALS RECOVERED</i></div>
-            <div class="finish-summary-line"><strong>RATING</strong><small id="finishRating"></small></div>
-            <div class="finish-summary-line"><strong>SCORE</strong><small id="finishScore"></small></div>
-            <div class="finish-summary-line"><strong>TIME</strong><small id="finishTime"></small></div>
+
+            <div class="finish-summary-line">
+              <strong>SIGNALS</strong>
+              <i id="finishSignals">
+                00 / 00 SIGNALS RECOVERED
+              </i>
+            </div>
+
+            <div class="finish-summary-line">
+              <strong>RATING</strong>
+              <small id="finishRating"></small>
+            </div>
+
+            <div class="finish-summary-line">
+              <strong>SCORE</strong>
+              <small id="finishScore"></small>
+            </div>
+
+            <div class="finish-summary-line">
+              <strong>TIME</strong>
+              <small id="finishTime"></small>
+            </div>
+
           </div>
+
         </div>
+
+
         <div class="finish-actions">
-          <button id="again" class="primary" type="button">REPLAY RUN <b>↻</b></button>
-          <button id="nextMission" class="primary" type="button">NEXT MISSION</button>
-          <button id="finishTitle" class="text-button" type="button">RETURN TO TERMINAL</button>
+
+          <button
+            id="again"
+            class="primary"
+            type="button"
+          >
+            REPLAY RUN
+            <b>↻</b>
+          </button>
+
+          <button
+            id="nextMission"
+            class="primary"
+            type="button"
+          >
+            NEXT MISSION
+          </button>
+
+          <button
+            id="finishTitle"
+            class="text-button"
+            type="button"
+          >
+            RETURN TO TERMINAL
+          </button>
+
         </div>
+
       </div>
+
     </section>
 
-    <section id="gameOver" class="overlay hidden">
+
+    <!-- ===================================================
+         GAME OVER
+         =================================================== -->
+
+    <section
+      id="gameOver"
+      class="overlay hidden"
+      aria-hidden="true"
+    >
+
       <div class="outcome fail">
-        <span class="outcome-mark">×</span>
-        <p class="eyebrow">SIGNAL LOST</p>
-        <h2>RUN<br><em>INTERRUPTED.</em></h2>
-        <p id="failLine">The live barrier cut the delivery short.</p>
-        <button id="retry" class="primary" type="button">TRY AGAIN <b>↻</b></button>
-        <button id="failTitle" class="text-button" type="button">RETURN TO BRIEFING</button>
+
+        <span class="outcome-mark">
+          ×
+        </span>
+
+        <p class="eyebrow">
+          SIGNAL LOST
+        </p>
+
+        <h2>
+          RUN
+          <br>
+          <em>INTERRUPTED.</em>
+        </h2>
+
+        <p id="failLine">
+          The live barrier cut the delivery short.
+        </p>
+
+        <button
+          id="retry"
+          class="primary"
+          type="button"
+        >
+          TRY AGAIN
+          <b>↻</b>
+        </button>
+
+        <button
+          id="failTitle"
+          class="text-button"
+          type="button"
+        >
+          RETURN TO BRIEFING
+        </button>
+
       </div>
+
     </section>
 
-    <section id="levelUp" class="overlay hidden">
+
+    <!-- ===================================================
+         LEVEL UP
+         =================================================== -->
+
+    <section
+      id="levelUp"
+      class="overlay hidden"
+      aria-hidden="true"
+    >
+
       <div class="system-card">
-        <button id="closeLevelUp" class="close" type="button" aria-label="Close">×</button>
-        <p class="eyebrow">RANK UP</p>
+
+        <button
+          id="closeLevelUp"
+          class="close"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+        <p class="eyebrow">
+          RANK UP
+        </p>
+
         <b id="levelUpRank"></b>
+
         <span id="levelUpUnlock"></span>
+
       </div>
+
     </section>
 
-    <section id="abilityUnlock" class="overlay hidden">
+
+    <!-- ===================================================
+         ABILITY UNLOCK
+         =================================================== -->
+
+    <section
+      id="abilityUnlock"
+      class="overlay hidden"
+      aria-hidden="true"
+    >
+
       <div class="system-card">
-        <button id="closeAbilityUnlock" class="close" type="button" aria-label="Close">×</button>
-        <p class="eyebrow">NEW ABILITY UNLOCKED</p>
+
+        <button
+          id="closeAbilityUnlock"
+          class="close"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+        <p class="eyebrow">
+          NEW ABILITY UNLOCKED
+        </p>
+
         <b id="abilityName"></b>
+
         <span id="abilityControl"></span>
+
         <span id="abilityDetail"></span>
+
       </div>
+
     </section>
 
-    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <!-- ===================================================
+         TOAST
+         =================================================== -->
+
+    <div
+      id="toast"
+      class="toast"
+      aria-live="polite"
+    ></div>
+
   </main>
 
  <!-- Keep the first-load splash as a plain static script so itch.io can start it before the Vite module graph. -->
