@@ -38,6 +38,9 @@ jobs:
       - name: Run release hardening checks
         run: npm run test:release-hardening
 
+      - name: Run mobile runtime QA
+        run: npm run test:release-runtime-qa
+
       - name: Build production web game
         run: npm run build
 
