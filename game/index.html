@@ -36,12 +36,32 @@
   <!-- Keep the legacy DOM from flashing before the current Home module mounts. -->
  <style id="relay-critical-boot-style">
   /*
-   * The splash is the loading layer.
-   * The application itself must remain renderable so a delayed
-   * optional module or boot race cannot produce a permanent black screen.
+   * CLEAN HOME BOOT
+   * Home is the only visible surface on first paint.
+   * Gameplay and gameplay overlays become visible only after PLAY.
    */
-  #game{
-    visibility:visible;
+  body.home-v3-active #play,
+  body.home-v3-active #pauseMenu,
+  body.home-v3-active #titlePanel,
+  body.home-v3-active #relayInfoPanel,
+  body.home-v3-active #finish,
+  body.home-v3-active #gameOver,
+  body.home-v3-active #levelUp,
+  body.home-v3-active #abilityUnlock,
+  body.home-v3-active #toast,
+  body.home-v3-active #worldMap,
+  body.home-v3-active #preflight {
+    display:none !important;
+    visibility:hidden !important;
+    opacity:0 !important;
+    pointer-events:none !important;
+  }
+
+  body.home-v3-active #intro {
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:auto !important;
   }
 
   #relaySplash{
@@ -50,7 +70,7 @@
 </style>
 </head>
 
-<body>
+<body class="home-v3-active">
 
   <div id="relaySplash" class="relay-splash" role="status" aria-live="polite" aria-busy="true">
     <picture id="relaySplashPicture">
