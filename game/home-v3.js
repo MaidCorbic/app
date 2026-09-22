@@ -2794,8 +2794,13 @@ bindOnce(
   'click',
   event => {
     event.preventDefault();
-    event.stopImmediatePropagation();
+    event.stopPropagation();
 
+    /*
+     * The visible Home button is presentation only.
+     * Always forward to the original gameplay-owned #start.
+     * The deployment loader owns only the cinematic handoff.
+     */
     try {
       const loader = window.relayPlayDeploymentV1;
 
@@ -2806,12 +2811,8 @@ bindOnce(
           mobile: './assets/loadplaymobile.jpg',
 
           beforeRoute: async () => {
-            const target = document.querySelector(
-              'body > #game > div[hidden] #start'
-            );
-
-            if (target instanceof HTMLElement) {
-              HTMLElement.prototype.click.call(target);
+            if (sourceStart instanceof HTMLElement) {
+              HTMLElement.prototype.click.call(sourceStart);
             }
           }
         });
@@ -2819,16 +2820,12 @@ bindOnce(
         return;
       }
 
-      const target = document.querySelector(
-        'body > #game > div[hidden] #start'
-      );
-
-      if (target instanceof HTMLElement) {
-        HTMLElement.prototype.click.call(target);
+      if (sourceStart instanceof HTMLElement) {
+        HTMLElement.prototype.click.call(sourceStart);
       }
     } catch (error) {
       console.error(
-        '[RelayRunner] Deployment loader error:',
+        '[RelayRunner] Home Start handoff failed:',
         error
       );
     }

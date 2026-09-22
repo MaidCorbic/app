@@ -140,17 +140,13 @@ async function runMobileViewport(browser, viewport) {
       `Horizontal overflow detected at ${viewport.width}x${viewport.height}: ${initial.scrollWidth}px > ${initial.innerWidth}px`,
     );
 
-    if (viewport.orientation === 'portrait') {
-      assert.equal(initial.mobileControlsVisible, false, `Touch controls should be locked in portrait at ${viewport.width}x${viewport.height}`);
-      assert.equal(initial.pauseVisible, false, `Pause HUD should remain inaccessible while portrait lock is active at ${viewport.width}x${viewport.height}`);
-      assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
-      return;
-    }
-
+    // Phones are playable in both orientations. Portrait is not a dead-end:
+    // the same touch movement surface and six action buttons remain available.
     assert.equal(initial.briefingLock, false, `Gameplay briefing lock remained active at ${viewport.width}x${viewport.height}`);
-    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height}`);
-        assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible on phone at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.legacyMobileHud, false, `Legacy bottom PAUSE/SETTINGS HUD must not exist at ${viewport.width}x${viewport.height}`);
+    assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
 
     const controls = await page.evaluate(() => ({
       viewport: { width: window.innerWidth, height: window.innerHeight },
@@ -212,6 +208,13 @@ assertNoPairwiseOverlap(
   `Mobile action layout ${viewport.width}x${viewport.height}`,
 );
 
+    // Portrait is a fully playable phone mode. Validate the touch surface
+    // and action layout, then keep the deeper pause/settings/resume suite for
+    // landscape where the full HUD has room for those panels.
+    if (viewport.orientation === 'portrait') {
+      return;
+    }
+
     // The canonical in-game Pause control is #play #pause.
     // There is no mobile bottom PAUSE/SETTINGS HUD.
     await clickDom(page, '#play #pause');
@@ -221,18 +224,19 @@ assertNoPairwiseOverlap(
 
     await clickDom(page, '[data-pause-tab="settings"]');
     await page.waitForFunction(() => document.querySelector('.relay-cinematic-title')?.textContent?.trim() === 'OPTIONS');
+    await page.waitForFunction(() => document.querySelectorAll('[data-unified-toggle]').length >= 4);
     const settings = await page.evaluate(() => ({
       title: document.querySelector('.relay-cinematic-title')?.textContent?.trim() || '',
-      toggleCount: document.querySelectorAll('[data-unified-setting]').length,
+      toggleCount: document.querySelectorAll('[data-unified-toggle]').length,
       bodyOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
     }));
     assert.equal(settings.title, 'OPTIONS', `Settings panel failed to render at ${viewport.width}x${viewport.height}`);
     assert(settings.toggleCount >= 4, `Settings panel is incomplete at ${viewport.width}x${viewport.height}`);
     assert.equal(settings.bodyOverflow, false, `Settings created horizontal overflow at ${viewport.width}x${viewport.height}`);
 
-    const firstToggle = page.locator('[data-unified-setting]').first();
+    const firstToggle = page.locator('[data-unified-toggle]').first();
     const beforeToggle = await firstToggle.getAttribute('aria-pressed');
-    await clickDom(page, '[data-unified-setting]');
+    await clickDom(page, '[data-unified-toggle]');
     const afterToggle = await firstToggle.getAttribute('aria-pressed');
     assert.notEqual(beforeToggle, afterToggle, `Settings toggle did not react at ${viewport.width}x${viewport.height}`);
 

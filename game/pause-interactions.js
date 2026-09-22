@@ -19,22 +19,7 @@
          MOBILE PORTRAIT GUARD
          ========================================================= */
 
-      @media (pointer: coarse) and (orientation: portrait) {
-        html body.is-touch #cargoIntegrityV2,
-        html body.is-touch #play .hud-xp,
-       html body.is-touch #play #pause {
-          display: none !important;
-          visibility: hidden !important;
-          opacity: 0 !important;
-          pointer-events: none !important;
-        }
-
-        html body.is-touch .mobile-rotate-prompt.is-active {
-          display: flex !important;
-          visibility: visible !important;
-          opacity: 1 !important;
-        }
-      }
+      /* Portrait phones are fully playable now; no forced rotate lock. */
 
 
       /* =========================================================
@@ -391,10 +376,9 @@
        *
        * CSS decides whether it is visible in portrait.
        */
-      rotatePrompt.classList.toggle(
-        'is-active',
-        active
-      );
+      // Portrait and landscape are both supported. Keep the rotate prompt
+      // permanently inactive so it never blocks touch gameplay.
+      rotatePrompt.classList.remove('is-active');
     };
 
 
