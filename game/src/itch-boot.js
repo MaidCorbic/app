@@ -22,9 +22,19 @@ const optional = async (label, loader) => {
   }
 };
 
+const resetInitialPauseState = () => {
+  const pauseMenu = document.getElementById('pauseMenu');
+  if (!(pauseMenu instanceof HTMLElement)) return;
+
+  // The production entry must always open on Home, never inside the pause UI.
+  pauseMenu.classList.add('hidden');
+  pauseMenu.setAttribute('aria-hidden', 'true');
+};
+
 const boot = async () => {
   // Start the actual game first. This must never wait for cosmetic/UI extras.
   await import('./main.js');
+  resetInitialPauseState();
 
   // Presentation and enhancement layers are fail-soft by design.
   await optional('home-options', () => import('../home-options.js'));
@@ -43,6 +53,7 @@ const boot = async () => {
   await optional('cinematic-arrival', () => import('../cinematic-arrival-v2.js'));
   await optional('premium-finishing', () => import('../premium-finishing-pass-v1.js'));
   await optional('gameplay-core', () => import('../gameplay-core-v1.js'));
+  resetInitialPauseState();
 
   document.documentElement.dataset.relayBootComplete = '1';
   window.dispatchEvent(new CustomEvent('relay:boot-complete', {
