@@ -226,16 +226,16 @@ assertNoPairwiseOverlap(
     await page.waitForFunction(() => document.querySelector('.relay-cinematic-title')?.textContent?.trim() === 'OPTIONS');
     const settings = await page.evaluate(() => ({
       title: document.querySelector('.relay-cinematic-title')?.textContent?.trim() || '',
-      toggleCount: document.querySelectorAll('[data-unified-setting]').length,
+      toggleCount: document.querySelectorAll('[data-unified-toggle]').length,
       bodyOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
     }));
     assert.equal(settings.title, 'OPTIONS', `Settings panel failed to render at ${viewport.width}x${viewport.height}`);
     assert(settings.toggleCount >= 4, `Settings panel is incomplete at ${viewport.width}x${viewport.height}`);
     assert.equal(settings.bodyOverflow, false, `Settings created horizontal overflow at ${viewport.width}x${viewport.height}`);
 
-    const firstToggle = page.locator('[data-unified-setting]').first();
+    const firstToggle = page.locator('[data-unified-toggle]').first();
     const beforeToggle = await firstToggle.getAttribute('aria-pressed');
-    await clickDom(page, '[data-unified-setting]');
+    await clickDom(page, '[data-unified-toggle]');
     const afterToggle = await firstToggle.getAttribute('aria-pressed');
     assert.notEqual(beforeToggle, afterToggle, `Settings toggle did not react at ${viewport.width}x${viewport.height}`);
 
