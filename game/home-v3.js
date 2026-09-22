@@ -1,3 +1,5 @@
+import './home-v3.css';
+
 /* Home V3: presentation shell only; gameplay remains owned by main.js. */
 (() => {
   if (window.__relayHomeV3) return;
