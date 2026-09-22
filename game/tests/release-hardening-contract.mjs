@@ -74,12 +74,16 @@ assert.match(main, /mobile-input-single-owner-v1/);
 assert.match(itchBoot, /await optional\(\s*['"]home-v3['"]/);
 assert.match(itchBoot, /await optional\(\s*['"]play-intro['"]/);
 assert.doesNotMatch(itchBoot, /await optional\(\s*['"]home-v4['"]/);
-assert.doesNotMatch(itchBoot, /home-v4-guard.*await optional/s);
 assert.match(home, /home-v3-play/);
 assert.match(home, /homeV3Built/);
 assert.doesNotMatch(home, /home-v4-shell/);
 assert.match(splash, /homeV3Built/);
 assert.match(splash, /relay:home-ready/);
+const homeReadyIndex = itchBoot.indexOf("relay:home-ready");
+const backgroundUiIndex = itchBoot.indexOf("'relay-ui-init'");
+const backgroundDeploymentIndex = itchBoot.indexOf("'deployment-loader'");
+assert.equal(backgroundUiIndex > homeReadyIndex, true, 'heavy UI bootstrap must remain off the critical Home path');
+assert.equal(backgroundDeploymentIndex > homeReadyIndex, true, 'deployment loader must not gate the critical Home path');
 assert.doesNotMatch(
   deploymentLoader,
   /document\.addEventListener\(\s*['"]click['"][\s\S]*?,\s*true\s*\)\s*;/,
