@@ -14,6 +14,7 @@ const main = await read('src/main.js');
 const itchBoot = await read('src/itch-boot.js');
 const home = await read('home-v3.js');
 const deploymentLoader = await read('play-deployment-loader-v1.js');
+const playIntro = await read('play-intro-cinematic-v2.js');
 const mobileOwner = await read('src/systems/mobile-input-single-owner-v1.js');
 const uiInit = await read('relay-ui-init.js');
 const core = await read('src/systems/core-stability.js');
@@ -78,6 +79,10 @@ assert.doesNotMatch(
 assert.match(home, /const sourceStart = \$\('start'\);/);
 assert.match(home, /HTMLElement\.prototype\.click\.call\(sourceStart\)/);
 assert.doesNotMatch(home, /stopImmediatePropagation\(\)/);
+assert.match(
+  playIntro,
+  /window\.relayPlayDeploymentV1[\s\S]*?typeof window\.relayPlayDeploymentV1\.show === 'function'/
+);
 
 
 // V9 is the only mobile input owner. Legacy RunnerScene listeners are detached
