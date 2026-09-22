@@ -10,6 +10,13 @@
 
 import { RELAY_FAQ } from './faq.js';
 
+// Load the complete desktop Home presentation before buildHome() runs.
+// These layers are also imported by the optional finishing module, but Home
+// must not depend on that later module to receive its desktop composition.
+import './home-v5-refinement-v1.css';
+import './home-v5-composition-v1.css';
+import './home-v5-final-layout-v1.css';
+
 (() => {
   'use strict';
 
