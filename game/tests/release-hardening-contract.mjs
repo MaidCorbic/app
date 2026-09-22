@@ -13,6 +13,8 @@ const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
 const mobileOwner = await read('src/systems/mobile-input-single-owner-v1.js');
 const uiInit = await read('relay-ui-init.js');
+const homeV3 = await read('home-v3.js');
+const homeComposition = await read('home-v5-composition-v1.css');
 const core = await read('src/systems/core-stability.js');
 const cargo = await read('cargo-integrity-v2.js');
 const runner = await read('src/scenes/RunnerScene.js');
@@ -60,6 +62,17 @@ assert.match(arrivalCss, /\.arrival-mission[^}]*animation:arrivalMission \.6s 2\
 assert.match(config, /phaser-vendor/);
 assert.match(config, /strictExecutionOrder:\s*true/);
 assert.match(main, /mobile-input-single-owner-v1/);
+assert.match(homeV3, /import ['"]\.\/home-v5-refinement-v1\.css['"];?/);
+assert.match(homeV3, /import ['"]\.\/home-v5-composition-v1\.css['"];?/);
+assert.match(homeV3, /import ['"]\.\/home-v5-final-layout-v1\.css['"];?/);
+assert.match(homeV3, /bindOnce\(\s*start\s*,\s*['"]click['"]/);
+assert.match(homeV3, /beforeRoute:\s*async\s*\(\)\s*=>/);
+assert.match(homeV3, /body > #game > div\[hidden\] #start/);
+assert.match(homeV3, /bindOnce\(\s*continueButton\s*,\s*['"]click['"]/);
+assert.match(homeV3, /HTMLElement\.prototype\.click\.call\(\s*sourceContinue\s*\)/);
+assert.match(homeComposition, /\.home-v4-primary:active/);
+assert.match(homeComposition, /\.home-v4-secondary:active/);
+
 
 // V9 is the only mobile input owner. Legacy RunnerScene listeners are detached
 // at runtime instead of being allowed to compete with Phaser key/cursor state.
