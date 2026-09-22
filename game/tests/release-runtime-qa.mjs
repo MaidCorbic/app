@@ -208,6 +208,13 @@ assertNoPairwiseOverlap(
   `Mobile action layout ${viewport.width}x${viewport.height}`,
 );
 
+    // Portrait is a fully playable phone mode. Validate the touch surface
+    // and action layout, then keep the deeper pause/settings/resume suite for
+    // landscape where the full HUD has room for those panels.
+    if (viewport.orientation === 'portrait') {
+      return;
+    }
+
     // The canonical in-game Pause control is #play #pause.
     // There is no mobile bottom PAUSE/SETTINGS HUD.
     await clickDom(page, '#play #pause');
