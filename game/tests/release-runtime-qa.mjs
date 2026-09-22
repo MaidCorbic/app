@@ -140,17 +140,13 @@ async function runMobileViewport(browser, viewport) {
       `Horizontal overflow detected at ${viewport.width}x${viewport.height}: ${initial.scrollWidth}px > ${initial.innerWidth}px`,
     );
 
-    if (viewport.orientation === 'portrait') {
-      assert.equal(initial.mobileControlsVisible, false, `Touch controls should be locked in portrait at ${viewport.width}x${viewport.height}`);
-      assert.equal(initial.pauseVisible, false, `Pause HUD should remain inaccessible while portrait lock is active at ${viewport.width}x${viewport.height}`);
-      assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
-      return;
-    }
-
+    // Phones are playable in both orientations. Portrait is not a dead-end:
+    // the same touch movement surface and six action buttons remain available.
     assert.equal(initial.briefingLock, false, `Gameplay briefing lock remained active at ${viewport.width}x${viewport.height}`);
-    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height}`);
-        assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible on phone at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.legacyMobileHud, false, `Legacy bottom PAUSE/SETTINGS HUD must not exist at ${viewport.width}x${viewport.height}`);
+    assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
 
     const controls = await page.evaluate(() => ({
       viewport: { width: window.innerWidth, height: window.innerHeight },
