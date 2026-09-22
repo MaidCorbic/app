@@ -2946,3 +2946,46 @@
       none;
   }
 }
+
+/* =========================================================
+   FINAL TYPEWRITER READABILITY / MOBILE COLLISION FIX
+   ========================================================= */
+
+#relayPlayCinematic .ric-title-line{
+  display:block !important;
+  width:100%;
+  min-height:1.08em !important;
+  line-height:1.02 !important;
+  letter-spacing:-0.02em !important;
+  white-space:nowrap !important;
+  overflow:visible !important;
+  text-align:center !important;
+  font-kerning:none;
+  font-variant-ligatures:none;
+  text-rendering:geometricPrecision;
+}
+
+#relayPlayCinematic .ric-char{
+  display:inline-block !important;
+  position:relative;
+  vertical-align:baseline;
+  white-space:pre;
+  transform-origin:center bottom;
+}
+
+@media (max-width:700px){
+  #relayPlayCinematic .ric-title{
+    font-size:clamp(36px,10.5vw,72px) !important;
+    line-height:.92 !important;
+  }
+
+  #relayPlayCinematic .ric-title-line{
+    letter-spacing:-0.012em !important;
+    min-height:1.10em !important;
+    line-height:1.04 !important;
+  }
+
+  #relayPlayCinematic .ric-kicker{
+    letter-spacing:.18em !important;
+  }
+}
