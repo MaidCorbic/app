@@ -1780,7 +1780,7 @@ import { loadState, saveState } from './src/state.js';
     if (pause) {
       const host =
         pause.querySelector(
-          '#panelContent'
+          '#panelContent, .relay-pause-content'
         );
 
       if (host) {
