@@ -143,5 +143,7 @@ await assert.rejects(access(fileURLToPath(new URL('../vite.config.js', gameRoot)
 
 const actionCount = (index.match(/data-mobile-action=/g) || []).length;
 assert.equal(actionCount, 6, 'touch action surface must stay at exactly six controls');
+assert.match(index, /id="gameplayActionDock"/);
+assert.match(index, /id="settings"/);
 
 console.log('Release hardening contract: PASS');
