@@ -52814,27 +52814,14 @@ const landmarkRingA =
   // Prevents stomp / defeat / combat state changes.
   // ============================================================
 
-   if (
+  if (
     this.afkCryostasisActive
   ) {
     return;
   }
 
-  // ============================================================
-  // DASH / INVULNERABILITY
-  // The authoritative dash system grants a short i-frame window.
-  // Enemy contact must respect that state.
-  // ============================================================
-
-  if (
-    player.getData?.('invulnerable') === true ||
-    player.getData?.('dashing') === true
-  ) {
-    return;
-  }
-
-  // ============================================================
-  // SAFE START ZONE
+      // ============================================================
+      // SAFE START ZONE
       // Enemies can be seen here but cannot hurt the player.
       // ============================================================
       if (this.safeStartZoneActive) {
@@ -53109,11 +53096,11 @@ const landmarkRingA =
 
       plasma.destroy();
 
-          this.defeatEnemy(
+      this.defeatEnemy(
         enemy,
         'BLASTER',
         Math.max(
-          1,
+          999,
           power
         )
       );
@@ -53617,24 +53604,15 @@ const landmarkRingA =
         ? 12
         : 8;
 
-    this.addPolarity(
+  this.addPolarity(
     -polarityLoss,
     'damage'
   );
 
-  // Apply the actual health damage here.
-  // takeSciFiHit() is the direct damage entry point for
-  // enemies, eggs and comets.
-  this.health =
-    Math.max(
-      0,
-      this.health - 1
-    );
-
   // ============================================================
   // LOW HP · CRITICAL STATE
   // ============================================================
-
+    
   if (
     this.health === 1 &&
     !this.motionReduced
@@ -55383,167 +55361,165 @@ const landmarkRingA =
     '#8df4ff'
   );
 
+  if (
+    this.blasterCooldown > 0 ||
+    this.cinematicActive ||
+    this.finished ||
+    this.respawning ||
+    this.relayPuzzleActive ||
+    !this.player?.active ||
+    !this.player?.body
+  ) {
+    return;
   }
 
-  useBlaster() {
-    if (
-      this.blasterCooldown > 0 ||
-      this.cinematicActive ||
-      this.finished ||
-      this.respawning ||
-      this.relayPuzzleActive ||
-      !this.player?.active ||
-      !this.player?.body
-    ) {
-      return;
-    }
+  if (!this.ammo) {
+    const reloadPulse =
+      this.add
+        .circle(
+          this.player.x,
+          this.player.y,
+          13,
+          0xffcf82,
+          .28
+        )
+        .setDepth(12);
 
-    if (!this.ammo) {
-      const reloadPulse =
-        this.add
-          .circle(
-            this.player.x,
-            this.player.y,
-            13,
-            0xffcf82,
-            .28
-          )
-          .setDepth(12);
-
-      this.tweens.add({
-        targets: reloadPulse,
-        scale: 3.8,
-        alpha: 0,
-        duration: 300,
-        onComplete: () =>
-          reloadPulse.destroy()
-      });
-
-      this.playerCue(
-        'PLASMA RECHARGING',
-        '#ffcf82'
-      );
-
-      this.gadgetPulse(
-        0xffcf82,
-        9,
-        300
-      );
-
-      this.game.events.emit(
-        'feedback',
-        'empty'
-      );
-
-      return;
-    }
-
-    const direction =
-      this.player.flipX
-        ? -1
-        : 1;
-
-    const weapon =
-      this.loadout.weapon ||
-      'sidearm';
-
-    const spread =
-      weapon === 'scattergun'
-        ? [-150, 0, 150]
-        : [0];
-
-    spread.forEach(
-      vertical => {
-        const plasma =
-          this.plasma
-            .create(
-              this.player.x +
-                direction * 30,
-              this.player.y - 4,
-              'plasma'
-            )
-            .setDepth(12)
-            .setFlipX(
-              direction < 0
-            );
-
-        plasma.body
-          .setAllowGravity(false)
-          .setVelocity(
-            direction *
-              (
-                weapon ===
-                'pulse-rifle'
-                  ? 980
-                  : 840
-              ),
-            vertical
-          );
-
-        plasma.setData(
-          'power',
-          weapon ===
-          'pulse-rifle'
-            ? 2
-            : 1
-        );
-
-        this.time.delayedCall(
-          900,
-          () => plasma.destroy()
-        );
-      }
-    );
-
-    this.ammo--;
-
-    this.game.events.emit(
-      'ammo',
-      this.ammo /
-        this.ammoMax *
-        100
-    );
-
-    this.blasterCooldown =
-      weapon === 'scattergun'
-        ? 420
-        : 240;
+    this.tweens.add({
+      targets: reloadPulse,
+      scale: 3.8,
+      alpha: 0,
+      duration: 300,
+      onComplete: () =>
+        reloadPulse.destroy()
+    });
 
     this.playerCue(
-      weapon === 'sidearm'
-        ? 'PLASMA FIRE'
-        : weapon.toUpperCase(),
-      '#8df4ff'
+      'PLASMA RECHARGING',
+      '#ffcf82'
     );
 
-    if (!this.motionReduced) {
-      const muzzleFlash =
-        this.add
-          .circle(
-            this.player.x +
-              (this.player.flipX ? -30 : 30),
-            this.player.y - 4,
-            7,
-            0x8df4ff,
-            .34
-          )
-          .setDepth(13);
-
-      this.tweens.add({
-        targets: muzzleFlash,
-        scale: 2.6,
-        alpha: 0,
-        duration: 110,
-        ease: 'Quad.out',
-        onComplete: () =>
-          muzzleFlash.destroy()
-      });
-    }
+    this.gadgetPulse(
+    0xffcf82,
+    9,
+    300
+  );
 
     this.game.events.emit(
       'feedback',
-      'blaster_fire'
+      'empty'
     );
+
+    return;
+  }
+
+  const direction =
+    this.player.flipX
+      ? -1
+      : 1;
+
+  const weapon =
+    this.loadout.weapon ||
+    'sidearm';
+
+  const spread =
+    weapon === 'scattergun'
+      ? [-150, 0, 150]
+      : [0];
+
+  spread.forEach(
+    vertical => {
+      const plasma =
+        this.plasma
+          .create(
+            this.player.x +
+              direction * 30,
+            this.player.y - 4,
+            'plasma'
+          )
+          .setDepth(12)
+          .setFlipX(
+            direction < 0
+          );
+
+      plasma.body
+        .setAllowGravity(false)
+        .setVelocity(
+          direction *
+            (
+              weapon ===
+              'pulse-rifle'
+                ? 980
+                : 840
+            ),
+          vertical
+        );
+
+      plasma.setData(
+        'power',
+        weapon ===
+        'pulse-rifle'
+          ? 2
+          : 1
+      );
+
+      this.time.delayedCall(
+        900,
+        () => plasma.destroy()
+      );
+    }
+  );
+
+  this.ammo--;
+
+  this.game.events.emit(
+    'ammo',
+    this.ammo /
+      this.ammoMax *
+      100
+  );
+
+  this.blasterCooldown =
+    weapon === 'scattergun'
+      ? 420
+      : 240;
+
+  this.playerCue(
+    weapon === 'sidearm'
+      ? 'PLASMA FIRE'
+      : weapon.toUpperCase(),
+    '#8df4ff'
+  );
+
+    if (!this.motionReduced) {
+    const muzzleFlash =
+      this.add
+        .circle(
+          this.player.x +
+            (this.player.flipX ? -30 : 30),
+          this.player.y - 4,
+          7,
+          0x8df4ff,
+          .34
+        )
+        .setDepth(13);
+
+    this.tweens.add({
+      targets: muzzleFlash,
+      scale: 2.6,
+      alpha: 0,
+      duration: 110,
+      ease: 'Quad.out',
+      onComplete: () =>
+        muzzleFlash.destroy()
+    });
+  }
+    
+  this.game.events.emit(
+    'feedback',
+    'blaster_fire'
+  );
+
   }
 
   useSword() {
@@ -67251,10 +67227,7 @@ const y =
   this.wallJumpTimer =
     0;
 
-   this.firstPersonCamera =
-    false;
-
-  this.flightMode =
+  this.firstPersonCamera =
     false;
 
   if (
@@ -71084,9 +71057,6 @@ if (wasWaterDeath) {
     }
   );
 
-  const previousEmpTimer =
-    this.empTimer;
-
   this.empTimer =
     Math.max(
       0,
@@ -71117,10 +71087,7 @@ if (wasWaterDeath) {
         delta
     );
 
-  if (
-    previousEmpTimer > 0 &&
-    this.empTimer === 0
-  ) {
+  if (!this.empTimer) {
     this.enemies
       ?.getChildren()
       .forEach(
@@ -71843,7 +71810,7 @@ if (wasWaterDeath) {
     );
   }
 
-   if (
+  if (
     onGround &&
     (
       upgrades.includes(
@@ -72169,14 +72136,10 @@ if (wasWaterDeath) {
       canWallJump
     )
   ) {
-        if (canWallJump) {
+    if (canWallJump) {
       body.setVelocityX(
         445 *
           wallDirection
-      );
-
-      body.setVelocityY(
-        RUNNER_TUNING.jumpVelocity
       );
 
       this.wallJumpCooldown =
@@ -72405,12 +72368,9 @@ if (wasWaterDeath) {
         
       }
 
-const isDoubleJump =
-  !canWallJump &&
-  !onGround &&
-  this.jumpsUsed >= 1;
-
-if (!canWallJump) {
+  const isDoubleJump =
+    !onGround &&
+    this.jumpsUsed >= 1;
 
   if (isDoubleJump) {
     body.setVelocityY(
@@ -72991,7 +72951,8 @@ if (!canWallJump) {
     !this.wasGrounded &&
     this.fallSpeed > 80
   ) {
-   hardLanding =
+  hardLanding =
+    this.landingTimer > 0 &&
     this.fallSpeed > 260;
 
   if (this.graphicsLevel >= 1) {
@@ -74370,4 +74331,3 @@ if (!canWallJump) {
   }
       }
     }
-  }

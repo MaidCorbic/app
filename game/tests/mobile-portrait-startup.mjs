@@ -19,18 +19,13 @@ assert.doesNotMatch(
 );
 assert.match(
   splashLoader,
-  /const openHomeOnly = \(\) =>/,
-  'The splash must have one explicit recovery path to the Home screen.',
+  /homeV4Built/,
+  'The splash must wait for the rendered home screen.',
 );
 assert.match(
   splashLoader,
-  /html\.classList\.remove\(\s*'relay-booting'\s*\)/,
-  'The splash must release the first-paint boot lock.',
-);
-assert.match(
-  splashLoader,
-  /game\.style\.setProperty\(\s*'visibility',\s*'visible'/,
-  'The splash recovery path must reveal the game container.',
+  /await waitForHomeReady\(\);/,
+  'The splash exit must be gated by home readiness.',
 );
 
 console.log('Mobile portrait startup contract: PASS');

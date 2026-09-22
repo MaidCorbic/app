@@ -10,13 +10,6 @@
 
 import { RELAY_FAQ } from './faq.js';
 
-// Load the complete desktop Home presentation before buildHome() runs.
-// These layers are also imported by the optional finishing module, but Home
-// must not depend on that later module to receive its desktop composition.
-import './home-v5-refinement-v1.css';
-import './home-v5-composition-v1.css';
-import './home-v5-final-layout-v1.css';
-
 (() => {
   'use strict';
 
@@ -2794,13 +2787,8 @@ bindOnce(
   'click',
   event => {
     event.preventDefault();
-    event.stopPropagation();
+    event.stopImmediatePropagation();
 
-    /*
-     * The visible Home button is presentation only.
-     * Always forward to the original gameplay-owned #start.
-     * The deployment loader owns only the cinematic handoff.
-     */
     try {
       const loader = window.relayPlayDeploymentV1;
 
@@ -2811,8 +2799,12 @@ bindOnce(
           mobile: './assets/loadplaymobile.jpg',
 
           beforeRoute: async () => {
-            if (sourceStart instanceof HTMLElement) {
-              HTMLElement.prototype.click.call(sourceStart);
+            const target = document.querySelector(
+              'body > #game > div[hidden] #start'
+            );
+
+            if (target instanceof HTMLElement) {
+              HTMLElement.prototype.click.call(target);
             }
           }
         });
@@ -2820,12 +2812,16 @@ bindOnce(
         return;
       }
 
-      if (sourceStart instanceof HTMLElement) {
-        HTMLElement.prototype.click.call(sourceStart);
+      const target = document.querySelector(
+        'body > #game > div[hidden] #start'
+      );
+
+      if (target instanceof HTMLElement) {
+        HTMLElement.prototype.click.call(target);
       }
     } catch (error) {
       console.error(
-        '[RelayRunner] Home Start handoff failed:',
+        '[RelayRunner] Deployment loader error:',
         error
       );
     }

@@ -836,9 +836,9 @@
   }
 
   #play .hud-actions{
-    position:relative;
-    right:auto;
-    bottom:auto;
+    position:fixed;
+    right:10px;
+    bottom:12px;
     z-index:120;
   }
 
@@ -866,9 +866,8 @@
   }
 
   #play .hud-actions{
-    position:relative;
-    right:auto;
-    bottom:auto;
+    bottom:10px;
+    right:10px;
   }
 }
 

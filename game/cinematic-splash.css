@@ -3,7 +3,7 @@
    RELAY RUNNER — CINEMATIC TACTICAL SPLASH
    Loading presentation only. Runtime logic stays in splash-loader-v2.js.
    ========================================================= */
-
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&display=swap');
 
 .relay-splash,
 .relay-splash *{
@@ -53,6 +53,36 @@
   animation:rr-atmosphere 6s ease-in-out infinite alternate;
 }
 
+.relay-splash::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:5;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255,255,255,.018) 0 1px,
+      transparent 1px 5px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,.70),
+      transparent 15%,
+      transparent 85%,
+      rgba(0,0,0,.70)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.42),
+      transparent 24%,
+      transparent 68%,
+      rgba(0,0,0,.78)
+    );
+  opacity:.72;
+  mix-blend-mode:screen;
+}
+
 .relay-splash-art{
   position:absolute;
   inset:0;
@@ -80,7 +110,7 @@
 
 .relay-splash-brand{
   position:absolute;
-  z-index:10;
+  z-index:8;
   left:max(28px,env(safe-area-inset-left));
   top:max(28px,env(safe-area-inset-top));
   display:flex;
@@ -585,4 +615,45 @@ background:linear-gradient(
 @keyframes rr-energy-scan{
   from{transform:translateX(0)}
   to{transform:translateX(1100px)}
+}
+@media(min-width:701px){
+
+  .relay-splash .relay-boot-status-cell span{
+    font-family:"Orbitron",sans-serif !important;
+    font-size:9px !important;
+    font-weight:700 !important;
+    letter-spacing:.16em !important;
+  }
+
+  .relay-splash .relay-boot-status-cell b{
+    font-family:"Orbitron",sans-serif !important;
+    font-size:12px !important;
+    font-weight:800 !important;
+    letter-spacing:.10em !important;
+  }
+
+}
+.relay-splash .relay-boot-log{
+  font-family:"Orbitron",sans-serif !important;
+  font-size:8px !important;
+  line-height:1.4 !important;
+  letter-spacing:.10em !important;
+}
+/* =========================================================
+   RELAY NETWORK — ONLINE INDICATOR
+   ========================================================= */
+
+.relay-splash .relay-splash-network-status i{
+  background:#39ff88 !important;
+  box-shadow:
+    0 0 6px #39ff88,
+    0 0 14px #39ff88,
+    0 0 28px rgba(57,255,136,.85) !important;
+}
+
+.relay-splash .relay-splash-network-status{
+  color:#39ff88 !important;
+  text-shadow:
+    0 0 8px rgba(57,255,136,.45),
+    0 0 18px rgba(57,255,136,.20);
 }

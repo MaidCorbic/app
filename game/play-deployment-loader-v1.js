@@ -50,12 +50,10 @@
   let active = false;
   let serial = 0;
 
-// Stable URLs backed by the real JPEGs in game/assets/.
-  // vite.config.mjs copies these into dist/assets for production.
-  const DEFAULT_ASSETS = Object.freeze({
-    desktop: './assets/loadplay.jpg',
-    mobile: './assets/loadplaymobile.jpg',
-  });
+const DEFAULT_ASSETS = Object.freeze({
+  desktop: './assets/loadplay.jpg',
+  mobile: './assets/loadplaymobile.jpg',
+});
   const normalizeConfig = config => ({
     missionNumber: Math.max(1, Number(config?.missionNumber) || 1),
     desktop: config?.desktop || DEFAULT_ASSETS.desktop,
@@ -433,7 +431,26 @@ console.log('[RelayRunner] OVERLAY ZINDEX:', getComputedStyle(overlay).zIndex);
     defaultAssets: DEFAULT_ASSETS,
   });
 
-  // Home owns the visible Start button click.
-  // This module exposes the cinematic API only; it must not install a
-  // document-level capture listener that competes with Home's handler.
+   document.addEventListener('click', event => {
+    if (active) return;
+
+    const button = event.target.closest('#start');
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    void runDeployment({
+      missionNumber: 1,
+      beforeRoute: async () => {
+        const originalStart = document.querySelector(
+          'body > #game > div[hidden] #start'
+        );
+
+        if (originalStart instanceof HTMLElement) {
+          originalStart.click();
+        }
+      },
+    });
+  }, true);
 })();

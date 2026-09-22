@@ -75,8 +75,7 @@ import { installFlightVfx } from './systems/flight-vfx-v1.js';
 import { installEarthquakeEvents } from './systems/earthquake-events-v1.js';
 import { installEarthquakeCinematic } from './systems/earthquake-events-cinematic-v1.js';
 import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.js';
-// Water survival is owned by RunnerScene's authored water/shark system.
-// Do not install a second global water-death runtime.
+import { installWaterSurvival } from './systems/water-survival-v1.js';
 import { installForwardCollapseZone } from './systems/forward-collapse-zone-v1.js';
 
 
@@ -143,7 +142,6 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installEarthquakeCinematic(RunnerScene);
 
   installDroneStrikeRecovery(RunnerScene);
-
-  // RunnerScene owns authored water zones, shark timing and water recovery.
+  installWaterSurvival(RunnerScene);
   installForwardCollapseZone(RunnerScene);
 }

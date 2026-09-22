@@ -13,7 +13,7 @@ if (!RunnerScene.prototype.__relayCoreStabilityV1Installed) {
     window.__relaySurfaceGuardInstalled = true;
     const style = document.createElement('style');
     style.id = 'relay-phaser-surface-guard';
-    style.textContent = '#phaser-game{min-width:1px;min-height:1px}';
+    style.textContent = '#play.hidden{display:block!important} #phaser-game{min-width:1px;min-height:1px}';
     document.head.appendChild(style);
   }
   keepPhaserSurfaceMounted();
