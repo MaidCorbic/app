@@ -1424,6 +1424,15 @@ import {
 
   const openPause = tab => {
     try {
+      // Never allow the gameplay pause overlay to open while the itch Home
+      // screen is still booting. The guard is released once Home is mounted.
+      if (
+        window.__relayHomeBooting &&
+        !document.getElementById('intro')?.classList.contains('hidden')
+      ) {
+        return false;
+      }
+
       closeAllOverlays();
 
       ensurePauseShell();
