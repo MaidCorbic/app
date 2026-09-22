@@ -1,6 +1,7 @@
 import './systems/runtime-guard.js';
 import './systems/core-stability.js';
 import './systems/mobile-viewport-hardening.js';
+import './systems/performance-guard.js';
 import './systems/mobile-input-single-owner-v1.js';
 import './systems/mission-finish-recovery.js';
 import './systems/mission-results.js';
