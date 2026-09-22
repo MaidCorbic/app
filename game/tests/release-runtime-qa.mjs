@@ -273,7 +273,7 @@ try {
     await runMobileViewport(browser, viewport);
     console.log(`Release runtime QA passed: ${viewport.width}x${viewport.height} ${viewport.orientation}`);
   }
-  console.log('Release runtime QA passed: portrait orientation lock + landscape gameplay/pause/settings/resume with zero browser errors.');
+  console.log('Release runtime QA passed: portrait + landscape phone gameplay, pause/settings/resume with zero browser errors.');
 } finally {
   if (browser) await browser.close();
   server.kill();
