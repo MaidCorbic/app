@@ -22,6 +22,12 @@ const optional = async (label, loader) => {
   }
 };
 
+const setHomeBootGuard = enabled => {
+  window.__relayHomeBooting = Boolean(enabled);
+  document.documentElement.dataset.relayHomeBooting =
+    enabled ? '1' : '0';
+};
+
 const resetInitialPauseState = () => {
   const pauseMenu = document.getElementById('pauseMenu');
   if (!(pauseMenu instanceof HTMLElement)) return;
@@ -29,9 +35,18 @@ const resetInitialPauseState = () => {
   // The production entry must always open on Home, never inside the pause UI.
   pauseMenu.classList.add('hidden');
   pauseMenu.setAttribute('aria-hidden', 'true');
+  pauseMenu.classList.remove(
+    'relay-cinematic-overlay',
+    'relay-options-unified'
+  );
 };
 
 const boot = async () => {
+  // During production boot, Home owns the screen. The pause route becomes
+  // available only after the Home runtime is installed.
+  setHomeBootGuard(true);
+  resetInitialPauseState();
+
   // Start the actual game first. This must never wait for cosmetic/UI extras.
   await import('./main.js');
   resetInitialPauseState();
@@ -43,6 +58,13 @@ const boot = async () => {
   // Presentation and enhancement layers are fail-soft by design.
   await optional('home-options', () => import('../home-options.js'));
   await optional('home-v4', () => import('../home-v3.js'));
+
+  // Home is now mounted; release the one-time startup guard so gameplay
+  // hamburger pause can work normally.
+  if (document.getElementById('intro')?.classList.contains('home-v3')) {
+    setHomeBootGuard(false);
+  }
+
   await optional('home-v4-guard', () => import('../home-v3-guard.js'));
   await optional('home-v4-interaction', () => import('../home-v3-interaction-fix.js'));
   await optional('play-intro', () => import('../play-intro-cinematic-v2.js'));
@@ -56,6 +78,7 @@ const boot = async () => {
   await optional('cinematic-arrival', () => import('../cinematic-arrival-v2.js'));
   await optional('premium-finishing', () => import('../premium-finishing-pass-v1.js'));
   await optional('gameplay-core', () => import('../gameplay-core-v1.js'));
+  setHomeBootGuard(false);
   resetInitialPauseState();
 
   document.documentElement.dataset.relayBootComplete = '1';
