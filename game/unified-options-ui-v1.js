@@ -1855,12 +1855,11 @@ import { loadState, saveState } from './src/state.js';
 
     const tab =
       pause.querySelector(
-        '[data-tab="settings"]'
+        '[data-pause-tab="settings"], [data-tab="settings"]'
       );
 
-    return tab?.classList.contains(
-      'active'
-    )
+    return tab?.classList.contains('active') ||
+      tab?.classList.contains('is-active')
       ? pause
       : null;
   };
