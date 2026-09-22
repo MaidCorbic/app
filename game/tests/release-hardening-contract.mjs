@@ -13,6 +13,7 @@ const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
 const itchBoot = await read('src/itch-boot.js');
 const home = await read('home-v3.js');
+const splash = await read('splash-loader-v2.js');
 const deploymentLoader = await read('play-deployment-loader-v1.js');
 const playIntro = await read('play-intro-cinematic-v2.js');
 const unifiedOptions = await read('unified-options-ui-v1.js');
@@ -67,12 +68,18 @@ assert.match(config, /phaser-vendor/);
 assert.match(config, /strictExecutionOrder:\s*true/);
 assert.match(main, /mobile-input-single-owner-v1/);
 
-// Desktop Home wiring: deployment is loaded before Home and the deployment
-// module does not steal the visible Start click at document capture level.
-const deploymentIndex = itchBoot.indexOf("await optional('deployment-loader'");
-const homeIndex = itchBoot.indexOf("await optional('home-v4'");
-assert.equal(deploymentIndex >= 0, true, 'itch boot must load deployment loader');
-assert.equal(homeIndex > deploymentIndex, true, 'deployment loader must load before Home');
+// Final Home-first wiring: stable Home V3 owns the first visible surface.
+// Deployment loader remains available for mission-to-mission transitions,
+// but it no longer gates the initial Home.
+assert.match(itchBoot, /await optional\(\s*['"]home-v3['"]/);
+assert.match(itchBoot, /await optional\(\s*['"]play-intro['"]/);
+assert.doesNotMatch(itchBoot, /await optional\(\s*['"]home-v4['"]/);
+assert.doesNotMatch(itchBoot, /home-v4-guard.*await optional/s);
+assert.match(home, /home-v3-play/);
+assert.match(home, /homeV3Built/);
+assert.doesNotMatch(home, /home-v4-shell/);
+assert.match(splash, /homeV3Built/);
+assert.match(splash, /relay:home-ready/);
 assert.doesNotMatch(
   deploymentLoader,
   /document\.addEventListener\(\s*['"]click['"][\s\S]*?,\s*true\s*\)\s*;/,
@@ -80,7 +87,7 @@ assert.doesNotMatch(
 );
 assert.match(home, /const sourceStart = \$\('start'\);/);
 assert.match(home, /HTMLElement\.prototype\.click\.call\(sourceStart\)/);
-assert.match(
+assert.doesNotMatch(
   playIntro,
   /window\.relayPlayDeploymentV1[\s\S]*?typeof window\.relayPlayDeploymentV1\.show === 'function'/
 );
@@ -143,5 +150,8 @@ await assert.rejects(access(fileURLToPath(new URL('../vite.config.js', gameRoot)
 
 const actionCount = (index.match(/data-mobile-action=/g) || []).length;
 assert.equal(actionCount, 6, 'touch action surface must stay at exactly six controls');
+assert.doesNotMatch(home, /RUN THE SLEEPING CITY\. CARRY THE SIGNAL\. KEEP THE LINE ALIVE\. EVERY ROOFTOP IS PART OF THE NETWORK\./);
+assert.match(unifiedOptions, /GRAPHICS_QUALITY_DEFAULT[\s\S]*LOW/);
+assert.match(unifiedOptions, /GRAPHICS_QUALITY_KEY/);
 
 console.log('Release hardening contract: PASS');
