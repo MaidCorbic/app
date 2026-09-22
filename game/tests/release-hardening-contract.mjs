@@ -89,8 +89,8 @@ assert.doesNotMatch(
   /document\.addEventListener\(\s*['"]click['"][\s\S]*?,\s*true\s*\)\s*;/,
   'deployment loader must not own document-level capture clicks'
 );
-assert.match(home, /const sourceStart = \$\('start'\);/);
-assert.match(home, /HTMLElement\.prototype\.click\.call\(sourceStart\)/);
+assert.match(home, /nativeClick\(['"]#start['"]\)/);
+assert.match(home, /import ['"]\.\/home-v3\.css['"];/);
 assert.doesNotMatch(
   playIntro,
   /window\.relayPlayDeploymentV1[\s\S]*?typeof window\.relayPlayDeploymentV1\.show === 'function'/
