@@ -24,10 +24,17 @@
 
   const homeIsReady = () => {
     const home = document.getElementById('intro');
-    const start = home?.querySelector('#start');
+    const start = home?.querySelector(
+      '#start, [data-v3-play], [data-home-v3-action="start"]'
+    );
 
     return Boolean(
-      home?.dataset.homeV4Built === '1' &&
+      home &&
+      (
+        home.dataset.homeV3Built === '1' ||
+        home.dataset.homeV4Built === '1' ||
+        document.documentElement.dataset.relayHomeReady === '1'
+      ) &&
       start
     );
   };
@@ -44,37 +51,61 @@
     document.getElementById('game')?.classList.add('relay-boot-ready');
   };
 
-  const waitForHomeReady = ({ timeoutMs } = {}) => new Promise(resolve => {
-    const effectiveTimeout = timeoutMs ?? (
-      window.matchMedia?.('(pointer: coarse)').matches === true
-        ? 1200
-        : 4000
+  const waitForHomeReady = ({ timeoutMs = 1600 } = {}) => new Promise(resolve => {
+    if (homeIsReady()) {
+      resolve(true);
+      return;
+    }
+
+    let settled = false;
+    let timer = 0;
+
+    const finish = ready => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      window.removeEventListener(
+        'relay:home-ready',
+        onReady
+      );
+      resolve(ready);
+    };
+
+    const onReady = () => {
+      if (homeIsReady()) {
+        finish(true);
+      }
+    };
+
+    window.addEventListener(
+      'relay:home-ready',
+      onReady
     );
+
     const startedAt = performance.now();
 
     const check = () => {
       if (homeIsReady()) {
-        resolve(true);
+        finish(true);
         return;
       }
 
-      /*
-       * Do not leave mobile users behind an opaque splash forever. A slow
-       * device or a blocked optional module must not prevent the already
-       * mounted app from becoming visible. The normal path still waits for
-       * the home screen; this is only a bounded fail-open recovery path.
-       */
-      if (performance.now() - startedAt >= effectiveTimeout) {
+      if (performance.now() - startedAt >= timeoutMs) {
         revealHomeForRecovery();
-        console.warn('[RelaySplash V6] Home readiness timeout; opening app');
-        resolve(false);
+        console.warn(
+          '[RelaySplash V6] Home readiness timeout; opening app'
+        );
+        finish(false);
         return;
       }
 
-      window.setTimeout(check, 50);
+      window.setTimeout(check, 20);
     };
 
-    check();
+    timer = window.setTimeout(
+      () => check(),
+      20
+    );
   });
 
   /* ---------------------------------------------------------
@@ -439,7 +470,7 @@
       revealHomeForRecovery();
       splash.setAttribute('aria-busy', 'false');
       splash.remove();
-    }, 10000);
+    }, 3500);
 
     const clearFailOpenTimer = () =>
       window.clearTimeout(failOpenTimer);
@@ -594,82 +625,17 @@
     splash.setAttribute('aria-busy', 'true');
 
     /* =====================================================
-       BOOT SEQUENCE
+       HOME-FIRST REVEAL
        ===================================================== */
 
-    setProgress(0, 'INITIALIZING RELAY CORE');
-
-    await sleep(350);
-
-    await animateTo(
-      8,
-      'RELAY CORE INITIALIZING',
-      700
-    );
-
-    await sleep(300);
-
-    await animateTo(
-      26,
-      'INTERFACE CORE ONLINE',
-      850
-    );
-
-    console.log(
-      '[RelaySplash V6] 26% COMPLETE — CONTINUING'
-    );
-
-    await sleep(500);
-
-    await animateTo(
-      48,
-      'GAME SYSTEMS LOADING',
-      900
-    );
-
-    console.log(
-      '[RelaySplash V6] 48% COMPLETE — CONTINUING'
-    );
-
-    await sleep(500);
-
-    await animateTo(
-      68,
-      'WORLD NETWORK CONNECTING',
-      900
-    );
-
-    console.log(
-      '[RelaySplash V6] 68% COMPLETE — CONTINUING'
-    );
-
-    await sleep(500);
-
-    await animateTo(
-      86,
-      'HOME SYSTEMS READY',
-      800
-    );
-
-    console.log(
-      '[RelaySplash V6] 86% COMPLETE — CONTINUING'
-    );
-
-    await sleep(500);
-
-    await animateTo(
+    setProgress(
       100,
-      'RELAY ONLINE',
-      1000
+      'RELAY ONLINE'
     );
 
-    console.log(
-      '[RelaySplash V6] 100% COMPLETE'
-    );
-
-    /* Do not reveal an empty background while slower mobile devices are
-       still evaluating the home modules. */
-    await waitForHomeReady();
+    await waitForHomeReady({
+      timeoutMs: 1600
+    });
 
     /* =====================================================
        100% HOLD
@@ -682,7 +648,7 @@
     const isMobileBoot =
       window.matchMedia?.('(pointer: coarse)').matches === true;
 
-    await sleep(isMobileBoot ? 250 : 1200);
+    await sleep(100);
 
     /* =====================================================
        CINEMATIC EXIT
@@ -690,7 +656,7 @@
 
     splash.setAttribute('aria-busy', 'false');
 
-    const exitDuration = isMobileBoot ? '0.45s' : '1.2s';
+    const exitDuration = isMobileBoot ? '0.10s' : '0.14s';
 
     splash.style.transition =
       `opacity ${exitDuration} cubic-bezier(.16,1,.3,1),` +
@@ -704,7 +670,7 @@
     splash.style.filter =
       'brightness(1.2) saturate(1.08)';
 
-    await sleep(isMobileBoot ? 500 : 1250);
+    await sleep(150);
 
     splash.remove();
     document.getElementById('game')?.classList.add('relay-boot-ready');
