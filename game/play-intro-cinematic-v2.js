@@ -30,6 +30,8 @@
    - no gameplay ownership
    ========================================================= */
 
+import './play-intro-cinematic-v2.css';
+
 (() => {
   'use strict';
 
@@ -43,48 +45,8 @@
   }
 
   window.__relayPlayIntroV5 = true;
+  window.__relayPlayCinematicActive = false;
 
-
-  /* =========================================================
-     CSS
-     ========================================================= */
-
-  const CSS_HREF =
-    './play-intro-cinematic-v2.css';
-
-  if (
-    !document.querySelector(
-      'link[data-relay-play-intro-v5="true"]'
-    )
-  ) {
-
-    const css =
-      document.createElement('link');
-
-    css.rel =
-      'stylesheet';
-
-    css.href =
-      CSS_HREF;
-
-    css.dataset.relayPlayIntroV5 =
-      'true';
-
-    css.addEventListener(
-      'error',
-      () => {
-        console.warn(
-          '[Relay Play Cinematic V5] CSS could not be loaded:',
-          CSS_HREF
-        );
-      },
-      {
-        once: true
-      }
-    );
-
-    document.head.appendChild(css);
-  }
 
 
   /* =========================================================
@@ -1194,6 +1156,7 @@
 
     running =
       true;
+    window.__relayPlayCinematicActive = true;
 
 
     const state = {
@@ -1732,17 +1695,14 @@
 
 
     /*
-     * Do not intercept a deployment
-     * loader handoff.
+     * Deployment loader owns the Home Start cinematic.
+     * Do not install a second capture-phase owner for the
+     * same #start button. The synthetic authoritative click
+     * fired by the deployment handoff is also allowed through.
      */
     if (
       window.relayPlayDeploymentV1 &&
-      typeof
-        window.relayPlayDeploymentV1
-          .isActive ===
-        'function' &&
-      window.relayPlayDeploymentV1
-        .isActive()
+      typeof window.relayPlayDeploymentV1.show === 'function'
     ) {
       return;
     }
