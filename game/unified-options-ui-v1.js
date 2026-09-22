@@ -1724,7 +1724,7 @@ import { loadState, saveState } from './src/state.js';
             '#titlePanelContent'
           )
         : root.querySelector(
-            '#panelContent'
+            '#panelContent, .relay-pause-content'
           );
 
     if (!host) {
