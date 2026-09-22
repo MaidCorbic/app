@@ -433,30 +433,7 @@ console.log('[RelayRunner] OVERLAY ZINDEX:', getComputedStyle(overlay).zIndex);
     defaultAssets: DEFAULT_ASSETS,
   });
 
-   document.addEventListener('click', event => {
-    if (active) return;
-
-    const button = event.target.closest('#start');
-    if (!button) return;
-
-    // The cinematic owns the first Play click.
-    // After the cinematic releases the button, this loader takes over.
-    if (window.__relayPlayCinematicActive === true) return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    void runDeployment({
-      missionNumber: 1,
-      beforeRoute: async () => {
-        const originalStart = document.querySelector(
-          'body > #game > div[hidden] #start'
-        );
-
-        if (originalStart instanceof HTMLElement) {
-          originalStart.click();
-        }
-      },
-    });
-  }, true);
+  // Home owns the visible Start button click.
+  // This module exposes the cinematic API only; it must not install a
+  // document-level capture listener that competes with Home's handler.
 })();
