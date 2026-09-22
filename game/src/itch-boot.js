@@ -43,11 +43,6 @@ const boot = async () => {
   resetInitialPauseState();
 
   await optional(
-    'relay-ui-init',
-    () => import('../relay-ui-init.js')
-  );
-
-  await optional(
     'home-v3',
     () => import('../home-v3.js')
   );
@@ -74,6 +69,11 @@ const boot = async () => {
    * Preserve the existing dependency order, but do not block Home.
    */
   void (async () => {
+    await optional(
+      'relay-ui-init',
+      () => import('../relay-ui-init.js')
+    );
+
     await optional(
       'deployment-loader',
       () => import('../play-deployment-loader-v1.js')
