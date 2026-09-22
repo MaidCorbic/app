@@ -25,8 +25,7 @@ const core = await read('src/systems/core-stability.js');
 const cargo = await read('cargo-integrity-v2.js');
 const runner = await read('src/scenes/RunnerScene.js');
 const state = await read('src/state.js');
-const unifiedBridge = await read('unified-cinematic-ui-bridge-v1.js');
-const performanceGuard = await read('src/systems/performance-guard.js');
+
 const factionDialogue = await read('src/systems/enemy-dialogue-v1.js');
 
 assert.equal(packageJson.scripts['test:final-stability']?.length > 0, true, 'final stability suite must remain wired');
