@@ -11,6 +11,12 @@ const arrivalCss = await read('cinematic-arrival-v2.css');
 const config = await read('vite.config.mjs');
 const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
+const itchBoot = await read('src/itch-boot.js');
+const home = await read('home-v3.js');
+const deploymentLoader = await read('play-deployment-loader-v1.js');
+const playIntro = await read('play-intro-cinematic-v2.js');
+const unifiedOptions = await read('unified-options-ui-v1.js');
+const unifiedCinematic = await read('unified-cinematic-ui-v1.js');
 const mobileOwner = await read('src/systems/mobile-input-single-owner-v1.js');
 const uiInit = await read('relay-ui-init.js');
 const core = await read('src/systems/core-stability.js');
@@ -44,8 +50,10 @@ assert.match(config, /export default defineConfig/);
 assert.doesNotMatch(config, /patch(DeathReason|InitialSpawnShield|CheckpointCollectibles|RespawnTransientState|SeasonalProgression|SpecialEventCreditReward)/);
 assert.doesNotMatch(config, /relay-(death-reason|initial-spawn-shield|checkpoint-collectibles|respawn-transient-state|cargo-state-import|runner-zoom-stability)-fix/);
 assert.doesNotMatch(config, /relayTransform\(/, 'Vite config must not rewrite gameplay source');
-assert.match(index, /<script type="module" src="\.\/cinematic-arrival-v2\.js"><\/script>/);
-assert.doesNotMatch(index, /<script src=["']\.\/cinematic-arrival-v2\.js["']/);
+assert.match(index, /<script type="module" src="\.\/src\/itch-boot\.js"><\/script>/);
+assert.doesNotMatch(index, /<script[^>]+src=["']\/src\//, 'itch HTML must not contain root-absolute module URLs');
+assert.match(index, /<script(?:\s+defer)? src=["']\.\/splash-loader-v2\.js["']><\/script>/, 'itch splash bootstrap must load as a plain static script');
+assert.match(config, /splash-loader-v2\.js/, 'Vite build must copy the splash bootstrap into dist');
 assert.doesNotMatch(index, /href=["']mobile-viewport\.css["']/);
 assert.doesNotMatch(arrival, /^import ['"]\.\/canonical-ui-v1\.css['"];?$/m, 'cinematic arrival must not own canonical UI CSS');
 assert.match(arrival, /^import ['"]\.\/cinematic-arrival-v2\.css['"];?$/m);
@@ -59,12 +67,51 @@ assert.match(config, /phaser-vendor/);
 assert.match(config, /strictExecutionOrder:\s*true/);
 assert.match(main, /mobile-input-single-owner-v1/);
 
+// Desktop Home wiring: deployment is loaded before Home and the deployment
+// module does not steal the visible Start click at document capture level.
+const deploymentIndex = itchBoot.indexOf("await optional('deployment-loader'");
+const homeIndex = itchBoot.indexOf("await optional('home-v4'");
+assert.equal(deploymentIndex >= 0, true, 'itch boot must load deployment loader');
+assert.equal(homeIndex > deploymentIndex, true, 'deployment loader must load before Home');
+assert.doesNotMatch(
+  deploymentLoader,
+  /document\.addEventListener\(\s*['"]click['"][\s\S]*?,\s*true\s*\)\s*;/,
+  'deployment loader must not own document-level capture clicks'
+);
+assert.match(home, /const sourceStart = \$\('start'\);/);
+assert.match(home, /HTMLElement\.prototype\.click\.call\(sourceStart\)/);
+assert.match(
+  playIntro,
+  /window\.relayPlayDeploymentV1[\s\S]*?typeof window\.relayPlayDeploymentV1\.show === 'function'/
+);
+assert.match(
+  unifiedOptions,
+  /#pauseMenu \[data-pause-tab="settings"\], #pauseMenu \[data-tab="settings"\]/
+);
+assert.match(
+  unifiedOptions,
+  /#panelContent, \.relay-pause-content/
+);
+assert.match(
+  unifiedOptions,
+  /\[data-pause-tab="settings"\], \[data-tab="settings"\]/
+);
+assert.match(
+  unifiedOptions,
+  /classList\.contains\('is-active'\)/
+);
+assert.match(
+  unifiedCinematic,
+  /data-unified-setting="\$\{key\}"[\s\S]*data-unified-toggle="\$\{key\}"/
+);
+
+
 // V9 is the only mobile input owner. Legacy RunnerScene listeners are detached
 // at runtime instead of being allowed to compete with Phaser key/cursor state.
-assert.match(mobileOwner, /window\.addEventListener\('relay:runner-scene-ready'/);
+assert.match(mobileOwner, /window\s*\.addEventListener\s*\(\s*['"]relay:runner-scene-ready['"]/);
 assert.match(mobileOwner, /detachLegacyRunnerInput/);
-assert.match(mobileOwner, /events\.off\('mobile-action'/);
-assert.match(mobileOwner, /events\.off\('mobile-move'/);
+assert.match(mobileOwner, /events\s*\.off\s*\(\s*['"]mobile-action['"]/);
+assert.match(mobileOwner, /events\s*\.off\s*\(\s*['"]mobile-move['"]/);
 assert.match(mobileOwner, /window\.\__relayMobileInputSingleOwnerV9/);
 
 // RunnerScene stability behavior is source-owned by the runtime authority.
@@ -96,5 +143,7 @@ await assert.rejects(access(fileURLToPath(new URL('../vite.config.js', gameRoot)
 
 const actionCount = (index.match(/data-mobile-action=/g) || []).length;
 assert.equal(actionCount, 6, 'touch action surface must stay at exactly six controls');
+assert.match(index, /id="gameplayActionDock"/);
+assert.match(index, /id="settings"/);
 
 console.log('Release hardening contract: PASS');

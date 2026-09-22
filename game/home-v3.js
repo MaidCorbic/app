@@ -10,6 +10,13 @@
 
 import { RELAY_FAQ } from './faq.js';
 
+// Load the complete desktop Home presentation before buildHome() runs.
+// These layers are also imported by the optional finishing module, but Home
+// must not depend on that later module to receive its desktop composition.
+import './home-v5-refinement-v1.css';
+import './home-v5-composition-v1.css';
+import './home-v5-final-layout-v1.css';
+
 (() => {
   'use strict';
 
@@ -3352,14 +3359,12 @@ import { RELAY_FAQ } from './faq.js';
       }
     );
 
-    /* =========================================================
-       CONTINUE
-       ========================================================= */
-
-    const continueButton =
-      shell.querySelector(
-        '#continue'
-      );
+          beforeRoute: async () => {
+            if (sourceStart instanceof HTMLElement) {
+              HTMLElement.prototype.click.call(sourceStart);
+            }
+          }
+        });
 
     const syncContinue = () => {
       if (
@@ -3368,12 +3373,13 @@ import { RELAY_FAQ } from './faq.js';
         return;
       }
 
-      continueButton.classList.remove(
-        'hidden'
-      );
-
-      continueButton.removeAttribute(
-        'hidden'
+      if (sourceStart instanceof HTMLElement) {
+        HTMLElement.prototype.click.call(sourceStart);
+      }
+    } catch (error) {
+      console.error(
+        '[RelayRunner] Home Start handoff failed:',
+        error
       );
 
       continueButton.style.setProperty(

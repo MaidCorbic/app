@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const LEGACY_TEXT_ASSETS = ['campaign-v2.css', 'gameplay-core-v1.css', 'world-atmosphere.css'];
+const LEGACY_TEXT_ASSETS = ['campaign-v2.css', 'gameplay-core-v1.css', 'world-atmosphere.css', 'splash-loader-v2.js'];
 const LEGACY_BINARY_ASSETS = [
   'assets/loading.jpg',
   'assets/loading-landscape.jpg',
@@ -47,6 +47,12 @@ function relayLegacyAssetAliases() {
         const destination = path.join(legacyDir, relativePath);
         fs.mkdirSync(path.dirname(destination), { recursive: true });
         fs.copyFileSync(source, destination);
+
+        // Dynamic runtime loaders use stable /assets/... URLs.
+        // Keep the real source image available there too instead of relying
+        // on Vite to discover a string URL at runtime.
+        const stableAssetDestination = path.join(bundleAssetsDir, path.basename(relativePath));
+        fs.copyFileSync(source, stableAssetDestination);
       }
       const favicon = Buffer.from(FAVICON_ICO_BASE64, 'base64');
       fs.writeFileSync(path.join(outDir, 'favicon.ico'), favicon);
@@ -122,6 +128,8 @@ function relayExplicitRunnerSceneBinding() {
 }
 
 export default defineConfig({
+  // itch.io hosts the game inside a subdirectory, so production URLs must be relative.
+  base: './',
   server: {
     host: '0.0.0.0',
     port: 3000,

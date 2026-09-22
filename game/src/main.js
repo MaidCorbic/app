@@ -1,3 +1,11 @@
+import './systems/runtime-guard.js';
+import './systems/core-stability.js';
+import './systems/mobile-viewport-hardening.js';
+import './systems/mobile-input-single-owner-v1.js';
+import './systems/mission-finish-recovery.js';
+import './systems/mission-results.js';
+import './systems/mission-mastery.js';
+import './systems/enemy-alert.js';
 import Phaser from 'phaser';
 import { missions } from './missions.js';
 import { contracts } from './contracts.js';
@@ -829,7 +837,6 @@ function toast(text) {
     1700
   );
 }
-
 
 function nextMissionIndex() {
   const index =

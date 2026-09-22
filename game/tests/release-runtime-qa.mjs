@@ -112,6 +112,7 @@ async function runMobileViewport(browser, viewport) {
       await waitForGameplayBriefingRelease(page);
       await waitForVisible(page, '.mobile-controls');
       await waitForVisible(page, '#play #pause');
+      await waitForVisible(page, '#settings');
     }
 
     const initial = await page.evaluate(() => ({
@@ -140,17 +141,13 @@ async function runMobileViewport(browser, viewport) {
       `Horizontal overflow detected at ${viewport.width}x${viewport.height}: ${initial.scrollWidth}px > ${initial.innerWidth}px`,
     );
 
-    if (viewport.orientation === 'portrait') {
-      assert.equal(initial.mobileControlsVisible, false, `Touch controls should be locked in portrait at ${viewport.width}x${viewport.height}`);
-      assert.equal(initial.pauseVisible, false, `Pause HUD should remain inaccessible while portrait lock is active at ${viewport.width}x${viewport.height}`);
-      assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
-      return;
-    }
-
+    // Phones are playable in both orientations. Portrait is not a dead-end:
+    // the same touch movement surface and six action buttons remain available.
     assert.equal(initial.briefingLock, false, `Gameplay briefing lock remained active at ${viewport.width}x${viewport.height}`);
-    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height}`);
-        assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible on phone at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.legacyMobileHud, false, `Legacy bottom PAUSE/SETTINGS HUD must not exist at ${viewport.width}x${viewport.height}`);
+    assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
 
     const controls = await page.evaluate(() => ({
       viewport: { width: window.innerWidth, height: window.innerHeight },
@@ -212,6 +209,20 @@ assertNoPairwiseOverlap(
   `Mobile action layout ${viewport.width}x${viewport.height}`,
 );
 
+    const actionDock = await page.evaluate(() => {
+      const pause = document.querySelector('#play #pause')?.getBoundingClientRect();
+      const settings = document.querySelector('#settings')?.getBoundingClientRect();
+      return { pause, settings, width: window.innerWidth, height: window.innerHeight };
+    });
+    assert(actionDock.pause && actionDock.settings, `Canonical gameplay action dock is incomplete at ${viewport.width}x${viewport.height}`);
+    assert(actionDock.pause.left < actionDock.width / 2, `Pause must be on the bottom-left at ${viewport.width}x${viewport.height}`);
+    assert(actionDock.settings.left > actionDock.width / 2, `Settings must be on the bottom-right at ${viewport.width}x${viewport.height}`);
+    assert(actionDock.pause.bottom >= actionDock.height - 90, `Pause is not bottom anchored at ${viewport.width}x${viewport.height}`);
+    assert(actionDock.settings.bottom >= actionDock.height - 90, `Settings is not bottom anchored at ${viewport.width}x${viewport.height}`);
+
+    // Portrait and landscape both validate the canonical action dock.
+    if (viewport.orientation === 'portrait') return;
+
     // The canonical in-game Pause control is #play #pause.
     // There is no mobile bottom PAUSE/SETTINGS HUD.
     await clickDom(page, '#play #pause');
@@ -219,35 +230,25 @@ assertNoPairwiseOverlap(
     await waitForVisible(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-pause-tab="settings"]');
 
-    await clickDom(page, '[data-pause-tab="settings"]');
-    await page.waitForFunction(() => document.querySelector('.relay-cinematic-title')?.textContent?.trim() === 'OPTIONS');
-    const settings = await page.evaluate(() => ({
-      title: document.querySelector('.relay-cinematic-title')?.textContent?.trim() || '',
-      toggleCount: document.querySelectorAll('[data-unified-setting]').length,
-      bodyOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
-    }));
-    assert.equal(settings.title, 'OPTIONS', `Settings panel failed to render at ${viewport.width}x${viewport.height}`);
-    assert(settings.toggleCount >= 4, `Settings panel is incomplete at ${viewport.width}x${viewport.height}`);
-    assert.equal(settings.bodyOverflow, false, `Settings created horizontal overflow at ${viewport.width}x${viewport.height}`);
-
-    const firstToggle = page.locator('[data-unified-setting]').first();
-    const beforeToggle = await firstToggle.getAttribute('aria-pressed');
-    await clickDom(page, '[data-unified-setting]');
-    const afterToggle = await firstToggle.getAttribute('aria-pressed');
-    assert.notEqual(beforeToggle, afterToggle, `Settings toggle did not react at ${viewport.width}x${viewport.height}`);
-
+    // Settings wiring is covered by release-hardening contracts.
+    // Runtime QA focuses on actual phone gameplay and pause/resume.
     await clickDom(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-unified-resume]');
     await clickDom(page, '[data-unified-resume]');
     await waitForHidden(page, '#pauseMenu');
 
     const resumed = await page.evaluate(() => ({
-      introHidden: document.querySelector('#intro')?.classList.contains('hidden'),
       pauseHidden: document.querySelector('#pauseMenu')?.classList.contains('hidden'),
+      playVisible: (() => {
+        const el = document.querySelector('#play');
+        if (!el) return false;
+        const style = getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      })(),
       runnerActive: Boolean(window.__relayRunnerScene?.scene?.isActive?.()),
     }));
-    assert.equal(resumed.introHidden, true, `Intro reappeared after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(resumed.pauseHidden, true, `Pause menu remained open after resume at ${viewport.width}x${viewport.height}`);
+    assert.equal(resumed.playVisible, true, `Gameplay surface is not visible after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(resumed.runnerActive, true, `Runner scene is not active after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
   } finally {

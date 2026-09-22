@@ -411,8 +411,9 @@
 
       </header>
 
-
-      <!-- WORLD MARKER -->
+      <div id="gameplayActionDock" class="gameplay-action-dock" aria-label="Gameplay actions">
+        <button id="settings" class="gameplay-action-button" type="button" aria-label="Open settings">⚙</button>
+      </div>
 
       <div class="world-marker">
 
@@ -950,160 +951,9 @@
 
   </main>
 
+ <!-- Keep the first-load splash as a plain static script so itch.io can start it before the Vite module graph. -->
+ <script defer src="./splash-loader-v2.js"></script>
 
-  <!-- =====================================================
-       BOOT
-       ===================================================== -->
-
-  <script
-    type="module"
-    src="./splash-loader-v2.js"
-  ></script>
-
-
-  <!-- =====================================================
-       HOME
-       ===================================================== -->
-
-  <script
-    type="module"
-    src="./home-options.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./home-v3.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./home-v3-guard.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./home-v3-interaction-fix.js"
-  ></script>
-
-
-  <!-- =====================================================
-       CORE SYSTEMS
-       ===================================================== -->
-
-  <script
-    type="module"
-    src="./src/systems/runtime-guard.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./src/systems/core-stability.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./src/systems/mobile-viewport-hardening.js"
-  ></script>
-
-
-  <!-- =====================================================
-       MAIN GAME
-       ===================================================== -->
-
-  <script
-    type="module"
-    src="./src/main.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./src/systems/mobile-input-single-owner-v1.js"
-  ></script>
-
-
-  <!-- =====================================================
-       MISSION SYSTEMS
-       ===================================================== -->
-
-  <script
-    type="module"
-    src="./src/systems/mission-finish-recovery.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./src/systems/mission-results.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./src/systems/mission-mastery.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./src/systems/enemy-alert.js"
-  ></script>
-
-
-  <!-- =====================================================
-       UI / PROFILE
-       ===================================================== -->
-
-  <script
-    type="module"
-    src="./menu-music.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./player-profile-v1.js"
-  ></script>
-
-
-  <!-- =====================================================
-       PAUSE
-       ===================================================== -->
-
-  <script
-    type="module"
-    src="./pause-interactions.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./pause-final-polish-v1.js"
-  ></script>
-
-
-  <!-- =====================================================
-       WORLD / GAMEPLAY
-       ===================================================== -->
-
-  <script
-    type="module"
-    src="./relay-ui-init.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./world-interaction-v1.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./gameplay-touch-lock.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./premium-finishing-pass-v1.js"
-  ></script>
-
-  <script
-    type="module"
-    src="./gameplay-core-v1.js"
-  ></script>
-
+<script type="module" src="./src/itch-boot.js"></script>
 </body>
 </html>

@@ -1356,3 +1356,30 @@ if (homeAction && homeVisible()) {
 
 }
 )();
+
+
+// Canonical gameplay Settings action. Settings remains owned by the existing
+// unified Options UI and is opened through the Pause menu tab.
+(() => {
+  if (window.__relayCanonicalSettingsActionV1) return;
+  window.__relayCanonicalSettingsActionV1 = true;
+  const openSettings = (event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const pause = document.getElementById('pause');
+    if (!pause) return;
+    pause.click();
+    window.setTimeout(() => {
+      const tab = document.querySelector('#pauseMenu [data-pause-tab="settings"], #pauseMenu [data-tab="settings"]');
+      if (tab instanceof HTMLElement) tab.click();
+    }, 0);
+  };
+  const bind = () => {
+    const button = document.getElementById('settings');
+    if (!(button instanceof HTMLElement) || button.dataset.bound === '1') return;
+    button.dataset.bound = '1';
+    button.addEventListener('click', openSettings);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, {once:true});
+  else bind();
+})();

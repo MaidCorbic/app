@@ -3,10 +3,9 @@
    FINAL HOME OWNER
 
    FINAL ORDER:
-   1. OPTIONS
-   2. UPDATE
-   3. FAQ
-   4. EXIT
+   1. UPDATE
+   2. FAQ
+   3. EXIT
 
    ONE HOME MENU ONLY.
    ========================================================= */
@@ -137,7 +136,6 @@
        ------------------------------------------------------- */
 
     const legacySelectors = [
-      '[data-v3-options]',
       '[data-v3-update]',
       '[data-v3-faq]',
       '[data-v3-exit]',
@@ -198,17 +196,6 @@
 
     makeHomeButton(
       side,
-      'options',
-      'OPTIONS',
-      'SETTINGS · AUDIO · DISPLAY',
-      () => {
-        /* Options belongs exclusively to unified-options-ui-v1. */
-        nativeClick('[data-title-panel="controls"]');
-      }
-    );
-
-    makeHomeButton(
-      side,
       'update',
       'UPDATE',
       'LATEST PATCHES · LIVE',
@@ -265,7 +252,7 @@
 
     console.info(
       '[relay-final-layout-v2] FINAL:',
-      'OPTIONS → UPDATE → FAQ → EXIT'
+      'UPDATE → FAQ → EXIT'
     );
   };
 
@@ -595,11 +582,10 @@
       );
 
     const correct =
-      buttons.length === 4 &&
-      buttons[0]?.dataset.finalHome === 'options' &&
-      buttons[1]?.dataset.finalHome === 'update' &&
-      buttons[2]?.dataset.finalHome === 'faq' &&
-      buttons[3]?.dataset.finalHome === 'exit';
+      buttons.length === 3 &&
+      buttons[0]?.dataset.finalHome === 'update' &&
+      buttons[1]?.dataset.finalHome === 'faq' &&
+      buttons[2]?.dataset.finalHome === 'exit';
 
     if (!correct) {
       installHome();

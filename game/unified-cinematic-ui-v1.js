@@ -242,6 +242,7 @@ import {
         type="button"
         class="relay-ui-toggle ${enabled ? 'is-on' : ''}"
         data-unified-setting="${key}"
+        data-unified-toggle="${key}"
         aria-pressed="${enabled}"
       >
         ${enabled ? 'ON' : 'OFF'}
@@ -1922,7 +1923,7 @@ import {
 
     const setting =
       target.closest(
-        '[data-unified-setting]'
+        '[data-unified-setting],[data-unified-toggle]'
       );
 
     if (setting) {
