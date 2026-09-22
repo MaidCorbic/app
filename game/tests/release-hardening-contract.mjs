@@ -105,6 +105,24 @@ assert.match(
   /data-unified-setting="\$\{key\}"[\s\S]*data-unified-toggle="\$\{key\}"/
 );
 
+assert.match(
+  unifiedCinematic,
+  /const openPause = tab =>[\s\S]*?const intro = \$\('intro'\);[\s\S]*?return false;/
+);
+assert.match(
+  unifiedBridge,
+  /visible\('pauseMenu'\)[\s\S]*?const intro = document\.getElementById\('intro'\);[\s\S]*?pause\.classList\.add\('hidden'\)/
+);
+assert.match(
+  uiInit,
+  /itch-performance-faction-fix-v1\.css/
+);
+assert.match(
+  performanceGuard,
+  /tier/
+);
+
+
 
 // V9 is the only mobile input owner. Legacy RunnerScene listeners are detached
 // at runtime instead of being allowed to compete with Phaser key/cursor state.
