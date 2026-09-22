@@ -112,6 +112,7 @@ async function runMobileViewport(browser, viewport) {
       await waitForGameplayBriefingRelease(page);
       await waitForVisible(page, '.mobile-controls');
       await waitForVisible(page, '#play #pause');
+      await waitForVisible(page, '#settings');
     }
 
     const initial = await page.evaluate(() => ({
@@ -208,12 +209,19 @@ assertNoPairwiseOverlap(
   `Mobile action layout ${viewport.width}x${viewport.height}`,
 );
 
-    // Portrait is a fully playable phone mode. Validate the touch surface
-    // and action layout, then keep the deeper pause/settings/resume suite for
-    // landscape where the full HUD has room for those panels.
-    if (viewport.orientation === 'portrait') {
-      return;
-    }
+    const actionDock = await page.evaluate(() => {
+      const pause = document.querySelector('#play #pause')?.getBoundingClientRect();
+      const settings = document.querySelector('#settings')?.getBoundingClientRect();
+      return { pause, settings, width: window.innerWidth, height: window.innerHeight };
+    });
+    assert(actionDock.pause && actionDock.settings, `Canonical gameplay action dock is incomplete at ${viewport.width}x${viewport.height}`);
+    assert(actionDock.pause.left < actionDock.width / 2, `Pause must be on the bottom-left at ${viewport.width}x${viewport.height}`);
+    assert(actionDock.settings.left > actionDock.width / 2, `Settings must be on the bottom-right at ${viewport.width}x${viewport.height}`);
+    assert(actionDock.pause.bottom >= actionDock.height - 90, `Pause is not bottom anchored at ${viewport.width}x${viewport.height}`);
+    assert(actionDock.settings.bottom >= actionDock.height - 90, `Settings is not bottom anchored at ${viewport.width}x${viewport.height}`);
+
+    // Portrait and landscape both validate the canonical action dock.
+    if (viewport.orientation === 'portrait') return;
 
     // The canonical in-game Pause control is #play #pause.
     // There is no mobile bottom PAUSE/SETTINGS HUD.
