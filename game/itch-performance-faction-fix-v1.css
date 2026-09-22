@@ -1,0 +1,109 @@
+/* Relay Runner — itch performance and faction readability patch.
+ * Scoped release layer. Does not change gameplay/input ownership.
+ */
+
+/* =========================================================
+   FACTION INTEL — readable on desktop web
+   ========================================================= */
+#play .relay-faction-dialogue{
+  position:fixed !important;
+  left:50% !important;
+  right:auto !important;
+  top:auto !important;
+  bottom:clamp(84px,11vh,132px) !important;
+  width:min(620px,calc(100vw - 40px)) !important;
+  max-width:620px !important;
+  min-width:320px !important;
+  max-height:min(42dvh,320px) !important;
+  overflow:auto !important;
+  padding:16px 18px 14px !important;
+  box-sizing:border-box !important;
+  transform:translateX(-50%) !important;
+  z-index:980 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+#play .relay-faction-dialogue .relay-faction-text{
+  display:block !important;
+  width:100% !important;
+  max-width:none !important;
+  min-height:0 !important;
+  color:#eafcff !important;
+  font-size:15px !important;
+  line-height:1.45 !important;
+  overflow-wrap:break-word !important;
+  white-space:normal !important;
+}
+#play .relay-faction-dialogue .relay-faction-name,
+#play .relay-faction-dialogue .relay-faction-kicker,
+#play .relay-faction-dialogue .relay-faction-footer{
+  width:100% !important;
+  min-width:0 !important;
+}
+#play .relay-faction-dialogue .relay-faction-footer{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  align-items:center !important;
+  gap:8px !important;
+  margin-top:10px !important;
+}
+#play .relay-faction-dialogue button{
+  min-width:96px !important;
+  min-height:38px !important;
+}
+
+/* =========================================================
+   ITCH PERFORMANCE — disable expensive CSS compositing during gameplay
+   ========================================================= */
+@media (prefers-reduced-motion: no-preference){
+  #play .hud-route,
+  #play .hud-progress,
+  #play .hud-xp,
+  #play .hud-actions>button,
+  #play #cargoIntegrityV2 .cargo-card{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+}
+
+#play .gameplay-dash #phaser-game,
+#play.gameplay-dash #phaser-game,
+#play.gameplay-moving #phaser-game{
+  filter:none !important;
+}
+
+#play #phaser-game{
+  will-change:auto !important;
+  contain:layout paint size !important;
+}
+
+/* Do not animate HUD surfaces continuously on web. */
+#play .hud-route .route-dot,
+#play #cargoIntegrityV2.is-critical .cargo-card{
+  animation:none !important;
+}
+
+@media (max-width:760px){
+  #play .relay-faction-dialogue{
+    left:50% !important;
+    bottom:calc(112px + env(safe-area-inset-bottom)) !important;
+    width:calc(100vw - 18px) !important;
+    min-width:0 !important;
+    max-width:none !important;
+    max-height:min(31dvh,220px) !important;
+    padding:11px 12px 10px !important;
+  }
+  #play .relay-faction-dialogue .relay-faction-text{
+    font-size:13px !important;
+    line-height:1.36 !important;
+  }
+  #play #phaser-game{
+    contain:strict !important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  #play *{
+    scroll-behavior:auto !important;
+  }
+}
