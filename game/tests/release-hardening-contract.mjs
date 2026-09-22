@@ -11,6 +11,9 @@ const arrivalCss = await read('cinematic-arrival-v2.css');
 const config = await read('vite.config.mjs');
 const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
+const itchBoot = await read('src/itch-boot.js');
+const home = await read('home-v3.js');
+const deploymentLoader = await read('play-deployment-loader-v1.js');
 const mobileOwner = await read('src/systems/mobile-input-single-owner-v1.js');
 const uiInit = await read('relay-ui-init.js');
 const core = await read('src/systems/core-stability.js');
@@ -60,6 +63,22 @@ assert.match(arrivalCss, /\.arrival-mission[^}]*animation:arrivalMission \.6s 2\
 assert.match(config, /phaser-vendor/);
 assert.match(config, /strictExecutionOrder:\s*true/);
 assert.match(main, /mobile-input-single-owner-v1/);
+
+// Desktop Home wiring: deployment is loaded before Home and the deployment
+// module does not steal the visible Start click at document capture level.
+const deploymentIndex = itchBoot.indexOf("await optional('deployment-loader'");
+const homeIndex = itchBoot.indexOf("await optional('home-v4'");
+assert.equal(deploymentIndex >= 0, true, 'itch boot must load deployment loader');
+assert.equal(homeIndex > deploymentIndex, true, 'deployment loader must load before Home');
+assert.doesNotMatch(
+  deploymentLoader,
+  /document\.addEventListener\(\s*['"]click['"][\s\S]*?,\s*true\s*\)\s*;/,
+  'deployment loader must not own document-level capture clicks'
+);
+assert.match(home, /const sourceStart = \$\('start'\);/);
+assert.match(home, /HTMLElement\.prototype\.click\.call\(sourceStart\)/);
+assert.doesNotMatch(home, /stopImmediatePropagation\(\)/);
+
 
 // V9 is the only mobile input owner. Legacy RunnerScene listeners are detached
 // at runtime instead of being allowed to compete with Phaser key/cursor state.
