@@ -15,6 +15,8 @@ const itchBoot = await read('src/itch-boot.js');
 const home = await read('home-v3.js');
 const deploymentLoader = await read('play-deployment-loader-v1.js');
 const playIntro = await read('play-intro-cinematic-v2.js');
+const unifiedOptions = await read('unified-options-ui-v1.js');
+const unifiedCinematic = await read('unified-cinematic-ui-v1.js');
 const mobileOwner = await read('src/systems/mobile-input-single-owner-v1.js');
 const uiInit = await read('relay-ui-init.js');
 const core = await read('src/systems/core-stability.js');
@@ -81,6 +83,26 @@ assert.match(home, /HTMLElement\.prototype\.click\.call\(sourceStart\)/);
 assert.match(
   playIntro,
   /window\.relayPlayDeploymentV1[\s\S]*?typeof window\.relayPlayDeploymentV1\.show === 'function'/
+);
+assert.match(
+  unifiedOptions,
+  /#pauseMenu \[data-pause-tab="settings"\], #pauseMenu \[data-tab="settings"\]/
+);
+assert.match(
+  unifiedOptions,
+  /#panelContent, \.relay-pause-content/
+);
+assert.match(
+  unifiedOptions,
+  /\[data-pause-tab="settings"\], \[data-tab="settings"\]/
+);
+assert.match(
+  unifiedOptions,
+  /classList\.contains\('is-active'\)/
+);
+assert.match(
+  unifiedCinematic,
+  /data-unified-setting="\$\{key\}"[\s\S]*data-unified-toggle="\$\{key\}"/
 );
 
 
