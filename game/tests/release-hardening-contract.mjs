@@ -166,8 +166,8 @@ await assert.rejects(access(fileURLToPath(new URL('../vite.config.js', gameRoot)
 const actionCount = (index.match(/data-mobile-action=/g) || []).length;
 assert.match(main, /systems\/performance-guard\.js/);
 assert.match(performanceGuard, /coarse/);
-assert.match(factionDialogue, /\.relay-faction-dialogue\[hidden\]\{display:none!important;\}/);
-assert.match(factionDialogue, /\.relay-faction-dialogue:not\(\[hidden\]\)\{/);
+assert.match(factionDialogue, /#play \.relay-faction-dialogue\[hidden\]\{display:none!important;\}/);
+assert.match(factionDialogue, /#play \.relay-faction-dialogue:not\(\[hidden\]\)\{/);
 assert.match(unifiedBridge, /pause\.classList\.add\('hidden'\)/);
 assert.equal(actionCount, 6, 'touch action surface must stay at exactly six controls');
 
