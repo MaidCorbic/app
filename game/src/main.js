@@ -839,6 +839,14 @@ function toast(text) {
   );
 }
 
+  window.clearTimeout(toastTimer);
+
+  toastTimer = window.setTimeout(
+    () => element.classList.remove('show'),
+    1700
+  );
+
+
 function nextMissionIndex() {
   const index =
     missions.findIndex(
