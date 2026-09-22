@@ -5,6 +5,14 @@
  * enhancement can never keep the itch.io splash at 0%.
  */
 
+const setHomeBootGuard = enabled => {
+  window.__relayHomeBooting = Boolean(enabled);
+  document.documentElement.dataset.relayHomeBooting =
+    enabled ? '1' : '0';
+};
+
+setHomeBootGuard(true);
+
 const report = (label, error) => {
   console.error('[RelayBoot] ' + label + ' failed', error);
   window.__relayBootErrors ||= [];
@@ -43,6 +51,7 @@ const boot = async () => {
   // Presentation and enhancement layers are fail-soft by design.
   await optional('home-options', () => import('../home-options.js'));
   await optional('home-v4', () => import('../home-v3.js'));
+  setHomeBootGuard(false);
   await optional('home-v4-guard', () => import('../home-v3-guard.js'));
   await optional('home-v4-interaction', () => import('../home-v3-interaction-fix.js'));
   await optional('play-intro', () => import('../play-intro-cinematic-v2.js'));
