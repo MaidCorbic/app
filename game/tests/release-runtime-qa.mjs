@@ -230,12 +230,17 @@ assertNoPairwiseOverlap(
     await waitForHidden(page, '#pauseMenu');
 
     const resumed = await page.evaluate(() => ({
-      introHidden: document.querySelector('#intro')?.classList.contains('hidden'),
       pauseHidden: document.querySelector('#pauseMenu')?.classList.contains('hidden'),
+      playVisible: (() => {
+        const el = document.querySelector('#play');
+        if (!el) return false;
+        const style = getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      })(),
       runnerActive: Boolean(window.__relayRunnerScene?.scene?.isActive?.()),
     }));
-    assert.equal(resumed.introHidden, true, `Intro reappeared after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(resumed.pauseHidden, true, `Pause menu remained open after resume at ${viewport.width}x${viewport.height}`);
+    assert.equal(resumed.playVisible, true, `Gameplay surface is not visible after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(resumed.runnerActive, true, `Runner scene is not active after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
   } finally {
