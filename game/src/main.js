@@ -117,13 +117,12 @@ const game = new Phaser.Game({
   // Touch/mobile devices use ENVELOP so the 16:9 gameplay world keeps
   // its proportions instead of being stretched to the phone viewport.
   scale: {
-    mode: detectTouchDevice()
-      ? Phaser.Scale.ENVELOP
-      : Phaser.Scale.RESIZE,
-
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    zoom: 1
-  },
+  mode: Phaser.Scale.NONE,
+  width: 1280,
+  height: 720,
+  autoCenter: Phaser.Scale.CENTER_BOTH,
+  zoom: 1
+},
 
   scene: []
 });
@@ -830,13 +829,6 @@ function toast(text) {
     1700
   );
 }
-
-  window.clearTimeout(toastTimer);
-
-  toastTimer = window.setTimeout(
-    () => element.classList.remove('show'),
-    1700
-  );
 
 
 function nextMissionIndex() {
@@ -2167,6 +2159,20 @@ function closeTitlePanel() {
     .classList.add('hidden');
 }
 
+const clearHomeBootstrapStyles = intro => {
+  [
+    'display',
+    'visibility',
+    'opacity',
+    'pointer-events',
+    'transform',
+    'filter',
+    'transition'
+  ].forEach(
+    property => intro.style.removeProperty(property)
+  );
+};
+
 function leaveHome(next) {
   const intro = $('intro');
 
@@ -2187,6 +2193,14 @@ function leaveHome(next) {
     intro.classList.remove(
       'is-leaving'
     );
+
+    /*
+     * The splash opens Home using inline !important styles.  A class alone
+     * cannot override those styles, which left Home visible over the mission
+     * briefing and Phaser canvas after Start or Continue.
+     */
+    clearHomeBootstrapStyles(intro);
+    document.body.classList.remove('home-v3-active');
 
     next();
   }, 240);
@@ -4545,7 +4559,7 @@ document.addEventListener(
   true
 );
 
-$('start').onclick = () => {
+const startRun = () => {
   startAudioBed();
 
   leaveHome(
@@ -4559,7 +4573,7 @@ $('start').onclick = () => {
   );
 };
 
-$('continue').onclick = () => {
+const continueRun = () => {
   startAudioBed();
 
   leaveHome(() =>
@@ -4568,6 +4582,17 @@ $('continue').onclick = () => {
     )
   );
 };
+
+/*
+ * Home V4 replaces the original menu markup before this module runs.  Keep
+ * the run routes on a stable API instead of trying to click the detached
+ * legacy buttons that were present before the Home was rebuilt.
+ */
+window.relayStartRun = startRun;
+window.relayContinueRun = continueRun;
+
+$('start').onclick = startRun;
+$('continue').onclick = continueRun;
 
 $('pause').onclick =
   () => openMenu();

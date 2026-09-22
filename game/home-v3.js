@@ -1,5 +1,5 @@
 /*
- * Runner Relay — Home V4 presentation owner.
+ * Runner Relay — Home V3 presentation owner.
  *
  * Contract:
  * - Home owns presentation only.
@@ -53,13 +53,6 @@ import { RELAY_FAQ } from './faq.js';
           ? dailyChallenges
           : [];
 
-      /*
-       * Home is presentation-only.
-       *
-       * The authoritative daily challenge
-       * definitions and progress remain in
-       * src/state.js.
-       */
       const challenge =
         challenges.find(item => {
           const progress =
@@ -75,9 +68,7 @@ import { RELAY_FAQ } from './faq.js';
 
           const claimed =
             Array.isArray(dailyState.claimed) &&
-            dailyState.claimed.includes(
-              item.id
-            );
+            dailyState.claimed.includes(item.id);
 
           return !claimed && progress < target;
         }) ||
@@ -211,16 +202,16 @@ import { RELAY_FAQ } from './faq.js';
 
       if (rewardEl) {
         rewardEl.textContent =
-          `+${(
+          `+${
             Number(challenge.xp) || 0
-          ).toLocaleString()} XP`;
+          } XP`;
       }
 
       if (creditsEl) {
         creditsEl.textContent =
-          `+${(
+          `+${
             Number(challenge.credits) || 0
-          ).toLocaleString()} CREDITS`;
+          } CREDITS`;
       }
 
       if (statusEl) {
@@ -279,20 +270,25 @@ import { RELAY_FAQ } from './faq.js';
 
       const state = loadState();
 
-      /*
-       * Home only reads contract definitions.
-       * It does not create or own contract progression state.
-       */
       if (!homeContractsAPI) {
         homeContractsAPI =
           await import('./src/contracts.js');
       }
 
-      const xp = Number(state.xp) || 0;
-    const signals = Number(state.signals) || 0;
-const credits = Number(state.credits) || 0;
-const totalRuns = Number(state.totalRuns) || 0;
-      const bestRun = Number(state.bestRun) || 0;
+      const xp =
+        Number(state.xp) || 0;
+
+      const signals =
+        Number(state.signals) || 0;
+
+      const credits =
+        Number(state.credits) || 0;
+
+      const totalRuns =
+        Number(state.totalRuns) || 0;
+
+      const bestRun =
+        Number(state.bestRun) || 0;
 
       const lastRunTime =
         state.lastRun?.time ??
@@ -315,122 +311,127 @@ const totalRuns = Number(state.totalRuns) || 0;
         state.lastRating ??
         null;
 
-      const level = getLevelProgress(xp);
-      const rank = getCourierRank(xp);
+      const level =
+        getLevelProgress(xp);
 
-      const xpIntoLevel = Math.max(
-        0,
-        xp - Number(level.current || 0)
-      );
+      const rank =
+        getCourierRank(xp);
 
-      const xpNeeded = Math.max(
-        1,
-        Number(level.next || 100) -
-        Number(level.current || 0)
-      );
+      const xpIntoLevel =
+        Math.max(
+          0,
+          xp - Number(level.current || 0)
+        );
 
-      const xpProgress = Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(
-            (Number(level.progress) || 0) * 100
+      const xpNeeded =
+        Math.max(
+          1,
+          Number(level.next || 100) -
+          Number(level.current || 0)
+        );
+
+      const xpProgress =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            Math.round(
+              (Number(level.progress) || 0) * 100
+            )
           )
-        )
-      );
+        );
 
-      const rankEl = $('homeV4Rank');
-      const levelEl = $('homeV4Level');
-      const xpTextEl = $('homeV4XpText');
-      const xpFillEl = $('homeV4XpFill');
-      const bestRunEl = $('homeV4BestRun');
-      const runsEl = $('homeV4Runs');
-   const signalsEl = $('homeV4Signals');
-const creditsEl = $('homeV4Credits');
-const missionXpEl = $('homeV4MissionXp');
-      const bestRatingEl = $('homeV4BestRating');
-      const signalValueEl = $('homeV4SignalValue');
-     const signalFillEl = $('homeV4SignalFill');
+      const rankEl =
+        $('homeV4Rank');
 
-const unlockLevelEl = $('homeV4UnlockLevel');
-const unlockTitleEl = $('homeV4UnlockTitle');
-const unlockTextEl = $('homeV4UnlockText');
-const unlockFillEl = $('homeV4UnlockFill');
+      const levelEl =
+        $('homeV4Level');
 
-const activityOneEl =
-  $('homeV4ActivityOne');
+      const xpTextEl =
+        $('homeV4XpText');
 
-const activityOneMetaEl =
-  $('homeV4ActivityOneMeta');
+      const xpFillEl =
+        $('homeV4XpFill');
 
-const activityTwoEl =
-  $('homeV4ActivityTwo');
+      const bestRunEl =
+        $('homeV4BestRun');
 
-const activityTwoMetaEl =
-  $('homeV4ActivityTwoMeta');
+      const runsEl =
+        $('homeV4Runs');
 
-const activityThreeEl =
-  $('homeV4ActivityThree');
+      const signalsEl =
+        $('homeV4Signals');
 
-const activityThreeMetaEl =
-  $('homeV4ActivityThreeMeta');
+      const creditsEl =
+        $('homeV4Credits');
 
-      const lastRunFeedEl = $('homeV5LastRunFeed');
-      const runTimeEl = $('homeV5RunTime');
-      const runSignalsEl = $('homeV5RunSignals');
-      const runScoreEl = $('homeV5RunScore');
-      const runRatingEl = $('homeV5RunRating');
+      const missionXpEl =
+        $('homeV4MissionXp');
 
-   if (lastRunFeedEl) {
-  lastRunFeedEl.textContent =
-    totalRuns > 0
-      ? 'LAST RUN // RECORDED'
-      : 'LAST RUN // READY';
-}
+      const bestRatingEl =
+        $('homeV4BestRating');
 
-/* RECENT ACTIVITY */
+      const signalValueEl =
+        $('homeV4SignalValue');
 
-if (activityOneEl) {
-  activityOneEl.textContent =
-    totalRuns > 0
-      ? 'RUN RECORDED'
-      : 'NETWORK READY';
-}
+      const signalFillEl =
+        $('homeV4SignalFill');
 
-if (activityOneMetaEl) {
-  activityOneMetaEl.textContent =
-    totalRuns > 0
-      ? `RUNS // ${totalRuns.toLocaleString()}`
-      : 'RELAY CHANNEL // 01';
-}
+      const unlockLevelEl =
+        $('homeV4UnlockLevel');
 
-if (activityTwoEl) {
-  activityTwoEl.textContent =
-    signals > 0
-      ? `${signals.toLocaleString()} SIGNALS RECOVERED`
-      : 'AWAITING FIRST SIGNAL';
-}
+      const unlockTitleEl =
+        $('homeV4UnlockTitle');
 
-if (activityTwoMetaEl) {
-  activityTwoMetaEl.textContent =
-    signals > 0
-      ? 'SIGNAL NETWORK // ACTIVE'
-      : 'SIGNAL NETWORK // STANDBY';
-}
+      const unlockTextEl =
+        $('homeV4UnlockText');
 
-if (activityThreeEl) {
-  activityThreeEl.textContent =
-    xp > 0
-      ? `XP BALANCE // ${xp.toLocaleString()}`
-      : 'CONTRACT NETWORK READY';
-}
+      const unlockFillEl =
+        $('homeV4UnlockFill');
 
-if (activityThreeMetaEl) {
-  activityThreeMetaEl.textContent =
-    xp > 0
-      ? 'PROGRESSION // ACTIVE'
-      : 'CONTRACTS // ONLINE';
-}
+      const activityOneEl =
+        $('homeV4ActivityOne');
+
+      const activityOneMetaEl =
+        $('homeV4ActivityOneMeta');
+
+      const activityTwoEl =
+        $('homeV4ActivityTwo');
+
+      const activityTwoMetaEl =
+        $('homeV4ActivityTwoMeta');
+
+      const activityThreeEl =
+        $('homeV4ActivityThree');
+
+      const activityThreeMetaEl =
+        $('homeV4ActivityThreeMeta');
+
+      const lastRunFeedEl =
+        $('homeV5LastRunFeed');
+
+      const runTimeEl =
+        $('homeV5RunTime');
+
+      const runSignalsEl =
+        $('homeV5RunSignals');
+
+      const runScoreEl =
+        $('homeV5RunScore');
+
+      const runRatingEl =
+        $('homeV5RunRating');
+
+      /* =====================================================
+         LAST RUN
+         ===================================================== */
+
+      if (lastRunFeedEl) {
+        lastRunFeedEl.textContent =
+          totalRuns > 0
+            ? 'LAST RUN // RECORDED'
+            : 'LAST RUN // READY';
+      }
 
       if (runTimeEl) {
         runTimeEl.textContent =
@@ -465,6 +466,56 @@ if (activityThreeMetaEl) {
               )
             : '—';
       }
+
+      /* =====================================================
+         RECENT ACTIVITY
+         ===================================================== */
+
+      if (activityOneEl) {
+        activityOneEl.textContent =
+          totalRuns > 0
+            ? 'RUN RECORDED'
+            : 'NETWORK READY';
+      }
+
+      if (activityOneMetaEl) {
+        activityOneMetaEl.textContent =
+          totalRuns > 0
+            ? `RUNS // ${totalRuns.toLocaleString()}`
+            : 'RELAY CHANNEL // 01';
+      }
+
+      if (activityTwoEl) {
+        activityTwoEl.textContent =
+          signals > 0
+            ? `${signals.toLocaleString()} SIGNALS RECOVERED`
+            : 'AWAITING FIRST SIGNAL';
+      }
+
+      if (activityTwoMetaEl) {
+        activityTwoMetaEl.textContent =
+          signals > 0
+            ? 'SIGNAL NETWORK // ACTIVE'
+            : 'SIGNAL NETWORK // STANDBY';
+      }
+
+      if (activityThreeEl) {
+        activityThreeEl.textContent =
+          xp > 0
+            ? `XP BALANCE // ${xp.toLocaleString()}`
+            : 'CONTRACT NETWORK READY';
+      }
+
+      if (activityThreeMetaEl) {
+        activityThreeMetaEl.textContent =
+          xp > 0
+            ? 'PROGRESSION // ACTIVE'
+            : 'CONTRACTS // ONLINE';
+      }
+
+      /* =====================================================
+         PROFILE
+         ===================================================== */
 
       if (rankEl) {
         rankEl.textContent =
@@ -502,15 +553,15 @@ if (activityThreeMetaEl) {
           totalRuns.toLocaleString();
       }
 
-   if (signalsEl) {
-  signalsEl.textContent =
-    signals.toLocaleString();
-}
+      if (signalsEl) {
+        signalsEl.textContent =
+          signals.toLocaleString();
+      }
 
-if (creditsEl) {
-  creditsEl.textContent =
-    credits.toLocaleString();
-}
+      if (creditsEl) {
+        creditsEl.textContent =
+          credits.toLocaleString();
+      }
 
       if (missionXpEl) {
         const missionXp =
@@ -545,6 +596,10 @@ if (creditsEl) {
               )
             : '—';
       }
+
+      /* =====================================================
+         SIGNAL PROGRESS
+         ===================================================== */
 
       const activeScene =
         window.__relayRunnerScene ||
@@ -591,41 +646,65 @@ if (creditsEl) {
 
       if (signalValueEl) {
         signalValueEl.textContent =
-          `${String(missionSignals).padStart(2, '0')} / ${String(missionSignalTarget).padStart(2, '0')}`;
+          `${String(
+            missionSignals
+          ).padStart(2, '0')} / ${String(
+            missionSignalTarget
+          ).padStart(2, '0')}`;
       }
 
-if (signalFillEl) {
-  const signalProgress =
-    missionSignalTarget > 0
-      ? Math.round(
-          (missionSignals / missionSignalTarget) * 100
-        )
-      : 0;
+      if (signalFillEl) {
+        const signalProgress =
+          missionSignalTarget > 0
+            ? Math.round(
+                (
+                  missionSignals /
+                  missionSignalTarget
+                ) * 100
+              )
+            : 0;
 
-  signalFillEl.style.width = `${signalProgress}%`;
-}
+        signalFillEl.style.width =
+          `${signalProgress}%`;
+      }
 
-/* NEXT UNLOCK */
-const nextLevel = (level.level || 1) + 1;
-const unlockProgress = xpProgress;
+      /* =====================================================
+         NEXT UNLOCK
+         ===================================================== */
 
-if (unlockLevelEl) {
-  unlockLevelEl.textContent = `LV ${String(nextLevel).padStart(2, '0')}`;
-}
+      const nextLevel =
+        (level.level || 1) + 1;
 
-if (unlockTitleEl) {
-  unlockTitleEl.textContent = `SECTOR ${String(nextLevel).padStart(2, '0')} // SKYLINE`;
-}
+      const unlockProgress =
+        xpProgress;
 
-if (unlockTextEl) {
-  unlockTextEl.textContent = `${unlockProgress}%`;
-}
+      if (unlockLevelEl) {
+        unlockLevelEl.textContent =
+          `LV ${String(
+            nextLevel
+          ).padStart(2, '0')}`;
+      }
 
-if (unlockFillEl) {
-  unlockFillEl.style.width = `${unlockProgress}%`;
-}
+      if (unlockTitleEl) {
+        unlockTitleEl.textContent =
+          `SECTOR ${String(
+            nextLevel
+          ).padStart(2, '0')} // SKYLINE`;
+      }
+
+      if (unlockTextEl) {
+        unlockTextEl.textContent =
+          `${unlockProgress}%`;
+      }
+
+      if (unlockFillEl) {
+        unlockFillEl.style.width =
+          `${unlockProgress}%`;
+      }
 
       await syncHomeContract();
+
+      void syncHomeDailyOperation();
 
     } catch (error) {
       console.error(
@@ -633,9 +712,11 @@ if (unlockFillEl) {
         error
       );
     }
-
-      void syncHomeDailyOperation();
   };
+
+  /* =========================================================
+     STATE EVENTS
+     ========================================================= */
 
   window.addEventListener(
     'storage',
@@ -643,17 +724,22 @@ if (unlockFillEl) {
       if (
         event.key === 'relay-runner-state'
       ) {
-        syncHomeProfile();
+        void syncHomeProfile();
       }
     }
   );
 
-window.addEventListener(
-  'relay:mission-complete',
-  () => {
-    void syncHomeProfile();
-  }
-);
+  window.addEventListener(
+    'relay:mission-complete',
+    () => {
+      void syncHomeProfile();
+    }
+  );
+
+  /* =========================================================
+     VISIBILITY
+     ========================================================= */
+
   const introVisible = () => {
     const intro = $('intro');
 
@@ -668,7 +754,7 @@ window.addEventListener(
         document.visibilityState === 'visible' &&
         introVisible()
       ) {
-        syncHomeProfile();
+        void syncHomeProfile();
       }
     }
   );
@@ -678,7 +764,9 @@ window.addEventListener(
      ========================================================= */
 
   const forceStartVisible = start => {
-    if (!(start instanceof HTMLElement)) return;
+    if (!(start instanceof HTMLElement)) {
+      return;
+    }
 
     start.hidden = false;
     start.removeAttribute('hidden');
@@ -721,192 +809,419 @@ window.addEventListener(
     }
 
     try {
-      HTMLElement.prototype.click.call(target);
+      HTMLElement.prototype.click.call(
+        target
+      );
+
       return true;
     } catch {
       return false;
     }
   };
 
-  const openOptions = () => {
-    try {
-      if (
-        typeof window
-          .relayUnifiedCinematicUI
-          ?.openOptions ===
-        'function'
-      ) {
-        window
-          .relayUnifiedCinematicUI
-          .openOptions();
+  /*
+   * =========================================================
+   * HOME PANEL VISIBILITY FIX
+   * =========================================================
+   *
+   * index.html contains global visibility:hidden rules for
+   * #titlePanel and #relayInfoPanel.
+   *
+   * Removing only the .hidden class is therefore NOT enough.
+   *
+   * This helper explicitly restores the visual and interactive
+   * state whenever a Home utility opens a panel.
+   */
 
-        return true;
-      }
-    } catch {}
+  const showHomePanel = panel => {
+    if (!(panel instanceof HTMLElement)) {
+      return false;
+    }
 
-    return clickExisting(
-      '[data-title-panel="controls"]'
-    );
-  };
+    panel.hidden = false;
 
-  const openFaq = () => {
-  const panel =
-    document.getElementById(
-      'relayInfoPanel'
-    );
+    panel.removeAttribute('hidden');
 
-  const eyebrow =
-    document.getElementById(
-      'relayInfoEyebrow'
-    );
-
-  const heading =
-    document.getElementById(
-      'relayInfoHeading'
-    );
-
-  const content =
-    document.getElementById(
-      'relayInfoContent'
-    );
-
-  if (
-    !(panel instanceof HTMLElement) ||
-    !(eyebrow instanceof HTMLElement) ||
-    !(heading instanceof HTMLElement) ||
-    !(content instanceof HTMLElement)
-  ) {
-    console.error(
-      '[RelayRunner] FAQ panel elements not found'
-    );
-
-    return false;
-  }
-
-  try {
     panel.classList.remove('hidden');
-
-    panel.classList.remove(
-      'relay-update-mode'
-    );
-
-    panel.classList.add(
-      'relay-faq-mode'
-    );
 
     panel.setAttribute(
       'aria-hidden',
       'false'
     );
 
-    eyebrow.textContent =
-      'RELAY RUNNER // FIELD GUIDE';
+    panel.style.setProperty(
+      'visibility',
+      'visible',
+      'important'
+    );
 
-    heading.textContent =
-      'FAQ';
+    panel.style.setProperty(
+      'opacity',
+      '1',
+      'important'
+    );
 
-    content.innerHTML = `
-      <div
-        class="relay-terminal-prompt"
-        aria-hidden="true"
-      >
-        SELECT A QUERY
-      </div>
+    panel.style.setProperty(
+      'pointer-events',
+      'auto',
+      'important'
+    );
 
-      <div
-        class="relay-faq-list"
-        role="list"
-      >
-        ${RELAY_FAQ.map(
-          ([question, answer], index) => {
-            const isOpen =
-              index === 0;
-
-            const number =
-              String(index + 1)
-                .padStart(2, '0');
-
-            return `
-              <article
-                class="relay-faq-item${isOpen ? ' open' : ''}"
-                role="listitem"
-              >
-                <button
-                  class="relay-faq-question"
-                  type="button"
-                  data-faq-question
-                  aria-expanded="${isOpen}"
-                >
-                  <span
-                    class="faq-index"
-                    aria-hidden="true"
-                  >
-                    ${number}
-                  </span>
-
-                  <span class="faq-question-text">
-                    ${String(question)}
-                  </span>
-
-                  <span
-                    class="faq-question-state"
-                    aria-hidden="true"
-                  >
-                    ${isOpen
-                      ? 'ACTIVE'
-                      : 'QUERY'}
-                  </span>
-                </button>
-
-                <div
-                  class="relay-faq-answer"
-                  ${isOpen ? '' : 'hidden'}
-                >
-                  ${String(answer)}
-                </div>
-              </article>
-            `;
-          }
-        ).join('')}
-      </div>
-    `;
+    panel.style.setProperty(
+      'z-index',
+      '500',
+      'important'
+    );
 
     return true;
+  };
 
-  } catch (error) {
-    console.error(
-      '[RelayRunner] FAQ open failed:',
-      error
-    );
+  /* =========================================================
+     OPTIONS
+     ========================================================= */
 
-    return false;
-  }
-};
-  
-  const openUpdate = () => {
-    console.log(
-      '[RelayRunner] UPDATE CLICKED'
-    );
+  const openOptions = () => {
+    let opened = false;
 
-    const panel =
-      document.getElementById(
-        'relayInfoPanel'
+    try {
+      const optionsUI =
+        window.relayUnifiedCinematicUI;
+
+      if (
+        optionsUI &&
+        typeof optionsUI.openOptions ===
+        'function'
+      ) {
+        optionsUI.openOptions();
+
+        opened = true;
+      }
+    } catch (error) {
+      console.error(
+        '[RelayRunner] Options open failed:',
+        error
       );
+    }
+
+    /*
+     * Compatibility fallback.
+     */
+
+    if (!opened) {
+      opened =
+        clickExisting(
+          '[data-title-panel="controls"]'
+        );
+    }
+
+    /*
+     * Some existing Options implementations use titlePanel.
+     * If that panel is the actual Options surface, remove the
+     * global hidden state after the owner opens it.
+     */
+
+    const titlePanel =
+      $('titlePanel');
+
+    if (
+      opened &&
+      titlePanel instanceof HTMLElement &&
+      (
+        !titlePanel.classList.contains('hidden') ||
+        titlePanel.getAttribute('data-panel') === 'controls' ||
+        titlePanel.getAttribute('data-title-panel') === 'controls'
+      )
+    ) {
+      showHomePanel(titlePanel);
+    }
+
+    return opened;
+  };
+
+  /* =========================================================
+     FAQ
+     ========================================================= */
+
+  const openFaq = () => {
+    const panel =
+      $('relayInfoPanel');
 
     const eyebrow =
-      document.getElementById(
-        'relayInfoEyebrow'
-      );
+      $('relayInfoEyebrow');
 
     const heading =
-      document.getElementById(
-        'relayInfoHeading'
-      );
+      $('relayInfoHeading');
 
     const content =
-      document.getElementById(
-        'relayInfoContent'
+      $('relayInfoContent');
+
+    if (
+      !(panel instanceof HTMLElement) ||
+      !(eyebrow instanceof HTMLElement) ||
+      !(heading instanceof HTMLElement) ||
+      !(content instanceof HTMLElement)
+    ) {
+      console.error(
+        '[RelayRunner] FAQ panel elements not found'
       );
+
+      return false;
+    }
+
+    try {
+      /*
+       * IMPORTANT:
+       * Do this BEFORE rendering content.
+       * The panel may be globally visibility:hidden.
+       */
+
+      showHomePanel(panel);
+
+      panel.classList.remove(
+        'relay-update-mode'
+      );
+
+      panel.classList.add(
+        'relay-faq-mode'
+      );
+
+      panel.setAttribute(
+        'aria-hidden',
+        'false'
+      );
+
+      eyebrow.textContent =
+        'RELAY RUNNER // FIELD GUIDE';
+
+      heading.textContent =
+        'FAQ';
+
+      content.innerHTML = `
+        <div
+          class="relay-terminal-prompt"
+          aria-hidden="true"
+        >
+          SELECT A QUERY
+        </div>
+
+        <div
+          class="relay-faq-list"
+          role="list"
+        >
+          ${RELAY_FAQ.map(
+            ([question, answer], index) => {
+              const isOpen =
+                index === 0;
+
+              const number =
+                String(index + 1)
+                  .padStart(2, '0');
+
+              return `
+                <article
+                  class="relay-faq-item${isOpen ? ' open' : ''}"
+                  role="listitem"
+                >
+                  <button
+                    class="relay-faq-question"
+                    type="button"
+                    data-faq-question
+                    aria-expanded="${isOpen}"
+                  >
+                    <span
+                      class="faq-index"
+                      aria-hidden="true"
+                    >
+                      ${number}
+                    </span>
+
+                    <span class="faq-question-text">
+                      ${String(question)}
+                    </span>
+
+                    <span
+                      class="faq-question-state"
+                      aria-hidden="true"
+                    >
+                      ${
+                        isOpen
+                          ? 'ACTIVE'
+                          : 'QUERY'
+                      }
+                    </span>
+                  </button>
+
+                  <div
+                    class="relay-faq-answer"
+                    ${isOpen ? '' : 'hidden'}
+                  >
+                    ${String(answer)}
+                  </div>
+                </article>
+              `;
+            }
+          ).join('')}
+        </div>
+      `;
+
+      /*
+       * FAQ buttons are generated dynamically,
+       * therefore wire them after innerHTML.
+       */
+
+      content
+        .querySelectorAll(
+          '[data-faq-question]'
+        )
+        .forEach(button => {
+
+          if (
+            !(button instanceof HTMLElement)
+          ) {
+            return;
+          }
+
+          button.addEventListener(
+            'click',
+            event => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              const item =
+                button.closest(
+                  '.relay-faq-item'
+                );
+
+              if (
+                !(item instanceof HTMLElement)
+              ) {
+                return;
+              }
+
+              const answer =
+                item.querySelector(
+                  '.relay-faq-answer'
+                );
+
+              const state =
+                item.querySelector(
+                  '.faq-question-state'
+                );
+
+              const currentlyOpen =
+                button.getAttribute(
+                  'aria-expanded'
+                ) === 'true';
+
+              content
+                .querySelectorAll(
+                  '.relay-faq-item'
+                )
+                .forEach(otherItem => {
+
+                  if (
+                    !(otherItem instanceof HTMLElement)
+                  ) {
+                    return;
+                  }
+
+                  const otherButton =
+                    otherItem.querySelector(
+                      '[data-faq-question]'
+                    );
+
+                  const otherAnswer =
+                    otherItem.querySelector(
+                      '.relay-faq-answer'
+                    );
+
+                  const otherState =
+                    otherItem.querySelector(
+                      '.faq-question-state'
+                    );
+
+                  if (
+                    otherButton instanceof HTMLElement
+                  ) {
+                    otherButton.setAttribute(
+                      'aria-expanded',
+                      'false'
+                    );
+                  }
+
+                  if (
+                    otherAnswer instanceof HTMLElement
+                  ) {
+                    otherAnswer.hidden = true;
+                  }
+
+                  if (
+                    otherState instanceof HTMLElement
+                  ) {
+                    otherState.textContent =
+                      'QUERY';
+                  }
+
+                  otherItem.classList.remove(
+                    'open'
+                  );
+                });
+
+              if (!currentlyOpen) {
+                button.setAttribute(
+                  'aria-expanded',
+                  'true'
+                );
+
+                if (
+                  answer instanceof HTMLElement
+                ) {
+                  answer.hidden = false;
+                }
+
+                if (
+                  state instanceof HTMLElement
+                ) {
+                  state.textContent =
+                    'ACTIVE';
+                }
+
+                item.classList.add(
+                  'open'
+                );
+              }
+            }
+          );
+        });
+
+      return true;
+
+    } catch (error) {
+      console.error(
+        '[RelayRunner] FAQ open failed:',
+        error
+      );
+
+      return false;
+    }
+  };
+
+  /* =========================================================
+     UPDATE
+     ========================================================= */
+
+  const openUpdate = () => {
+    const panel =
+      $('relayInfoPanel');
+
+    const eyebrow =
+      $('relayInfoEyebrow');
+
+    const heading =
+      $('relayInfoHeading');
+
+    const content =
+      $('relayInfoContent');
 
     try {
       if (
@@ -930,9 +1245,25 @@ window.addEventListener(
       return false;
     }
 
-    panel.classList.remove('hidden');
+    /*
+     * IMPORTANT:
+     * Existing relayOpenInfo() may only remove .hidden.
+     * Force the actual panel to become visible.
+     */
+
+    showHomePanel(panel);
+
     panel.classList.add(
       'relay-update-mode'
+    );
+
+    panel.classList.remove(
+      'relay-faq-mode'
+    );
+
+    panel.setAttribute(
+      'aria-hidden',
+      'false'
     );
 
     if (eyebrow instanceof HTMLElement) {
@@ -975,11 +1306,11 @@ window.addEventListener(
       `;
     }
 
-     return true;
+    return true;
   };
 
   /* =========================================================
-     HOME PANEL // CREDITS
+     CREDITS
      ========================================================= */
 
   const openHomeCredits = () => {
@@ -1015,6 +1346,7 @@ window.addEventListener(
 
         <div class="home-info-panel-intro">
           <span>RUNNER RELAY // NIGHT SHIFT</span>
+
           <p>
             A compact rooftop relay experience
             built with Phaser 3.
@@ -1047,13 +1379,13 @@ window.addEventListener(
       </div>
     `;
 
-    panel.classList.remove('hidden');
+    showHomePanel(panel);
 
     return true;
   };
 
   /* =========================================================
-     HOME PANEL // TUTORIAL
+     TUTORIAL
      ========================================================= */
 
   const openHomeTutorial = () => {
@@ -1095,41 +1427,44 @@ window.addEventListener(
             combat and relay systems
             before entering the route.
           </p>
+
           <div class="tutorial-keyboard">
-  <div class="tutorial-keyboard-label">
-    KEYBOARD PROTOCOL
-  </div>
 
-  <span class="tutorial-key">
-    A / D
-    <small>RUN</small>
-  </span>
+            <div class="tutorial-keyboard-label">
+              KEYBOARD PROTOCOL
+            </div>
 
-  <span class="tutorial-key">
-    SPACE
-    <small>JUMP</small>
-  </span>
+            <span class="tutorial-key">
+              A / D
+              <small>RUN</small>
+            </span>
 
-  <span class="tutorial-key">
-    E
-    <small>FIRE</small>
-  </span>
+            <span class="tutorial-key">
+              SPACE
+              <small>JUMP</small>
+            </span>
 
-  <span class="tutorial-key">
-    Q
-    <small>BLADE</small>
-  </span>
+            <span class="tutorial-key">
+              E
+              <small>FIRE</small>
+            </span>
 
-  <span class="tutorial-key">
-    SHIFT
-    <small>DASH</small>
-  </span>
+            <span class="tutorial-key">
+              Q
+              <small>BLADE</small>
+            </span>
 
-  <span class="tutorial-key">
-    ESC
-    <small>PAUSE</small>
-  </span>
-</div>
+            <span class="tutorial-key">
+              SHIFT
+              <small>DASH</small>
+            </span>
+
+            <span class="tutorial-key">
+              ESC
+              <small>PAUSE</small>
+            </span>
+
+          </div>
         </div>
 
         <div class="tutorial-quick-grid">
@@ -1254,7 +1589,13 @@ window.addEventListener(
       </div>
     `;
 
-    panel.classList.remove('hidden');
+    /*
+     * IMPORTANT:
+     * Do this AFTER the content has been created but BEFORE
+     * returning from the function.
+     */
+
+    showHomePanel(panel);
 
     content
       .querySelectorAll(
@@ -1264,7 +1605,10 @@ window.addEventListener(
 
         button.addEventListener(
           'click',
-          () => {
+          event => {
+
+            event.preventDefault();
+            event.stopPropagation();
 
             const open =
               button.getAttribute(
@@ -1281,7 +1625,7 @@ window.addEventListener(
                 '.tutorial-accordion'
               );
 
-            const panel =
+            const tutorialPanel =
               article?.querySelector(
                 '.tutorial-panel'
               );
@@ -1290,9 +1634,10 @@ window.addEventListener(
               button.querySelector('b');
 
             if (
-              panel instanceof HTMLElement
+              tutorialPanel instanceof HTMLElement
             ) {
-              panel.hidden = open;
+              tutorialPanel.hidden =
+                open;
             }
 
             if (
@@ -1316,7 +1661,7 @@ window.addEventListener(
     return true;
   };
 
-   /* =========================================================
+  /* =========================================================
      ACTIVE CONTRACT
      ========================================================= */
 
@@ -1391,15 +1736,18 @@ window.addEventListener(
         }
 
         if (missionEl) {
-          missionEl.textContent = '—';
+          missionEl.textContent =
+            '—';
         }
 
         if (rewardEl) {
-          rewardEl.textContent = '+0 XP';
+          rewardEl.textContent =
+            '+0 XP';
         }
 
         if (creditsEl) {
-          creditsEl.textContent = '+0 CREDITS';
+          creditsEl.textContent =
+            '+0 CREDITS';
         }
 
         return;
@@ -1474,6 +1822,7 @@ window.addEventListener(
         creditsEl.textContent =
           `+${credits.toLocaleString()} CREDITS`;
       }
+
     } catch (error) {
       console.error(
         '[RelayRunner] Active contract sync failed:',
@@ -1487,8 +1836,11 @@ window.addEventListener(
      ========================================================= */
 
   const setHomeState = () => {
-    const intro = $('intro');
-    const visible = introVisible();
+    const intro =
+      $('intro');
+
+    const visible =
+      introVisible();
 
     document.body.classList.toggle(
       'home-v3-active',
@@ -1500,30 +1852,40 @@ window.addEventListener(
       visible
     );
 
-    if (!visible) return;
+    if (!visible) {
+      return;
+    }
 
     const start =
-      intro?.querySelector('#start');
+      intro?.querySelector(
+        '#start'
+      );
 
     forceStartVisible(start);
-    syncHomeProfile();
+
+    void syncHomeProfile();
   };
 
-    /* =========================================================
-     HOME TYPEWRITER
-     ========================================================= */
-
-  
-     /* =========================================================
-     HOME TYPEWRITER LOOP
+  /* =========================================================
+     TYPEWRITER
      ========================================================= */
 
   const startHomeTypewriter = () => {
-    const target = $('homeV4Typewriter');
+    const target =
+      $('homeV4Typewriter');
 
     if (!(target instanceof HTMLElement)) {
       return;
     }
+
+    if (
+      target.dataset.typewriterStarted === '1'
+    ) {
+      return;
+    }
+
+    target.dataset.typewriterStarted =
+      '1';
 
     const text =
       'RUN THE SLEEPING CITY. CARRY THE SIGNAL. KEEP THE LINE ALIVE. EVERY ROOFTOP IS PART OF THE NETWORK.';
@@ -1537,32 +1899,58 @@ window.addEventListener(
     const pauseAfterDeleting = 700;
 
     const run = () => {
+      if (!document.body.contains(target)) {
+        return;
+      }
+
       if (!deleting) {
         if (index < text.length) {
-          target.textContent += text.charAt(index);
+          target.textContent +=
+            text.charAt(index);
+
           index += 1;
 
-          window.setTimeout(run, typeSpeed);
+          window.setTimeout(
+            run,
+            typeSpeed
+          );
+
           return;
         }
 
         deleting = true;
 
-        window.setTimeout(run, pauseAfterTyping);
+        window.setTimeout(
+          run,
+          pauseAfterTyping
+        );
+
         return;
       }
 
       if (index > 0) {
         index -= 1;
-        target.textContent = text.substring(0, index);
 
-        window.setTimeout(run, deleteSpeed);
+        target.textContent =
+          text.substring(
+            0,
+            index
+          );
+
+        window.setTimeout(
+          run,
+          deleteSpeed
+        );
+
         return;
       }
 
       deleting = false;
 
-      window.setTimeout(run, pauseAfterDeleting);
+      window.setTimeout(
+        run,
+        pauseAfterDeleting
+      );
     };
 
     target.textContent = '';
@@ -1572,6 +1960,9 @@ window.addEventListener(
     run();
   };
 
+  /* =========================================================
+     BIND ONCE
+     ========================================================= */
 
   const bindOnce = (
     node,
@@ -1591,7 +1982,8 @@ window.addEventListener(
       return;
     }
 
-    node.dataset[key] = '1';
+    node.dataset[key] =
+      '1';
 
     node.addEventListener(
       event,
@@ -1600,35 +1992,131 @@ window.addEventListener(
   };
 
   /* =========================================================
+     HOME COMMAND ROUTER
+     ========================================================= */
+
+  const routeHomeAction = (
+    action,
+    event
+  ) => {
+    if (!action) {
+      return;
+    }
+
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    switch (action) {
+
+      case 'faq':
+        openFaq();
+        break;
+
+      case 'update':
+        openUpdate();
+        break;
+
+      case 'tutorial':
+        openHomeTutorial();
+        break;
+
+      case 'options':
+        openOptions();
+        break;
+
+      case 'daily': {
+        const target =
+          document.querySelector(
+            '#pauseMenu [data-tab="challenges"]'
+          );
+
+        if (
+          target instanceof HTMLElement &&
+          !target.disabled
+        ) {
+          HTMLElement.prototype.click.call(
+            target
+          );
+
+          break;
+        }
+
+        const fallback =
+          document.querySelector(
+            '[data-relay-info="challenges"]'
+          );
+
+        if (
+          fallback instanceof HTMLElement &&
+          !fallback.disabled
+        ) {
+          HTMLElement.prototype.click.call(
+            fallback
+          );
+        }
+
+        break;
+      }
+
+      case 'contracts': {
+        if (
+          typeof window.relayOpenContracts !==
+          'function'
+        ) {
+          console.error(
+            '[RelayRunner] Contracts API not ready'
+          );
+
+          break;
+        }
+
+        try {
+          window.relayOpenContracts();
+        } catch (error) {
+          console.error(
+            '[RelayRunner] Contracts open failed:',
+            error
+          );
+        }
+
+        break;
+      }
+
+      default:
+        break;
+    }
+  };
+
+  /* =========================================================
      BUILD HOME
      ========================================================= */
 
   const buildHome = () => {
-    const intro = $('intro');
+    const intro =
+      $('intro');
 
     if (
-      !intro ||
+      !(intro instanceof HTMLElement) ||
       intro.dataset.homeV4Built === '1'
     ) {
       return;
     }
 
-    /*
-     * Preserve references to the original
-     * gameplay entry buttons.
-     *
-     * The existing game runtime owns their
-     * actual gameplay behaviour.
-     */
-const sourceStart = $('start');
-const sourceContinue = $('continue');
+    intro.dataset.homeV4Built =
+      '1';
 
-    intro.dataset.homeV4Built = '1';
-    intro.classList.add('home-v3');
+    intro.classList.add(
+      'home-v3'
+    );
+
     intro.replaceChildren();
 
     const scene =
-      document.createElement('div');
+      document.createElement(
+        'div'
+      );
 
     scene.className =
       'home-v4-scene';
@@ -1636,6 +2124,12 @@ const sourceContinue = $('continue');
     scene.setAttribute(
       'aria-hidden',
       'true'
+    );
+
+    scene.style.setProperty(
+      'pointer-events',
+      'none',
+      'important'
     );
 
     scene.innerHTML = `
@@ -1663,65 +2157,79 @@ const sourceContinue = $('continue');
     `;
 
     const shell =
-      document.createElement('div');
+      document.createElement(
+        'div'
+      );
 
     shell.className =
       'home-v4-shell';
 
+    shell.style.setProperty(
+      'pointer-events',
+      'auto',
+      'important'
+    );
+
+    shell.style.setProperty(
+      'position',
+      'relative'
+    );
+
+    shell.style.setProperty(
+      'z-index',
+      '20',
+      'important'
+    );
+
     shell.innerHTML = `
- 
-  <header class="home-v4-topbar">
+      <header class="home-v4-topbar">
 
-  <div
-    class="home-v4-brand"
-    aria-label="Relay Runner"
-  >
-    <span class="home-v4-brand-mark">
-      R/
-    </span>
+        <div
+          class="home-v4-brand"
+          aria-label="Relay Runner"
+        >
+          <span class="home-v4-brand-mark">
+            R/
+          </span>
 
-    <span>
-      RELAY RUNNER
-    </span>
-  </div>
+          <span>
+            RELAY RUNNER
+          </span>
+        </div>
 
-  <div class="home-v4-topbar-right">
+        <div class="home-v4-topbar-right">
 
-    <!-- CREDITS MOVED TO HOME FOOTER -->
+          <div
+            class="home-v4-credits"
+            aria-label="Credits"
+          >
+            <span
+              class="home-v4-credits-icon"
+              aria-hidden="true"
+            >
+              ◈
+            </span>
 
-   <div class="home-v4-topbar-right">
+            <span class="home-v4-credits-data">
+              <small>CREDITS</small>
+              <strong id="homeV4Credits">0</strong>
+            </span>
+          </div>
 
-  <div
-    class="home-v4-credits"
-    aria-label="Credits"
-  >
-    <span
-      class="home-v4-credits-icon"
-      aria-hidden="true"
-    >
-      ◈
-    </span>
+          <div
+            class="home-v4-status"
+            aria-label="System status"
+          >
+            <span class="home-v4-status-dot"></span>
 
-    <span class="home-v4-credits-data">
-      <small>CREDITS</small>
-      <strong id="homeV4Credits">0</strong>
-    </span>
-  </div>
+            <b>SYSTEM ONLINE</b>
 
-  <div
-    class="home-v4-status"
-    aria-label="System status"
-  >
-      <span class="home-v4-status-dot"></span>
+            <span>NIGHT SHIFT</span>
+          </div>
 
-      <b>SYSTEM ONLINE</b>
+        </div>
 
-      <span>NIGHT SHIFT</span>
-    </div>
-
-  </div>
-
-</header>
+      </header>
 
       <main class="home-v4-main">
 
@@ -1729,6 +2237,7 @@ const sourceContinue = $('continue');
           class="home-v4-copy"
           aria-labelledby="homeV4Title"
         >
+
           <p class="home-v4-kicker">
             CHAPTER 01 / OLD QUARTER
           </p>
@@ -1744,99 +2253,110 @@ const sourceContinue = $('continue');
             ROOFTOP RELAY // LIVE NETWORK
           </p>
 
-         <p class="home-v4-description home-v4-typewriter">
-  <span id="homeV4Typewriter"></span>
-  <span class="home-v4-cursor" aria-hidden="true">▌</span>
-</p>
+          <p class="home-v4-description home-v4-typewriter">
+            <span id="homeV4Typewriter"></span>
+            <span
+              class="home-v4-cursor"
+              aria-hidden="true"
+            >▌</span>
+          </p>
 
-   <div
-  class="home-v4-actions"
-  aria-label="Main menu"
->
+          <div
+            class="home-v4-actions"
+            aria-label="Main menu"
+          >
 
-  <button
-    id="start"
-    class="home-v4-primary home-v5-start"
-    type="button"
-    aria-label="Start Run"
-  >
-    <span
-      class="home-v5-start-glow"
-      aria-hidden="true"
-    ></span>
+            <button
+              id="start"
+              class="home-v4-primary home-v5-start"
+              type="button"
+              aria-label="Start Run"
+            >
 
-    <span
-      class="home-v5-start-scan"
-      aria-hidden="true"
-    ></span>
+              <span
+                class="home-v5-start-glow"
+                aria-hidden="true"
+              ></span>
 
-    <span
-      class="home-v4-primary-content"
-    >
-      <span class="home-v5-start-main">
-        <span
-          class="home-v5-start-label"
-        >
-          START RUN
-        </span>
+              <span
+                class="home-v5-start-scan"
+                aria-hidden="true"
+              ></span>
 
-        <small
-          class="home-v5-start-sub"
-        >
-          DEPLOY TO OLD QUARTER
-        </small>
-      </span>
+              <span
+                class="home-v4-primary-content"
+              >
 
-      <span
-        class="home-v5-start-key"
-        aria-hidden="true"
-      >
-        ENTER
-      </span>
+                <span class="home-v5-start-main">
 
-      <span
-        class="home-v4-primary-arrow"
-        aria-hidden="true"
-      >
-        →
-      </span>
-    </span>
+                  <span
+                    class="home-v5-start-label"
+                  >
+                    START RUN
+                  </span>
 
-    <span
-      class="home-v5-start-ready"
-      aria-hidden="true"
-    >
-      READY
-    </span>
-  </button>
+                  <small
+                    class="home-v5-start-sub"
+                  >
+                    DEPLOY TO OLD QUARTER
+                  </small>
 
-  <button
-    id="continue"
-    class="home-v4-secondary hidden"
-    type="button"
-    aria-label="Continue last run"
-  >
-    <span class="home-v5-continue-icon">
-      ↻
-    </span>
+                </span>
 
-    <span class="home-v5-continue-copy">
-      <strong>CONTINUE</strong>
+                <span
+                  class="home-v5-start-key"
+                  aria-hidden="true"
+                >
+                  ENTER
+                </span>
 
-      <small>
-        RESUME LAST RUN
-      </small>
-    </span>
+                <span
+                  class="home-v4-primary-arrow"
+                  aria-hidden="true"
+                >
+                  →
+                </span>
 
-    <span
-      class="home-v5-continue-arrow"
-      aria-hidden="true"
-    >
-      →
-    </span>
-  </button>
+              </span>
 
-</div>
+              <span
+                class="home-v5-start-ready"
+                aria-hidden="true"
+              >
+                READY
+              </span>
+
+            </button>
+
+            <button
+              id="continue"
+              class="home-v4-secondary hidden"
+              type="button"
+              aria-label="Continue last run"
+            >
+
+              <span class="home-v5-continue-icon">
+                ↻
+              </span>
+
+              <span class="home-v5-continue-copy">
+                <strong>CONTINUE</strong>
+
+                <small>
+                  RESUME LAST RUN
+                </small>
+              </span>
+
+              <span
+                class="home-v5-continue-arrow"
+                aria-hidden="true"
+              >
+                →
+              </span>
+
+            </button>
+
+          </div>
 
           <p class="home-v4-micro">
             <b>DEPLOYMENT READY</b>
@@ -1847,6 +2367,7 @@ const sourceContinue = $('continue');
             class="home-v5-relay-status"
             aria-label="Relay deployment status"
           >
+
             <div
               class="home-v5-relay-status-head"
             >
@@ -1874,6 +2395,7 @@ const sourceContinue = $('continue');
             <div
               class="home-v5-relay-status-meta"
             >
+
               <span>
                 <small>CHANNEL</small>
                 <b>01</b>
@@ -1888,11 +2410,10 @@ const sourceContinue = $('continue');
                 <small>STATUS</small>
                 <b>READY</b>
               </span>
+
             </div>
+
           </div>
-            <!-- =================================================
-               ACTIVE CONTRACT
-               ================================================= -->
 
           <article
             class="home-v4-contract"
@@ -1902,6 +2423,7 @@ const sourceContinue = $('continue');
             <div
               class="home-v4-contract-head"
             >
+
               <div>
                 <span
                   class="home-v4-contract-kicker"
@@ -1922,11 +2444,13 @@ const sourceContinue = $('continue');
               >
                 AVAILABLE
               </span>
+
             </div>
 
             <div
               class="home-v4-contract-main"
             >
+
               <span
                 id="homeV4ContractCode"
                 class="home-v4-contract-code"
@@ -1947,15 +2471,15 @@ const sourceContinue = $('continue');
               >
                 READING AVAILABLE CONTRACT DATA...
               </p>
+
             </div>
 
             <div
               class="home-v4-contract-meta"
             >
+
               <div>
-                <small>
-                  MISSION
-                </small>
+                <small>MISSION</small>
 
                 <b
                   id="homeV4ContractMission"
@@ -1965,9 +2489,7 @@ const sourceContinue = $('continue');
               </div>
 
               <div>
-                <small>
-                  REWARD
-                </small>
+                <small>REWARD</small>
 
                 <b
                   id="homeV4ContractReward"
@@ -1977,9 +2499,7 @@ const sourceContinue = $('continue');
               </div>
 
               <div>
-                <small>
-                  PAYLOAD
-                </small>
+                <small>PAYLOAD</small>
 
                 <b
                   id="homeV4ContractCredits"
@@ -1987,11 +2507,13 @@ const sourceContinue = $('continue');
                   +0 CREDITS
                 </b>
               </div>
+
             </div>
 
             <div
               class="home-v4-contract-bottom"
             >
+
               <span>
                 CONTRACT NETWORK // READY
               </span>
@@ -2003,12 +2525,11 @@ const sourceContinue = $('continue');
               >
                 OPEN CONTRACTS
 
-                <span
-                  aria-hidden="true"
-                >
+                <span aria-hidden="true">
                   →
                 </span>
               </button>
+
             </div>
 
           </article>
@@ -2020,69 +2541,78 @@ const sourceContinue = $('continue');
           aria-label="Current mission"
         >
 
-         <aside
-  class="home-v5-live-feed"
-  aria-label="Relay network status"
->
-  <div class="home-v5-panel-head">
-    <span>RELAY NETWORK</span>
-    <b><i></i> LIVE</b>
-  </div>
+          <aside
+            class="home-v5-live-feed"
+            aria-label="Relay network status"
+          >
 
-  <div class="home-v5-network-status">
+            <div class="home-v5-panel-head">
+              <span>RELAY NETWORK</span>
 
-    <div class="home-v5-network-row">
-      <span>
-        <i></i>
-        CORE
-      </span>
+              <b>
+                <i></i>
+                LIVE
+              </b>
+            </div>
 
-      <strong>ONLINE</strong>
-    </div>
+            <div class="home-v5-network-status">
 
-    <div class="home-v5-network-row">
-      <span>
-        <i></i>
-        SIGNAL
-      </span>
+              <div class="home-v5-network-row">
+                <span>
+                  <i></i>
+                  CORE
+                </span>
 
-      <strong>STABLE</strong>
-    </div>
+                <strong>ONLINE</strong>
+              </div>
 
-    <div class="home-v5-network-row">
-      <span>
-        <i></i>
-        CONTRACTS
-      </span>
+              <div class="home-v5-network-row">
+                <span>
+                  <i></i>
+                  SIGNAL
+                </span>
 
-      <strong>READY</strong>
-    </div>
+                <strong>STABLE</strong>
+              </div>
 
-    <div class="home-v5-network-row">
-      <span>
-        <i></i>
-        CHANNEL
-      </span>
+              <div class="home-v5-network-row">
+                <span>
+                  <i></i>
+                  CONTRACTS
+                </span>
 
-      <strong>SECURE</strong>
-    </div>
+                <strong>READY</strong>
+              </div>
 
-  </div>
+              <div class="home-v5-network-row">
+                <span>
+                  <i></i>
+                  CHANNEL
+                </span>
 
-  <div class="home-v5-feed-line">
-    <span>&gt;</span>
-    <strong id="homeV5LastRunFeed">
-      LAST RUN // READY
-    </strong>
-  </div>
-</aside>
+                <strong>SECURE</strong>
+              </div>
+
+            </div>
+
+            <div class="home-v5-feed-line">
+              <span>&gt;</span>
+
+              <strong id="homeV5LastRunFeed">
+                LAST RUN // READY
+              </strong>
+            </div>
+
+          </aside>
 
           <article
             class="home-v4-mission"
           >
+
             <div
               class="home-v4-mission-head"
             >
+
               <span
                 class="home-v4-mission-label"
               >
@@ -2094,6 +2624,7 @@ const sourceContinue = $('continue');
               >
                 RR-01 / NIGHT
               </span>
+
             </div>
 
             <h2
@@ -2113,23 +2644,21 @@ const sourceContinue = $('continue');
             <div
               class="home-v5-last-run"
             >
+
               <div
                 class="home-v5-last-run-head"
               >
-                <span>
-                  LAST RUN
-                </span>
-
-                <b>
-                  TELEMETRY
-                </b>
+                <span>LAST RUN</span>
+                <b>TELEMETRY</b>
               </div>
 
               <div
                 class="home-v5-telemetry-grid"
               >
+
                 <div>
                   <small>TIME</small>
+
                   <strong
                     id="homeV5RunTime"
                   >
@@ -2139,6 +2668,7 @@ const sourceContinue = $('continue');
 
                 <div>
                   <small>SIGNALS</small>
+
                   <strong
                     id="homeV5RunSignals"
                   >
@@ -2148,6 +2678,7 @@ const sourceContinue = $('continue');
 
                 <div>
                   <small>SCORE</small>
+
                   <strong
                     id="homeV5RunScore"
                   >
@@ -2157,24 +2688,26 @@ const sourceContinue = $('continue');
 
                 <div>
                   <small>RATING</small>
+
                   <strong
                     id="homeV5RunRating"
                   >
                     —
                   </strong>
                 </div>
+
               </div>
+
             </div>
 
             <div
               class="home-v4-stat-grid"
             >
+
               <div
                 class="home-v4-stat"
               >
-                <small>
-                  MISSION XP
-                </small>
+                <small>MISSION XP</small>
 
                 <b
                   id="homeV4MissionXp"
@@ -2186,9 +2719,7 @@ const sourceContinue = $('continue');
               <div
                 class="home-v4-stat"
               >
-                <small>
-                  BEST RATING
-                </small>
+                <small>BEST RATING</small>
 
                 <b
                   id="homeV4BestRating"
@@ -2196,12 +2727,10 @@ const sourceContinue = $('continue');
                   —
                 </b>
               </div>
-            </div>
-                 </article>
 
-                   <!-- =================================================
-               DAILY OPERATION
-               ================================================= -->
+            </div>
+
+          </article>
 
           <article
             class="home-v4-daily"
@@ -2211,6 +2740,7 @@ const sourceContinue = $('continue');
             <div
               class="home-v4-daily-head"
             >
+
               <div>
                 <span
                   class="home-v4-daily-kicker"
@@ -2229,11 +2759,13 @@ const sourceContinue = $('continue');
               >
                 IN PROGRESS
               </span>
+
             </div>
 
             <div
               class="home-v4-daily-main"
             >
+
               <span
                 class="home-v4-daily-code"
               >
@@ -2253,17 +2785,17 @@ const sourceContinue = $('continue');
               >
                 READING RELAY NETWORK OBJECTIVE...
               </p>
+
             </div>
 
             <div
               class="home-v4-daily-progress"
             >
+
               <div
                 class="home-v4-daily-progress-meta"
               >
-                <span>
-                  PROGRESS
-                </span>
+                <span>PROGRESS</span>
 
                 <strong
                   id="homeV4DailyProgress"
@@ -2281,18 +2813,19 @@ const sourceContinue = $('continue');
                   style="width:0%"
                 ></i>
               </div>
+
             </div>
 
             <div
               class="home-v4-daily-bottom"
             >
+
               <div
                 class="home-v4-daily-rewards"
               >
+
                 <div>
-                  <small>
-                    REWARD
-                  </small>
+                  <small>REWARD</small>
 
                   <b
                     id="homeV4DailyReward"
@@ -2302,9 +2835,7 @@ const sourceContinue = $('continue');
                 </div>
 
                 <div>
-                  <small>
-                    PAYLOAD
-                  </small>
+                  <small>PAYLOAD</small>
 
                   <b
                     id="homeV4DailyCredits"
@@ -2312,6 +2843,7 @@ const sourceContinue = $('continue');
                     +0 CREDITS
                   </b>
                 </div>
+
               </div>
 
               <button
@@ -2321,111 +2853,140 @@ const sourceContinue = $('continue');
               >
                 CHALLENGES
 
-                <span
-                  aria-hidden="true"
-                >
+                <span aria-hidden="true">
                   →
                 </span>
               </button>
+
             </div>
 
           </article>
 
+          <article
+            class="home-v4-unlock"
+            aria-label="Next unlock"
+          >
 
-        
+            <div class="home-v4-unlock-head">
+              <span>NEXT UNLOCK</span>
 
-        <article
-  class="home-v4-unlock"
-  aria-label="Next unlock"
->
-  <div class="home-v4-unlock-head">
-    <span>NEXT UNLOCK</span>
-    <b id="homeV4UnlockLevel">LV 08</b>
-  </div>
+              <b id="homeV4UnlockLevel">
+                LV 08
+              </b>
+            </div>
 
-  <h3 id="homeV4UnlockTitle">
-    SECTOR 02 // SKYLINE
-  </h3>
+            <h3 id="homeV4UnlockTitle">
+              SECTOR 02 // SKYLINE
+            </h3>
 
-  <p id="homeV4UnlockDesc">
-    Reach the required level to unlock the next district.
-  </p>
+            <p id="homeV4UnlockDesc">
+              Reach the required level to unlock the next district.
+            </p>
 
-  <div class="home-v4-unlock-progress">
-    <div class="home-v4-unlock-meta">
-      <span>PROGRESS</span>
-      <strong id="homeV4UnlockText">0%</strong>
-    </div>
+            <div class="home-v4-unlock-progress">
 
-    <div class="home-v4-unlock-bar">
-      <i id="homeV4UnlockFill" style="width:0%"></i>
-    </div>
-  </div>
-</article>
+              <div class="home-v4-unlock-meta">
+                <span>PROGRESS</span>
 
-<div
-  class="home-v4-activity"
-  aria-label="Recent activity"
->
-  <div class="home-v4-activity-head">
-    <span>RECENT ACTIVITY</span>
-    <b>LIVE FEED</b>
-  </div>
+                <strong id="homeV4UnlockText">
+                  0%
+                </strong>
+              </div>
 
-  <div class="home-v4-activity-list">
+              <div class="home-v4-unlock-bar">
+                <i
+                  id="homeV4UnlockFill"
+                  style="width:0%"
+                ></i>
+              </div>
 
-    <div class="home-v4-activity-item">
-      <span class="home-v4-activity-dot"></span>
-      <div>
-        <strong id="homeV4ActivityOne">
-          NETWORK READY
-        </strong>
-        <small id="homeV4ActivityOneMeta">
-          RELAY CHANNEL // 01
-        </small>
-      </div>
-    </div>
+            </div>
 
-    <div class="home-v4-activity-item">
-      <span class="home-v4-activity-dot"></span>
-      <div>
-        <strong id="homeV4ActivityTwo">
-          AWAITING FIRST RUN
-        </strong>
-        <small id="homeV4ActivityTwoMeta">
-          TELEMETRY // STANDBY
-        </small>
-      </div>
-    </div>
+          </article>
 
-    <div class="home-v4-activity-item">
-      <span class="home-v4-activity-dot"></span>
-      <div>
-        <strong id="homeV4ActivityThree">
-          CONTRACT NETWORK READY
-        </strong>
-        <small id="homeV4ActivityThreeMeta">
-          CONTRACTS // ONLINE
-        </small>
-      </div>
-    </div>
+          <div
+            class="home-v4-activity"
+            aria-label="Recent activity"
+          >
 
-  </div>
-</div>
+            <div class="home-v4-activity-head">
+              <span>RECENT ACTIVITY</span>
+              <b>LIVE FEED</b>
+            </div>
 
-<div
-  class="home-v4-badge"
->
-  LIVE RELAY CHANNEL // 01
-</div>
+            <div class="home-v4-activity-list">
+
+              <div class="home-v4-activity-item">
+
+                <span
+                  class="home-v4-activity-dot"
+                ></span>
+
+                <div>
+                  <strong id="homeV4ActivityOne">
+                    NETWORK READY
+                  </strong>
+
+                  <small id="homeV4ActivityOneMeta">
+                    RELAY CHANNEL // 01
+                  </small>
+                </div>
+
+              </div>
+
+              <div class="home-v4-activity-item">
+
+                <span
+                  class="home-v4-activity-dot"
+                ></span>
+
+                <div>
+                  <strong id="homeV4ActivityTwo">
+                    AWAITING FIRST RUN
+                  </strong>
+
+                  <small id="homeV4ActivityTwoMeta">
+                    TELEMETRY // STANDBY
+                  </small>
+                </div>
+
+              </div>
+
+              <div class="home-v4-activity-item">
+
+                <span
+                  class="home-v4-activity-dot"
+                ></span>
+
+                <div>
+                  <strong id="homeV4ActivityThree">
+                    CONTRACT NETWORK READY
+                  </strong>
+
+                  <small id="homeV4ActivityThreeMeta">
+                    CONTRACTS // ONLINE
+                  </small>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="home-v4-badge">
+            LIVE RELAY CHANNEL // 01
+          </div>
 
           <aside
             class="home-v4-profile"
             aria-label="Runner profile"
           >
+
             <div
               class="home-v4-profile-head"
             >
+
               <div>
                 <span
                   class="home-v4-profile-kicker"
@@ -2443,11 +3004,13 @@ const sourceContinue = $('continue');
               >
                 LIVE
               </span>
+
             </div>
 
             <div
               class="home-v4-profile-rank"
             >
+
               <div>
                 <small>RANK</small>
 
@@ -2463,17 +3026,17 @@ const sourceContinue = $('continue');
                   01
                 </b>
               </div>
+
             </div>
 
             <div
               class="home-v4-profile-xp"
             >
+
               <div
                 class="home-v4-profile-xp-meta"
               >
-                <span>
-                  XP PROGRESS
-                </span>
+                <span>XP PROGRESS</span>
 
                 <strong
                   id="homeV4XpText"
@@ -2490,15 +3053,15 @@ const sourceContinue = $('continue');
                   style="width:0%"
                 ></i>
               </div>
+
             </div>
 
             <div
               class="home-v4-profile-stats"
             >
+
               <div>
-                <small>
-                  BEST RUN
-                </small>
+                <small>BEST RUN</small>
 
                 <b id="homeV4BestRun">
                   0
@@ -2506,9 +3069,7 @@ const sourceContinue = $('continue');
               </div>
 
               <div>
-                <small>
-                  RUNS
-                </small>
+                <small>RUNS</small>
 
                 <b id="homeV4Runs">
                   0
@@ -2516,14 +3077,13 @@ const sourceContinue = $('continue');
               </div>
 
               <div>
-                <small>
-                  SIGNALS
-                </small>
+                <small>SIGNALS</small>
 
                 <b id="homeV4Signals">
                   0
                 </b>
               </div>
+
             </div>
 
             <div
@@ -2537,66 +3097,68 @@ const sourceContinue = $('continue');
                 ONLINE
               </b>
             </div>
+
           </aside>
 
         </section>
+
       </main>
 
-   <footer
-  class="home-v4-bottom"
->
-  <div
-    class="home-v4-bottom-left"
-  >
+      <footer
+        class="home-v4-bottom"
+      >
 
-    <button
-      class="home-v4-utility"
-      type="button"
-      data-home-v4-action="faq"
-      aria-label="Open FAQ"
-    >
-      ? &nbsp;FAQ
-    </button>
+        <div
+          class="home-v4-bottom-left"
+        >
 
-    <button
-      class="home-v4-utility"
-      type="button"
-      data-home-v4-action="update"
-      aria-label="Open latest update"
-    >
-      ↗ &nbsp;UPDATE
-    </button>
+          <button
+            class="home-v4-utility"
+            type="button"
+            data-home-v4-action="faq"
+            aria-label="Open FAQ"
+          >
+            ? &nbsp;FAQ
+          </button>
 
-  <!-- CREDITS REMAIN IN TOPBAR -->
+          <button
+            class="home-v4-utility"
+            type="button"
+            data-home-v4-action="update"
+            aria-label="Open latest update"
+          >
+            ↗ &nbsp;UPDATE
+          </button>
 
-    <button
-      class="home-v4-utility home-v4-tutorial"
-      type="button"
-      data-home-v4-action="tutorial"
-      aria-label="Open tutorial"
-    >
-      ◉ &nbsp;TUTORIAL
-    </button>
+          <button
+            class="home-v4-utility home-v4-tutorial"
+            type="button"
+            data-home-v4-action="tutorial"
+            aria-label="Open tutorial"
+          >
+            ◉ &nbsp;TUTORIAL
+          </button>
 
-    <button
-      class="home-v4-utility"
-      type="button"
-      data-home-v4-action="options"
-      aria-label="Open options"
-    >
-      ⚙ &nbsp;OPTIONS
-    </button>
+          <button
+            class="home-v4-utility"
+            type="button"
+            data-home-v4-action="options"
+            aria-label="Open options"
+          >
+            ⚙ &nbsp;OPTIONS
+          </button>
 
-  </div>
+        </div>
 
-  <div
-    class="home-v4-bottom-meta"
-  >
-    RELAY NETWORK
-    <b>ONLINE</b>
-    · V1.1.0
-  </div>
-</footer>
+        <div
+          class="home-v4-bottom-meta"
+        >
+          RELAY NETWORK
+          <b>ONLINE</b>
+          · V1.1.0
+        </div>
+
+      </footer>
 
       <button
         id="exitTitle"
@@ -2609,40 +3171,39 @@ const sourceContinue = $('continue');
       </button>
     `;
 
-      intro.append(
+    intro.append(
       scene,
       shell
     );
 
     /* =========================================================
-       HOME V5 // FINAL COMMAND LAYOUT
-       Move existing presentation-only elements into their
-       final visual zones without duplicating state or handlers.
+       HOME V5 // COMMAND ROW
        ========================================================= */
 
     const homeCopy =
-      shell.querySelector('.home-v4-copy');
+      shell.querySelector(
+        '.home-v4-copy'
+      );
 
     const homeActions =
-      shell.querySelector('.home-v4-actions');
+      shell.querySelector(
+        '.home-v4-actions'
+      );
 
     const homeDaily =
-      shell.querySelector('.home-v4-daily');
+      shell.querySelector(
+        '.home-v4-daily'
+      );
 
-    /*
-     * START + DAILY OPERATION
-     *
-     * Daily Operation is already the canonical Home presentation
-     * of the existing daily challenge system. We only move its
-     * existing DOM node; no new state or handlers are created.
-     */
     if (
       homeCopy instanceof HTMLElement &&
       homeActions instanceof HTMLElement &&
       homeDaily instanceof HTMLElement
     ) {
       const commandRow =
-        document.createElement('div');
+        document.createElement(
+          'div'
+        );
 
       commandRow.className =
         'home-v5-command-row';
@@ -2658,240 +3219,189 @@ const sourceContinue = $('continue');
       );
     }
 
-  startHomeTypewriter();
-installHomeScrollStatus();
-syncHomeProfile();
+    /* =========================================================
+       INITIAL HOME SYNC
+       ========================================================= */
+
+    startHomeTypewriter();
+
+    installHomeScrollStatus();
+
+    void syncHomeProfile();
+
+    /* =========================================================
+       CENTRAL HOME ACTION ROUTER
+       ========================================================= */
 
     bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="faq"]'
-      ),
+      shell,
       'click',
       event => {
-        event.preventDefault();
-        openFaq();
-      }
-    );
-
-    bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="update"]'
-      ),
-      'click',
-      event => {
-        event.preventDefault();
-        openUpdate();
-      }
-    );
-
-          bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="daily"]'
-      ),
-      'click',
-      event => {
-        event.preventDefault();
-
-        /*
-         * Open the existing Challenges system.
-         * Home does not create a duplicate challenge UI.
-         */
         const target =
-          document.querySelector(
-            '#pauseMenu [data-tab="challenges"]'
+          event.target instanceof Element
+            ? event.target
+            : null;
+
+        if (!target) {
+          return;
+        }
+
+        const button =
+          target.closest(
+            '[data-home-v4-action]'
           );
 
         if (
-          target instanceof HTMLElement
+          !(button instanceof HTMLElement) ||
+          !shell.contains(button)
         ) {
-          HTMLElement.prototype.click.call(
-            target
+          return;
+        }
+
+        const action =
+          button.getAttribute(
+            'data-home-v4-action'
+          );
+
+        if (!action) {
+          return;
+        }
+
+        routeHomeAction(
+          action,
+          event
+        );
+      }
+    );
+
+    /* =========================================================
+       INTERACTION HARDENING
+       ========================================================= */
+
+    shell
+      .querySelectorAll(
+        '[data-home-v4-action]'
+      )
+      .forEach(button => {
+
+        if (
+          !(button instanceof HTMLElement)
+        ) {
+          return;
+        }
+
+        button.style.setProperty(
+          'pointer-events',
+          'auto',
+          'important'
+        );
+
+        button.style.setProperty(
+          'position',
+          'relative'
+        );
+
+        button.style.setProperty(
+          'z-index',
+          '30',
+          'important'
+        );
+
+        button.style.setProperty(
+          'touch-action',
+          'manipulation'
+        );
+      });
+
+    scene.style.setProperty(
+      'pointer-events',
+      'none',
+      'important'
+    );
+
+    /* =========================================================
+       START
+       ========================================================= */
+
+    const start =
+      shell.querySelector(
+        '#start'
+      );
+
+    forceStartVisible(start);
+
+    bindOnce(
+      start,
+      'click',
+      event => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (
+          typeof window.relayStartRun !==
+          'function'
+        ) {
+          console.error(
+            '[RelayRunner] Start route is not ready'
           );
 
           return;
         }
 
-        const fallback =
-          document.querySelector(
-            '[data-relay-info="challenges"]'
-          );
-
-        if (
-          fallback instanceof HTMLElement
-        ) {
-          HTMLElement.prototype.click.call(
-            fallback
-          );
-        }
+        window.relayStartRun();
       }
     );
 
- bindOnce(
-  shell.querySelector(
-    '[data-home-v4-action="contracts"]'
-  ),
-  'click',
-  event => {
-    event.preventDefault();
-    event.stopImmediatePropagation();
+    /* =========================================================
+       CONTINUE
+       ========================================================= */
 
-    if (
-      typeof window.relayOpenContracts !==
-      'function'
-    ) {
-      console.error(
-        '[RelayRunner] Contracts API not ready'
+    const continueButton =
+      shell.querySelector(
+        '#continue'
       );
-      return;
-    }
 
-    window.relayOpenContracts();
-  }
-);
-       /* CREDITS IS DISPLAYED IN THE TOPBAR */
-
-    bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="tutorial"]'
-      ),
-      'click',
-      event => {
-        event.preventDefault();
-        openHomeTutorial();
-      }
-    );
-
-    bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="options"]'
-      ),
-      'click',
-      event => {
-        event.preventDefault();
-        openOptions();
-      }
-    );
-    /*
-     * START
-     *
-     * The Home button forwards to the
-     * original gameplay-owned button.
-     */
-    const start =
-      shell.querySelector('#start');
-
-    forceStartVisible(start);
-
-bindOnce(
-  start,
-  'click',
-  event => {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    try {
-      const loader = window.relayPlayDeploymentV1;
-
-      if (loader && typeof loader.show === 'function') {
-        void loader.show({
-          missionNumber: 1,
-          desktop: './assets/loadplay.jpg',
-          mobile: './assets/loadplaymobile.jpg',
-
-          beforeRoute: async () => {
-            const target = document.querySelector(
-              'body > #game > div[hidden] #start'
-            );
-
-            if (target instanceof HTMLElement) {
-              HTMLElement.prototype.click.call(target);
-            }
-          }
-        });
-
+    const syncContinue = () => {
+      if (
+        !(continueButton instanceof HTMLElement)
+      ) {
         return;
       }
 
-      const target = document.querySelector(
-        'body > #game > div[hidden] #start'
+      continueButton.classList.remove(
+        'hidden'
       );
 
-      if (target instanceof HTMLElement) {
-        HTMLElement.prototype.click.call(target);
-      }
-    } catch (error) {
-      console.error(
-        '[RelayRunner] Deployment loader error:',
-        error
+      continueButton.removeAttribute(
+        'hidden'
       );
-    }
-  }
-);
 
-    /*
-     * CONTINUE
-     */
+      continueButton.style.setProperty(
+        'display',
+        'inline-flex',
+        'important'
+      );
 
-    const continueButton =
-      shell.querySelector('#continue');
+      continueButton.style.setProperty(
+        'visibility',
+        'visible',
+        'important'
+      );
 
-  const syncContinue = () => {
-  if (!(continueButton instanceof HTMLElement)) {
-    return;
-  }
+      continueButton.style.setProperty(
+        'opacity',
+        '1',
+        'important'
+      );
 
-  continueButton.classList.remove('hidden');
-  continueButton.removeAttribute('hidden');
-
-  continueButton.style.setProperty(
-    'display',
-    'inline-flex',
-    'important'
-  );
-
-  continueButton.style.setProperty(
-    'visibility',
-    'visible',
-    'important'
-  );
-
-  continueButton.style.setProperty(
-    'opacity',
-    '1',
-    'important'
-  );
-
-  continueButton.style.setProperty(
-    'pointer-events',
-    'auto',
-    'important'
-  );
-};
+      continueButton.style.setProperty(
+        'pointer-events',
+        'auto',
+        'important'
+      );
+    };
 
     syncContinue();
-
-    if (
-      sourceContinue instanceof HTMLElement &&
-      sourceContinue !== continueButton &&
-      !sourceContinue.dataset.homeV4Observed
-    ) {
-      sourceContinue.dataset.homeV4Observed =
-        '1';
-
-      new MutationObserver(
-        syncContinue
-      ).observe(
-        sourceContinue,
-        {
-          attributes: true,
-          attributeFilter: [
-            'class',
-            'style',
-            'hidden'
-          ]
-        }
-      );
-    }
 
     bindOnce(
       continueButton,
@@ -2900,54 +3410,99 @@ bindOnce(
         event.preventDefault();
 
         if (
-          !(sourceContinue instanceof HTMLElement)
+          typeof window.relayContinueRun !==
+          'function'
         ) {
+          console.error(
+            '[RelayRunner] Continue route is not ready'
+          );
+
           return;
         }
 
-        try {
-          HTMLElement.prototype.click.call(
-            sourceContinue
-          );
-        } catch {}
+        window.relayContinueRun();
       }
+    );
+
+    /* =========================================================
+       HOME READY SIGNAL
+       ========================================================= */
+
+    intro.dataset.homeV4Ready =
+      '1';
+
+    window.dispatchEvent(
+      new CustomEvent(
+        'relay:home-ready',
+        {
+          detail: {
+            version: 'v4'
+          }
+        }
+      )
     );
   };
 
-    /* =========================================================
+  /* =========================================================
      HOME SCROLL STATUS
      ========================================================= */
 
   const installHomeScrollStatus = () => {
-    if (document.documentElement.dataset.homeScrollStatus === '1') {
+    if (
+      document.documentElement.dataset
+        .homeScrollStatus === '1'
+    ) {
       return;
     }
 
-    document.documentElement.dataset.homeScrollStatus = '1';
+    document.documentElement.dataset
+      .homeScrollStatus = '1';
 
-    let lastScrollY = window.scrollY;
+    let lastScrollY =
+      window.scrollY;
 
-    window.addEventListener('scroll', () => {
-      const intro = $('intro');
+    window.addEventListener(
+      'scroll',
+      () => {
+        const intro =
+          $('intro');
 
-      if (!(intro instanceof HTMLElement)) {
-        return;
+        if (
+          !(intro instanceof HTMLElement)
+        ) {
+          return;
+        }
+
+        const currentScrollY =
+          window.scrollY;
+
+        if (
+          currentScrollY >
+            lastScrollY &&
+          currentScrollY > 10
+        ) {
+          intro.classList.add(
+            'is-scrolling'
+          );
+        }
+
+        if (
+          currentScrollY <
+          lastScrollY
+        ) {
+          intro.classList.remove(
+            'is-scrolling'
+          );
+        }
+
+        lastScrollY =
+          currentScrollY;
+      },
+      {
+        passive: true
       }
-
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY > lastScrollY && currentScrollY > 10) {
-        intro.classList.add('is-scrolling');
-      }
-
-      if (currentScrollY < lastScrollY) {
-        intro.classList.remove('is-scrolling');
-      }
-
-      lastScrollY = currentScrollY;
-    }, { passive:true });
+    );
   };
-
 
   /* =========================================================
      KEYBOARD
@@ -2974,7 +3529,9 @@ bindOnce(
           return;
         }
 
-        if (event.key === 'Enter') {
+        if (
+          event.key === 'Enter'
+        ) {
           const active =
             document.activeElement;
 
@@ -2987,11 +3544,16 @@ bindOnce(
             tag !== 'TEXTAREA'
           ) {
             event.preventDefault();
-            clickExisting('#start');
+
+            clickExisting(
+              '#start'
+            );
           }
         }
 
-        if (event.key === 'Escape') {
+        if (
+          event.key === 'Escape'
+        ) {
           const title =
             $('titlePanel');
 
@@ -2999,22 +3561,58 @@ bindOnce(
             $('relayInfoPanel');
 
           if (
-            !title?.classList.contains(
+            title &&
+            !title.classList.contains(
               'hidden'
             )
           ) {
             title.classList.add(
               'hidden'
             );
+
+            title.setAttribute(
+              'aria-hidden',
+              'true'
+            );
+
+            title.style.setProperty(
+              'visibility',
+              'hidden',
+              'important'
+            );
+
+            title.style.setProperty(
+              'pointer-events',
+              'none',
+              'important'
+            );
           }
 
           if (
-            !info?.classList.contains(
+            info &&
+            !info.classList.contains(
               'hidden'
             )
           ) {
             info.classList.add(
               'hidden'
+            );
+
+            info.setAttribute(
+              'aria-hidden',
+              'true'
+            );
+
+            info.style.setProperty(
+              'visibility',
+              'hidden',
+              'important'
+            );
+
+            info.style.setProperty(
+              'pointer-events',
+              'none',
+              'important'
             );
           }
         }
@@ -3027,45 +3625,68 @@ bindOnce(
      ========================================================= */
 
   const boot = () => {
-    buildHome();
-    setHomeState();
-    installKeyboard();
+    try {
+      buildHome();
+      setHomeState();
+      installKeyboard();
 
-    const intro = $('intro');
+      const intro =
+        $('intro');
 
-    if (
-      intro &&
-      intro.dataset.homeV4Observed !== '1'
-    ) {
-      intro.dataset.homeV4Observed =
-        '1';
+      if (
+        intro &&
+        intro.dataset.homeV4Observed !== '1'
+      ) {
+        intro.dataset.homeV4Observed =
+          '1';
 
-      new MutationObserver(
-        setHomeState
-      ).observe(
-        intro,
-        {
-          attributes: true,
-          attributeFilter: [
-            'class',
-            'style',
-            'hidden'
-          ]
-        }
+        new MutationObserver(
+          mutations => {
+            const relevant =
+              mutations.some(
+                mutation =>
+                  mutation.type ===
+                  'attributes'
+              );
+
+            if (relevant) {
+              setHomeState();
+            }
+          }
+        ).observe(
+          intro,
+          {
+            attributes: true,
+            attributeFilter: [
+              'class',
+              'style',
+              'hidden'
+            ]
+          }
+        );
+      }
+
+    } catch (error) {
+      console.error(
+        '[RelayRunner] Home V4 boot failed:',
+        error
       );
     }
   };
 
   if (
-    document.readyState === 'loading'
+    document.readyState ===
+    'loading'
   ) {
     document.addEventListener(
       'DOMContentLoaded',
       boot,
-      { once: true }
+      {
+        once: true
+      }
     );
   } else {
     boot();
   }
-})();
 
+})();

@@ -67251,7 +67251,10 @@ const y =
   this.wallJumpTimer =
     0;
 
-  this.firstPersonCamera =
+   this.firstPersonCamera =
+    false;
+
+  this.flightMode =
     false;
 
   if (
@@ -71081,6 +71084,9 @@ if (wasWaterDeath) {
     }
   );
 
+  const previousEmpTimer =
+    this.empTimer;
+
   this.empTimer =
     Math.max(
       0,
@@ -71111,7 +71117,10 @@ if (wasWaterDeath) {
         delta
     );
 
-  if (!this.empTimer) {
+  if (
+    previousEmpTimer > 0 &&
+    this.empTimer === 0
+  ) {
     this.enemies
       ?.getChildren()
       .forEach(
@@ -72160,10 +72169,14 @@ if (wasWaterDeath) {
       canWallJump
     )
   ) {
-    if (canWallJump) {
+        if (canWallJump) {
       body.setVelocityX(
         445 *
           wallDirection
+      );
+
+      body.setVelocityY(
+        RUNNER_TUNING.jumpVelocity
       );
 
       this.wallJumpCooldown =
@@ -72397,7 +72410,7 @@ const isDoubleJump =
   !onGround &&
   this.jumpsUsed >= 1;
 
-if (isDoubleJump) {
+if (!canWallJump) {
 
   if (isDoubleJump) {
     body.setVelocityY(
@@ -72978,8 +72991,7 @@ if (isDoubleJump) {
     !this.wasGrounded &&
     this.fallSpeed > 80
   ) {
-  hardLanding =
-    this.landingTimer > 0 &&
+   hardLanding =
     this.fallSpeed > 260;
 
   if (this.graphicsLevel >= 1) {
