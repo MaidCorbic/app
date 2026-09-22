@@ -1724,7 +1724,7 @@ import { loadState, saveState } from './src/state.js';
             '#titlePanelContent'
           )
         : root.querySelector(
-            '#panelContent'
+            '#panelContent, .relay-pause-content'
           );
 
     if (!host) {
@@ -1855,12 +1855,11 @@ import { loadState, saveState } from './src/state.js';
 
     const tab =
       pause.querySelector(
-        '[data-tab="settings"]'
+        '[data-pause-tab="settings"], [data-tab="settings"]'
       );
 
-    return tab?.classList.contains(
-      'active'
-    )
+    return tab?.classList.contains('active') ||
+      tab?.classList.contains('is-active')
       ? pause
       : null;
   };
@@ -2367,7 +2366,7 @@ import { loadState, saveState } from './src/state.js';
 
         const pauseSettings =
           target.closest(
-            '#pauseMenu [data-tab="settings"]'
+            '#pauseMenu [data-pause-tab="settings"], #pauseMenu [data-tab="settings"]'
           );
 
         if (
