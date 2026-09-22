@@ -2111,6 +2111,21 @@ box-shadow:
     }
   `;
 
+  style.textContent += `
+#play .relay-faction-dialogue[hidden]{display:none!important;}
+#play .relay-faction-dialogue:not([hidden]){
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+#play .relay-faction-dialogue .relay-faction-dialogue-core,
+#play .relay-faction-dialogue .relay-faction-header,
+#play .relay-faction-dialogue .relay-faction-tactical{
+  min-width:0!important;
+  min-height:0!important;
+}
+`;
+
   document.head.appendChild(style);
 }
 
