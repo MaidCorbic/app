@@ -25,6 +25,9 @@ const core = await read('src/systems/core-stability.js');
 const cargo = await read('cargo-integrity-v2.js');
 const runner = await read('src/scenes/RunnerScene.js');
 const state = await read('src/state.js');
+const unifiedBridge = await read('unified-cinematic-ui-bridge-v1.js');
+const performanceGuard = await read('src/systems/performance-guard.js');
+const factionDialogue = await read('src/systems/enemy-dialogue-v1.js');
 
 assert.equal(packageJson.scripts['test:final-stability']?.length > 0, true, 'final stability suite must remain wired');
 assert.equal(packageJson.scripts['test:release-ux-gameplay-polish'], 'node tests/release-ux-gameplay-polish.mjs', 'release UX/gameplay polish suite must remain wired');
@@ -162,6 +165,11 @@ assert.match(cargo, /saveState\(state\);/);
 await assert.rejects(access(fileURLToPath(new URL('../vite.config.js', gameRoot))), /ENOENT/, 'legacy Vite config must not return');
 
 const actionCount = (index.match(/data-mobile-action=/g) || []).length;
+assert.match(main, /systems\/performance-guard\.js/);
+assert.match(performanceGuard, /coarse/);
+assert.match(factionDialogue, /\.relay-faction-dialogue\[hidden\]\{display:none!important;\}/);
+assert.match(factionDialogue, /\.relay-faction-dialogue:not\(\[hidden\]\)\{/);
+assert.match(unifiedBridge, /pause\.classList\.add\('hidden'\)/);
 assert.equal(actionCount, 6, 'touch action surface must stay at exactly six controls');
 
 console.log('Release hardening contract: PASS');
