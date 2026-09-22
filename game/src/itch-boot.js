@@ -36,13 +36,16 @@ const boot = async () => {
   await import('./main.js');
   resetInitialPauseState();
 
+  // Load the deployment API before Home so the visible Home button
+  // never depends on a later optional module becoming available.
+  await optional('deployment-loader', () => import('../play-deployment-loader-v1.js'));
+
   // Presentation and enhancement layers are fail-soft by design.
   await optional('home-options', () => import('../home-options.js'));
   await optional('home-v4', () => import('../home-v3.js'));
   await optional('home-v4-guard', () => import('../home-v3-guard.js'));
   await optional('home-v4-interaction', () => import('../home-v3-interaction-fix.js'));
   await optional('play-intro', () => import('../play-intro-cinematic-v2.js'));
-  await optional('deployment-loader', () => import('../play-deployment-loader-v1.js'));
   await optional('menu-music', () => import('../menu-music.js'));
   await optional('player-profile', () => import('../player-profile-v1.js'));
   await optional('pause-interactions', () => import('../pause-interactions.js'));
