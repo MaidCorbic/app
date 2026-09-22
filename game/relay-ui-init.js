@@ -53,6 +53,7 @@ import './mobile-ui-cleanup-v1.css';
 import './release-ux-gameplay-polish-v1.css';
 import './canonical-ui-v1.css';
 import './release-final-ui-v1.css';
+import './itch-performance-faction-fix-v1.css';
 
 
 // ============================================================
