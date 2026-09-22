@@ -2544,3 +2544,42 @@ body.home-v3-active #phaser-game{
     letter-spacing:.08em;
   }
 }
+
+
+/* =========================================================
+   HOME BOOT SAFETY — MISSION / GAMEPLAY MUST NOT BLEED THROUGH
+   ========================================================= */
+
+body.home-v3-active #play,
+#intro:not(.hidden) ~ #play {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+body.home-v3-active #play .hud,
+body.home-v3-active #play .world-marker,
+body.home-v3-active #play .input-guide,
+body.home-v3-active #play .mobile-controls,
+body.home-v3-active #play #gameplayActionDock,
+body.home-v3-active #play #phaser-game {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.home-v3-active #play [id*="mission"],
+body.home-v3-active #play [class*="mission"],
+body.home-v3-active #play [id*="Mission"],
+body.home-v3-active #play [class*="Mission"] {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Home must never render a gameplay Mission card. */
+#intro.home-v3 .home-v4-mission-wrap,
+#intro.home-v3 [data-home-mission],
+#intro.home-v3 .mission-panel {
+  display: none !important;
+}
