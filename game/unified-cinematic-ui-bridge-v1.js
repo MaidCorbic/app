@@ -50,6 +50,14 @@
     }
 
     if (pause && visible('pauseMenu') && !isUnified('pauseMenu')) {
+      /* Ignore accidental pause-menu reveals while the Home screen is active. */
+      const intro = document.getElementById('intro');
+      if (intro instanceof HTMLElement && !intro.classList.contains('hidden')) {
+        pause.classList.add('hidden');
+        pause.setAttribute('aria-hidden', 'true');
+        return;
+      }
+
       api.openPause('resume');
     }
   };
