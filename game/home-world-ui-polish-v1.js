@@ -140,10 +140,13 @@
   }
 
   function startMusic() {
-    try { window.relayGameplayAudioStartV3?.start?.(); } catch {}
     try {
-      const music = window.relayAdaptiveMusic;
-      if (music) { music.setEnabled?.(true); music.unlock?.().then?.(() => music.start?.()).catch?.(() => {}); }
+      window.relayAdaptiveMusic?.stop?.();
+      window.relayAdaptiveMusic?.setEnabled?.(false);
+    } catch {}
+
+    try {
+      void window.relayGameplayAudioStartV3?.start?.();
     } catch {}
   }
 
