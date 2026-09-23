@@ -12,6 +12,7 @@
  */
 
 import { RELAY_FAQ } from './faq.js';
+import gameplayMusicUrl from './assets/audio/music.mp3';
 
 (() => {
   'use strict';
@@ -2746,12 +2747,7 @@ const startGameplayMusic = async () => {
      */
     if (!relayGameplayAudio) {
       relayGameplayAudio =
-        new Audio(
-          new URL(
-            './assets/audio/music.mp3',
-            import.meta.url
-          ).href
-        );
+        new Audio(gameplayMusicUrl);
 
       relayGameplayAudio.loop = true;
       relayGameplayAudio.preload = 'auto';
