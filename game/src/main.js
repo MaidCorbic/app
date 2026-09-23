@@ -233,145 +233,14 @@ window.relayProceduralAudio = {
 };
 
 function startHomeAudio() {
-  if (state.muted || audioBed?.missionId === 'home') return;
-
+  /* Procedural music disabled: gameplay uses the supplied MP3. */
   stopAudioBed();
-
-  const context = getAudioContext();
-
-  if (!context) return;
-
-  const ambientGain = context.createGain();
-  ambientGain.gain.value = .014 * state.musicVolume;
-  ambientGain.connect(context.destination);
-
-  const drone = context.createOscillator();
-  drone.type = 'sine';
-  drone.frequency.value = 49;
-  drone.connect(ambientGain);
-  drone.start();
-
-  const shimmerGain = context.createGain();
-  shimmerGain.gain.value = .007 * state.musicVolume;
-  shimmerGain.connect(context.destination);
-
-  const shimmer = context.createOscillator();
-  shimmer.type = 'triangle';
-  shimmer.frequency.value = 196;
-  shimmer.detune.value = 7;
-  shimmer.connect(shimmerGain);
-  shimmer.start();
-
-  audioBed = {
-    nodes: [drone, shimmer],
-    gains: [ambientGain, shimmerGain],
-    missionId: 'home'
-  };
-
-  const notes = [146.83, 220, 293.66, 246.94];
-  let noteIndex = 0;
-
-  musicTimer = window.setInterval(() => {
-    if (
-      !state.muted &&
-      !$('intro').classList.contains('hidden')
-    ) {
-      playTone(
-        notes[noteIndex++ % notes.length],
-        .9,
-        'sine',
-        .009 * state.musicVolume,
-        true
-      );
-    }
-  }, 1600);
 }
 
 function startAudioBed(mission = missions[missionIndex]) {
-  if (state.muted || audioBed?.missionId === mission?.id) return;
-
+  /* Procedural gameplay music disabled: gameplay uses the supplied MP3. */
   stopAudioBed();
-
-  const context = getAudioContext();
-
-  if (!context) return;
-
-  const ambientGain = context.createGain();
-  ambientGain.gain.value = .018 * state.musicVolume;
-  ambientGain.connect(context.destination);
-
-  const hum = context.createOscillator();
-  hum.type = 'sine';
-  hum.frequency.value = 55;
-  hum.connect(ambientGain);
-  hum.start();
-
-  const buffer = context.createBuffer(
-    1,
-    context.sampleRate * 2,
-    context.sampleRate
-  );
-
-  const samples = buffer.getChannelData(0);
-
-  for (let index = 0; index < samples.length; index++) {
-    samples[index] =
-      (Math.random() * 2 - 1) * .16;
-  }
-
-  const city = context.createBufferSource();
-  const cityFilter = context.createBiquadFilter();
-  const cityGain = context.createGain();
-
-  city.loop = true;
-  city.buffer = buffer;
-
-  cityFilter.type = 'lowpass';
-  cityFilter.frequency.value = 420;
-
-  cityGain.gain.value = .035 * state.musicVolume;
-
-  city
-    .connect(cityFilter)
-    .connect(cityGain)
-    .connect(context.destination);
-
-  city.start();
-
-  audioBed = {
-    nodes: [hum, city],
-    gains: [ambientGain, cityGain],
-    missionId: mission?.id
-  };
-
-  const notes = ({
-    'first-delivery': [146.83, 220, 293.66, 349.23],
-    'dead-drop': [130.81, 196, 261.63, 329.63],
-    blackout: [110, 164.81, 220, 246.94],
-    pursuit: [164.81, 246.94, 329.63, 493.88],
-    'signal-storm': [146.83, 220, 329.63, 440],
-    'corporate-lockdown': [123.47, 185, 277.18, 369.99],
-    'final-relay': [196, 293.66, 392, 587.33]
-  })[mission?.id] || [
-    146.83,
-    220,
-    293.66,
-    349.23
-  ];
-
-  let noteIndex = 0;
-
-  musicTimer = window.setInterval(() => {
-    if (!state.muted) {
-      playTone(
-        notes[noteIndex++ % notes.length],
-        .42,
-        'triangle',
-        .012 * state.musicVolume,
-        true
-      );
-    }
-  }, 1220);
+  return;
 }
 
 document
