@@ -126,6 +126,38 @@
   };
 
   export class RunnerScene extends Phaser.Scene {
+      canRenderDecoration(minimumLevel = 1) {
+    const level = Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
+    return (
+      !this.motionReduced &&
+      level >= minimumLevel &&
+      this.scene?.isActive?.() !== false
+    );
+  }
+
+  getDecorationLimit(defaultLimit = 100) {
+    const level = Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
+    if (level <= 0) {
+      return 0;
+    }
+
+    if (level === 1) {
+      return Math.min(defaultLimit, 24);
+    }
+
+    if (level === 2) {
+      return Math.min(defaultLimit, 60);
+    }
+
+    return Math.min(defaultLimit, 100);
+  }
+
   constructor() {
     super('runner');
 
@@ -334,14 +366,19 @@
     this.graphicsQuality =
       quality;
 
-    this.graphicsLevel = {
+     this.graphicsLevel = {
       LOW: 0,
       MEDIUM: 1,
       HIGH: 2,
       ULTRA: 3
     }[quality];
 
+    this.motionReduced =
+      this.motionReduced ||
+      this.graphicsLevel === 0;
+
     this.graphicsSettings = {
+
       quality,
       level: this.graphicsLevel,
       effects: true,
@@ -896,10 +933,18 @@
   this.voiceSerial =
     voiceSerial;
 
-  const utterance =
-    new SpeechSynthesisUtterance(
-      text
-    );
+ const UtteranceConstructor =
+  window.SpeechSynthesisUtterance ||
+  globalThis.SpeechSynthesisUtterance;
+
+if (typeof UtteranceConstructor !== 'function') {
+  this.voiceSpeaking = false;
+  return;
+}
+
+const utterance =
+  new UtteranceConstructor(text);
+
 
     utterance.lang =
       'en-US';
@@ -1046,7 +1091,7 @@
   setupNarrationVoice() {
     if (
       typeof window === 'undefined' ||
-      !('speechSynthesis' in window)
+      !window.speechSynthesis
     ) {
       return;
     }
@@ -1058,10 +1103,9 @@
       );
     }
 
-    this.narrationHandler =
-      text => {
-        this.speakNarration(text);
-      };
+    this.narrationHandler = text => {
+      this.speakNarration(text);
+    };
 
     this.game.events.on(
       'narration',
@@ -1081,49 +1125,53 @@
     loadVoices();
 
     if (
-      'onvoiceschanged' in
-      window.speechSynthesis
+      typeof window.speechSynthesis.addEventListener ===
+      'function'
     ) {
-  const previousHandler =
-    window.speechSynthesis.onvoiceschanged;
-
-  this.voicePreviousVoicesChangedHandler =
-    typeof previousHandler === 'function'
-      ? previousHandler
-      : null;
-
       this.voiceVoicesChangedHandler =
-        () => {
-          loadVoices();
+        loadVoices;
 
-          if (
-            typeof previousHandler === 'function' &&
-            previousHandler !==
-              this.voiceVoicesChangedHandler
-          ) {
-            try {
-              previousHandler.call(
-                window.speechSynthesis
-              );
-            } catch (error) {
-              console.warn(
-                '[AI VOICE] Previous voiceschanged handler failed:',
-                error
-              );
-            }
-          }
-        };
-
-      window.speechSynthesis.onvoiceschanged =
-        this.voiceVoicesChangedHandler;
+      window.speechSynthesis.addEventListener(
+        'voiceschanged',
+        this.voiceVoicesChangedHandler
+      );
     }
   }
 
+
   createTextures() {
-  const make = (key, width, height, draw) => {
-  const graphics = this.make.graphics({ add: false });
-  draw(graphics); graphics.generateTexture(key, width, height); graphics.destroy();
-  };
+const make = (key, width, height, draw) => {
+  if (
+    typeof key !== 'string' ||
+    !Number.isFinite(width) ||
+    !Number.isFinite(height) ||
+    typeof draw !== 'function'
+  ) {
+    return;
+  }
+
+  if (this.textures.exists(key)) {
+    return;
+  }
+
+  const graphics =
+    this.make.graphics({
+      add: false
+    });
+
+  try {
+    draw(graphics);
+
+    graphics.generateTexture(
+      key,
+      Math.max(1, Math.floor(width)),
+      Math.max(1, Math.floor(height))
+    );
+  } finally {
+    graphics.destroy();
+  }
+};
+
 
   const runner = (key, leftLeg, rightLeg, arm) =>
     make(key, 48, 64, g => {
@@ -3510,17 +3558,9 @@
   }
 
   createAnimations() {
-    if (this.anims.exists('runner-idle') &&
-        this.anims.exists('runner-run') &&
-        this.anims.exists('runner-jump') &&
-        this.anims.exists('runner-fall') &&
-        this.anims.exists('runner-land') &&
-        this.anims.exists('runner-dash') &&
-        this.anims.exists('runner-wall') &&
-        this.anims.exists('runner-hit') &&
-        this.anims.exists('runner-finish')) {
-      return;
-    }
+ if (this.anims.exists('runner-idle')) {
+  return;
+}
 
     // ------------------------------------------------------------
     // IDLE
@@ -3629,13 +3669,32 @@
     firstTimeTutorial = false
   } = {}) {
   this.mission = mission || {};
-  this.mission.spawn ??= { x: 0, y: 0 };
-  this.mission.goal ??= { x: this.mission.spawn.x + 1200, y: this.mission.spawn.y };
+
+  this.mission.spawn = {
+    x: Number(this.mission.spawn?.x) || 0,
+    y: Number(this.mission.spawn?.y) || 0
+  };
+
+  this.mission.goal = {
+    x:
+      Number(this.mission.goal?.x) ||
+      this.mission.spawn.x + 1200,
+    y:
+      Number(this.mission.goal?.y) ||
+      this.mission.spawn.y
+  };
+
   this.runId = runId;
   this.abilities = new Set(abilities || []);
   this.rainEnabled = rain;
   this.screenShake = screenShake;
-  this.motionReduced = reducedMotion;
+  this.motionReduced =
+    Boolean(
+      reducedMotion ||
+      String(graphicsQuality).toUpperCase() === 'LOW'
+    );
+this.reducedMotionRequested =
+  Boolean(reducedMotion);
 
   const savedGraphicsQuality =
     typeof window !== 'undefined' &&
@@ -3666,7 +3725,17 @@
     ULTRA: 3
   }[this.graphicsQuality];
 
+  // LOW disables expensive animated visual systems.
+  this.reducedMotionRequested =
+    Boolean(reducedMotion);
+
+  this.motionReduced =
+    this.reducedMotionRequested ||
+    this.graphicsLevel === 0;
+
+
   this.graphicsSettings = {
+
     quality: this.graphicsQuality,
     level: this.graphicsLevel,
     effects: true,
@@ -3980,7 +4049,7 @@
 
   this.objectiveHUD = null;
   this.objectiveProgressBar = null;
-  this.objectiveProgressText = null;;
+  this.objectiveProgressText = null;
 
   this.checkpoint = {
     x: this.mission.spawn.x,
@@ -4010,34 +4079,74 @@
 
   validateMission() {
     const mission = this.mission || {};
-    mission.spawn ??= { x: 0, y: 0 };
-    mission.goal ??= { x: mission.spawn.x + 1200, y: mission.spawn.y };
-  for (const key of [
-    'platforms',
-    'obstacles',
-    'movingGates',
-    'enemies',
-    'signals',
-    'secrets',
-    'checkpoints',
-    'boostPads',
-    'guides',
-    'safeZones',
-    'events',
-    'waterZones',
-  'relayGates'
-  ]) {
-    if (!Array.isArray(this.mission[key])) {
-      this.mission[key] = [];
-    }
-  }
-    mission.enemies = mission.enemies.map(enemy => ({
-      ...enemy,
-      min: Number.isFinite(enemy?.min) ? enemy.min : (Number(enemy?.x) || mission.spawn.x) - 90,
-      max: Number.isFinite(enemy?.max) ? enemy.max : (Number(enemy?.x) || mission.spawn.x) + 90
-    }));
+
+    mission.spawn = {
+      
+      x: Number(mission.spawn?.x) || 0,
+      y: Number(mission.spawn?.y) || 0
+    };
+
+    mission.goal = {
+      x:
+        Number(mission.goal?.x) ||
+        mission.spawn.x + 1200,
+      y:
+        Number(mission.goal?.y) ||
+        mission.spawn.y
+    };
+
+    const arrayFields = [
+      'platforms',
+      'obstacles',
+      'movingGates',
+      'enemies',
+      'signals',
+      'secrets',
+      'checkpoints',
+      'boostPads',
+      'guides',
+      'safeZones',
+      'events',
+      'waterZones',
+      'relayGates'
+    ];
+
+    arrayFields.forEach(key => {
+      if (!Array.isArray(mission[key])) {
+        mission[key] = [];
+      }
+    });
+
+    mission.enemies =
+      mission.enemies.map(enemy => {
+        const enemyX =
+          Number(enemy?.x) ||
+          mission.spawn.x;
+
+        return {
+          ...enemy,
+
+          x: enemyX,
+
+          y:
+            Number(enemy?.y) ||
+            mission.spawn.y,
+
+          min:
+            Number.isFinite(enemy?.min)
+              ? Number(enemy.min)
+              : enemyX - 90,
+
+          max:
+            Number.isFinite(enemy?.max)
+              ? Number(enemy.max)
+              : enemyX + 90
+        };
+      });
+
     this.mission = mission;
   }
+
 
   /*
   * ============================================================
@@ -4567,38 +4676,56 @@
     this.applyGraphicsSettings();
 
     this.validateMission();
-  const requiredTextures = [
-    'runner-idle',
-    'runner-run-a',
-    'runner-run-b',
-    'runner-jump',
-    'runner-fall',
-    'runner-land',
-    'runner-dash',
-    'runner-wall',
-    'runner-hit',
-    'runner-finish',
-    'signal',
-    'shark',
-    'barrier',
-    'goal',
-    'rain',
-    'dust',
-    'speed-line',
-    'boost-pad',
-    'chaser',
-    'checkpoint',
-    'security',
-    'guard',
-    'enemy-runner',
-    'invader',
-    'chicken',
-    'dino',
+const requiredTextures = [
+  'runner-idle',
+  'runner-run-a',
+  'runner-run-b',
+  'runner-jump',
+  'runner-fall',
+  'runner-land',
+  'runner-dash',
+  'runner-wall',
+  'runner-hit',
+  'runner-finish',
+
+  'signal',
+  'shark',
+  'barrier',
+  'goal',
+  'rain',
+  'dust',
+  'speed-line',
+
+  'boost-pad',
+  'spring-pad',
+  'checkpoint',
+  'shield',
+  'kinetic-ball',
+  'blaster',
+  'sword',
+  'plasma',
+  'turret',
+
+  'chaser',
+  'security',
+  'guard',
+  'enemy-runner',
+  'invader',
+  'chicken',
+  'dino',
+  'alien-ground',
+
+  'egg',
+  'comet',
+
   'dino-boss',
   'sentinel-boss',
   'storm-boss',
-  'blaster'
-  ];
+  'apex-boss',
+
+  'guide-drone',
+  'alien-guide'
+];
 
   if (
     requiredTextures.some(
@@ -4915,7 +5042,12 @@
   });
 
   if (this.mission.gravityMode === 'low') {
-    for (let index = 0; index < 86; index++) {
+     for (
+    let index = 0;
+    index < this.getDecorationLimit(86);
+    index++
+  ) {
+
       const x = (index * 137) % 1500;
       const y = (index * 71) % 500;
 
@@ -5091,15 +5223,20 @@
       .setScrollFactor(0)
       .setDepth(3);
 
-  const environment = {
-    'first-delivery': ['LANTERN ROOFS', 0xffd06e],
-    'dead-drop': ['HARBOR FOG', 0xffbd5b],
-    blackout: ['EMERGENCY GRID', 0x8df4ff],
-    pursuit: ['RAIL STORM', 0xff826e],
-    'signal-storm': ['CROWN TEMPEST', 0xb993ff],
-    'corporate-lockdown': ['HELIX SIEGE', 0xff826e],
-    'final-relay': ['APEX ORBIT', 0xffe0a8]
-  }[this.mission.id];
+  const environment =
+    {
+      'first-delivery': ['LANTERN ROOFS', 0xffd06e],
+      'dead-drop': ['HARBOR FOG', 0xffbd5b],
+      blackout: ['EMERGENCY GRID', 0x8df4ff],
+      pursuit: ['RAIL STORM', 0xff826e],
+      'signal-storm': ['CROWN TEMPEST', 0xb993ff],
+      'corporate-lockdown': ['HELIX SIEGE', 0xff826e],
+      'final-relay': ['APEX ORBIT', 0xffe0a8]
+    }[this.mission?.id] || [
+      'UNKNOWN DISTRICT',
+      0x8df4ff
+    ];
+
 
   sky
     .fillStyle(environment[1], .08)
@@ -32124,7 +32261,10 @@ if (
   }
 
   createWorldLandmarks() {
-  const visual = DISTRICT_VISUALS[this.mission.id];
+const visual =
+  DISTRICT_VISUALS[this.mission?.id] ||
+  DISTRICT_VISUALS['first-delivery'];
+
   const world = this.add.graphics();
 
   // Lamps, directional signs, and the distant relay tower make the route readable without UI text.
@@ -40786,7 +40926,6 @@ const landmarkRingA =
   )
   .setDepth(10);
 
-  this.player.body
   // ============================================================
   // PLAYER PHYSICS BODY · STANDING / CROUCH
   // ============================================================
@@ -40990,6 +41129,39 @@ const landmarkRingA =
     this.input.keyboard.enabled = true;
   }
 
+  if (!this.keys || !this.cursors) {
+  console.error(
+    '[RunnerScene] Keyboard input is unavailable; gameplay update disabled.'
+  );
+
+   this.keys = {
+    A: { isDown: false },
+    D: { isDown: false },
+    C: { isDown: false },
+    F: { isDown: false },
+    W: { isDown: false },
+    S: { isDown: false },
+    E: { isDown: false },
+    Q: { isDown: false },
+    R: { isDown: false },
+    X: { isDown: false },
+    SPACE: { isDown: false },
+    SHIFT: { isDown: false },
+    ONE: { isDown: false },
+    TWO: { isDown: false },
+    THREE: { isDown: false },
+    FOUR: { isDown: false },
+    ESC: { isDown: false }
+  };
+
+  this.cursors = {
+    left: { isDown: false },
+    right: { isDown: false },
+    up: { isDown: false },
+    down: { isDown: false }
+  };
+}
+
   if (this.keys) {
     this.keys.A.enabled = true;
     this.keys.D.enabled = true;
@@ -41003,6 +41175,7 @@ const landmarkRingA =
     this.keys.X.enabled = true;
   }
 
+  
   this.flightMode = false;
   this.flightSpeed = 420;
 
@@ -41126,22 +41299,25 @@ const landmarkRingA =
     );
   };
 
-  window.addEventListener(
-    'keydown',
-    this.rawKeyboardDownHandler,
-    true
-  );
+  if (typeof window !== 'undefined') {
+    window.addEventListener(
+      'keydown',
+      this.rawKeyboardDownHandler,
+      true
+    );
 
-  window.addEventListener(
-    'keyup',
-    this.rawKeyboardUpHandler,
-    true
-  );
+    window.addEventListener(
+      'keyup',
+      this.rawKeyboardUpHandler,
+      true
+    );
 
-  window.addEventListener(
-    'blur',
-    this.rawKeyboardBlurHandler
-  );
+    window.addEventListener(
+      'blur',
+      this.rawKeyboardBlurHandler
+    );
+  }
+
 
   this.mobileActions = {
     jump: false,
@@ -43709,22 +43885,20 @@ const landmarkRingA =
       220 + strength * 90,
     ease: 'Sine.out',
     onComplete: () => {
-      if (ring.active) {
-        ring.destroy();
-      }
+      ring?.destroy?.();
+      foam?.destroy?.();
 
-      if (foam.active) {
-        foam.destroy();
-      }
-
-      if (this.waterWaveObjects) {
+      if (Array.isArray(this.waterWaveObjects)) {
         this.waterWaveObjects =
           this.waterWaveObjects.filter(
             object =>
-              object?.active
+              object &&
+              object.active
           );
       }
     }
+
+
   });
   }
 
@@ -45112,11 +45286,14 @@ const landmarkRingA =
 
     if (
       this.motionReduced ||
-      graphicsLevel < 2
+      graphicsLevel < 2 ||
+      !Array.isArray(this.mission?.waterZones) ||
+      this.waterWavesCreated
     ) {
       return;
     }
 
+    this.waterWavesCreated = true;
     this.waterWaveObjects = [];
     this.waterWaveTimers = [];
 
@@ -46043,11 +46220,15 @@ const landmarkRingA =
         }
       );
 
-      this.waterWaveObjects = [];
+          this.waterWaveObjects = [];
     }
+
+    this.waterWavesCreated = false;
   }
 
+
   shutdown() {
+    if (typeof window !== 'undefined') {
     if (this.rawKeyboardDownHandler) {
       window.removeEventListener(
         'keydown',
@@ -46070,6 +46251,8 @@ const landmarkRingA =
         this.rawKeyboardBlurHandler
       );
     }
+  }
+
 
     this.rawKeyboardState = null;
     this.rawKeyboardDownHandler = null;
@@ -46081,24 +46264,6 @@ const landmarkRingA =
 
     this.clearWaterWaves();
 
-    if (this.waterWaveObjects) {
-      this.tweens.killTweensOf(
-        this.waterWaveObjects
-      );
-
-      this.waterWaveObjects.forEach(
-        object => {
-          if (
-            object &&
-            object.active
-          ) {
-            object.destroy();
-          }
-        }
-      );
-
-      this.waterWaveObjects = [];
-    }
 
     /*
     * ============================================================
@@ -46141,12 +46306,15 @@ const landmarkRingA =
       window.speechSynthesis.cancel();
 
   if (
-    window.speechSynthesis.onvoiceschanged ===
-    this.voiceVoicesChangedHandler
+    this.voiceVoicesChangedHandler &&
+    typeof window.speechSynthesis.removeEventListener === 'function'
   ) {
-    window.speechSynthesis.onvoiceschanged =
-      this.voicePreviousVoicesChangedHandler || null;
+    window.speechSynthesis.removeEventListener(
+      'voiceschanged',
+      this.voiceVoicesChangedHandler
+    );
   }
+
     }
 
   this.voiceVoicesChangedHandler =
@@ -46193,23 +46361,18 @@ const landmarkRingA =
       Number(gameSize.height) ||
       this.scale.height;
 
-    const panelWidth =
-      Math.min(
-        620,
-        Math.max(
-          300,
-          width - 34
-        )
-      );
+   const panelWidth =
+  Math.min(
+    620,
+    Math.max(300, width - 34)
+  );
 
-    const panelHeight =
-      Math.min(
-        440,
-        Math.max(
-          240,
-          height - 40
-        )
-      );
+const panelHeight =
+  Math.min(
+    440,
+    Math.max(240, height - 40)
+  );
+
 
     /*
     * ------------------------------------------------------------
@@ -46807,17 +46970,18 @@ const landmarkRingA =
         .setDepth(1000)
         .setInteractive();
 
-    const panelWidth =
-      Math.min(
-        620,
-        width - 34
-      );
+   const panelWidth =
+  Math.min(
+    620,
+    Math.max(300, width - 34)
+  );
 
-    const panelHeight =
-      Math.min(
-        440,
-        height - 40
-      );
+const panelHeight =
+  Math.min(
+    440,
+    Math.max(240, height - 40)
+  );
+
 
     const panel =
       this.add
@@ -48780,15 +48944,16 @@ const landmarkRingA =
         startX +
         i * 105;
 
-      const core =
-        this.add
-          .circle(
-            x,
-            height / 2,
-            34,
-            0x0a1e30,
-            0.96
-          )
+      const coreNode =
+  this.add
+    .circle(
+      x,
+      height / 2,
+      34,
+      0x0a1e30,
+      0.96
+    )
+
           .setStrokeStyle(
             2.5,
             0x276f8d,
@@ -48833,21 +48998,24 @@ const landmarkRingA =
           .setScrollFactor(0)
           .setDepth(1004);
 
-      data.puzzleObjects.push(
-        core,
+           data.puzzleObjects.push(
+        coreNode,
         value,
         target
       );
 
-      controls.push({
-        core,
+
+          controls.push({
+        core: coreNode,
         value,
         target,
         index: i
       });
 
-      core.on(
+
+            coreNode.on(
         'pointerdown',
+
         () => {
 
           if (
@@ -48871,13 +49039,14 @@ const landmarkRingA =
     data.states[i] ===
     data.targetStates[i];
 
-  core.setStrokeStyle(
+  coreNode.setStrokeStyle(
     2.8,
     correct
       ? 0x8df4ff
       : 0x276f8d,
     1
   );
+
 
   /*
   * ----------------------------------------------------------
@@ -48891,9 +49060,10 @@ const landmarkRingA =
       '#8df4ff'
     );
 
-    this.tweens.killTweensOf(
-      core
+        this.tweens.killTweensOf(
+      coreNode
     );
+
 
     if (!this.motionReduced) {
       this.tweens.add({
@@ -49393,21 +49563,51 @@ const landmarkRingA =
     break;
   }
 
-  if (!generated) {
-    rotations =
-      solvedMasks.map(
-        () => 1
-      );
+if (!generated) {
+  const fallbackCandidates = [
+    solvedMasks.map(() => 1),
+    solvedMasks.map((_, index) =>
+      index % 2 === 0 ? 1 : 3
+    ),
+    solvedMasks.map((_, index) =>
+      index % 3 === 0 ? 2 : 1
+    ),
+    solvedMasks.map((_, index) =>
+      index === 0 || index === count - 1 ? 1 : 2
+    )
+  ];
 
-    masks =
-      solvedMasks.map(
-        (mask, index) =>
+  const validFallback =
+    fallbackCandidates.find(candidateRotations => {
+      const candidateMasks =
+        solvedMasks.map((mask, index) =>
           this.rotateRelayMask(
             mask,
-            rotations[index]
+            candidateRotations[index]
           )
-      );
-  }
+        );
+
+      const reachable =
+        this.relayCircuitReachable(
+          candidateMasks,
+          columns,
+          rows
+        );
+
+      return !reachable.has(count - 1);
+    }) || fallbackCandidates[0];
+
+  rotations = validFallback;
+
+  masks =
+    solvedMasks.map((mask, index) =>
+      this.rotateRelayMask(
+        mask,
+        rotations[index]
+      )
+    );
+}
+
 
   const baselineAttempts =
     rotations.reduce(
@@ -52313,13 +52513,33 @@ const landmarkRingA =
       this.mission.spawn.x + spawnSafeDistance
     );
 
-  const enemy =
-    this.enemies
-      .create(
-        enemySpawnX,
-        data.y,
-        data.type
-      )
+const validEnemyTextures = new Set([
+  'enemy-runner',
+  'chicken',
+  'dino',
+  'alien-ground',
+  'invader',
+  'security',
+  'guard',
+  'dino-boss',
+  'sentinel-boss',
+  'storm-boss',
+  'apex-boss'
+]);
+
+const enemyTexture =
+  validEnemyTextures.has(data?.type)
+    ? data.type
+    : 'enemy-runner';
+
+const enemy =
+  this.enemies
+    .create(
+      enemySpawnX,
+      Number(data?.y) || this.mission.spawn.y,
+      enemyTexture
+    )
+
       .setDepth(8)
       .setImmovable(true);
 
@@ -52430,14 +52650,13 @@ const landmarkRingA =
         routeShift
     );
 
-  enemy.setData(
-    'route',
-    {
-      ...data,
-      min: routeMin,
-      max: routeMax
-    }
-  );
+enemy.setData('route', {
+  ...data,
+  type: enemyTexture,
+  min: routeMin,
+  max: routeMax
+});
+
 
   enemy.setData(
     'direction',
@@ -52453,10 +52672,12 @@ const landmarkRingA =
   }
 
   createSciFiThreats() {
-  const tier =
-  Number(
-  this.mission.difficulty?.split('/')[0]
-  ) || 1;
+   const tier =
+    Number(
+      String(this.mission?.difficulty ?? '1')
+        .split('/')[0]
+    ) || 1;
+
 
   this.eggs =
     this.physics.add.group();
@@ -52663,13 +52884,19 @@ const landmarkRingA =
           12
       );
 
-    this.boss.setTint(
-      profile.color
+       this.boss.setTint(
+      Number.isFinite(profile.color)
+        ? profile.color
+        : 0xff826e
     );
 
-    this.boss.setData(
+
+      this.boss.setData(
       'health',
-      profile.health
+      Math.max(
+        1,
+        Number(profile.health) || 1
+      )
     );
 
     this.boss.setData(
@@ -53610,13 +53837,28 @@ const landmarkRingA =
   );
 
   // ============================================================
+  // APPLY DAMAGE
+  // ============================================================
+
+  this.health = Math.max(
+    0,
+    this.health - 1
+  );
+
+  this.game.events.emit(
+    'health',
+    this.health
+  );
+
+  // ============================================================
   // LOW HP · CRITICAL STATE
   // ============================================================
-    
+
   if (
     this.health === 1 &&
     !this.motionReduced
   ) {
+
     this.playerCue(
       'CRITICAL',
       '#ff826e'
@@ -53666,11 +53908,6 @@ const landmarkRingA =
   if (this.health > 0) {
     this.healthInvulnerable = 1100;
   }
-
-  this.game.events.emit(
-    'health',
-    this.health
-  );
 
   /* -------------------------------------------------
     DAMAGE DIRECTION INDICATOR
@@ -55361,6 +55598,7 @@ const landmarkRingA =
     '#8df4ff'
   );
 
+  
   if (
     this.blasterCooldown > 0 ||
     this.cinematicActive ||
@@ -58022,27 +58260,37 @@ const y =
     );
 
   /* HP */
-  this.playerStatusHealthBar.fill.width =
-    Phaser.Math.Linear(
-      this.playerStatusHealthBar.fill.width,
-      healthTarget,
-      health === 0 ? 0.30 : 0.22
-    );
+   this.playerStatusHealthBar.fill.width =
+    health <= 0
+      ? 0
+      : Phaser.Math.Linear(
+          this.playerStatusHealthBar.fill.width,
+          healthTarget,
+          0.22
+        );
+
 
   /* ENERGY */
   this.playerStatusEnergyBar.fill.width =
-    Phaser.Math.Linear(
-      this.playerStatusEnergyBar.fill.width,
-      energyTarget,
-      0.22
+    Phaser.Math.Clamp(
+      Phaser.Math.Linear(
+        this.playerStatusEnergyBar.fill.width,
+        energyTarget,
+        0.22
+      ),
+      0,
+      this.playerStatusEnergyBar.barWidth
     );
 
-  /* POLARITY */
   this.playerStatusPolarityBar.fill.width =
-    Phaser.Math.Linear(
-      this.playerStatusPolarityBar.fill.width,
-      polarityTarget,
-      0.22
+    Phaser.Math.Clamp(
+      Phaser.Math.Linear(
+        this.playerStatusPolarityBar.fill.width,
+        polarityTarget,
+        0.22
+      ),
+      0,
+      this.playerStatusPolarityBar.barWidth
     );
 
     /* TEXT */
@@ -60162,36 +60410,41 @@ const y =
         }
       );
 
-    const weather = {
-    'first-delivery': [
-      'NIGHT RAIN',
-      0x6d8faa
-    ],
-    'dead-drop': [
-      'HARBOR FOG',
-      0xb7d4df
-    ],
-    blackout: [
-      'GRID FLICKER',
+     const weather =
+    {
+      'first-delivery': [
+        'NIGHT RAIN',
+        0x6d8faa
+      ],
+      'dead-drop': [
+        'HARBOR FOG',
+        0xb7d4df
+      ],
+      blackout: [
+        'GRID FLICKER',
+        0x8df4ff
+      ],
+      pursuit: [
+        'CROSSWIND',
+        0x8ba2c4
+      ],
+      'signal-storm': [
+        'SIGNAL STORM',
+        0xb993ff
+      ],
+      'corporate-lockdown': [
+        'ASH FRONT',
+        0xff826e
+      ],
+      'final-relay': [
+        'ORBITAL STATIC',
+        0xffe0a8
+      ]
+    }[this.mission?.id] || [
+      'NIGHT SKY',
       0x8df4ff
-    ],
-    pursuit: [
-      'CROSSWIND',
-      0x8ba2c4
-    ],
-    'signal-storm': [
-      'SIGNAL STORM',
-      0xb993ff
-    ],
-    'corporate-lockdown': [
-      'ASH FRONT',
-      0xff826e
-    ],
-    'final-relay': [
-      'ORBITAL STATIC',
-      0xffe0a8
-    ]
-  }[this.mission.id];
+    ];
+
 
   this.weatherOverlay =
     this.add
@@ -70124,16 +70377,91 @@ if (wasWaterDeath) {
   );
     }
 
-  update(_, delta) {
-    delta = Phaser.Math.Clamp(
-      Number(delta) || 0,
-      0,
-      50
+      // ============================================================
+  // CPU OPTIMIZACIJA
+  // ============================================================
+
+  canRunVisualEffects(minimumLevel = 1) {
+    const graphicsLevel = Number.isFinite(this.graphicsLevel)
+      ? this.graphicsLevel
+      : 2;
+
+    return (
+      !this.motionReduced &&
+      graphicsLevel >= minimumLevel &&
+      this.scene?.isActive?.() !== false
     );
+  }
+
+  shouldUpdateVisualTimer(timerName, delta, interval = 33) {
+    if (!this._visualTimers) {
+      this._visualTimers = Object.create(null);
+    }
+
+    this._visualTimers[timerName] =
+      Math.max(
+        0,
+        (this._visualTimers[timerName] || 0) - delta
+      );
+
+    if (this._visualTimers[timerName] > 0) {
+      return false;
+    }
+
+    this._visualTimers[timerName] = interval;
+    return true;
+  }
+
+  destroySafely(object) {
+    if (!object) {
+      return;
+    }
+
+    try {
+      this.tweens?.killTweensOf?.(object);
+
+      if (object.active) {
+        object.destroy();
+      }
+    } catch (error) {
+      console.warn(
+        '[RunnerScene] Greška pri uništavanju objekta:',
+        error
+      );
+    }
+  }
+
+  destroyManySafely(objects) {
+    if (!Array.isArray(objects)) {
+      return;
+    }
+
+    objects.forEach(object => {
+      this.destroySafely(object);
+    });
+  }
+
+
+update(_, delta) {
+  delta = Phaser.Math.Clamp(
+    Number(delta) || 0,
+    0,
+    50
+  );
+
+  if (
+    !this.scene?.isActive?.() ||
+    !this.player?.active ||
+    !this.keys ||
+    !this.cursors
+  ) {
+    return;
+  }
 
   this.updatePlayerStatusHUD();
   this.updateCombatHUD();
   this.updateMobilityHUD();
+
 
     if (
       !this.scene.isActive() ||
@@ -70328,11 +70656,13 @@ if (wasWaterDeath) {
   // ============================================================
   // CAMERA MODE · C = THIRD PERSON / FIRST PERSON
   // ============================================================
-  if (
+    if (
+    this.keys.C &&
     Phaser.Input.Keyboard.JustDown(
       this.keys.C
     )
   ) {
+
     this.firstPersonCamera =
       !this.firstPersonCamera;
 

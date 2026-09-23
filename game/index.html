@@ -9,121 +9,304 @@
   >
 
   <meta name="format-detection" content="telephone=no">
-<link
-  rel="preconnect"
-  href="https://fonts.googleapis.com"
->
 
-<link
-  rel="preconnect"
-  href="https://fonts.gstatic.com"
-  crossorigin
->
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
 
-<link
-  href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap"
-  rel="stylesheet"
->
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+
+
   <title>Relay Runner | Rooftop Game</title>
 
   <link rel="icon" href="./favicon.ico">
 
-  <!-- SPLASH CSS MUST ARRIVE BEFORE THE MODULE BOOTSTRAP -->
+  <!-- SPLASH CSS -->
   <link rel="stylesheet" href="splash-progress-visibility.css">
   <link rel="stylesheet" href="cinematic-splash.css">
   <link rel="stylesheet" href="faq-terminal-polish-v1.css">
 
-  <!-- Keep the legacy DOM from flashing before the current Home module mounts. -->
-  <style id="relay-critical-boot-style">
-    #game{visibility:hidden}
-    #game.relay-boot-ready{visibility:visible}
-    #relaySplash{visibility:visible}
-  </style>
+  <!--
+    BOOT VISIBILITY
+    The game DOM must not be permanently locked behind
+    relay-boot-ready because a failed bootstrap could leave
+    the entire page invisible.
+  -->
+<style id="relay-critical-boot-style">
+  /* GAME: potpuno skriven dok splash ne završi */
+  #game {
+    visibility: hidden;
+  }
+
+  /* Loader završio -> prikaži igru */
+  #game.relay-boot-ready {
+    visibility: visible;
+  }
+
+  /* SPLASH: vidljiv odmah od prvog painta */
+  #relaySplash {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* STARI LOADER HUD: nikad ga ne prikazuj */
+  #relaySplash .relay-splash-brand,
+  #relaySplash .relay-splash-ui {
+    display: none !important;
+  }
+  
+</style>
 </head>
 
 <body>
 
-  <div id="relaySplash" class="relay-splash" role="status" aria-live="polite" aria-busy="true">
+  <!-- =====================================================
+       INITIAL SPLASH
+       ===================================================== -->
+
+  <div
+    id="relaySplash"
+    class="relay-splash"
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+  >
+
     <picture id="relaySplashPicture">
-      <source media="(orientation: landscape)" srcset="./assets/loading-landscape.jpg">
-      <img id="relaySplashArt" class="relay-splash-art" src="./assets/loading.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high">
+
+      <source
+        media="(orientation: landscape)"
+        srcset="./assets/loading-landscape.jpg"
+      >
+
+      <img
+        id="relaySplashArt"
+        class="relay-splash-art"
+        src="./assets/loading.jpg"
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        fetchpriority="high"
+      >
+
     </picture>
+
     <div class="relay-splash-brand">
       <b>R/</b>
       <span>RELAY RUNNER</span>
     </div>
+
     <div class="relay-splash-ui">
+
       <div class="relay-splash-meta">
         <span class="relay-splash-status">LOADING</span>
         <span class="relay-splash-percent">0%</span>
       </div>
+
       <div class="relay-splash-track">
         <i class="relay-splash-progress"></i>
       </div>
+
     </div>
+
   </div>
 
-<main id="game">
 
-  <div hidden aria-hidden="true">
-    <button id="start" type="button"></button>
-    <button id="continue" type="button"></button>
-  </div>
+  <!-- =====================================================
+       MAIN GAME
+       ===================================================== -->
 
-  <section id="play" class="play">
-      <div id="phaser-game" aria-label="Relay Runner game world"></div>
+  <main id="game">
+
+    <!--
+      Legacy programmatic controls.
+      Kept for compatibility with existing JS.
+    -->
+    <div hidden aria-hidden="true">
+      <button id="start" type="button"></button>
+      <button id="continue" type="button"></button>
+    </div>
+
+
+    <!-- ===================================================
+         PLAY / GAME WORLD
+         =================================================== -->
+
+    <section id="play" class="play">
+
+      <div
+        id="phaser-game"
+        aria-label="Relay Runner game world"
+      ></div>
+
       <div class="vignette"></div>
 
+
+      <!-- GAME HUD -->
+
       <header class="hud">
+
         <div class="hud-route">
+
           <span class="route-dot"></span>
+
           <div>
             <small id="district">OLD QUARTER</small>
             <b id="objective">ROOFTOP RELAY</b>
           </div>
+
         </div>
+
+
         <div class="hud-progress hud-run">
+
           <span id="signalCount">00</span>
+
           <small>SIGNALS</small>
-          <div><i id="progress"></i></div>
+
+          <div>
+            <i id="progress"></i>
+          </div>
+
         </div>
+
+
         <div class="hud-actions">
+
           <div class="hud-xp">
             <small>XP</small>
             <b id="hudXp">0000</b>
           </div>
-          <button id="pause" class="pause-button" type="button" aria-label="Open game menu">☰</button>
+
+          <button
+            id="pause"
+            class="pause-button"
+            type="button"
+            aria-label="Open game menu"
+          >
+            ☰
+          </button>
+
         </div>
+
       </header>
 
+
+      <!-- WORLD MISSION MARKER -->
+
       <div class="world-marker">
-        <span id="worldMissionLabel">MISSION 01</span>
-        <b id="worldGoal">FOLLOW THE RELAY</b>
+
+        <span id="worldMissionLabel">
+          MISSION 01
+        </span>
+
+        <b id="worldGoal">
+          FOLLOW THE RELAY
+        </b>
+
       </div>
+
+
+      <!-- DESKTOP INPUT GUIDE -->
 
       <div class="input-guide">
-        <kbd>A</kbd><kbd>D</kbd> RUN
+
+        <kbd>A</kbd>
+        <kbd>D</kbd>
+        RUN
+
         <i></i>
-        <kbd>SPACE</kbd> JUMP
+
+        <kbd>SPACE</kbd>
+        JUMP
+
         <i></i>
-        <kbd>E</kbd> FIRE
+
+        <kbd>E</kbd>
+        FIRE
+
         <i></i>
-        <kbd>Q</kbd> BLADE
+
+        <kbd>Q</kbd>
+        BLADE
+
         <i></i>
-        <kbd>SHIFT</kbd> DASH
+
+        <kbd>SHIFT</kbd>
+        DASH
+
       </div>
 
-      <div class="mobile-controls" aria-label="Touch game controls">
-      
+
+      <!-- MOBILE CONTROLS -->
+
+      <div
+        class="mobile-controls"
+        aria-label="Touch game controls"
+      >
+
         <div class="mobile-actions">
-          <button type="button" data-mobile-action="jump">JUMP<small>SPACE</small></button>
-          <button type="button" data-mobile-action="fire">FIRE<small>E</small></button>
-          <button type="button" data-mobile-action="sword">SWORD<small>Q</small></button>
-          <button type="button" data-mobile-action="dash">DASH<small>SHIFT</small></button>
-          <button type="button" data-mobile-action="build1">BUILD<small>1</small></button>
-          <button type="button" data-mobile-action="gadget1">GEAR<small>3</small></button>
+
+          <button
+            type="button"
+            data-mobile-action="jump"
+          >
+            JUMP
+            <small>SPACE</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="fire"
+          >
+            FIRE
+            <small>E</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="sword"
+          >
+            SWORD
+            <small>Q</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="dash"
+          >
+            DASH
+            <small>SHIFT</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="build1"
+          >
+            BUILD
+            <small>1</small>
+          </button>
+
+          <button
+            type="button"
+            data-mobile-action="gadget1"
+          >
+            GEAR
+            <small>3</small>
+          </button>
+
         </div>
+
       </div>
+
+
+      <!-- LEGACY / DATA ELEMENTS -->
 
       <span id="signalTotal" hidden></span>
       <i id="signalProgress" hidden></i>
@@ -131,139 +314,575 @@
       <span id="runTime" hidden></span>
       <span id="progressValue" hidden></span>
       <span id="missionNumber" hidden></span>
+
     </section>
 
-    <section id="intro" class="overlay intro">
-  
-      </section>
 
-    <section id="titlePanel" class="title-panel hidden" role="dialog" aria-modal="true" aria-labelledby="titlePanelHeading">
+    <!-- ===================================================
+         INTRO
+         
+         IMPORTANT:
+         This section is currently empty, therefore it is
+         explicitly hidden so it cannot block interaction.
+         =================================================== -->
+
+    <section
+      id="intro"
+      class="overlay intro hidden"
+      aria-hidden="true"
+    ></section>
+
+
+    <!-- ===================================================
+         TITLE PANEL
+         =================================================== -->
+
+    <section
+      id="titlePanel"
+      class="title-panel hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titlePanelHeading"
+    >
+
       <div class="title-panel-card">
-        <button id="closeTitlePanel" class="title-panel-close" type="button" aria-label="Close panel">×</button>
-        <p id="titlePanelEyebrow" class="eyebrow"></p>
+
+        <button
+          id="closeTitlePanel"
+          class="title-panel-close"
+          type="button"
+          aria-label="Close panel"
+        >
+          ×
+        </button>
+
+        <p
+          id="titlePanelEyebrow"
+          class="eyebrow"
+        ></p>
+
         <h2 id="titlePanelHeading"></h2>
+
         <div id="titlePanelContent"></div>
+
       </div>
+
     </section>
 
-    <section id="relayInfoPanel" class="relay-info-panel hidden" role="dialog" aria-modal="true" aria-labelledby="relayInfoHeading">
+
+    <!-- ===================================================
+         RELAY INFO PANEL
+         =================================================== -->
+
+    <section
+      id="relayInfoPanel"
+      class="relay-info-panel hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="relayInfoHeading"
+    >
+
       <div class="relay-info-card">
-        <button class="relay-info-close" type="button" data-relay-close aria-label="Close">×</button>
-        <p id="relayInfoEyebrow" class="relay-info-eyebrow"></p>
+
+        <button
+          class="relay-info-close"
+          type="button"
+          data-relay-close
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+        <p
+          id="relayInfoEyebrow"
+          class="relay-info-eyebrow"
+        ></p>
+
         <h2 id="relayInfoHeading"></h2>
+
         <div id="relayInfoContent"></div>
+
       </div>
+
     </section>
 
-    <section id="pauseMenu" class="overlay hidden">
+
+    <!-- ===================================================
+         PAUSE MENU
+         =================================================== -->
+
+    <section
+      id="pauseMenu"
+      class="overlay hidden"
+    >
+
       <div class="menu">
-        <header><span class="logo">R/</span><button class="close" type="button" data-close aria-label="Close game menu">×</button></header>
+
+        <header>
+
+          <span class="logo">R/</span>
+
+          <button
+            class="close"
+            type="button"
+            data-close
+            aria-label="Close game menu"
+          >
+            ×
+          </button>
+
+        </header>
+
+
         <div class="menu-grid">
+
           <aside>
-            <p class="eyebrow">COURIER TERMINAL</p>
-            <h2>KEEP THE<br><em>LINE OPEN.</em></h2>
+
+            <p class="eyebrow">
+              COURIER TERMINAL
+            </p>
+
+            <h2>
+              KEEP THE<br>
+              <em>LINE OPEN.</em>
+            </h2>
+
             <nav>
-              <button class="tab active" type="button" data-tab="resume">RESUME</button>
-              <button class="tab" type="button" data-tab="missions">MISSIONS</button>
-              <button class="tab" type="button" data-tab="progress">PROGRESS</button>
-              <button class="tab" type="button" data-tab="settings">SETTINGS</button>
+
+              <button
+                class="tab active"
+                type="button"
+                data-tab="resume"
+              >
+                RESUME
+              </button>
+
+              <button
+                class="tab"
+                type="button"
+                data-tab="missions"
+              >
+                MISSIONS
+              </button>
+
+              <button
+                class="tab"
+                type="button"
+                data-tab="progress"
+              >
+                PROGRESS
+              </button>
+
+              <button
+                class="tab"
+                type="button"
+                data-tab="settings"
+              >
+                SETTINGS
+              </button>
+
             </nav>
+
           </aside>
+
           <section id="panelContent"></section>
+
         </div>
-        <footer><button id="returnTitle" class="secondary" type="button">RESTART BRIEFING</button></footer>
+
+
+        <footer>
+
+          <button
+            id="returnTitle"
+            class="secondary"
+            type="button"
+          >
+            RESTART BRIEFING
+          </button>
+
+        </footer>
+
       </div>
+
     </section>
 
-    <section id="finish" class="overlay hidden">
+
+    <!-- ===================================================
+         MISSION FINISH
+         =================================================== -->
+
+    <section
+      id="finish"
+      class="overlay hidden"
+    >
+
       <div class="outcome">
+
         <span class="outcome-mark">✓</span>
-        <p class="eyebrow">MISSION COMPLETE</p>
-        <h2>LINE<br><em>RESTORED.</em></h2>
-        <p id="finishLine">Awaiting relay status.</p>
+
+        <p class="eyebrow">
+          MISSION COMPLETE
+        </p>
+
+        <h2>
+          LINE<br>
+          <em>RESTORED.</em>
+        </h2>
+
+        <p id="finishLine">
+          Awaiting relay status.
+        </p>
+
+
         <div class="reward">
-          <b id="finishXp">+120</b>
-          <span>MISSION XP EARNED</span>
+
+          <b id="finishXp">
+            +120
+          </b>
+
+          <span>
+            MISSION XP EARNED
+          </span>
+
+
           <div class="finish-summary">
-            <div class="finish-summary-line"><strong>SIGNALS</strong><i id="finishSignals">00 / 00 SIGNALS RECOVERED</i></div>
-            <div class="finish-summary-line"><strong>RATING</strong><small id="finishRating"></small></div>
-            <div class="finish-summary-line"><strong>SCORE</strong><small id="finishScore"></small></div>
-            <div class="finish-summary-line"><strong>TIME</strong><small id="finishTime"></small></div>
+
+            <div class="finish-summary-line">
+              <strong>SIGNALS</strong>
+              <i id="finishSignals">
+                00 / 00 SIGNALS RECOVERED
+              </i>
+            </div>
+
+            <div class="finish-summary-line">
+              <strong>RATING</strong>
+              <small id="finishRating"></small>
+            </div>
+
+            <div class="finish-summary-line">
+              <strong>SCORE</strong>
+              <small id="finishScore"></small>
+            </div>
+
+            <div class="finish-summary-line">
+              <strong>TIME</strong>
+              <small id="finishTime"></small>
+            </div>
+
           </div>
+
         </div>
+
+
         <div class="finish-actions">
-          <button id="again" class="primary" type="button">REPLAY RUN <b>↻</b></button>
-          <button id="nextMission" class="primary" type="button">NEXT MISSION</button>
-          <button id="finishTitle" class="text-button" type="button">RETURN TO TERMINAL</button>
+
+          <button
+            id="again"
+            class="primary"
+            type="button"
+          >
+            REPLAY RUN
+            <b>↻</b>
+          </button>
+
+          <button
+            id="nextMission"
+            class="primary"
+            type="button"
+          >
+            NEXT MISSION
+          </button>
+
+          <button
+            id="finishTitle"
+            class="text-button"
+            type="button"
+          >
+            RETURN TO TERMINAL
+          </button>
+
         </div>
+
       </div>
+
     </section>
 
-    <section id="gameOver" class="overlay hidden">
+
+    <!-- ===================================================
+         GAME OVER
+         =================================================== -->
+
+    <section
+      id="gameOver"
+      class="overlay hidden"
+    >
+
       <div class="outcome fail">
+
         <span class="outcome-mark">×</span>
-        <p class="eyebrow">SIGNAL LOST</p>
-        <h2>RUN<br><em>INTERRUPTED.</em></h2>
-        <p id="failLine">The live barrier cut the delivery short.</p>
-        <button id="retry" class="primary" type="button">TRY AGAIN <b>↻</b></button>
-        <button id="failTitle" class="text-button" type="button">RETURN TO BRIEFING</button>
+
+        <p class="eyebrow">
+          SIGNAL LOST
+        </p>
+
+        <h2>
+          RUN<br>
+          <em>INTERRUPTED.</em>
+        </h2>
+
+        <p id="failLine">
+          The live barrier cut the delivery short.
+        </p>
+
+        <button
+          id="retry"
+          class="primary"
+          type="button"
+        >
+          TRY AGAIN
+          <b>↻</b>
+        </button>
+
+        <button
+          id="failTitle"
+          class="text-button"
+          type="button"
+        >
+          RETURN TO BRIEFING
+        </button>
+
       </div>
+
     </section>
 
-    <section id="levelUp" class="overlay hidden">
+
+    <!-- ===================================================
+         LEVEL UP
+         =================================================== -->
+
+    <section
+      id="levelUp"
+      class="overlay hidden"
+    >
+
       <div class="system-card">
-        <button id="closeLevelUp" class="close" type="button" aria-label="Close">×</button>
-        <p class="eyebrow">RANK UP</p>
+
+        <button
+          id="closeLevelUp"
+          class="close"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+        <p class="eyebrow">
+          RANK UP
+        </p>
+
         <b id="levelUpRank"></b>
+
         <span id="levelUpUnlock"></span>
+
       </div>
+
     </section>
 
-    <section id="abilityUnlock" class="overlay hidden">
+
+    <!-- ===================================================
+         ABILITY UNLOCK
+         =================================================== -->
+
+    <section
+      id="abilityUnlock"
+      class="overlay hidden"
+    >
+
       <div class="system-card">
-        <button id="closeAbilityUnlock" class="close" type="button" aria-label="Close">×</button>
-        <p class="eyebrow">NEW ABILITY UNLOCKED</p>
+
+        <button
+          id="closeAbilityUnlock"
+          class="close"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+        <p class="eyebrow">
+          NEW ABILITY UNLOCKED
+        </p>
+
         <b id="abilityName"></b>
+
         <span id="abilityControl"></span>
+
         <span id="abilityDetail"></span>
+
       </div>
+
     </section>
 
-    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <!-- TOAST -->
+
+    <div
+      id="toast"
+      class="toast"
+      aria-live="polite"
+    ></div>
+
   </main>
 
- <script type="module" src="./splash-loader-v2.js"></script>
 
-<script type="module" src="./home-options.js"></script>
-<script type="module" src="./home-v3.js"></script>
-<script type="module" src="./home-v3-guard.js"></script>
-<script type="module" src="./home-v3-interaction-fix.js"></script>
+  <!-- =====================================================
+       BOOT / HOME
+       ===================================================== -->
 
-<script type="module" src="./play-intro-cinematic-v2.js"></script>
+  <script
+    type="module"
+    src="./splash-loader-v2.js"
+  ></script>
 
-<script type="module" src="/src/systems/runtime-guard.js"></script>
-<script type="module" src="/src/systems/core-stability.js"></script>
-<script type="module" src="/src/systems/mobile-viewport-hardening.js"></script>
+  <script
+    type="module"
+    src="./home-options.js"
+  ></script>
 
-<script type="module" src="/src/main.js"></script>
-<script type="module" src="/src/systems/mobile-input-single-owner-v1.js"></script>
+  <script
+    type="module"
+    src="./home-v3.js"
+  ></script>
 
-  <script type="module" src="/src/systems/mission-finish-recovery.js"></script>
-  <script type="module" src="/src/systems/mission-results.js"></script>
-  <script type="module" src="/src/systems/mission-mastery.js"></script>
-  <script type="module" src="/src/systems/enemy-alert.js"></script>
+  <script
+    type="module"
+    src="./home-v3-guard.js"
+  ></script>
 
-  <script type="module" src="./menu-music.js"></script>
-  <script type="module" src="./player-profile-v1.js"></script>
+  <script
+    type="module"
+    src="./home-v3-interaction-fix.js"
+  ></script>
 
-  <script type="module" src="./pause-interactions.js"></script>
-  <script type="module" src="./pause-final-polish-v1.js"></script>
+  <!-- =====================================================
+       CORE SYSTEMS
+       ===================================================== -->
 
-  <script type="module" src="./relay-ui-init.js"></script>
-  <script type="module" src="./world-interaction-v1.js"></script>
-  <script type="module" src="./gameplay-touch-lock.js"></script>
-  <script type="module" src="./cinematic-arrival-v2.js"></script>
-  <script type="module" src="./premium-finishing-pass-v1.js"></script>
-  <script type="module" src="./gameplay-core-v1.js"></script>
+  <script
+    type="module"
+    src="/src/systems/runtime-guard.js"
+  ></script>
+
+  <script
+    type="module"
+    src="/src/systems/core-stability.js"
+  ></script>
+
+  <script
+    type="module"
+    src="/src/systems/mobile-viewport-hardening.js"
+  ></script>
+
+
+  <!-- =====================================================
+       MAIN GAME
+       ===================================================== -->
+
+  <script
+    type="module"
+    src="/src/main.js"
+  ></script>
+
+  <script
+    type="module"
+    src="/src/systems/mobile-input-single-owner-v1.js"
+  ></script>
+
+
+  <!-- =====================================================
+       MISSION SYSTEMS
+       ===================================================== -->
+
+  <script
+    type="module"
+    src="/src/systems/mission-finish-recovery.js"
+  ></script>
+
+  <script
+    type="module"
+    src="/src/systems/mission-results.js"
+  ></script>
+
+  <script
+    type="module"
+    src="/src/systems/mission-mastery.js"
+  ></script>
+
+  <script
+    type="module"
+    src="/src/systems/enemy-alert.js"
+  ></script>
+
+
+  <!-- =====================================================
+       UI / PROFILE / PAUSE
+       ===================================================== -->
+
+
+  <script
+    type="module"
+    src="./menu-music.js"
+  ></script>
+
+  <script
+    type="module"
+    src="./player-profile-v1.js"
+  ></script>
+
+  <script
+    type="module"
+    src="./pause-interactions.js"
+  ></script>
+
+  <script
+    type="module"
+    src="./pause-final-polish-v1.js"
+  ></script>
+
+
+  <!-- =====================================================
+       WORLD / GAMEPLAY
+       ===================================================== -->
+
+  <script
+    type="module"
+    src="./relay-ui-init.js"
+  ></script>
+
+  <script
+    type="module"
+    src="./world-interaction-v1.js"
+  ></script>
+
+  <script
+    type="module"
+    src="./gameplay-touch-lock.js"
+  ></script>
+
+  <script
+    type="module"
+    src="./cinematic-arrival-v2.js"
+  ></script>
+
+  <script
+    type="module"
+    src="./premium-finishing-pass-v1.js"
+  ></script>
+
+  <script
+    type="module"
+    src="./gameplay-core-v1.js"
+  ></script>
+
 </body>
 </html>

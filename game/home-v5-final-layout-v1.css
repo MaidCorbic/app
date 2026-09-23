@@ -424,9 +424,9 @@
 
 #intro.home-v3 .home-v5-start .home-v4-primary-content > span:first-child{
   color:#f4fbff;
-  font-family:Arial,Helvetica,sans-serif;
-  font-weight:900;
-  letter-spacing:.14em;
+  font-family:"Orbitron",sans-serif !important;
+  font-weight:900 !important;
+  letter-spacing:.12em !important;
   text-align:center;
   text-shadow:
     0 0 12px rgba(56,189,248,.28),
@@ -439,4 +439,279 @@
 
 #intro.home-v3 .home-v5-start .home-v4-primary-arrow{
   display:none !important;
+}
+/* =========================================================
+   RUNNER RELAY — HOME PREMIUM TYPOGRAPHY V6
+   Orbitron + reduced-motion + premium HUD typography
+   HOME ONLY — does not touch gameplay
+   ========================================================= */
+
+#intro.home-v3 {
+  --home-font-display: "Orbitron", sans-serif;
+
+  font-family: var(--home-font-display) !important;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------------------------------------------------------
+   GLOBAL HOME TYPOGRAPHY
+   --------------------------------------------------------- */
+
+#intro.home-v3,
+#intro.home-v3 *,
+#intro.home-v3 button,
+#intro.home-v3 input,
+#intro.home-v3 textarea,
+#intro.home-v3 select {
+  font-family: var(--home-font-display) !important;
+}
+
+/* ---------------------------------------------------------
+   MAIN TITLE
+   --------------------------------------------------------- */
+
+#intro.home-v3 .home-v4-title {
+  font-family: var(--home-font-display) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.045em !important;
+  line-height: .82 !important;
+
+  text-rendering: geometricPrecision;
+  font-kerning: normal;
+
+  /* prevents ugly glyph collisions */
+  word-spacing: -.04em;
+}
+
+/* ---------------------------------------------------------
+   KICKER / EYEBROW
+   --------------------------------------------------------- */
+
+#intro.home-v3 .home-v4-kicker,
+#intro.home-v3 .home-v4-eyebrow,
+#intro.home-v3 .home-v4-badge,
+#intro.home-v3 .home-v4-status,
+#intro.home-v3 .home-v4-status *,
+#intro.home-v3 .home-v4-meta,
+#intro.home-v3 .home-v4-label {
+  font-family: var(--home-font-display) !important;
+  font-weight: 700 !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------
+   MISSION / DESCRIPTION
+   --------------------------------------------------------- */
+
+#intro.home-v3 .home-v4-mission-title,
+#intro.home-v3 .home-v4-mission,
+#intro.home-v3 .home-v4-description,
+#intro.home-v3 .home-v4-description *,
+#intro.home-v3 .home-v4-secondary,
+#intro.home-v3 .home-v4-secondary * {
+  font-family: var(--home-font-display) !important;
+}
+
+#intro.home-v3 .home-v4-mission-title {
+  font-weight: 800 !important;
+  letter-spacing: .035em !important;
+}
+
+#intro.home-v3 .home-v4-description {
+  font-weight: 500 !important;
+  letter-spacing: .025em !important;
+  line-height: 1.65 !important;
+}
+
+/* ---------------------------------------------------------
+   START BUTTON
+   --------------------------------------------------------- */
+
+#intro.home-v3 .home-v5-start,
+#intro.home-v3 .home-v5-start *,
+#intro.home-v3 .home-v4-primary-content,
+#intro.home-v3 .home-v4-primary-content * {
+  font-family: var(--home-font-display) !important;
+}
+
+#intro.home-v3 .home-v5-start .home-v4-primary-content > span:first-child {
+  font-family: var(--home-font-display) !important;
+  font-weight: 900 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------
+   SECONDARY BUTTONS / UI
+   --------------------------------------------------------- */
+
+#intro.home-v3 button,
+#intro.home-v3 [role="button"] {
+  font-family: var(--home-font-display) !important;
+  font-weight: 700 !important;
+  letter-spacing: .11em !important;
+  text-transform: uppercase;
+
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------
+   SMALL TECHNICAL TEXT
+   --------------------------------------------------------- */
+
+#intro.home-v3 .home-v4-secondary span,
+#intro.home-v3 .home-v4-secondary small,
+#intro.home-v3 .home-v4-secondary strong,
+#intro.home-v3 .home-v4-secondary label {
+  font-family: var(--home-font-display) !important;
+  font-weight: 600 !important;
+  letter-spacing: .08em !important;
+}
+
+/* ---------------------------------------------------------
+   PREMIUM NUMBERS / STATS
+   --------------------------------------------------------- */
+
+#intro.home-v3 .home-v4-stat,
+#intro.home-v3 .home-v4-stat *,
+#intro.home-v3 .home-v4-number,
+#intro.home-v3 .home-v4-number *,
+#intro.home-v3 strong,
+#intro.home-v3 b {
+  font-family: var(--home-font-display) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------
+   BETTER SELECTION
+   --------------------------------------------------------- */
+
+#intro.home-v3 ::selection {
+  background: rgba(80, 220, 255, .28);
+  color: #ffffff;
+}
+
+/* =========================================================
+   PREMIUM MOTION
+   ========================================================= */
+
+@keyframes homePremiumPulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+
+  50% {
+    filter: brightness(1.08);
+  }
+}
+
+@keyframes homePremiumGlow {
+  0%, 100% {
+    opacity: .72;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Keep motion subtle — premium rather than flashy */
+
+#intro.home-v3 .home-v4-title {
+  animation:
+    homePremiumPulse 5s ease-in-out infinite;
+}
+
+#intro.home-v3 .home-v4-badge {
+  animation:
+    homePremiumGlow 3.8s ease-in-out infinite;
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  #intro.home-v3,
+  #intro.home-v3 *,
+  #intro.home-v3 *::before,
+  #intro.home-v3 *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+
+    transition-duration: .01ms !important;
+    transition-delay: 0ms !important;
+
+    scroll-behavior: auto !important;
+  }
+
+  #intro.home-v3 .home-v4-title,
+  #intro.home-v3 .home-v4-badge {
+    animation: none !important;
+  }
+
+  #intro.home-v3 * {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================
+   LOW POWER / TOUCH DEVICES
+   ========================================================= */
+
+@media (hover: none) and (pointer: coarse) {
+
+  #intro.home-v3 * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #intro.home-v3 button,
+  #intro.home-v3 [role="button"] {
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   MOBILE TYPOGRAPHY
+   ========================================================= */
+
+@media (max-width: 780px) {
+
+  #intro.home-v3 .home-v4-title {
+    letter-spacing: -.035em !important;
+    line-height: .86 !important;
+  }
+
+  #intro.home-v3 .home-v4-description {
+    letter-spacing: .018em !important;
+    line-height: 1.55 !important;
+  }
+
+  #intro.home-v3 button,
+  #intro.home-v3 [role="button"] {
+    letter-spacing: .08em !important;
+  }
+}
+
+/* =========================================================
+   VERY SMALL SCREENS
+   ========================================================= */
+
+@media (max-width: 430px) {
+
+  #intro.home-v3 .home-v4-title {
+    letter-spacing: -.025em !important;
+    line-height: .88 !important;
+  }
+
+  #intro.home-v3 .home-v4-kicker,
+  #intro.home-v3 .home-v4-eyebrow {
+    letter-spacing: .12em !important;
+  }
 }

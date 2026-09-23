@@ -3640,7 +3640,12 @@ z-index:1;
   gap:12px;
   padding:16px;
   border:1px solid rgba(56,189,248,.18);
-  background:linear-gradient(180deg,rgba(7,16,28,.94),rgba(4,10,18,.92));
+background:
+  linear-gradient(
+    135deg,
+    rgba(8,25,40,.94),
+    rgba(3,10,18,.96)
+  ) !important;
   border-radius:18px;
 }
 
@@ -6715,5 +6720,1380 @@ z-index:1;
   #relayInfoPanel.relay-update-mode
   .relay-update-item{
     transition:none !important;
+  }
+}
+/* =========================================================
+   RUNNER RELAY // V7
+   CLEAN FUTURISTIC TACTICAL HUD
+   VALORANT / COD INSPIRED
+   ---------------------------------------------------------
+   VISUAL OVERRIDE ONLY
+   NO JS / GAMEPLAY CHANGES
+   ========================================================= */
+
+#intro.home-v3{
+
+  /* ---------- core palette ---------- */
+
+  --hud-bg:#05080c;
+  --hud-bg-2:#080e14;
+
+  --hud-panel:rgba(8,14,20,.88);
+  --hud-panel-2:rgba(11,19,27,.94);
+
+  --hud-cyan:#4de3ff;
+  --hud-cyan-soft:#8beeff;
+
+  --hud-white:#f3f8fa;
+  --hud-text:#c4d1d7;
+  --hud-muted:#70818a;
+
+  --hud-green:#63e6a5;
+
+  --hud-purple:#8b7cff;
+
+  --hud-line:rgba(150,220,235,.13);
+  --hud-line-strong:rgba(77,227,255,.42);
+
+  background:
+    linear-gradient(
+      180deg,
+      #05080c 0%,
+      #060a0f 55%,
+      #030609 100%
+    ) !important;
+
+  color:var(--hud-white);
+}
+
+
+/* =========================================================
+   GLOBAL RESET
+   ========================================================= */
+
+#intro.home-v3 .home-v4-shell,
+#intro.home-v3 .home-v4-shell *{
+  box-sizing:border-box;
+}
+
+
+#intro.home-v3 button{
+  -webkit-tap-highlight-color:transparent;
+}
+
+
+/* =========================================================
+   ATMOSPHERE
+   ========================================================= */
+
+#intro.home-v3 .home-v4-scene::before{
+
+  background:
+
+    /* central light */
+    radial-gradient(
+      circle at 58% 42%,
+      rgba(77,227,255,.055),
+      transparent 25%
+    ),
+
+    /* subtle purple */
+    radial-gradient(
+      circle at 84% 76%,
+      rgba(139,124,255,.035),
+      transparent 24%
+    ),
+
+    /* top shadow */
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.20),
+      transparent 35%,
+      rgba(0,0,0,.30)
+    ) !important;
+
+  mix-blend-mode:screen;
+}
+
+
+/* grid */
+
+#intro.home-v3 .home-v4-grid{
+
+  opacity:.13 !important;
+
+  background-size:48px 48px !important;
+
+  filter:none !important;
+}
+
+
+/* scan */
+
+#intro.home-v3 .home-v4-scan{
+
+  opacity:.08 !important;
+}
+
+
+/* =========================================================
+   VIGNETTE
+   ========================================================= */
+
+#intro.home-v3 .home-v4-vignette{
+
+  background:
+
+    linear-gradient(
+      90deg,
+      rgba(2,5,8,.94),
+      rgba(2,5,8,.45) 24%,
+      transparent 55%,
+      rgba(2,5,8,.46) 78%,
+      rgba(2,5,8,.92)
+    ),
+
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.16),
+      transparent 32%,
+      rgba(0,0,0,.86)
+    ) !important;
+}
+
+
+/* =========================================================
+   TOP NAV
+   ========================================================= */
+
+#intro.home-v3 .home-v4-topbar{
+
+  min-height:48px;
+
+  padding-bottom:10px;
+
+  border-bottom:
+    1px solid var(--hud-line);
+
+  position:relative;
+}
+
+
+#intro.home-v3 .home-v4-topbar::after{
+
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  bottom:-1px;
+
+  width:90px;
+  height:1px;
+
+  background:var(--hud-cyan);
+
+  box-shadow:
+    0 0 8px rgba(77,227,255,.45);
+}
+
+
+/* =========================================================
+   BRAND MARK
+   ========================================================= */
+
+#intro.home-v3 .home-v4-brand-mark{
+
+  width:34px;
+  height:34px;
+
+  border:
+    1px solid rgba(139,238,255,.72) !important;
+
+  border-radius:3px !important;
+
+  background:
+    rgba(7,17,24,.94) !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(77,227,255,.035),
+    inset 0 0 16px rgba(77,227,255,.045),
+    0 0 14px rgba(77,227,255,.055) !important;
+
+  transform:none !important;
+}
+
+
+/* corner indicator */
+
+#intro.home-v3 .home-v4-brand-mark::before{
+
+  content:"";
+
+  position:absolute;
+
+  top:3px;
+  left:3px;
+
+  width:7px;
+  height:7px;
+
+  border-top:1px solid var(--hud-cyan);
+  border-left:1px solid var(--hud-cyan);
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+#intro.home-v3 .home-v4-status{
+
+  min-height:32px;
+
+  border:
+    1px solid var(--hud-line) !important;
+
+  border-radius:3px !important;
+
+  background:
+    rgba(8,15,21,.88) !important;
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.035),
+    0 8px 20px rgba(0,0,0,.22) !important;
+
+  backdrop-filter:
+    blur(10px);
+}
+
+
+/* =========================================================
+   HERO KICKER
+   ========================================================= */
+
+#intro.home-v3 .home-v4-kicker{
+
+  margin-bottom:16px;
+
+  color:var(--hud-cyan) !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace;
+
+  font-size:9px;
+
+  font-weight:800;
+
+  letter-spacing:.22em;
+
+  text-shadow:
+    0 0 10px rgba(77,227,255,.14);
+}
+
+
+#intro.home-v3 .home-v4-kicker::before{
+
+  width:24px;
+  flex-basis:24px;
+
+  height:1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--hud-cyan),
+      transparent
+    );
+
+  box-shadow:
+    0 0 8px rgba(77,227,255,.35);
+}
+
+
+/* =========================================================
+   HERO TITLE
+   ========================================================= */
+
+#intro.home-v3 .home-v4-title{
+
+  font-family:
+    'Orbitron',
+    Arial,
+    sans-serif !important;
+
+  font-weight:900 !important;
+
+  letter-spacing:-.065em !important;
+
+  line-height:.84 !important;
+
+  color:#f4f8fa !important;
+
+  text-shadow:
+
+    0 2px 0 rgba(255,255,255,.05),
+
+    0 18px 45px rgba(0,0,0,.60) !important;
+}
+
+
+/* title span */
+
+#intro.home-v3 .home-v4-title span{
+
+  display:inline-block;
+
+  text-shadow:
+
+    0 0 20px rgba(77,227,255,.055),
+
+    0 12px 32px rgba(0,0,0,.48) !important;
+}
+
+
+/* tactical underline */
+
+#intro.home-v3 .home-v4-title span::after{
+
+  left:0;
+
+  right:16%;
+
+  bottom:-12px;
+
+  height:2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--hud-cyan),
+      rgba(77,227,255,.45) 45%,
+      transparent 100%
+    );
+
+  box-shadow:
+    0 0 8px rgba(77,227,255,.28);
+}
+
+
+/* =========================================================
+   SUBTITLE
+   ========================================================= */
+
+#intro.home-v3 .home-v4-subline{
+
+  margin-top:25px;
+
+  padding:8px 11px;
+
+  border:
+    1px solid var(--hud-line) !important;
+
+  border-radius:3px !important;
+
+  background:
+    rgba(9,17,23,.76) !important;
+
+  color:
+    #d2e3e9 !important;
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.035),
+    0 8px 22px rgba(0,0,0,.18) !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace;
+
+  font-weight:700;
+
+  letter-spacing:.12em;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+#intro.home-v3 .home-v4-description{
+
+  max-width:580px;
+
+  margin-top:14px;
+
+  color:#9cafb7 !important;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+
+  font-size:11px;
+
+  line-height:1.75;
+
+  letter-spacing:.015em;
+
+  text-shadow:
+    0 4px 15px rgba(0,0,0,.35);
+}
+
+
+/* =========================================================
+   ACTION AREA
+   ========================================================= */
+
+#intro.home-v3 .home-v4-actions{
+
+  margin-top:25px;
+
+  gap:9px;
+
+  max-width:590px;
+}
+
+
+/* =========================================================
+   PRIMARY BUTTON
+   ========================================================= */
+
+#intro.home-v3 .home-v4-primary{
+
+  min-height:56px !important;
+
+  flex:0 0 255px;
+
+  border:
+    1px solid rgba(77,227,255,.62) !important;
+
+  border-radius:3px !important;
+
+  background:
+
+    linear-gradient(
+      135deg,
+      rgba(13,39,50,.96),
+      rgba(7,22,30,.98)
+    ) !important;
+
+  box-shadow:
+
+    inset 0 1px rgba(255,255,255,.08),
+
+    inset 0 -1px rgba(0,0,0,.35),
+
+    0 12px 30px rgba(0,0,0,.34),
+
+    0 0 18px rgba(77,227,255,.055) !important;
+
+  transition:
+
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease !important;
+}
+
+
+/* cyan tactical edge */
+
+#intro.home-v3 .home-v4-primary::before{
+
+  content:"";
+
+  position:absolute;
+
+  left:-1px;
+  top:9px;
+
+  width:2px;
+  height:calc(100% - 18px);
+
+  background:var(--hud-cyan);
+
+  box-shadow:
+    0 0 7px rgba(77,227,255,.55);
+}
+
+
+/* hover */
+
+#intro.home-v3 .home-v4-primary:hover{
+
+  transform:translateY(-2px);
+
+  border-color:
+    rgba(139,238,255,.90) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(17,50,63,.98),
+      rgba(8,25,34,.98)
+    ) !important;
+
+  box-shadow:
+
+    inset 0 1px rgba(255,255,255,.11),
+
+    0 18px 38px rgba(0,0,0,.40),
+
+    0 0 24px rgba(77,227,255,.10) !important;
+}
+
+
+/* active */
+
+#intro.home-v3 .home-v4-primary:active{
+
+  transform:
+    translateY(0)
+    scale(.985);
+}
+
+
+/* =========================================================
+   PRIMARY CONTENT
+   ========================================================= */
+
+#intro.home-v3 .home-v4-primary-content{
+
+  padding:
+    0 12px 0 18px;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace;
+
+  font-weight:900;
+
+  letter-spacing:.13em;
+}
+
+
+/* keyboard hint */
+
+#intro.home-v3 .home-v4-arrow-key{
+
+  padding:5px 7px;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  background:
+    rgba(255,255,255,.045);
+
+  color:#91a7b0;
+}
+
+
+/* arrow */
+
+#intro.home-v3 .home-v4-primary-arrow{
+
+  width:34px !important;
+  height:34px !important;
+
+  border:
+    1px solid rgba(139,238,255,.22);
+
+  border-radius:2px;
+
+  background:
+    rgba(77,227,255,.09) !important;
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.07) !important;
+
+  transition:
+    transform .16s ease,
+    background .16s ease;
+}
+
+
+#intro.home-v3 .home-v4-primary:hover
+.home-v4-primary-arrow{
+
+  transform:translateX(3px);
+
+  background:
+    rgba(77,227,255,.15) !important;
+}
+
+
+/* =========================================================
+   SECONDARY BUTTON
+   ========================================================= */
+
+#intro.home-v3 .home-v4-secondary{
+
+  min-height:56px !important;
+
+  border:
+    1px solid rgba(139,124,255,.28) !important;
+
+  border-radius:3px !important;
+
+  background:
+    rgba(11,13,23,.86) !important;
+
+  color:#c8c9dd;
+
+  box-shadow:
+
+    inset 0 1px rgba(255,255,255,.035),
+
+    0 12px 28px rgba(0,0,0,.28) !important;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace;
+
+  font-weight:800;
+
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    color .16s ease,
+    background .16s ease !important;
+}
+
+
+#intro.home-v3 .home-v4-secondary:hover{
+
+  transform:translateY(-2px);
+
+  border-color:
+    rgba(139,124,255,.58) !important;
+
+  color:#e4e2ff;
+
+  background:
+    rgba(17,18,31,.94) !important;
+}
+
+
+/* =========================================================
+   MICRO STATUS
+   ========================================================= */
+
+#intro.home-v3 .home-v4-micro{
+
+  margin-top:9px;
+
+  color:#61757f;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace;
+
+  font-size:7px;
+
+  letter-spacing:.14em;
+}
+
+
+#intro.home-v3 .home-v4-micro::before{
+
+  width:5px;
+  height:5px;
+
+  background:var(--hud-green);
+
+  box-shadow:
+    0 0 6px rgba(99,230,165,.65);
+}
+
+
+/* =========================================================
+   MISSION PANEL
+   ========================================================= */
+
+#intro.home-v3 .home-v4-mission{
+
+  padding:19px !important;
+
+  border:
+    1px solid rgba(125,211,252,.16) !important;
+
+  border-radius:4px !important;
+
+  background:
+
+    linear-gradient(
+      145deg,
+      rgba(10,19,27,.94),
+      rgba(4,9,14,.97)
+    ) !important;
+
+  box-shadow:
+
+    inset 0 1px rgba(255,255,255,.045),
+
+    0 24px 70px rgba(0,0,0,.44),
+
+    0 0 30px rgba(77,227,255,.025) !important;
+}
+
+
+/* tactical top line */
+
+#intro.home-v3 .home-v4-mission::before{
+
+  width:54px !important;
+
+  height:1px !important;
+
+  background:
+    var(--hud-cyan) !important;
+
+  box-shadow:
+    0 0 8px rgba(77,227,255,.35) !important;
+}
+
+
+/* inner border */
+
+#intro.home-v3 .home-v4-mission::after{
+
+  inset:7px !important;
+
+  border:
+    1px solid rgba(125,211,252,.035) !important;
+
+  box-shadow:none !important;
+}
+
+
+/* =========================================================
+   MISSION HEADER
+   ========================================================= */
+
+#intro.home-v3 .home-v4-mission-head{
+
+  margin-bottom:14px;
+
+  padding-bottom:11px;
+
+  border-bottom:
+    1px solid rgba(125,211,252,.08);
+}
+
+
+#intro.home-v3 .home-v4-mission-label{
+
+  min-height:26px;
+
+  padding:5px 8px;
+
+  border:
+    1px solid rgba(77,227,255,.22) !important;
+
+  border-radius:2px;
+
+  background:
+    rgba(77,227,255,.055) !important;
+
+  color:#91eaff;
+}
+
+
+#intro.home-v3 .home-v4-mission-code{
+
+  color:#657982 !important;
+
+  font-family:
+    ui-monospace,
+    monospace;
+
+  letter-spacing:.14em;
+}
+
+
+/* =========================================================
+   MISSION TITLE
+   ========================================================= */
+
+#intro.home-v3 .home-v4-mission-title{
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace !important;
+
+  font-weight:900 !important;
+
+  letter-spacing:.025em !important;
+
+  color:#eef7fa !important;
+
+  text-shadow:
+    0 10px 25px rgba(0,0,0,.45) !important;
+}
+
+
+/* subtitle */
+
+#intro.home-v3 .home-v4-mission-sub{
+
+  color:#80939c !important;
+
+  font-family:
+    ui-monospace,
+    monospace;
+
+  font-weight:600;
+
+  letter-spacing:.07em;
+}
+
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+#intro.home-v3 .home-v4-progress-bar{
+
+  height:5px;
+
+  margin-top:9px;
+
+  border:
+    1px solid rgba(125,211,252,.10);
+
+  border-radius:1px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  box-shadow:
+    none;
+}
+
+
+#intro.home-v3 .home-v4-progress-fill{
+
+  background:
+    linear-gradient(
+      90deg,
+      #39dfff,
+      #62e6ff 60%,
+      #8b7cff
+    );
+
+  box-shadow:
+    0 0 10px rgba(77,227,255,.30);
+}
+
+
+/* =========================================================
+   STAT CARDS
+   ========================================================= */
+
+#intro.home-v3 .home-v4-stat{
+
+  min-height:60px;
+
+  padding:10px;
+
+  border:
+    1px solid rgba(125,211,252,.085) !important;
+
+  border-radius:2px !important;
+
+  background:
+    rgba(255,255,255,.018) !important;
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.025),
+
+    0 8px 20px rgba(0,0,0,.15) !important;
+}
+
+
+#intro.home-v3 .home-v4-stat:hover{
+
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(77,227,255,.28) !important;
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.04),
+
+    0 12px 26px rgba(0,0,0,.22),
+
+    0 0 15px rgba(77,227,255,.035) !important;
+}
+
+
+#intro.home-v3 .home-v4-stat b{
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace;
+
+  font-size:15px;
+
+  color:#e9f5f8 !important;
+}
+
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
+#intro.home-v3 .home-v4-profile{
+
+  margin-top:14px;
+
+  padding:14px;
+
+  border:
+    1px solid rgba(125,211,252,.12) !important;
+
+  border-radius:3px !important;
+
+  background:
+    rgba(6,13,19,.80) !important;
+
+  box-shadow:
+
+    inset 0 1px rgba(255,255,255,.035),
+
+    0 16px 42px rgba(0,0,0,.28) !important;
+}
+
+
+/* remove excessive sweep */
+
+#intro.home-v3 .home-v4-profile::before{
+
+  opacity:.28;
+
+  animation-duration:11s;
+}
+
+
+/* profile title */
+
+#intro.home-v3 .home-v4-profile-head strong{
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace;
+
+  letter-spacing:.10em;
+}
+
+
+/* live */
+
+#intro.home-v3 .home-v4-profile-live{
+
+  border:
+    1px solid rgba(99,230,165,.22);
+
+  background:
+    rgba(99,230,165,.035);
+
+  color:#73e9ac;
+}
+
+
+/* =========================================================
+   XP
+   ========================================================= */
+
+#intro.home-v3 .home-v4-profile-xp-track{
+
+  height:4px;
+
+  border:
+    1px solid rgba(125,211,252,.08);
+
+  border-radius:1px;
+
+  background:
+    rgba(255,255,255,.025);
+}
+
+
+#intro.home-v3 .home-v4-profile-xp-track i{
+
+  background:
+    linear-gradient(
+      90deg,
+      #3ddfff,
+      #8b7cff
+    );
+
+  box-shadow:
+    0 0 10px rgba(77,227,255,.28);
+}
+
+
+/* =========================================================
+   RELAY STATUS
+   ========================================================= */
+
+#intro.home-v3 .home-v5-relay-status{
+
+  margin-top:11px;
+
+  padding:11px 13px;
+
+  border:
+    1px solid rgba(125,211,252,.12) !important;
+
+  border-radius:3px !important;
+
+  background:
+    rgba(7,14,20,.78) !important;
+
+  box-shadow:
+
+    inset 0 1px rgba(255,255,255,.035),
+
+    0 12px 30px rgba(0,0,0,.22) !important;
+
+  backdrop-filter:
+    blur(12px);
+}
+
+
+/* relay title */
+
+#intro.home-v3 .home-v5-relay-status-title{
+
+  color:#91cddd;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace;
+
+  letter-spacing:.15em;
+}
+
+
+/* live */
+
+#intro.home-v3 .home-v5-relay-status-live{
+
+  color:#69e4a4;
+
+  font-family:
+    'Orbitron',
+    ui-monospace,
+    monospace;
+}
+
+
+/* relay track */
+
+#intro.home-v3 .home-v5-relay-status-track{
+
+  height:3px;
+
+  border:
+    0;
+
+  background:
+    rgba(255,255,255,.035);
+}
+
+
+#intro.home-v3 .home-v5-relay-status-track span{
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(77,227,255,.30),
+      #4de3ff 45%,
+      #8b7cff
+    );
+
+  box-shadow:
+    0 0 8px rgba(77,227,255,.22);
+}
+
+
+/* =========================================================
+   BOTTOM UTILITY
+   ========================================================= */
+
+#intro.home-v3 .home-v4-bottom{
+
+  min-height:42px;
+
+  padding-top:11px;
+
+  border-top:
+    1px solid rgba(125,211,252,.065);
+}
+
+
+#intro.home-v3 .home-v4-utility{
+
+  border:
+    1px solid rgba(125,211,252,.10) !important;
+
+  border-radius:2px;
+
+  background:
+    rgba(7,14,20,.72) !important;
+
+  color:#8799a2 !important;
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.025);
+}
+
+
+#intro.home-v3 .home-v4-utility:hover{
+
+  border-color:
+    rgba(77,227,255,.26) !important;
+
+  color:#b8d7df !important;
+}
+
+
+/* =========================================================
+   DESKTOP LAYOUT
+   ========================================================= */
+
+@media (min-width:781px){
+
+  #intro.home-v3 .home-v4-main{
+
+    grid-template-columns:
+      minmax(0,1.15fr)
+      minmax(330px,.72fr);
+
+    gap:
+      clamp(38px,5vw,76px);
+  }
+
+
+  #intro.home-v3 .home-v4-copy{
+
+    max-width:720px;
+  }
+
+
+  #intro.home-v3 .home-v4-mission-wrap{
+
+    max-width:500px;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width:1050px){
+
+  #intro.home-v3 .home-v4-main{
+
+    gap:28px;
+  }
+
+
+  #intro.home-v3 .home-v4-title{
+
+    font-size:
+      clamp(58px,8.5vw,100px) !important;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width:780px){
+
+  #intro.home-v3 .home-v4-shell{
+
+    width:
+      calc(100% - 16px);
+
+    padding:
+      9px 0;
+  }
+
+
+  #intro.home-v3 .home-v4-title{
+
+    font-size:
+      clamp(46px,15vw,78px) !important;
+
+    line-height:.87 !important;
+  }
+
+
+  #intro.home-v3 .home-v4-description{
+
+    font-size:8px !important;
+
+    line-height:1.7 !important;
+  }
+
+
+  #intro.home-v3 .home-v4-actions{
+
+    margin-top:17px;
+
+    gap:7px;
+  }
+
+
+  #intro.home-v3 .home-v4-primary{
+
+    min-height:52px !important;
+
+    flex:1 1 auto;
+  }
+
+
+  #intro.home-v3 .home-v4-secondary{
+
+    min-height:52px !important;
+
+    flex:
+      0 0 108px;
+  }
+
+
+  #intro.home-v3 .home-v4-primary-content{
+
+    padding-left:13px;
+
+    letter-spacing:.08em;
+  }
+
+
+  #intro.home-v3 .home-v4-primary-arrow{
+
+    width:30px !important;
+    height:30px !important;
+  }
+
+
+  #intro.home-v3 .home-v4-mission{
+
+    padding:13px !important;
+  }
+
+
+  #intro.home-v3 .home-v4-profile{
+
+    padding:10px !important;
+  }
+
+
+  #intro.home-v3 .home-v5-relay-status{
+
+    padding:9px 10px !important;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width:430px){
+
+  #intro.home-v3 .home-v4-title{
+
+    font-size:
+      clamp(42px,15.5vw,66px) !important;
+  }
+
+
+  #intro.home-v3 .home-v4-secondary{
+
+    flex-basis:92px;
+
+    width:92px;
+
+    min-width:92px;
+
+    max-width:92px;
+  }
+
+
+  #intro.home-v3 .home-v4-description{
+
+    font-size:7px !important;
+  }
+
+
+  #intro.home-v3 .home-v4-mission-title{
+
+    font-size:
+      clamp(24px,7vw,34px) !important;
+  }
+}
+
+
+/* =========================================================
+   LOW HEIGHT
+   ========================================================= */
+
+@media
+  (min-width:781px)
+  and (max-height:760px){
+
+  #intro.home-v3 .home-v4-title{
+
+    font-size:
+      clamp(54px,7vw,88px) !important;
+  }
+
+
+  #intro.home-v3 .home-v4-actions{
+
+    margin-top:18px;
+  }
+
+
+  #intro.home-v3 .home-v4-mission{
+
+    padding:15px !important;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion:reduce){
+
+  #intro.home-v3 *,
+  #intro.home-v3 *::before,
+  #intro.home-v3 *::after{
+
+    animation-duration:.01ms !important;
+
+    animation-iteration-count:1 !important;
+
+    transition-duration:.01ms !important;
   }
 }

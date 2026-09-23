@@ -1,11 +1,14 @@
+
 /*
  * Runner Relay — Home V4 presentation owner.
  *
- * Contract:
+ * CONTRACT:
  * - Home owns presentation only.
  * - #start / #continue remain the authoritative gameplay entry points.
  * - Options / FAQ / Update remain owned by existing systems.
- * - The intro surface is rebuilt once, without duplicating gameplay UI.
+ * - Tutorial remains Home presentation.
+ * - Desktop presentation uses reduced motion / reduced visual intensity.
+ * - FAQ / UPDATE / TUTORIAL / OPTIONS use stable delegated click handling.
  */
 
 import { RELAY_FAQ } from './faq.js';
@@ -21,6 +24,53 @@ import { RELAY_FAQ } from './faq.js';
   let homeProfileStateAPI = null;
   let homeDailyChallengesAPI = null;
   let homeContractsAPI = null;
+
+  /* =========================================================
+     PANEL HELPERS
+     ========================================================= */
+
+  const closeHomePanels = () => {
+    const titlePanel = $('titlePanel');
+    const infoPanel = $('relayInfoPanel');
+
+    if (titlePanel instanceof HTMLElement) {
+      titlePanel.classList.add('hidden');
+      titlePanel.setAttribute('aria-hidden', 'true');
+    }
+
+    if (infoPanel instanceof HTMLElement) {
+      infoPanel.classList.add('hidden');
+      infoPanel.classList.remove(
+        'relay-faq-mode',
+        'relay-update-mode'
+      );
+      infoPanel.setAttribute('aria-hidden', 'true');
+    }
+  };
+
+  const prepareInfoPanel = mode => {
+    const panel = $('relayInfoPanel');
+
+    if (!(panel instanceof HTMLElement)) {
+      return false;
+    }
+
+    panel.classList.remove('hidden');
+
+    panel.classList.toggle(
+      'relay-faq-mode',
+      mode === 'faq'
+    );
+
+    panel.classList.toggle(
+      'relay-update-mode',
+      mode === 'update'
+    );
+
+    panel.setAttribute('aria-hidden', 'false');
+
+    return true;
+  };
 
   /* =========================================================
      DAILY OPERATION
@@ -53,13 +103,6 @@ import { RELAY_FAQ } from './faq.js';
           ? dailyChallenges
           : [];
 
-      /*
-       * Home is presentation-only.
-       *
-       * The authoritative daily challenge
-       * definitions and progress remain in
-       * src/state.js.
-       */
       const challenge =
         challenges.find(item => {
           const progress =
@@ -279,19 +322,15 @@ import { RELAY_FAQ } from './faq.js';
 
       const state = loadState();
 
-      /*
-       * Home only reads contract definitions.
-       * It does not create or own contract progression state.
-       */
       if (!homeContractsAPI) {
         homeContractsAPI =
           await import('./src/contracts.js');
       }
 
       const xp = Number(state.xp) || 0;
-    const signals = Number(state.signals) || 0;
-const credits = Number(state.credits) || 0;
-const totalRuns = Number(state.totalRuns) || 0;
+      const signals = Number(state.signals) || 0;
+      const credits = Number(state.credits) || 0;
+      const totalRuns = Number(state.totalRuns) || 0;
       const bestRun = Number(state.bestRun) || 0;
 
       const lastRunTime =
@@ -345,92 +384,99 @@ const totalRuns = Number(state.totalRuns) || 0;
       const xpFillEl = $('homeV4XpFill');
       const bestRunEl = $('homeV4BestRun');
       const runsEl = $('homeV4Runs');
-   const signalsEl = $('homeV4Signals');
-const creditsEl = $('homeV4Credits');
-const missionXpEl = $('homeV4MissionXp');
+      const signalsEl = $('homeV4Signals');
+      const creditsEl = $('homeV4Credits');
+      const missionXpEl = $('homeV4MissionXp');
       const bestRatingEl = $('homeV4BestRating');
       const signalValueEl = $('homeV4SignalValue');
-     const signalFillEl = $('homeV4SignalFill');
+      const signalFillEl = $('homeV4SignalFill');
 
-const unlockLevelEl = $('homeV4UnlockLevel');
-const unlockTitleEl = $('homeV4UnlockTitle');
-const unlockTextEl = $('homeV4UnlockText');
-const unlockFillEl = $('homeV4UnlockFill');
+      const unlockLevelEl = $('homeV4UnlockLevel');
+      const unlockTitleEl = $('homeV4UnlockTitle');
+      const unlockTextEl = $('homeV4UnlockText');
+      const unlockFillEl = $('homeV4UnlockFill');
 
-const activityOneEl =
-  $('homeV4ActivityOne');
+      const activityOneEl =
+        $('homeV4ActivityOne');
 
-const activityOneMetaEl =
-  $('homeV4ActivityOneMeta');
+      const activityOneMetaEl =
+        $('homeV4ActivityOneMeta');
 
-const activityTwoEl =
-  $('homeV4ActivityTwo');
+      const activityTwoEl =
+        $('homeV4ActivityTwo');
 
-const activityTwoMetaEl =
-  $('homeV4ActivityTwoMeta');
+      const activityTwoMetaEl =
+        $('homeV4ActivityTwoMeta');
 
-const activityThreeEl =
-  $('homeV4ActivityThree');
+      const activityThreeEl =
+        $('homeV4ActivityThree');
 
-const activityThreeMetaEl =
-  $('homeV4ActivityThreeMeta');
+      const activityThreeMetaEl =
+        $('homeV4ActivityThreeMeta');
 
-      const lastRunFeedEl = $('homeV5LastRunFeed');
-      const runTimeEl = $('homeV5RunTime');
-      const runSignalsEl = $('homeV5RunSignals');
-      const runScoreEl = $('homeV5RunScore');
-      const runRatingEl = $('homeV5RunRating');
+      const lastRunFeedEl =
+        $('homeV5LastRunFeed');
 
-   if (lastRunFeedEl) {
-  lastRunFeedEl.textContent =
-    totalRuns > 0
-      ? 'LAST RUN // RECORDED'
-      : 'LAST RUN // READY';
-}
+      const runTimeEl =
+        $('homeV5RunTime');
 
-/* RECENT ACTIVITY */
+      const runSignalsEl =
+        $('homeV5RunSignals');
 
-if (activityOneEl) {
-  activityOneEl.textContent =
-    totalRuns > 0
-      ? 'RUN RECORDED'
-      : 'NETWORK READY';
-}
+      const runScoreEl =
+        $('homeV5RunScore');
 
-if (activityOneMetaEl) {
-  activityOneMetaEl.textContent =
-    totalRuns > 0
-      ? `RUNS // ${totalRuns.toLocaleString()}`
-      : 'RELAY CHANNEL // 01';
-}
+      const runRatingEl =
+        $('homeV5RunRating');
 
-if (activityTwoEl) {
-  activityTwoEl.textContent =
-    signals > 0
-      ? `${signals.toLocaleString()} SIGNALS RECOVERED`
-      : 'AWAITING FIRST SIGNAL';
-}
+      if (lastRunFeedEl) {
+        lastRunFeedEl.textContent =
+          totalRuns > 0
+            ? 'LAST RUN // RECORDED'
+            : 'LAST RUN // READY';
+      }
 
-if (activityTwoMetaEl) {
-  activityTwoMetaEl.textContent =
-    signals > 0
-      ? 'SIGNAL NETWORK // ACTIVE'
-      : 'SIGNAL NETWORK // STANDBY';
-}
+      if (activityOneEl) {
+        activityOneEl.textContent =
+          totalRuns > 0
+            ? 'RUN RECORDED'
+            : 'NETWORK READY';
+      }
 
-if (activityThreeEl) {
-  activityThreeEl.textContent =
-    xp > 0
-      ? `XP BALANCE // ${xp.toLocaleString()}`
-      : 'CONTRACT NETWORK READY';
-}
+      if (activityOneMetaEl) {
+        activityOneMetaEl.textContent =
+          totalRuns > 0
+            ? `RUNS // ${totalRuns.toLocaleString()}`
+            : 'RELAY CHANNEL // 01';
+      }
 
-if (activityThreeMetaEl) {
-  activityThreeMetaEl.textContent =
-    xp > 0
-      ? 'PROGRESSION // ACTIVE'
-      : 'CONTRACTS // ONLINE';
-}
+      if (activityTwoEl) {
+        activityTwoEl.textContent =
+          signals > 0
+            ? `${signals.toLocaleString()} SIGNALS RECOVERED`
+            : 'AWAITING FIRST SIGNAL';
+      }
+
+      if (activityTwoMetaEl) {
+        activityTwoMetaEl.textContent =
+          signals > 0
+            ? 'SIGNAL NETWORK // ACTIVE'
+            : 'SIGNAL NETWORK // STANDBY';
+      }
+
+      if (activityThreeEl) {
+        activityThreeEl.textContent =
+          xp > 0
+            ? `XP BALANCE // ${xp.toLocaleString()}`
+            : 'CONTRACT NETWORK READY';
+      }
+
+      if (activityThreeMetaEl) {
+        activityThreeMetaEl.textContent =
+          xp > 0
+            ? 'PROGRESSION // ACTIVE'
+            : 'CONTRACTS // ONLINE';
+      }
 
       if (runTimeEl) {
         runTimeEl.textContent =
@@ -502,15 +548,15 @@ if (activityThreeMetaEl) {
           totalRuns.toLocaleString();
       }
 
-   if (signalsEl) {
-  signalsEl.textContent =
-    signals.toLocaleString();
-}
+      if (signalsEl) {
+        signalsEl.textContent =
+          signals.toLocaleString();
+      }
 
-if (creditsEl) {
-  creditsEl.textContent =
-    credits.toLocaleString();
-}
+      if (creditsEl) {
+        creditsEl.textContent =
+          credits.toLocaleString();
+      }
 
       if (missionXpEl) {
         const missionXp =
@@ -594,36 +640,43 @@ if (creditsEl) {
           `${String(missionSignals).padStart(2, '0')} / ${String(missionSignalTarget).padStart(2, '0')}`;
       }
 
-if (signalFillEl) {
-  const signalProgress =
-    missionSignalTarget > 0
-      ? Math.round(
-          (missionSignals / missionSignalTarget) * 100
-        )
-      : 0;
+      if (signalFillEl) {
+        const signalProgress =
+          missionSignalTarget > 0
+            ? Math.round(
+                (missionSignals / missionSignalTarget) * 100
+              )
+            : 0;
 
-  signalFillEl.style.width = `${signalProgress}%`;
-}
+        signalFillEl.style.width =
+          `${signalProgress}%`;
+      }
 
-/* NEXT UNLOCK */
-const nextLevel = (level.level || 1) + 1;
-const unlockProgress = xpProgress;
+      const nextLevel =
+        (level.level || 1) + 1;
 
-if (unlockLevelEl) {
-  unlockLevelEl.textContent = `LV ${String(nextLevel).padStart(2, '0')}`;
-}
+      const unlockProgress =
+        xpProgress;
 
-if (unlockTitleEl) {
-  unlockTitleEl.textContent = `SECTOR ${String(nextLevel).padStart(2, '0')} // SKYLINE`;
-}
+      if (unlockLevelEl) {
+        unlockLevelEl.textContent =
+          `LV ${String(nextLevel).padStart(2, '0')}`;
+      }
 
-if (unlockTextEl) {
-  unlockTextEl.textContent = `${unlockProgress}%`;
-}
+      if (unlockTitleEl) {
+        unlockTitleEl.textContent =
+          `SECTOR ${String(nextLevel).padStart(2, '0')} // SKYLINE`;
+      }
 
-if (unlockFillEl) {
-  unlockFillEl.style.width = `${unlockProgress}%`;
-}
+      if (unlockTextEl) {
+        unlockTextEl.textContent =
+          `${unlockProgress}%`;
+      }
+
+      if (unlockFillEl) {
+        unlockFillEl.style.width =
+          `${unlockProgress}%`;
+      }
 
       await syncHomeContract();
 
@@ -634,7 +687,7 @@ if (unlockFillEl) {
       );
     }
 
-      void syncHomeDailyOperation();
+    void syncHomeDailyOperation();
   };
 
   window.addEventListener(
@@ -643,17 +696,18 @@ if (unlockFillEl) {
       if (
         event.key === 'relay-runner-state'
       ) {
-        syncHomeProfile();
+        void syncHomeProfile();
       }
     }
   );
 
-window.addEventListener(
-  'relay:mission-complete',
-  () => {
-    void syncHomeProfile();
-  }
-);
+  window.addEventListener(
+    'relay:mission-complete',
+    () => {
+      void syncHomeProfile();
+    }
+  );
+
   const introVisible = () => {
     const intro = $('intro');
 
@@ -668,7 +722,7 @@ window.addEventListener(
         document.visibilityState === 'visible' &&
         introVisible()
       ) {
-        syncHomeProfile();
+        void syncHomeProfile();
       }
     }
   );
@@ -728,6 +782,10 @@ window.addEventListener(
     }
   };
 
+  /* =========================================================
+     OPTIONS
+     ========================================================= */
+
   const openOptions = () => {
     try {
       if (
@@ -742,210 +800,174 @@ window.addEventListener(
 
         return true;
       }
-    } catch {}
+    } catch (error) {
+      console.error(
+        '[RelayRunner] Unified options open failed:',
+        error
+      );
+    }
 
     return clickExisting(
       '[data-title-panel="controls"]'
     );
   };
 
+  /* =========================================================
+     FAQ
+     ========================================================= */
+
   const openFaq = () => {
-  const panel =
-    document.getElementById(
-      'relayInfoPanel'
-    );
-
-  const eyebrow =
-    document.getElementById(
-      'relayInfoEyebrow'
-    );
-
-  const heading =
-    document.getElementById(
-      'relayInfoHeading'
-    );
-
-  const content =
-    document.getElementById(
-      'relayInfoContent'
-    );
-
-  if (
-    !(panel instanceof HTMLElement) ||
-    !(eyebrow instanceof HTMLElement) ||
-    !(heading instanceof HTMLElement) ||
-    !(content instanceof HTMLElement)
-  ) {
-    console.error(
-      '[RelayRunner] FAQ panel elements not found'
-    );
-
-    return false;
-  }
-
-  try {
-    panel.classList.remove('hidden');
-
-    panel.classList.remove(
-      'relay-update-mode'
-    );
-
-    panel.classList.add(
-      'relay-faq-mode'
-    );
-
-    panel.setAttribute(
-      'aria-hidden',
-      'false'
-    );
-
-    eyebrow.textContent =
-      'RELAY RUNNER // FIELD GUIDE';
-
-    heading.textContent =
-      'FAQ';
-
-    content.innerHTML = `
-      <div
-        class="relay-terminal-prompt"
-        aria-hidden="true"
-      >
-        SELECT A QUERY
-      </div>
-
-      <div
-        class="relay-faq-list"
-        role="list"
-      >
-        ${RELAY_FAQ.map(
-          ([question, answer], index) => {
-            const isOpen =
-              index === 0;
-
-            const number =
-              String(index + 1)
-                .padStart(2, '0');
-
-            return `
-              <article
-                class="relay-faq-item${isOpen ? ' open' : ''}"
-                role="listitem"
-              >
-                <button
-                  class="relay-faq-question"
-                  type="button"
-                  data-faq-question
-                  aria-expanded="${isOpen}"
-                >
-                  <span
-                    class="faq-index"
-                    aria-hidden="true"
-                  >
-                    ${number}
-                  </span>
-
-                  <span class="faq-question-text">
-                    ${String(question)}
-                  </span>
-
-                  <span
-                    class="faq-question-state"
-                    aria-hidden="true"
-                  >
-                    ${isOpen
-                      ? 'ACTIVE'
-                      : 'QUERY'}
-                  </span>
-                </button>
-
-                <div
-                  class="relay-faq-answer"
-                  ${isOpen ? '' : 'hidden'}
-                >
-                  ${String(answer)}
-                </div>
-              </article>
-            `;
-          }
-        ).join('')}
-      </div>
-    `;
-
-    return true;
-
-  } catch (error) {
-    console.error(
-      '[RelayRunner] FAQ open failed:',
-      error
-    );
-
-    return false;
-  }
-};
-  
-  const openUpdate = () => {
-    console.log(
-      '[RelayRunner] UPDATE CLICKED'
-    );
-
     const panel =
-      document.getElementById(
-        'relayInfoPanel'
-      );
+      $('relayInfoPanel');
 
     const eyebrow =
-      document.getElementById(
-        'relayInfoEyebrow'
-      );
+      $('relayInfoEyebrow');
 
     const heading =
-      document.getElementById(
-        'relayInfoHeading'
-      );
+      $('relayInfoHeading');
 
     const content =
-      document.getElementById(
-        'relayInfoContent'
-      );
+      $('relayInfoContent');
 
-    try {
-      if (
-        typeof window.relayOpenInfo ===
-        'function'
-      ) {
-        window.relayOpenInfo('update');
-      }
-    } catch (error) {
+    if (
+      !(panel instanceof HTMLElement) ||
+      !(eyebrow instanceof HTMLElement) ||
+      !(heading instanceof HTMLElement) ||
+      !(content instanceof HTMLElement)
+    ) {
       console.error(
-        '[RelayRunner] UPDATE open failed:',
-        error
-      );
-    }
-
-    if (!(panel instanceof HTMLElement)) {
-      console.error(
-        '[RelayRunner] relayInfoPanel NOT FOUND'
+        '[RelayRunner] FAQ panel elements not found'
       );
 
       return false;
     }
 
-    panel.classList.remove('hidden');
-    panel.classList.add(
-      'relay-update-mode'
-    );
+    try {
+      prepareInfoPanel('faq');
 
-    if (eyebrow instanceof HTMLElement) {
+      eyebrow.textContent =
+        'RELAY RUNNER // FIELD GUIDE';
+
+      heading.textContent =
+        'FAQ';
+
+      content.innerHTML = `
+        <div
+          class="relay-terminal-prompt"
+          aria-hidden="true"
+        >
+          SELECT A QUERY
+        </div>
+
+        <div
+          class="relay-faq-list"
+          role="list"
+        >
+          ${RELAY_FAQ.map(
+            ([question, answer], index) => {
+              const isOpen =
+                index === 0;
+
+              const number =
+                String(index + 1)
+                  .padStart(2, '0');
+
+              return `
+                <article
+                  class="relay-faq-item${isOpen ? ' open' : ''}"
+                  role="listitem"
+                >
+                  <button
+                    class="relay-faq-question"
+                    type="button"
+                    data-faq-question
+                    aria-expanded="${isOpen}"
+                  >
+                    <span
+                      class="faq-index"
+                      aria-hidden="true"
+                    >
+                      ${number}
+                    </span>
+
+                    <span class="faq-question-text">
+                      ${String(question)}
+                    </span>
+
+                    <span
+                      class="faq-question-state"
+                      aria-hidden="true"
+                    >
+                      ${isOpen
+                        ? 'ACTIVE'
+                        : 'QUERY'}
+                    </span>
+                  </button>
+
+                  <div
+                    class="relay-faq-answer"
+                    ${isOpen ? '' : 'hidden'}
+                  >
+                    ${String(answer)}
+                  </div>
+                </article>
+              `;
+            }
+          ).join('')}
+        </div>
+      `;
+
+      return true;
+
+    } catch (error) {
+      console.error(
+        '[RelayRunner] FAQ open failed:',
+        error
+      );
+
+      return false;
+    }
+  };
+
+  /* =========================================================
+     UPDATE
+     ========================================================= */
+
+  const openUpdate = () => {
+    const panel =
+      $('relayInfoPanel');
+
+    const eyebrow =
+      $('relayInfoEyebrow');
+
+    const heading =
+      $('relayInfoHeading');
+
+    const content =
+      $('relayInfoContent');
+
+    if (
+      !(panel instanceof HTMLElement) ||
+      !(eyebrow instanceof HTMLElement) ||
+      !(heading instanceof HTMLElement) ||
+      !(content instanceof HTMLElement)
+    ) {
+      console.error(
+        '[RelayRunner] UPDATE panel elements not found'
+      );
+
+      return false;
+    }
+
+    try {
+      prepareInfoPanel('update');
+
       eyebrow.textContent =
         'LATEST UPDATE';
-    }
 
-    if (heading instanceof HTMLElement) {
       heading.textContent =
         'UPDATE';
-    }
 
-    if (content instanceof HTMLElement) {
       content.innerHTML = `
         <p class="relay-update-meta">
           CHAPTER 01 / NIGHT SHIFT · PATCH 01.08 · DEPLOYMENT READY
@@ -973,13 +995,21 @@ window.addEventListener(
           </div>
         </div>
       `;
-    }
 
-     return true;
+      return true;
+
+    } catch (error) {
+      console.error(
+        '[RelayRunner] UPDATE open failed:',
+        error
+      );
+
+      return false;
+    }
   };
 
   /* =========================================================
-     HOME PANEL // CREDITS
+     CREDITS
      ========================================================= */
 
   const openHomeCredits = () => {
@@ -1003,6 +1033,8 @@ window.addEventListener(
     ) {
       return false;
     }
+
+    closeHomePanels();
 
     eyebrow.textContent =
       'CREDITS';
@@ -1048,12 +1080,13 @@ window.addEventListener(
     `;
 
     panel.classList.remove('hidden');
+    panel.setAttribute('aria-hidden', 'false');
 
     return true;
   };
 
   /* =========================================================
-     HOME PANEL // TUTORIAL
+     TUTORIAL
      ========================================================= */
 
   const openHomeTutorial = () => {
@@ -1078,6 +1111,8 @@ window.addEventListener(
       return false;
     }
 
+    closeHomePanels();
+
     eyebrow.textContent =
       'FIELD MANUAL';
 
@@ -1095,41 +1130,42 @@ window.addEventListener(
             combat and relay systems
             before entering the route.
           </p>
+
           <div class="tutorial-keyboard">
-  <div class="tutorial-keyboard-label">
-    KEYBOARD PROTOCOL
-  </div>
+            <div class="tutorial-keyboard-label">
+              KEYBOARD PROTOCOL
+            </div>
 
-  <span class="tutorial-key">
-    A / D
-    <small>RUN</small>
-  </span>
+            <span class="tutorial-key">
+              A / D
+              <small>RUN</small>
+            </span>
 
-  <span class="tutorial-key">
-    SPACE
-    <small>JUMP</small>
-  </span>
+            <span class="tutorial-key">
+              SPACE
+              <small>JUMP</small>
+            </span>
 
-  <span class="tutorial-key">
-    E
-    <small>FIRE</small>
-  </span>
+            <span class="tutorial-key">
+              E
+              <small>FIRE</small>
+            </span>
 
-  <span class="tutorial-key">
-    Q
-    <small>BLADE</small>
-  </span>
+            <span class="tutorial-key">
+              Q
+              <small>BLADE</small>
+            </span>
 
-  <span class="tutorial-key">
-    SHIFT
-    <small>DASH</small>
-  </span>
+            <span class="tutorial-key">
+              SHIFT
+              <small>DASH</small>
+            </span>
 
-  <span class="tutorial-key">
-    ESC
-    <small>PAUSE</small>
-  </span>
-</div>
+            <span class="tutorial-key">
+              ESC
+              <small>PAUSE</small>
+            </span>
+          </div>
         </div>
 
         <div class="tutorial-quick-grid">
@@ -1255,6 +1291,7 @@ window.addEventListener(
     `;
 
     panel.classList.remove('hidden');
+    panel.setAttribute('aria-hidden', 'false');
 
     content
       .querySelectorAll(
@@ -1281,7 +1318,7 @@ window.addEventListener(
                 '.tutorial-accordion'
               );
 
-            const panel =
+            const tutorialPanel =
               article?.querySelector(
                 '.tutorial-panel'
               );
@@ -1290,9 +1327,9 @@ window.addEventListener(
               button.querySelector('b');
 
             if (
-              panel instanceof HTMLElement
+              tutorialPanel instanceof HTMLElement
             ) {
-              panel.hidden = open;
+              tutorialPanel.hidden = open;
             }
 
             if (
@@ -1316,7 +1353,7 @@ window.addEventListener(
     return true;
   };
 
-   /* =========================================================
+  /* =========================================================
      ACTIVE CONTRACT
      ========================================================= */
 
@@ -1474,6 +1511,7 @@ window.addEventListener(
         creditsEl.textContent =
           `+${credits.toLocaleString()} CREDITS`;
       }
+
     } catch (error) {
       console.error(
         '[RelayRunner] Active contract sync failed:',
@@ -1506,20 +1544,16 @@ window.addEventListener(
       intro?.querySelector('#start');
 
     forceStartVisible(start);
-    syncHomeProfile();
+    void syncHomeProfile();
   };
 
-    /* =========================================================
-     HOME TYPEWRITER
-     ========================================================= */
-
-  
-     /* =========================================================
-     HOME TYPEWRITER LOOP
+  /* =========================================================
+     TYPEWRITER
      ========================================================= */
 
   const startHomeTypewriter = () => {
-    const target = $('homeV4Typewriter');
+    const target =
+      $('homeV4Typewriter');
 
     if (!(target instanceof HTMLElement)) {
       return;
@@ -1537,32 +1571,56 @@ window.addEventListener(
     const pauseAfterDeleting = 700;
 
     const run = () => {
+      if (!introVisible()) {
+        window.setTimeout(run, 500);
+        return;
+      }
+
       if (!deleting) {
         if (index < text.length) {
-          target.textContent += text.charAt(index);
+          target.textContent +=
+            text.charAt(index);
+
           index += 1;
 
-          window.setTimeout(run, typeSpeed);
+          window.setTimeout(
+            run,
+            typeSpeed
+          );
+
           return;
         }
 
         deleting = true;
 
-        window.setTimeout(run, pauseAfterTyping);
+        window.setTimeout(
+          run,
+          pauseAfterTyping
+        );
+
         return;
       }
 
       if (index > 0) {
         index -= 1;
-        target.textContent = text.substring(0, index);
 
-        window.setTimeout(run, deleteSpeed);
+        target.textContent =
+          text.substring(0, index);
+
+        window.setTimeout(
+          run,
+          deleteSpeed
+        );
+
         return;
       }
 
       deleting = false;
 
-      window.setTimeout(run, pauseAfterDeleting);
+      window.setTimeout(
+        run,
+        pauseAfterDeleting
+      );
     };
 
     target.textContent = '';
@@ -1570,33 +1628,6 @@ window.addEventListener(
     deleting = false;
 
     run();
-  };
-
-
-  const bindOnce = (
-    node,
-    event,
-    handler
-  ) => {
-    if (!(node instanceof HTMLElement)) {
-      return;
-    }
-
-    const key =
-      `homeV4Bound${event}`;
-
-    if (
-      node.dataset[key] === '1'
-    ) {
-      return;
-    }
-
-    node.dataset[key] = '1';
-
-    node.addEventListener(
-      event,
-      handler
-    );
   };
 
   /* =========================================================
@@ -1613,15 +1644,8 @@ window.addEventListener(
       return;
     }
 
-    /*
-     * Preserve references to the original
-     * gameplay entry buttons.
-     *
-     * The existing game runtime owns their
-     * actual gameplay behaviour.
-     */
-const sourceStart = $('start');
-const sourceContinue = $('continue');
+    const sourceContinue =
+      $('continue');
 
     intro.dataset.homeV4Built = '1';
     intro.classList.add('home-v3');
@@ -1669,59 +1693,54 @@ const sourceContinue = $('continue');
       'home-v4-shell';
 
     shell.innerHTML = `
- 
-  <header class="home-v4-topbar">
+      <header class="home-v4-topbar">
 
-  <div
-    class="home-v4-brand"
-    aria-label="Relay Runner"
-  >
-    <span class="home-v4-brand-mark">
-      R/
-    </span>
+        <div
+          class="home-v4-brand"
+          aria-label="Relay Runner"
+        >
+          <span class="home-v4-brand-mark">
+            R/
+          </span>
 
-    <span>
-      RELAY RUNNER
-    </span>
-  </div>
+          <span>
+            RELAY RUNNER
+          </span>
+        </div>
 
-  <div class="home-v4-topbar-right">
+        <div class="home-v4-topbar-right">
 
-    <!-- CREDITS MOVED TO HOME FOOTER -->
+          <div
+            class="home-v4-credits"
+            aria-label="Credits"
+          >
+            <span
+              class="home-v4-credits-icon"
+              aria-hidden="true"
+            >
+              ◈
+            </span>
 
-   <div class="home-v4-topbar-right">
+            <span class="home-v4-credits-data">
+              <small>CREDITS</small>
+              <strong id="homeV4Credits">0</strong>
+            </span>
+          </div>
 
-  <div
-    class="home-v4-credits"
-    aria-label="Credits"
-  >
-    <span
-      class="home-v4-credits-icon"
-      aria-hidden="true"
-    >
-      ◈
-    </span>
+          <div
+            class="home-v4-status"
+            aria-label="System status"
+          >
+            <span class="home-v4-status-dot"></span>
 
-    <span class="home-v4-credits-data">
-      <small>CREDITS</small>
-      <strong id="homeV4Credits">0</strong>
-    </span>
-  </div>
+            <b>SYSTEM ONLINE</b>
 
-  <div
-    class="home-v4-status"
-    aria-label="System status"
-  >
-      <span class="home-v4-status-dot"></span>
+            <span>NIGHT SHIFT</span>
+          </div>
 
-      <b>SYSTEM ONLINE</b>
+        </div>
 
-      <span>NIGHT SHIFT</span>
-    </div>
-
-  </div>
-
-</header>
+      </header>
 
       <main class="home-v4-main">
 
@@ -1729,6 +1748,7 @@ const sourceContinue = $('continue');
           class="home-v4-copy"
           aria-labelledby="homeV4Title"
         >
+
           <p class="home-v4-kicker">
             CHAPTER 01 / OLD QUARTER
           </p>
@@ -1744,99 +1764,104 @@ const sourceContinue = $('continue');
             ROOFTOP RELAY // LIVE NETWORK
           </p>
 
-         <p class="home-v4-description home-v4-typewriter">
-  <span id="homeV4Typewriter"></span>
-  <span class="home-v4-cursor" aria-hidden="true">▌</span>
-</p>
+          <p class="home-v4-description home-v4-typewriter">
+            <span id="homeV4Typewriter"></span>
+            <span
+              class="home-v4-cursor"
+              aria-hidden="true"
+            >
+              ▌
+            </span>
+          </p>
 
-   <div
-  class="home-v4-actions"
-  aria-label="Main menu"
->
+          <div
+            class="home-v4-actions"
+            aria-label="Main menu"
+          >
 
-  <button
-    id="start"
-    class="home-v4-primary home-v5-start"
-    type="button"
-    aria-label="Start Run"
-  >
-    <span
-      class="home-v5-start-glow"
-      aria-hidden="true"
-    ></span>
+            <button
+              id="start"
+              class="home-v4-primary home-v5-start"
+              type="button"
+              aria-label="Start Run"
+            >
+              <span
+                class="home-v5-start-glow"
+                aria-hidden="true"
+              ></span>
 
-    <span
-      class="home-v5-start-scan"
-      aria-hidden="true"
-    ></span>
+              <span
+                class="home-v5-start-scan"
+                aria-hidden="true"
+              ></span>
 
-    <span
-      class="home-v4-primary-content"
-    >
-      <span class="home-v5-start-main">
-        <span
-          class="home-v5-start-label"
-        >
-          START RUN
-        </span>
+              <span
+                class="home-v4-primary-content"
+              >
+                <span class="home-v5-start-main">
+                  <span
+                    class="home-v5-start-label"
+                  >
+                    START RUN
+                  </span>
 
-        <small
-          class="home-v5-start-sub"
-        >
-          DEPLOY TO OLD QUARTER
-        </small>
-      </span>
+                  <small
+                    class="home-v5-start-sub"
+                  >
+                    DEPLOY TO OLD QUARTER
+                  </small>
+                </span>
 
-      <span
-        class="home-v5-start-key"
-        aria-hidden="true"
-      >
-        ENTER
-      </span>
+                <span
+                  class="home-v5-start-key"
+                  aria-hidden="true"
+                >
+                  ENTER
+                </span>
 
-      <span
-        class="home-v4-primary-arrow"
-        aria-hidden="true"
-      >
-        →
-      </span>
-    </span>
+                <span
+                  class="home-v4-primary-arrow"
+                  aria-hidden="true"
+                >
+                  →
+                </span>
+              </span>
 
-    <span
-      class="home-v5-start-ready"
-      aria-hidden="true"
-    >
-      READY
-    </span>
-  </button>
+              <span
+                class="home-v5-start-ready"
+                aria-hidden="true"
+              >
+                READY
+              </span>
+            </button>
 
-  <button
-    id="continue"
-    class="home-v4-secondary hidden"
-    type="button"
-    aria-label="Continue last run"
-  >
-    <span class="home-v5-continue-icon">
-      ↻
-    </span>
+            <button
+              id="continue"
+              class="home-v4-secondary hidden"
+              type="button"
+              aria-label="Continue last run"
+            >
+              <span class="home-v5-continue-icon">
+                ↻
+              </span>
 
-    <span class="home-v5-continue-copy">
-      <strong>CONTINUE</strong>
+              <span class="home-v5-continue-copy">
+                <strong>CONTINUE</strong>
 
-      <small>
-        RESUME LAST RUN
-      </small>
-    </span>
+                <small>
+                  RESUME LAST RUN
+                </small>
+              </span>
 
-    <span
-      class="home-v5-continue-arrow"
-      aria-hidden="true"
-    >
-      →
-    </span>
-  </button>
+              <span
+                class="home-v5-continue-arrow"
+                aria-hidden="true"
+              >
+                →
+              </span>
+            </button>
 
-</div>
+          </div>
 
           <p class="home-v4-micro">
             <b>DEPLOYMENT READY</b>
@@ -1890,9 +1915,6 @@ const sourceContinue = $('continue');
               </span>
             </div>
           </div>
-            <!-- =================================================
-               ACTIVE CONTRACT
-               ================================================= -->
 
           <article
             class="home-v4-contract"
@@ -1953,9 +1975,7 @@ const sourceContinue = $('continue');
               class="home-v4-contract-meta"
             >
               <div>
-                <small>
-                  MISSION
-                </small>
+                <small>MISSION</small>
 
                 <b
                   id="homeV4ContractMission"
@@ -1965,9 +1985,7 @@ const sourceContinue = $('continue');
               </div>
 
               <div>
-                <small>
-                  REWARD
-                </small>
+                <small>REWARD</small>
 
                 <b
                   id="homeV4ContractReward"
@@ -1977,9 +1995,7 @@ const sourceContinue = $('continue');
               </div>
 
               <div>
-                <small>
-                  PAYLOAD
-                </small>
+                <small>PAYLOAD</small>
 
                 <b
                   id="homeV4ContractCredits"
@@ -2003,9 +2019,7 @@ const sourceContinue = $('continue');
               >
                 OPEN CONTRACTS
 
-                <span
-                  aria-hidden="true"
-                >
+                <span aria-hidden="true">
                   →
                 </span>
               </button>
@@ -2020,66 +2034,63 @@ const sourceContinue = $('continue');
           aria-label="Current mission"
         >
 
-         <aside
-  class="home-v5-live-feed"
-  aria-label="Relay network status"
->
-  <div class="home-v5-panel-head">
-    <span>RELAY NETWORK</span>
-    <b><i></i> LIVE</b>
-  </div>
+          <aside
+            class="home-v5-live-feed"
+            aria-label="Relay network status"
+          >
+            <div class="home-v5-panel-head">
+              <span>RELAY NETWORK</span>
+              <b><i></i> LIVE</b>
+            </div>
 
-  <div class="home-v5-network-status">
+            <div class="home-v5-network-status">
 
-    <div class="home-v5-network-row">
-      <span>
-        <i></i>
-        CORE
-      </span>
+              <div class="home-v5-network-row">
+                <span>
+                  <i></i>
+                  CORE
+                </span>
+                <strong>ONLINE</strong>
+              </div>
 
-      <strong>ONLINE</strong>
-    </div>
+              <div class="home-v5-network-row">
+                <span>
+                  <i></i>
+                  SIGNAL
+                </span>
+                <strong>STABLE</strong>
+              </div>
 
-    <div class="home-v5-network-row">
-      <span>
-        <i></i>
-        SIGNAL
-      </span>
+              <div class="home-v5-network-row">
+                <span>
+                  <i></i>
+                  CONTRACTS
+                </span>
+                <strong>READY</strong>
+              </div>
 
-      <strong>STABLE</strong>
-    </div>
+              <div class="home-v5-network-row">
+                <span>
+                  <i></i>
+                  CHANNEL
+                </span>
+                <strong>SECURE</strong>
+              </div>
 
-    <div class="home-v5-network-row">
-      <span>
-        <i></i>
-        CONTRACTS
-      </span>
+            </div>
 
-      <strong>READY</strong>
-    </div>
-
-    <div class="home-v5-network-row">
-      <span>
-        <i></i>
-        CHANNEL
-      </span>
-
-      <strong>SECURE</strong>
-    </div>
-
-  </div>
-
-  <div class="home-v5-feed-line">
-    <span>&gt;</span>
-    <strong id="homeV5LastRunFeed">
-      LAST RUN // READY
-    </strong>
-  </div>
-</aside>
+            <div class="home-v5-feed-line">
+              <span>&gt;</span>
+              <strong id="homeV5LastRunFeed">
+                LAST RUN // READY
+              </strong>
+            </div>
+          </aside>
 
           <article
             class="home-v4-mission"
           >
+
             <div
               class="home-v4-mission-head"
             >
@@ -2116,13 +2127,8 @@ const sourceContinue = $('continue');
               <div
                 class="home-v5-last-run-head"
               >
-                <span>
-                  LAST RUN
-                </span>
-
-                <b>
-                  TELEMETRY
-                </b>
+                <span>LAST RUN</span>
+                <b>TELEMETRY</b>
               </div>
 
               <div
@@ -2130,38 +2136,22 @@ const sourceContinue = $('continue');
               >
                 <div>
                   <small>TIME</small>
-                  <strong
-                    id="homeV5RunTime"
-                  >
-                    —
-                  </strong>
+                  <strong id="homeV5RunTime">—</strong>
                 </div>
 
                 <div>
                   <small>SIGNALS</small>
-                  <strong
-                    id="homeV5RunSignals"
-                  >
-                    —
-                  </strong>
+                  <strong id="homeV5RunSignals">—</strong>
                 </div>
 
                 <div>
                   <small>SCORE</small>
-                  <strong
-                    id="homeV5RunScore"
-                  >
-                    —
-                  </strong>
+                  <strong id="homeV5RunScore">—</strong>
                 </div>
 
                 <div>
                   <small>RATING</small>
-                  <strong
-                    id="homeV5RunRating"
-                  >
-                    —
-                  </strong>
+                  <strong id="homeV5RunRating">—</strong>
                 </div>
               </div>
             </div>
@@ -2172,9 +2162,7 @@ const sourceContinue = $('continue');
               <div
                 class="home-v4-stat"
               >
-                <small>
-                  MISSION XP
-                </small>
+                <small>MISSION XP</small>
 
                 <b
                   id="homeV4MissionXp"
@@ -2186,9 +2174,7 @@ const sourceContinue = $('continue');
               <div
                 class="home-v4-stat"
               >
-                <small>
-                  BEST RATING
-                </small>
+                <small>BEST RATING</small>
 
                 <b
                   id="homeV4BestRating"
@@ -2197,11 +2183,8 @@ const sourceContinue = $('continue');
                 </b>
               </div>
             </div>
-                 </article>
 
-                   <!-- =================================================
-               DAILY OPERATION
-               ================================================= -->
+          </article>
 
           <article
             class="home-v4-daily"
@@ -2261,9 +2244,7 @@ const sourceContinue = $('continue');
               <div
                 class="home-v4-daily-progress-meta"
               >
-                <span>
-                  PROGRESS
-                </span>
+                <span>PROGRESS</span>
 
                 <strong
                   id="homeV4DailyProgress"
@@ -2290,9 +2271,7 @@ const sourceContinue = $('continue');
                 class="home-v4-daily-rewards"
               >
                 <div>
-                  <small>
-                    REWARD
-                  </small>
+                  <small>REWARD</small>
 
                   <b
                     id="homeV4DailyReward"
@@ -2302,9 +2281,7 @@ const sourceContinue = $('continue');
                 </div>
 
                 <div>
-                  <small>
-                    PAYLOAD
-                  </small>
+                  <small>PAYLOAD</small>
 
                   <b
                     id="homeV4DailyCredits"
@@ -2321,9 +2298,7 @@ const sourceContinue = $('continue');
               >
                 CHALLENGES
 
-                <span
-                  aria-hidden="true"
-                >
+                <span aria-hidden="true">
                   →
                 </span>
               </button>
@@ -2331,98 +2306,103 @@ const sourceContinue = $('continue');
 
           </article>
 
+          <article
+            class="home-v4-unlock"
+            aria-label="Next unlock"
+          >
+            <div class="home-v4-unlock-head">
+              <span>NEXT UNLOCK</span>
+              <b id="homeV4UnlockLevel">LV 08</b>
+            </div>
 
-        
+            <h3 id="homeV4UnlockTitle">
+              SECTOR 02 // SKYLINE
+            </h3>
 
-        <article
-  class="home-v4-unlock"
-  aria-label="Next unlock"
->
-  <div class="home-v4-unlock-head">
-    <span>NEXT UNLOCK</span>
-    <b id="homeV4UnlockLevel">LV 08</b>
-  </div>
+            <p id="homeV4UnlockDesc">
+              Reach the required level to unlock the next district.
+            </p>
 
-  <h3 id="homeV4UnlockTitle">
-    SECTOR 02 // SKYLINE
-  </h3>
+            <div class="home-v4-unlock-progress">
+              <div class="home-v4-unlock-meta">
+                <span>PROGRESS</span>
+                <strong id="homeV4UnlockText">0%</strong>
+              </div>
 
-  <p id="homeV4UnlockDesc">
-    Reach the required level to unlock the next district.
-  </p>
+              <div class="home-v4-unlock-bar">
+                <i
+                  id="homeV4UnlockFill"
+                  style="width:0%"
+                ></i>
+              </div>
+            </div>
+          </article>
 
-  <div class="home-v4-unlock-progress">
-    <div class="home-v4-unlock-meta">
-      <span>PROGRESS</span>
-      <strong id="homeV4UnlockText">0%</strong>
-    </div>
+          <div
+            class="home-v4-activity"
+            aria-label="Recent activity"
+          >
+            <div class="home-v4-activity-head">
+              <span>RECENT ACTIVITY</span>
+              <b>LIVE FEED</b>
+            </div>
 
-    <div class="home-v4-unlock-bar">
-      <i id="homeV4UnlockFill" style="width:0%"></i>
-    </div>
-  </div>
-</article>
+            <div class="home-v4-activity-list">
 
-<div
-  class="home-v4-activity"
-  aria-label="Recent activity"
->
-  <div class="home-v4-activity-head">
-    <span>RECENT ACTIVITY</span>
-    <b>LIVE FEED</b>
-  </div>
+              <div class="home-v4-activity-item">
+                <span class="home-v4-activity-dot"></span>
 
-  <div class="home-v4-activity-list">
+                <div>
+                  <strong id="homeV4ActivityOne">
+                    NETWORK READY
+                  </strong>
 
-    <div class="home-v4-activity-item">
-      <span class="home-v4-activity-dot"></span>
-      <div>
-        <strong id="homeV4ActivityOne">
-          NETWORK READY
-        </strong>
-        <small id="homeV4ActivityOneMeta">
-          RELAY CHANNEL // 01
-        </small>
-      </div>
-    </div>
+                  <small id="homeV4ActivityOneMeta">
+                    RELAY CHANNEL // 01
+                  </small>
+                </div>
+              </div>
 
-    <div class="home-v4-activity-item">
-      <span class="home-v4-activity-dot"></span>
-      <div>
-        <strong id="homeV4ActivityTwo">
-          AWAITING FIRST RUN
-        </strong>
-        <small id="homeV4ActivityTwoMeta">
-          TELEMETRY // STANDBY
-        </small>
-      </div>
-    </div>
+              <div class="home-v4-activity-item">
+                <span class="home-v4-activity-dot"></span>
 
-    <div class="home-v4-activity-item">
-      <span class="home-v4-activity-dot"></span>
-      <div>
-        <strong id="homeV4ActivityThree">
-          CONTRACT NETWORK READY
-        </strong>
-        <small id="homeV4ActivityThreeMeta">
-          CONTRACTS // ONLINE
-        </small>
-      </div>
-    </div>
+                <div>
+                  <strong id="homeV4ActivityTwo">
+                    AWAITING FIRST RUN
+                  </strong>
 
-  </div>
-</div>
+                  <small id="homeV4ActivityTwoMeta">
+                    TELEMETRY // STANDBY
+                  </small>
+                </div>
+              </div>
 
-<div
-  class="home-v4-badge"
->
-  LIVE RELAY CHANNEL // 01
-</div>
+              <div class="home-v4-activity-item">
+                <span class="home-v4-activity-dot"></span>
+
+                <div>
+                  <strong id="homeV4ActivityThree">
+                    CONTRACT NETWORK READY
+                  </strong>
+
+                  <small id="homeV4ActivityThreeMeta">
+                    CONTRACTS // ONLINE
+                  </small>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="home-v4-badge">
+            LIVE RELAY CHANNEL // 01
+          </div>
 
           <aside
             class="home-v4-profile"
             aria-label="Runner profile"
           >
+
             <div
               class="home-v4-profile-head"
             >
@@ -2471,13 +2451,9 @@ const sourceContinue = $('continue');
               <div
                 class="home-v4-profile-xp-meta"
               >
-                <span>
-                  XP PROGRESS
-                </span>
+                <span>XP PROGRESS</span>
 
-                <strong
-                  id="homeV4XpText"
-                >
+                <strong id="homeV4XpText">
                   0 / 100
                 </strong>
               </div>
@@ -2496,9 +2472,7 @@ const sourceContinue = $('continue');
               class="home-v4-profile-stats"
             >
               <div>
-                <small>
-                  BEST RUN
-                </small>
+                <small>BEST RUN</small>
 
                 <b id="homeV4BestRun">
                   0
@@ -2506,9 +2480,7 @@ const sourceContinue = $('continue');
               </div>
 
               <div>
-                <small>
-                  RUNS
-                </small>
+                <small>RUNS</small>
 
                 <b id="homeV4Runs">
                   0
@@ -2516,9 +2488,7 @@ const sourceContinue = $('continue');
               </div>
 
               <div>
-                <small>
-                  SIGNALS
-                </small>
+                <small>SIGNALS</small>
 
                 <b id="homeV4Signals">
                   0
@@ -2529,74 +2499,72 @@ const sourceContinue = $('continue');
             <div
               class="home-v4-profile-footer"
             >
-              <span>
-                PROFILE STATUS
-              </span>
+              <span>PROFILE STATUS</span>
 
-              <b>
-                ONLINE
-              </b>
+              <b>ONLINE</b>
             </div>
+
           </aside>
 
         </section>
+
       </main>
 
-   <footer
-  class="home-v4-bottom"
->
-  <div
-    class="home-v4-bottom-left"
-  >
+      <footer
+        class="home-v4-bottom"
+      >
 
-    <button
-      class="home-v4-utility"
-      type="button"
-      data-home-v4-action="faq"
-      aria-label="Open FAQ"
-    >
-      ? &nbsp;FAQ
-    </button>
+        <div
+          class="home-v4-bottom-left"
+        >
 
-    <button
-      class="home-v4-utility"
-      type="button"
-      data-home-v4-action="update"
-      aria-label="Open latest update"
-    >
-      ↗ &nbsp;UPDATE
-    </button>
+          <button
+            class="home-v4-utility"
+            type="button"
+            data-home-v4-action="faq"
+            aria-label="Open FAQ"
+          >
+            ? &nbsp;FAQ
+          </button>
 
-  <!-- CREDITS REMAIN IN TOPBAR -->
+          <button
+            class="home-v4-utility"
+            type="button"
+            data-home-v4-action="update"
+            aria-label="Open latest update"
+          >
+            ↗ &nbsp;UPDATE
+          </button>
 
-    <button
-      class="home-v4-utility home-v4-tutorial"
-      type="button"
-      data-home-v4-action="tutorial"
-      aria-label="Open tutorial"
-    >
-      ◉ &nbsp;TUTORIAL
-    </button>
+          <button
+            class="home-v4-utility home-v4-tutorial"
+            type="button"
+            data-home-v4-action="tutorial"
+            aria-label="Open tutorial"
+          >
+            ◉ &nbsp;TUTORIAL
+          </button>
 
-    <button
-      class="home-v4-utility"
-      type="button"
-      data-home-v4-action="options"
-      aria-label="Open options"
-    >
-      ⚙ &nbsp;OPTIONS
-    </button>
+          <button
+            class="home-v4-utility"
+            type="button"
+            data-home-v4-action="options"
+            aria-label="Open options"
+          >
+            ⚙ &nbsp;OPTIONS
+          </button>
 
-  </div>
+        </div>
 
-  <div
-    class="home-v4-bottom-meta"
-  >
-    RELAY NETWORK
-    <b>ONLINE</b>
-    · V1.1.0
-  </div>
-</footer>
+        <div
+          class="home-v4-bottom-meta"
+        >
+          RELAY NETWORK
+          <b>ONLINE</b>
+          · V1.1.0
+        </div>
+
+      </footer>
 
       <button
         id="exitTitle"
@@ -2609,33 +2577,30 @@ const sourceContinue = $('continue');
       </button>
     `;
 
-      intro.append(
+    intro.append(
       scene,
       shell
     );
 
     /* =========================================================
-       HOME V5 // FINAL COMMAND LAYOUT
-       Move existing presentation-only elements into their
-       final visual zones without duplicating state or handlers.
+       HOME V5 COMMAND ROW
        ========================================================= */
 
     const homeCopy =
-      shell.querySelector('.home-v4-copy');
+      shell.querySelector(
+        '.home-v4-copy'
+      );
 
     const homeActions =
-      shell.querySelector('.home-v4-actions');
+      shell.querySelector(
+        '.home-v4-actions'
+      );
 
     const homeDaily =
-      shell.querySelector('.home-v4-daily');
+      shell.querySelector(
+        '.home-v4-daily'
+      );
 
-    /*
-     * START + DAILY OPERATION
-     *
-     * Daily Operation is already the canonical Home presentation
-     * of the existing daily challenge system. We only move its
-     * existing DOM node; no new state or handlers are created.
-     */
     if (
       homeCopy instanceof HTMLElement &&
       homeActions instanceof HTMLElement &&
@@ -2658,47 +2623,301 @@ const sourceContinue = $('continue');
       );
     }
 
-  startHomeTypewriter();
-installHomeScrollStatus();
-syncHomeProfile();
+    /* =========================================================
+       TYPEWRITER / STATE
+       ========================================================= */
 
-    bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="faq"]'
-      ),
+    startHomeTypewriter();
+    syncHomeProfile();
+
+    /* =========================================================
+       STABLE HOME BUTTON EVENTS
+       ========================================================= */
+
+    shell.addEventListener(
       'click',
       event => {
+        const target =
+          event.target instanceof Element
+            ? event.target.closest(
+                '[data-home-v4-action]'
+              )
+            : null;
+
+        if (!(target instanceof HTMLElement)) {
+          return;
+        }
+
         event.preventDefault();
-        openFaq();
+        event.stopPropagation();
+
+        const action =
+          target.dataset.homeV4Action;
+
+        switch (action) {
+
+          case 'faq':
+            openFaq();
+            break;
+
+          case 'update':
+            openUpdate();
+            break;
+
+          case 'tutorial':
+            openHomeTutorial();
+            break;
+
+          case 'options':
+            openOptions();
+            break;
+
+          case 'daily': {
+            const challengeTab =
+              document.querySelector(
+                '#pauseMenu [data-tab="challenges"]'
+              );
+
+            if (
+              challengeTab instanceof HTMLElement
+            ) {
+              HTMLElement.prototype.click.call(
+                challengeTab
+              );
+
+              break;
+            }
+
+            const fallback =
+              document.querySelector(
+                '[data-relay-info="challenges"]'
+              );
+
+            if (
+              fallback instanceof HTMLElement
+            ) {
+              HTMLElement.prototype.click.call(
+                fallback
+              );
+            }
+
+            break;
+          }
+
+          case 'contracts':
+            if (
+              typeof window.relayOpenContracts ===
+              'function'
+            ) {
+              window.relayOpenContracts();
+            } else {
+              console.error(
+                '[RelayRunner] Contracts API not ready'
+              );
+            }
+            break;
+
+          default:
+            break;
+        }
       }
     );
 
-    bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="update"]'
-      ),
-      'click',
-      event => {
-        event.preventDefault();
-        openUpdate();
+/* =========================================================
+   GAMEPLAY MUSIC
+   HOME -> PLAY
+   ========================================================= */
+
+let relayGameplayAudio = null;
+let relayGameplayAudioStarted = false;
+
+const startGameplayMusic = async () => {
+  try {
+    /*
+     * Stop any older/procedural music system.
+     */
+    try {
+      window.relayAdaptiveMusic?.stop?.();
+      window.relayMenuMusic?.stop?.();
+    } catch {}
+
+    /*
+     * Create the MP3 player only once.
+     */
+    if (!relayGameplayAudio) {
+      relayGameplayAudio =
+        new Audio('/game/assets/audio/music.mp3');
+
+      relayGameplayAudio.loop = true;
+      relayGameplayAudio.preload = 'auto';
+      relayGameplayAudio.volume = 0;
+    }
+
+    /*
+     * Do not restart an already playing track.
+     */
+    if (
+      relayGameplayAudioStarted &&
+      !relayGameplayAudio.paused
+    ) {
+      return;
+    }
+
+    /*
+     * Start from the beginning on a new run.
+     */
+    if (!relayGameplayAudioStarted) {
+      relayGameplayAudio.currentTime = 0;
+    }
+
+    await relayGameplayAudio.play();
+
+    relayGameplayAudioStarted = true;
+
+    /*
+     * Smooth fade-in.
+     */
+    const targetVolume = 0.58;
+    const duration = 900;
+    const startTime = performance.now();
+
+    const fadeIn = now => {
+      if (!relayGameplayAudio) {
+        return;
       }
+
+      const progress = Math.min(
+        1,
+        (now - startTime) / duration
+      );
+
+      relayGameplayAudio.volume =
+        targetVolume * progress;
+
+      if (progress < 1) {
+        requestAnimationFrame(fadeIn);
+      }
+    };
+
+    requestAnimationFrame(fadeIn);
+
+  } catch (error) {
+    console.warn(
+      '[RelayRunner] Gameplay MP3 could not start:',
+      error
     );
+  }
+};
 
-          bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="daily"]'
-      ),
-      'click',
-      event => {
-        event.preventDefault();
+window.relayGameplayAudio = {
+  play: startGameplayMusic,
 
+  pause() {
+    if (!relayGameplayAudio) {
+      return;
+    }
+
+    relayGameplayAudio.pause();
+  },
+
+  resume() {
+    if (!relayGameplayAudio) {
+      return;
+    }
+
+    relayGameplayAudio
+      .play()
+      .catch(() => {});
+  },
+
+  stop() {
+    if (!relayGameplayAudio) {
+      return;
+    }
+
+    relayGameplayAudio.pause();
+    relayGameplayAudio.currentTime = 0;
+    relayGameplayAudio.volume = 0;
+    relayGameplayAudioStarted = false;
+  },
+
+  setVolume(value) {
+    if (!relayGameplayAudio) {
+      return;
+    }
+
+    relayGameplayAudio.volume =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          Number(value) || 0
+        )
+      );
+  }
+};
+
+/* =========================================================
+   START
+   ========================================================= */
+
+const start =
+  shell.querySelector('#start');
+
+forceStartVisible(start);
+
+if (start instanceof HTMLElement) {
+  start.addEventListener(
+    'click',
+    event => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      try {
         /*
-         * Open the existing Challenges system.
-         * Home does not create a duplicate challenge UI.
+         * Start the new MP3 immediately
+         * when START RUN is pressed.
          */
+        void startGameplayMusic();
+
+        const loader =
+          window.relayPlayDeploymentV1;
+
+        if (
+          loader &&
+          typeof loader.show === 'function'
+        ) {
+          void loader.show({
+            missionNumber: 1,
+
+            desktop:
+              './assets/loadplay.jpg',
+
+            mobile:
+              './assets/loadplaymobile.jpg',
+
+            beforeRoute: async () => {
+              const target =
+                document.querySelector(
+                  'body > #game > div[hidden] #start'
+                );
+
+              if (
+                target instanceof HTMLElement
+              ) {
+                HTMLElement.prototype.click.call(
+                  target
+                );
+              }
+            }
+          });
+
+          return;
+        }
+
         const target =
           document.querySelector(
-            '#pauseMenu [data-tab="challenges"]'
+            'body > #game > div[hidden] #start'
           );
 
         if (
@@ -2707,166 +2926,64 @@ syncHomeProfile();
           HTMLElement.prototype.click.call(
             target
           );
-
-          return;
         }
 
-        const fallback =
-          document.querySelector(
-            '[data-relay-info="challenges"]'
-          );
-
-        if (
-          fallback instanceof HTMLElement
-        ) {
-          HTMLElement.prototype.click.call(
-            fallback
-          );
-        }
+      } catch (error) {
+        console.error(
+          '[RelayRunner] Deployment loader error:',
+          error
+        );
       }
-    );
-
- bindOnce(
-  shell.querySelector(
-    '[data-home-v4-action="contracts"]'
-  ),
-  'click',
-  event => {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    if (
-      typeof window.relayOpenContracts !==
-      'function'
-    ) {
-      console.error(
-        '[RelayRunner] Contracts API not ready'
-      );
-      return;
     }
+  );
+}
 
-    window.relayOpenContracts();
-  }
-);
-       /* CREDITS IS DISPLAYED IN THE TOPBAR */
-
-    bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="tutorial"]'
-      ),
-      'click',
-      event => {
-        event.preventDefault();
-        openHomeTutorial();
-      }
-    );
-
-    bindOnce(
-      shell.querySelector(
-        '[data-home-v4-action="options"]'
-      ),
-      'click',
-      event => {
-        event.preventDefault();
-        openOptions();
-      }
-    );
-    /*
-     * START
-     *
-     * The Home button forwards to the
-     * original gameplay-owned button.
-     */
-    const start =
-      shell.querySelector('#start');
-
-    forceStartVisible(start);
-
-bindOnce(
-  start,
-  'click',
-  event => {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    try {
-      const loader = window.relayPlayDeploymentV1;
-
-      if (loader && typeof loader.show === 'function') {
-        void loader.show({
-          missionNumber: 1,
-          desktop: './assets/loadplay.jpg',
-          mobile: './assets/loadplaymobile.jpg',
-
-          beforeRoute: async () => {
-            const target = document.querySelector(
-              'body > #game > div[hidden] #start'
-            );
-
-            if (target instanceof HTMLElement) {
-              HTMLElement.prototype.click.call(target);
-            }
-          }
-        });
-
-        return;
-      }
-
-      const target = document.querySelector(
-        'body > #game > div[hidden] #start'
-      );
-
-      if (target instanceof HTMLElement) {
-        HTMLElement.prototype.click.call(target);
-      }
-    } catch (error) {
-      console.error(
-        '[RelayRunner] Deployment loader error:',
-        error
-      );
-    }
-  }
-);
-
-    /*
-     * CONTINUE
-     */
+    /* =========================================================
+       CONTINUE
+       ========================================================= */
 
     const continueButton =
       shell.querySelector('#continue');
 
-  const syncContinue = () => {
-  if (!(continueButton instanceof HTMLElement)) {
-    return;
-  }
+    const syncContinue = () => {
+      if (
+        !(continueButton instanceof HTMLElement)
+      ) {
+        return;
+      }
 
-  continueButton.classList.remove('hidden');
-  continueButton.removeAttribute('hidden');
+      continueButton.classList.remove(
+        'hidden'
+      );
 
-  continueButton.style.setProperty(
-    'display',
-    'inline-flex',
-    'important'
-  );
+      continueButton.removeAttribute(
+        'hidden'
+      );
 
-  continueButton.style.setProperty(
-    'visibility',
-    'visible',
-    'important'
-  );
+      continueButton.style.setProperty(
+        'display',
+        'inline-flex',
+        'important'
+      );
 
-  continueButton.style.setProperty(
-    'opacity',
-    '1',
-    'important'
-  );
+      continueButton.style.setProperty(
+        'visibility',
+        'visible',
+        'important'
+      );
 
-  continueButton.style.setProperty(
-    'pointer-events',
-    'auto',
-    'important'
-  );
-};
+      continueButton.style.setProperty(
+        'opacity',
+        '1',
+        'important'
+      );
+
+      continueButton.style.setProperty(
+        'pointer-events',
+        'auto',
+        'important'
+      );
+    };
 
     syncContinue();
 
@@ -2893,61 +3010,126 @@ bindOnce(
       );
     }
 
-    bindOnce(
-      continueButton,
-      'click',
-      event => {
-        event.preventDefault();
+    if (
+      continueButton instanceof HTMLElement
+    ) {
+      continueButton.addEventListener(
+        'click',
+        event => {
+          event.preventDefault();
+          event.stopPropagation();
 
-        if (
-          !(sourceContinue instanceof HTMLElement)
-        ) {
-          return;
+          if (
+            !(sourceContinue instanceof HTMLElement)
+          ) {
+            return;
+          }
+
+          try {
+            HTMLElement.prototype.click.call(
+              sourceContinue
+            );
+          } catch {}
         }
+      );
+    }
+  };
 
-        try {
-          HTMLElement.prototype.click.call(
-            sourceContinue
-          );
-        } catch {}
+  /* =========================================================
+     REDUCED DESKTOP MOTION
+     ========================================================= */
+
+  const installDesktopCalmMode = () => {
+    const root =
+      document.documentElement;
+
+    if (
+      root.dataset.homeV4CalmMode === '1'
+    ) {
+      return;
+    }
+
+    root.dataset.homeV4CalmMode = '1';
+
+    const apply = () => {
+      const desktop =
+        window.innerWidth >= 769;
+
+      document.body.classList.toggle(
+        'home-v4-desktop-calm',
+        desktop
+      );
+    };
+
+    apply();
+
+    window.addEventListener(
+      'resize',
+      apply,
+      {
+        passive: true
       }
     );
   };
 
-    /* =========================================================
+  /* =========================================================
      HOME SCROLL STATUS
      ========================================================= */
 
   const installHomeScrollStatus = () => {
-    if (document.documentElement.dataset.homeScrollStatus === '1') {
+    if (
+      document.documentElement.dataset
+        .homeScrollStatus === '1'
+    ) {
       return;
     }
 
-    document.documentElement.dataset.homeScrollStatus = '1';
+    document.documentElement.dataset
+      .homeScrollStatus = '1';
 
-    let lastScrollY = window.scrollY;
+    let lastScrollY =
+      window.scrollY;
 
-    window.addEventListener('scroll', () => {
-      const intro = $('intro');
+    window.addEventListener(
+      'scroll',
+      () => {
+        const intro =
+          $('intro');
 
-      if (!(intro instanceof HTMLElement)) {
-        return;
+        if (
+          !(intro instanceof HTMLElement)
+        ) {
+          return;
+        }
+
+        const currentScrollY =
+          window.scrollY;
+
+        if (
+          currentScrollY > lastScrollY &&
+          currentScrollY > 10
+        ) {
+          intro.classList.add(
+            'is-scrolling'
+          );
+        }
+
+        if (
+          currentScrollY < lastScrollY
+        ) {
+          intro.classList.remove(
+            'is-scrolling'
+          );
+        }
+
+        lastScrollY =
+          currentScrollY;
+      },
+      {
+        passive: true
       }
-
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY > lastScrollY && currentScrollY > 10) {
-        intro.classList.add('is-scrolling');
-      }
-
-      if (currentScrollY < lastScrollY) {
-        intro.classList.remove('is-scrolling');
-      }
-
-      lastScrollY = currentScrollY;
-    }, { passive:true });
+    );
   };
-
 
   /* =========================================================
      KEYBOARD
@@ -2987,36 +3169,15 @@ bindOnce(
             tag !== 'TEXTAREA'
           ) {
             event.preventDefault();
-            clickExisting('#start');
+
+            clickExisting(
+              '#start'
+            );
           }
         }
 
         if (event.key === 'Escape') {
-          const title =
-            $('titlePanel');
-
-          const info =
-            $('relayInfoPanel');
-
-          if (
-            !title?.classList.contains(
-              'hidden'
-            )
-          ) {
-            title.classList.add(
-              'hidden'
-            );
-          }
-
-          if (
-            !info?.classList.contains(
-              'hidden'
-            )
-          ) {
-            info.classList.add(
-              'hidden'
-            );
-          }
+          closeHomePanels();
         }
       }
     );
@@ -3030,8 +3191,11 @@ bindOnce(
     buildHome();
     setHomeState();
     installKeyboard();
+    installDesktopCalmMode();
+    installHomeScrollStatus();
 
-    const intro = $('intro');
+    const intro =
+      $('intro');
 
     if (
       intro &&
@@ -3062,10 +3226,13 @@ bindOnce(
     document.addEventListener(
       'DOMContentLoaded',
       boot,
-      { once: true }
+      {
+        once: true
+      }
     );
   } else {
     boot();
   }
+
 })();
 
