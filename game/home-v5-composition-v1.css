@@ -1729,3 +1729,64 @@
   font-size:11px !important;
   letter-spacing:.12em !important;
 }
+/* =====================================================
+   CONTINUE — SAME DESIGN AS START / DIFFERENT COLOR
+   ===================================================== */
+
+#intro.home-v3 .home-v5-command-row .home-v4-secondary{
+  position:relative !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  width:250px !important;
+  min-width:250px !important;
+  max-width:250px !important;
+
+  height:58px !important;
+  min-height:58px !important;
+
+  border:1px solid rgba(168,85,247,.85) !important;
+  border-radius:2px !important;
+
+  background:#13091f !important;
+
+  color:#f3e8ff !important;
+
+  font-family:"Orbitron",sans-serif !important;
+  font-size:14px !important;
+  font-weight:800 !important;
+  letter-spacing:.18em !important;
+  text-transform:uppercase !important;
+
+  box-shadow:
+    0 0 0 1px rgba(168,85,247,.08),
+    0 0 25px rgba(168,85,247,.14),
+    inset 0 0 20px rgba(168,85,247,.07) !important;
+
+  overflow:hidden !important;
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease !important;
+}
+
+#intro.home-v3 .home-v5-command-row .home-v4-secondary:hover{
+  background:#1b0d2b !important;
+  border-color:rgba(192,132,252,.95) !important;
+
+  box-shadow:
+    0 0 0 1px rgba(168,85,247,.14),
+    0 0 32px rgba(168,85,247,.28),
+    inset 0 0 24px rgba(168,85,247,.10) !important;
+
+  transform:translateY(-1px);
+}
+
+#intro.home-v3 .home-v5-command-row .home-v4-secondary:active{
+  transform:translateY(0);
+}
+#intro.home-v3 .home-v4-secondary .home-v5-continue-icon{
+  display:none !important;
+}
