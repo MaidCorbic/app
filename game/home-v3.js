@@ -2746,7 +2746,12 @@ const startGameplayMusic = async () => {
      */
     if (!relayGameplayAudio) {
       relayGameplayAudio =
-        new Audio('./assets/audio/music.mp3');
+        new Audio(
+          new URL(
+            './assets/audio/music.mp3',
+            import.meta.url
+          ).href
+        );
 
       relayGameplayAudio.loop = true;
       relayGameplayAudio.preload = 'auto';
@@ -2897,8 +2902,13 @@ if (start instanceof HTMLElement) {
 
       try {
         /*
-         * Start the new MP3 immediately
-         * when START RUN is pressed.
+         * Kill the old procedural game audio immediately.
+         * Main exposes this after its module loads.
+         */
+        window.relayProceduralAudio?.stop?.();
+
+        /*
+         * Start the MP3 immediately on the trusted click.
          */
         void startGameplayMusic();
 
