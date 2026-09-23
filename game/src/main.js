@@ -618,11 +618,12 @@ game.events.once(
 game.events.on(
   'runner-ready',
   () => {
-    if ($('intro').classList.contains('hidden')) {
-      startAudioBed(
-        game.scene.getScene('runner').mission
-      );
-    }
+    /*
+     * Gameplay uses the MP3 player owned by home-v3.js.
+     * Stop the old procedural audio bed and keep the MP3 running.
+     */
+    stopAudioBed();
+    window.relayGameplayAudio?.play?.();
   }
 );
 
@@ -2196,6 +2197,7 @@ function toggleSetting(name) {
 
     if (state.muted) {
       stopAudioBed();
+      window.relayGameplayAudio?.pause?.();
     } else if (
       !$('intro').classList.contains(
         'hidden'
@@ -2205,7 +2207,7 @@ function toggleSetting(name) {
     } else if (
       game.scene.isActive('runner')
     ) {
-      startAudioBed();
+      window.relayGameplayAudio?.resume?.();
     }
   }
 
@@ -4534,7 +4536,8 @@ document.addEventListener(
 );
 
 $('start').onclick = () => {
-  startAudioBed();
+  stopAudioBed();
+  window.relayGameplayAudio?.play?.();
 
   leaveHome(
     game.scene.isPaused('runner')
@@ -4548,7 +4551,8 @@ $('start').onclick = () => {
 };
 
 $('continue').onclick = () => {
-  startAudioBed();
+  stopAudioBed();
+  window.relayGameplayAudio?.play?.();
 
   leaveHome(() =>
     launch(
@@ -4572,7 +4576,8 @@ $('returnTitle').onclick =
 
 $('again').onclick =
   () => {
-    startAudioBed();
+    stopAudioBed();
+    window.relayGameplayAudio?.play?.();
 
     $('finish')
       .classList.add('hidden');
@@ -4584,7 +4589,8 @@ $('again').onclick =
 
 $('nextMission').onclick =
   () => {
-    startAudioBed();
+    stopAudioBed();
+    window.relayGameplayAudio?.play?.();
 
     $('finish')
       .classList.add('hidden');
@@ -4606,7 +4612,8 @@ $('finishTitle').onclick =
 
 $('retry').onclick =
   () => {
-    startAudioBed();
+    stopAudioBed();
+    window.relayGameplayAudio?.play?.();
 
     $('gameOver')
       .classList.add('hidden');

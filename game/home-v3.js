@@ -2746,7 +2746,7 @@ const startGameplayMusic = async () => {
      */
     if (!relayGameplayAudio) {
       relayGameplayAudio =
-        new Audio('/game/assets/audio/music.mp3');
+        new Audio('./assets/audio/music.mp3');
 
       relayGameplayAudio.loop = true;
       relayGameplayAudio.preload = 'auto';
@@ -2767,7 +2767,29 @@ const startGameplayMusic = async () => {
      * Start from the beginning on a new run.
      */
     if (!relayGameplayAudioStarted) {
-      relayGameplayAudio.currentTime = 0;
+      const startFromMiddle = () => {
+        if (
+          relayGameplayAudio &&
+          Number.isFinite(relayGameplayAudio.duration) &&
+          relayGameplayAudio.duration > 0
+        ) {
+          relayGameplayAudio.currentTime =
+            relayGameplayAudio.duration / 2;
+        }
+      };
+
+      if (
+        Number.isFinite(relayGameplayAudio.duration) &&
+        relayGameplayAudio.duration > 0
+      ) {
+        startFromMiddle();
+      } else {
+        relayGameplayAudio.addEventListener(
+          'loadedmetadata',
+          startFromMiddle,
+          { once: true }
+        );
+      }
     }
 
     await relayGameplayAudio.play();
