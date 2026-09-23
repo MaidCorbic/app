@@ -1207,90 +1207,26 @@ function startMusic() {
 
   window.__relayRuntimeMusicStarting = true;
 
-  let settings = {};
+  try {
+    window.relayAdaptiveMusic?.stop?.();
+    window.relayAdaptiveMusic?.setEnabled?.(false);
+  } catch {}
 
   try {
-    settings =
-      JSON.parse(
-        localStorage.getItem(
-          'relay-runner-state'
-        ) || '{}'
-      ) || {};
-  } catch {
-    window.__relayRuntimeMusicStarting = false;
-    return;
-  }
+    void window.relayGameplayAudio?.play?.();
+  } catch {}
 
-  if (
-    settings.muted === true
-  ) {
-    window.__relayRuntimeMusicStarting = false;
-    return;
-  }
-
-  const volume =
-    Number.isFinite(
-      Number(
-        settings.musicVolume
-      )
-    )
-      ? Math.max(
-          0.05,
-          Math.min(
-            0.85,
-            Number(
-              settings.musicVolume
-            )
-          )
-        )
-      : 0.55;
-
-  const music =
-    window.relayAdaptiveMusic;
-
-  if (!music) {
-    window.__relayRuntimeMusicStarting = false;
-    return;
-  }
-
-  try {
-    music.setEnabled?.(true);
-
-    music.setVolume?.(
-      volume
-    );
-
-    Promise.resolve(
-      music.unlock?.()
-    )
-      .then(
-        ok => {
-          if (
-            ok !== false &&
-            gameplay()
-          ) {
-            music.start?.();
-          }
-        }
-      )
-      .catch(
-        () => {}
-      )
-      .finally(
-        () => {
-          window.__relayRuntimeMusicStarting =
-            false;
-        }
-      );
-
-  } catch {
-    window.__relayRuntimeMusicStarting =
-      false;
-  }
+  window.setTimeout(
+    () => {
+      window.__relayRuntimeMusicStarting = false;
+    },
+    250
+  );
 }
 
 /*
  * Audio gesture binding.
+ 
  */
 function bindAudio() {
   let lastAudioGesture = 0;
