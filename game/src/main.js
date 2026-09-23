@@ -233,12 +233,12 @@ window.relayProceduralAudio = {
 };
 
 function startHomeAudio() {
-  /* Procedural music disabled: gameplay uses the supplied MP3. */
+  /* Old procedural music is disabled. */
   stopAudioBed();
 }
 
 function startAudioBed(mission = missions[missionIndex]) {
-  /* Procedural gameplay music disabled: gameplay uses the supplied MP3. */
+  /* Old procedural gameplay music is disabled. */
   stopAudioBed();
   return;
 }
