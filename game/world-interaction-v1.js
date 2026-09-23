@@ -70,21 +70,174 @@ function markCheckpointSecured(scene, checkpoint) {
 }
 
 function makeTerminal(scene, checkpoint, index) {
-  const terminal = scene.add.container(checkpoint.x + 42, checkpoint.y - 58).setDepth(20).setSize(46, 62);
+  const terminal = scene.add.container(
+    checkpoint.x + 42,
+    checkpoint.y - 58
+  ).setDepth(20).setSize(46, 62);
+
   terminal.setDataEnabled();
   terminal.setData('checkpoint', checkpoint);
   terminal.setData('index', index);
   terminal.setData('activated', false);
 
-  const shadow = scene.add.ellipse(0, 27, 40, 9, 0x000000, .34);
-  const body = scene.add.rectangle(0, 0, 34, 46, 0x101d31, 1).setStrokeStyle(2, 0x8df4ff, 1);
-  const screen = scene.add.rectangle(0, -11, 22, 12, 0x19c8f5, .42).setStrokeStyle(1, 0xc8fbff, 1);
-  const core = scene.add.circle(0, 9, 6, 0xffd06e, 1).setStrokeStyle(1, 0xfff0b0, .95);
-  const label = scene.add.text(0, 39, `LINK ${String(index + 1).padStart(2,'0')}`, { fontFamily:'monospace', fontSize:'9px', fontStyle:'bold', color:'#dffcff', stroke:'#02050d', strokeThickness:4 }).setOrigin(.5);
-  terminal.add([shadow, body, screen, core, label]);
-  terminal.setData('children', {body, screen, core, label});
-  scene.tweens?.add({targets:core,alpha:{from:.35,to:1},scale:{from:.9,to:1.15},duration:620,yoyo:true,repeat:-1});
-  scene.tweens?.add({targets:screen,alpha:{from:.25,to:.8},duration:800,yoyo:true,repeat:-1});
+  const shadow = scene.add.ellipse(
+    0, 27, 40, 9,
+    0x000000, .34
+  );
+
+  const body = scene.add.rectangle(
+    0, 0, 34, 46,
+    0x101d31, 1
+  ).setStrokeStyle(2, 0x8df4ff, 1);
+
+  const screen = scene.add.rectangle(
+    0, -11, 22, 12,
+    0x19c8f5, .42
+  ).setStrokeStyle(1, 0xc8fbff, 1);
+
+  const core = scene.add.circle(
+    0, 9, 6,
+    0xffd06e, 1
+  ).setStrokeStyle(1, 0xfff0b0, .95);
+
+  const label = scene.add.text(
+    0,
+    39,
+    `LINK ${String(index + 1).padStart(2, '0')}`,
+    {
+      fontFamily: 'monospace',
+      fontSize: '9px',
+      fontStyle: 'bold',
+      color: '#dffcff',
+      stroke: '#02050d',
+      strokeThickness: 4
+    }
+  ).setOrigin(.5);
+
+  /* =========================
+     CHECKPOINT NAV ARROW
+     ========================= */
+
+  const arrowGlow = scene.add.triangle(
+    0,
+    -76,
+    0, -20,
+    -13, 6,
+    13, 6,
+    0x19c8f5,
+    .18
+  );
+
+  const arrow = scene.add.triangle(
+    0,
+    -76,
+    0, -16,
+    -9, 4,
+    9, 4,
+    0xdffcff,
+    1
+  );
+
+  const arrowCore = scene.add.triangle(
+    0,
+    -76,
+    0, -11,
+    -5, 2,
+    5, 2,
+    0x8df4ff,
+    1
+  );
+
+  const arrowLine = scene.add.rectangle(
+    0,
+    -54,
+    3,
+    20,
+    0x8df4ff,
+    .9
+  );
+
+  const arrowLabel = scene.add.text(
+    0,
+    -102,
+    `CP-${String(index + 1).padStart(2, '0')}`,
+    {
+      fontFamily: 'monospace',
+      fontSize: '8px',
+      fontStyle: 'bold',
+      color: '#dffcff',
+      stroke: '#02050d',
+      strokeThickness: 3,
+      align: 'center'
+    }
+  ).setOrigin(.5);
+
+  terminal.add([
+    shadow,
+    body,
+    screen,
+    core,
+    arrowGlow,
+    arrowLine,
+    arrow,
+    arrowCore,
+    label,
+    arrowLabel
+  ]);
+
+  terminal.setData('children', {
+    body,
+    screen,
+    core,
+    label,
+    arrowGlow,
+    arrowLine,
+    arrow,
+    arrowCore,
+    arrowLabel
+  });
+
+  /* TERMINAL ANIMATION */
+
+  scene.tweens?.add({
+    targets: core,
+    alpha: { from: .35, to: 1 },
+    scale: { from: .9, to: 1.15 },
+    duration: 620,
+    yoyo: true,
+    repeat: -1
+  });
+
+  scene.tweens?.add({
+    targets: screen,
+    alpha: { from: .25, to: .8 },
+    duration: 800,
+    yoyo: true,
+    repeat: -1
+  });
+
+  /* ARROW PULSE */
+
+  scene.tweens?.add({
+    targets: [arrow, arrowCore],
+    y: '-=7',
+    alpha: { from: .72, to: 1 },
+    duration: 650,
+    ease: 'Sine.inOut',
+    yoyo: true,
+    repeat: -1
+  });
+
+  scene.tweens?.add({
+    targets: arrowGlow,
+    scale: { from: 1, to: 1.35 },
+    alpha: { from: .10, to: .28 },
+    duration: 900,
+    ease: 'Sine.inOut',
+    yoyo: true,
+    repeat: -1
+  });
+
   return terminal;
 }
 
