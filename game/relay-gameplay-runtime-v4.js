@@ -67,23 +67,15 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
   const audioUnlock = () => {
     try {
-      window.relayAdaptiveMusic?.setEnabled?.(true);
-
-      const result = window.relayAdaptiveMusic?.unlock?.();
-
-      if (result?.then) {
-        result
-          .then(ok => {
-            if (
-              ok &&
-              $('intro')?.classList.contains('hidden')
-            ) {
-              window.relayAdaptiveMusic?.start?.();
-            }
-          })
-          .catch(() => {});
-      }
+      window.relayAdaptiveMusic?.stop?.();
+      window.relayAdaptiveMusic?.setEnabled?.(false);
     } catch {}
+
+    if ($('intro')?.classList.contains('hidden')) {
+      try {
+        void window.relayGameplayAudio?.play?.();
+      } catch {}
+    }
   };
 
   /* =========================================================

@@ -161,71 +161,18 @@
   };
 
   const unlockAndStart = async () => {
-    let music = getMusic();
-
-    if (!music) {
-      music = await ensureMusicModule();
-    }
-
-    if (!music) {
-      return false;
-    }
-
     if (!isGameplayVisible()) {
       return false;
     }
 
-    const settingsApplied =
-      applySettings(music);
-
-    if (!settingsApplied) {
-      return true;
-    }
-
-    /*
-     * RunnerScene must be known before
-     * adaptive music is started.
-     */
-    bindScene();
-
-    const before =
-      music.getState?.();
-
-    if (before?.running) {
-      return true;
-    }
+    try {
+      window.relayAdaptiveMusic?.stop?.();
+      window.relayAdaptiveMusic?.setEnabled?.(false);
+    } catch {}
 
     try {
-      if (
-        typeof music.unlock === 'function'
-      ) {
-        const unlocked =
-          await music.unlock();
-
-        if (unlocked === false) {
-          return false;
-        }
-      }
-
-      /*
-       * Scene may have become available
-       * while AudioContext was resuming.
-       */
-      bindScene();
-
-      const after =
-        music.getState?.();
-
-      if (after?.running) {
-        return true;
-      }
-
-      music.start?.();
-
-      const finalState =
-        music.getState?.();
-
-      return !!finalState?.running;
+      await window.relayGameplayAudio?.play?.();
+      return true;
     } catch {
       return false;
     }
