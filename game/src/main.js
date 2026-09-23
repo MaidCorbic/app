@@ -228,6 +228,10 @@ function stopAudioBed() {
   audioBed = undefined;
 }
 
+window.relayProceduralAudio = {
+  stop: stopAudioBed
+};
+
 function startHomeAudio() {
   if (state.muted || audioBed?.missionId === 'home') return;
 
