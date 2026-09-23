@@ -427,44 +427,15 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   }
 
   function start() {
-    if (
-      !s.enabled ||
-      !s.unlocked ||
-      !s.scene ||
-      s.paused
-    ) {
-      return;
-    }
-
-    const c = ensureContext();
-
-    if (!c) {
-      return;
-    }
-
-    if (c.state !== 'running') {
-      return;
-    }
-
-    if (!s.running) {
-      s.running = true;
-      s.step = 0;
-      s.next = s.ctx.currentTime + 0.06;
-
-      master(
-        s.volume,
-        0.55
-      );
-    }
-
+    /*
+     * Procedural adaptive music is disabled.
+     * The supplied MP3 is the only gameplay music source.
+     */
+    s.running = false;
     clearInterval(s.timer);
-
-    s.timer = window.setInterval(
-      schedule,
-      55
-    );
-
-    schedule();
+    s.timer = 0;
+    try { master(0.0001, 0.10); } catch {}
+    return false;
   }
 
   function stop(fade = true) {
@@ -964,15 +935,10 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
     setEnabled(v) {
       s.enabled = !!v;
-
       if (!s.enabled) {
         stop(true);
-      } else if (
-        s.unlocked &&
-        s.scene &&
-        !s.paused
-      ) {
-        start();
+      } else {
+        try { master(0.0001, 0.08); } catch {}
       }
     },
 
