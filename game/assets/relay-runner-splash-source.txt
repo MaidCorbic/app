@@ -1,1 +1,0 @@
-Source artwork is supplied by the user and should be stored as binary JPG.

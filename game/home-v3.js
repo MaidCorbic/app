@@ -12,7 +12,9 @@
  */
 
 import { RELAY_FAQ } from './faq.js';
-import gameplayMusicUrl from './assets/audio/music.mp3';
+
+const gameplayMusicUrl =
+  './assets/audio/music.mp3';
 
 (() => {
   'use strict';
@@ -1693,889 +1695,1128 @@ import gameplayMusicUrl from './assets/audio/music.mp3';
     shell.className =
       'home-v4-shell';
 
-    shell.innerHTML = `
-      <header class="home-v4-topbar">
+   shell.innerHTML = `
+  <header class="home-v4-topbar">
+
+    <div
+      class="home-v4-brand"
+      aria-label="Relay Runner"
+    >
+      <span class="home-v4-brand-mark">
+        R/
+      </span>
+
+      <span>
+        RELAY RUNNER
+      </span>
+    </div>
+
+    <div class="home-v4-topbar-right">
+
+      <div
+        class="home-v4-credits"
+        aria-label="Credits"
+      >
+        <span
+          class="home-v4-credits-icon"
+          aria-hidden="true"
+        >
+          ◈
+        </span>
+
+        <span class="home-v4-credits-data">
+          <small>NETWORK CREDITS</small>
+          <strong id="homeV4Credits">0</strong>
+        </span>
+      </div>
+
+      <div
+        class="home-v4-status"
+        aria-label="System status"
+      >
+        <span class="home-v4-status-dot"></span>
+
+        <b>RELAY ACTIVE</b>
+
+        <span>NIGHT PROTOCOL</span>
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <main class="home-v4-main">
+
+    <section
+      class="home-v4-copy"
+      aria-labelledby="homeV4Title"
+    >
+
+      <p class="home-v4-kicker">
+        SECTOR 01 / AFTER DARK
+      </p>
+
+      <h1
+        id="homeV4Title"
+        class="home-v4-title"
+      >
+        RELAY<span>RUNNER</span>
+      </h1>
+
+      <p class="home-v4-subline">
+        CITY GRID // SIGNAL RECOVERY UNIT
+      </p>
+
+      <p class="home-v4-description home-v4-typewriter">
+        <span id="homeV4Typewriter"></span>
+        <span
+          class="home-v4-cursor"
+          aria-hidden="true"
+        >
+          ▌
+        </span>
+      </p>
+
+
+      <div
+        class="home-v4-actions"
+        aria-label="Main menu"
+      >
+
+        <button
+          id="start"
+          class="home-v4-primary home-v5-start"
+          type="button"
+          aria-label="Start Run"
+        >
+
+          <span
+            class="home-v5-start-glow"
+            aria-hidden="true"
+          ></span>
+
+          <span
+            class="home-v5-start-scan"
+            aria-hidden="true"
+          ></span>
+
+          <span
+            class="home-v4-primary-content"
+          >
+
+            <span class="home-v5-start-main">
+
+              <span
+                class="home-v5-start-label"
+              >
+                DEPLOY RUN
+              </span>
+
+              <small
+                class="home-v5-start-sub"
+              >
+                ENTER THE CITY GRID
+              </small>
+
+            </span>
+
+            <span
+              class="home-v5-start-key"
+              aria-hidden="true"
+            >
+              ENTER
+            </span>
+
+            <span
+              class="home-v4-primary-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
+
+          </span>
+
+          <span
+            class="home-v5-start-ready"
+            aria-hidden="true"
+          >
+            ONLINE
+          </span>
+
+        </button>
+
+
+        <button
+          id="continue"
+          class="home-v4-secondary hidden"
+          type="button"
+          aria-label="Continue last run"
+        >
+
+          <span class="home-v5-continue-icon">
+            ↻
+          </span>
+
+          <span class="home-v5-continue-copy">
+
+            <strong>RESUME RUN</strong>
+
+            <small>
+              RETURN TO LAST POSITION
+            </small>
+
+          </span>
+
+          <span
+            class="home-v5-continue-arrow"
+            aria-hidden="true"
+          >
+            →
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <p class="home-v4-micro">
+        <b>ROUTE LOCKED</b>
+        · ENTER TO DEPLOY
+      </p>
+
+
+      <div
+        class="home-v5-relay-status"
+        aria-label="Relay deployment status"
+      >
 
         <div
-          class="home-v4-brand"
-          aria-label="Relay Runner"
+          class="home-v5-relay-status-head"
         >
-          <span class="home-v4-brand-mark">
-            R/
+
+          <span
+            class="home-v5-relay-status-title"
+          >
+            &gt; CITY GRID STATUS
+          </span>
+
+          <span
+            class="home-v5-relay-status-live"
+          >
+            <i aria-hidden="true"></i>
+            CONNECTED
+          </span>
+
+        </div>
+
+
+        <div
+          class="home-v5-relay-status-track"
+          aria-hidden="true"
+        >
+          <span></span>
+        </div>
+
+
+        <div
+          class="home-v5-relay-status-meta"
+        >
+
+          <span>
+            <small>SECTOR</small>
+            <b>01</b>
           </span>
 
           <span>
-            RELAY RUNNER
+            <small>ROUTE</small>
+            <b>OPEN</b>
           </span>
-        </div>
 
-        <div class="home-v4-topbar-right">
-
-          <div
-            class="home-v4-credits"
-            aria-label="Credits"
-          >
-            <span
-              class="home-v4-credits-icon"
-              aria-hidden="true"
-            >
-              ◈
-            </span>
-
-            <span class="home-v4-credits-data">
-              <small>CREDITS</small>
-              <strong id="homeV4Credits">0</strong>
-            </span>
-          </div>
-
-          <div
-            class="home-v4-status"
-            aria-label="System status"
-          >
-            <span class="home-v4-status-dot"></span>
-
-            <b>SYSTEM ONLINE</b>
-
-            <span>NIGHT SHIFT</span>
-          </div>
+          <span>
+            <small>LINK</small>
+            <b>STABLE</b>
+          </span>
 
         </div>
 
-      </header>
+      </div>
 
-      <main class="home-v4-main">
 
-        <section
-          class="home-v4-copy"
-          aria-labelledby="homeV4Title"
-        >
-
-          <p class="home-v4-kicker">
-            CHAPTER 01 / OLD QUARTER
-          </p>
-
-          <h1
-            id="homeV4Title"
-            class="home-v4-title"
-          >
-            RELAY<span>RUNNER</span>
-          </h1>
-
-          <p class="home-v4-subline">
-            ROOFTOP RELAY // LIVE NETWORK
-          </p>
-
-          <p class="home-v4-description home-v4-typewriter">
-            <span id="homeV4Typewriter"></span>
-            <span
-              class="home-v4-cursor"
-              aria-hidden="true"
-            >
-              ▌
-            </span>
-          </p>
-
-          <div
-            class="home-v4-actions"
-            aria-label="Main menu"
-          >
-
-            <button
-              id="start"
-              class="home-v4-primary home-v5-start"
-              type="button"
-              aria-label="Start Run"
-            >
-              <span
-                class="home-v5-start-glow"
-                aria-hidden="true"
-              ></span>
-
-              <span
-                class="home-v5-start-scan"
-                aria-hidden="true"
-              ></span>
-
-              <span
-                class="home-v4-primary-content"
-              >
-                <span class="home-v5-start-main">
-                  <span
-                    class="home-v5-start-label"
-                  >
-                    START RUN
-                  </span>
-
-                  <small
-                    class="home-v5-start-sub"
-                  >
-                    DEPLOY TO OLD QUARTER
-                  </small>
-                </span>
-
-                <span
-                  class="home-v5-start-key"
-                  aria-hidden="true"
-                >
-                  ENTER
-                </span>
-
-                <span
-                  class="home-v4-primary-arrow"
-                  aria-hidden="true"
-                >
-                  →
-                </span>
-              </span>
-
-              <span
-                class="home-v5-start-ready"
-                aria-hidden="true"
-              >
-                READY
-              </span>
-            </button>
-
-            <button
-              id="continue"
-              class="home-v4-secondary hidden"
-              type="button"
-              aria-label="Continue last run"
-            >
-              <span class="home-v5-continue-icon">
-                ↻
-              </span>
-
-              <span class="home-v5-continue-copy">
-                <strong>CONTINUE</strong>
-
-                <small>
-                  RESUME LAST RUN
-                </small>
-              </span>
-
-              <span
-                class="home-v5-continue-arrow"
-                aria-hidden="true"
-              >
-                →
-              </span>
-            </button>
-
-          </div>
-
-          <p class="home-v4-micro">
-            <b>DEPLOYMENT READY</b>
-            · PRESS ENTER TO BEGIN
-          </p>
-
-          <div
-            class="home-v5-relay-status"
-            aria-label="Relay deployment status"
-          >
-            <div
-              class="home-v5-relay-status-head"
-            >
-              <span
-                class="home-v5-relay-status-title"
-              >
-                &gt; RELAY STATUS
-              </span>
-
-              <span
-                class="home-v5-relay-status-live"
-              >
-                <i aria-hidden="true"></i>
-                ONLINE
-              </span>
-            </div>
-
-            <div
-              class="home-v5-relay-status-track"
-              aria-hidden="true"
-            >
-              <span></span>
-            </div>
-
-            <div
-              class="home-v5-relay-status-meta"
-            >
-              <span>
-                <small>CHANNEL</small>
-                <b>01</b>
-              </span>
-
-              <span>
-                <small>LINK</small>
-                <b>SECURE</b>
-              </span>
-
-              <span>
-                <small>STATUS</small>
-                <b>READY</b>
-              </span>
-            </div>
-          </div>
-
-          <article
-            class="home-v4-contract"
-            aria-label="Active contract"
-          >
-
-            <div
-              class="home-v4-contract-head"
-            >
-              <div>
-                <span
-                  class="home-v4-contract-kicker"
-                >
-                  ACTIVE CONTRACT
-                </span>
-
-                <strong
-                  id="homeV4ContractType"
-                >
-                  CONTRACT // ONLINE
-                </strong>
-              </div>
-
-              <span
-                id="homeV4ContractStatus"
-                class="home-v4-contract-status"
-              >
-                AVAILABLE
-              </span>
-            </div>
-
-            <div
-              class="home-v4-contract-main"
-            >
-              <span
-                id="homeV4ContractCode"
-                class="home-v4-contract-code"
-              >
-                CONTRACT // LOADING
-              </span>
-
-              <h3
-                id="homeV4ContractTitle"
-                class="home-v4-contract-title"
-              >
-                SCANNING CONTRACT NETWORK
-              </h3>
-
-              <p
-                id="homeV4ContractDescription"
-                class="home-v4-contract-description"
-              >
-                READING AVAILABLE CONTRACT DATA...
-              </p>
-            </div>
-
-            <div
-              class="home-v4-contract-meta"
-            >
-              <div>
-                <small>MISSION</small>
-
-                <b
-                  id="homeV4ContractMission"
-                >
-                  —
-                </b>
-              </div>
-
-              <div>
-                <small>REWARD</small>
-
-                <b
-                  id="homeV4ContractReward"
-                >
-                  +0 XP
-                </b>
-              </div>
-
-              <div>
-                <small>PAYLOAD</small>
-
-                <b
-                  id="homeV4ContractCredits"
-                >
-                  +0 CREDITS
-                </b>
-              </div>
-            </div>
-
-            <div
-              class="home-v4-contract-bottom"
-            >
-              <span>
-                CONTRACT NETWORK // READY
-              </span>
-
-              <button
-                type="button"
-                class="home-v4-contract-button"
-                data-home-v4-action="contracts"
-              >
-                OPEN CONTRACTS
-
-                <span aria-hidden="true">
-                  →
-                </span>
-              </button>
-            </div>
-
-          </article>
-
-        </section>
-
-        <section
-          class="home-v4-mission-wrap"
-          aria-label="Current mission"
-        >
-
-          <aside
-            class="home-v5-live-feed"
-            aria-label="Relay network status"
-          >
-            <div class="home-v5-panel-head">
-              <span>RELAY NETWORK</span>
-              <b><i></i> LIVE</b>
-            </div>
-
-            <div class="home-v5-network-status">
-
-              <div class="home-v5-network-row">
-                <span>
-                  <i></i>
-                  CORE
-                </span>
-                <strong>ONLINE</strong>
-              </div>
-
-              <div class="home-v5-network-row">
-                <span>
-                  <i></i>
-                  SIGNAL
-                </span>
-                <strong>STABLE</strong>
-              </div>
-
-              <div class="home-v5-network-row">
-                <span>
-                  <i></i>
-                  CONTRACTS
-                </span>
-                <strong>READY</strong>
-              </div>
-
-              <div class="home-v5-network-row">
-                <span>
-                  <i></i>
-                  CHANNEL
-                </span>
-                <strong>SECURE</strong>
-              </div>
-
-            </div>
-
-            <div class="home-v5-feed-line">
-              <span>&gt;</span>
-              <strong id="homeV5LastRunFeed">
-                LAST RUN // READY
-              </strong>
-            </div>
-          </aside>
-
-          <article
-            class="home-v4-mission"
-          >
-
-            <div
-              class="home-v4-mission-head"
-            >
-              <span
-                class="home-v4-mission-label"
-              >
-                ACTIVE MISSION
-              </span>
-
-              <span
-                class="home-v4-mission-code"
-              >
-                RR-01 / NIGHT
-              </span>
-            </div>
-
-            <h2
-              class="home-v4-mission-title"
-            >
-              FOLLOW<br>
-              THE RELAY
-            </h2>
-
-            <p
-              class="home-v4-mission-sub"
-            >
-              RECONNECT THE SIGNAL CHAIN
-              ACROSS OLD QUARTER.
-            </p>
-
-            <div
-              class="home-v5-last-run"
-            >
-              <div
-                class="home-v5-last-run-head"
-              >
-                <span>LAST RUN</span>
-                <b>TELEMETRY</b>
-              </div>
-
-              <div
-                class="home-v5-telemetry-grid"
-              >
-                <div>
-                  <small>TIME</small>
-                  <strong id="homeV5RunTime">—</strong>
-                </div>
-
-                <div>
-                  <small>SIGNALS</small>
-                  <strong id="homeV5RunSignals">—</strong>
-                </div>
-
-                <div>
-                  <small>SCORE</small>
-                  <strong id="homeV5RunScore">—</strong>
-                </div>
-
-                <div>
-                  <small>RATING</small>
-                  <strong id="homeV5RunRating">—</strong>
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="home-v4-stat-grid"
-            >
-              <div
-                class="home-v4-stat"
-              >
-                <small>MISSION XP</small>
-
-                <b
-                  id="homeV4MissionXp"
-                >
-                  +0
-                </b>
-              </div>
-
-              <div
-                class="home-v4-stat"
-              >
-                <small>BEST RATING</small>
-
-                <b
-                  id="homeV4BestRating"
-                >
-                  —
-                </b>
-              </div>
-            </div>
-
-          </article>
-
-          <article
-            class="home-v4-daily"
-            aria-label="Daily operation"
-          >
-
-            <div
-              class="home-v4-daily-head"
-            >
-              <div>
-                <span
-                  class="home-v4-daily-kicker"
-                >
-                  DAILY OPERATION
-                </span>
-
-                <strong>
-                  CITY RELAY NETWORK
-                </strong>
-              </div>
-
-              <span
-                id="homeV4DailyStatus"
-                class="home-v4-daily-status"
-              >
-                IN PROGRESS
-              </span>
-            </div>
-
-            <div
-              class="home-v4-daily-main"
-            >
-              <span
-                class="home-v4-daily-code"
-              >
-                DAILY // ACTIVE OBJECTIVE
-              </span>
-
-              <h3
-                id="homeV4DailyTitle"
-                class="home-v4-daily-title"
-              >
-                LOADING OPERATION
-              </h3>
-
-              <p
-                id="homeV4DailyDescription"
-                class="home-v4-daily-description"
-              >
-                READING RELAY NETWORK OBJECTIVE...
-              </p>
-            </div>
-
-            <div
-              class="home-v4-daily-progress"
-            >
-              <div
-                class="home-v4-daily-progress-meta"
-              >
-                <span>PROGRESS</span>
-
-                <strong
-                  id="homeV4DailyProgress"
-                >
-                  0 / 0
-                </strong>
-              </div>
-
-              <div
-                class="home-v4-daily-progress-track"
-                aria-hidden="true"
-              >
-                <i
-                  id="homeV4DailyProgressFill"
-                  style="width:0%"
-                ></i>
-              </div>
-            </div>
-
-            <div
-              class="home-v4-daily-bottom"
-            >
-              <div
-                class="home-v4-daily-rewards"
-              >
-                <div>
-                  <small>REWARD</small>
-
-                  <b
-                    id="homeV4DailyReward"
-                  >
-                    +0 XP
-                  </b>
-                </div>
-
-                <div>
-                  <small>PAYLOAD</small>
-
-                  <b
-                    id="homeV4DailyCredits"
-                  >
-                    +0 CREDITS
-                  </b>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                class="home-v4-daily-button"
-                data-home-v4-action="daily"
-              >
-                CHALLENGES
-
-                <span aria-hidden="true">
-                  →
-                </span>
-              </button>
-            </div>
-
-          </article>
-
-          <article
-            class="home-v4-unlock"
-            aria-label="Next unlock"
-          >
-            <div class="home-v4-unlock-head">
-              <span>NEXT UNLOCK</span>
-              <b id="homeV4UnlockLevel">LV 08</b>
-            </div>
-
-            <h3 id="homeV4UnlockTitle">
-              SECTOR 02 // SKYLINE
-            </h3>
-
-            <p id="homeV4UnlockDesc">
-              Reach the required level to unlock the next district.
-            </p>
-
-            <div class="home-v4-unlock-progress">
-              <div class="home-v4-unlock-meta">
-                <span>PROGRESS</span>
-                <strong id="homeV4UnlockText">0%</strong>
-              </div>
-
-              <div class="home-v4-unlock-bar">
-                <i
-                  id="homeV4UnlockFill"
-                  style="width:0%"
-                ></i>
-              </div>
-            </div>
-          </article>
-
-          <div
-            class="home-v4-activity"
-            aria-label="Recent activity"
-          >
-            <div class="home-v4-activity-head">
-              <span>RECENT ACTIVITY</span>
-              <b>LIVE FEED</b>
-            </div>
-
-            <div class="home-v4-activity-list">
-
-              <div class="home-v4-activity-item">
-                <span class="home-v4-activity-dot"></span>
-
-                <div>
-                  <strong id="homeV4ActivityOne">
-                    NETWORK READY
-                  </strong>
-
-                  <small id="homeV4ActivityOneMeta">
-                    RELAY CHANNEL // 01
-                  </small>
-                </div>
-              </div>
-
-              <div class="home-v4-activity-item">
-                <span class="home-v4-activity-dot"></span>
-
-                <div>
-                  <strong id="homeV4ActivityTwo">
-                    AWAITING FIRST RUN
-                  </strong>
-
-                  <small id="homeV4ActivityTwoMeta">
-                    TELEMETRY // STANDBY
-                  </small>
-                </div>
-              </div>
-
-              <div class="home-v4-activity-item">
-                <span class="home-v4-activity-dot"></span>
-
-                <div>
-                  <strong id="homeV4ActivityThree">
-                    CONTRACT NETWORK READY
-                  </strong>
-
-                  <small id="homeV4ActivityThreeMeta">
-                    CONTRACTS // ONLINE
-                  </small>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <div class="home-v4-badge">
-            LIVE RELAY CHANNEL // 01
-          </div>
-
-          <aside
-            class="home-v4-profile"
-            aria-label="Runner profile"
-          >
-
-            <div
-              class="home-v4-profile-head"
-            >
-              <div>
-                <span
-                  class="home-v4-profile-kicker"
-                >
-                  RUNNER INTEL
-                </span>
-
-                <strong>
-                  COURIER PROFILE
-                </strong>
-              </div>
-
-              <span
-                class="home-v4-profile-live"
-              >
-                LIVE
-              </span>
-            </div>
-
-            <div
-              class="home-v4-profile-rank"
-            >
-              <div>
-                <small>RANK</small>
-
-                <b id="homeV4Rank">
-                  ROOKIE
-                </b>
-              </div>
-
-              <div>
-                <small>LEVEL</small>
-
-                <b id="homeV4Level">
-                  01
-                </b>
-              </div>
-            </div>
-
-            <div
-              class="home-v4-profile-xp"
-            >
-              <div
-                class="home-v4-profile-xp-meta"
-              >
-                <span>XP PROGRESS</span>
-
-                <strong id="homeV4XpText">
-                  0 / 100
-                </strong>
-              </div>
-
-              <div
-                class="home-v4-profile-xp-track"
-              >
-                <i
-                  id="homeV4XpFill"
-                  style="width:0%"
-                ></i>
-              </div>
-            </div>
-
-            <div
-              class="home-v4-profile-stats"
-            >
-              <div>
-                <small>BEST RUN</small>
-
-                <b id="homeV4BestRun">
-                  0
-                </b>
-              </div>
-
-              <div>
-                <small>RUNS</small>
-
-                <b id="homeV4Runs">
-                  0
-                </b>
-              </div>
-
-              <div>
-                <small>SIGNALS</small>
-
-                <b id="homeV4Signals">
-                  0
-                </b>
-              </div>
-            </div>
-
-            <div
-              class="home-v4-profile-footer"
-            >
-              <span>PROFILE STATUS</span>
-
-              <b>ONLINE</b>
-            </div>
-
-          </aside>
-
-        </section>
-
-      </main>
-
-      <footer
-        class="home-v4-bottom"
+      <article
+        class="home-v4-contract"
+        aria-label="Active contract"
       >
 
         <div
-          class="home-v4-bottom-left"
+          class="home-v4-contract-head"
         >
 
-          <button
-            class="home-v4-utility"
-            type="button"
-            data-home-v4-action="faq"
-            aria-label="Open FAQ"
-          >
-            ? &nbsp;FAQ
-          </button>
+          <div>
 
-          <button
-            class="home-v4-utility"
-            type="button"
-            data-home-v4-action="update"
-            aria-label="Open latest update"
-          >
-            ↗ &nbsp;UPDATE
-          </button>
+            <span
+              class="home-v4-contract-kicker"
+            >
+              CURRENT ASSIGNMENT
+            </span>
 
-          <button
-            class="home-v4-utility home-v4-tutorial"
-            type="button"
-            data-home-v4-action="tutorial"
-            aria-label="Open tutorial"
-          >
-            ◉ &nbsp;TUTORIAL
-          </button>
+            <strong
+              id="homeV4ContractType"
+            >
+              CONTRACT // ACTIVE
+            </strong>
 
-          <button
-            class="home-v4-utility"
-            type="button"
-            data-home-v4-action="options"
-            aria-label="Open options"
+          </div>
+
+          <span
+            id="homeV4ContractStatus"
+            class="home-v4-contract-status"
           >
-            ⚙ &nbsp;OPTIONS
-          </button>
+            AVAILABLE
+          </span>
 
         </div>
+
 
         <div
-          class="home-v4-bottom-meta"
+          class="home-v4-contract-main"
         >
-          RELAY NETWORK
-          <b>ONLINE</b>
-          · V1.1.0
+
+          <span
+            id="homeV4ContractCode"
+            class="home-v4-contract-code"
+          >
+            CONTRACT // SCANNING
+          </span>
+
+          <h3
+            id="homeV4ContractTitle"
+            class="home-v4-contract-title"
+          >
+            WAITING FOR ASSIGNMENT
+          </h3>
+
+          <p
+            id="homeV4ContractDescription"
+            class="home-v4-contract-description"
+          >
+            CONTRACT DATA WILL APPEAR WHEN THE NETWORK IS READY.
+          </p>
+
         </div>
 
-      </footer>
+
+        <div
+          class="home-v4-contract-meta"
+        >
+
+          <div>
+            <small>TARGET</small>
+
+            <b
+              id="homeV4ContractMission"
+            >
+              —
+            </b>
+          </div>
+
+          <div>
+            <small>XP PAYOUT</small>
+
+            <b
+              id="homeV4ContractReward"
+            >
+              +0 XP
+            </b>
+          </div>
+
+          <div>
+            <small>CREDITS</small>
+
+            <b
+              id="homeV4ContractCredits"
+            >
+              +0 CREDITS
+            </b>
+          </div>
+
+        </div>
+
+
+        <div
+          class="home-v4-contract-bottom"
+        >
+
+          <span>
+            CONTRACT CHANNEL // OPEN
+          </span>
+
+          <button
+            type="button"
+            class="home-v4-contract-button"
+            data-home-v4-action="contracts"
+          >
+            VIEW ASSIGNMENT
+
+            <span aria-hidden="true">
+              →
+            </span>
+          </button>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <section
+      class="home-v4-mission-wrap"
+      aria-label="Current mission"
+    >
+
+
+      <aside
+        class="home-v5-live-feed"
+        aria-label="Relay network status"
+      >
+
+        <div class="home-v5-panel-head">
+          <span>CITY GRID</span>
+
+          <b>
+            <i></i>
+            CONNECTED
+          </b>
+        </div>
+
+
+        <div class="home-v5-network-status">
+
+          <div class="home-v5-network-row">
+            <span>
+              <i></i>
+              MAIN CORE
+            </span>
+
+            <strong>STABLE</strong>
+          </div>
+
+
+          <div class="home-v5-network-row">
+            <span>
+              <i></i>
+              SIGNAL GRID
+            </span>
+
+            <strong>ACTIVE</strong>
+          </div>
+
+
+          <div class="home-v5-network-row">
+            <span>
+              <i></i>
+              RUNNER ROUTE
+            </span>
+
+            <strong>OPEN</strong>
+          </div>
+
+
+          <div class="home-v5-network-row">
+            <span>
+              <i></i>
+              CITY LINK
+            </span>
+
+            <strong>SECURE</strong>
+          </div>
+
+        </div>
+
+
+        <div class="home-v5-feed-line">
+
+          <span>&gt;</span>
+
+          <strong id="homeV5LastRunFeed">
+            TELEMETRY // AWAITING RUN
+          </strong>
+
+        </div>
+
+      </aside>
+
+
+      <article
+        class="home-v4-mission"
+      >
+
+        <div
+          class="home-v4-mission-head"
+        >
+
+          <span
+            class="home-v4-mission-label"
+          >
+            PRIMARY ROUTE
+          </span>
+
+          <span
+            class="home-v4-mission-code"
+          >
+            GRID-01 / AFTER DARK
+          </span>
+
+        </div>
+
+
+        <h2
+          class="home-v4-mission-title"
+        >
+          BREAK<br>
+          THE GRID
+        </h2>
+
+
+        <p
+          class="home-v4-mission-sub"
+        >
+          CROSS THE DISTRICT, RECOVER THE SIGNALS
+          AND RECONNECT THE CITY RELAY.
+        </p>
+
+
+        <div
+          class="home-v5-last-run"
+        >
+
+          <div
+            class="home-v5-last-run-head"
+          >
+
+            <span>RUN TELEMETRY</span>
+
+            <b>LAST SESSION</b>
+
+          </div>
+
+
+          <div
+            class="home-v5-telemetry-grid"
+          >
+
+            <div>
+              <small>DURATION</small>
+              <strong id="homeV5RunTime">—</strong>
+            </div>
+
+            <div>
+              <small>RECOVERED</small>
+              <strong id="homeV5RunSignals">—</strong>
+            </div>
+
+            <div>
+              <small>SCORE</small>
+              <strong id="homeV5RunScore">—</strong>
+            </div>
+
+            <div>
+              <small>RATING</small>
+              <strong id="homeV5RunRating">—</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="home-v4-stat-grid"
+        >
+
+          <div
+            class="home-v4-stat"
+          >
+
+            <small>LAST PAYOUT</small>
+
+            <b
+              id="homeV4MissionXp"
+            >
+              +0
+            </b>
+
+          </div>
+
+
+          <div
+            class="home-v4-stat"
+          >
+
+            <small>BEST CLEAR</small>
+
+            <b
+              id="homeV4BestRating"
+            >
+              —
+            </b>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <article
+        class="home-v4-daily"
+        aria-label="Daily operation"
+      >
+
+        <div
+          class="home-v4-daily-head"
+        >
+
+          <div>
+
+            <span
+              class="home-v4-daily-kicker"
+            >
+              DAILY DIRECTIVE
+            </span>
+
+            <strong>
+              CITYWIDE OBJECTIVE
+            </strong>
+
+          </div>
+
+          <span
+            id="homeV4DailyStatus"
+            class="home-v4-daily-status"
+          >
+            IN PROGRESS
+          </span>
+
+        </div>
+
+
+        <div
+          class="home-v4-daily-main"
+        >
+
+          <span
+            class="home-v4-daily-code"
+          >
+            DAILY // DIRECTIVE CHANNEL
+          </span>
+
+          <h3
+            id="homeV4DailyTitle"
+            class="home-v4-daily-title"
+          >
+            SCANNING DAILY DIRECTIVE
+          </h3>
+
+          <p
+            id="homeV4DailyDescription"
+            class="home-v4-daily-description"
+          >
+            SYNCHRONIZING TODAY'S NETWORK OBJECTIVE...
+          </p>
+
+        </div>
+
+
+        <div
+          class="home-v4-daily-progress"
+        >
+
+          <div
+            class="home-v4-daily-progress-meta"
+          >
+
+            <span>COMPLETION</span>
+
+            <strong
+              id="homeV4DailyProgress"
+            >
+              0 / 0
+            </strong>
+
+          </div>
+
+
+          <div
+            class="home-v4-daily-progress-track"
+            aria-hidden="true"
+          >
+
+            <i
+              id="homeV4DailyProgressFill"
+              style="width:0%"
+            ></i>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="home-v4-daily-bottom"
+        >
+
+          <div
+            class="home-v4-daily-rewards"
+          >
+
+            <div>
+              <small>XP BONUS</small>
+
+              <b
+                id="homeV4DailyReward"
+              >
+                +0 XP
+              </b>
+            </div>
+
+
+            <div>
+              <small>CREDIT BONUS</small>
+
+              <b
+                id="homeV4DailyCredits"
+              >
+                +0 CREDITS
+              </b>
+            </div>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="home-v4-daily-button"
+            data-home-v4-action="daily"
+          >
+            VIEW DIRECTIVES
+
+            <span aria-hidden="true">
+              →
+            </span>
+          </button>
+
+        </div>
+
+      </article>
+
+
+      <article
+        class="home-v4-unlock"
+        aria-label="Next unlock"
+      >
+
+        <div class="home-v4-unlock-head">
+
+          <span>
+            NEXT SECTOR
+          </span>
+
+          <b id="homeV4UnlockLevel">
+            LV 08
+          </b>
+
+        </div>
+
+
+        <h3 id="homeV4UnlockTitle">
+          SECTOR 02 // SKYLINE
+        </h3>
+
+
+        <p id="homeV4UnlockDesc">
+          BUILD ENOUGH EXPERIENCE TO ACCESS
+          THE NEXT CITY ROUTE.
+        </p>
+
+
+        <div
+          class="home-v4-unlock-progress"
+        >
+
+          <div
+            class="home-v4-unlock-meta"
+          >
+
+            <span>
+              ACCESS PROGRESS
+            </span>
+
+            <strong
+              id="homeV4UnlockText"
+            >
+              0%
+            </strong>
+
+          </div>
+
+
+          <div
+            class="home-v4-unlock-bar"
+          >
+
+            <i
+              id="homeV4UnlockFill"
+              style="width:0%"
+            ></i>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <div
+        class="home-v4-activity"
+        aria-label="Recent activity"
+      >
+
+        <div class="home-v4-activity-head">
+
+          <span>
+            NETWORK ACTIVITY
+          </span>
+
+          <b>
+            LIVE TELEMETRY
+          </b>
+
+        </div>
+
+
+        <div
+          class="home-v4-activity-list"
+        >
+
+          <div class="home-v4-activity-item">
+
+            <span
+              class="home-v4-activity-dot"
+            ></span>
+
+            <div>
+
+              <strong
+                id="homeV4ActivityOne"
+              >
+                CITY GRID READY
+              </strong>
+
+              <small
+                id="homeV4ActivityOneMeta"
+              >
+                CHANNEL 01 // STANDING BY
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="home-v4-activity-item">
+
+            <span
+              class="home-v4-activity-dot"
+            ></span>
+
+            <div>
+
+              <strong
+                id="homeV4ActivityTwo"
+              >
+                SIGNAL SEARCH ACTIVE
+              </strong>
+
+              <small
+                id="homeV4ActivityTwoMeta"
+              >
+                RECOVERY NETWORK // ONLINE
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="home-v4-activity-item">
+
+            <span
+              class="home-v4-activity-dot"
+            ></span>
+
+            <div>
+
+              <strong
+                id="homeV4ActivityThree"
+              >
+                ASSIGNMENT CHANNEL OPEN
+              </strong>
+
+              <small
+                id="homeV4ActivityThreeMeta"
+              >
+                CONTRACT SYSTEM // READY
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="home-v4-badge">
+        CITY GRID // CHANNEL 01 // LIVE
+      </div>
+
+
+      <aside
+        class="home-v4-profile"
+        aria-label="Runner profile"
+      >
+
+        <div
+          class="home-v4-profile-head"
+        >
+
+          <div>
+
+            <span
+              class="home-v4-profile-kicker"
+            >
+              RUNNER DATA
+            </span>
+
+            <strong>
+              FIELD PROFILE
+            </strong>
+
+          </div>
+
+          <span
+            class="home-v4-profile-live"
+          >
+            ACTIVE
+          </span>
+
+        </div>
+
+
+        <div
+          class="home-v4-profile-rank"
+        >
+
+          <div>
+
+            <small>
+              CURRENT RANK
+            </small>
+
+            <b id="homeV4Rank">
+              ROOKIE
+            </b>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              LEVEL
+            </small>
+
+            <b id="homeV4Level">
+              01
+            </b>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="home-v4-profile-xp"
+        >
+
+          <div
+            class="home-v4-profile-xp-meta"
+          >
+
+            <span>
+              EXPERIENCE
+            </span>
+
+            <strong id="homeV4XpText">
+              0 / 100
+            </strong>
+
+          </div>
+
+
+          <div
+            class="home-v4-profile-xp-track"
+          >
+
+            <i
+              id="homeV4XpFill"
+              style="width:0%"
+            ></i>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="home-v4-profile-stats"
+        >
+
+          <div>
+
+            <small>
+              HIGH SCORE
+            </small>
+
+            <b id="homeV4BestRun">
+              0
+            </b>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              RUNS COMPLETED
+            </small>
+
+            <b id="homeV4Runs">
+              0
+            </b>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              SIGNALS
+            </small>
+
+            <b id="homeV4Signals">
+              0
+            </b>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="home-v4-profile-footer"
+        >
+
+          <span>
+            RUNNER STATUS
+          </span>
+
+          <b>
+            FIELD READY
+          </b>
+
+        </div>
+
+      </aside>
+
+    </section>
+
+  </main>
+
+
+  <footer
+    class="home-v4-bottom"
+  >
+
+    <div
+      class="home-v4-bottom-left"
+    >
 
       <button
-        id="exitTitle"
+        class="home-v4-utility"
         type="button"
-        aria-hidden="true"
-        tabindex="-1"
-        class="home-v4-compat-anchor"
+        data-home-v4-action="faq"
+        aria-label="Open FAQ"
       >
-        EXIT
+        ? &nbsp;FIELD GUIDE
       </button>
+
+
+      <button
+        class="home-v4-utility"
+        type="button"
+        data-home-v4-action="update"
+        aria-label="Open latest update"
+      >
+        ↗ &nbsp;PATCH NOTES
+      </button>
+
+
+      <button
+        class="home-v4-utility home-v4-tutorial"
+        type="button"
+        data-home-v4-action="tutorial"
+        aria-label="Open tutorial"
+      >
+        ◉ &nbsp;TRAINING
+      </button>
+
+
+      <button
+        class="home-v4-utility"
+        type="button"
+        data-home-v4-action="options"
+        aria-label="Open options"
+      >
+        ⚙ &nbsp;SYSTEM
+      </button>
+
+    </div>
+
+
+    <div
+      class="home-v4-bottom-meta"
+    >
+      CITY GRID
+      <b>CONNECTED</b>
+      · BUILD 1.1.0
+    </div>
+
+  </footer>
+
+
+  <button
+    id="exitTitle"
+    type="button"
+    aria-hidden="true"
+    tabindex="-1"
+    class="home-v4-compat-anchor"
+  >
+    EXIT
+  </button>
     `;
 
     intro.append(
@@ -2729,34 +2970,57 @@ import gameplayMusicUrl from './assets/audio/music.mp3';
    HOME -> PLAY
    ========================================================= */
 
+const gameplayMusicTracks = [
+  new URL('./assets/audio/music.mp3', import.meta.url).href,
+  new URL('./assets/audio/music2.mp3', import.meta.url).href,
+  new URL('./assets/audio/music3.mp3', import.meta.url).href
+];
+
 let relayGameplayAudio = null;
 let relayGameplayAudioStarted = false;
+let relayGameplayTrackIndex = 0;
+let relayGameplayFadeFrame = null;
+
+const gameplayTargetVolume = 0.58;
+
+const clampVolume = value =>
+  Math.max(
+    0,
+    Math.min(
+      1,
+      Number.isFinite(value)
+        ? value
+        : 0
+    )
+  );
 
 const startGameplayMusic = async () => {
   try {
-    /*
-     * Stop any older/procedural music system.
-     */
     try {
       window.relayAdaptiveMusic?.stop?.();
       window.relayMenuMusic?.stop?.();
     } catch {}
 
-    /*
-     * Create the MP3 player only once.
-     */
     if (!relayGameplayAudio) {
       relayGameplayAudio =
-        new Audio(gameplayMusicUrl);
+        new Audio(
+          gameplayMusicTracks[
+            relayGameplayTrackIndex
+          ]
+        );
 
-      relayGameplayAudio.loop = true;
+      relayGameplayAudio.loop = false;
       relayGameplayAudio.preload = 'auto';
       relayGameplayAudio.volume = 0;
+
+      relayGameplayAudio.addEventListener(
+        'ended',
+        () => {
+          void playNextGameplayTrack();
+        }
+      );
     }
 
-    /*
-     * Do not restart an already playing track.
-     */
     if (
       relayGameplayAudioStarted &&
       !relayGameplayAudio.paused
@@ -2764,43 +3028,21 @@ const startGameplayMusic = async () => {
       return;
     }
 
-    /*
-     * Start from the beginning on a new run.
-     */
     if (!relayGameplayAudioStarted) {
-      const startFromMiddle = () => {
-        if (
-          relayGameplayAudio &&
-          Number.isFinite(relayGameplayAudio.duration) &&
-          relayGameplayAudio.duration > 0
-        ) {
-          relayGameplayAudio.currentTime =
-            relayGameplayAudio.duration / 2;
-        }
-      };
-
-      if (
-        Number.isFinite(relayGameplayAudio.duration) &&
-        relayGameplayAudio.duration > 0
-      ) {
-        startFromMiddle();
-      } else {
-        relayGameplayAudio.addEventListener(
-          'loadedmetadata',
-          startFromMiddle,
-          { once: true }
-        );
-      }
+      relayGameplayAudio.currentTime = 0;
+      relayGameplayAudio.volume = 0;
     }
 
     await relayGameplayAudio.play();
 
     relayGameplayAudioStarted = true;
 
-    /*
-     * Smooth fade-in.
-     */
-    const targetVolume = 0.58;
+    if (relayGameplayFadeFrame) {
+      cancelAnimationFrame(
+        relayGameplayFadeFrame
+      );
+    }
+
     const duration = 900;
     const startTime = performance.now();
 
@@ -2809,20 +3051,37 @@ const startGameplayMusic = async () => {
         return;
       }
 
-      const progress = Math.min(
-        1,
-        (now - startTime) / duration
-      );
+      const rawProgress =
+        (now - startTime) / duration;
+
+      const progress =
+        Math.max(
+          0,
+          Math.min(
+            1,
+            rawProgress
+          )
+        );
 
       relayGameplayAudio.volume =
-        targetVolume * progress;
+        clampVolume(
+          gameplayTargetVolume * progress
+        );
 
       if (progress < 1) {
-        requestAnimationFrame(fadeIn);
+        relayGameplayFadeFrame =
+          requestAnimationFrame(
+            fadeIn
+          );
+      } else {
+        relayGameplayFadeFrame = null;
       }
     };
 
-    requestAnimationFrame(fadeIn);
+    relayGameplayFadeFrame =
+      requestAnimationFrame(
+        fadeIn
+      );
 
   } catch (error) {
     console.warn(
@@ -2832,51 +3091,138 @@ const startGameplayMusic = async () => {
   }
 };
 
+const playNextGameplayTrack = async () => {
+  try {
+    if (!relayGameplayAudio) {
+      return;
+    }
+
+    relayGameplayTrackIndex =
+      (
+        relayGameplayTrackIndex + 1
+      ) %
+      gameplayMusicTracks.length;
+
+    relayGameplayAudio.src =
+      gameplayMusicTracks[
+        relayGameplayTrackIndex
+      ];
+
+    relayGameplayAudio.currentTime = 0;
+    relayGameplayAudio.volume = 0;
+
+    await relayGameplayAudio.play();
+
+    relayGameplayAudioStarted = true;
+
+    const duration = 900;
+    const startTime = performance.now();
+
+    const fadeIn = now => {
+      if (!relayGameplayAudio) {
+        return;
+      }
+
+      const progress =
+        Math.max(
+          0,
+          Math.min(
+            1,
+            (now - startTime) / duration
+          )
+        );
+
+      relayGameplayAudio.volume =
+        clampVolume(
+          gameplayTargetVolume * progress
+        );
+
+      if (progress < 1) {
+        relayGameplayFadeFrame =
+          requestAnimationFrame(
+            fadeIn
+          );
+      } else {
+        relayGameplayFadeFrame = null;
+      }
+    };
+
+    if (relayGameplayFadeFrame) {
+      cancelAnimationFrame(
+        relayGameplayFadeFrame
+      );
+    }
+
+    relayGameplayFadeFrame =
+      requestAnimationFrame(
+        fadeIn
+      );
+
+  } catch (error) {
+    console.warn(
+      '[RelayRunner] Next gameplay track could not start:',
+      error
+    );
+
+    setTimeout(
+      () => {
+        void playNextGameplayTrack();
+      },
+      250
+    );
+  }
+};
+
 window.relayGameplayAudio = {
   play: startGameplayMusic,
 
   pause() {
-    if (!relayGameplayAudio) {
-      return;
-    }
-
-    relayGameplayAudio.pause();
+    try {
+      relayGameplayAudio?.pause?.();
+    } catch {}
   },
 
   resume() {
-    if (!relayGameplayAudio) {
-      return;
-    }
-
-    relayGameplayAudio
-      .play()
-      .catch(() => {});
+    try {
+      if (
+        relayGameplayAudio &&
+        relayGameplayAudio.paused
+      ) {
+        void relayGameplayAudio.play();
+      }
+    } catch {}
   },
 
   stop() {
-    if (!relayGameplayAudio) {
-      return;
-    }
+    try {
+      if (relayGameplayFadeFrame) {
+        cancelAnimationFrame(
+          relayGameplayFadeFrame
+        );
 
-    relayGameplayAudio.pause();
-    relayGameplayAudio.currentTime = 0;
-    relayGameplayAudio.volume = 0;
-    relayGameplayAudioStarted = false;
+        relayGameplayFadeFrame = null;
+      }
+
+      relayGameplayAudio?.pause?.();
+
+      if (relayGameplayAudio) {
+        relayGameplayAudio.currentTime = 0;
+        relayGameplayAudio.volume = 0;
+      }
+
+      relayGameplayAudioStarted = false;
+      relayGameplayTrackIndex = 0;
+
+    } catch {}
   },
 
   setVolume(value) {
-    if (!relayGameplayAudio) {
-      return;
-    }
-
-    relayGameplayAudio.volume =
-      Math.max(
-        0,
-        Math.min(
-          1,
-          Number(value) || 0
-        )
-      );
+    try {
+      if (relayGameplayAudio) {
+        relayGameplayAudio.volume =
+          clampVolume(value);
+      }
+    } catch {}
   }
 };
 

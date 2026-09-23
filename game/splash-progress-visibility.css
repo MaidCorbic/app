@@ -183,3 +183,50 @@
     visibility: visible !important;
   }
 }
+/* =========================================================
+   HOME — PREVENT SPLASH SCROLLBAR
+   ========================================================= */
+
+html,
+body {
+  overflow: hidden !important;
+  width: 100%;
+  max-width: 100%;
+}
+
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+#intro.home-v3,
+#intro.home-v3 .home-v4-scene {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+#intro.home-v3 .home-v4-shell {
+  max-width: calc(100vw - 40px);
+  overflow: hidden;
+}
+
+@media (max-width: 780px) {
+  #intro.home-v3 .home-v4-shell {
+    max-width: calc(100vw - 20px);
+  }
+
+  #intro.home-v3 .home-v4-main {
+    overflow-x: hidden !important;
+  }
+}
