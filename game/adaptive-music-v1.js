@@ -46,6 +46,14 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     tension: 0
   };
 
+  const isHomeVisible = () => {
+    const intro = document.getElementById('intro');
+    return !!intro &&
+      !intro.hidden &&
+      !intro.classList.contains('hidden') &&
+      getComputedStyle(intro).display !== 'none';
+  };
+
   const clamp = (n, a, b) =>
     Math.max(a, Math.min(b, n));
 
@@ -179,7 +187,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       if (
         s.unlocked &&
         s.scene &&
-        !s.paused
+        !s.paused &&
+        isHomeVisible()
       ) {
         start();
       }
@@ -427,15 +436,54 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   }
 
   function start() {
-    /*
-     * Procedural adaptive music is disabled.
-     * The supplied MP3 is the only gameplay music source.
-     */
-    s.running = false;
+    if (!isHomeVisible()) {
+      s.running = false;
+      clearInterval(s.timer);
+      s.timer = 0;
+      try { master(0.0001, 0.10); } catch {}
+      return false;
+    }
+
+    if (
+      !s.enabled ||
+      !s.unlocked ||
+      !s.scene ||
+      s.paused
+    ) {
+      return;
+    }
+
+    const c = ensureContext();
+
+    if (!c) {
+      return;
+    }
+
+    if (c.state !== 'running') {
+      return;
+    }
+
+    if (!s.running) {
+      s.running = true;
+      s.step = 0;
+      s.next = s.ctx.currentTime + 0.06;
+
+      master(
+        s.volume,
+        0.55
+      );
+    }
+
     clearInterval(s.timer);
-    s.timer = 0;
-    try { master(0.0001, 0.10); } catch {}
-    return false;
+
+    s.timer = window.setInterval(
+      schedule,
+      55
+    );
+
+    schedule();
+
+    return true;
   }
 
   function stop(fade = true) {
@@ -671,7 +719,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
     if (
       s.unlocked &&
-      !s.paused
+      !s.paused &&
+      isHomeVisible()
     ) {
       start();
     }
@@ -792,7 +841,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
         if (
           s.unlocked &&
-          s.scene
+          s.scene &&
+          isHomeVisible()
         ) {
           start();
         }
@@ -814,7 +864,8 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
         if (
           s.scene?.sys?.isActive?.() &&
-          !s.running
+          !s.running &&
+          isHomeVisible()
         ) {
           start();
         }
@@ -935,10 +986,15 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
     setEnabled(v) {
       s.enabled = !!v;
+
       if (!s.enabled) {
         stop(true);
-      } else {
-        try { master(0.0001, 0.08); } catch {}
+      } else if (
+        s.unlocked &&
+        s.scene &&
+        !s.paused
+      ) {
+        start();
       }
     },
 
