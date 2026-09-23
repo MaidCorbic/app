@@ -492,11 +492,10 @@ game.events.on(
   'runner-ready',
   () => {
     /*
-     * Gameplay uses the MP3 player owned by home-v3.js.
-     * Stop the old procedural audio bed and keep the MP3 running.
+     * RunnerScene can become ready while Home is still visible.
+     * START RUN owns the Home -> Gameplay audio transition.
      */
     stopAudioBed();
-    window.relayGameplayAudio?.play?.();
   }
 );
 
