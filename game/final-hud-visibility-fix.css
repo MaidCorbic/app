@@ -519,3 +519,14 @@ html, body { min-height:100%; }
     pointer-events:auto !important;
   }
 }
+
+
+/* Final landscape gameplay routing: #intro is the authoritative home gate. */
+@media (pointer:coarse) and (orientation:landscape) and (max-width:900px){
+  body:has(#intro.hidden) #play .mobile-controls{
+    display:flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:auto !important;
+  }
+}
