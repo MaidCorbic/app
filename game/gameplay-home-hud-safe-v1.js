@@ -178,7 +178,6 @@
          ===================================================== */
 
       #game #play .input-guide,
-      #game #play .mobile-bottom-hud,
       #game #play .relay-debug-hud,
       #game #play [data-relay-debug-hud],
       #game #play [data-debug-hud] {
