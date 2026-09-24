@@ -3394,18 +3394,14 @@ if (start instanceof HTMLElement) {
             mobile:
               './assets/loadplaymobile.jpg',
 
-            beforeRoute: async () => {
-              const target =
-                document.querySelector(
-                  'body > #game > div[hidden] #start'
-                );
+            skipRoute: true,
 
+            beforeRoute: async () => {
               if (
-                target instanceof HTMLElement
+                typeof window.relayLaunchGameplay ===
+                'function'
               ) {
-                HTMLElement.prototype.click.call(
-                  target
-                );
+                window.relayLaunchGameplay();
               }
             }
           });
