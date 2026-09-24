@@ -314,6 +314,37 @@
         'important'
       );
 
+      const touchControls =
+        document.querySelector('.mobile-controls');
+
+      if (touchControls) {
+        const landscape =
+          matchMedia('(orientation: landscape)').matches;
+        const showTouchControls =
+          active && landscape;
+
+        touchControls.style.setProperty(
+          'display',
+          showTouchControls ? 'flex' : 'none',
+          'important'
+        );
+        touchControls.style.setProperty(
+          'visibility',
+          showTouchControls ? 'visible' : 'hidden',
+          'important'
+        );
+        touchControls.style.setProperty(
+          'opacity',
+          showTouchControls ? '1' : '0',
+          'important'
+        );
+        touchControls.style.setProperty(
+          'pointer-events',
+          showTouchControls ? 'auto' : 'none',
+          'important'
+        );
+      }
+
       [mobilePauseButton, mobileSettingsButton]
         .filter(Boolean)
         .forEach(button => {
