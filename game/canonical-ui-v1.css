@@ -1720,19 +1720,6 @@ body.is-touch #play .mobile-actions small{
   }
 
   /*
-   * Existing lower cargo/mobile HUD compatibility surface.
-   * Keep it hidden on phone as well.
-   */
-  body.is-touch #play .mobile-bottom-hud{
-
-    display:none !important;
-
-    visibility:hidden !important;
-
-    pointer-events:none !important;
-  }
-
-  /*
    * Prevent any legacy cargo/mission presentation from stealing
    * mobile gameplay space.
    */
@@ -2253,16 +2240,6 @@ body.is-touch #play .mobile-actions button:focus-visible{
 /* ==========================================================================
    31. MOBILE LEGACY SURFACES — HARD HIDE
    ========================================================================== */
-
-body.is-touch #play .mobile-bottom-hud{
-
-  display:none !important;
-
-  visibility:hidden !important;
-
-  pointer-events:none !important;
-}
-
 
 /*
  * Mission/Cargo are intentionally NOT mobile HUD surfaces.
