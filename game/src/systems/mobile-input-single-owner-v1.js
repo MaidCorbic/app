@@ -129,9 +129,7 @@ const attachSceneWhenReady = () => {
   return true;
 };
 
-window.addEventListener(
-  'relay:runner-scene-ready',
-  (event) => {
+window.addEventListener('relay:runner-scene-ready', (event) => {
     const scene =
       event?.detail?.scene ||
       window.__relayRunnerScene;
