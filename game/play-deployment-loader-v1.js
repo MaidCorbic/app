@@ -4519,61 +4519,14 @@
      HOME START BUTTON
      ============================================================ */
 
-  document.addEventListener(
-    'click',
-    event => {
-
-      if (active) {
-        return;
-      }
-
-
-      const button =
-        event.target.closest(
-          '#start'
-        );
-
-
-      if (!button) {
-        return;
-      }
-
-
-      event.preventDefault();
-
-      event.stopImmediatePropagation();
-
-
-      void runDeployment({
-
-        missionNumber:
-          1,
-
-
-        beforeRoute:
-          async () => {
-
-            const originalStart =
-              document.querySelector(
-                'body > #game > div[hidden] #start'
-              );
-
-
-            if (
-              originalStart instanceof
-              HTMLElement
-            ) {
-
-              originalStart.click();
-
-            }
-
-          },
-
-      });
-
-    },
-    true
-  );
+  /*
+   * IMPORTANT:
+   * The HOME #start button is owned by the Play cinematic.
+   * Do not intercept it here, otherwise this deployment loader
+   * opens the tactical map before gameplay.
+   *
+   * The deployment API remains available for mission/route flows
+   * that explicitly call relayPlayDeploymentV4.show().
+   */
 
 })();

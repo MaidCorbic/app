@@ -1893,14 +1893,41 @@ function fail(message) {
 }
 
 function openMenu(tab = 'resume') {
+  /*
+   * The unified cinematic UI is the canonical pause-menu owner.
+   * Prefer it so the legacy menu cannot race the modern shell.
+   */
+  const unified =
+    window.relayUnifiedCinematicUI;
+
   if (
-    game.scene.isActive('runner')
+    unified &&
+    typeof unified.openPause === 'function'
+  ) {
+    unified.openPause(tab || 'resume');
+    return;
+  }
+
+  const pauseMenu =
+    $('pauseMenu');
+
+  if (!pauseMenu) {
+    console.error(
+      '[RelayRunner] Pause menu element is missing.'
+    );
+    return;
+  }
+
+  if (
+    game.scene.isActive('runner') &&
+    !game.scene.isPaused('runner')
   ) {
     game.scene.pause('runner');
   }
 
-  $('pauseMenu')
-    .classList.remove('hidden');
+  pauseMenu.classList.remove('hidden');
+  pauseMenu.removeAttribute('hidden');
+  pauseMenu.setAttribute('aria-hidden', 'false');
 
   renderPanel(tab);
 }
