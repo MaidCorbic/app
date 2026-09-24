@@ -872,12 +872,48 @@ import { loadState, saveState } from './src/state.js';
         width:100%;
       }
 
+      #titlePanel.relay-options-unified .relay-options-nav,
+      #pauseMenu.relay-options-unified .relay-options-nav{
+        display:flex;
+        flex-wrap:wrap;
+        gap:7px;
+        margin:0 0 12px;
+        padding:8px;
+        border:1px solid rgba(56,189,248,.10);
+        background:rgba(4,13,23,.72);
+        position:relative;
+        z-index:2;
+      }
+
+      #titlePanel.relay-options-unified .relay-options-nav button,
+      #pauseMenu.relay-options-unified .relay-options-nav button{
+        min-height:34px;
+        padding:8px 12px;
+        border:1px solid rgba(56,189,248,.20);
+        border-radius:3px;
+        background:linear-gradient(180deg,rgba(10,28,45,.96),rgba(4,12,22,.98));
+        color:rgba(214,241,255,.62);
+        font:800 8px/1 Arial,sans-serif;
+        letter-spacing:.12em;
+        cursor:pointer;
+        transition:border-color .18s ease,background .18s ease,color .18s ease,transform .18s ease;
+      }
+
+      #titlePanel.relay-options-unified .relay-options-nav button:hover,
+      #pauseMenu.relay-options-unified .relay-options-nav button:focus-visible{
+        border-color:rgba(56,189,248,.72);
+        color:#e8fbff;
+        background:linear-gradient(180deg,rgba(14,51,72,.98),rgba(5,20,32,.98));
+        outline:none;
+        transform:translateY(-1px);
+      }
+
       #titlePanel.relay-options-unified .relay-action-row,
       #pauseMenu.relay-options-unified .relay-action-row{
         display:grid;
         grid-template-columns:
           repeat(
-            3,
+            4,
             minmax(0,1fr)
           );
         gap:10px;
@@ -975,6 +1011,19 @@ import { loadState, saveState } from './src/state.js';
         .relay-voice-select{
           grid-template-columns:1fr;
           gap:9px;
+        }
+
+        #titlePanel.relay-options-unified .relay-options-nav,
+        #pauseMenu.relay-options-unified .relay-options-nav{
+          display:grid;
+          grid-template-columns:repeat(2,minmax(0,1fr));
+          gap:6px;
+        }
+
+        #titlePanel.relay-options-unified .relay-options-nav button,
+        #pauseMenu.relay-options-unified .relay-options-nav button{
+          width:100%;
+          min-height:38px;
         }
 
         #titlePanel.relay-options-unified .relay-action-row,
@@ -1146,6 +1195,17 @@ import { loadState, saveState } from './src/state.js';
 
         </header>
 
+        <nav
+          class="relay-options-nav"
+          aria-label="Options sections"
+        >
+          <button type="button" data-unified-jump="gameplay">GAMEPLAY</button>
+          <button type="button" data-unified-jump="audio">AUDIO</button>
+          <button type="button" data-unified-jump="interface">INTERFACE</button>
+          <button type="button" data-unified-jump="graphics">GRAPHICS</button>
+          <button type="button" data-unified-jump="system">SYSTEM</button>
+        </nav>
+
         <div class="relay-options-body">
 
           <div class="relay-options-grid">
@@ -1154,7 +1214,10 @@ import { loadState, saveState } from './src/state.js';
                  GAMEPLAY
             ================================================== -->
 
-            <section class="relay-options-section">
+            <section
+              class="relay-options-section"
+              data-option-section="gameplay"
+            >
 
               <div class="relay-section-title">
                 GAMEPLAY
@@ -1194,7 +1257,10 @@ import { loadState, saveState } from './src/state.js';
                  AUDIO
             ================================================== -->
 
-            <section class="relay-options-section">
+            <section
+              class="relay-options-section"
+              data-option-section="audio"
+            >
 
               <div class="relay-section-title">
                 AUDIO
@@ -1319,7 +1385,10 @@ import { loadState, saveState } from './src/state.js';
                  INTERFACE
             ================================================== -->
 
-            <section class="relay-options-section full">
+            <section
+              class="relay-options-section full"
+              data-option-section="interface"
+            >
 
               <div class="relay-section-title">
                 INTERFACE
@@ -1365,6 +1434,7 @@ import { loadState, saveState } from './src/state.js';
 
             <section
               class="relay-options-section full relay-graphics-section"
+              data-option-section="graphics"
             >
 
               <div class="relay-section-title">
@@ -1481,7 +1551,10 @@ import { loadState, saveState } from './src/state.js';
                  SYSTEM
             ================================================== -->
 
-            <section class="relay-options-section full">
+            <section
+              class="relay-options-section full"
+              data-option-section="system"
+            >
 
               <div class="relay-section-title">
                 SYSTEM
@@ -1577,6 +1650,14 @@ import { loadState, saveState } from './src/state.js';
                   aria-expanded="false"
                 >
                   CONTROL REFERENCE
+                </button>
+
+                <button
+                  class="relay-action"
+                  type="button"
+                  data-unified-close
+                >
+                  CLOSE OPTIONS
                 </button>
 
               </div>
@@ -2439,6 +2520,73 @@ import { loadState, saveState } from './src/state.js';
             'relay-options-unified'
           )
         ) {
+          return;
+        }
+
+        /* -----------------------------------
+           SECTION NAVIGATION
+        ----------------------------------- */
+
+        const jumpButton =
+          target.closest(
+            '[data-unified-jump]'
+          );
+
+        if (jumpButton) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const key =
+            jumpButton.dataset.unifiedJump;
+
+          const section =
+            host.querySelector(
+              '[data-option-section="' +
+              key +
+              '"]'
+            );
+
+          if (section) {
+            section.scrollIntoView({
+              behavior:
+                document.body.classList.contains('reduced-motion')
+                  ? 'auto'
+                  : 'smooth',
+              block: 'start'
+            });
+          }
+
+          return;
+        }
+
+        /* -----------------------------------
+           CLOSE OPTIONS
+        ----------------------------------- */
+
+        const closeOptions =
+          target.closest(
+            '[data-unified-close]'
+          );
+
+        if (closeOptions) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const root =
+            host.closest(
+              '#titlePanel, #pauseMenu'
+            );
+
+          if (root?.id === 'titlePanel') {
+            root.querySelector(
+              '#closeTitlePanel'
+            )?.click();
+          } else if (root?.id === 'pauseMenu') {
+            root.querySelector(
+              '[data-close]'
+            )?.click();
+          }
+
           return;
         }
 
