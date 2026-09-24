@@ -313,9 +313,30 @@
       );
       hud.style.setProperty(
         'pointer-events',
-        active ? 'none' : 'none',
+        'none',
         'important'
       );
+
+      [mobilePauseButton, mobileSettingsButton]
+        .filter(Boolean)
+        .forEach(button => {
+          button.hidden = !active;
+          button.style.setProperty(
+            'display',
+            active ? 'grid' : 'none',
+            'important'
+          );
+          button.style.setProperty(
+            'visibility',
+            active ? 'visible' : 'hidden',
+            'important'
+          );
+          button.style.setProperty(
+            'opacity',
+            active ? '1' : '0',
+            'important'
+          );
+        });
 
 
       /*
