@@ -2824,6 +2824,17 @@ const gameplayMusicUrl =
       shell
     );
 
+    // The intro is the actual home screen. It starts hidden in index.html
+    // only to prevent the empty shell from blocking interaction before
+    // this module has constructed the real UI.
+    intro.hidden = false;
+    intro.removeAttribute('hidden');
+    intro.classList.remove('hidden');
+    intro.setAttribute('aria-hidden', 'false');
+    intro.style.setProperty('visibility', 'visible', 'important');
+    intro.style.setProperty('opacity', '1', 'important');
+    intro.style.setProperty('pointer-events', 'auto', 'important');
+
     /* =========================================================
        HOME V5 COMMAND ROW
        ========================================================= */
