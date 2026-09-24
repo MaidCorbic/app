@@ -4515,65 +4515,14 @@
     window.relayPlayDeploymentV4;
 
 
+
   /* ============================================================
      HOME START BUTTON
+     ============================================================
+     
+     #start is intentionally NOT intercepted here.
+     Home owns the authoritative PLAY -> GAMEPLAY transition.
+     The deployment API remains available for optional use.
      ============================================================ */
-
-  document.addEventListener(
-    'click',
-    event => {
-
-      if (active) {
-        return;
-      }
-
-
-      const button =
-        event.target.closest(
-          '#start'
-        );
-
-
-      if (!button) {
-        return;
-      }
-
-
-      event.preventDefault();
-
-      event.stopImmediatePropagation();
-
-
-      void runDeployment({
-
-        missionNumber:
-          1,
-
-
-        beforeRoute:
-          async () => {
-
-            const originalStart =
-              document.querySelector(
-                'body > #game > div[hidden] #start'
-              );
-
-
-            if (
-              originalStart instanceof
-              HTMLElement
-            ) {
-
-              originalStart.click();
-
-            }
-
-          },
-
-      });
-
-    },
-    true
-  );
 
 })();
