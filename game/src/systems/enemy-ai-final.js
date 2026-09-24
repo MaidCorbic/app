@@ -86,7 +86,15 @@ function updateGroundEnemy(scene, enemy) {
   if (!enemy?.active || !enemy.body || !GROUND_TYPES.has(typeOf(enemy))) return;
   initialize(scene, enemy);
   const type = typeOf(enemy);
-  const profile = PROFILE[type] || PROFILE.security;
+  const baseProfile = PROFILE[type] || PROFILE.security;
+  const roadmap = enemy.getData('roadmapAI') || null;
+  const profile = roadmap ? {
+    ...baseProfile,
+    chase: baseProfile.chase * Number(roadmap.chaseMultiplier || 1),
+    patrol: baseProfile.patrol * Number(roadmap.patrolMultiplier || 1),
+    stop: Number.isFinite(Number(roadmap.stop)) ? Number(roadmap.stop) : baseProfile.stop,
+    range: Number.isFinite(Number(roadmap.range)) ? Number(roadmap.range) : baseProfile.range,
+  } : baseProfile;
   const player = scene.player;
   if (!player?.active) { patrol(scene, enemy, profile); return; }
 
