@@ -3,7 +3,8 @@
   const PORTRAIT_GUARD_STYLE_ID = 'mobile-portrait-hud-rotate-style';
 
   const isTouchDevice = () =>
-    document.body.classList.contains('is-touch');
+    document.body.classList.contains('is-touch') ||
+    matchMedia('(pointer: coarse)').matches;
 
   const installPortraitGuardStyle = () => {
     if (document.getElementById(PORTRAIT_GUARD_STYLE_ID)) {
@@ -186,8 +187,6 @@
      */
     if (
       !pause ||
-      !pauseMenu ||
-      !panel ||
       document.getElementById('mobileBottomHud')
     ) {
       return false;
@@ -198,7 +197,7 @@
        PREVENT GAMEPLAY POINTER PROPAGATION INSIDE PAUSE MENU
        ========================================================= */
 
-    panel.addEventListener('pointerdown', event => {
+    panel?.addEventListener('pointerdown', event => {
       const target =
         event.target instanceof Element
           ? event.target
@@ -300,7 +299,7 @@
         !visible('intro') &&
         !visible('finish') &&
         !visible('gameOver') &&
-        pauseMenu.classList.contains('hidden');
+        !pauseMenu || pauseMenu.classList.contains('hidden');
 
 
       /*
