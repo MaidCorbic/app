@@ -216,36 +216,17 @@
        MOBILE BOTTOM HUD
        ========================================================= */
 
-    const hud = document.createElement('div');
+    const hud = document.getElementById('mobileBottomHud');
 
-    hud.id = 'mobileBottomHud';
-    hud.className = 'mobile-bottom-hud';
+    if (!hud) {
+      return false;
+    }
 
-    /*
-     * Mobile PAUSE + SETTINGS buttons removed.
-     *
-     * Keep the HUD container alive because the rest of this
-     * module uses it for gameplay-state synchronisation.
-     */
-    hud.innerHTML = `
-      <button id="mobilePauseButton" class="mobile-hud-action mobile-menu-pause" type="button" aria-label="Open pause menu">
-        <span class="mobile-hud-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" focusable="false"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
-        </span>
-        <span class="mobile-hud-label">PAUSE</span>
-      </button>
-      <button id="mobileSettingsButton" class="mobile-hud-action mobile-menu-settings" type="button" aria-label="Open settings">
-        <span class="mobile-hud-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" focusable="false"><path d="M12 8.1a3.9 3.9 0 1 0 0 7.8 3.9 3.9 0 0 0 0-7.8Z"></path><path d="m19.1 13.1 1.4 1.1-1.8 3.1-1.7-.7a7.9 7.9 0 0 1-1.7 1l-.2 1.8h-3.6l-.2-1.8a7.9 7.9 0 0 1-1.7-1l-1.7.7-1.8-3.1 1.4-1.1a7.9 7.9 0 0 1 0-2.2L6.1 9.8l1.8-3.1 1.7.7a7.9 7.9 0 0 1 1.7-1l.2-1.8h3.6l.2 1.8a7.9 7.9 0 0 1 1.7 1l1.7-.7 1.8 3.1-1.4 1.1a7.9 7.9 0 0 1 0 2.2Z"></path></svg>
-        </span>
-        <span class="mobile-hud-label">SETTINGS</span>
-      </button>
-    `;
+    const mobilePauseButton =
+      hud.querySelector('#mobilePauseButton');
 
-    const mobilePauseButton = hud.querySelector('#mobilePauseButton');
-    const mobileSettingsButton = hud.querySelector('#mobileSettingsButton');
-
-    document.body.append(hud);
+    const mobileSettingsButton =
+      hud.querySelector('#mobileSettingsButton');
 
 
     /* =========================================================
