@@ -6,8 +6,8 @@
     "start": "npm run build && vite preview --host 0.0.0.0 --port 3000 --strictPort",
     "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "vite build",
-    "lint": "npx --yes eslint .",
-    "lint:fix": "npx --yes eslint . --fix",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache",
     "format": "npx --yes prettier --write .",
     "format:check": "npx --yes prettier --check .",
     "test:progression": "node tests/progression.mjs",
@@ -66,6 +66,9 @@
     "vite": "^8.2.1"
   },
   "devDependencies": {
-    "playwright": "^1.62.1"
+    "playwright": "^1.62.1",
+    "@eslint/js": "^9.35.0",
+    "eslint": "^9.35.0",
+    "prettier": "^3.9.6"
   }
 }
