@@ -2997,6 +2997,17 @@ const gameplayMusicUrl =
         position:fixed !important;
         inset:0 !important;
         pointer-events:none !important;
+        z-index:0 !important;
+      }
+      #intro.home-v3 .home-v4-shell{
+        z-index:1 !important;
+        pointer-events:auto !important;
+      }
+      #intro.home-v3 .home-v4-shell *,
+      #intro.home-v3 .home-v4-shell button,
+      #intro.home-v3 .home-v4-shell a,
+      #intro.home-v3 .home-v4-shell [role="button"]{
+        pointer-events:auto !important;
       }
       #intro.home-v3 .home-v4-shell{
         position:relative !important;
