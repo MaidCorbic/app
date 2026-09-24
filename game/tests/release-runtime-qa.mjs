@@ -110,7 +110,35 @@ async function runMobileViewport(browser, viewport) {
 
     if (viewport.orientation === 'landscape') {
       await waitForGameplayBriefingRelease(page);
-      await waitForVisible(page, '.mobile-controls');
+      try {
+        await waitForVisible(page, '.mobile-controls');
+      } catch (error) {
+        const diagnostic = await page.evaluate(() => {
+          const el = document.querySelector('.mobile-controls');
+          const intro = document.querySelector('#intro');
+          const play = document.querySelector('#play');
+          const describe = node => node ? {
+            exists: true,
+            className: node.className || '',
+            hidden: node.hidden,
+            display: getComputedStyle(node).display,
+            visibility: getComputedStyle(node).visibility,
+            opacity: getComputedStyle(node).opacity,
+            rect: (() => { const r = node.getBoundingClientRect(); return { width:r.width, height:r.height, left:r.left, top:r.top }; })(),
+          } : { exists: false };
+          return {
+            bodyClass: document.body.className,
+            orientation: matchMedia('(orientation: landscape)').matches ? 'landscape' : 'portrait',
+            pointerCoarse: matchMedia('(pointer: coarse)').matches,
+            touchPoints: navigator.maxTouchPoints,
+            mobileControls: describe(el),
+            intro: describe(intro),
+            play: describe(play),
+          };
+        });
+        console.error('Mobile controls diagnostic:', JSON.stringify(diagnostic));
+        throw error;
+      }
       try {
         await waitForVisible(page, '#mobilePauseButton');
       } catch (error) {
