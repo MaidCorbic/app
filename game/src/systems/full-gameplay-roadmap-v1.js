@@ -549,15 +549,17 @@ function bindPursuitEvents(scene) {
     );
   };
 
-  gameEvents.on('detection', onDetection);
-  gameEvents.on('enemy-alert', (stateName) => {
+  const onEnemyAlert = stateName => {
     if (stateName === 'SUSPICIOUS') onDetection(8);
     if (stateName === 'ALERT') onDetection(26);
-  });
-  gameEvents.on('alarm', onAlarm);
-  gameEvents.on('chase', active => {
+  };
+  const onChase = active => {
     if (active) onAlarm();
-  });
+  };
+  gameEvents.on('detection', onDetection);
+  gameEvents.on('enemy-alert', onEnemyAlert);
+  gameEvents.on('alarm', onAlarm);
+  gameEvents.on('chase', onChase);
 
   gameEvents.on(
     'relay:variety-route',
@@ -582,7 +584,9 @@ function bindPursuitEvents(scene) {
 
   scene.__roadmapPursuitHandlers = {
     onDetection,
+    onEnemyAlert,
     onAlarm,
+    onChase,
   };
 }
 
@@ -598,9 +602,9 @@ function cleanupPursuit(scene) {
     handlers
   ) {
     events.off('detection', handlers.onDetection);
-    events.off('enemy-alert', handlers.onDetection);
+    events.off('enemy-alert', handlers.onEnemyAlert);
     events.off('alarm', handlers.onAlarm);
-    events.off('chase', handlers.onAlarm);
+    events.off('chase', handlers.onChase);
   }
 
   scene.__roadmapPursuitHandlers =
