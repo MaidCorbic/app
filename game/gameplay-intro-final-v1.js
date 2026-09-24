@@ -17,8 +17,10 @@
 
   const ROOT_ID = 'relayGameplayIntroFinalV5';
 
+  // HOME #start is handled by the Play cinematic/main gameplay entry.
+  // Keep the tactical briefing for explicit mission/replay launch flows.
   const PLAY_BUTTONS =
-    '#start,#nextMission,#again,#retry,#launchJob';
+    '#nextMission,#again,#retry,#launchJob';
 
   const WAIT = ms =>
     new Promise(resolve => setTimeout(resolve, ms));
