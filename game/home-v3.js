@@ -3181,7 +3181,6 @@ const gameplayMusicUrl =
     };
 
     window.__relaySyncMissionNetwork = syncMissionNetwork;
-    window.__relaySyncOperationsTelemetry?.(state);
 
     /* =========================================================
        TYPEWRITER / STATE
