@@ -17,8 +17,11 @@
 
   const ROOT_ID = 'relayGameplayIntroFinalV5';
 
+  // Initial PLAY must enter the real Phaser gameplay directly.
+  // Keep the tactical route briefing for mission/replay launch flows.
+  // The existing Play splash/cinematic remains untouched.
   const PLAY_BUTTONS =
-    '#start,#nextMission,#again,#retry,#launchJob';
+    '#nextMission,#again,#retry,#launchJob';
 
   const WAIT = ms =>
     new Promise(resolve => setTimeout(resolve, ms));
