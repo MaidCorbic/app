@@ -990,6 +990,98 @@ import { loadState, saveState } from './src/state.js';
           rgba(255,255,255,.045);
       }
 
+      /* =====================================================
+         RESPONSIVE OPTIONS COMPOSITION
+      ====================================================== */
+
+      #titlePanel.relay-options-unified .title-panel-card{
+        width:min(1040px,94vw) !important;
+        max-height:min(88dvh,760px) !important;
+        overflow:hidden !important;
+      }
+
+      #titlePanel.relay-options-unified .relay-options-body,
+      #pauseMenu.relay-options-unified .relay-options-body{
+        padding:16px 18px 20px;
+        scrollbar-gutter:stable;
+      }
+
+      #titlePanel.relay-options-unified .relay-options-grid,
+      #pauseMenu.relay-options-unified .relay-options-grid{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        align-items:start;
+        gap:12px;
+      }
+
+      #titlePanel.relay-options-unified .relay-options-grid > .relay-options-section.full,
+      #pauseMenu.relay-options-unified .relay-options-grid > .relay-options-section.full{
+        grid-column:1 / -1;
+      }
+
+      #titlePanel.relay-options-unified .relay-options-section,
+      #pauseMenu.relay-options-unified .relay-options-section{
+        min-width:0;
+        margin:0 !important;
+        padding:12px;
+        border:1px solid rgba(125,211,252,.08);
+        background:linear-gradient(180deg,rgba(8,20,31,.94),rgba(3,10,18,.96));
+        box-shadow:inset 0 1px rgba(255,255,255,.025);
+      }
+
+      #titlePanel.relay-options-unified .relay-section-title,
+      #pauseMenu.relay-options-unified .relay-section-title{
+        margin:0 0 10px;
+        padding-bottom:8px;
+        border-bottom:1px solid rgba(255,255,255,.055);
+        font-size:8px;
+        letter-spacing:.18em;
+      }
+
+      #titlePanel.relay-options-unified .relay-option-copy strong,
+      #pauseMenu.relay-options-unified .relay-option-copy strong{
+        font-size:10px;
+        letter-spacing:.08em;
+      }
+
+      #titlePanel.relay-options-unified .relay-option-copy small,
+      #pauseMenu.relay-options-unified .relay-option-copy small{
+        line-height:1.45;
+      }
+
+      #titlePanel.relay-options-unified .relay-action-row,
+      #pauseMenu.relay-options-unified .relay-action-row{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:8px;
+        margin-top:12px;
+        padding-top:12px;
+      }
+
+      #titlePanel.relay-options-unified .relay-action,
+      #pauseMenu.relay-options-unified .relay-action{
+        min-height:40px;
+        padding:9px 10px;
+        font-size:8px;
+      }
+
+      @media (min-width:781px) and (max-height:760px){
+        #titlePanel.relay-options-unified .title-panel-card{
+          max-height:92dvh !important;
+        }
+
+        #titlePanel.relay-options-unified .relay-options-body{
+          padding:12px 14px 16px;
+        }
+
+        #titlePanel.relay-options-unified .relay-options-grid{
+          gap:9px;
+        }
+
+        #titlePanel.relay-options-unified .relay-options-section{
+          padding:10px;
+        }
+      }
+
       @media (max-width:780px){
 
         .relay-graphics-quality{
