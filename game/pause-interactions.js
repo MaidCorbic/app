@@ -228,7 +228,25 @@
      * Keep the HUD container alive because the rest of this
      * module uses it for gameplay-state synchronisation.
      */
-    hud.innerHTML = '';
+    hud.innerHTML = `
+      <button id="mobilePauseButton" class="mobile-menu-pause" type="button" aria-label="Open pause menu">PAUSE</button>
+      <button id="mobileSettingsButton" class="mobile-menu-settings" type="button" aria-label="Open settings">SETTINGS</button>
+    `;
+
+    const mobilePauseButton = hud.querySelector('#mobilePauseButton');
+    const mobileSettingsButton = hud.querySelector('#mobileSettingsButton');
+
+    mobilePauseButton?.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      openPause('resume');
+    });
+
+    mobileSettingsButton?.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      openPause('settings');
+    });
 
     document.body.append(hud);
 
