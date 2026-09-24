@@ -1,6 +1,6 @@
 /* ============================================================
    RELAY RUNNER — MOBILE PAUSE AUTHORITY V2
-   One mobile entry point: the original ☰ #pause button.
+   One mobile entry point for PAUSE + SETTINGS on touch devices.
    Prevents duplicate legacy/cinematic click routes.
    ============================================================ */
 (() => {
@@ -81,10 +81,14 @@
     if (!isMobile()) return;
 
     const button = event.target instanceof Element
-      ? event.target.closest('#pause')
+      ? event.target.closest('#pause, #mobileSettingsButton')
       : null;
 
     if (!button) return;
+
+    const tab = button.id === 'mobileSettingsButton'
+      ? 'settings'
+      : 'resume';
 
     /*
      * This capture-phase handler is the single mobile owner.
@@ -93,7 +97,7 @@
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    openCanonicalPause('resume');
+    openCanonicalPause(tab);
   };
 
   const install = () => {
