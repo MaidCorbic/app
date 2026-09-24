@@ -71,6 +71,12 @@
     }
   };
 
+  const syncPauseLock = () => {
+    const menu = getPauseMenu();
+    const open = !!menu && !menu.classList.contains('hidden');
+    document.body.classList.toggle('relay-mobile-pause-open', isMobile() && open);
+  };
+
   const handleClick = event => {
     if (!isMobile()) return;
 
@@ -94,6 +100,16 @@
     if (!getPauseButton()) return false;
 
     document.addEventListener('click', handleClick, true);
+
+    const menu = getPauseMenu();
+    if (menu) {
+      new MutationObserver(syncPauseLock).observe(menu, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    }
+
+    syncPauseLock();
     return true;
   };
 
