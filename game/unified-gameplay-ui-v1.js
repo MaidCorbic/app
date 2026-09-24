@@ -111,12 +111,31 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
   const closeInfoPanel = () => {
     const panel = $('relayInfoPanel');
 
-    panel?.classList.add('hidden');
-    panel?.classList.remove(
+    if (!panel) {
+      return;
+    }
+
+    /*
+     * Move focus out of the panel before hiding it.
+     * Otherwise aria-hidden would be applied to an ancestor
+     * that still contains the focused close button.
+     */
+    const activeElement =
+      document.activeElement;
+
+    if (
+      activeElement instanceof HTMLElement &&
+      panel.contains(activeElement)
+    ) {
+      activeElement.blur();
+    }
+
+    panel.classList.add('hidden');
+    panel.classList.remove(
       'relay-update-mode',
       'relay-faq-mode'
     );
-    panel?.setAttribute(
+    panel.setAttribute(
       'aria-hidden',
       'true'
     );
