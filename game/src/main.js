@@ -1646,6 +1646,16 @@ function renderContacts() {
     );
 }
 
+/* =========================================================
+   ROUTE BRIEFING -> REAL GAMEPLAY BRIDGE
+   ========================================================= */
+
+window.relayLaunchGameplay = () =>
+  launch(
+    missionIndex,
+    false
+  );
+
 function launch(
   index = missionIndex,
   paused = false,

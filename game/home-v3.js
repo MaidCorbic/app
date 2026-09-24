@@ -325,6 +325,8 @@ const gameplayMusicUrl =
 
       const state = loadState();
 
+      window.__relaySyncMissionNetwork?.(state);
+
       if (!homeContractsAPI) {
         homeContractsAPI =
           await import('./src/contracts.js');
@@ -2875,6 +2877,117 @@ const gameplayMusicUrl =
         homeDaily
       );
     }
+
+    /* =========================================================
+       HOME V6 MISSION NETWORK
+       ========================================================= */
+
+    const missionNetwork =
+      document.createElement('section');
+
+    missionNetwork.className =
+      'home-v6-mission-network';
+
+    missionNetwork.setAttribute(
+      'aria-label',
+      'Mission network'
+    );
+
+    missionNetwork.innerHTML = `
+      <div class="home-v6-mission-head">
+        <div>
+          <span>MISSION NETWORK</span>
+          <strong>FOUR ROUTES // ONE CITY</strong>
+        </div>
+        <b data-home-v6-progress>0 / 4 ONLINE</b>
+      </div>
+
+      <div class="home-v6-mission-grid">
+        <article data-home-mission="0">
+          <span>01</span>
+          <div><strong>ROOFTOP BREACH</strong><small>EAST DISTRICT · HIGH</small></div>
+          <b>READY</b>
+        </article>
+        <article data-home-mission="1">
+          <span>02</span>
+          <div><strong>NIGHT RUN</strong><small>NORTH SECTOR · CRITICAL</small></div>
+          <b>LOCKED</b>
+        </article>
+        <article data-home-mission="2">
+          <span>03</span>
+          <div><strong>DEAD DROP</strong><small>WEST DISTRICT · EXTREME</small></div>
+          <b>LOCKED</b>
+        </article>
+        <article data-home-mission="3">
+          <span>04</span>
+          <div><strong>BLACK OUT</strong><small>SOUTH SECTOR · HIGH</small></div>
+          <b>LOCKED</b>
+        </article>
+      </div>
+    `;
+
+    homeCopy?.append(missionNetwork);
+
+    const missionNetworkStyle =
+      document.createElement('style');
+
+    missionNetworkStyle.textContent = `
+      .home-v6-mission-network{
+        width:100%;
+        margin-top:18px;
+        padding:14px;
+        border:1px solid rgba(100,220,235,.16);
+        background:linear-gradient(145deg,rgba(3,11,16,.88),rgba(2,6,10,.94));
+        box-shadow:inset 0 0 28px rgba(0,190,255,.025),0 12px 32px rgba(0,0,0,.28);
+        box-sizing:border-box;
+      }
+      .home-v6-mission-head{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:14px;
+        margin-bottom:10px;
+        font-family:Orbitron,sans-serif;
+      }
+      .home-v6-mission-head div{display:grid;gap:3px;}
+      .home-v6-mission-head span{color:#7deaff;font-size:9px;letter-spacing:.18em;}
+      .home-v6-mission-head strong{color:#eafcff;font-size:12px;letter-spacing:.08em;}
+      .home-v6-mission-head>b{color:#39ff88;font-size:9px;letter-spacing:.1em;white-space:nowrap;}
+      .home-v6-mission-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+      .home-v6-mission-grid article{
+        min-width:0;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;
+        padding:10px;border:1px solid rgba(100,220,235,.10);background:rgba(4,14,20,.72);font-family:Orbitron,sans-serif;
+      }
+      .home-v6-mission-grid article>span{color:#55dff0;font-size:10px;font-weight:800;}
+      .home-v6-mission-grid article div{min-width:0;display:grid;gap:3px;}
+      .home-v6-mission-grid article strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f3fbff;font-size:10px;letter-spacing:.04em;}
+      .home-v6-mission-grid article small{color:rgba(214,239,244,.58);font-size:7px;letter-spacing:.08em;}
+      .home-v6-mission-grid article>b{color:#ffd75c;font-size:7px;letter-spacing:.08em;}
+      .home-v6-mission-grid article.is-complete{border-color:rgba(57,255,136,.28);}
+      .home-v6-mission-grid article.is-complete>b{color:#39ff88;}
+      @media(max-width:700px){.home-v6-mission-grid{grid-template-columns:1fr;}.home-v6-mission-head{align-items:flex-start;}.home-v6-mission-head strong{font-size:10px;}}
+    `;
+
+    document.head.append(missionNetworkStyle);
+
+    const syncMissionNetwork = state => {
+      const completed =
+        Array.isArray(state?.completed)
+          ? state.completed
+          : [];
+
+      missionNetwork.querySelectorAll('[data-home-mission]').forEach((card,index)=>{
+        const done = completed.includes(index);
+        card.classList.toggle('is-complete',done);
+        const status=card.querySelector('b');
+        if(status) status.textContent=done?'COMPLETE':index===0?'READY':'LOCKED';
+      });
+
+      const progress=missionNetwork.querySelector('[data-home-v6-progress]');
+      if(progress) progress.textContent=`${Math.min(4,completed.length)} / 4 ONLINE`;
+    };
+
+    window.__relaySyncMissionNetwork = syncMissionNetwork;
 
     /* =========================================================
        TYPEWRITER / STATE
