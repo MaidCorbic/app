@@ -563,7 +563,6 @@ function cleanupPursuit(scene) {
     'relay:runner-transient-reset',
     handlers?.onTransientReset
   );
-  }
 
   scene.__roadmapPursuitHandlers =
     null;
