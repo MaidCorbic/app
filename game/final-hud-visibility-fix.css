@@ -1,0 +1,106 @@
+/* ============================================================
+   RELAY RUNNER — FINAL HUD VISIBILITY / MOBILE PAUSE FIX
+   Loaded last so legacy UI rules cannot hide the live controls.
+   ============================================================ */
+
+html, body { min-height:100%; }
+
+#play #pause {
+  position:relative;
+  z-index:910;
+  display:grid !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+  place-items:center;
+  touch-action:manipulation;
+}
+
+#pauseMenu.relay-cinematic-overlay {
+  display:grid !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+}
+
+#pauseMenu.relay-cinematic-overlay.hidden {
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+#singleplayerTerminal {
+  z-index:10050 !important;
+  visibility:visible !important;
+}
+
+#singleplayerTerminal.is-open {
+  display:flex !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+}
+
+#mobileBottomHud {
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:max(10px, env(safe-area-inset-bottom));
+  z-index:9500;
+  display:none;
+  align-items:flex-end;
+  justify-content:space-between;
+  padding:0 max(12px, env(safe-area-inset-left)) 0 max(12px, env(safe-area-inset-right));
+  box-sizing:border-box;
+  pointer-events:none;
+}
+
+#mobileBottomHud.is-active {
+  display:flex;
+}
+
+#mobileBottomHud .mobile-menu-pause,
+#mobileBottomHud .mobile-menu-settings {
+  width:58px;
+  height:52px;
+  min-width:58px;
+  min-height:52px;
+  border:1px solid rgba(56,189,248,.72);
+  border-radius:12px;
+  color:#eaffff;
+  background:linear-gradient(145deg,rgba(8,31,46,.98),rgba(2,10,17,.98));
+  box-shadow:0 0 20px rgba(56,189,248,.16),inset 0 1px 0 rgba(255,255,255,.08);
+  font:900 8px/1 "DM Mono",ui-monospace,monospace;
+  letter-spacing:.1em;
+  cursor:pointer;
+  pointer-events:auto;
+  touch-action:manipulation;
+}
+
+#mobileBottomHud .mobile-menu-pause:active,
+#mobileBottomHud .mobile-menu-settings:active {
+  transform:scale(.95);
+}
+
+@media (pointer:coarse) and (max-width:900px) {
+  #play #pause { display:none !important; }
+  #mobileBottomHud.is-active { display:flex !important; }
+}
+
+@media (pointer:coarse) and (orientation:portrait) {
+  #play { min-height:100dvh; }
+  #mobileBottomHud.is-active {
+    display:flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+  }
+  #mobileBottomHud .mobile-menu-pause,
+  #mobileBottomHud .mobile-menu-settings {
+    display:grid !important;
+    place-items:center;
+  }
+  #mobileBottomHud .mobile-menu-pause { justify-self:start; }
+  #mobileBottomHud .mobile-menu-settings { justify-self:end; }
+}
+
+@media (min-width:901px) {
+  #mobileBottomHud { display:none !important; }
+}
