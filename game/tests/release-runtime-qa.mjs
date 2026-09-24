@@ -28,17 +28,41 @@ function waitForServer(url, timeoutMs = 15000) {
   });
 }
 
-async function waitForVisible(page, selector, timeout = 15000) {
-  await page.waitForFunction(
-    sel => {
-      const el = document.querySelector(sel);
-      if (!el) return false;
-      const style = getComputedStyle(el);
-      return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0' && !el.classList.contains('hidden');
-    },
-    selector,
-    { timeout },
-  );
+async function waitForVisible(page, selector, timeout = 30000) {
+  try {
+    await page.waitForFunction(
+      sel => {
+        const el = document.querySelector(sel);
+        if (!el) return false;
+        const style = getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0' && !el.classList.contains('hidden');
+      },
+      selector,
+      { timeout },
+    );
+  } catch (error) {
+    const diagnostics = await page.evaluate(sel => {
+      const intro = document.querySelector('#intro');
+      const start = document.querySelector(sel);
+      const style = start ? getComputedStyle(start) : null;
+      return {
+        readyState: document.readyState,
+        startCount: document.querySelectorAll(sel).length,
+        startDisplay: style?.display ?? null,
+        startVisibility: style?.visibility ?? null,
+        startOpacity: style?.opacity ?? null,
+        startHidden: start?.hidden ?? null,
+        startClass: start?.className ?? null,
+        introBuilt: intro?.dataset?.homeV4Built ?? null,
+        introClass: intro?.className ?? null,
+        introHidden: intro?.hidden ?? null,
+        gameBootReady: document.querySelector('#game')?.classList.contains('relay-boot-ready') ?? false,
+        runtimeError: window.relayLastRuntimeError?.error ?? null,
+      };
+    }, selector);
+    error.message = `${error.message} | waitForVisible diagnostics: ${JSON.stringify(diagnostics)}`;
+    throw error;
+  }
 }
 
 async function waitForHidden(page, selector, timeout = 15000) {

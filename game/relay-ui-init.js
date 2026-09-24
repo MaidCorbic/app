@@ -233,6 +233,11 @@ import './src/systems/gameplay-route-choice-bridge-v1.js';
 
 import './src/systems/route-choice-branching-v1.js';
 
+// Final coordinator for the agreed gameplay roadmap.
+// Existing feature owners remain authoritative; this layer only adds
+// adaptive pursuit pressure and differentiated enemy archetypes.
+import './src/systems/full-gameplay-roadmap-v1.js';
+
 
 // ============================================================
 // DOM READY RUNTIME PATCHES
