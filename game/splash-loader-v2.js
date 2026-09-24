@@ -447,9 +447,7 @@
 
 
         image.style.objectFit =
-          portrait
-            ? 'contain'
-            : 'cover';
+          'cover';
 
 
         image.style.objectPosition =

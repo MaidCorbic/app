@@ -84,7 +84,7 @@
    * IMPORTANT:
    * Do not force width/height on the Phaser canvas.
    *
-   * Phaser.Scale.ENVELOP on mobile and
+   * Phaser.Scale.FIT on mobile and
    * Phaser.Scale.RESIZE on desktop must control
    * the canvas dimensions.
    */

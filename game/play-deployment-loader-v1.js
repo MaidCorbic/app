@@ -4138,7 +4138,9 @@
 
 
               image.src =
-                DEFAULT_ASSETS.desktop;
+                isCoarseDevice()
+                  ? DEFAULT_ASSETS.mobile
+                  : DEFAULT_ASSETS.desktop;
 
             },
             {

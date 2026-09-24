@@ -117,11 +117,14 @@ const game = new Phaser.Game({
   // Touch/mobile devices use ENVELOP so the 16:9 gameplay world keeps
   // its proportions instead of being stretched to the phone viewport.
   scale: {
+    // Mobile keeps the same 1280x720 world and fits it into the phone viewport.
     mode: detectTouchDevice()
-      ? Phaser.Scale.ENVELOP
+      ? Phaser.Scale.FIT
       : Phaser.Scale.RESIZE,
 
     autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 1280,
+    height: 720,
     zoom: 1
   },
 

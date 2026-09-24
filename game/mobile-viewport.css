@@ -45,7 +45,7 @@ body {
  * IMPORTANT:
  * Do NOT force width/height on the Phaser canvas here.
  *
- * Phaser.Scale.ENVELOP / RESIZE must be allowed to control
+ * Phaser.Scale.FIT / RESIZE must be allowed to control
  * the actual canvas dimensions.
  */
 
