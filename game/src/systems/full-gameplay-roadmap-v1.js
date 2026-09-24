@@ -127,6 +127,28 @@ function updateArchetype(scene, actor, delta, pressure) {
   const profile =
     ARCHETYPES[archetypeId];
 
+  if (!profile) return;
+
+  /*
+   * Movement remains owned by enemy-ai-final. We only publish a
+   * per-enemy profile that that authoritative AI consumes. This
+   * prevents two systems from fighting over body.velocity.
+   */
+  actor.setData('roadmapAI', {
+    range: profile.range,
+    stop: profile.stop,
+    chaseMultiplier: profile.speed * (1 + pressure * .32),
+    patrolMultiplier: profile.speed,
+    pressure,
+  });
+
+  const player = getPlayer(scene);
+  const archetypeId =
+    actor.getData('roadmapArchetype');
+
+  const profile =
+    ARCHETYPES[archetypeId];
+
   const player = getPlayer(scene);
 
   if (!profile || !player || !actor?.body) return;
@@ -144,50 +166,6 @@ function updateArchetype(scene, actor, delta, pressure) {
     Number(scene.decoyTimer || 0) > 0;
 
   if (disabled || !visible) return;
-
-  const direction = dx < 0 ? -1 : 1;
-  const current = Number(actor.body.velocity?.x || 0);
-
-  /*
-   * Archetypes modify the existing AI result rather than owning
-   * movement from scratch. This prevents a second enemy AI loop.
-   */
-  if (
-    archetypeId === 'interceptor' ||
-    archetypeId === 'tracker'
-  ) {
-    if (distance > profile.stop) {
-      const target =
-        direction *
-        Math.min(
-          260,
-          92 *
-            profile.speed *
-            (1 + pressure * .32)
-        );
-
-      actor.body.setVelocityX?.(
-        current +
-          clamp(
-            target - current,
-            -42,
-            42
-          )
-      );
-    }
-  }
-
-  if (archetypeId === 'blocker') {
-    if (distance < 230) {
-      actor.body.setVelocityX?.(
-        direction * 30
-      );
-      actor.setData(
-        'awarenessState',
-        'block'
-      );
-    }
-  }
 
   if (archetypeId === 'disruptor') {
     if (
@@ -208,10 +186,6 @@ function updateArchetype(scene, actor, delta, pressure) {
   }
 
   if (archetypeId === 'sniper') {
-    actor.body.setVelocityX?.(
-      clamp(current * .55, -35, 35)
-    );
-
     if (
       distance >= 260 &&
       distance <= 520
@@ -255,40 +229,10 @@ function updateArchetype(scene, actor, delta, pressure) {
   }
 
   if (archetypeId === 'drone') {
-    const target =
-      direction *
-      Math.min(
-        180,
-        72 *
-          profile.speed *
-          (1 + pressure * .24)
-      );
-
-    actor.body.setVelocityX?.(
-      current +
-        clamp(
-          target - current,
-          -28,
-          28
-        )
+    actor.setData(
+      'awarenessState',
+      Math.abs(dy) > 34 ? 'track-vertical' : 'track'
     );
-
-    /*
-     * Small vertical correction gives invaders a real aerial
-     * tracking role without replacing their existing threat AI.
-     */
-    if (
-      Math.abs(dy) > 34 &&
-      actor.body.setVelocityY
-    ) {
-      actor.body.setVelocityY(
-        clamp(
-          dy * .7,
-          -115,
-          115
-        )
-      );
-    }
   }
 }
 
@@ -556,37 +500,51 @@ function bindPursuitEvents(scene) {
   const onChase = active => {
     if (active) onAlarm();
   };
+
+  const onVarietyRoute = detail => {
+    if (
+      detail?.route === 'hot' ||
+      detail?.risk === 'HIGH PRESSURE'
+    ) {
+      const state = scene.__roadmapPursuitState;
+      if (state) {
+        state.heat = clamp(state.heat + 14, 0, 100);
+      }
+    }
+  };
+
+  const onTransientReset = event => {
+    if (event?.detail?.scene !== scene) return;
+    const state = scene.__roadmapPursuitState;
+    if (!state) return;
+    state.heat = 0;
+    state.lastDetection = 0;
+    state.lastPulse = 0;
+    state.lockdownUntil = 0;
+    state.lastBanner = 'CLEAR';
+    scene.__roadmapPursuitBanner?.destroy?.();
+    scene.__roadmapPursuitBanner = null;
+    for (const actor of [...getEnemies(scene), ...getThreats(scene)]) {
+      actor.removeData?.('awarenessState');
+      actor.removeData?.('roadmapDisruptAt');
+      actor.removeData?.('roadmapWarningAt');
+    }
+  };
   gameEvents.on('detection', onDetection);
   gameEvents.on('enemy-alert', onEnemyAlert);
   gameEvents.on('alarm', onAlarm);
   gameEvents.on('chase', onChase);
 
-  gameEvents.on(
-    'relay:variety-route',
-    detail => {
-      if (
-        detail?.route === 'hot' ||
-        detail?.risk === 'HIGH PRESSURE'
-      ) {
-        const state =
-          scene.__roadmapPursuitState;
-
-        if (state) {
-          state.heat = clamp(
-            state.heat + 14,
-            0,
-            100
-          );
-        }
-      }
-    }
-  );
+  gameEvents.on('relay:variety-route', onVarietyRoute);
+  window.addEventListener?.('relay:runner-transient-reset', onTransientReset);
 
   scene.__roadmapPursuitHandlers = {
     onDetection,
     onEnemyAlert,
     onAlarm,
     onChase,
+    onVarietyRoute,
+    onTransientReset,
   };
 }
 
@@ -605,6 +563,13 @@ function cleanupPursuit(scene) {
     events.off('enemy-alert', handlers.onEnemyAlert);
     events.off('alarm', handlers.onAlarm);
     events.off('chase', handlers.onChase);
+    events.off('relay:variety-route', handlers.onVarietyRoute);
+  }
+
+  window.removeEventListener?.(
+    'relay:runner-transient-reset',
+    handlers?.onTransientReset
+  );
   }
 
   scene.__roadmapPursuitHandlers =
