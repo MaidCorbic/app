@@ -3255,67 +3255,22 @@ if (start instanceof HTMLElement) {
 
       try {
         /*
-         * Kill the old procedural game audio immediately.
-         * Main exposes this after its module loads.
+         * PLAY goes directly from Home into the runner.
+         * The deployment/map overlay is intentionally bypassed.
          */
         window.relayProceduralAudio?.stop?.();
-
-        /*
-         * Start the MP3 immediately on the trusted click.
-         */
         void startGameplayMusic();
 
-        const loader =
-          window.relayPlayDeploymentV1;
-
-        if (
-          loader &&
-          typeof loader.show === 'function'
-        ) {
-          void loader.show({
-            missionNumber: 1,
-
-            desktop:
-              './assets/loadplay.jpg',
-
-            mobile:
-              './assets/loadplaymobile.jpg',
-
-            beforeRoute: async () => {
-              const target =
-                document.querySelector(
-                  'body > #game > div[hidden] #start'
-                );
-
-              if (
-                target instanceof HTMLElement
-              ) {
-                HTMLElement.prototype.click.call(
-                  target
-                );
-              }
-            }
-          });
-
-          return;
+        /*
+         * main.js installs the authoritative #start.onclick.
+         * Invoke it directly so PLAY cannot be routed to the map.
+         */
+        if (typeof start.onclick === 'function') {
+          start.onclick.call(start, event);
         }
-
-        const target =
-          document.querySelector(
-            'body > #game > div[hidden] #start'
-          );
-
-        if (
-          target instanceof HTMLElement
-        ) {
-          HTMLElement.prototype.click.call(
-            target
-          );
-        }
-
       } catch (error) {
         console.error(
-          '[RelayRunner] Deployment loader error:',
+          '[RelayRunner] Direct gameplay start failed:',
           error
         );
       }
