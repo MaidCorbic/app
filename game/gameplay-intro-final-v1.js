@@ -7862,9 +7862,39 @@ function updateTimer(ms) {
 
     root.classList.remove('opening');
 
-    lockGame(false);
+    /*
+     * The route briefing is a pre-game lock, not an exit screen.
+     * When the countdown reaches zero, stay in the current mission
+     * and reveal/resume the real Phaser runner instead of Home.
+     */
+    const scene =
+      runner();
 
     root.hidden = true;
+    lockGame(false);
+
+    if (
+      scene &&
+      typeof scene.isPaused === 'function' &&
+      scene.isPaused()
+    ) {
+      scene.resume();
+      return;
+    }
+
+    if (
+      scene &&
+      typeof scene.scene?.isActive === 'function' &&
+      scene.scene.isActive()
+    ) {
+      return;
+    }
+
+    if (
+      typeof window.relayLaunchGameplay === 'function'
+    ) {
+      window.relayLaunchGameplay();
+    }
   }
 
   /*
