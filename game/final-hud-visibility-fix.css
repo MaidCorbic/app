@@ -497,3 +497,25 @@ html, body { min-height:100%; }
     overscroll-behavior:none !important;
   }
 }
+
+
+/* ============================================================
+   MOBILE GAMEPLAY AUTHORITY — FINAL STATE ROUTING
+   The home screen owns #intro until it becomes hidden. Once
+   gameplay starts, the deterministic bottom HUD becomes visible.
+   ============================================================ */
+@media (pointer:coarse) and (max-width:900px){
+  body:has(#intro.hidden):not(:has(#finish:not(.hidden))):not(:has(#gameOver:not(.hidden))) #mobileBottomHud{
+    display:flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:none !important;
+  }
+
+  body:has(#intro.hidden):not(:has(#finish:not(.hidden))):not(:has(#gameOver:not(.hidden))) #mobileBottomHud .mobile-hud-action{
+    display:grid !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:auto !important;
+  }
+}
