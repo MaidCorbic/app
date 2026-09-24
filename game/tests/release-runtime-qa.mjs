@@ -111,7 +111,36 @@ async function runMobileViewport(browser, viewport) {
     if (viewport.orientation === 'landscape') {
       await waitForGameplayBriefingRelease(page);
       await waitForVisible(page, '.mobile-controls');
-      await waitForVisible(page, '#mobilePauseButton');
+      try {
+        await waitForVisible(page, '#mobilePauseButton');
+      } catch (error) {
+        const diagnostic = await page.evaluate(() => {
+          const el = document.querySelector('#mobilePauseButton');
+          const hud = document.querySelector('#mobileBottomHud');
+          const intro = document.querySelector('#intro');
+          const play = document.querySelector('#play');
+          const pauseMenu = document.querySelector('#pauseMenu');
+          const describe = node => node ? {
+            exists: true,
+            className: node.className || '',
+            hidden: node.hidden,
+            display: getComputedStyle(node).display,
+            visibility: getComputedStyle(node).visibility,
+            opacity: getComputedStyle(node).opacity,
+            rect: (() => { const r = node.getBoundingClientRect(); return { width:r.width, height:r.height, left:r.left, top:r.top }; })(),
+          } : { exists: false };
+          return {
+            bodyClass: document.body.className,
+            el: describe(el),
+            hud: describe(hud),
+            intro: describe(intro),
+            play: describe(play),
+            pauseMenu: describe(pauseMenu),
+          };
+        });
+        console.error('Mobile pause HUD diagnostic:', JSON.stringify(diagnostic));
+        throw error;
+      }
     }
 
     const initial = await page.evaluate(() => ({
