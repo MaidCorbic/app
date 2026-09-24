@@ -279,8 +279,7 @@
         visible('play') &&
         !visible('intro') &&
         !visible('finish') &&
-        !visible('gameOver') &&
-        !pauseMenu || pauseMenu.classList.contains('hidden');
+        !visible('gameOver');
 
 
       /*
