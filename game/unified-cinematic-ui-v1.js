@@ -1745,54 +1745,6 @@ import {
 
 
     /* -------------------------------------------------------
-       PAUSE
-       ------------------------------------------------------- */
-
-    const pauseButton =
-      target.closest(
-        '#pause, #mobilePauseButton'
-      );
-
-    if (pauseButton) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      if (
-        document.getElementById(
-          'pauseMenu'
-        )
-      ) {
-        openPause(
-          'resume'
-        );
-      }
-
-      return;
-    }
-
-
-    /* -------------------------------------------------------
-       MOBILE SETTINGS
-       ------------------------------------------------------- */
-
-    const settingsMobile =
-      target.closest(
-        '#mobileSettingsButton'
-      );
-
-    if (settingsMobile) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      openPause(
-        'settings'
-      );
-
-      return;
-    }
-
-
-    /* -------------------------------------------------------
        CLOSE
        ------------------------------------------------------- */
 
