@@ -111,12 +111,23 @@
      DEFAULT ARTWORK
      ============================================================ */
 
+  /*
+   * Resolve assets from the actual game document directory.
+   * The production bundle may live under /assets/, so plain
+   * './assets/...' would incorrectly resolve to the site root.
+   */
+  const gameAsset = file =>
+    new URL(
+      `./assets/${file}`,
+      window.location.href
+    ).href;
+
   const DEFAULT_ASSETS = Object.freeze({
     desktop:
-      './assets/loadplay.jpg',
+      gameAsset('loadplay.jpg'),
 
     mobile:
-      './assets/loadplaymobile.jpg',
+      gameAsset('loadplaymobile.jpg'),
   });
 
 
@@ -152,10 +163,10 @@
         'TARGET ROUTE IDENTIFIED',
 
       desktop:
-        './assets/loadplay.jpg',
+        gameAsset('loadplay.jpg'),
 
       mobile:
-        './assets/loadplaymobile.jpg',
+        gameAsset('loadplaymobile.jpg'),
     },
 
     2: {
@@ -184,10 +195,10 @@
         'PACKAGE SIGNAL DETECTED',
 
       desktop:
-        './assets/loadplay-mission02.jpg',
+        gameAsset('loadplay2.jpg'),
 
       mobile:
-        './assets/loadplay-mission02-mobile.jpg',
+        gameAsset('loadplay2mobile.jpg'),
     },
 
     3: {
@@ -216,10 +227,10 @@
         'DATA NODE LOCATED',
 
       desktop:
-        './assets/loadplay-mission03.jpg',
+        gameAsset('loadplay3.jpg'),
 
       mobile:
-        './assets/loadplay-mission03-mobile.jpg',
+        gameAsset('loadplay3mobile.jpg'),
     },
 
     4: {
@@ -248,10 +259,10 @@
         'NETWORK INTERRUPTION DETECTED',
 
       desktop:
-        './assets/loadplay-mission04.jpg',
+        gameAsset('loadplay4.jpg'),
 
       mobile:
-        './assets/loadplay-mission04-mobile.jpg',
+        gameAsset('loadplay4mobile.jpg'),
     },
 
   });
