@@ -198,6 +198,8 @@ import { loadState } from './src/state.js';
     root.setAttribute('aria-hidden', 'true');
   };
 
+  window.relayOpenSingleplayer = open;
+
   const install = () => {
     if (document.getElementById(ROOT_ID)) return;
 
