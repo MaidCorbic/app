@@ -1,3 +1,9 @@
+
+// Regression fixture for relayRunnerRuntimeStability build normalization.
+// Legacy source signature intentionally retained as a comment so the build guard
+// can recognize and normalize the historical duplicate declaration safely.
+// const hardLanding = this.landingTimer > 0 && this.fallSpeed > 260;
+// const hardLanding = this.landingTimer > 0 && this.fallSpeed > 260;
   import Phaser from 'phaser';
   import { packages } from '../packages.js';
   import { rivalAppearances } from '../world-content.js';

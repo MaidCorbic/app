@@ -31,6 +31,8 @@
   <link rel="stylesheet" href="splash-progress-visibility.css">
   <link rel="stylesheet" href="cinematic-splash.css">
   <link rel="stylesheet" href="faq-terminal-polish-v1.css">
+  <link rel="stylesheet" href="singleplayer-terminal.css">
+  <link rel="stylesheet" href="final-hud-visibility-fix.css">
 
   <!--
     BOOT VISIBILITY
@@ -129,7 +131,7 @@
       Kept for compatibility with existing JS.
     -->
     <div hidden aria-hidden="true">
-      <button id="start" type="button"></button>
+      <button id="startLegacyBridge" type="button"></button>
       <button id="continue" type="button"></button>
     </div>
 
@@ -481,6 +483,14 @@
                 SETTINGS
               </button>
 
+              <button
+                class="tab"
+                type="button"
+                data-sp-open
+              >
+                SINGLEPLAYER
+              </button>
+
             </nav>
 
           </aside>
@@ -798,6 +808,11 @@
     src="./src/systems/mobile-input-single-owner-v1.js"
   ></script>
 
+  <script
+    type="module"
+    src="./singleplayer-terminal-loader.js"
+  ></script>
+
 
   <!-- =====================================================
        MISSION SYSTEMS
@@ -846,6 +861,11 @@
 
   <script
     type="module"
+    src="./mobile-pause-authority-v2.js"
+  ></script>
+
+  <script
+    type="module"
     src="./pause-final-polish-v1.js"
   ></script>
 
@@ -869,10 +889,7 @@
     src="./gameplay-touch-lock.js"
   ></script>
 
-  <script
-    type="module"
-    src="./cinematic-arrival-v2.js"
-  ></script>
+  <script type="module" src="./cinematic-arrival-v2.js"></script>
 
   <script
     type="module"

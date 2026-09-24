@@ -1,0 +1,256 @@
+/* ============================================================
+   RELAY RUNNER — SINGLEPLAYER TERMINAL
+   Local/singleplayer presentation layer.
+   No online services. No multiplayer dependencies.
+   ============================================================ */
+
+#singleplayerTerminal {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+           max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  background: rgba(1, 5, 10, .84);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow: auto;
+}
+
+#singleplayerTerminal.is-open { display: flex; }
+
+.singleplayer-card {
+  width: min(1080px, 100%);
+  max-height: min(900px, calc(100dvh - 24px));
+  overflow: auto;
+  box-sizing: border-box;
+  padding: clamp(16px, 3vw, 28px);
+  color: #eafcff;
+  border: 1px solid rgba(88,231,255,.34);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(88,231,255,.09), transparent 30%),
+    linear-gradient(145deg, rgba(4,18,27,.98), rgba(1,7,12,.99));
+  box-shadow: 0 28px 90px rgba(0,0,0,.7), 0 0 42px rgba(0,217,255,.06);
+}
+
+.singleplayer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.singleplayer-kicker {
+  margin: 0 0 6px;
+  font: 800 9px/1.2 "DM Mono", ui-monospace, monospace;
+  letter-spacing: .2em;
+  opacity: .58;
+}
+
+.singleplayer-title {
+  margin: 0;
+  font: 900 clamp(22px, 4vw, 42px)/1 "Orbitron", ui-monospace, monospace;
+  letter-spacing: .05em;
+}
+
+.singleplayer-sub {
+  margin: 8px 0 0;
+  max-width: 720px;
+  font: 500 11px/1.55 "DM Mono", ui-monospace, monospace;
+  opacity: .62;
+}
+
+.singleplayer-close {
+  flex: 0 0 auto;
+  min-width: 42px;
+  min-height: 42px;
+  border: 1px solid rgba(88,231,255,.28);
+  border-radius: 8px;
+  color: #eaffff;
+  background: rgba(88,231,255,.06);
+  cursor: pointer;
+}
+
+.singleplayer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.singleplayer-module {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  background: rgba(255,255,255,.025);
+}
+
+.singleplayer-module h3 {
+  margin: 0 0 6px;
+  font: 800 11px/1.2 "Orbitron", ui-monospace, monospace;
+  letter-spacing: .1em;
+}
+
+.singleplayer-module p {
+  margin: 0 0 12px;
+  min-height: 34px;
+  font: 500 10px/1.45 "DM Mono", ui-monospace, monospace;
+  opacity: .58;
+}
+
+.singleplayer-value {
+  display: block;
+  margin-bottom: 10px;
+  font: 900 24px/1 "Orbitron", ui-monospace, monospace;
+}
+
+.singleplayer-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid rgba(88,231,255,.2);
+  border-radius: 999px;
+  color: #8df4ff;
+  background: rgba(88,231,255,.05);
+  font: 800 8px/1 "DM Mono", ui-monospace, monospace;
+  letter-spacing: .12em;
+}
+
+.singleplayer-list {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.singleplayer-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,.055);
+  font: 700 9px/1.25 "DM Mono", ui-monospace, monospace;
+}
+
+.singleplayer-list li:last-child { border-bottom: 0; }
+
+.singleplayer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.singleplayer-actions button {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(88,231,255,.22);
+  border-radius: 7px;
+  color: #eaffff;
+  background: rgba(88,231,255,.055);
+  font: 800 9px/1 "DM Mono", ui-monospace, monospace;
+  letter-spacing: .08em;
+  cursor: pointer;
+}
+
+.singleplayer-actions button.is-active {
+  border-color: rgba(88,231,255,.72);
+  background: rgba(88,231,255,.13);
+  box-shadow: 0 0 18px rgba(88,231,255,.08);
+}
+
+.singleplayer-history {
+  grid-column: 1 / -1;
+}
+
+.singleplayer-history ol {
+  max-height: 210px;
+  overflow: auto;
+}
+
+@media (max-width: 820px) {
+  #singleplayerTerminal {
+    align-items: flex-start;
+  }
+
+  .singleplayer-card {
+    max-height: calc(100dvh - 12px);
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .singleplayer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .singleplayer-history {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .singleplayer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .singleplayer-history {
+    grid-column: auto;
+  }
+
+  .singleplayer-head {
+    gap: 10px;
+  }
+
+  .singleplayer-title {
+    font-size: 24px;
+  }
+
+  .singleplayer-sub {
+    font-size: 9px;
+  }
+}
+
+@media (pointer: coarse) {
+  #singleplayerTerminal button {
+    touch-action: manipulation;
+  }
+
+  .singleplayer-card {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Mobile stays mobile: no forced desktop/landscape hand-off. */
+@media (pointer: coarse) and (orientation: portrait) {
+  html body.is-touch .mobile-rotate-prompt {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html body.is-touch #play .hud-xp,
+  html body.is-touch #play #pause,
+  html body.is-touch #mobileBottomHud .mobile-menu-pause {
+    display: initial !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html body.is-touch #play .hud-xp {
+    display: block !important;
+  }
+
+  html body.is-touch #play #pause {
+    display: grid !important;
+  }
+}

@@ -96,17 +96,11 @@ const detachLegacyRunnerInput = (scene) => {
   if (!events) return;
 
   if (scene.mobileActionHandler) {
-    events.off(
-      'mobile-action',
-      scene.mobileActionHandler
-    );
+    events.off('mobile-action', scene.mobileActionHandler);
   }
 
   if (scene.mobileMoveHandler) {
-    events.off(
-      'mobile-move',
-      scene.mobileMoveHandler
-    );
+    events.off('mobile-move', scene.mobileMoveHandler);
   }
 
   scene.mobileActionHandler = null;
@@ -129,9 +123,7 @@ const attachSceneWhenReady = () => {
   return true;
 };
 
-window.addEventListener(
-  'relay:runner-scene-ready',
-  (event) => {
+window.addEventListener('relay:runner-scene-ready', (event) => {
     const scene =
       event?.detail?.scene ||
       window.__relayRunnerScene;

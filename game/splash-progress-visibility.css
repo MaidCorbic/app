@@ -113,8 +113,8 @@
 
 /* =========================================================
    PORTRAIT
-   Portrait is not a gameplay layout.
-   Show the rotate-device gate instead of squeezing 16:9.
+   Portrait is a supported gameplay viewport.
+   Never force a desktop/landscape hand-off.
    ========================================================= */
 
 @media (pointer: coarse) and (orientation: portrait) {
@@ -123,49 +123,19 @@
   }
 
   .relay-orientation-gate::after {
-    content: 'ROTATE DEVICE  •  LANDSCAPE MODE REQUIRED';
-
-    position: fixed;
-    inset: 0;
-
-    z-index: 999998;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    box-sizing: border-box;
-    padding: 24px;
-
-    background:
-      radial-gradient(
-        circle at 50% 42%,
-        rgba(10, 35, 54, 0.98),
-        rgba(1, 5, 10, 0.99) 68%
-      );
-
-    border: 1px solid rgba(0, 234, 255, 0.18);
-
-    color: #8dfaff;
-
-    font:
-      900 clamp(10px, 3vw, 15px) / 1.5
-      ui-monospace,
-      SFMono-Regular,
-      Menlo,
-      Monaco,
-      Consolas,
-      monospace;
-
-    letter-spacing: 0.14em;
-    text-align: center;
-    text-transform: uppercase;
-
-    text-shadow: 0 0 18px rgba(0, 234, 255, 0.35);
+    display: none !important;
+    content: none !important;
   }
 
+  .relay-splash,
+  .relay-splash-picture,
+  #relaySplashPicture,
   .relay-splash .relay-splash-art {
-    object-fit: contain !important;
+    width: 100dvw !important;
+    height: 100dvh !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    object-fit: cover !important;
     object-position: center !important;
   }
 }
