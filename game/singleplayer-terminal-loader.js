@@ -6,11 +6,18 @@
     if (!trigger) return;
 
     event.preventDefault();
-    event.stopPropagation();
+    event.stopImmediatePropagation();
 
     try {
       await import('./singleplayer-terminal.js');
-      window.relayOpenSingleplayer?.();
+
+      const open = window.relayOpenSingleplayer;
+      if (typeof open !== 'function') {
+        console.error('[Singleplayer] terminal API missing');
+        return;
+      }
+
+      open();
     } catch (error) {
       console.error('[Singleplayer] failed to load terminal', error);
     }
