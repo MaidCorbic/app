@@ -130,6 +130,16 @@ const game = new Phaser.Game({
 
 game.scene.add('runner', RunnerScene, false);
 
+/*
+ * The route briefing reads the runner through window scope.
+ * Keep one authoritative Phaser instance and one scene reference;
+ * this avoids creating duplicate runners and lets the briefing
+ * resume the real scene instead of navigating back to Home.
+ */
+window.game = game;
+window.__relayRunnerScene =
+  game.scene.getScene('runner') || null;
+
 document.addEventListener(
   'keydown',
   event => {
@@ -1731,24 +1741,43 @@ function launch(
 
   applyRuntimeSettings();
 
-  game.scene.start(
-    'runner',
-    {
-      mission: runMission,
-      runId,
-      abilities: state.abilities,
-      rain: state.rain,
-      screenShake:
-        state.screenShake,
-      reducedMotion:
-        state.reducedMotion,
-      firstTimeTutorial:
-        !state.tutorialSeen
-    }
-  );
+  /*
+   * Start/restart the single registered RunnerScene.
+   * If the briefing is already showing an active runner, do not
+   * create another scene instance; simply resume it.
+   */
+  const runnerScene =
+    game.scene.getScene('runner');
 
-  if (paused) {
+  window.__relayRunnerScene =
+    runnerScene || null;
+
+  if (
+    runnerScene &&
+    runnerScene.scene?.isActive?.() &&
+    paused
+  ) {
     game.scene.pause('runner');
+  } else {
+    game.scene.start(
+      'runner',
+      {
+        mission: runMission,
+        runId,
+        abilities: state.abilities,
+        rain: state.rain,
+        screenShake:
+          state.screenShake,
+        reducedMotion:
+          state.reducedMotion,
+        firstTimeTutorial:
+          !state.tutorialSeen
+      }
+    );
+
+    if (paused) {
+      game.scene.pause('runner');
+    }
   }
 }
 

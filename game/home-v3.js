@@ -2928,6 +2928,188 @@ const gameplayMusicUrl =
 
     homeCopy?.append(missionNetwork);
 
+    /* =========================================================
+       HOME V7 OPERATIONS TELEMETRY
+       Uses only persisted runtime state; no placeholder values.
+       ========================================================= */
+
+    const operationsPanel =
+      document.createElement('section');
+
+    operationsPanel.className =
+      'home-v7-operations';
+
+    operationsPanel.setAttribute(
+      'aria-label',
+      'Operations telemetry'
+    );
+
+    operationsPanel.innerHTML = `
+      <div class="home-v7-head">
+        <div>
+          <span>OPERATIONS TELEMETRY</span>
+          <strong>LIVE RUNNER RECORD</strong>
+        </div>
+        <b>LOCAL SAVE</b>
+      </div>
+
+      <div class="home-v7-grid">
+        <article>
+          <small>TOTAL RUNS</small>
+          <strong data-home-v7="runs">0</strong>
+        </article>
+        <article>
+          <small>SIGNALS RECOVERED</small>
+          <strong data-home-v7="signals">0</strong>
+        </article>
+        <article>
+          <small>NETWORK CREDITS</small>
+          <strong data-home-v7="credits">0</strong>
+        </article>
+        <article>
+          <small>BEST SCORE</small>
+          <strong data-home-v7="best">0</strong>
+        </article>
+      </div>
+
+      <div class="home-v7-foot">
+        <span>COMPLETED ROUTES</span>
+        <strong data-home-v7="completed">0</strong>
+        <span>UNLOCKED ROUTES</span>
+        <strong data-home-v7="unlocked">0</strong>
+      </div>
+    `;
+
+    homeCopy?.append(operationsPanel);
+
+    const operationsStyle =
+      document.createElement('style');
+
+    operationsStyle.textContent = `
+      #intro.home-v3{
+        overflow-x:hidden !important;
+        overflow-y:auto !important;
+        -webkit-overflow-scrolling:touch;
+        overscroll-behavior-y:contain;
+        scrollbar-gutter:stable;
+      }
+      #intro.home-v3 .home-v4-scene{
+        position:fixed !important;
+        inset:0 !important;
+        pointer-events:none !important;
+      }
+      #intro.home-v3 .home-v4-shell{
+        position:relative !important;
+        min-height:100% !important;
+        height:auto !important;
+      }
+      #intro.home-v3 .home-v4-main{
+        min-height:calc(100vh - 150px);
+        height:auto !important;
+      }
+      #intro.home-v3 .home-v4-copy{
+        padding-bottom:clamp(120px,15vh,220px);
+      }
+      .home-v7-operations{
+        width:100%;
+        margin-top:12px;
+        padding:14px;
+        box-sizing:border-box;
+        border:1px solid rgba(100,220,235,.14);
+        background:rgba(2,8,13,.82);
+        font-family:Orbitron,sans-serif;
+      }
+      .home-v7-head{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        margin-bottom:10px;
+      }
+      .home-v7-head div{display:grid;gap:3px;}
+      .home-v7-head span{font-size:8px;letter-spacing:.18em;color:#7deaff;}
+      .home-v7-head strong{font-size:11px;letter-spacing:.08em;color:#eefcff;}
+      .home-v7-head>b{font-size:7px;letter-spacing:.14em;color:#39ff88;}
+      .home-v7-grid{
+        display:grid;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:7px;
+      }
+      .home-v7-grid article{
+        min-width:0;
+        padding:10px;
+        border:1px solid rgba(100,220,235,.08);
+        background:rgba(4,14,20,.72);
+        display:grid;
+        gap:5px;
+      }
+      .home-v7-grid small,.home-v7-foot span{
+        font-size:7px;
+        letter-spacing:.1em;
+        color:rgba(214,239,244,.56);
+      }
+      .home-v7-grid strong{
+        font-size:14px;
+        color:#eafcff;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .home-v7-foot{
+        display:flex;
+        align-items:center;
+        gap:9px;
+        margin-top:9px;
+        padding-top:9px;
+        border-top:1px solid rgba(100,220,235,.08);
+      }
+      .home-v7-foot strong{
+        color:#55dff0;
+        font-size:9px;
+        margin-right:auto;
+      }
+      @media(max-width:700px){
+        #intro.home-v3 .home-v4-main{min-height:0;}
+        #intro.home-v3 .home-v4-copy{padding-bottom:150px;}
+        .home-v7-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+        .home-v7-foot{flex-wrap:wrap;}
+        .home-v7-foot strong{margin-right:4px;}
+      }
+    `;
+
+    document.head.append(operationsStyle);
+
+    const syncOperationsTelemetry = state => {
+      const completed =
+        Array.isArray(state?.completed)
+          ? state.completed.length
+          : 0;
+
+      const unlocked =
+        Array.isArray(state?.unlockedMissions)
+          ? state.unlockedMissions.length
+          : 0;
+
+      const values = {
+        runs: Number(state?.totalRuns) || 0,
+        signals: Number(state?.signals) || 0,
+        credits: Number(state?.credits) || 0,
+        best: Number(state?.bestRun) || 0,
+        completed,
+        unlocked
+      };
+
+      operationsPanel
+        .querySelectorAll('[data-home-v7]')
+        .forEach(el => {
+          const key = el.dataset.homeV7;
+          el.textContent =
+            Number(values[key] || 0).toLocaleString();
+        });
+    };
+
+    window.__relaySyncOperationsTelemetry =
+      syncOperationsTelemetry;
+
     const missionNetworkStyle =
       document.createElement('style');
 
@@ -2988,6 +3170,7 @@ const gameplayMusicUrl =
     };
 
     window.__relaySyncMissionNetwork = syncMissionNetwork;
+    window.__relaySyncOperationsTelemetry?.(state);
 
     /* =========================================================
        TYPEWRITER / STATE
@@ -3394,18 +3577,14 @@ if (start instanceof HTMLElement) {
             mobile:
               './assets/loadplaymobile.jpg',
 
-            beforeRoute: async () => {
-              const target =
-                document.querySelector(
-                  'body > #game > div[hidden] #start'
-                );
+            skipRoute: true,
 
+            beforeRoute: async () => {
               if (
-                target instanceof HTMLElement
+                typeof window.relayLaunchGameplay ===
+                'function'
               ) {
-                HTMLElement.prototype.click.call(
-                  target
-                );
+                window.relayLaunchGameplay();
               }
             }
           });
