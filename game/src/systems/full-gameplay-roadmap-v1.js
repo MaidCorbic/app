@@ -143,13 +143,6 @@ function updateArchetype(scene, actor, delta, pressure) {
   });
 
   const player = getPlayer(scene);
-  const archetypeId =
-    actor.getData('roadmapArchetype');
-
-  const profile =
-    ARCHETYPES[archetypeId];
-
-  const player = getPlayer(scene);
 
   if (!profile || !player || !actor?.body) return;
 
