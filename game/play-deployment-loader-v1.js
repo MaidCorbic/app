@@ -351,6 +351,14 @@
             ? config.beforeRoute
             : null,
 
+        /*
+         * HOME PLAY uses the same cinematic scan, but it must
+         * hand off directly to the real runner. Mission/replay
+         * flows keep the tactical route briefing.
+         */
+        skipRoute:
+          config?.skipRoute === true,
+
       };
 
     };
@@ -4446,6 +4454,26 @@
           token !== serial
         ) {
           return false;
+        }
+
+
+        /*
+         * HOME PLAY: the splash is the complete presentation.
+         * Do not open the tactical map afterwards.
+         */
+        if (config.skipRoute) {
+          overlay.classList.add('is-closing');
+
+          await WAIT(
+            isCoarseDevice()
+              ? 180
+              : 300
+          );
+
+          overlay.remove();
+          active = false;
+
+          return true;
         }
 
 
