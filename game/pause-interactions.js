@@ -185,10 +185,7 @@
      * Do not create the mobile HUD until the canonical pause
      * elements exist.
      */
-    if (
-      !pause ||
-      document.getElementById('mobileBottomHud')
-    ) {
+    if (!pause) {
       return false;
     }
 
