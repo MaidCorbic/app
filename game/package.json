@@ -52,7 +52,9 @@
     "test:route-mutation-choice-coordination": "node tests/route-mutation-choice-coordination-v1.mjs",
     "test:release-runtime-qa": "node tests/release-runtime-qa.mjs",
     "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:full-gameplay-roadmap && npm run test:release-ux-gameplay-polish && npm run test:gameplay-variety-safe-layer && npm run test:gameplay-route-choice-v2 && npm run test:gameplay-route-score-bonus && npm run test:route-choice-branching-v1 && npm run test:route-choice-duplicate-event-guard && npm run test:route-mutation-choice-coordination && npm run test:final-stability && npm run test:runner-runtime-stability && npm run build",
-    "test:full-gameplay-roadmap": "node tests/full-gameplay-roadmap-v1.mjs && node tests/enemy-pursuit-lockdown-escape-v1.mjs"
+    "test:full-gameplay-roadmap": "node tests/full-gameplay-roadmap-v1.mjs && node tests/enemy-pursuit-lockdown-escape-v1.mjs",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache"
   },
   "engines": {
     "node": "24.x"
@@ -62,6 +64,9 @@
     "vite": "^8.2.1"
   },
   "devDependencies": {
-    "playwright": "^1.62.1"
+    "playwright": "^1.62.1",
+    "@eslint/js": "^9.35.0",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2"
   }
 }
