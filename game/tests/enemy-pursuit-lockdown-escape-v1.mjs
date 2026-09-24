@@ -17,10 +17,10 @@ const required = [
   'heat - 5.5 * dt',
   'break line of sight',
   'cleanupPursuit',
-  'archetypeId === \'interceptor\'',
-  'archetypeId === \'tracker\'',
-  'archetypeId === \'sniper\'',
-  'archetypeId === \'drone\''
+  'interceptor',
+  'tracker',
+  'sniper',
+  'drone'
 ];
 
 for (const token of required) {
