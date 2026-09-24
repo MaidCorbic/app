@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { RunnerScene } from '../scenes/RunnerScene.js';
 
 /*
@@ -421,11 +420,10 @@ function updatePursuit(scene, delta) {
    * it upward, so this is a pressure layer rather than a second
    * stealth system.
    */
-  state.heat = clamp(
-    state.heat - 5.5 * dt,
-    0,
-    100
-  );
+  const alertState = String(scene.enemyAlertState || 'CLEAR');
+  if (alertState === 'SUSPICIOUS') state.heat = clamp(state.heat + 3.5 * dt, 0, 100);
+  if (alertState === 'ALERT') state.heat = clamp(state.heat + 11 * dt, 0, 100);
+  state.heat = clamp(state.heat - 5.5 * dt, 0, 100);
 
   const pressure =
     state.heat / 100;
@@ -551,15 +549,15 @@ function bindPursuitEvents(scene) {
     );
   };
 
-  gameEvents.on(
-    'detection',
-    onDetection
-  );
-
-  gameEvents.on(
-    'alarm',
-    onAlarm
-  );
+  gameEvents.on('detection', onDetection);
+  gameEvents.on('enemy-alert', (stateName) => {
+    if (stateName === 'SUSPICIOUS') onDetection(8);
+    if (stateName === 'ALERT') onDetection(26);
+  });
+  gameEvents.on('alarm', onAlarm);
+  gameEvents.on('chase', active => {
+    if (active) onAlarm();
+  });
 
   gameEvents.on(
     'relay:variety-route',
@@ -599,15 +597,10 @@ function cleanupPursuit(scene) {
     events &&
     handlers
   ) {
-    events.off(
-      'detection',
-      handlers.onDetection
-    );
-
-    events.off(
-      'alarm',
-      handlers.onAlarm
-    );
+    events.off('detection', handlers.onDetection);
+    events.off('enemy-alert', handlers.onDetection);
+    events.off('alarm', handlers.onAlarm);
+    events.off('chase', handlers.onAlarm);
   }
 
   scene.__roadmapPursuitHandlers =
@@ -722,4 +715,9 @@ export function installFullGameplayRoadmapV1(
 
   prototype.__fullGameplayRoadmapV1 =
     true;
+}
+
+
+if (typeof window !== 'undefined') {
+  installFullGameplayRoadmapV1(RunnerScene);
 }
