@@ -291,6 +291,33 @@
         active
       );
 
+      /*
+       * The mobile HUD is an authoritative gameplay control surface.
+       * Apply the final visibility state inline so legacy CSS layers
+       * cannot resurrect an old mobile-HUD hard-hide rule.
+       */
+      hud.hidden = !active;
+      hud.style.setProperty(
+        'display',
+        active ? 'flex' : 'none',
+        'important'
+      );
+      hud.style.setProperty(
+        'visibility',
+        active ? 'visible' : 'hidden',
+        'important'
+      );
+      hud.style.setProperty(
+        'opacity',
+        active ? '1' : '0',
+        'important'
+      );
+      hud.style.setProperty(
+        'pointer-events',
+        active ? 'none' : 'none',
+        'important'
+      );
+
 
       /*
        * Rotate prompt uses the same gameplay state.
