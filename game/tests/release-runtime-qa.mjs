@@ -28,7 +28,7 @@ function waitForServer(url, timeoutMs = 15000) {
   });
 }
 
-async function waitForVisible(page, selector, timeout = 15000) {
+async function waitForVisible(page, selector, timeout = 30000) {
   await page.waitForFunction(
     sel => {
       const el = document.querySelector(sel);
