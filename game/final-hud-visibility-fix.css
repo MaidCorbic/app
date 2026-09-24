@@ -256,3 +256,117 @@ html, body { min-height:100%; }
 @media (min-width:901px){
   #mobileBottomHud{display:none !important;}
 }
+
+/* ============================================================
+   MOBILE PAUSE AUTHORITY V2 — ORIGINAL ☰ BUTTON
+   ============================================================ */
+@media (pointer:coarse) and (max-width:900px){
+  #play #pause{
+    position:fixed !important;
+    left:max(12px, env(safe-area-inset-left)) !important;
+    right:auto !important;
+    bottom:max(14px, env(safe-area-inset-bottom)) !important;
+    top:auto !important;
+    z-index:9600 !important;
+
+    width:56px !important;
+    height:56px !important;
+    min-width:56px !important;
+    min-height:56px !important;
+
+    display:grid !important;
+    place-items:center !important;
+
+    margin:0 !important;
+    padding:0 !important;
+
+    border:1px solid rgba(56,189,248,.78) !important;
+    border-radius:16px !important;
+
+    color:#e9fbff !important;
+    background:
+      linear-gradient(145deg,rgba(9,29,43,.97),rgba(1,7,13,.98)) !important;
+
+    box-shadow:
+      0 0 0 1px rgba(56,189,248,.10),
+      0 8px 26px rgba(0,0,0,.50),
+      0 0 22px rgba(56,189,248,.22),
+      inset 0 1px 0 rgba(255,255,255,.10) !important;
+
+    font-size:0 !important;
+    line-height:1 !important;
+    cursor:pointer !important;
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+    -webkit-tap-highlight-color:transparent !important;
+  }
+
+  #play #pause::before{
+    content:"☰";
+    display:block;
+    font:900 24px/1 Arial,sans-serif;
+    color:#9cecff;
+    transform:translateY(-1px);
+    text-shadow:
+      0 0 7px rgba(56,189,248,.80),
+      0 0 18px rgba(56,189,248,.48);
+  }
+
+  #play #pause::after{
+    content:"MENU";
+    position:absolute;
+    left:50%;
+    bottom:5px;
+    transform:translateX(-50%);
+    font:900 5px/1 "DM Mono",ui-monospace,monospace;
+    letter-spacing:.16em;
+    color:#7696a6;
+  }
+
+  #play #pause:active{
+    transform:scale(.94) !important;
+    border-color:#63d9ff !important;
+    box-shadow:
+      0 0 0 1px rgba(56,189,248,.20),
+      0 4px 16px rgba(0,0,0,.48),
+      0 0 36px rgba(56,189,248,.34),
+      inset 0 0 18px rgba(56,189,248,.10) !important;
+  }
+
+  #mobileBottomHud{
+    display:none !important;
+    pointer-events:none !important;
+  }
+}
+
+@media (pointer:coarse) and (max-width:390px){
+  #play #pause{
+    left:10px !important;
+    bottom:max(10px, env(safe-area-inset-bottom)) !important;
+    width:52px !important;
+    height:52px !important;
+    min-width:52px !important;
+    min-height:52px !important;
+    border-radius:14px !important;
+  }
+
+  #play #pause::before{font-size:21px;}
+}
+
+/* Pause menu is the only modal layer allowed to capture the screen. */
+@media (pointer:coarse) and (max-width:900px){
+  #pauseMenu.relay-cinematic-overlay{
+    position:fixed !important;
+    inset:0 !important;
+    z-index:10000 !important;
+    overflow:hidden !important;
+    overscroll-behavior:contain !important;
+    touch-action:pan-y !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-pause-shell{
+    max-height:100dvh !important;
+    max-height:100svh !important;
+    overflow:hidden !important;
+  }
+}
