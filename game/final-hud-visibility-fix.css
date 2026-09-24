@@ -346,8 +346,9 @@ html, body { min-height:100%; }
   }
 
   #mobileBottomHud .mobile-menu-pause{
-    display:none !important;
-    pointer-events:none !important;
+    display:grid !important;
+    place-items:center !important;
+    pointer-events:auto !important;
   }
 
   #mobileBottomHud .mobile-menu-settings{
