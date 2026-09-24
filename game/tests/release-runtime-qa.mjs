@@ -104,7 +104,32 @@ async function runMobileViewport(browser, viewport) {
 
   try {
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
-    await waitForVisible(page, '#start');
+    try {
+      await waitForVisible(page, '#start');
+    } catch (error) {
+      const diagnostic = await page.evaluate(() => {
+        const el = document.querySelector('#start');
+        const intro = document.querySelector('#intro');
+        const describe = node => node ? {
+          exists: true,
+          className: node.className || '',
+          hidden: node.hidden,
+          display: getComputedStyle(node).display,
+          visibility: getComputedStyle(node).visibility,
+          opacity: getComputedStyle(node).opacity,
+          rect: (() => { const r = node.getBoundingClientRect(); return { width:r.width, height:r.height, left:r.left, top:r.top }; })(),
+        } : { exists: false };
+        return {
+          bodyClass: document.body.className,
+          orientation: matchMedia('(orientation: landscape)').matches ? 'landscape' : 'portrait',
+          pointerCoarse: matchMedia('(pointer: coarse)').matches,
+          start: describe(el),
+          intro: describe(intro),
+        };
+      });
+      console.error('Home start diagnostic:', JSON.stringify(diagnostic));
+      throw error;
+    }
     await clickDom(page, '#start');
     await waitForHidden(page, '#intro');
 
