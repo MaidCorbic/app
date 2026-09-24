@@ -20,18 +20,24 @@
          ========================================================= */
 
       @media (pointer: coarse) and (orientation: portrait) {
-        html body.is-touch #cargoIntegrityV2,
-        html body.is-touch #play .hud-xp,
-        html body.is-touch #play #pause,
-        html body.is-touch #mobileBottomHud .mobile-menu-pause {
+        /* Portrait is supported. Never replace gameplay with a desktop/rotate gate. */
+        html body.is-touch .mobile-rotate-prompt {
           display: none !important;
           visibility: hidden !important;
           opacity: 0 !important;
           pointer-events: none !important;
         }
 
-        html body.is-touch .mobile-rotate-prompt.is-active {
-          display: flex !important;
+        html body.is-touch #play #pause,
+        html body.is-touch #mobileBottomHud .mobile-menu-pause {
+          display: grid !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
+
+        html body.is-touch #play .hud-xp {
+          display: block !important;
           visibility: visible !important;
           opacity: 1 !important;
         }
