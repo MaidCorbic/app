@@ -370,3 +370,110 @@ html, body { min-height:100%; }
     overflow:hidden !important;
   }
 }
+
+/* ============================================================
+   MOBILE PAUSE — LEGACY LAYER IS FULLY DORMANT
+   The canonical relay-pause-shell is the only visible menu.
+   ============================================================ */
+@media (pointer:coarse) and (max-width:900px){
+  #pauseMenu.relay-cinematic-overlay > .menu{
+    display:none !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay > .relay-pause-shell{
+    display:flex !important;
+    flex-direction:column !important;
+    width:100% !important;
+    height:100% !important;
+    min-height:0 !important;
+    max-width:none !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    background:
+      radial-gradient(circle at 50% 0%,rgba(56,189,248,.10),transparent 34%),
+      linear-gradient(180deg,rgba(2,9,16,.985),rgba(1,4,8,.995)) !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-pause-head{
+    flex:0 0 auto !important;
+    min-height:62px !important;
+    padding:
+      max(12px,env(safe-area-inset-top))
+      14px
+      10px !important;
+    box-sizing:border-box !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-pause-layout{
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    overflow:hidden !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-pause-nav{
+    flex:0 0 auto !important;
+    display:flex !important;
+    gap:7px !important;
+    width:100% !important;
+    padding:8px 10px !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    overscroll-behavior-x:contain !important;
+    -webkit-overflow-scrolling:touch !important;
+    scrollbar-width:none !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-pause-nav::-webkit-scrollbar{
+    display:none !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-pause-nav button{
+    flex:0 0 auto !important;
+    min-height:42px !important;
+    min-width:92px !important;
+    padding:0 13px !important;
+    touch-action:manipulation !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-pause-content{
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    width:100% !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    overscroll-behavior:contain !important;
+    -webkit-overflow-scrolling:touch !important;
+    padding-bottom:max(18px,env(safe-area-inset-bottom)) !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-cinematic-panel,
+  #pauseMenu.relay-cinematic-overlay .relay-cinematic-body{
+    min-height:0 !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-ui-card,
+  #pauseMenu.relay-cinematic-overlay .relay-ui-button,
+  #pauseMenu.relay-cinematic-overlay input,
+  #pauseMenu.relay-cinematic-overlay select,
+  #pauseMenu.relay-cinematic-overlay button{
+    touch-action:manipulation !important;
+  }
+
+  #pauseMenu.relay-cinematic-overlay .relay-cinematic-close{
+    width:44px !important;
+    height:44px !important;
+    min-width:44px !important;
+    min-height:44px !important;
+    touch-action:manipulation !important;
+  }
+
+  body.relay-mobile-pause-open{
+    overflow:hidden !important;
+    overscroll-behavior:none !important;
+  }
+}
