@@ -10,7 +10,7 @@
 
     try {
       await import('./singleplayer-terminal.js');
-      window.dispatchEvent(new CustomEvent('relay-singleplayer-open'));
+      window.relayOpenSingleplayer?.();
     } catch (error) {
       console.error('[Singleplayer] failed to load terminal', error);
     }
