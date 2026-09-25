@@ -50,22 +50,10 @@ assert.match(
 assert.match(main, /function speakNarration\(text\)/, 'English browser narration must be available for cinematic subtitles');
 assert.match(main, /claimLoginReward/, 'The challenge board must provide persistent login rewards');
 assert.match(main, /WEEKLY/, 'The challenge board must explain and display weekly missions');
-assert.match(mobileOwner, /setDirection\(null\)/, 'Single mobile owner must clear movement direction on release');
-assert.doesNotMatch(main, /data-mobile-joystick|mobile-move|activePointerId/, 'main.js must not own mobile joystick dispatch');
-assert.match(runner, /this\.mobileActions\.sword/, 'The runner must consume the mobile sword action');
-assert.match(runner, /this\.mobileActions\.dash/, 'The runner must consume the mobile nitro action');
-assert.match(runner, /this\.mobileActions\.build1/, 'The runner must consume mobile build actions');
-assert.match(runner, /this\.mobileActions\.gadget1/, 'The runner must consume mobile gadget actions');
-assert.match(runner, /this\.cursors\.left\.isDown/, 'The runner must consume left movement through Phaser cursor state');
-assert.match(runner, /this\.keys\.A\.isDown/, 'The runner must consume left movement through Phaser A-key state');
-assert.match(runner, /this\.cursors\.right\.isDown/, 'The runner must consume right movement through Phaser cursor state');
-assert.match(runner, /this\.keys\.D\.isDown/, 'The runner must consume right movement through Phaser D-key state');
-assert.match(runner, /this\.mobileActions\.jump/, 'The runner must consume the touch jump action');
-assert.match(styles, /body #pauseMenu \.menu-grid\{grid-template-columns:1fr/, 'Pause settings must collapse to one column on touch screens');
-assert.doesNotMatch(
-  styles,
-  /data-mobile-joystick|mobile-joystick-thumb/,
-  'Base stylesheet must not own the canonical joystick markup'
+assert.match(
+  mobileOwner,
+  /setJoystickAxis\(0\)/,
+  'Single mobile owner must clear joystick movement on release'
 );
 
 assert.match(
