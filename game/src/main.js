@@ -4769,7 +4769,13 @@ $('closeAbilityUnlock').onclick =
 applyRuntimeSettings();
 renderHomeProgress();
 
-launch(0, true);
+const shouldDeferInitialRunnerPreboot =
+  detectTouchDevice() &&
+  matchMedia('(orientation:portrait)').matches;
+
+if (!shouldDeferInitialRunnerPreboot) {
+  launch(0, true);
+}
 
 function openWorldMapSafe() {
   game.scene.stop('runner');
