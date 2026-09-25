@@ -1743,7 +1743,7 @@ import {
 
     const pauseButton =
       target.closest(
-        '#pause, #mobilePauseButton'
+        '#pause'
       );
 
     if (pauseButton) {
@@ -1766,24 +1766,9 @@ import {
 
     /* -------------------------------------------------------
        MOBILE SETTINGS
+       -------------------------------------------------------
+       Mobile settings is owned by mobile-pause-authority-v2.
        ------------------------------------------------------- */
-
-    const settingsMobile =
-      target.closest(
-        '#mobileSettingsButton'
-      );
-
-    if (settingsMobile) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      openPause(
-        'settings'
-      );
-
-      return;
-    }
-
 
     /* -------------------------------------------------------
        CLOSE
