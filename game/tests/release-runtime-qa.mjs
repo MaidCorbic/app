@@ -223,18 +223,43 @@ async function runMobileViewport(browser, viewport) {
     });
 
     if (viewport.orientation === 'portrait') {
-      await page.waitForFunction(
-        () => {
+      try {
+        await page.waitForFunction(
+          () => {
+            const splash = document.querySelector('#relaySplash, .relay-splash');
+            const intro = document.getElementById('intro');
+            return Boolean(
+              splash ||
+              intro?.dataset?.homeV4Built === '1'
+            );
+          },
+          undefined,
+          { timeout: 10000 },
+        );
+      } catch (error) {
+        const diagnostics = await page.evaluate(() => {
           const splash = document.querySelector('#relaySplash, .relay-splash');
           const intro = document.getElementById('intro');
-          return Boolean(
-            splash ||
-            intro?.dataset?.homeV4Built === '1'
-          );
-        },
-        undefined,
-        { timeout: 10000 },
-      );
+          const game = document.getElementById('game');
+          return {
+            url: location.href,
+            readyState: document.readyState,
+            splashPresent: Boolean(splash),
+            splashClass: splash?.className ?? null,
+            splashDisplay: splash ? getComputedStyle(splash).display : null,
+            introPresent: Boolean(intro),
+            homeBuilt: intro?.dataset?.homeV4Built ?? null,
+            introClass: intro?.className ?? null,
+            gameBootReady: game?.classList.contains('relay-boot-ready') ?? false,
+            scriptCount: document.scripts.length,
+            relaySplashOwner: Boolean(window.__relaySplashV9),
+            runtimeError: window.relayLastRuntimeError?.error ?? null,
+            bodyChildren: Array.from(document.body.children).map(el => el.id || el.className || el.tagName).slice(0, 40),
+          };
+        });
+        error.message = `${error.message} | startup diagnostics: ${JSON.stringify(diagnostics)}`;
+        throw error;
+      }
 
       const portraitLock = await page.evaluate(() => ({
         splashVisible: (() => {
