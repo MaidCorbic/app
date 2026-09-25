@@ -18,6 +18,7 @@ const uiInit = await read('relay-ui-init.js');
 const core = await read('src/systems/core-stability.js');
 const cargo = await read('cargo-integrity-v2.js');
 const runner = await read('src/scenes/RunnerScene.js');
+const main = await read('src/main.js');
 const state = await read('src/state.js');
 
 assert.equal(
