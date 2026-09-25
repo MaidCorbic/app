@@ -68,6 +68,39 @@
 
 
     /* =====================================================
+       LANDSCAPE TOUCH CONTROL VISIBILITY CONTRACT
+       The release QA enters gameplay at 760x430 after the
+       briefing lock is released. Keep the canonical touch
+       HUD explicitly visible in that state.
+       ===================================================== */
+
+    @media (orientation: landscape) and (pointer: coarse) {
+      html body.is-touch #play .mobile-controls {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: none !important;
+      }
+
+      html body.is-touch #play .mobile-actions {
+        display: grid !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+    }
+
+    @media (orientation: portrait) and (pointer: coarse) {
+      html body.is-touch #play .mobile-controls {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+    }
+
+
+    /* =====================================================
        MOBILE CONTROLS
        Gameplay controls remain functional.
        ===================================================== */
