@@ -4517,13 +4517,14 @@ document.addEventListener(
   true
 );
 
-$('start').onclick = () => {
+const startGameplayFromHome = () => {
   stopAudioBed();
   window.relayGameplayAudio?.play?.();
 
   /*
-   * MAIN owns the real Home -> Gameplay handoff.
-   * Home presentation must not install a second competing Start handler.
+   * MAIN is the single owner of the real Home -> Gameplay handoff.
+   * Capture-phase ownership is intentional: later-loaded cinematic or
+   * legacy click listeners must not swallow the START activation.
    */
   const intro = $('intro');
 
@@ -4575,6 +4576,28 @@ $('start').onclick = () => {
           launch(0)
   );
 };
+
+/*
+ * START is owned at the document capture boundary so another module
+ * cannot intercept the click before the canonical Home -> Gameplay path.
+ */
+document.addEventListener(
+  'click',
+  event => {
+    const start = event.target instanceof Element
+      ? event.target.closest('#start')
+      : null;
+
+    if (!(start instanceof HTMLElement)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    void startGameplayFromHome();
+  },
+  true
+);
 
 $('continue').onclick = () => {
   stopAudioBed();
