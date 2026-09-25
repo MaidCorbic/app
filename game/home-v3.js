@@ -3561,6 +3561,17 @@ if (start instanceof HTMLElement) {
 
       try {
         /*
+         * Home -> Gameplay visual ownership starts immediately on the
+         * trusted click. The deployment cinematic then covers the game
+         * while the real runner boots underneath it.
+         */
+        const intro =
+          document.getElementById('intro');
+
+        intro?.classList.add('hidden');
+        intro?.setAttribute('aria-hidden', 'true');
+
+        /*
          * Kill the old procedural game audio immediately.
          * Main exposes this after its module loads.
          */
