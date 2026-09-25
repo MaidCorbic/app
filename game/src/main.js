@@ -100,6 +100,10 @@ const game = new Phaser.Game({
   width: 1280,
   height: 720,
 
+  // Keep Phaser at a predictable 1x backing resolution instead of allowing
+  // high-density displays to multiply the canvas workload.
+  resolution: 1,
+
   backgroundColor: '#091225',
 
   // Performance profile: keep the 1280x720 gameplay world stable while
