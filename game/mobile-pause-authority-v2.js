@@ -15,6 +15,7 @@
     matchMedia('(max-width: 900px)').matches;
 
   const getPauseButton = () => document.getElementById('pause');
+  const getMobileEntry = () => document.querySelector('#mobilePauseButton, #mobileSettingsButton');
   const getPauseMenu = () => document.getElementById('pauseMenu');
 
   let opening = false;
@@ -43,6 +44,12 @@
       const menu = getPauseMenu();
 
       if (!menu) return;
+
+      // Make the canonical shell visible immediately. The cinematic API may
+      // render asynchronously, but the pause surface must never remain hidden
+      // while automation/user input is waiting for the open state.
+      menu.classList.remove('hidden');
+      menu.setAttribute('aria-hidden', 'false');
 
       /*
        * Do not click another button and do not call Phaser pause/resume.
@@ -106,7 +113,7 @@
   };
 
   const install = () => {
-    if (!getPauseButton()) return false;
+    if (!getPauseButton() && !getMobileEntry()) return false;
 
     if (window.__relayMobilePauseAuthorityInstalledV2) {
       return true;
@@ -138,7 +145,7 @@
    * The game shell can be created/replaced during bootstrap.
    * Keep a short observer only until #pause exists.
    */
-  if (!getPauseButton()) {
+  if (!getPauseButton() && !getMobileEntry()) {
     const observer = new MutationObserver(() => {
       if (install()) observer.disconnect();
     });
