@@ -1759,13 +1759,16 @@ function launch(
   window.__relayRunnerScene =
     runnerScene || null;
 
-  if (
-    runnerScene &&
-    runnerScene.scene?.isActive?.() &&
-    paused
-  ) {
-    game.scene.pause('runner');
-  } else {
+  const startRunnerScene = () => {
+    if (
+      runnerScene &&
+      runnerScene.scene?.isActive?.() &&
+      paused
+    ) {
+      game.scene.pause('runner');
+      return;
+    }
+
     game.scene.start(
       'runner',
       {
@@ -1785,6 +1788,12 @@ function launch(
     if (paused) {
       game.scene.pause('runner');
     }
+  };
+
+  if (paused) {
+    startRunnerScene();
+  } else {
+    window.setTimeout(startRunnerScene, 0);
   }
 }
 
