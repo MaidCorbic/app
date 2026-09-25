@@ -81,7 +81,7 @@
     if (!isMobile()) return;
 
     const button = event.target instanceof Element
-      ? event.target.closest('#pause, #mobileSettingsButton')
+      ? event.target.closest('#pause, #mobilePauseButton, #mobileSettingsButton')
       : null;
 
     if (!button) return;
