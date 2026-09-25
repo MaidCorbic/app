@@ -481,6 +481,7 @@ assertNoPairwiseOverlap(
         document.querySelector('#mobilePauseButton')?.click();
       }, 0);
     });
+    console.log('LANDSCAPE: pause click scheduled');
     await waitForVisible(page, '#pauseMenu');
     await waitForVisible(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-pause-tab="settings"]');
