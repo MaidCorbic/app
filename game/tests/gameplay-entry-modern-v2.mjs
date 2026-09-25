@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 const init = fs.readFileSync(new URL('../relay-ui-init.js', import.meta.url), 'utf8');
 const eventHud = fs.readFileSync(new URL('../gameplay-event-hud-v2.js', import.meta.url), 'utf8');
 const css = fs.readFileSync(new URL('../gameplay-entry-modern-v2.css', import.meta.url), 'utf8');
+const polish = fs.readFileSync(new URL('../gameplay-polish-v2.js', import.meta.url), 'utf8');
 
 assert.match(init, /gameplay-entry-modern-v2\.css/);
 assert.doesNotMatch(init, /gameplay-intro-final-v1\.js/);
@@ -14,5 +15,8 @@ assert.match(css, /#play \.world-marker/);
 assert.match(css, /#play \.input-guide/);
 assert.match(css, /#play #gameplayEventHud/);
 assert.match(css, /orientation:landscape/);
+assert.match(polish, /maintainDecorativeFrameBudget/);
+assert.match(polish, /getTweensOf/);
+assert.match(polish, /scrollFactorX === 0\.24/);
 
 console.log('gameplay entry modern v2 contract: PASS');
