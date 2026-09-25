@@ -18,7 +18,7 @@ import { LATEST_UPDATE } from './faq.js';
       version: '1.1.0',
       date: '2026-08-30',
       title: 'Unified cinematic menus',
-      detail: 'Options, FAQ and Pause share one responsive tactical presentation.'
+      detail: 'Options and Pause share one responsive tactical presentation.'
     },
     {
       id: 'gameplay-hud',
@@ -276,7 +276,6 @@ const updateMarkup = () => `
 
     $('relayUpdateCenter')?.classList.add('hidden');
     panel.classList.remove('hidden');
-    panel.classList.remove('relay-faq-mode');
     panel.classList.add('relay-update-mode');
     panel.setAttribute('aria-hidden', 'false');
 
