@@ -97,6 +97,13 @@ function patrol(scene, enemy, profile, diff, delta) {
 function updateGroundEnemy(scene, enemy, delta) {
   if (!enemy?.active || !enemy.body || !GROUND_TYPES.has(typeOf(enemy))) return;
   initialize(scene, enemy);
+
+  // Perception is the expensive part (platform + obstacle scans). Physics still
+  // runs every frame, so evaluate AI decisions at 20 Hz instead of 60+ Hz.
+  const now = scene.elapsedMs || 0;
+  const nextThinkAt = enemy.getData('awarenessNextThinkAt') || 0;
+  if (now < nextThinkAt) return;
+  enemy.setData('awarenessNextThinkAt', now + 50);
   const type = typeOf(enemy), profile = PROFILE[type] || PROFILE.security, diff = difficulty(scene), player = scene.player;
   if (!player?.active) { patrol(scene, enemy, profile, diff, delta); return; }
   const same = samePlatform(scene, enemy), visible = same && canSee(scene, enemy, player, profile, diff);
