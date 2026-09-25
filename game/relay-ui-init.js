@@ -26,6 +26,7 @@
 // the mobile owner itself is loaded once by index.html after main.js.
 
 import './mobile-final-polish.css';
+import './mobile-touch-joystick-v1.css';
 import './styles.css';
 import './main-menu.css';
 import './menu-overrides.css';
