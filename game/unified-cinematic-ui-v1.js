@@ -1443,7 +1443,9 @@ import {
        * P1 observes this class change and pauses
        * the Phaser Runner scene.
        */
-      /* Do not mutate pauseMenu.classList: legacy observers watch it. */
+      /* The canonical pause state must be visible to both the new
+       * data-pause-open renderer and legacy runtime observers. */
+      pause.classList.remove('hidden');
       pause.setAttribute('data-pause-open', 'true');
       pause.setAttribute(
         'aria-hidden',
