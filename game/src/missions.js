@@ -466,8 +466,8 @@ export const missions = [
     ],
     chase: {
       sections: [
-        { start: 820, end: 1670, speed: 245 },
-        { start: 2430, end: 3310, speed: 275 }
+        { start: 820, end: 1670, speed: 225 },
+        { start: 2430, end: 3310, speed: 250 }
       ]
     },
 
@@ -583,9 +583,9 @@ export const missions = [
     boss: {
       type: 'storm-boss',
       name: 'STORM TITAN',
-      health: 8,
+      health: 7,
       color: 0xb993ff,
-      attackCooldown: 1450
+      attackCooldown: 1650
     },
     enemies: [
       { type: 'security', x: 1780, y: 360, min: 1640, max: 1950 },
@@ -598,8 +598,8 @@ export const missions = [
     ],
     chase: {
       sections: [
-        { start: 1380, end: 2110, speed: 260 },
-        { start: 2780, end: 3650, speed: 295 }
+        { start: 1380, end: 2110, speed: 235 },
+        { start: 2780, end: 3650, speed: 265 }
       ]
     },
 
@@ -725,9 +725,9 @@ export const missions = [
     boss: {
       type: 'sentinel-boss',
       name: 'HELIX WARDEN',
-      health: 12,
+      health: 10,
       color: 0xff826e,
-      attackCooldown: 1200
+      attackCooldown: 1450
     },
     enemies: [
       { type: 'security', x: 1120, y: 420, min: 920, max: 1280 },
@@ -741,8 +741,8 @@ export const missions = [
     ],
     chase: {
       sections: [
-        { start: 1500, end: 2260, speed: 285 },
-        { start: 3100, end: 3850, speed: 310 }
+        { start: 1500, end: 2260, speed: 260 },
+        { start: 3100, end: 3850, speed: 280 }
       ]
     },
 
@@ -859,7 +859,7 @@ export const missions = [
       name: 'APEX OVERSEER',
       health: 14,
       color: 0xffd06e,
-      attackCooldown: 950
+      attackCooldown: 1250
     },
     enemies: [
       { type: 'security', x: 1700, y: 360, min: 1540, max: 1910 },
@@ -878,8 +878,8 @@ export const missions = [
     ],
     chase: {
       sections: [
-        { start: 1420, end: 2280, speed: 295 },
-        { start: 3060, end: 3820, speed: 325 }
+        { start: 1420, end: 2280, speed: 275 },
+        { start: 3060, end: 3820, speed: 300 }
       ]
     },
 
