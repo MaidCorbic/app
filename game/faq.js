@@ -77,7 +77,7 @@ export const RELAY_FAQ = [
 
   [
     'How many missions are there?',
-    'Relay Runner currently contains seven missions. The missions progressively increase enemy awareness, encounter complexity and combat difficulty as your progression advances. Later missions are designed to require more careful movement, positioning and use of abilities.'
+    'Relay Runner currently contains eight missions. The missions progressively increase enemy awareness, encounter complexity and combat difficulty as your progression advances. Later missions are designed to require more careful movement, positioning and use of abilities.'
   ],
 
   [
@@ -187,7 +187,7 @@ export const RELAY_FAQ = [
 
   [
     'How do enemy encounters work?',
-    'Enemies use movement, platform awareness and combat behaviours that scale across the seven missions. Their pursuit depends on whether the player can be physically reached through the level layout. This means enemies react to the actual structure of the level instead of simply moving through geometry that cannot be reached.'
+    'Enemies use movement, platform awareness and combat behaviours that scale across the eight missions. Their pursuit depends on whether the player can be physically reached through the level layout. This means enemies react to the actual structure of the level instead of simply moving through geometry that cannot be reached.'
   ],
 
   [
@@ -197,7 +197,7 @@ export const RELAY_FAQ = [
 
   [
     'How does enemy difficulty change?',
-    'Enemy awareness and combat difficulty scale progressively across the seven missions. As progression advances, encounters can require more careful movement, positioning and use of abilities. The goal is to increase the challenge while keeping enemy behaviour connected to the structure of each mission.'
+    'Enemy awareness and combat difficulty scale progressively across the eight missions. As progression advances, encounters can require more careful movement, positioning and use of abilities. The goal is to increase the challenge while keeping enemy behaviour connected to the structure of each mission.'
   ],
 
   [
@@ -231,7 +231,7 @@ export const LATEST_UPDATE = {
 
     'Enemies now recognize platform positions and only pursue the player when the route is physically reachable through the available level geometry.',
 
-    'Enemy awareness and combat difficulty scale progressively across all seven missions, creating more demanding encounters as progression advances.',
+    'Enemy awareness and combat difficulty scale progressively across all eight missions, creating more demanding encounters as progression advances.',
 
     'Platform combat, ranged attacks and enemy abilities remain active without forcing enemies through level geometry or unreachable platform routes.',
 

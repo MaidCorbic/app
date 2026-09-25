@@ -24,7 +24,7 @@ mustInclude(runtime, 'label:', 'mission-specific route label');
 mustInclude(runtime, 'risk:', 'route risk metadata');
 mustInclude(runtime, 'reward:', 'route reward metadata');
 mustInclude(runtime, 'relay:variety-route-applied', 'route applied UI sync event');
-for (const mission of ['first-delivery', 'dead-drop', 'blackout', 'pursuit', 'signal-storm', 'corporate-lockdown', 'final-relay']) {
+for (const mission of ['first-delivery', 'dead-drop', 'blackout', 'pursuit', 'signal-storm', 'corporate-lockdown', 'final-relay', 'mission-08']) {
   mustInclude(runtime, mission, `mission consequence ${mission}`);
 }
 mustInclude(runtime, "encounter: 'pursuit'", 'pursuit-specific encounter state');

@@ -106,6 +106,18 @@ export const enemyIntel = {
       'CLOSING SWEEP',
       'FINAL RELAY CONTROL'
     ]
+  },
+
+  'ghost-boss': {
+    name: 'GHOST WARDEN',
+    attack: 'Fires rapid relay bolts while forcing movement through the Ghostline arena.',
+    defense: 'Stay mobile through the blackout and punish the firing window.',
+    tactic: 'Break pressure with dash timing and finish the relay fight cleanly.',
+    abilities: [
+      'RAPID RELAY BOLT',
+      'GHOST SWEEP',
+      'BLACKOUT CONTROL'
+    ]
   }
 
 };
@@ -125,5 +137,6 @@ export const signatureThreats = {
   'corporate-lockdown': 'sentinel-boss',
 
   'final-relay': 'apex-boss',
+  'mission-08': 'ghost-boss',
 
 };

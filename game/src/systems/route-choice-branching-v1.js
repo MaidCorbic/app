@@ -20,7 +20,8 @@ const BRANCH_PROFILES = Object.freeze({
   pursuit: { safeOffset: 0, hotOffset: 1, activationProgress: 0.42, label: 'RAIL SPINE // ESCAPE-INTERCEPT SPLIT' },
   'signal-storm': { safeOffset: 0, hotOffset: 1, activationProgress: 0.46, label: 'CROWN ARRAY // CLEAN-STORM SPLIT' },
   'corporate-lockdown': { safeOffset: 0, hotOffset: 1, activationProgress: 0.45, label: 'HELIX TOWER // SECURITY SPLIT' },
-  'final-relay': { safeOffset: 0, hotOffset: 1, activationProgress: 0.48, label: 'APEX SPINE // FINAL SPLIT' }
+  'final-relay': { safeOffset: 0, hotOffset: 1, activationProgress: 0.48, label: 'APEX SPINE // FINAL SPLIT' },
+  'mission-08': { safeOffset: 0, hotOffset: 1, activationProgress: 0.46, label: 'GHOSTLINE // STABLE-HUNTER SPLIT' }
 });
 
 function missionId(scene) {

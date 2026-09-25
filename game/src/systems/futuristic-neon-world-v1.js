@@ -116,6 +116,18 @@ const WORLD_SKINS =
       building2: 0x19140e,
       zone: 'APEX SPINE',
       architecture: 'APEX'
+    },
+    'mission-08': {
+      accent: 0x76e7ff,
+      secondary: 0x9f7bff,
+      tertiary: 0x69efb0,
+      warning: 0xff5364,
+      sky: 0x03050c,
+      horizon: 0x07101d,
+      building: 0x08101c,
+      building2: 0x10172a,
+      zone: 'GHOSTLINE',
+      architecture: 'GHOST'
     }
 
   });

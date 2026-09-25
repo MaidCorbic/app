@@ -6,7 +6,7 @@ const css = await readFile(new URL('../unified-gameplay-ui-v1.css', import.meta.
 const polish = await readFile(new URL('../unified-gameplay-ui-v1-polish.css', import.meta.url), 'utf8');
 
 for (const token of ['MISSION INTELLIGENCE','relayUpdateCenter','relay-home-update','REFRESH NOW','gameplay:v12:event']) assert.match(ui, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-for (const missionId of ['first-delivery','dead-drop','blackout','pursuit','signal-storm','corporate-lockdown','final-relay']) assert.match(ui, new RegExp(missionId));
+for (const missionId of ['first-delivery','dead-drop','blackout','pursuit','signal-storm','corporate-lockdown','final-relay','mission-08']) assert.match(ui, new RegExp(missionId));
 assert.doesNotMatch(ui, /ROTATE YOUR DEVICE/);
 assert.doesNotMatch(ui, /relayRotateCard/);
 assert.doesNotMatch(css, /\.relay-rotate-card/);

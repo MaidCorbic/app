@@ -539,6 +539,15 @@ const updateMarkup = () => `
         'FINAL',
         'APEX SPINE'
       ]
+    ],
+    
+    'mission-08': [
+      'GHOSTLINE RELAY',
+      'Follow the ghost trace through blackout lanes, hunter pressure and the final relay approach.',
+      [
+        'LEVEL 08',
+        'GHOSTLINE'
+      ]
     ]
 
   }[mission?.id] || [

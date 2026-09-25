@@ -5,4 +5,5 @@ export const districts = [
   { id: 'corporate', name: 'CORPORATE', identity: 'Rail spines under active surveillance.', hazards: 'Chase sectors · security gates', enemies: 'Security drones · guards', unlockMission: 'blackout', missions: ['pursuit'] },
   { id: 'residential', name: 'RESIDENTIAL', identity: 'Storm-facing rooftops above the sleeping blocks.', hazards: 'Power failures · final relay stack', enemies: 'Drones · guards · interceptor', unlockMission: 'pursuit', missions: ['signal-storm'] },
   { id: 'apex', name: 'APEX SPINE', identity: 'Corporate towers and the final city relay core.', hazards: 'Moving gates · oversized core · final chase', enemies: 'Security drones · guards · interceptor', unlockMission: 'signal-storm', missions: ['corporate-lockdown', 'final-relay'] },
+  { id: 'ghostline', name: 'GHOSTLINE', identity: 'Hidden relay lanes above the city spine.', hazards: 'Blackout routes · hunter chases · moving gates', enemies: 'Runners · security · alien threats', unlockMission: 'final-relay', missions: ['mission-08'] },
 ];

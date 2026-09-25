@@ -24,5 +24,5 @@ for (const mission of missions) {
   if (mission.id !== 'first-delivery' && mission.id !== 'dead-drop') assert.ok(mission.boss?.type && mission.boss.health > 0 && mission.boss.name, `${mission.id} needs a distinct route boss`);
 }
 
-assert.equal(missions.map(mission => mission.difficulty.split(' ')[0]).join(','), '1/5,2/5,3/5,4/5,5/5,6/5,7/5');
+assert.equal(missions.map(mission => mission.difficulty.split(' ')[0]).join(','), '1/5,2/5,3/5,4/5,5/5,6/5,7/5,8/5');
 console.log('Mission flow and fairness checks passed.');

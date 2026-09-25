@@ -21,6 +21,7 @@ const missions = [
   'signal-storm',
   'corporate-lockdown',
   'final-relay',
+  'mission-08',
 ];
 
 for (const mission of missions) {
