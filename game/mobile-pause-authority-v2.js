@@ -115,17 +115,22 @@
   };
 
   const install = () => {
-    if (!getPauseButton() && !getMobileEntry()) return false;
-
     if (window.__relayMobilePauseAuthorityInstalledV2) {
       return true;
     }
 
+    /*
+     * Install the delegated mobile click owner independently of the HUD
+     * creation order. The HUD is created dynamically during bootstrap, so
+     * requiring #mobilePauseButton/#mobileSettingsButton to exist here can
+     * leave the mobile controls without any click owner.
+     */
     window.__relayMobilePauseAuthorityInstalledV2 = true;
 
     document.addEventListener('click', handleClick, true);
 
     const menu = getPauseMenu();
+
     if (menu) {
       new MutationObserver(syncPauseLock).observe(menu, {
         attributes: true,
@@ -144,16 +149,52 @@
   }
 
   /*
-   * The game shell can be created/replaced during bootstrap.
-   * Keep a short observer only until #pause exists.
+   * The menu can be replaced during bootstrap. Keep the pause-lock observer
+   * synchronized with the current pauseMenu without gating click ownership.
    */
-  if (!getPauseButton() && !getMobileEntry()) {
+  const observeShell = () => {
+    if (!document.body) return;
+
     const observer = new MutationObserver(() => {
-      if (install()) observer.disconnect();
+      const menu = getPauseMenu();
+
+      if (!menu || menu.__relayMobilePauseLockObservedV2) {
+        return;
+      }
+
+      menu.__relayMobilePauseLockObservedV2 = true;
+
+      new MutationObserver(syncPauseLock).observe(menu, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+
+      syncPauseLock();
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
-    window.setTimeout(() => observer.disconnect(), 5000);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    const menu = getPauseMenu();
+
+    if (menu) {
+      menu.__relayMobilePauseLockObservedV2 = true;
+
+      new MutationObserver(syncPauseLock).observe(menu, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    }
+
+    syncPauseLock();
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', observeShell, { once: true });
+  } else {
+    observeShell();
   }
 
   window.relayMobilePauseV2 = Object.freeze({
