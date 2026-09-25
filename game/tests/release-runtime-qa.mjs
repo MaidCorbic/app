@@ -462,7 +462,7 @@ assert.equal(
 
 assert.equal(
   touchSurface.movementOwner,
-  'touch-screen-v13',
+  'touch-screen-v13 joystick-v1',
   `Gameplay touch surface owner is incorrect at ${viewport.width}x${viewport.height}`,
 );
 
