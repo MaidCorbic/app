@@ -117,6 +117,10 @@ import {
       'true'
     );
 
+    /* Resume must never reveal the Home surface while Runner remains active. */
+    const intro = $('intro');
+    intro?.classList.add('hidden');
+    intro?.setAttribute('aria-hidden', 'true');
 
     /*
      * Release the authoritative P1 pause lock.
