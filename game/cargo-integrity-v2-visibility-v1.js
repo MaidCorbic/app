@@ -112,9 +112,16 @@
     window.addEventListener('orientationchange', sync, { passive: true });
     window.addEventListener('resize', sync, { passive: true });
 
-    const observer = new MutationObserver(sync);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-    window.setInterval(sync, 250);
+    /*
+     * Desktop keeps the reconciliation observer. On phones the hard-hide
+     * state is invariant, so lifecycle/resize events are enough and a
+     * document-wide observer only adds startup DOM churn.
+     */
+    if (!isPhone()) {
+      const observer = new MutationObserver(sync);
+      observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+      window.setInterval(sync, 250);
+    }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, { once: true });
