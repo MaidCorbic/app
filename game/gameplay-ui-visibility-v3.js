@@ -82,10 +82,21 @@
         pointer-events: none !important;
       }
 
+      html body.is-touch #play .mobile-joystick {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+
       html body.is-touch #play .mobile-actions {
         display: grid !important;
         visibility: visible !important;
         opacity: 1 !important;
+        pointer-events: none !important;
+      }
+
+      html body.is-touch #play .mobile-actions > button {
         pointer-events: auto !important;
       }
     }
