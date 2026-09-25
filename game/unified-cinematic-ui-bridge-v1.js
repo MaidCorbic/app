@@ -49,7 +49,12 @@
       return;
     }
 
-    if (pause && visible('pauseMenu') && !isUnified('pauseMenu')) {
+    if (
+      pause &&
+      visible('pauseMenu') &&
+      pause.getAttribute('data-pause-open') !== 'true' &&
+      !isUnified('pauseMenu')
+    ) {
       api.openPause('resume');
     }
   };
