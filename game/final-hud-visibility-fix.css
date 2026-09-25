@@ -497,3 +497,15 @@ html, body { min-height:100%; }
     overscroll-behavior:none !important;
   }
 }
+
+
+/* PAUSE V3: hidden remains stable; data-pause-open controls visibility. */
+#pauseMenu.relay-cinematic-overlay.hidden[data-pause-open="true"]{
+  display:grid !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+}
+#pauseMenu.relay-cinematic-overlay.hidden[data-pause-open="true"] > .menu{
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
