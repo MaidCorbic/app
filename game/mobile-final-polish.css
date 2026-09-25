@@ -597,8 +597,8 @@
     display: flex !important;
     align-items: flex-end !important;
     justify-content: flex-end !important;
-    width: max-content !important;
-    height: max-content !important;
+    width: 160px !important;
+    height: 170px !important;
     margin: 0 !important;
     padding: 0 !important;
     pointer-events: none !important;
