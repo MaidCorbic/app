@@ -123,6 +123,14 @@ import {
     intro?.setAttribute('aria-hidden', 'true');
 
     /*
+     * Explicit Resume also dismisses a discovery card that may still hold
+     * the P1 enemy-intel lock. This is important for automation and for a
+     * pause action taken during a non-blocking intel transition.
+     */
+    const runner = window.__relayRunnerScene || window.game?.scene?.getScene?.('runner') || null;
+    runner?.dismissEnemyDiscovery?.();
+
+    /*
      * Release the authoritative P1 pause lock.
      *
      * p1-gameplay-correctness-v1.js exposes this
