@@ -89,6 +89,7 @@ let runScore = 0;
 let toastTimer;
 let activeRunId = 0;
 let runSettled = false;
+let nextMissionTimer = 0;
 
 // RunnerScene must never auto-start.
 // Phaser automatically starts the first scene in the initial scene config.
@@ -1685,6 +1686,9 @@ function launch(
     return;
   }
 
+  window.clearTimeout(nextMissionTimer);
+  nextMissionTimer = 0;
+
   missionIndex = index;
 
   const mission =
@@ -1866,6 +1870,34 @@ function complete(
 
   $('finish')
     .classList.remove('hidden');
+
+  /*
+   * Campaign progression:
+   * after a successful mission, automatically move to the next
+   * unlocked mission instead of leaving the player on the result
+   * screen. The result panel remains visible briefly so the run
+   * completion feedback is still readable.
+   */
+  if (hasNext) {
+    const completedIndex = missionIndex;
+    nextMissionTimer = window.setTimeout(() => {
+      nextMissionTimer = 0;
+
+      if (
+        missionIndex !== completedIndex ||
+        !$('finish') ||
+        $('finish').classList.contains('hidden')
+      ) {
+        return;
+      }
+
+      $('finish').classList.add('hidden');
+      $('levelUp')?.classList.add('hidden');
+      $('abilityUnlock')?.classList.add('hidden');
+
+      launch(completedIndex + 1);
+    }, 1400);
+  }
 
   if (state.lastRankUp) {
     $('levelUpRank').textContent =
