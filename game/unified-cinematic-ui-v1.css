@@ -34,6 +34,39 @@
 #titlePanel.relay-cinematic-overlay.hidden,
 #relayInfoPanel.relay-cinematic-overlay.hidden,
 #pauseMenu.relay-cinematic-overlay.hidden{display:none!important;pointer-events:none!important}
+
+/* Pause V3: data state avoids legacy class observers. */
+#pauseMenu[data-pause-open="true"]{
+  position:fixed!important;
+  inset:0!important;
+  z-index:9000!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:clamp(10px,2vw,26px)!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  isolation:isolate;
+  background:
+    radial-gradient(circle at 14% 10%,rgba(56,189,248,.09),transparent 28%),
+    radial-gradient(circle at 86% 88%,rgba(56,189,248,.055),transparent 30%),
+    rgba(0,3,7,.84)!important;
+  backdrop-filter:blur(9px)!important;
+  pointer-events:auto!important;
+}
+#pauseMenu[data-pause-open="true"] > .menu{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+#pauseMenu[data-pause-open="true"]::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.72;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.02),transparent 16%,transparent 84%,rgba(56,189,248,.025)),
+    repeating-linear-gradient(180deg,transparent 0 5px,rgba(255,255,255,.012) 6px);
+}
 #titlePanel.relay-cinematic-overlay::before,
 #relayInfoPanel.relay-cinematic-overlay::before,
 #pauseMenu.relay-cinematic-overlay::before{
