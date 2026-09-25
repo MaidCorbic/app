@@ -119,7 +119,7 @@
 
 @media (pointer: coarse) and (orientation: portrait) {
   #game {
-    visibility: visible !important;
+    visibility: hidden !important;
   }
 
   .relay-orientation-gate::after {
@@ -145,6 +145,14 @@
    ========================================================= */
 
 @media (pointer: coarse) and (orientation: landscape) {
+  #game {
+    visibility: hidden !important;
+  }
+
+  #game.relay-boot-ready {
+    visibility: visible !important;
+  }
+
   body::after {
     display: none !important;
   }
