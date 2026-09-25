@@ -53,14 +53,24 @@ assert.match(
 
 assert.match(
   mobile,
-  /directionFromScreen/,
-  'Mobile input must map touch position to left/right movement'
+  /data-mobile-joystick/,
+  'Mobile input must bind the canonical joystick'
+);
+assert.match(
+  mobile,
+  /setJoystickAxis/,
+  'Mobile input must update the joystick axis'
 );
 
 assert.match(
   mobile,
-  /SWIPE_THRESHOLD/,
-  'Mobile input must support horizontal swipe movement'
+  /DEAD_ZONE/,
+  'Mobile input must define a joystick dead zone'
+);
+assert.match(
+  mobile,
+  /directionFromAxis/,
+  'Mobile input must map joystick axis to direction'
 );
 
 assert.match(

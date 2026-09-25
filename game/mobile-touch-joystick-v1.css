@@ -1,0 +1,146 @@
+/* =========================================================
+   RELAY RUNNER — MOBILE TOUCH JOYSTICK V1
+   Canonical mobile gameplay control surface.
+   ========================================================= */
+
+body.is-touch #play .mobile-controls{
+  position:absolute !important;
+  inset:0 !important;
+  z-index:40 !important;
+  display:flex !important;
+  align-items:flex-end !important;
+  justify-content:space-between !important;
+  box-sizing:border-box !important;
+  padding:
+    0
+    max(14px, env(safe-area-inset-right, 0px) + 10px)
+    max(16px, env(safe-area-inset-bottom, 0px) + 14px)
+    max(14px, env(safe-area-inset-left, 0px) + 10px) !important;
+  pointer-events:none !important;
+  touch-action:none !important;
+}
+
+body.is-touch #play .mobile-joystick{
+  position:relative !important;
+  flex:0 0 clamp(118px, 23vw, 154px) !important;
+  width:clamp(118px, 23vw, 154px) !important;
+  height:clamp(118px, 23vw, 154px) !important;
+  margin:0 !important;
+  pointer-events:auto !important;
+  touch-action:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+  -webkit-touch-callout:none !important;
+  border:1px solid rgba(141,244,255,.24) !important;
+  border-radius:50% !important;
+  background:radial-gradient(circle at 50% 50%,rgba(141,244,255,.055) 0 32%,rgba(141,244,255,.025) 33% 60%,rgba(3,11,20,.72) 61% 100%) !important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),inset 0 0 34px rgba(141,244,255,.055),0 14px 32px rgba(0,0,0,.38),0 0 26px rgba(141,244,255,.06) !important;
+  opacity:.92 !important;
+  transition:opacity .16s ease,transform .12s ease !important;
+}
+
+body.is-touch #play .mobile-joystick::before{
+  content:"" !important;
+  position:absolute !important;
+  inset:15% !important;
+  border:1px dashed rgba(141,244,255,.12) !important;
+  border-radius:50% !important;
+  pointer-events:none !important;
+}
+
+body.is-touch #play .mobile-joystick::after{
+  content:"MOVE" !important;
+  position:absolute !important;
+  left:50% !important;
+  bottom:10% !important;
+  transform:translateX(-50%) !important;
+  color:rgba(141,244,255,.38) !important;
+  font:800 8px/1 "DM Mono",monospace !important;
+  letter-spacing:.18em !important;
+  pointer-events:none !important;
+}
+
+body.is-touch #play .mobile-joystick.is-active{
+  opacity:1 !important;
+  transform:scale(1.015) !important;
+}
+
+body.is-touch #play .mobile-joystick-thumb{
+  position:absolute !important;
+  left:50% !important;
+  top:50% !important;
+  width:clamp(54px,10vw,70px) !important;
+  height:clamp(54px,10vw,70px) !important;
+  margin:calc(clamp(54px,10vw,70px) / -2) 0 0 calc(clamp(54px,10vw,70px) / -2) !important;
+  border:1px solid rgba(141,244,255,.74) !important;
+  border-radius:50% !important;
+  background:radial-gradient(circle at 34% 28%,rgba(222,252,255,.32),rgba(30,73,96,.92) 38%,rgba(4,15,26,.96) 100%) !important;
+  box-shadow:inset 0 0 14px rgba(141,244,255,.16),0 0 20px rgba(141,244,255,.18),0 8px 18px rgba(0,0,0,.42) !important;
+  transform:translate3d(0,0,0);
+  will-change:transform !important;
+  pointer-events:none !important;
+}
+
+body.is-touch #play .mobile-joystick-label{
+  position:absolute !important;
+  left:50% !important;
+  top:50% !important;
+  transform:translate(-50%,-50%) !important;
+  color:rgba(223,252,255,.72) !important;
+  font:900 clamp(8px,1.7vw,10px)/1 "DM Mono",monospace !important;
+  letter-spacing:.10em !important;
+  pointer-events:none !important;
+}
+
+body.is-touch #play .mobile-actions{
+  flex:0 0 auto !important;
+  display:grid !important;
+  grid-template-columns:repeat(3,clamp(58px,12vw,72px)) !important;
+  grid-template-rows:repeat(2,clamp(58px,12vw,72px)) !important;
+  gap:clamp(7px,1.4vw,12px) !important;
+  align-items:end !important;
+  justify-items:end !important;
+  pointer-events:none !important;
+}
+
+body.is-touch #play .mobile-actions > button{
+  width:clamp(58px,12vw,72px) !important;
+  height:clamp(58px,12vw,72px) !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  pointer-events:auto !important;
+  touch-action:none !important;
+  -webkit-user-select:none !important;
+  user-select:none !important;
+}
+
+body.is-touch #play .mobile-actions > [data-mobile-action="jump"]{grid-column:1 !important;grid-row:1 !important;}
+body.is-touch #play .mobile-actions > [data-mobile-action="fire"]{grid-column:2 !important;grid-row:1 !important;}
+body.is-touch #play .mobile-actions > [data-mobile-action="sword"]{grid-column:3 !important;grid-row:1 !important;}
+body.is-touch #play .mobile-actions > [data-mobile-action="dash"]{grid-column:1 !important;grid-row:2 !important;}
+body.is-touch #play .mobile-actions > [data-mobile-action="build1"]{grid-column:2 !important;grid-row:2 !important;}
+body.is-touch #play .mobile-actions > [data-mobile-action="gadget1"]{grid-column:3 !important;grid-row:2 !important;}
+body.is-touch #play .mobile-actions > button small{display:none !important;}
+
+@media (max-width:430px){
+  body.is-touch #play .mobile-joystick{flex-basis:112px !important;width:112px !important;height:112px !important;}
+  body.is-touch #play .mobile-joystick-thumb{width:52px !important;height:52px !important;margin:-26px 0 0 -26px !important;}
+  body.is-touch #play .mobile-actions{grid-template-columns:repeat(3,54px) !important;grid-template-rows:repeat(2,54px) !important;gap:5px !important;}
+  body.is-touch #play .mobile-actions > button{width:54px !important;height:54px !important;font-size:9px !important;}
+}
+
+@media (max-height:480px) and (orientation:landscape){
+  body.is-touch #play .mobile-controls{padding-bottom:max(8px,env(safe-area-inset-bottom,0px) + 6px) !important;}
+  body.is-touch #play .mobile-joystick{flex-basis:96px !important;width:96px !important;height:96px !important;}
+  body.is-touch #play .mobile-joystick-thumb{width:46px !important;height:46px !important;margin:-23px 0 0 -23px !important;}
+  body.is-touch #play .mobile-actions{grid-template-columns:repeat(3,50px) !important;grid-template-rows:repeat(2,50px) !important;gap:5px !important;}
+  body.is-touch #play .mobile-actions > button{width:50px !important;height:50px !important;}
+}
+
+
+@media (prefers-reduced-motion:reduce){
+  body.is-touch #play .mobile-joystick{transition:none !important;}
+}

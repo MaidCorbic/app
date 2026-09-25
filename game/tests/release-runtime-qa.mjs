@@ -462,7 +462,7 @@ assert.equal(
 
 assert.equal(
   touchSurface.movementOwner,
-  'touch-screen-v13',
+  'touch-screen-v13 joystick-v1',
   `Gameplay touch surface owner is incorrect at ${viewport.width}x${viewport.height}`,
 );
 
@@ -506,6 +506,12 @@ assertNoPairwiseOverlap(
     await waitForVisible(page, '[data-unified-resume]');
     await clickDom(page, '[data-unified-resume]');
     await waitForHidden(page, '#pauseMenu');
+
+    await page.waitForFunction(
+      () => Boolean(window.__relayRunnerScene?.scene?.isActive?.()),
+      undefined,
+      { timeout: 10000 },
+    );
 
     const resumed = await page.evaluate(() => ({
       introHidden: document.querySelector('#intro')?.classList.contains('hidden'),
