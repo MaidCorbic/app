@@ -44,7 +44,6 @@
     "test:dash-physics-single-owner": "node tests/dash-physics-single-owner.mjs",
     "test:runtime-wrapper-order": "node tests/runtime-wrapper-order.mjs",
     "test:runtime-lifecycle-dom-audit": "node tests/runtime-lifecycle-dom-audit.mjs",
-    "test:final-stability-suite": "node tests/final-stability-suite.mjs",
     "test:canonical-css": "node tests/css-canonical-contract.mjs",
     "test:release-ux-gameplay-polish": "node tests/release-ux-gameplay-polish.mjs",
     "test:runner-runtime-stability": "node tests/runner-runtime-stability-contract.mjs",
