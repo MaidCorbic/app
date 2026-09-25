@@ -201,13 +201,11 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const observer =
       new MutationObserver(() => {
         /*
-         * Let the canonical UI finish its DOM operation
-         * before synchronising Phaser.
+         * Pause UI visibility is owned by pause-authority-v3.js.
+         *
+         * Do not pause/resume Phaser from a DOM mutation. Multiple
+         * legacy observers can otherwise re-enter the pause route.
          */
-        window.setTimeout(
-          syncPause,
-          0
-        );
       });
 
     observer.observe(

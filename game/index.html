@@ -124,6 +124,15 @@
        MAIN GAME
        ===================================================== -->
 
+  <!--
+    Canonical Pause authority. This must load before main.js and
+    before legacy pause handlers so desktop and mobile share one route.
+  -->
+  <script
+    type="module"
+    src="./pause-authority-v3.js"
+  ></script>
+
   <main id="game">
 
     <!--
