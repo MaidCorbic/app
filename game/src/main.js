@@ -1708,6 +1708,11 @@ function launch(
   $('pauseMenu')
     .classList.add('hidden');
 
+  // End Home presentation synchronously before gameplay visibility changes.
+  // The Home guard also observes #intro, but MutationObserver delivery is async;
+  // clearing the state here prevents a landscape-frame race that can hide touch controls.
+  document.body.classList.remove('home-v3-active');
+
   $('intro')
     .classList.toggle(
       'hidden',
