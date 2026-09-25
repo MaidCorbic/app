@@ -3552,89 +3552,11 @@ const start =
 
 forceStartVisible(start);
 
-if (start instanceof HTMLElement) {
-  start.addEventListener(
-    'click',
-    event => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      try {
-        /*
-         * Home -> Gameplay visual ownership starts immediately on the
-         * trusted click. The deployment cinematic then covers the game
-         * while the real runner boots underneath it.
-         */
-        const intro =
-          document.getElementById('intro');
-
-        intro?.classList.add('hidden');
-        intro?.setAttribute('aria-hidden', 'true');
-
-        /*
-         * Kill the old procedural game audio immediately.
-         * Main exposes this after its module loads.
-         */
-        window.relayProceduralAudio?.stop?.();
-
-        /*
-         * Start the MP3 immediately on the trusted click.
-         */
-        void startGameplayMusic();
-
-        const loader =
-          window.relayPlayDeploymentV1;
-
-        if (
-          loader &&
-          typeof loader.show === 'function'
-        ) {
-          void loader.show({
-            missionNumber: 1,
-
-            desktop:
-              './assets/loadplay.jpg',
-
-            mobile:
-              './assets/loadplaymobile.jpg',
-
-            skipRoute: true,
-
-            beforeRoute: async () => {
-              if (
-                typeof window.relayLaunchGameplay ===
-                'function'
-              ) {
-                window.relayLaunchGameplay();
-              }
-            }
-          });
-
-          return;
-        }
-
-        const target =
-          document.querySelector(
-            'body > #game > div[hidden] #start'
-          );
-
-        if (
-          target instanceof HTMLElement
-        ) {
-          HTMLElement.prototype.click.call(
-            target
-          );
-        }
-
-      } catch (error) {
-        console.error(
-          '[RelayRunner] Deployment loader error:',
-          error
-        );
-      }
-    }
-  );
-}
+/*
+ * Gameplay Start ownership intentionally lives in main.js.
+ * Home only presents the button; it does not install a competing
+ * click/launch route here.
+ */
 
     /* =========================================================
        CONTINUE
