@@ -188,6 +188,18 @@ async function clickDom(page, selector) {
   }, selector);
 }
 
+function withTimeout(promise, timeoutMs, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`Release runtime QA timed out after ${timeoutMs}ms: ${label}`)),
+      timeoutMs,
+    );
+  });
+
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 async function runMobileViewport(browser, viewport) {
   const device = devices['Pixel 5'];
   const context = await browser.newContext({
@@ -389,7 +401,12 @@ try {
   await waitForServer(BASE_URL);
   browser = await chromium.launch();
   for (const viewport of MOBILE_VIEWPORTS) {
-    await runMobileViewport(browser, viewport);
+    console.log(`Release runtime QA starting: ${viewport.width}x${viewport.height} ${viewport.orientation}`);
+    await withTimeout(
+      runMobileViewport(browser, viewport),
+      90000,
+      `${viewport.width}x${viewport.height} ${viewport.orientation}`,
+    );
     console.log(`Release runtime QA passed: ${viewport.width}x${viewport.height} ${viewport.orientation}`);
   }
   console.log('Release runtime QA passed: portrait orientation lock + landscape gameplay/pause/settings/resume with zero browser errors.');
