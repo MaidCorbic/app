@@ -165,7 +165,11 @@
       else { startMusic(); }
     };
     sync();
-    new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden']});
+    /* Observe Home only. Watching document.body makes gameplay/pause state
+       mutations re-enter the Home sync and can create a mutation storm. */
+    if (intro) {
+      new MutationObserver(sync).observe(intro,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden']});
+    }
     document.addEventListener('click',event => {
       if (event.target.closest('#start,#continue,[data-v3-play],[data-v3-continue]')) startMusic();
     },{capture:true,passive:true});
