@@ -76,7 +76,7 @@ body.is-touch #play .mobile-joystick-thumb{
   border-radius:50% !important;
   background:radial-gradient(circle at 34% 28%,rgba(222,252,255,.32),rgba(30,73,96,.92) 38%,rgba(4,15,26,.96) 100%) !important;
   box-shadow:inset 0 0 14px rgba(141,244,255,.16),0 0 20px rgba(141,244,255,.18),0 8px 18px rgba(0,0,0,.42) !important;
-  transform:translate3d(0,0,0) !important;
+  transform:translate3d(0,0,0);
   will-change:transform !important;
   pointer-events:none !important;
 }
