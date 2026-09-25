@@ -140,9 +140,6 @@ body.is-touch #play .mobile-actions > button small{display:none !important;}
   body.is-touch #play .mobile-actions > button{width:50px !important;height:50px !important;}
 }
 
-@media (orientation:portrait) and (pointer:coarse){
-  body.is-touch #play .mobile-controls{display:none !important;}
-}
 
 @media (prefers-reduced-motion:reduce){
   body.is-touch #play .mobile-joystick{transition:none !important;}
