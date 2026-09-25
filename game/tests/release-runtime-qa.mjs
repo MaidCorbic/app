@@ -408,7 +408,7 @@ async function runMobileViewport(browser, viewport) {
     }
 
     assert.equal(initial.briefingLock, false, `Gameplay briefing lock remained active at ${viewport.width}x${viewport.height}`);
-    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height}`);
+    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height} | body=${await page.locator('body').getAttribute('class')} | controls=${JSON.stringify(await page.locator('.mobile-controls').boundingBox())} | actions=${JSON.stringify(await page.locator('.mobile-actions').boundingBox())} | play=${JSON.stringify(await page.locator('#play').boundingBox())} | display=${await page.locator('.mobile-controls').evaluate(el => getComputedStyle(el).display)} | visibility=${await page.locator('.mobile-controls').evaluate(el => getComputedStyle(el).visibility)}`);
     assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
 
     const controls = await page.evaluate(() => ({
