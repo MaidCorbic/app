@@ -408,8 +408,7 @@ async function runMobileViewport(browser, viewport) {
     }
 
     assert.equal(initial.briefingLock, false, `Gameplay briefing lock remained active at ${viewport.width}x${viewport.height}`);
-    console.log('LANDSCAPE: initial geometry', JSON.stringify({controls: await page.locator('.mobile-controls').boundingBox(), actions: await page.locator('.mobile-actions').boundingBox()}));
-    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height} | body=${await page.locator('body').getAttribute('class')} | controls=${JSON.stringify(await page.locator('.mobile-controls').boundingBox())} | actions=${JSON.stringify(await page.locator('.mobile-actions').boundingBox())} | play=${JSON.stringify(await page.locator('#play').boundingBox())} | display=${await page.locator('.mobile-controls').evaluate(el => getComputedStyle(el).display)} | visibility=${await page.locator('.mobile-controls').evaluate(el => getComputedStyle(el).visibility)}`);
+    assert.equal(initial.mobileControlsVisible, true, `Touch controls should be visible in landscape at ${viewport.width}x${viewport.height}`);
     assert.equal(initial.pauseVisible, false, `Pause menu must start hidden at ${viewport.width}x${viewport.height}`);
 
     const controls = await page.evaluate(() => ({
@@ -472,21 +471,13 @@ assertNoPairwiseOverlap(
   `Mobile action layout ${viewport.width}x${viewport.height}`,
 );
 
-    console.log('LANDSCAPE: touch surface + overlap checks passed');
-
     // On mobile, the canonical Pause control is #mobilePauseButton. This keeps the
     // runtime QA aligned with the actual mobile HUD ownership instead of the legacy #pause node.
-    await page.evaluate(() => {
-      window.setTimeout(() => {
-        window.relayMobilePauseV2?.open?.();
-      }, 0);
-    });
-    console.log('LANDSCAPE: canonical mobile pause open scheduled');
+    await clickDom(page, '#mobilePauseButton');
     await waitForVisible(page, '#pauseMenu');
     await waitForVisible(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-pause-tab="settings"]');
 
-    console.log('LANDSCAPE: pause menu opened');
     await clickDom(page, '[data-pause-tab="settings"]');
 
     await page.waitForFunction(
@@ -496,7 +487,6 @@ assertNoPairwiseOverlap(
       undefined,
       { timeout: 15000 },
     );
-    console.log('LANDSCAPE: settings page reached');
     const settings = await page.evaluate(() => ({
       title: document.querySelector('.relay-cinematic-title')?.textContent?.trim() || '',
       toggleCount: document.querySelectorAll('[data-unified-setting]').length,
@@ -512,7 +502,6 @@ assertNoPairwiseOverlap(
     const afterToggle = await firstToggle.getAttribute('aria-pressed');
     assert.notEqual(beforeToggle, afterToggle, `Settings toggle did not react at ${viewport.width}x${viewport.height}`);
 
-    console.log('LANDSCAPE: settings toggle passed');
     await clickDom(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-unified-resume]');
     await clickDom(page, '[data-unified-resume]');
@@ -527,7 +516,6 @@ assertNoPairwiseOverlap(
     assert.equal(resumed.pauseHidden, true, `Pause menu remained open after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(resumed.runnerActive, true, `Runner scene is not active after resume at ${viewport.width}x${viewport.height}`);
     assert.equal(errors.length, 0, `Browser errors at ${viewport.width}x${viewport.height}: ${errors.join(' | ')}`);
-    console.log('LANDSCAPE: about to close context');
   } finally {
     await context.close();
   }
