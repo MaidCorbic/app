@@ -587,7 +587,7 @@
    one frame late during the mobile boot hand-off.
    ========================================================= */
 @media (orientation: landscape) and (pointer: coarse) {
-  html body #play .mobile-controls {
+  html body.is-touch #play .mobile-controls {
     position: fixed !important;
     right: max(10px, env(safe-area-inset-right)) !important;
     bottom: max(10px, env(safe-area-inset-bottom)) !important;
