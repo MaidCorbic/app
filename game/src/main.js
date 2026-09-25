@@ -4523,8 +4523,7 @@ const startGameplayFromHome = () => {
 
   /*
    * MAIN is the single owner of the real Home -> Gameplay handoff.
-   * Capture-phase ownership is intentional: later-loaded cinematic or
-   * legacy click listeners must not swallow the START activation.
+   * The Home module only renders #start; this function owns activation.
    */
   const intro = $('intro');
 
@@ -4578,26 +4577,43 @@ const startGameplayFromHome = () => {
 };
 
 /*
- * START is owned at the document capture boundary so another module
- * cannot intercept the click before the canonical Home -> Gameplay path.
+ * The Home module creates #start after main.js has loaded.
+ * Bind the canonical owner directly to that button once it exists.
+ * This avoids document-level capture ordering between legacy modules.
  */
-document.addEventListener(
-  'click',
-  event => {
-    const start = event.target instanceof Element
-      ? event.target.closest('#start')
-      : null;
+const bindCanonicalStartButton = () => {
+  const startButton = $('start');
 
-    if (!(start instanceof HTMLElement)) {
-      return;
-    }
+  if (
+    !(startButton instanceof HTMLElement) ||
+    startButton.dataset.relayMainStartBound === '1'
+  ) {
+    return;
+  }
 
-    event.preventDefault();
-    event.stopImmediatePropagation();
+  startButton.dataset.relayMainStartBound = '1';
+  startButton.onclick = () => {
     void startGameplayFromHome();
-  },
-  true
+  };
+};
+
+bindCanonicalStartButton();
+
+const introStartObserver = new MutationObserver(
+  bindCanonicalStartButton
 );
+
+const introForStartObserver = $('intro');
+
+if (introForStartObserver) {
+  introStartObserver.observe(
+    introForStartObserver,
+    {
+      childList: true,
+      subtree: true
+    }
+  );
+}
 
 $('continue').onclick = () => {
   stopAudioBed();
