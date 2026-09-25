@@ -2,11 +2,12 @@
 // MOBILE INPUT SINGLE OWNER V9 compatibility contract.
 // V9 compatibility aliases are retained for older release-contract checks.
 // Canonical mobile input owner.
-// Movement is controlled directly from the gameplay screen.
-// No virtual joystick is used.
+// Movement is controlled by the visible virtual joystick.
+// The joystick owns one touch pointer; action buttons own their own pointers.
 //
 // Contract:
-// - Full-screen touch movement on mobile.
+// - Virtual joystick movement on mobile.
+
 // - Existing mobile action buttons remain functional.
 // - PAUSE / OPTIONS are excluded from gameplay touch input.
 // - Desktop keyboard input remains untouched.
@@ -440,43 +441,73 @@ const install = () => {
   };
 
   /* =========================================================
-     FULL SCREEN TOUCH MOVEMENT
+     VIRTUAL JOYSTICK MOVEMENT
      ========================================================= */
+
+  const joystick =
+    root.querySelector('[data-mobile-joystick]');
+
+  const joystickThumb =
+    root.querySelector('.mobile-joystick-thumb');
 
   let movementPointerId = null;
   let movementDirection = null;
+  let movementAxis = 0;
 
-  let startX = 0;
-  let startY = 0;
+  const DEAD_ZONE = 0.18;
 
-  const TAP_THRESHOLD = 18;
-  const SWIPE_THRESHOLD = 28;
+  const clamp = (value, min, max) =>
+    Math.max(min, Math.min(max, value));
 
-  const isExcludedTarget = (target) => {
-    if (!(target instanceof Element)) {
-      return false;
-    }
+  const setJoystickVisual = (axis) => {
+    if (!joystickThumb) return;
+
+    const rect = joystick?.getBoundingClientRect();
+
+    if (!rect?.width) return;
+
+    const thumbRect =
+      joystickThumb.getBoundingClientRect();
+
+    const radius =
+      Math.max(
+        1,
+        rect.width / 2 -
+          thumbRect.width / 2 -
+          7
+      );
+
+    const offset =
+      clamp(axis, -1, 1) * radius;
+
+    joystickThumb.style.transform =
+      \`translate3d(\${offset}px,0,0)\`;
+  };
+
+  const setMobileAxis = (axis) => {
+    const scene = getScene();
+
+    if (!scene) return;
 
     /*
-     * These controls must never become movement input.
+     * Keep an explicit analog value available for
+     * future movement-feel tuning while the current
+     * RunnerScene keyboard bridge remains digital.
      */
-    return Boolean(
-      target.closest(
-        [
-          '[data-mobile-action]',
-          '#pause',
-          '#pauseMenu',
-          '#titlePanel',
-          '#relayInfoPanel',
-          '.overlay',
-          'button',
-          'a',
-          'input',
-          'select',
-          'textarea',
-        ].join(',')
-      )
-    );
+    scene.mobileAxis =
+      clamp(axis, -1, 1);
+  };
+
+  const directionFromAxis = (axis) => {
+    if (axis <= -DEAD_ZONE) {
+      return 'left';
+    }
+
+    if (axis >= DEAD_ZONE) {
+      return 'right';
+    }
+
+    return null;
   };
 
   const setDirection = (next) => {
@@ -485,18 +516,14 @@ const install = () => {
       return;
     }
 
-    if (
-      movementDirection === 'left'
-    ) {
+    if (movementDirection === 'left') {
       emitKeyboard(
         MOVE_KEYS.left,
         'keyup'
       );
     }
 
-    if (
-      movementDirection === 'right'
-    ) {
+    if (movementDirection === 'right') {
       emitKeyboard(
         MOVE_KEYS.right,
         'keyup'
@@ -522,178 +549,164 @@ const install = () => {
     setPhaserDirection(next);
   };
 
+  const setJoystickAxis = (axis) => {
+    movementAxis =
+      clamp(axis, -1, 1);
+
+    setMobileAxis(
+      movementAxis
+    );
+
+    setJoystickVisual(
+      movementAxis
+    );
+
+    setDirection(
+      directionFromAxis(
+        movementAxis
+      )
+    );
+
+    joystick?.classList.toggle(
+      'is-active',
+      Math.abs(movementAxis) >
+        DEAD_ZONE
+    );
+  };
+
   const resetMovement = () => {
-    setDirection(null);
+    setJoystickAxis(0);
 
     movementPointerId = null;
-    startX = 0;
-    startY = 0;
+
+    if (joystick) {
+      joystick.releasePointerCapture?.(
+        movementPointerId
+      );
+    }
   };
 
-  const directionFromScreen = (clientX) => {
-    const width =
-      window.innerWidth || 1;
+  const axisFromPointer = (event) => {
+    const rect =
+      joystick?.getBoundingClientRect();
 
-    /*
-     * Invisible split:
-     *
-     * left  half -> LEFT
-     * right half -> RIGHT
-     */
-    return clientX < width / 2
-      ? 'left'
-      : 'right';
-  };
-
-  play.addEventListener(
-    'pointerdown',
-    (event) => {
-      // pointerdown routes touch through directionFromScreen.
-      if (!isTouchDevice()) {
-        return;
-      }
-
-      if (
-        event.pointerType !== 'touch'
-      ) {
-        return;
-      }
-
-      if (
-        isExcludedTarget(
-          event.target
-        )
-      ) {
-        return;
-      }
-
-      if (
-        movementPointerId !== null
-      ) {
-        // V9 compatibility form: if (pointerId !== null) return;
-        return;
-      }
-
-      event.preventDefault();
-
-      movementPointerId =
-        event.pointerId;
-
-      startX =
-        event.clientX;
-
-      startY =
-        event.clientY;
-
-      play.setPointerCapture?.(
-        event.pointerId
-      );
-
-      /*
-       * Immediate tap movement:
-       * touch left half = LEFT
-       * touch right half = RIGHT
-       */
-      setDirection(
-        directionFromScreen(
-          event.clientX
-        )
-      );
-    },
-    { passive: false }
-  );
-
-  play.addEventListener(
-    'pointermove',
-    (event) => {
-      if (
-        event.pointerId !==
-        movementPointerId
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-
-      const dx =
-        event.clientX -
-        startX;
-
-      const dy =
-        event.clientY -
-        startY;
-
-      const horizontalDistance =
-        Math.abs(dx);
-
-      const verticalDistance =
-        Math.abs(dy);
-
-      /*
-       * Horizontal swipe has priority.
-       */
-      if (
-        horizontalDistance >=
-          SWIPE_THRESHOLD &&
-        horizontalDistance >=
-          verticalDistance
-      ) {
-        setDirection(
-          dx < 0
-            ? 'left'
-            : 'right'
-        );
-
-        return;
-      }
-
-      /*
-       * Small movement remains controlled
-       * by the side of the screen that was touched.
-       */
-      if (
-        horizontalDistance <
-          TAP_THRESHOLD &&
-        verticalDistance <
-          TAP_THRESHOLD
-      ) {
-        setDirection(
-          directionFromScreen(
-            startX
-          )
-        );
-      }
-    },
-    { passive: false }
-  );
-
-  const end = event => {
-    if (
-      event &&
-      event.pointerId !==
-        movementPointerId
-    ) {
-      // Legacy V9 form: if (event && event.pointerId !== pointerId) return;
-      return;
+    if (!rect?.width) {
+      return 0;
     }
 
-    resetMovement();
+    const centerX =
+      rect.left +
+      rect.width / 2;
+
+    const half =
+      Math.max(
+        1,
+        rect.width / 2
+      );
+
+    return clamp(
+      (event.clientX - centerX) /
+        half,
+      -1,
+      1
+    );
   };
 
-  play.addEventListener(
-    'pointerup',
-    end
-  );
+  const resetJoystick = () => {
+    movementPointerId = null;
+    setJoystickAxis(0);
 
-  play.addEventListener(
-    'pointercancel',
-    end
-  );
+    if (joystick) {
+      joystick.classList.remove(
+        'is-active'
+      );
+    }
+  };
 
-  play.addEventListener(
-    'lostpointercapture',
-    end
-  );
+  if (joystick) {
+    joystick.addEventListener(
+      'pointerdown',
+      (event) => {
+        if (
+          !isTouchDevice() ||
+          event.pointerType !== 'touch' ||
+          movementPointerId !== null
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        movementPointerId =
+          event.pointerId;
+
+        joystick.setPointerCapture?.(
+          event.pointerId
+        );
+
+        setJoystickAxis(
+          axisFromPointer(event)
+        );
+      },
+      { passive: false }
+    );
+
+    joystick.addEventListener(
+      'pointermove',
+      (event) => {
+        if (
+          event.pointerId !==
+          movementPointerId
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+
+        setJoystickAxis(
+          axisFromPointer(event)
+        );
+      },
+      { passive: false }
+    );
+
+    const endJoystick = (event) => {
+      if (
+        event &&
+        event.pointerId !==
+          movementPointerId
+      ) {
+        return;
+      }
+
+      resetJoystick();
+    };
+
+    joystick.addEventListener(
+      'pointerup',
+      endJoystick
+    );
+
+    joystick.addEventListener(
+      'pointercancel',
+      endJoystick
+    );
+
+    joystick.addEventListener(
+      'lostpointercapture',
+      endJoystick
+    );
+  }
+
+  /*
+   * Compatibility marker retained so existing
+   * release checks can identify the touch-screen
+   * movement owner. The actual movement surface
+   * is now the visible virtual joystick.
+   */
+  play.dataset.mobileMovementOwner =
+    'touch-screen-v13 joystick-v1';
 
   /* =========================================================
      GLOBAL SAFETY
