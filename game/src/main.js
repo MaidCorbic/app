@@ -4530,50 +4530,57 @@ const startGameplayFromHome = () => {
   intro?.classList.add('hidden');
   intro?.setAttribute('aria-hidden', 'true');
 
-  const loader = window.relayPlayDeploymentV1;
+  /*
+   * Do not perform the deployment bootstrap inside the click event.
+   * The Home transition must paint first; the next task owns the
+   * potentially heavier loader/gameplay work.
+   */
+  window.setTimeout(() => {
+    const loader = window.relayPlayDeploymentV1;
 
-  if (
-    loader &&
-    typeof loader.show === 'function'
-  ) {
-    void loader.show({
-      missionNumber: 1,
+    if (
+      loader &&
+      typeof loader.show === 'function'
+    ) {
+      void loader.show({
+        missionNumber: 1,
 
-      desktop:
-        './assets/loadplay.jpg',
+        desktop:
+          './assets/loadplay.jpg',
 
-      mobile:
-        './assets/loadplaymobile.jpg',
+        mobile:
+          './assets/loadplaymobile.jpg',
 
-      skipRoute: true,
+        skipRoute: true,
 
-      beforeRoute: async () => {
-        if (
-          typeof window.relayLaunchGameplay ===
-          'function'
-        ) {
-          window.relayLaunchGameplay();
-          return;
+        beforeRoute: async () => {
+          if (
+            typeof window.relayLaunchGameplay ===
+            'function'
+          ) {
+            window.relayLaunchGameplay();
+            return;
+          }
+
+          game.scene.isPaused('runner')
+            ? game.scene.resume('runner')
+            : launch(0);
         }
+      });
 
-        game.scene.isPaused('runner')
-          ? game.scene.resume('runner')
-          : launch(0);
-      }
-    });
+      return;
+    }
 
-    return;
-  }
-
-  leaveHome(
-    game.scene.isPaused('runner')
-      ? () =>
-          game.scene.resume(
-            'runner'
-          )
-      : () =>
-          launch(0)
-  );
+    leaveHome(
+      game.scene.isPaused('runner')
+        ? () =>
+            game.scene.resume(
+              'runner'
+            )
+        : () =>
+            launch(0)
+    );
+  }, 0);
 };
 
 /*
