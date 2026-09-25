@@ -25,8 +25,6 @@
 // './gameplay-core-v1.js' loads before './src/systems/mobile-input-single-owner-v1.js';
 // the mobile owner itself is loaded once by index.html after main.js.
 
-import './splash-progress-visibility.css';
-import './cinematic-splash.css';
 import './mobile-final-polish.css';
 import './styles.css';
 import './main-menu.css';
