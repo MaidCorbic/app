@@ -1,5 +1,5 @@
 import { missions } from './src/missions.js';
-import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
+import { LATEST_UPDATE } from './faq.js';
 
 (() => {
   'use strict';
@@ -18,7 +18,7 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
       version: '1.1.0',
       date: '2026-08-30',
       title: 'Unified cinematic menus',
-      detail: 'Options, FAQ and Pause share one responsive tactical presentation.'
+      detail: 'Options and Pause share one responsive tactical presentation.'
     },
     {
       id: 'gameplay-hud',
@@ -131,10 +131,7 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
     }
 
     panel.classList.add('hidden');
-    panel.classList.remove(
-      'relay-update-mode',
-      'relay-faq-mode'
-    );
+    panel.classList.remove('relay-update-mode');
     panel.setAttribute(
       'aria-hidden',
       'true'
@@ -148,72 +145,6 @@ import { RELAY_FAQ, LATEST_UPDATE } from './faq.js';
     $('titlePanel')?.classList.add('hidden');
     $('preflight')?.classList.add('hidden');
   };
-
-  /* =========================================================
-     FAQ
-  ========================================================= */
-
-  const faqMarkup = () => `
-    <div
-      class="relay-terminal-prompt"
-      aria-hidden="true"
-    >
-      SELECT A QUERY
-    </div>
-
-    <div
-      class="relay-faq-list"
-      role="list"
-    >
-      ${RELAY_FAQ.map(([question, answer], index) => {
-        const isOpen = index === 0;
-        const number = String(index + 1).padStart(2, '0');
-
-        return `
-          <article
-           class="relay-faq-item${isOpen ? ' open' : ''}"
-            role="listitem"
-          >
-
-            <button
-              class="relay-faq-question"
-              type="button"
-              data-faq-question
-              aria-expanded="${isOpen ? 'true' : 'false'}"
-            >
-
-              <span
-                class="faq-index"
-                aria-hidden="true"
-              >
-                ${number}
-              </span>
-
-              <span class="faq-question-text">
-                ${safeText(question)}
-              </span>
-
-              <span
-                class="faq-question-state"
-                aria-hidden="true"
-              >
-                ${isOpen ? 'ACTIVE' : 'QUERY'}
-              </span>
-
-            </button>
-
-            <div
-              class="relay-faq-answer"
-              ${isOpen ? '' : 'hidden'}
-            >
-              ${safeText(answer)}
-            </div>
-
-          </article>
-        `;
-      }).join('')}
-    </div>
-  `;
 
   /* =========================================================
      UPDATE
@@ -333,62 +264,26 @@ const updateMarkup = () => `
      INFO PANEL
   ========================================================= */
 
-  const openInfoPanel = kind => {
+  const openInfoPanel = () => {
     const panel = $('relayInfoPanel');
     const eyebrow = $('relayInfoEyebrow');
     const heading = $('relayInfoHeading');
     const content = $('relayInfoContent');
 
-    if (
-      !panel ||
-      !eyebrow ||
-      !heading ||
-      !content
-    ) {
+    if (!panel || !eyebrow || !heading || !content) {
       return false;
     }
 
     $('relayUpdateCenter')?.classList.add('hidden');
-
     panel.classList.remove('hidden');
+    panel.classList.add('relay-update-mode');
+    panel.setAttribute('aria-hidden', 'false');
 
-    panel.setAttribute(
-      'aria-hidden',
-      'false'
-    );
+    eyebrow.textContent =
+      LATEST_UPDATE.version || 'LATEST UPDATE';
 
-   panel.classList.toggle(
-  'relay-update-mode',
-  kind === 'update'
-);
-
-panel.classList.toggle(
-  'relay-faq-mode',
-  kind === 'faq'
-);
-
-    if (kind === 'faq') {
-
-      eyebrow.textContent =
-        'RELAY RUNNER // FIELD GUIDE';
-
-      heading.textContent =
-        'FAQ';
-
-      content.innerHTML =
-        faqMarkup();
-
-    } else {
-
-      eyebrow.textContent =
-        LATEST_UPDATE.version || 'LATEST UPDATE';
-
-      heading.textContent =
-        'UPDATE';
-
-      content.innerHTML =
-        updateMarkup();
-    }
+    heading.textContent = 'UPDATE';
+    content.innerHTML = updateMarkup();
 
     return true;
   };
@@ -441,7 +336,7 @@ panel.classList.toggle(
 
     writeUpdates(next);
 
-    openInfoPanel('update');
+    openInfoPanel();
 
     announce(
       'UPDATE CHANNEL REFRESHED'
@@ -575,100 +470,6 @@ panel.classList.toggle(
 
     announce(
       `NEW UPDATE · ${incoming.title}`
-    );
-  };
-
-  /* =========================================================
-     HOME LINKS
-  ========================================================= */
-
-  const injectHomeLinks = () => {
-    const intro = $('intro');
-
-    if (!intro) return;
-
-    /*
-      Home V4 owns the visible utility buttons.
-      Do not create a second FAQ / Update row.
-    */
-
-    if (
-      intro.querySelector(
-        '[data-home-v4-action]'
-      )
-    ) {
-      return;
-    }
-
-    const side =
-      intro.querySelector(
-        '.home-v3-side'
-      );
-
-    if (!side) return;
-
-    const ensureCard = (
-      id,
-      text,
-      small
-    ) => {
-
-      let button =
-        side.querySelector(
-          `[data-unified-home="${id}"]`
-        );
-
-      if (!button) {
-
-        button =
-          document.createElement(
-            'button'
-          );
-
-        button.type = 'button';
-
-        button.className =
-          'home-v3-card relay-home-nav-card';
-
-        button.dataset.unifiedHome =
-          id;
-
-        button.innerHTML = `
-          <span>
-            ${text}
-          </span>
-
-          <small>
-            ${small}
-          </small>
-        `;
-
-        side.appendChild(button);
-      }
-
-      button.onclick = event => {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (id === 'faq') {
-          openInfoPanel('faq');
-        } else {
-          openInfoPanel('update');
-        }
-      };
-    };
-
-    ensureCard(
-      'faq',
-      'FAQ',
-      'HELP · GAME SYSTEMS'
-    );
-
-    ensureCard(
-      'update',
-      'UPDATE',
-      'LATEST PATCHES · LIVE'
     );
   };
 
@@ -923,8 +724,6 @@ panel.classList.toggle(
 
   const install = () => {
 
-    injectHomeLinks();
-
     ensureGameplayElements();
 
     if (!$('relayUpdateCenter')) {
@@ -991,29 +790,18 @@ panel.classList.toggle(
   target.closest('[data-home-v4-action]');
 
 if (homeAction && homeVisible()) {
-  const action =
-    homeAction.dataset.homeV4Action;
-
-  if (action === 'faq') {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    openInfoPanel('faq');
-    return;
-  }
+  const action = homeAction.dataset.homeV4Action;
 
   if (action === 'update') {
     event.preventDefault();
     event.stopImmediatePropagation();
-
-    openInfoPanel('update');
+    openInfoPanel();
     return;
   }
 
   if (action === 'options') {
     event.preventDefault();
     event.stopImmediatePropagation();
-
     openOptions();
     return;
   }
@@ -1031,144 +819,7 @@ if (homeAction && homeVisible()) {
           event.preventDefault();
           event.stopImmediatePropagation();
 
-          openInfoPanel(
-            infoButton.dataset
-              .relayInfo === 'update'
-              ? 'update'
-              : 'faq'
-          );
-
-          return;
-        }
-
-        /* =================================================
-           FAQ QUESTION
-        ================================================= */
-
-        const faqQuestion =
-          target.closest(
-            '[data-faq-question]'
-          );
-
-        if (faqQuestion) {
-
-          event.preventDefault();
-          event.stopPropagation();
-
-          const item =
-            faqQuestion.closest(
-              '.relay-faq-item'
-            );
-
-          if (!item) return;
-
-          const answer =
-            item.querySelector(
-              '.relay-faq-answer'
-            );
-
-          /*
-            IMPORTANT:
-            We use .open everywhere.
-            No more .is-open mismatch.
-          */
-
-          const willOpen =
-            !item.classList.contains(
-              'open'
-            );
-
-          /*
-            Close all other FAQ items.
-            This prevents multiple answers
-            from stacking and creating overlap.
-          */
-
-          const panel =
-            faqQuestion.closest(
-              '#relayInfoContent'
-            );
-
-          if (panel) {
-
-            panel
-              .querySelectorAll(
-                '.relay-faq-item.open'
-              )
-              .forEach(otherItem => {
-
-                if (
-                  otherItem === item
-                ) {
-                  return;
-                }
-
-                otherItem.classList.remove(
-                  'open'
-                );
-
-                const otherButton =
-                  otherItem.querySelector(
-                    '[data-faq-question]'
-                  );
-
-                const otherAnswer =
-                  otherItem.querySelector(
-                    '.relay-faq-answer'
-                  );
-
-                if (otherButton) {
-
-                  otherButton.setAttribute(
-                    'aria-expanded',
-                    'false'
-                  );
-
-                  const otherState =
-                    otherButton.querySelector(
-                      '.faq-question-state'
-                    );
-
-                  if (otherState) {
-                    otherState.textContent =
-                      'QUERY';
-                  }
-                }
-
-                if (otherAnswer) {
-                  otherAnswer.hidden =
-                    true;
-                }
-              });
-          }
-
-          item.classList.toggle(
-            'open',
-            willOpen
-          );
-
-          faqQuestion.setAttribute(
-            'aria-expanded',
-            String(willOpen)
-          );
-
-          const state =
-            faqQuestion.querySelector(
-              '.faq-question-state'
-            );
-
-          if (state) {
-
-            state.textContent =
-              willOpen
-                ? 'ACTIVE'
-                : 'QUERY';
-          }
-
-          if (answer) {
-            answer.hidden =
-              !willOpen;
-          }
+          openInfoPanel();
 
           return;
         }
@@ -1268,20 +919,6 @@ if (homeAction && homeVisible()) {
         addLiveUpdate(
           event.detail
         )
-    );
-
-    /* =====================================================
-       HOME MUTATION WATCHER
-    ===================================================== */
-
-    new MutationObserver(
-      () => injectHomeLinks()
-    ).observe(
-      $('intro') || document.body,
-      {
-        subtree: true,
-        childList: true
-      }
     );
 
     /* =====================================================

@@ -21,6 +21,14 @@ const getAction = button => {
 
   if (
     button.matches(
+      '[data-home-v4-action="tutorial"],[data-v3-tutorial]'
+    )
+  ) {
+    return 'tutorial';
+  }
+
+  if (
+    button.matches(
       '[data-home-v4-action="exit"],[data-v3-exit]'
     )
   ) {
@@ -39,6 +47,14 @@ const getAction = button => {
       if (typeof openInfo === 'function') {
         return openInfo(action);
       }
+    }
+
+    if (action === 'tutorial') {
+      const openTutorial = window.relayOpenHomeTutorial;
+      if (typeof openTutorial === 'function') {
+        return openTutorial();
+      }
+      return false;
     }
 
     if (action === 'options') {
@@ -70,7 +86,7 @@ const getAction = button => {
     if (!homeVisible()) return;
     const target = event.target;
     if (!(target instanceof Element)) return;
-    const button = target.closest('[data-home-v4-action],[data-v3-options],[data-v3-faq],[data-v3-update],[data-v3-exit]');
+    const button = target.closest('[data-home-v4-action],[data-v3-options],[data-v3-faq],[data-v3-update],[data-v3-tutorial],[data-v3-exit]');
     const action = getAction(button);
     if (!action) return;
 
@@ -103,6 +119,7 @@ const getAction = button => {
   window.relayHomeNavigationV2 = Object.freeze({
     focusHome: () => document.querySelector('#intro [data-home-v4-action], #intro [data-v3-options], #intro [data-v3-faq], #intro [data-v3-exit]'),
     options: () => callRouter('options'),
+  tutorial: () => callRouter('tutorial'),
     faq: () => callRouter('faq'),
     update: () => callRouter('update'),
     exit: () => callRouter('exit'),
