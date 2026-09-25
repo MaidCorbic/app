@@ -1,0 +1,265 @@
+/* ==========================================================================
+   RELAY RUNNER — GAMEPLAY ENTRY MODERN V1
+   Presentation-only layer for the first gameplay viewport.
+   Keeps gameplay ownership untouched and removes visual competition.
+   ========================================================================== */
+
+#play {
+  --relay-entry-cyan: #8df4ff;
+  --relay-entry-blue: #39b9ff;
+  --relay-entry-muted: #76909f;
+  --relay-entry-panel: rgba(4, 12, 21, .90);
+  --relay-entry-line: rgba(141, 244, 255, .16);
+  isolation: isolate;
+}
+
+/* --------------------------------------------------------------------------
+   HUD hierarchy
+   -------------------------------------------------------------------------- */
+
+#play .hud {
+  font-family: "Orbitron", var(--relay-font, system-ui), sans-serif !important;
+  z-index: 60 !important;
+}
+
+#play .hud-route,
+#play .hud-progress,
+#play .hud-xp,
+#play .hud-actions > button {
+  position: relative !important;
+  border-color: var(--relay-entry-line) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    inset 0 0 18px rgba(141,244,255,.018),
+    0 10px 28px rgba(0,0,0,.28),
+    0 0 22px rgba(57,185,255,.035) !important;
+}
+
+#play .hud-route::after,
+#play .hud-progress::after,
+#play .hud-xp::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 12px !important;
+  width: 34px !important;
+  height: 1px !important;
+  background: var(--relay-entry-cyan) !important;
+  opacity: .55 !important;
+  pointer-events: none !important;
+}
+
+#play .hud-route .route-dot {
+  box-shadow:
+    0 0 6px var(--relay-entry-cyan),
+    0 0 14px rgba(141,244,255,.45) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Mission / objective marker
+   -------------------------------------------------------------------------- */
+
+#play .world-marker {
+  position: absolute !important;
+  top: 92px !important;
+  left: 18px !important;
+  z-index: 45 !important;
+
+  width: min(300px, calc(100vw - 36px)) !important;
+  box-sizing: border-box !important;
+
+  padding: 9px 12px !important;
+  border: 1px solid rgba(141,244,255,.13) !important;
+  border-left: 2px solid var(--relay-entry-cyan) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(3,12,22,.82),
+      rgba(4,9,16,.58)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 12px 30px rgba(0,0,0,.20) !important;
+
+  backdrop-filter: blur(7px) !important;
+  -webkit-backdrop-filter: blur(7px) !important;
+
+  pointer-events: none !important;
+}
+
+#play .world-marker::before {
+  content: "LIVE OBJECTIVE" !important;
+  display: block !important;
+  margin-bottom: 5px !important;
+  color: var(--relay-entry-cyan) !important;
+  font: 800 7px/1 "Orbitron", sans-serif !important;
+  letter-spacing: .16em !important;
+  opacity: .72 !important;
+}
+
+#play .world-marker #worldMissionLabel {
+  display: block !important;
+  margin-bottom: 4px !important;
+  color: #708896 !important;
+  font: 700 7px/1.1 "Orbitron", sans-serif !important;
+  letter-spacing: .12em !important;
+}
+
+#play .world-marker #worldGoal {
+  display: block !important;
+  color: #e8fbff !important;
+  font: 800 10px/1.2 "Orbitron", sans-serif !important;
+  letter-spacing: .045em !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* --------------------------------------------------------------------------
+   Desktop input rail
+   -------------------------------------------------------------------------- */
+
+#play .input-guide {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 18px !important;
+  transform: translateX(-50%) !important;
+
+  z-index: 55 !important;
+  box-sizing: border-box !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+
+  width: max-content !important;
+  max-width: calc(100vw - 36px) !important;
+
+  padding: 7px 11px !important;
+
+  border: 1px solid rgba(141,244,255,.12) !important;
+  background: rgba(2,8,14,.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 8px 22px rgba(0,0,0,.24) !important;
+
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+
+  color: rgba(211,232,240,.64) !important;
+  font: 700 7px/1 "Orbitron", sans-serif !important;
+  letter-spacing: .10em !important;
+  text-transform: uppercase !important;
+
+  pointer-events: none !important;
+}
+
+#play .input-guide kbd {
+  display: inline-grid !important;
+  place-items: center !important;
+
+  min-width: 24px !important;
+  height: 20px !important;
+  padding: 0 5px !important;
+  box-sizing: border-box !important;
+
+  border: 1px solid rgba(141,244,255,.19) !important;
+  background: rgba(10,25,39,.88) !important;
+  color: var(--relay-entry-cyan) !important;
+
+  font: 900 7px/1 "Orbitron", sans-serif !important;
+  letter-spacing: .04em !important;
+}
+
+#play .input-guide i {
+  width: 2px !important;
+  height: 2px !important;
+  margin: 0 2px !important;
+  border-radius: 50% !important;
+  background: var(--relay-entry-cyan) !important;
+  box-shadow: 0 0 7px var(--relay-entry-cyan) !important;
+  opacity: .55 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Event HUD: keep it below the permanent HUD hierarchy.
+   -------------------------------------------------------------------------- */
+
+#play #gameplayEventHud,
+#play .gameplay-event-hud {
+  z-index: 35 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Desktop
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 881px) {
+  #play .hud {
+    padding-top: 14px !important;
+  }
+
+  #play .world-marker {
+    top: 96px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Touch landscape
+   -------------------------------------------------------------------------- */
+
+@media (pointer: coarse) and (orientation: landscape) {
+  #play .world-marker {
+    top: max(66px, calc(env(safe-area-inset-top) + 58px)) !important;
+    left: 10px !important;
+    width: min(250px, 36vw) !important;
+    padding: 7px 9px !important;
+  }
+
+  #play .world-marker::before {
+    font-size: 6px !important;
+  }
+
+  #play .world-marker #worldMissionLabel {
+    font-size: 6px !important;
+  }
+
+  #play .world-marker #worldGoal {
+    font-size: 8px !important;
+  }
+
+  #play .input-guide {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Narrow desktop/tablet landscape
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  #play .world-marker {
+    top: 88px !important;
+    left: 12px !important;
+    width: min(270px, 34vw) !important;
+  }
+
+  #play .input-guide {
+    bottom: 12px !important;
+    font-size: 6px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  #play .hud-route,
+  #play .hud-progress,
+  #play .hud-xp,
+  #play .hud-actions > button {
+    transition: none !important;
+  }
+}
