@@ -819,7 +819,7 @@ if (homeAction && homeVisible()) {
           event.preventDefault();
           event.stopImmediatePropagation();
 
-          openInfoPanel('update');
+          openInfoPanel();
 
           return;
         }
@@ -919,20 +919,6 @@ if (homeAction && homeVisible()) {
         addLiveUpdate(
           event.detail
         )
-    );
-
-    /* =====================================================
-       HOME MUTATION WATCHER
-    ===================================================== */
-
-    new MutationObserver(
-      () => injectHomeLinks()
-    ).observe(
-      $('intro') || document.body,
-      {
-        subtree: true,
-        childList: true
-      }
     );
 
     /* =====================================================
