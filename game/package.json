@@ -56,7 +56,8 @@
     "test:route-mutation-choice-coordination": "node tests/route-mutation-choice-coordination-v1.mjs",
     "test:release-runtime-qa": "node tests/release-runtime-qa.mjs",
     "test:release-hardening": "node tests/release-hardening-contract.mjs && npm run test:full-gameplay-roadmap && npm run test:release-ux-gameplay-polish && npm run test:gameplay-variety-safe-layer && npm run test:gameplay-route-choice-v2 && npm run test:gameplay-route-score-bonus && npm run test:route-choice-branching-v1 && npm run test:route-choice-duplicate-event-guard && npm run test:route-mutation-choice-coordination && npm run test:final-stability && npm run test:runner-runtime-stability && npm run build",
-    "test:full-gameplay-roadmap": "node tests/full-gameplay-roadmap-v1.mjs && node tests/enemy-pursuit-lockdown-escape-v1.mjs"
+    "test:full-gameplay-roadmap": "node tests/full-gameplay-roadmap-v1.mjs && node tests/enemy-pursuit-lockdown-escape-v1.mjs",
+    "test:gameplay-entry-modern": "node tests/gameplay-entry-modern-v1.mjs"
   },
   "engines": {
     "node": "24.x"
