@@ -478,10 +478,10 @@ assertNoPairwiseOverlap(
     // runtime QA aligned with the actual mobile HUD ownership instead of the legacy #pause node.
     await page.evaluate(() => {
       window.setTimeout(() => {
-        document.querySelector('#mobilePauseButton')?.click();
+        window.relayMobilePauseV2?.open?.();
       }, 0);
     });
-    console.log('LANDSCAPE: pause click scheduled');
+    console.log('LANDSCAPE: canonical mobile pause open scheduled');
     await waitForVisible(page, '#pauseMenu');
     await waitForVisible(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-pause-tab="settings"]');
