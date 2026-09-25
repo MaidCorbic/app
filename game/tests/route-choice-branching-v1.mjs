@@ -1,17 +1,32 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const root = new URL('..', import.meta.url);
 const runtimePath = new URL('src/systems/route-choice-branching-v1.js', root);
 const runtime = fs.readFileSync(runtimePath, 'utf8');
 const bootstrap = fs.readFileSync(new URL('relay-ui-init.js', root), 'utf8');
 
-const syntax = spawnSync(process.execPath, ['--check', runtimePath.pathname], { encoding: 'utf8' });
+const syntax = spawnSync(process.execPath, ['--check', fileURLToPath(runtimePath)], {
+  encoding: 'utf8',
+});
 assert.equal(syntax.status, 0, syntax.stderr || 'route choice branching failed node --check');
 
-for (const mission of ['first-delivery', 'dead-drop', 'blackout', 'pursuit', 'signal-storm', 'corporate-lockdown', 'final-relay']) {
-  assert.match(runtime, new RegExp(`['\\"]?${mission.replace('-', '\\-')}['\\"]?\\s*:`), `missing mission profile: ${mission}`);
+for (const mission of [
+  'first-delivery',
+  'dead-drop',
+  'blackout',
+  'pursuit',
+  'signal-storm',
+  'corporate-lockdown',
+  'final-relay',
+]) {
+  assert.match(
+    runtime,
+    new RegExp(`['\\"]?${mission.replace('-', '\\-')}['\\"]?\\s*:`),
+    `missing mission profile: ${mission}`,
+  );
 }
 
 assert.match(runtime, /safeOffset: 0/);

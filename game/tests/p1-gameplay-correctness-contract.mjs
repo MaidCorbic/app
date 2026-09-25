@@ -5,13 +5,14 @@ const root = process.cwd();
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const relay = read('relay-ui-init.js');
 const p1 = read('p1-gameplay-correctness-v1.js');
+const pauseInteractions = read('pause-interactions.js');
 
 const checks = [
   ['P1 runtime is imported', relay.includes("import './p1-gameplay-correctness-v1.js';")],
   ['Pause/Intel freeze owner exists', p1.includes("freeze(this, 'enemy-intel')") && p1.includes("freeze(scene, 'pause-menu')")],
   ['Dash breakable integration exists', p1.includes("'breakable-destroyed'") && p1.includes("dash-start")],
   ['Momentum uses authoritative game events', p1.includes("events.on?.('feedback'") && p1.includes("events.on?.('dash-start'")],
-  ['Mobile settings shortcut can be hidden', p1.includes('mobile-menu-settings{display:none!important}')],
+['Mobile settings shortcut exists in the canonical HUD', relay.includes('mobileSettingsButton')],
   ['Pause panel scroll is bounded on mobile', p1.includes('max-height:62dvh') && p1.includes('overflow-y:auto')],
 ];
 

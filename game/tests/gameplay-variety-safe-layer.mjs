@@ -1,15 +1,18 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const root = new URL('..', import.meta.url);
-const read = file => fs.readFileSync(new URL(file, root), 'utf8');
+const read = (file) => fs.readFileSync(new URL(file, root), 'utf8');
 
 const runtimePath = new URL('src/systems/gameplay-variety-safe-layer-v1.js', root);
 const runtime = fs.readFileSync(runtimePath, 'utf8');
 const bootstrap = read('relay-ui-init.js');
 
-const syntax = spawnSync(process.execPath, ['--check', runtimePath.pathname], { encoding: 'utf8' });
+const syntax = spawnSync(process.execPath, ['--check', fileURLToPath(runtimePath)], {
+  encoding: 'utf8',
+});
 assert.equal(syntax.status, 0, syntax.stderr || 'gameplay variety runtime failed node --check');
 
 assert.match(runtime, /GAMEPLAY_VARIETY_FLAGS/);
@@ -46,6 +49,9 @@ assert.match(runtime, /catch \(error\)/);
 assert.match(runtime, /getMissionRouteConsequence/);
 
 assert.match(bootstrap, /src\/systems\/gameplay-variety-safe-layer-v1\.js/);
-assert.equal((bootstrap.match(/src\/systems\/gameplay-variety-safe-layer-v1\.js/g) || []).length, 1);
+assert.equal(
+  (bootstrap.match(/src\/systems\/gameplay-variety-safe-layer-v1\.js/g) || []).length,
+  1,
+);
 
 console.log('gameplay-variety-safe-layer: PASS');

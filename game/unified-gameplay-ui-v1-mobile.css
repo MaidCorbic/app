@@ -185,9 +185,9 @@
      ORIGINAL PAUSE
      ========================================================== */
 
-  html body.is-touch #game #play .hud .hud-actions > #pause {
+    html body.is-touch #game #play .hud .hud-actions > #pause {
 
-    display: grid !important;
+    display: none !important;
 
     place-items: center !important;
 
@@ -205,13 +205,13 @@
 
     box-sizing: border-box !important;
 
-    visibility: visible !important;
+    flex: 0 0 44px !important;
 
-    opacity: 1 !important;
+    visibility: hidden !important;
 
-    pointer-events: auto !important;
+    opacity: 0 !important;
 
-    flex: 0 0 auto !important;
+    pointer-events: none !important;
   }
 
 
@@ -505,16 +505,7 @@
      REMOVE BOTTOM MOBILE HUD IN LANDSCAPE
      ========================================================== */
 
-  html body.is-touch #game #mobileBottomHud {
-
-    display: none !important;
-
-    visibility: hidden !important;
-
-    opacity: 0 !important;
-
-    pointer-events: none !important;
-  }
+  /* Bottom mobile HUD is controlled by #mobileBottomHud.is-active. */
 
 
   /* ==========================================================

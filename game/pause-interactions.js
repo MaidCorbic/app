@@ -28,7 +28,6 @@
           pointer-events: none !important;
         }
 
-        html body.is-touch #play #pause,
         html body.is-touch #mobileBottomHud .mobile-menu-pause {
           display: grid !important;
           visibility: visible !important;
