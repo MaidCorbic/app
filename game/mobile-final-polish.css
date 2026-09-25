@@ -578,3 +578,62 @@
     display: block !important;
   }
 }
+
+
+/* =========================================================
+   LANDSCAPE FALLBACK — TOUCH HUD GEOMETRY
+   The runtime also marks body.is-touch, but the landscape
+   contract must remain measurable even if that class arrives
+   one frame late during the mobile boot hand-off.
+   ========================================================= */
+@media (orientation: landscape) and (pointer: coarse) {
+  html body #play .mobile-controls {
+    position: fixed !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    left: auto !important;
+    top: auto !important;
+    z-index: 5000 !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  html body #play .mobile-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, clamp(48px, 10vh, 64px)) !important;
+    grid-template-rows: repeat(2, clamp(48px, 10vh, 64px)) !important;
+    gap: 5px !important;
+    width: max-content !important;
+    height: max-content !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+  }
+
+  html body #play .mobile-actions > button[data-mobile-action] {
+    position: relative !important;
+    width: clamp(48px, 10vh, 64px) !important;
+    height: clamp(48px, 10vh, 64px) !important;
+    min-width: clamp(48px, 10vh, 64px) !important;
+    min-height: clamp(48px, 10vh, 64px) !important;
+    max-width: clamp(48px, 10vh, 64px) !important;
+    max-height: clamp(48px, 10vh, 64px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+}
