@@ -1,0 +1,93 @@
+/* RELAY RUNNER — HOME OPTIONS ORBITRON POLISH
+   Presentation-only layer. Keeps canonical Options behaviour intact.
+*/
+
+#titlePanel.relay-options-unified,
+#titlePanel.relay-options-unified *,
+#pauseMenu.relay-options-unified,
+#pauseMenu.relay-options-unified *{
+  font-family:'Orbitron',system-ui,sans-serif !important;
+  font-synthesis:none;
+}
+
+#titlePanel.relay-options-unified .relay-option-copy small,
+#pauseMenu.relay-options-unified .relay-option-copy small,
+#titlePanel.relay-options-unified .relay-graphics-info span,
+#pauseMenu.relay-options-unified .relay-graphics-info span{
+  font-family:'Orbitron',system-ui,sans-serif !important;
+  letter-spacing:.08em;
+}
+
+#titlePanel.relay-options-unified .relay-options-shell,
+#pauseMenu.relay-options-unified .relay-options-shell{
+  background:
+    radial-gradient(circle at 50% 0%,rgba(56,189,248,.08),transparent 38%),
+    linear-gradient(180deg,rgba(2,9,16,.98),rgba(4,13,23,.99));
+  border:1px solid rgba(56,189,248,.22);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.04),
+    0 24px 80px rgba(0,0,0,.48),
+    0 0 32px rgba(56,189,248,.07);
+}
+
+#titlePanel.relay-options-unified .relay-options-nav,
+#pauseMenu.relay-options-unified .relay-options-nav{
+  border-color:rgba(56,189,248,.16);
+  background:rgba(3,12,21,.82);
+}
+
+#titlePanel.relay-options-unified .relay-options-nav button,
+#pauseMenu.relay-options-unified .relay-options-nav button,
+#titlePanel.relay-options-unified .relay-action,
+#pauseMenu.relay-options-unified .relay-action,
+#titlePanel.relay-options-unified .relay-graphics-button,
+#pauseMenu.relay-options-unified .relay-graphics-button{
+  font-family:'Orbitron',system-ui,sans-serif !important;
+  font-weight:700;
+  letter-spacing:.1em;
+}
+
+#titlePanel.relay-options-unified .relay-options-section,
+#pauseMenu.relay-options-unified .relay-options-section{
+  border-color:rgba(56,189,248,.13);
+  background:
+    linear-gradient(180deg,rgba(8,22,35,.96),rgba(3,11,19,.98));
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.025),
+    inset 0 0 28px rgba(56,189,248,.025);
+}
+
+#titlePanel.relay-options-unified .relay-section-title,
+#pauseMenu.relay-options-unified .relay-section-title{
+  color:#9be7ff;
+  font-family:'Orbitron',system-ui,sans-serif !important;
+  font-weight:800;
+}
+
+#titlePanel.relay-options-unified .relay-option-copy strong,
+#pauseMenu.relay-options-unified .relay-option-copy strong{
+  font-family:'Orbitron',system-ui,sans-serif !important;
+  color:#e8fbff;
+}
+
+#titlePanel.relay-options-unified .relay-option-copy small,
+#pauseMenu.relay-options-unified .relay-option-copy small{
+  color:rgba(210,235,246,.58);
+}
+
+#titlePanel.relay-options-unified input,
+#titlePanel.relay-options-unified select,
+#titlePanel.relay-options-unified button,
+#pauseMenu.relay-options-unified input,
+#pauseMenu.relay-options-unified select,
+#pauseMenu.relay-options-unified button{
+  -webkit-font-smoothing:antialiased;
+  text-rendering:geometricPrecision;
+}
+
+@media(max-width:780px){
+  #titlePanel.relay-options-unified .relay-options-section,
+  #pauseMenu.relay-options-unified .relay-options-section{
+    padding:11px;
+  }
+}
