@@ -55,6 +55,7 @@ jobs:
         run: npm run test:release-hardening
 
       - name: Run release runtime QA
+        timeout-minutes: 10
         run: npm run test:release-runtime-qa
 
       - name: Build production game
