@@ -77,92 +77,14 @@ async function waitForHidden(page, selector, timeout = 15000) {
 }
 
 async function waitForGameplayBriefingRelease(page, timeout = 20000) {
-  await page.waitForFunction(
-    () => {
-      const briefing = document.getElementById('relayGameplayIntroFinalV5');
-      const play = document.getElementById('play');
-
-      if (play?.classList.contains('relay-map-briefing-lock')) return false;
-      if (!briefing) return true;
-
-      const style = getComputedStyle(briefing);
-
-      return (
-        briefing.hidden ||
-        style.display === 'none' ||
-        style.visibility === 'hidden'
-      );
-    },
-    undefined,
-    { timeout },
-  );
-}
-
-async function waitForHomeEntry(page, timeout = 30000) {
-  try {
-    return await page.waitForFunction(
-      () => {
-        const intro = document.getElementById('intro');
-        const start = document.getElementById('start');
-
-        const bridgeReady =
-          typeof window.relayLaunchGameplay === 'function';
-
-        if (start) {
-          const introStyle = getComputedStyle(intro);
-          const startStyle = getComputedStyle(start);
-
-          const homeVisible =
-            Boolean(intro) &&
-            intro.dataset.homeV4Built === '1' &&
-            !intro.hidden &&
-            !intro.classList.contains('hidden') &&
-            introStyle.display !== 'none' &&
-            introStyle.visibility !== 'hidden' &&
-            introStyle.opacity !== '0' &&
-            startStyle.display !== 'none' &&
-            startStyle.visibility !== 'hidden' &&
-            startStyle.opacity !== '0';
-
-          if (homeVisible) {
-            return 'button';
-          }
-        }
-
-        return bridgeReady ? 'bridge' : false;
-      },
-      undefined,
-      { timeout },
-    );
-  } catch (error) {
-    const diagnostics = await page.evaluate(() => {
-      const intro = document.getElementById('intro');
-      const start = document.getElementById('start');
-      const introStyle = intro ? getComputedStyle(intro) : null;
-      const startStyle = start ? getComputedStyle(start) : null;
-
-      return {
-        readyState: document.readyState,
-        homeBuilt: intro?.dataset?.homeV4Built ?? null,
-        introHidden: intro?.hidden ?? null,
-        introClass: intro?.className ?? null,
-        introDisplay: introStyle?.display ?? null,
-        introVisibility: introStyle?.visibility ?? null,
-        introOpacity: introStyle?.opacity ?? null,
-        startExists: Boolean(start),
-        startDisplay: startStyle?.display ?? null,
-        startVisibility: startStyle?.visibility ?? null,
-        startOpacity: startStyle?.opacity ?? null,
-        launchBridgeReady:
-          typeof window.relayLaunchGameplay === 'function',
-        runtimeError: window.relayLastRuntimeError?.error ?? null,
-      };
-    });
-
-    error.message =
-      `${error.message} | waitForHomeEntry diagnostics: ${JSON.stringify(diagnostics)}`;
-    throw error;
-  }
+  await page.waitForFunction(() => {
+    const briefing = document.getElementById('relayGameplayIntroFinalV5');
+    const play = document.getElementById('play');
+    if (play?.classList.contains('relay-map-briefing-lock')) return false;
+    if (!briefing) return true;
+    const style = getComputedStyle(briefing);
+    return briefing.hidden || style.display === 'none' || style.visibility === 'hidden';
+  }, { timeout });
 }
 
 function assertNoPairwiseOverlap(rects, label) {
@@ -205,25 +127,9 @@ async function runMobileViewport(browser, viewport) {
   });
 
   try {
-    await page.goto(BASE_URL, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000,
-    });
-
-    const entryMode = await waitForHomeEntry(page, 30000);
-
-    if (entryMode === 'button') {
-      await clickDom(page, '#start');
-    } else {
-      await page.evaluate(() => {
-        if (typeof window.relayLaunchGameplay !== 'function') {
-          throw new Error('Canonical gameplay launch bridge is unavailable');
-        }
-
-        window.relayLaunchGameplay();
-      });
-    }
-
+    await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+    await waitForVisible(page, '#start');
+    await clickDom(page, '#start');
     await waitForHidden(page, '#intro');
 
     if (viewport.orientation === 'landscape') {
@@ -336,14 +242,7 @@ assertNoPairwiseOverlap(
     await waitForVisible(page, '[data-pause-tab="settings"]');
 
     await clickDom(page, '[data-pause-tab="settings"]');
-
-    await page.waitForFunction(
-      () =>
-        document.querySelector('.relay-cinematic-title')?.textContent?.trim() ===
-        'OPTIONS',
-      undefined,
-      { timeout: 15000 },
-    );
+    await page.waitForFunction(() => document.querySelector('.relay-cinematic-title')?.textContent?.trim() === 'OPTIONS');
     const settings = await page.evaluate(() => ({
       title: document.querySelector('.relay-cinematic-title')?.textContent?.trim() || '',
       toggleCount: document.querySelectorAll('[data-unified-setting]').length,

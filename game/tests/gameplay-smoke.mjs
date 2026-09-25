@@ -10,12 +10,10 @@ function waitForServer(url, timeoutMs = 15000) {
   const start = Date.now();
   return new Promise((resolve, reject) => {
     const attempt = () => {
-      fetch(url)
-        .then(() => resolve())
-        .catch(() => {
-          if (Date.now() - start > timeoutMs) reject(new Error('Server did not start in time'));
-          else setTimeout(attempt, 200);
-        });
+      fetch(url).then(() => resolve()).catch(() => {
+        if (Date.now() - start > timeoutMs) reject(new Error('Server did not start in time'));
+        else setTimeout(attempt, 200);
+      });
     };
     attempt();
   });
@@ -34,11 +32,9 @@ try {
   browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
-  page.on('pageerror', (err) => errors.push(`pageerror: ${err.message}`));
-  page.on('console', (message) => {
-    if (message.type() === 'error') {
-      errors.push(`console: ${message.text()}`);
-    }
+  page.on('pageerror', err => errors.push(`pageerror: ${err.message}`));
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(`console: ${message.text()}`);
   });
 
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
@@ -65,12 +61,10 @@ try {
   assert.ok(hud.objective.length > 0, 'Mission objective HUD should be populated during gameplay');
   assert.equal(hud.playHidden, false, 'Play HUD should be visible during gameplay');
   assert.equal(hud.introHidden, true, 'Intro screen should be hidden during gameplay');
-  assert.equal(hud.performanceVersion, '1.1', 'Mission Performance V1 should be installed');
+  assert.equal(hud.performanceVersion, '1.0', 'Mission Performance V1 should be installed');
   assert.equal(hud.performanceReady, true, 'Mission Performance V1 should expose its scoring API');
 
-  console.log(
-    'Gameplay smoke test passed: live gameplay reached with zero page and console errors.',
-  );
+  console.log('Gameplay smoke test passed: live gameplay reached with zero page and console errors.');
 } finally {
   if (browser) await browser.close();
   server.kill();

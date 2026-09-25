@@ -8,13 +8,13 @@
   pointer-events: none !important;
 }
 
-/* Portrait mobile keeps PAUSE + SETTINGS in the gameplay bottom HUD. */
+/* Portrait mobile keeps PAUSE only; SETTINGS remains available elsewhere when needed. */
 @media (max-width: 768px) and (orientation: portrait) {
   body.is-touch .mobile-bottom-hud .mobile-menu-settings {
-    display: grid !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 
   /* Keyboard-only ESC/controls hint has no purpose on touch devices. */

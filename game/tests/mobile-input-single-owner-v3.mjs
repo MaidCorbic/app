@@ -9,13 +9,7 @@ const index = await read('index.html');
 const owner = await read('src/systems/mobile-input-single-owner-v1.js');
 
 assert.equal((index.match(/src\/systems\/mobile-input-single-owner-v1\.js/g) || []).length, 1, 'single-owner module must be loaded exactly once');
-assert.ok(
-  index.indexOf('src="./src/main.js"') <
-    index.indexOf(
-      'src="./src/systems/mobile-input-single-owner-v1.js"'
-    ),
-  'single-owner must load after main boot'
-);
+assert.ok(index.indexOf('src="/src/main.js"') < index.indexOf('src="/src/systems/mobile-input-single-owner-v1.js"'), 'single-owner must load after main boot');
 assert.match(main, /data-mobile-action/);
 assert.match(owner, /MOBILE INPUT SINGLE OWNER V9/);
 assert.match(owner, /cloneNode\(true\)/);

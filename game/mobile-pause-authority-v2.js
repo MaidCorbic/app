@@ -103,12 +103,6 @@
   const install = () => {
     if (!getPauseButton()) return false;
 
-    if (window.__relayMobilePauseAuthorityInstalledV2) {
-      return true;
-    }
-
-    window.__relayMobilePauseAuthorityInstalledV2 = true;
-
     document.addEventListener('click', handleClick, true);
 
     const menu = getPauseMenu();
