@@ -4521,6 +4521,50 @@ $('start').onclick = () => {
   stopAudioBed();
   window.relayGameplayAudio?.play?.();
 
+  /*
+   * MAIN owns the real Home -> Gameplay handoff.
+   * Home presentation must not install a second competing Start handler.
+   */
+  const intro = $('intro');
+
+  intro?.classList.add('hidden');
+  intro?.setAttribute('aria-hidden', 'true');
+
+  const loader = window.relayPlayDeploymentV1;
+
+  if (
+    loader &&
+    typeof loader.show === 'function'
+  ) {
+    void loader.show({
+      missionNumber: 1,
+
+      desktop:
+        './assets/loadplay.jpg',
+
+      mobile:
+        './assets/loadplaymobile.jpg',
+
+      skipRoute: true,
+
+      beforeRoute: async () => {
+        if (
+          typeof window.relayLaunchGameplay ===
+          'function'
+        ) {
+          window.relayLaunchGameplay();
+          return;
+        }
+
+        game.scene.isPaused('runner')
+          ? game.scene.resume('runner')
+          : launch(0);
+      }
+    });
+
+    return;
+  }
+
   leaveHome(
     game.scene.isPaused('runner')
       ? () =>
