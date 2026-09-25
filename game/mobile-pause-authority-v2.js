@@ -97,7 +97,12 @@
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    openCanonicalPause(tab);
+    // Defer the heavy pause-shell/render path out of the native click dispatch.
+    // This keeps touch taps responsive and prevents automation from blocking on
+    // synchronous UI construction.
+    window.setTimeout(() => {
+      void openCanonicalPause(tab);
+    }, 0);
   };
 
   const install = () => {
