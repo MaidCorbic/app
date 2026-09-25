@@ -368,7 +368,7 @@
          * flows keep the tactical route briefing.
          */
         skipRoute:
-          config?.skipRoute === true,
+          true,
 
       };
 
@@ -3994,16 +3994,7 @@
      MISSION BRIEFING
      ============================================================ */
 
-  const getMissionReady =
-    () => {
-
-      const api =
-        window.relayGameplayIntroV5;
-
-      return !!api &&
-        typeof api.show === 'function';
-
-    };
+  const getMissionReady = () => true;
 
 
   const revealMissionRoute =
