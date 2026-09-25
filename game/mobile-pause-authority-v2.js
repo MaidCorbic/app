@@ -87,13 +87,25 @@
   };
 
   const handleClick = event => {
-    if (!isMobile()) return;
-
     const button = event.target instanceof Element
       ? event.target.closest('#pause, #mobilePauseButton, #mobileSettingsButton')
       : null;
 
     if (!button) return;
+
+    /*
+     * The dedicated mobile HUD controls are self-identifying. Do not make
+     * their click path depend on body.is-touch being synchronized in the
+     * same frame; that creates a bootstrap/orientation race in mobile QA.
+     * The legacy #pause button remains guarded by the mobile detector.
+     */
+    const isDedicatedMobileEntry =
+      button.id === 'mobilePauseButton' ||
+      button.id === 'mobileSettingsButton';
+
+    if (!isDedicatedMobileEntry && !isMobile()) {
+      return;
+    }
 
     const tab = button.id === 'mobileSettingsButton'
       ? 'settings'
