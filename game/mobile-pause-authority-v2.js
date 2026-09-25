@@ -60,17 +60,12 @@
         api.renderPause(tab || 'resume');
       }
 
-      const scene =
-        window.__relayRunnerScene ||
-        window.game?.scene?.getScene?.('runner') ||
-        null;
-
-      if (
-        scene?.scene?.isActive?.() &&
-        !scene.scene.isPaused?.()
-      ) {
-        scene.scene.pause();
-      }
+      /*
+       * Runner pause/resume is owned by p1-gameplay-correctness-v1.js.
+       * Do not call Phaser Scene.pause() here as a second authority: the
+       * pauseMenu class mutation above is enough to trigger the P1 lock.
+       * Keeping a single scene-state owner avoids pause-event re-entry.
+       */
     } catch (error) {
       console.error('[RelayRunner] Mobile pause authority failed:', error);
     } finally {
