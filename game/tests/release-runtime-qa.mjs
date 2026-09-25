@@ -507,6 +507,12 @@ assertNoPairwiseOverlap(
     await clickDom(page, '[data-unified-resume]');
     await waitForHidden(page, '#pauseMenu');
 
+    await page.waitForFunction(
+      () => Boolean(window.__relayRunnerScene?.scene?.isActive?.()),
+      undefined,
+      { timeout: 10000 },
+    );
+
     const resumed = await page.evaluate(() => ({
       introHidden: document.querySelector('#intro')?.classList.contains('hidden'),
       pauseHidden: document.querySelector('#pauseMenu')?.classList.contains('hidden'),
