@@ -111,8 +111,7 @@ import {
      *
      * This also triggers the P1 MutationObserver.
      */
-    pause.classList.add('hidden');
-
+    pause.setAttribute('data-pause-open', 'false');
     pause.setAttribute(
       'aria-hidden',
       'true'
@@ -1444,14 +1443,7 @@ import {
        * P1 observes this class change and pauses
        * the Phaser Runner scene.
        */
-      pause.classList.remove(
-        'hidden'
-      );
-
-      pause.classList.add(
-        'relay-cinematic-overlay'
-      );
-
+      pause.setAttribute('data-pause-open', 'true');
       pause.setAttribute(
         'aria-hidden',
         'false'
