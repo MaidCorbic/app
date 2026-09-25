@@ -328,11 +328,34 @@ async function runMobileViewport(browser, viewport) {
       );
     }
 
-    await withTimeout(
-      waitForHidden(page, '#intro'),
-      20000,
-      `${viewport.width}x${viewport.height} // hide home`,
-    );
+    try {
+      await withTimeout(
+        waitForHidden(page, '#intro'),
+        20000,
+        `${viewport.width}x${viewport.height} // hide home`,
+      );
+    } catch (error) {
+      const diagnostics = await page.evaluate(() => {
+        const intro = document.getElementById('intro');
+        const starts = [...document.querySelectorAll('#start')];
+        const start = starts[0] || null;
+        return {
+          introClass: intro?.className ?? null,
+          introHidden: intro?.hidden ?? null,
+          startCount: starts.length,
+          startDisabled: start?.disabled ?? null,
+          startConnected: start?.isConnected ?? null,
+          startOwner: start?.parentElement?.className ?? null,
+          launchBridge: typeof window.relayLaunchGameplay === 'function',
+          deploymentLoader: Boolean(window.relayPlayDeploymentV1),
+          deploymentActive: window.relayPlayDeploymentV1?.isActive?.() ?? null,
+          bootReady: document.getElementById('game')?.classList.contains('relay-boot-ready') ?? false,
+          runtimeError: window.relayLastRuntimeError?.error ?? null,
+        };
+      });
+      error.message += ' | hide-home diagnostics: ' + JSON.stringify(diagnostics);
+      throw error;
+    }
 
     if (viewport.orientation === 'landscape') {
       await withTimeout(
