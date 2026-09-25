@@ -132,6 +132,6 @@ assert.match(
 
 assert.match(
   mobileOwner,
-  /setDirection\(null\)/,
-  'Single mobile owner must clear movement direction on joystick release'
+  /setJoystickAxis\\(0\\)/,
+  'Single mobile owner must clear joystick movement on release'
 );
