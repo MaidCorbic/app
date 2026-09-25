@@ -64,8 +64,8 @@ assert.match(runner, /this\.mobileActions\.jump/, 'The runner must consume the t
 assert.match(styles, /body #pauseMenu \.menu-grid\{grid-template-columns:1fr/, 'Pause settings must collapse to one column on touch screens');
 assert.doesNotMatch(
   styles,
-  /\.mobile-joystick/,
-  'Canonical stylesheet must not contain legacy joystick styling'
+  /data-mobile-joystick|mobile-joystick-thumb/,
+  'Base stylesheet must not own the canonical joystick markup'
 );
 
 assert.match(
@@ -76,50 +76,74 @@ assert.match(
 assert.match(main, /const detectTouchDevice = \(\) => \{/, 'App must detect touch capability using multiple redundant signals');
 assert.match(main, /hasTouchPoints \|\| hasTouchEvents \|\| coarsePointer \|\| mobileUA/, 'Touch detection must avoid showing touch controls on desktop based only on viewport size');
 assert.match(main, /document\.body\.classList\.toggle\('is-touch', detectTouchDevice\(\)\)/, 'App must apply the detected state as a body class driving all touch CSS');
-assert.doesNotMatch(
+assert.match(
   index,
-  /data-mobile-joystick|mobile-joystick-thumb/,
-  'Touch controls must not contain a legacy virtual joystick'
+  /data-mobile-joystick/,
+  'Touch controls must contain the canonical virtual joystick'
+);
+
+assert.match(
+  index,
+  /mobile-joystick-thumb/,
+  'Virtual joystick must contain a movable thumb'
 );
 
 assert.match(
   mobileOwner,
-  /touch-screen-v13/,
-  'Single mobile owner must install the full-screen touch movement surface'
+  /touch-screen-v13 joystick-v1/,
+  'Single mobile owner must install the canonical joystick movement surface'
 );
 
 assert.match(
   mobileOwner,
-  /directionFromScreen/,
-  'Single mobile owner must map screen touch position to movement direction'
+  /data-mobile-joystick/,
+  'Single mobile owner must bind the canonical joystick'
 );
 
 assert.match(
   mobileOwner,
-  /SWIPE_THRESHOLD/,
-  'Single mobile owner must support horizontal swipe movement'
+  /mobile-joystick-thumb/,
+  'Single mobile owner must move the joystick thumb'
+);
+
+assert.match(
+  mobileOwner,
+  /DEAD_ZONE/,
+  'Joystick movement must have a dead zone'
+);
+
+assert.match(
+  mobileOwner,
+  /directionFromAxis/,
+  'Joystick axis must map to player direction'
+);
+
+assert.match(
+  mobileOwner,
+  /scene\.mobileAxis/,
+  'Joystick must expose its horizontal axis to the gameplay scene'
 );
 
 assert.match(
   mobileOwner,
   /movementPointerId/,
-  'Single mobile owner must track the active movement pointer'
+  'Single mobile owner must track the joystick pointer'
 );
 
 assert.match(
   mobileOwner,
-  /pointerdown[\s\S]{0,500}directionFromScreen/,
-  'Single mobile owner must route screen touch into movement direction'
+  /pointerdown[\s\S]{0,900}setJoystickAxis/,
+  'Single mobile owner must route joystick touch into movement'
 );
 
 assert.match(
   mobileOwner,
-  /SWIPE_THRESHOLD/,
-  'Single mobile owner must support swipe movement'
+  /pointermove[\s\S]{0,500}setJoystickAxis/,
+  'Single mobile owner must update movement while the thumb moves'
 );
 
 assert.match(
   mobileOwner,
   /setDirection\(null\)/,
-  'Single mobile owner must clear movement direction on release'
+  'Single mobile owner must clear movement direction on joystick release'
 );
