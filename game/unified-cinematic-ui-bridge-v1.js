@@ -49,9 +49,10 @@
       return;
     }
 
-    if (pause && visible('pauseMenu') && !isUnified('pauseMenu')) {
-      api.openPause('resume');
-    }
+    /*
+     * Pause is owned exclusively by pause-authority-v3.js.
+     * The bridge must never reopen it in response to DOM mutations.
+     */
   };
 
   const start = () => {
