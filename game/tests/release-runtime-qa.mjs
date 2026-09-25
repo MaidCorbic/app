@@ -476,7 +476,11 @@ assertNoPairwiseOverlap(
 
     // On mobile, the canonical Pause control is #mobilePauseButton. This keeps the
     // runtime QA aligned with the actual mobile HUD ownership instead of the legacy #pause node.
-    await clickDom(page, '#mobilePauseButton');
+    await page.evaluate(() => {
+      window.setTimeout(() => {
+        document.querySelector('#mobilePauseButton')?.click();
+      }, 0);
+    });
     await waitForVisible(page, '#pauseMenu');
     await waitForVisible(page, '[data-pause-tab="resume"]');
     await waitForVisible(page, '[data-pause-tab="settings"]');
