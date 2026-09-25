@@ -1,0 +1,97 @@
+name: Itch.io Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "Itch.io channel"
+        required: true
+        default: "html"
+        type: string
+      version:
+        description: "Release version (optional)"
+        required: false
+        default: ""
+        type: string
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-release:
+    name: Build and publish to Itch.io
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: game
+    env:
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      ITCH_USERNAME: ${{ vars.ITCH_USERNAME }}
+      ITCH_GAME: ${{ vars.ITCH_GAME }}
+      ITCH_CHANNEL: ${{ inputs.channel || 'html' }}
+      RELEASE_VERSION: ${{ inputs.version || github.ref_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: game/package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run release hardening
+        run: npm run test:release-hardening
+
+      - name: Run release runtime QA
+        run: npm run test:release-runtime-qa
+
+      - name: Build production game
+        run: npm run build
+
+      - name: Verify dist
+        run: |
+          test -f dist/index.html
+          echo "Build ready:"
+          du -sh dist
+          find dist -maxdepth 2 -type f | head -50
+
+      - name: Package Itch.io build
+        run: |
+          cd dist
+          zip -r ../itchio-${ITCH_CHANNEL}.zip .
+          cd ..
+          ls -lh itchio-${ITCH_CHANNEL}.zip
+
+      - name: Upload downloadable build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: itchio-${{ inputs.channel || 'html' }}
+          path: game/itchio-${{ inputs.channel || 'html' }}.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Setup Butler
+        if: ${{ env.BUTLER_API_KEY != '' && env.ITCH_USERNAME != '' && env.ITCH_GAME != '' }}
+        uses: remarkablegames/setup-butler@v3
+
+      - name: Publish to Itch.io
+        if: ${{ env.BUTLER_API_KEY != '' && env.ITCH_USERNAME != '' && env.ITCH_GAME != '' }}
+        working-directory: game
+        run: |
+          echo "Publishing ${ITCH_USERNAME}/${ITCH_GAME}:${ITCH_CHANNEL}"
+          butler push dist "${ITCH_USERNAME}/${ITCH_GAME}:${ITCH_CHANNEL}" --userversion "${RELEASE_VERSION}"
+
+      - name: Explain skipped Itch upload
+        if: ${{ env.BUTLER_API_KEY == '' || env.ITCH_USERNAME == '' || env.ITCH_GAME == '' }}
+        run: |
+          echo "Build artifact was created successfully."
+          echo "Itch.io upload was skipped because BUTLER_API_KEY, ITCH_USERNAME or ITCH_GAME is missing."
