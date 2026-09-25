@@ -264,61 +264,27 @@ const updateMarkup = () => `
      INFO PANEL
   ========================================================= */
 
-  const openInfoPanel = kind => {
+  const openInfoPanel = () => {
     const panel = $('relayInfoPanel');
     const eyebrow = $('relayInfoEyebrow');
     const heading = $('relayInfoHeading');
     const content = $('relayInfoContent');
 
-    if (
-      !panel ||
-      !eyebrow ||
-      !heading ||
-      !content
-    ) {
+    if (!panel || !eyebrow || !heading || !content) {
       return false;
     }
 
     $('relayUpdateCenter')?.classList.add('hidden');
-
     panel.classList.remove('hidden');
+    panel.classList.remove('relay-faq-mode');
+    panel.classList.add('relay-update-mode');
+    panel.setAttribute('aria-hidden', 'false');
 
-    panel.setAttribute(
-      'aria-hidden',
-      'false'
-    );
+    eyebrow.textContent =
+      LATEST_UPDATE.version || 'LATEST UPDATE';
 
-   panel.classList.toggle(
-  'relay-update-mode',
-  kind === 'update'
-);
-
-panel.classList.toggle(
-  'relay-faq-mode',
-  kind === 'faq'
-);
-
-    if (kind === 'faq') {
-
-      eyebrow.textContent =
-        'RELAY RUNNER // FIELD GUIDE';
-
-      heading.textContent =
-        'FAQ';
-
-      content.innerHTML =
-        faqMarkup();
-
-    } else {
-      eyebrow.textContent =
-        LATEST_UPDATE.version || 'LATEST UPDATE';
-
-      heading.textContent =
-        'UPDATE';
-
-      content.innerHTML =
-        updateMarkup();
-    }
+    heading.textContent = 'UPDATE';
+    content.innerHTML = updateMarkup();
 
     return true;
   };
@@ -371,7 +337,7 @@ panel.classList.toggle(
 
     writeUpdates(next);
 
-    openInfoPanel('update');
+    openInfoPanel();
 
     announce(
       'UPDATE CHANNEL REFRESHED'
@@ -825,29 +791,18 @@ panel.classList.toggle(
   target.closest('[data-home-v4-action]');
 
 if (homeAction && homeVisible()) {
-  const action =
-    homeAction.dataset.homeV4Action;
-
-  if (action === 'faq') {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    openInfoPanel('faq');
-    return;
-  }
+  const action = homeAction.dataset.homeV4Action;
 
   if (action === 'update') {
     event.preventDefault();
     event.stopImmediatePropagation();
-
-    openInfoPanel('update');
+    openInfoPanel();
     return;
   }
 
   if (action === 'options') {
     event.preventDefault();
     event.stopImmediatePropagation();
-
     openOptions();
     return;
   }
