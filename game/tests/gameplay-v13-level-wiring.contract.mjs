@@ -10,7 +10,8 @@ const systems=fs.readFileSync(v13,'utf8');
 const ids=[...systems.matchAll(/\['([A-Z0-9]+)','[^']+'\]/g)].map(m=>m[1]);
 const levelIds=[...src.matchAll(/\{ id:'([^']+)', active:/g)].map(m=>m[1]);
 assert.equal(ids.length,34,'V13 must define exactly 34 systems');
-assert.equal(levelIds.length,7,'all seven campaign missions must be wired');
+assert.equal(levelIds.length,8,'all eight campaign missions must be wired');
+assert.ok(levelIds.includes('mission-08'),'Mission 8 must be wired into V13');
 for(const id of ids) assert.match(src,new RegExp(`['"]${id}['"]`),`missing level wiring for ${id}`);
 assert.match(src,/missions/,'level wiring must use real mission data');
 assert.match(src,/gameplay:system-visible/,'each triggered system must be visible in gameplay');
@@ -19,4 +20,4 @@ assert.doesNotMatch(src,/addEventListener\(['"]keydown/,'must not add keyboard l
 assert.doesNotMatch(src,/console\.(log|warn|error)/,'must not add console noise');
 assert.match(boot,/installGameplayV13LevelWiring/,'loader must install level wiring');
 assert.match(boot,/gameplay-v13-level-wiring-v1\.js/,'loader must import level wiring');
-console.log('V13 level wiring contract OK: 7 missions, 34 systems, visible triggers, no keyboard listener, no console logging.');
+console.log('V13 level wiring contract OK: 8 missions, 34 systems, visible triggers, no keyboard listener, no console logging.');
