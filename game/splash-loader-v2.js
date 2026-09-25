@@ -52,6 +52,34 @@
     ).matches === true;
 
 
+  const isMobilePortrait = () =>
+    isCoarseDevice() &&
+    window.matchMedia?.(
+      '(orientation: portrait)'
+    ).matches === true;
+
+
+  const waitForLandscape = () =>
+    new Promise(resolve => {
+      if (!isMobilePortrait()) {
+        resolve();
+        return;
+      }
+
+      const check = () => {
+        if (!isMobilePortrait()) {
+          window.removeEventListener('orientationchange', check);
+          window.removeEventListener('resize', check);
+          resolve();
+        }
+      };
+
+      window.addEventListener('orientationchange', check, { passive: true });
+      window.addEventListener('resize', check, { passive: true });
+      check();
+    });
+
+
   const sleep = ms =>
     new Promise(resolve =>
       window.setTimeout(
@@ -2936,7 +2964,8 @@
             if (
               !document.body.contains(
                 splash
-              )
+              ) ||
+              isMobilePortrait()
             ) {
               return;
             }
@@ -2981,6 +3010,15 @@
       hardenSplash(
         splash
       );
+
+
+      /* ========================================================
+         MOBILE PORTRAIT GATE
+         Portrait intentionally stays on the loader.
+         Gameplay boots after rotation to landscape.
+         ======================================================== */
+
+      await waitForLandscape();
 
 
       /* ========================================================
