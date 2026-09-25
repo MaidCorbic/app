@@ -19,7 +19,7 @@ import './unified-cinematic-ui-v1.js';
 
   const isOpen = () => {
     const menu = getMenu();
-    return !!menu && !menu.classList.contains('hidden');
+    return !!menu && menu.dataset.pauseOpen === 'true';
   };
 
   const setMenuVisible = visible => {
@@ -27,11 +27,10 @@ import './unified-cinematic-ui-v1.js';
     if (!menu) return false;
 
     if (visible) {
-      menu.classList.remove('hidden');
-      menu.removeAttribute('hidden');
+      menu.setAttribute('data-pause-open', 'true');
       menu.setAttribute('aria-hidden', 'false');
     } else {
-      menu.classList.add('hidden');
+      menu.setAttribute('data-pause-open', 'false');
       menu.setAttribute('aria-hidden', 'true');
     }
 
