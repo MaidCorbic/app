@@ -45,30 +45,32 @@
 
       if (!menu) return;
 
-      // Make the canonical shell visible immediately. The cinematic API may
-      // render asynchronously, but the pause surface must never remain hidden
-      // while automation/user input is waiting for the open state.
-      menu.classList.remove('hidden');
-      menu.setAttribute('aria-hidden', 'false');
-
       /*
-       * Do not click another button and do not call Phaser pause/resume.
-       * The unified cinematic UI owns presentation; the P1 pause authority
-       * observes #pauseMenu and owns the actual Runner scene state.
+       * Mobile owns the actual pause entry. Do not route through
+       * unified openPause() here: that path is also observed by the
+       * cinematic bridge and can re-enter while the shell is mounting.
        */
-      const api = await waitForApi();
+      menu.setAttribute('data-pause-open', 'true');
+      menu.setAttribute('aria-hidden', 'false');
+      menu.classList.remove('hidden');
 
-      if (api) {
-        api.openPause(tab || 'resume');
-      } else {
-        menu.classList.remove('hidden');
-        menu.setAttribute('aria-hidden', 'false');
+      const api = window.relayUnifiedCinematicUI;
+
+      if (api && typeof api.renderPause === 'function') {
+        api.renderPause(tab || 'resume');
       }
 
-      requestAnimationFrame(() => {
-        menu.classList.remove('hidden');
-        menu.setAttribute('aria-hidden', 'false');
-      });
+      const scene =
+        window.__relayRunnerScene ||
+        window.game?.scene?.getScene?.('runner') ||
+        null;
+
+      if (
+        scene?.scene?.isActive?.() &&
+        !scene.scene.isPaused?.()
+      ) {
+        scene.scene.pause();
+      }
     } catch (error) {
       console.error('[RelayRunner] Mobile pause authority failed:', error);
     } finally {
