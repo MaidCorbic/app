@@ -117,6 +117,12 @@
 
   const revealHomeForRecovery = () => {
 
+    /*
+     * Gameplay handoff has started. Splash recovery must not reopen Home
+     * and race the canonical Home -> Gameplay transition.
+     */
+    if (window.__relayGameplayHandoffStarted) return;
+
     const home =
       document.getElementById(
         'intro'

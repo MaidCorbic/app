@@ -4518,6 +4518,7 @@ document.addEventListener(
 );
 
 const startGameplayFromHome = () => {
+  window.__relayGameplayHandoffStarted = true;
   stopAudioBed();
   window.relayGameplayAudio?.play?.();
 
