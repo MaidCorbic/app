@@ -38,6 +38,11 @@ const districts = [
     unlockMission: 'signal-storm',
     missions: ['corporate-lockdown', 'final-relay'],
   },
+  {
+    id: 'ghostline',
+    unlockMission: 'final-relay',
+    missions: ['mission-08'],
+  },
 ];
 
 const rivalMissionIds = new Set([
@@ -72,6 +77,12 @@ const campaignRewards = [
     missions: ['corporate-lockdown', 'final-relay'],
     xp: 350,
     credits: 150,
+  },
+  {
+    id: 'chapter-five',
+    missions: ['mission-08'],
+    xp: 220,
+    credits: 90,
   },
 ];
 

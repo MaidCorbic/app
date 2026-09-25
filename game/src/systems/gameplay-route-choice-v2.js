@@ -41,6 +41,10 @@ export const MISSION_ROUTE_CONSEQUENCES = Object.freeze({
   'final-relay': {
     safe: { targetCount: 1, windowMs: 4600, multiplier: 1, cue: 'SAFE ROUTE // FINAL LINE STABILIZED', label: 'FINAL STABILIZER', risk: 'CONTROLLED', reward: 'CLEAN FINISH' },
     hot: { targetCount: 2, windowMs: 8200, multiplier: 1.75, encounter: 'pursuit', cue: 'HOT ROUTE // FINAL INTERCEPT', label: 'FINAL INTERCEPT', risk: 'MAXIMUM PRESSURE', reward: '+75% VARIETY' }
+  },
+  'mission-08': {
+    safe: { targetCount: 1, windowMs: 5000, multiplier: 1, cue: 'SAFE ROUTE // GHOST LANE STABLE', label: 'GHOST LANE', risk: 'CONTROLLED', reward: 'CLEAN RUN' },
+    hot: { targetCount: 2, windowMs: 7800, multiplier: 1.7, encounter: 'pursuit', cue: 'HOT ROUTE // HUNTER LINE ACTIVE', label: 'HUNTER LINE', risk: 'PURSUIT', reward: '+70% VARIETY' }
   }
 });
 

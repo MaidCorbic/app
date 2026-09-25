@@ -6,6 +6,20 @@ const storyBeats = {
   'signal-storm': { chapter: 'CHAPTER 03 · CROWN ARRAY', arrival: 'Crown Array is broadcasting a storm signal strong enough to wake every relay in the city.', radio: [[820, 'NIA: Storm charge is destabilizing the route.'], [1900, 'MARA: Take the rooftop chain. It is the only clean line.'], [3020, 'NIA: Deliver the storm signal before Helix seals the array.']], completion: 'The storm signal reveals Helix Tower as the source of the lockdown protocol.', tutorial: [[320, 'STORM · Comets fall in hard routes. Watch the sky.'], [2100, 'COMBINE · Use blaster, build tools and movement together.']] },
   'corporate-lockdown': { chapter: 'CHAPTER 04 · CITYSPINE', arrival: 'The Helix core is heavy, the tower is closing, and every security system is now hostile.', radio: [[750, 'NIA: Oversized core slows you down. Clear the gates.'], [1850, 'MARA: I opened a high line. Use it before Helix sees it.'], [3150, 'NIA: The core is the key to Apex Spine. Do not lose it.']], completion: 'The Helix core unlocks Cityspine, but the interceptor reaches Apex before you.', tutorial: [[300, 'LOCKDOWN · Kinetic Ball destroys barriers and moving gates.'], [1700, 'ELITE · Arc Turrets create a safe window against squads.']] },
   'final-relay': { chapter: 'CHAPTER 04 · CITYSPINE', arrival: 'Apex Spine is the final relay. Mara, Helix and the storm converge on the same route.', radio: [[680, 'NIA: This is the last handoff. Every relay depends on it.'], [1940, 'MARA: Finish this and the city belongs to its runners.'], [3180, 'NIA: Final gate. Break the line and link the core.']], completion: 'The city relay comes online. The night network belongs to its couriers again.', tutorial: [[300, 'FINAL RUN · Read the route, clear threats, protect the core.'], [2450, 'CITYSPINE · Use every tool you have learned.']] },
+  'mission-08': {
+    chapter: 'CHAPTER 05 · GHOSTLINE',
+    arrival: 'The relay network has gone quiet above the Ghost District. Follow the ghost signal before Helix can erase the route.',
+    radio: [
+      [760, 'NIA: Ghostline is not on the public map. Keep the relay alive.'],
+      [1880, 'NIA: Apex opened a hidden route. Stay mobile and keep the relay ahead of the signal storm.'],
+      [3180, 'NIA: Hunter lock is rising. Break through and reach the Ghostline relay.']
+    ],
+    completion: 'The Ghostline relay answers and exposes a hidden corridor beyond the city spine.',
+    tutorial: [
+      [320, 'GHOSTLINE · Use the relay lights to read the route.'],
+      [1760, 'HUNTER LINE · Stay mobile when the interceptor closes.']
+    ]
+  },
 };
 
 const route = (data) => {
@@ -970,6 +984,54 @@ export const missions = [
       normal: 'Use relay lights, checkpoints and gate openings to survive the final route.',
       skill: 'Take Mara’s rooftop chain to bypass gates and maintain chase distance.',
       recovery: 'Four checkpoints cover each final-act escalation.'
+    }
+  }),
+
+  route({
+    id: 'mission-08',
+    title: 'Ghostline',
+    district: 'Ghost District',
+    description: 'Carry the ghost signal through a hidden route above the city spine.',
+    objective: 'Reach the Ghostline relay.',
+    difficulty: '8/5 · GHOSTLINE',
+    reward: 480,
+    parTime: 90000,
+    abilityUnlock: null,
+    requiredAbilities: ['dash', 'doubleJump', 'wallJump', 'airDash', 'climb'],
+    unlockRequirement: 'final-relay',
+    unlocks: null,
+    blackout: true,
+    energyEnabled: true,
+    boss: {
+      type: 'sentinel-boss',
+      name: 'GHOST WARDEN',
+      health: 9,
+      color: 0x76e7ff,
+      attackCooldown: 1100
+    },
+    events: [
+      { x: 1280, type: 'blackout', warning: 'GHOST GRID FAILING · FOLLOW RELAY LIGHTS' },
+      { x: 2480, type: 'sweep', warning: 'HUNTER SWEEP · STAY MOBILE OR BREAK LINE' },
+      { x: 4320, type: 'chase', warning: 'GHOSTLINE GATE · FINAL INTERCEPT' }
+    ],
+    chase: {
+      sections: [
+        { start: 1500, end: 2220, speed: 270 },
+        { start: 3300, end: 4120, speed: 305 }
+      ]
+    },
+    checkpoints: [[1400, 520]],
+    secrets: [[1540, 300],[3090, 220],[4630, 410]],
+    signals: [[210,468],[430,358],[820,388],[1030,278],[1260,418],[1510,308],[1710,358],[1930,253],[2250,398],[2480,288]],
+    guides: [
+      {x:105,y:520,text:'GHOSTLINE · FOLLOW THE TRACE'},
+      {x:3310,y:370,text:'HUNTER LINE · BREAK THE LOCK'}
+    ],
+    obstacles: [[520,546],[1100,506],[1680,476],[2260,536],[2840,471],[3420,506]],
+    routeProfile: {
+      normal: 'Follow relay lights and use checkpoints to stabilize the hidden route.',
+      skill: 'Take the rooftop chain through both chase sectors for the fastest Ghostline run.',
+      recovery: 'Three checkpoints divide the route before the final relay.'
     }
   })
 ];

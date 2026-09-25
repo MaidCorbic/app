@@ -21,6 +21,7 @@ for (const mission of [
   'signal-storm',
   'corporate-lockdown',
   'final-relay',
+  'mission-08',
 ]) {
   assert.match(
     runtime,

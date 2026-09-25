@@ -8,6 +8,7 @@ const DIFFICULTY = Object.freeze({
   'signal-storm': { speed: 1.08, range: 1, reaction: .90 },
   'corporate-lockdown': { speed: 1.14, range: 1.05, reaction: .86 },
   'final-relay': { speed: 1.20, range: 1.10, reaction: .82 },
+  'mission-08': { speed: 1.24, range: 1.12, reaction: .78 },
 });
 const PROFILE = Object.freeze({
   security: { patrol: 54, chase: 78, range: 220, stop: 58, accel: 620 },

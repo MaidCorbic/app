@@ -21,7 +21,8 @@ export const GAMEPLAY_VARIETY_CONFIG = Object.freeze({
   pursuit: { event: 'INTERCEPTOR', detail: 'Pursuit pressure rising', objective: 'HOT ROUTE' },
   'signal-storm': { event: 'SIGNAL STORM', detail: 'Network instability detected', objective: 'FLOW x4' },
   'corporate-lockdown': { event: 'LOCKDOWN', detail: 'Security response elevated', objective: 'HOT ROUTE' },
-  'final-relay': { event: 'FINAL INTERCEPT', detail: 'Maximum response detected', objective: 'NO HIT' }
+  'final-relay': { event: 'FINAL INTERCEPT', detail: 'Maximum response detected', objective: 'NO HIT' },
+  'mission-08': { event: 'GHOSTLINE', detail: 'Hunter route pressure detected', objective: 'GHOST LANE' }
 });
 
 const DEFAULT_CONFIG = Object.freeze({

@@ -35,6 +35,15 @@ export const campaignChapters = [
     reward: { xp: 350, credits: 150 },
     rival: 'MARA VEX · CITYSPINE FINALE',
   },
+  {
+    id: 'chapter-five',
+    number: 'CHAPTER 05',
+    title: 'GHOSTLINE',
+    briefing: 'Follow the hidden relay beyond Apex Spine and bring the Ghostline signal back online.',
+    missionIds: ['mission-08'],
+    reward: { xp: 220, credits: 90 },
+    rival: null,
+  },
 ];
 
 export const campaignChapterForMission = missionId => campaignChapters.find(chapter => chapter.missionIds.includes(missionId));

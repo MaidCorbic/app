@@ -6,4 +6,5 @@ export const packages = {
   'signal-storm': { type: 'SECRET', objective: 'Route the Crown Array storm signal.', duration: '01:30', condition: true },
   'corporate-lockdown': { type: 'OVERSIZED', objective: 'Carry the Helix relay core through the corporate lockdown.', duration: '01:38', condition: true, speedMultiplier: .88 },
   'final-relay': { type: 'PRIME RELAY', objective: 'Deliver the city core to Apex Spine before the network closes.', duration: '01:45', condition: true, speedMultiplier: .92 },
+  'mission-08': { type: 'GHOST RELAY', objective: 'Carry the Ghostline signal through the hidden route.', duration: '01:30', condition: true, speedMultiplier: .92 },
 };
