@@ -2847,12 +2847,7 @@
 
 
               const effectiveDuration =
-                isCoarseDevice()
-                  ? Math.max(
-                      120,
-                      duration * .28
-                    )
-                  : duration;
+                duration;
 
 
               const frame =
@@ -3243,9 +3238,7 @@
 
 
       await sleep(
-        isCoarseDevice()
-          ? 230
-          : 900
+        900
       );
 
 
@@ -3254,9 +3247,7 @@
          ======================================================== */
 
       const exitDuration =
-        isCoarseDevice()
-          ? '0.45s'
-          : '1.15s';
+        '1.15s';
 
 
       splash.style.transition =
@@ -3283,9 +3274,7 @@
 
 
       await sleep(
-        isCoarseDevice()
-          ? 500
-          : 1180
+        1180
       );
 
 
