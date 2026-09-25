@@ -480,8 +480,7 @@ const install = () => {
     const offset =
       clamp(axis, -1, 1) * radius;
 
-    joystickThumb.style.transform =
-      \`translate3d(\${offset}px,0,0)\`;
+    joystickThumb.style.transform = `translate3d(${offset}px,0,0)`;
   };
 
   const setMobileAxis = (axis) => {
