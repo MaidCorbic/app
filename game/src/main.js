@@ -4532,6 +4532,23 @@ const startGameplayFromHome = () => {
   intro?.setAttribute('aria-hidden', 'true');
 
   /*
+   * Commit the Home -> Gameplay presentation handoff immediately.
+   * The Home guard owns the body.home-v3-active state; do not leave
+   * that state waiting on a MutationObserver before the first gameplay
+   * frame. A stale Home lock makes #play invisible and collapses the
+   * landscape touch-control surface even though the briefing is gone.
+   */
+  document.body.classList.remove('home-v3-active');
+  intro?.classList.remove('home-v3');
+
+  const play = $('play');
+  if (play) {
+    play.style.removeProperty('visibility');
+    play.style.removeProperty('opacity');
+    play.style.removeProperty('pointer-events');
+  }
+
+  /*
    * Do not perform the deployment bootstrap inside the click event.
    * The Home transition must paint first; the next task owns the
    * potentially heavier loader/gameplay work.
