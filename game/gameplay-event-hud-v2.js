@@ -244,7 +244,6 @@ state.hideTimer = setTimeout(
     duration
   ]);
 }],
-      ['tutorial', message => show(['INTEL', 'NEW FIELD INSTRUCTION', message, 'world', 1700])],
       ['narration', message => { if (message) show(['RADIO', 'INCOMING TRANSMISSION', message, 'world', 1800]); }],
     ];
 

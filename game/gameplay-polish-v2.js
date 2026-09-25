@@ -255,6 +255,72 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     state.c.setScale?.(scale).setPosition?.(x, y);
   }
 
+  function maintainDecorativeFrameBudget(scene) {
+    if (!scene?.children?.list || !scene?.cameras?.main) return;
+
+    const now = finite(scene.time?.now);
+    if (
+      !scene.__relayDecorCullForce &&
+      now - finite(scene.__relayDecorCullAt) < 220
+    ) {
+      return;
+    }
+
+    scene.__relayDecorCullAt = now;
+
+    const level = Number.isFinite(scene.graphicsLevel)
+      ? scene.graphicsLevel
+      : 2;
+
+    const view = scene.cameras.main.worldView;
+    if (!view) return;
+
+    /*
+     * Floating data packets are decorative containers at depth 3.35 with
+     * parallax 0.24. They are intentionally non-interactive and can be
+     * paused completely while they are far outside the camera.
+     */
+    const decorativePackets = scene.children.list.filter(
+      object =>
+        object?.type === 'Container' &&
+        object?.depth === 3.35 &&
+        object?.scrollFactorX === 0.24 &&
+        Array.isArray(object.list) &&
+        object.list.length === 6
+    );
+
+    const marginX = Math.max(640, view.width * 0.50);
+    const marginY = Math.max(360, view.height * 0.65);
+
+    for (const packet of decorativePackets) {
+      const inBudget =
+        level >= 2 &&
+        !scene.motionReduced &&
+        packet.x >= view.x - marginX &&
+        packet.x <= view.right + marginX &&
+        packet.y >= view.y - marginY &&
+        packet.y <= view.bottom + marginY;
+
+      if (packet.visible === inBudget) continue;
+
+      packet.setVisible(inBudget);
+
+      const targets = [
+        packet,
+        ...(Array.isArray(packet.list) ? packet.list : [])
+      ];
+
+      const tweens = scene.tweens?.getTweensOf?.(targets) || [];
+      for (const tween of tweens) {
+        if (inBudget) {
+          tween.resume?.();
+        } else {
+          tween.pause?.();
+        }
+      }
+    }
+  }
+
   function installSceneHooks() {
     if (!RunnerScene?.prototype || RunnerScene.prototype.__relayGameplayPolishV2) return;
     RunnerScene.prototype.__relayGameplayPolishV2 = true;
@@ -301,6 +367,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
         if (!player || this.finished) return result;
 
         polishMissionHud(this);
+        maintainDecorativeFrameBudget(this);
         applyPolarityAssist(this);
 
         if (!this.respawning && !this.cinematicActive && !shieldActive(this)) {

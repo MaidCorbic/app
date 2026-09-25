@@ -1,0 +1,348 @@
+/* ==========================================================================
+   RELAY RUNNER — GAMEPLAY ENTRY MODERN V2
+   Presentation + runtime-entry cleanup only.
+   No gameplay, input, mission, save or progression ownership.
+   ========================================================================== */
+
+#play{
+  --entry-cyan:#8df4ff;
+  --entry-cyan-soft:rgba(141,244,255,.16);
+  --entry-panel:rgba(3,10,19,.86);
+  --entry-line:rgba(141,244,255,.20);
+  --entry-muted:rgba(190,218,231,.62);
+  isolation:isolate !important;
+}
+
+/* --------------------------------------------------------------------------
+   ENTRY FRAME / ATMOSPHERE
+   -------------------------------------------------------------------------- */
+
+#play::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:9;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.30),transparent 22%,transparent 72%,rgba(0,0,0,.26)),
+    repeating-linear-gradient(0deg,transparent 0 3px,rgba(141,244,255,.012) 4px);
+  opacity:.72;
+}
+
+#play .hud{
+  z-index:320 !important;
+  padding-top:max(12px,calc(env(safe-area-inset-top,0px) + 8px)) !important;
+}
+
+/* Thin tactical rail under the permanent HUD. */
+#play .hud::before{
+  content:"";
+  position:absolute;
+  left:max(14px,env(safe-area-inset-left,0px));
+  right:max(14px,env(safe-area-inset-right,0px));
+  top:100%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(141,244,255,.20) 18%,rgba(141,244,255,.42) 50%,rgba(141,244,255,.12) 82%,transparent);
+  box-shadow:0 0 12px rgba(141,244,255,.08);
+  pointer-events:none;
+}
+
+/* --------------------------------------------------------------------------
+   MISSION PANEL — clearer first-glance hierarchy
+   -------------------------------------------------------------------------- */
+
+#play .hud-route{
+  position:relative !important;
+  min-height:70px !important;
+  padding:10px 14px 11px 16px !important;
+  border-color:rgba(141,244,255,.28) !important;
+  background:
+    radial-gradient(circle at 88% 0%,rgba(141,244,255,.08),transparent 34%),
+    linear-gradient(145deg,rgba(5,15,26,.96),rgba(2,8,15,.94)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 14px 34px rgba(0,0,0,.34),
+    0 0 22px rgba(141,244,255,.06) !important;
+}
+
+#play .hud-route::after{
+  content:"MISSION // LIVE";
+  position:absolute;
+  top:7px;
+  right:12px;
+  color:rgba(141,244,255,.44);
+  font:800 6px/1 "DM Mono",ui-monospace,monospace;
+  letter-spacing:.16em;
+  pointer-events:none;
+}
+
+#play .hud-route #district{
+  font-size:8px !important;
+  letter-spacing:.16em !important;
+  color:rgba(141,244,255,.68) !important;
+}
+
+#play .hud-route #objective{
+  margin-top:4px !important;
+  font-size:clamp(11px,1vw,14px) !important;
+  letter-spacing:.055em !important;
+}
+
+#play .hud-route .route-dot{
+  flex:0 0 9px !important;
+  width:9px !important;
+  height:9px !important;
+}
+
+/* --------------------------------------------------------------------------
+   SIGNAL PANEL — make the primary progress state immediately readable
+   -------------------------------------------------------------------------- */
+
+#play .hud-progress{
+  min-height:70px !important;
+  padding:9px 12px !important;
+  border-color:rgba(141,244,255,.24) !important;
+  background:
+    linear-gradient(145deg,rgba(5,15,26,.95),rgba(2,8,15,.94)) !important;
+}
+
+#play .hud-progress::after{
+  content:"RUN STATUS";
+  position:absolute;
+  top:7px;
+  right:10px;
+  color:rgba(141,244,255,.34);
+  font:800 6px/1 "DM Mono",ui-monospace,monospace;
+  letter-spacing:.14em;
+  pointer-events:none;
+}
+
+#play .hud-progress #signalCount{
+  font-size:19px !important;
+}
+
+/* --------------------------------------------------------------------------
+   ACTION BUTTON — one authoritative pause control
+   -------------------------------------------------------------------------- */
+
+#play .hud-actions{
+  min-width:0 !important;
+}
+
+#play .hud-actions > button{
+  position:relative !important;
+  width:48px !important;
+  height:48px !important;
+  border-radius:11px !important;
+  border-color:rgba(141,244,255,.34) !important;
+  background:linear-gradient(145deg,rgba(5,15,26,.97),rgba(2,8,15,.96)) !important;
+  color:#e9fbff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 10px 28px rgba(0,0,0,.36),
+    0 0 18px rgba(141,244,255,.07) !important;
+}
+
+#play .hud-actions > button::after{
+  content:"PAUSE";
+  position:absolute;
+  left:50%;
+  bottom:4px;
+  transform:translateX(-50%);
+  color:rgba(141,244,255,.48);
+  font:800 5px/1 "DM Mono",ui-monospace,monospace;
+  letter-spacing:.14em;
+  pointer-events:none;
+}
+
+#play .hud-actions > button:hover,
+#play .hud-actions > button:focus-visible{
+  border-color:rgba(141,244,255,.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 12px 30px rgba(0,0,0,.42),
+    0 0 24px rgba(141,244,255,.15) !important;
+}
+
+/* --------------------------------------------------------------------------
+   WORLD OBJECTIVE — compact, non-interactive, never blocks gameplay
+   -------------------------------------------------------------------------- */
+
+#play .world-marker{
+  position:absolute !important;
+  top:clamp(92px,13vh,138px) !important;
+  left:max(16px,env(safe-area-inset-left,0px) + 10px) !important;
+  z-index:180 !important;
+  width:min(270px,calc(100vw - 32px)) !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  padding:10px 12px 11px 14px !important;
+  border:1px solid rgba(141,244,255,.18) !important;
+  border-left:2px solid rgba(141,244,255,.70) !important;
+  border-radius:10px !important;
+  background:
+    linear-gradient(145deg,rgba(3,11,20,.90),rgba(4,16,26,.76)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 12px 30px rgba(0,0,0,.30),
+    0 0 20px rgba(141,244,255,.05) !important;
+  backdrop-filter:blur(8px) !important;
+  -webkit-backdrop-filter:blur(8px) !important;
+  pointer-events:none !important;
+  overflow:hidden !important;
+}
+
+#play .world-marker::before{
+  content:"LIVE OBJECTIVE";
+  display:block;
+  margin-bottom:4px;
+  color:rgba(141,244,255,.54);
+  font:800 6px/1.1 "DM Mono",ui-monospace,monospace;
+  letter-spacing:.18em;
+}
+
+#play #worldMissionLabel{
+  display:block !important;
+  margin:0 0 3px !important;
+  color:rgba(141,244,255,.76) !important;
+  font:800 7px/1.1 "DM Mono",ui-monospace,monospace !important;
+  letter-spacing:.12em !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+#play #worldGoal{
+  display:block !important;
+  margin:0 !important;
+  color:#f2fbff !important;
+  font:800 11px/1.2 "Orbitron",sans-serif !important;
+  letter-spacing:.045em !important;
+  overflow-wrap:anywhere !important;
+}
+
+/* --------------------------------------------------------------------------
+   INPUT RAIL — desktop only; mobile controls remain the existing owner
+   -------------------------------------------------------------------------- */
+
+#play .input-guide{
+  position:absolute !important;
+  left:50% !important;
+  bottom:max(14px,calc(env(safe-area-inset-bottom,0px) + 12px)) !important;
+  z-index:170 !important;
+  transform:translateX(-50%) !important;
+  width:max-content !important;
+  max-width:calc(100vw - 32px) !important;
+  box-sizing:border-box !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:7px !important;
+  padding:7px 10px !important;
+  border:1px solid rgba(141,244,255,.15) !important;
+  border-radius:10px !important;
+  background:rgba(2,8,15,.74) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 10px 30px rgba(0,0,0,.30) !important;
+  color:rgba(213,235,246,.62) !important;
+  font:700 6px/1 "DM Mono",ui-monospace,monospace !important;
+  letter-spacing:.08em !important;
+  pointer-events:none !important;
+  backdrop-filter:blur(7px) !important;
+  -webkit-backdrop-filter:blur(7px) !important;
+}
+
+#play .input-guide kbd{
+  min-width:24px !important;
+  height:20px !important;
+  padding:0 5px !important;
+  display:inline-grid !important;
+  place-items:center !important;
+  border:1px solid rgba(141,244,255,.28) !important;
+  border-radius:5px !important;
+  background:linear-gradient(180deg,rgba(15,32,47,.96),rgba(3,11,19,.96)) !important;
+  color:#dffaff !important;
+  box-shadow:inset 0 1px rgba(255,255,255,.06),0 0 8px rgba(141,244,255,.05) !important;
+  font:800 6px/1 "DM Mono",ui-monospace,monospace !important;
+}
+
+#play .input-guide i{
+  width:1px !important;
+  height:12px !important;
+  background:rgba(141,244,255,.16) !important;
+}
+
+/* --------------------------------------------------------------------------
+   EVENT HUD — transient telemetry must stay below the permanent HUD
+   -------------------------------------------------------------------------- */
+
+#play #gameplayEventHud,
+#play .gameplay-event-hud{
+  z-index:240 !important;
+  pointer-events:none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Touch / mobile ownership
+   -------------------------------------------------------------------------- */
+
+@media (max-width:880px){
+  #play .hud{
+    gap:7px !important;
+    padding-left:max(10px,env(safe-area-inset-left,0px)) !important;
+    padding-right:max(10px,env(safe-area-inset-right,0px)) !important;
+  }
+
+  #play .world-marker{
+    top:clamp(84px,14vh,118px) !important;
+    left:max(10px,env(safe-area-inset-left,0px) + 6px) !important;
+    width:min(240px,calc(100vw - 20px)) !important;
+  }
+}
+
+@media (max-width:760px){
+  #play .input-guide{
+    display:none !important;
+  }
+
+  #play .world-marker{
+    max-width:calc(100vw - 20px) !important;
+  }
+}
+
+@media (max-width:560px){
+  #play .hud-route{
+    min-height:58px !important;
+    padding:8px 10px 9px 12px !important;
+  }
+
+  #play .hud-route::after,
+  #play .hud-progress::after{
+    display:none !important;
+  }
+
+  #play .hud-actions > button{
+    width:44px !important;
+    height:44px !important;
+  }
+}
+
+@media (orientation:landscape) and (max-width:900px){
+  #play .world-marker{
+    top:max(70px,calc(env(safe-area-inset-top,0px) + 62px)) !important;
+  }
+
+  #play .input-guide{
+    bottom:max(8px,calc(env(safe-area-inset-bottom,0px) + 6px)) !important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  #play .hud-route .route-dot,
+  #play .world-marker,
+  #play .hud-actions > button{
+    animation:none !important;
+    transition:none !important;
+  }
+}
