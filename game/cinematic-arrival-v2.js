@@ -7,7 +7,7 @@ import './cinematic-arrival-v2.css';
   // splash-loader-v2.js is the single owner of #relaySplash lifecycle.
   // Do not install a second release timer or remove the splash from here.
   // V6 is the active splash owner. Do not run a second progress/removal loop.
-  if (window.__relaySplashV6 || window.__relaySplashV3) return;
+  if (window.__relaySplashV9 || window.__relaySplashV6 || window.__relaySplashV3) return;
 
   window.__relayCinematicArrivalV5 = true;
 
@@ -66,7 +66,6 @@ import './cinematic-arrival-v2.css';
       splash.dataset.cinematicReleased = 'true';
       splash.classList.add('is-leaving');
       splash.setAttribute('aria-busy', 'false');
-      window.setTimeout(() => splash.remove(), 420);
       window.dispatchEvent(new CustomEvent('relay:splash-released', { detail: { reason } }));
     };
 
