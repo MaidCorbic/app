@@ -102,6 +102,14 @@ const game = new Phaser.Game({
 
   backgroundColor: '#091225',
 
+  // Performance profile: keep the 1280x720 gameplay world stable while
+  // avoiding unnecessary canvas filtering/compositing work on weaker GPUs.
+  render: {
+    antialias: false,
+    roundPixels: true,
+    powerPreference: 'high-performance'
+  },
+
   physics: {
     default: 'arcade',
     arcade: {
