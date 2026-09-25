@@ -4,11 +4,11 @@ import { RunnerScene } from '../scenes/RunnerScene.js';
 // Additive only: never replaces or mutates player creation/physics configuration.
 export const MISSION_MODIFIERS = Object.freeze({
   'first-delivery': { id: 'low-gravity', title: 'LOW GRAVITY', subtitle: 'VERTICAL ASSIST ACTIVE', tuning: { jumpVelocity: -775, fallGravity: 500, maxFallSpeed: 860 } },
-  'dead-drop': { id: 'security-alert', title: 'SECURITY ALERT', subtitle: 'THREAT RESPONSE ELEVATED', enemySpeedMultiplier: 1.16 },
+  'dead-drop': { id: 'security-alert', title: 'SECURITY ALERT', subtitle: 'THREAT RESPONSE ELEVATED', enemySpeedMultiplier: 1 },
   blackout: { id: 'dark-sector', title: 'DARK SECTOR', subtitle: 'VISIBILITY REDUCED', darkness: 0.34 },
   pursuit: { id: 'overclock', title: 'OVERCLOCK', subtitle: 'MOBILITY SYSTEM BOOSTED', tuning: { maxRunSpeed: 520, groundAcceleration: 4700, airAcceleration: 2700, dashSpeed: 745 } },
   'signal-storm': { id: 'signal-interference', title: 'SIGNAL INTERFERENCE', subtitle: 'NETWORK INSTABILITY DETECTED', signalPulse: true },
-  'corporate-lockdown': { id: 'security-alert-plus', title: 'SECURITY ALERT+', subtitle: 'MAXIMUM SECURITY RESPONSE', enemySpeedMultiplier: 1.28 },
+  'corporate-lockdown': { id: 'security-alert-plus', title: 'SECURITY ALERT+', subtitle: 'MAXIMUM SECURITY RESPONSE', enemySpeedMultiplier: 1.08 },
   'final-relay': { id: 'kinetic-instability', title: 'KINETIC INSTABILITY', subtitle: 'BOOST SYSTEM VOLATILE', kineticMultiplier: 1.18 },
 });
 
