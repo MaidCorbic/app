@@ -302,26 +302,54 @@ async function runMobileViewport(browser, viewport) {
       return;
     }
 
-    const entryMode = await waitForHomeEntry(page, 30000);
+    const entryMode = await withTimeout(
+      waitForHomeEntry(page, 30000),
+      35000,
+      `${viewport.width}x${viewport.height} // home entry`,
+    );
 
     if (entryMode === 'button') {
-      await clickDom(page, '#start');
+      await withTimeout(
+        clickDom(page, '#start'),
+        10000,
+        `${viewport.width}x${viewport.height} // start click`,
+      );
     } else {
-      await page.evaluate(() => {
-        if (typeof window.relayLaunchGameplay !== 'function') {
-          throw new Error('Canonical gameplay launch bridge is unavailable');
-        }
+      await withTimeout(
+        page.evaluate(() => {
+          if (typeof window.relayLaunchGameplay !== 'function') {
+            throw new Error('Canonical gameplay launch bridge is unavailable');
+          }
 
-        window.relayLaunchGameplay();
-      });
+          window.relayLaunchGameplay();
+        }),
+        10000,
+        `${viewport.width}x${viewport.height} // launch bridge`,
+      );
     }
 
-    await waitForHidden(page, '#intro');
+    await withTimeout(
+      waitForHidden(page, '#intro'),
+      20000,
+      `${viewport.width}x${viewport.height} // hide home`,
+    );
 
     if (viewport.orientation === 'landscape') {
-      await waitForGameplayBriefingRelease(page);
-      await waitForVisible(page, '.mobile-controls');
-      await waitForVisible(page, '#mobilePauseButton');
+      await withTimeout(
+        waitForGameplayBriefingRelease(page),
+        25000,
+        `${viewport.width}x${viewport.height} // briefing release`,
+      );
+      await withTimeout(
+        waitForVisible(page, '.mobile-controls'),
+        25000,
+        `${viewport.width}x${viewport.height} // mobile controls`,
+      );
+      await withTimeout(
+        waitForVisible(page, '#mobilePauseButton'),
+        25000,
+        `${viewport.width}x${viewport.height} // mobile pause`,
+      );
     }
 
     const initial = await page.evaluate(() => ({
