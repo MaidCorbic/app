@@ -53,6 +53,7 @@ import './mobile-ui-cleanup-v1.css';
 import './release-ux-gameplay-polish-v1.css';
 import './canonical-ui-v1.css';
 import './release-final-ui-v1.css';
+import './gameplay-entry-modern-v1.css';
 
 
 // ============================================================
@@ -122,11 +123,6 @@ import './city-response-v1.js';
 import './play-deployment-loader-v1.js';
 
 import './mission-transition-loader-v1.js';
-
-import './gameplay-intro-final-v1.js';
-
-import './mission-route-v6-layout-v1.js';
-import './mission-route-v6-layout-v1.css';
 
 import './mobile-map-web-parity-all-levels-v1.js';
 
