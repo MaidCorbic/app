@@ -1001,3 +1001,14 @@
     top: 8px !important;
   }
 }
+
+
+/* CENTERED GAMEPLAY HUD — presentation only */
+#play .hud{width:min(1180px,calc(100vw - 36px))!important;max-width:1180px!important;margin-left:auto!important;margin-right:auto!important;padding-left:0!important;padding-right:0!important;grid-template-columns:minmax(0,1fr) minmax(220px,300px) minmax(0,1fr)!important;align-items:start!important}
+#play .hud-route{justify-self:stretch!important}
+#play .hud-progress{justify-self:center!important;width:100%!important;max-width:300px!important}
+#play .hud-actions{justify-self:end!important;width:auto!important}
+#play .hud-xp{min-width:64px!important}
+@media(max-width:760px){#play .hud{width:calc(100vw - 18px)!important;max-width:none!important}}
+@media(max-width:520px){#play .hud{width:calc(100vw - 18px)!important}}
+@media(orientation:landscape) and (max-height:560px){#play .hud{width:calc(100vw - 18px)!important}}
