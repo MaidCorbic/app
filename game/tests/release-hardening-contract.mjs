@@ -8,6 +8,8 @@ const read = (path) => readFile(fileURLToPath(new URL(path, gameRoot)), 'utf8');
 const index = await read('index.html');
 const arrival = await read('cinematic-arrival-v2.js');
 const arrivalCss = await read('cinematic-arrival-v2.css');
+const splashLoader = await read('splash-loader-v2.js');
+const productionUnfreeze = await read('production-unfreeze-v1.js');
 const config = await read('vite.config.mjs');
 const packageJson = JSON.parse(await read('package.json'));
 const main = await read('src/main.js');
@@ -79,6 +81,10 @@ assert.doesNotMatch(
   'cinematic arrival must not own canonical UI CSS',
 );
 assert.match(arrival, /^import ['"]\.\/cinematic-arrival-v2\.css['"];?$/m);
+assert.match(arrival, /window\.__relaySplashV9/);
+assert.doesNotMatch(arrival, /splash\.remove\(\)/, 'cinematic arrival must not own splash removal');
+assert.match(splashLoader, /window\.__relaySplashV9/);
+assert.doesNotMatch(productionUnfreeze, /relaySplash[\s\S]{0,180}splash\.remove\(\)/, 'production watchdog must not remove splash');
 assert.match(uiInit, /^import ['"]\.\/canonical-ui-v1\.css['"];?$/m);
 assert.match(uiInit, /CSS bootstrap ownership/);
 assert.doesNotMatch(arrival, /createElement\(['"]link['"]\)/);

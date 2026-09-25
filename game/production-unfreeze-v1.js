@@ -49,13 +49,7 @@
     const tutorialOverlayBlocking = scene && panel && !hidden(panel) && scene.scene?.isActive?.();
     if (sceneStuck || tutorialOverlayBlocking) recover(sceneStuck ? 'cinematic timeout' : 'blocking title panel');
   };
-  window.setTimeout(() => {
-    const splash = document.getElementById('relaySplash');
-    if (splash && !splash.classList.contains('is-leaving')) {
-      splash.classList.add('is-leaving');
-      window.setTimeout(() => splash.remove(), 500);
-    }
-  }, 20000);
+  // Splash lifecycle is exclusively owned by splash-loader-v2.js.
   window.setInterval(check, 1000);
   window.addEventListener('error', () => window.setTimeout(check, 0));
   window.addEventListener('unhandledrejection', () => window.setTimeout(check, 0));

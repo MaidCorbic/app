@@ -6,6 +6,8 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const relay = read('relay-ui-init.js');
 const p1 = read('p1-gameplay-correctness-v1.js');
 const pauseInteractions = read('pause-interactions.js');
+const mobilePauseAuthority = read('mobile-pause-authority-v2.js');
+const index = read('index.html');
 
 const checks = [
   ['P1 runtime is imported', relay.includes("import './p1-gameplay-correctness-v1.js';")],

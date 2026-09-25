@@ -117,6 +117,10 @@ import {
       'true'
     );
 
+    /* Resume must never reveal the Home surface while Runner remains active. */
+    const intro = $('intro');
+    intro?.classList.add('hidden');
+    intro?.setAttribute('aria-hidden', 'true');
 
     /*
      * Release the authoritative P1 pause lock.
@@ -1443,7 +1447,9 @@ import {
        * P1 observes this class change and pauses
        * the Phaser Runner scene.
        */
-      /* Do not mutate pauseMenu.classList: legacy observers watch it. */
+      /* The canonical pause state must be visible to both the new
+       * data-pause-open renderer and legacy runtime observers. */
+      pause.classList.remove('hidden');
       pause.setAttribute('data-pause-open', 'true');
       pause.setAttribute(
         'aria-hidden',
@@ -1743,7 +1749,7 @@ import {
 
     const pauseButton =
       target.closest(
-        '#pause, #mobilePauseButton'
+        '#pause'
       );
 
     if (pauseButton) {
@@ -1766,24 +1772,9 @@ import {
 
     /* -------------------------------------------------------
        MOBILE SETTINGS
+       -------------------------------------------------------
+       Mobile settings is owned by mobile-pause-authority-v2.
        ------------------------------------------------------- */
-
-    const settingsMobile =
-      target.closest(
-        '#mobileSettingsButton'
-      );
-
-    if (settingsMobile) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      openPause(
-        'settings'
-      );
-
-      return;
-    }
-
 
     /* -------------------------------------------------------
        CLOSE

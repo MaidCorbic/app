@@ -81,8 +81,22 @@
     let timer = Number(card.dataset.messageTimer || 0);
     const paint = () => {
       const [headline, message] = messages[index % messages.length];
-      card.querySelector('#relayPauseHeadline').textContent = headline;
-      card.querySelector('#relayPauseMessage').textContent = message;
+      const headlineNode = card.querySelector('#relayPauseHeadline');
+      const messageNode = card.querySelector('#relayPauseMessage');
+
+      /*
+       * observeUi watches body child mutations. Avoid rewriting identical
+       * text nodes on every observer pass or pause opening can self-trigger
+       * an unbounded mutation/render loop.
+       */
+      if (headlineNode?.textContent !== headline) {
+        headlineNode.textContent = headline;
+      }
+
+      if (messageNode?.textContent !== message) {
+        messageNode.textContent = message;
+      }
+
       card.dataset.messageIndex = String(index % messages.length);
     };
     paint();

@@ -578,3 +578,111 @@
     display: block !important;
   }
 }
+
+
+/* =========================================================
+   LANDSCAPE FALLBACK — TOUCH HUD GEOMETRY
+   The runtime also marks body.is-touch, but the landscape
+   contract must remain measurable even if that class arrives
+   one frame late during the mobile boot hand-off.
+   ========================================================= */
+@media (orientation: landscape) and (pointer: coarse) {
+  html body.is-touch #play .mobile-controls {
+    position: fixed !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    left: auto !important;
+    top: auto !important;
+    z-index: 5000 !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    width: 160px !important;
+    height: 170px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  html body #play .mobile-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, clamp(48px, 10vh, 64px)) !important;
+    grid-template-rows: repeat(2, clamp(48px, 10vh, 64px)) !important;
+    gap: 5px !important;
+    width: max-content !important;
+    height: max-content !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+  }
+
+  html body #play .mobile-actions > button[data-mobile-action] {
+    position: relative !important;
+    width: clamp(48px, 10vh, 64px) !important;
+    height: clamp(48px, 10vh, 64px) !important;
+    min-width: clamp(48px, 10vh, 64px) !important;
+    min-height: clamp(48px, 10vh, 64px) !important;
+    max-width: clamp(48px, 10vh, 64px) !important;
+    max-height: clamp(48px, 10vh, 64px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+}
+
+
+/* =========================================================
+   LANDSCAPE QA GEOMETRY HARDENING
+   The touch HUD must have a measurable box in 760x430
+   even when another legacy mobile layer supplies its own
+   flex/size defaults. Visibility alone is not sufficient:
+   release-runtime-qa measures the actual bounding box.
+   ========================================================= */
+@media (orientation: landscape) and (pointer: coarse) {
+  html body.is-touch #play .mobile-controls {
+    position: fixed !important;
+    left: auto !important;
+    top: auto !important;
+    right: max(10px, env(safe-area-inset-right, 0px)) !important;
+    bottom: max(10px, env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 5000 !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 160px !important;
+    min-width: 160px !important;
+    max-width: 160px !important;
+    height: 112px !important;
+    min-height: 112px !important;
+    max-height: 112px !important;
+    flex: 0 0 160px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    pointer-events: none !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  html body.is-touch #play .mobile-actions {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: max-content !important;
+    min-width: 154px !important;
+    height: 101px !important;
+    min-height: 101px !important;
+    flex: 0 0 auto !important;
+    pointer-events: auto !important;
+  }
+}

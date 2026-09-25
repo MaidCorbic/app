@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const root = new URL('../', import.meta.url);
 const owner = await readFile(fileURLToPath(new URL('src/systems/mobile-input-single-owner-v1.js', root)), 'utf8');
-const controller = await readFile(fileURLToPath(new URL('src/systems/mobile-controls-controller.js', root)), 'utf8');
 const index = await readFile(fileURLToPath(new URL('index.html', root)), 'utf8');
 
 assert.match(owner, /MOBILE INPUT SINGLE OWNER V9/);
@@ -17,8 +16,11 @@ assert.ok(owner.includes("gadget1: [51, '3', 'Digit3']"));
 assert.match(owner, /normalizeActionButtons/);
 assert.match(owner, /replaceWith\(clone\)/);
 assert.match(owner, /seen\.has\(action\)/);
-assert.match(controller, /DEPRECATED COMPATIBILITY SHIM/);
-assert.doesNotMatch(controller, /addEventListener\(['\"]pointer(down|move|up)/);
+await assert.rejects(
+  access(fileURLToPath(new URL('src/systems/mobile-controls-controller.js', root))),
+  /ENOENT/,
+  'deprecated secondary mobile controller must stay removed',
+);
 assert.match(index, /data-mobile-action=\"fire\"/);
 assert.equal((index.match(/data-mobile-action=/g) || []).length, 6);
 

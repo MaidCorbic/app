@@ -1730,6 +1730,13 @@
       return;
     }
 
+    /*
+     * HOME #start is owned by home-v3.js.
+     * This cinematic module must never capture or cancel that
+     * canonical click in the capture phase.
+     */
+    return;
+
 
     /*
      * Do not intercept a deployment

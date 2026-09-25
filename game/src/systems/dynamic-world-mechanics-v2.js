@@ -227,7 +227,7 @@ function setup(scene) {
 
   const targetBarrier = getAuthoredBarrier(scene, config);
   if (!targetBarrier) {
-    console.error(`[DynamicWorldV4] authored target ${config.targetId} missing at ${config.targetX},${config.targetY}; mechanic not spawned.`);
+    console.warn(`[DynamicWorldV4] authored target ${config.targetId} missing at ${config.targetX},${config.targetY}; mechanic not spawned.`);
     return;
   }
 

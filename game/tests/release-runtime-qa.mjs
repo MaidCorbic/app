@@ -223,18 +223,43 @@ async function runMobileViewport(browser, viewport) {
     });
 
     if (viewport.orientation === 'portrait') {
-      await page.waitForFunction(
-        () => {
+      try {
+        await page.waitForFunction(
+          () => {
+            const splash = document.querySelector('#relaySplash, .relay-splash');
+            const intro = document.getElementById('intro');
+            return Boolean(
+              splash ||
+              intro?.dataset?.homeV4Built === '1'
+            );
+          },
+          undefined,
+          { timeout: 10000 },
+        );
+      } catch (error) {
+        const diagnostics = await page.evaluate(() => {
           const splash = document.querySelector('#relaySplash, .relay-splash');
           const intro = document.getElementById('intro');
-          return Boolean(
-            splash ||
-            intro?.dataset?.homeV4Built === '1'
-          );
-        },
-        undefined,
-        { timeout: 10000 },
-      );
+          const game = document.getElementById('game');
+          return {
+            url: location.href,
+            readyState: document.readyState,
+            splashPresent: Boolean(splash),
+            splashClass: splash?.className ?? null,
+            splashDisplay: splash ? getComputedStyle(splash).display : null,
+            introPresent: Boolean(intro),
+            homeBuilt: intro?.dataset?.homeV4Built ?? null,
+            introClass: intro?.className ?? null,
+            gameBootReady: game?.classList.contains('relay-boot-ready') ?? false,
+            scriptCount: document.scripts.length,
+            relaySplashOwner: Boolean(window.__relaySplashV9),
+            runtimeError: window.relayLastRuntimeError?.error ?? null,
+            bodyChildren: Array.from(document.body.children).map(el => el.id || el.className || el.tagName).slice(0, 40),
+          };
+        });
+        error.message = `${error.message} | startup diagnostics: ${JSON.stringify(diagnostics)}`;
+        throw error;
+      }
 
       const portraitLock = await page.evaluate(() => ({
         splashVisible: (() => {
@@ -277,26 +302,77 @@ async function runMobileViewport(browser, viewport) {
       return;
     }
 
-    const entryMode = await waitForHomeEntry(page, 30000);
+    const entryMode = await withTimeout(
+      waitForHomeEntry(page, 30000),
+      35000,
+      `${viewport.width}x${viewport.height} // home entry`,
+    );
 
     if (entryMode === 'button') {
-      await clickDom(page, '#start');
+      await withTimeout(
+        clickDom(page, '#start'),
+        10000,
+        `${viewport.width}x${viewport.height} // start click`,
+      );
     } else {
-      await page.evaluate(() => {
-        if (typeof window.relayLaunchGameplay !== 'function') {
-          throw new Error('Canonical gameplay launch bridge is unavailable');
-        }
+      await withTimeout(
+        page.evaluate(() => {
+          if (typeof window.relayLaunchGameplay !== 'function') {
+            throw new Error('Canonical gameplay launch bridge is unavailable');
+          }
 
-        window.relayLaunchGameplay();
-      });
+          window.relayLaunchGameplay();
+        }),
+        10000,
+        `${viewport.width}x${viewport.height} // launch bridge`,
+      );
     }
 
-    await waitForHidden(page, '#intro');
+    try {
+      await withTimeout(
+        waitForHidden(page, '#intro'),
+        20000,
+        `${viewport.width}x${viewport.height} // hide home`,
+      );
+    } catch (error) {
+      const diagnostics = await page.evaluate(() => {
+        const intro = document.getElementById('intro');
+        const starts = [...document.querySelectorAll('#start')];
+        const start = starts[0] || null;
+        return {
+          introClass: intro?.className ?? null,
+          introHidden: intro?.hidden ?? null,
+          startCount: starts.length,
+          startDisabled: start?.disabled ?? null,
+          startConnected: start?.isConnected ?? null,
+          startOwner: start?.parentElement?.className ?? null,
+          launchBridge: typeof window.relayLaunchGameplay === 'function',
+          deploymentLoader: Boolean(window.relayPlayDeploymentV1),
+          deploymentActive: window.relayPlayDeploymentV1?.isActive?.() ?? null,
+          bootReady: document.getElementById('game')?.classList.contains('relay-boot-ready') ?? false,
+          runtimeError: window.relayLastRuntimeError?.error ?? null,
+        };
+      });
+      error.message += ' | hide-home diagnostics: ' + JSON.stringify(diagnostics);
+      throw error;
+    }
 
     if (viewport.orientation === 'landscape') {
-      await waitForGameplayBriefingRelease(page);
-      await waitForVisible(page, '.mobile-controls');
-      await waitForVisible(page, '#mobilePauseButton');
+      await withTimeout(
+        waitForGameplayBriefingRelease(page),
+        25000,
+        `${viewport.width}x${viewport.height} // briefing release`,
+      );
+      await withTimeout(
+        waitForVisible(page, '.mobile-controls'),
+        25000,
+        `${viewport.width}x${viewport.height} // mobile controls`,
+      );
+      await withTimeout(
+        waitForVisible(page, '#mobilePauseButton'),
+        25000,
+        `${viewport.width}x${viewport.height} // mobile pause`,
+      );
     }
 
     const initial = await page.evaluate(() => ({

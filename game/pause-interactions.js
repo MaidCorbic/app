@@ -242,20 +242,9 @@
       </button>
     `;
 
-    const mobilePauseButton = hud.querySelector('#mobilePauseButton');
-    const mobileSettingsButton = hud.querySelector('#mobileSettingsButton');
-
-    mobilePauseButton?.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      openPause('resume');
-    });
-
-    mobileSettingsButton?.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      openPause('settings');
-    });
+    // Mobile pause/settings click ownership is centralized in
+    // mobile-pause-authority-v2.js. This module only mounts the HUD
+    // and synchronizes its visibility with game state.
 
     document.body.append(hud);
 
@@ -286,125 +275,10 @@
 
 
     /* =========================================================
-       OPEN PAUSE
-       
-       IMPORTANT:
-       - NEVER use pause.click()
-       - unified-cinematic-ui-v1.js owns the canonical
-         pause-menu UI route
-       - p1-gameplay-correctness-v1.js owns Phaser
-         pause/resume state
+       MOBILE PAUSE / SETTINGS AUTHORITY
+       =========================================================
+       Event routing is owned by mobile-pause-authority-v2.js.
        ========================================================= */
-
-    const openPause = (tabName = 'resume') => {
-      try {
-        const api =
-          window.relayUnifiedCinematicUI;
-
-        /*
-         * Preferred path:
-         * use the already-installed unified cinematic UI.
-         */
-        if (
-          api &&
-          typeof api.openPause === 'function'
-        ) {
-          api.openPause(tabName);
-          return;
-        }
-
-
-        /*
-         * Fallback:
-         *
-         * Only change DOM visibility.
-         *
-         * Do NOT call:
-         *   pause.click()
-         *   scene.pause()
-         *   scene.resume()
-         *
-         * The P1 pause observer is responsible for
-         * synchronising the Phaser scene.
-         */
-
-        pauseMenu.classList.remove('hidden');
-
-        pauseMenu.setAttribute(
-          'aria-hidden',
-          'false'
-        );
-
-
-        if (!tabName) {
-          return;
-        }
-
-
-        /*
-         * Wait briefly for the pause menu content
-         * and tabs to become available.
-         */
-        const deadline =
-          performance.now() + 750;
-
-
-        const selectTab = () => {
-          /*
-           * If another system closed the menu while
-           * we were waiting, stop trying.
-           */
-          if (
-            pauseMenu.classList.contains('hidden')
-          ) {
-            if (
-              performance.now() < deadline
-            ) {
-              window.setTimeout(selectTab, 16);
-            }
-
-            return;
-          }
-
-
-          /*
-           * Support both current and legacy tab
-           * attributes.
-           */
-          const tab =
-            pauseMenu.querySelector(
-              `[data-pause-tab="${tabName}"],
-               [data-tab="${tabName}"]`
-            );
-
-
-          if (tab) {
-            /*
-             * The tab itself is safe to activate.
-             * This does NOT route through #pause.
-             */
-            tab.click();
-            return;
-          }
-
-
-          if (
-            performance.now() < deadline
-          ) {
-            window.setTimeout(selectTab, 16);
-          }
-        };
-
-
-        window.setTimeout(selectTab, 16);
-
-      } catch (error) {
-        console.error(
-          '[RelayRunner] Mobile pause open failed:',
-          error
-        );
-      }
-    };
 
         /* =========================================================
        MOBILE PAUSE + SETTINGS BUTTONS

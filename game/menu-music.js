@@ -2,7 +2,9 @@
 // The actual module lives in ./src/menu-music.js.
 import './src/menu-music.js';
 import './world-atmosphere.js';
-import './world-atmosphere-test.js';
+if (new URLSearchParams(window.location.search).get('debug') === 'atmosphere') {
+  import('./world-atmosphere-test.js');
+}
 import './home-ai-tutorial-options.js';
 import './runtime-ai-tutorial-settings.js';
 import './home-world-ui-polish-v1.css';

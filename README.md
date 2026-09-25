@@ -465,8 +465,6 @@ app/
 │   ├── package.json
 │   │
 │   ├── pause-interactions.js
-│   ├── pause-final-polish-v1.js
-│   ├── pause-mobile-polish.css
 │   ├── unified-options-ui-v1.js
 │   ├── home-world-ui-polish-v1.js
 │   ├── gameplay-touch-lock.js

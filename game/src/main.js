@@ -1708,6 +1708,11 @@ function launch(
   $('pauseMenu')
     .classList.add('hidden');
 
+  // End Home presentation synchronously before gameplay visibility changes.
+  // The Home guard also observes #intro, but MutationObserver delivery is async;
+  // clearing the state here prevents a landscape-frame race that can hide touch controls.
+  document.body.classList.remove('home-v3-active');
+
   $('intro')
     .classList.toggle(
       'hidden',
@@ -1759,13 +1764,16 @@ function launch(
   window.__relayRunnerScene =
     runnerScene || null;
 
-  if (
-    runnerScene &&
-    runnerScene.scene?.isActive?.() &&
-    paused
-  ) {
-    game.scene.pause('runner');
-  } else {
+  const startRunnerScene = () => {
+    if (
+      runnerScene &&
+      runnerScene.scene?.isActive?.() &&
+      paused
+    ) {
+      game.scene.pause('runner');
+      return;
+    }
+
     game.scene.start(
       'runner',
       {
@@ -1785,6 +1793,12 @@ function launch(
     if (paused) {
       game.scene.pause('runner');
     }
+  };
+
+  if (paused) {
+    startRunnerScene();
+  } else {
+    window.setTimeout(startRunnerScene, 0);
   }
 }
 
@@ -4508,20 +4522,128 @@ document.addEventListener(
   true
 );
 
-$('start').onclick = () => {
+const startGameplayFromHome = () => {
+  window.__relayGameplayHandoffStarted = true;
   stopAudioBed();
   window.relayGameplayAudio?.play?.();
 
-  leaveHome(
-    game.scene.isPaused('runner')
-      ? () =>
-          game.scene.resume(
-            'runner'
-          )
-      : () =>
-          launch(0)
-  );
+  /*
+   * MAIN is the single owner of the real Home -> Gameplay handoff.
+   * The Home module only renders #start; this function owns activation.
+   */
+  const intro = $('intro');
+
+  intro?.classList.add('hidden');
+  intro?.setAttribute('aria-hidden', 'true');
+
+  /*
+   * Commit the Home -> Gameplay presentation handoff immediately.
+   * The Home guard owns the body.home-v3-active state; do not leave
+   * that state waiting on a MutationObserver before the first gameplay
+   * frame. A stale Home lock makes #play invisible and collapses the
+   * landscape touch-control surface even though the briefing is gone.
+   */
+  document.body.classList.remove('home-v3-active');
+  intro?.classList.remove('home-v3');
+
+  const play = $('play');
+  if (play) {
+    play.style.removeProperty('visibility');
+    play.style.removeProperty('opacity');
+    play.style.removeProperty('pointer-events');
+  }
+
+  /*
+   * Do not perform the deployment bootstrap inside the click event.
+   * The Home transition must paint first; the next task owns the
+   * potentially heavier loader/gameplay work.
+   */
+  window.setTimeout(() => {
+    const loader = window.relayPlayDeploymentV1;
+
+    if (
+      loader &&
+      typeof loader.show === 'function'
+    ) {
+      void loader.show({
+        missionNumber: 1,
+
+        desktop:
+          './assets/loadplay.jpg',
+
+        mobile:
+          './assets/loadplaymobile.jpg',
+
+        skipRoute: true,
+
+        beforeRoute: async () => {
+          if (
+            typeof window.relayLaunchGameplay ===
+            'function'
+          ) {
+            window.relayLaunchGameplay();
+            return;
+          }
+
+          game.scene.isPaused('runner')
+            ? game.scene.resume('runner')
+            : launch(0);
+        }
+      });
+
+      return;
+    }
+
+    leaveHome(
+      game.scene.isPaused('runner')
+        ? () =>
+            game.scene.resume(
+              'runner'
+            )
+        : () =>
+            launch(0)
+    );
+  }, 0);
 };
+
+/*
+ * The Home module creates #start after main.js has loaded.
+ * Bind the canonical owner directly to that button once it exists.
+ * This avoids document-level capture ordering between legacy modules.
+ */
+const bindCanonicalStartButton = () => {
+  const startButton = $('start');
+
+  if (
+    !(startButton instanceof HTMLElement) ||
+    startButton.dataset.relayMainStartBound === '1'
+  ) {
+    return;
+  }
+
+  startButton.dataset.relayMainStartBound = '1';
+  startButton.onclick = () => {
+    void startGameplayFromHome();
+  };
+};
+
+bindCanonicalStartButton();
+
+const introStartObserver = new MutationObserver(
+  bindCanonicalStartButton
+);
+
+const introForStartObserver = $('intro');
+
+if (introForStartObserver) {
+  introStartObserver.observe(
+    introForStartObserver,
+    {
+      childList: true,
+      subtree: true
+    }
+  );
+}
 
 $('continue').onclick = () => {
   stopAudioBed();
@@ -4769,7 +4891,12 @@ $('closeAbilityUnlock').onclick =
 applyRuntimeSettings();
 renderHomeProgress();
 
-launch(0, true);
+const shouldDeferInitialRunnerPreboot =
+  detectTouchDevice();
+
+if (!shouldDeferInitialRunnerPreboot) {
+  launch(0, true);
+}
 
 function openWorldMapSafe() {
   game.scene.stop('runner');

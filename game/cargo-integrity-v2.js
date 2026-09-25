@@ -40,6 +40,25 @@ export function calculateCargoDamage({ packageType = 'STANDARD', amount = 1, cau
   return Math.max(0, Number((Number(amount || 0) * profile.damageMultiplier * causeMultiplier).toFixed(2)));
 }
 
+function isPhoneViewport() {
+  const ua = String(navigator.userAgent || '');
+  const mobileUa =
+    /Android.*Mobile|iPhone|iPod|Windows Phone|webOS|BlackBerry|Opera Mini|IEMobile/i.test(ua);
+  const coarseTouch =
+    Number(navigator.maxTouchPoints || 0) > 0 &&
+    window.matchMedia?.('(pointer: coarse)').matches === true;
+  const shortSide =
+    Math.min(window.innerWidth || 0, window.innerHeight || 0);
+  const longSide =
+    Math.max(window.innerWidth || 0, window.innerHeight || 0);
+  const phoneViewport =
+    coarseTouch &&
+    shortSide <= 600 &&
+    longSide <= 1000;
+
+  return mobileUa || phoneViewport;
+}
+
 function installStyle() {
   if (document.getElementById(STYLE_ID)) return;
   const style = document.createElement('style');
@@ -90,6 +109,8 @@ const runtime = {
 };
 
 function pulse(kind = 'hit') {
+  if (isPhoneViewport()) return;
+
   const root = mountHud();
   root.classList.remove('is-hit', 'is-warning', 'is-anomaly');
   void root.offsetWidth;
@@ -155,6 +176,10 @@ function resetForScene(scene) {
 }
 
 function renderHud() {
+  // Mobile visibility is owned by cargo-integrity-v2-visibility-v1.
+  // Do not fight the mobile hard-hide layer with a periodic DOM renderer.
+  if (isPhoneViewport()) return;
+
   const root = mountHud();
   root.style.setProperty('--cargo-accent', runtime.packageProfile.accent);
   root.classList.toggle('is-visible', Boolean(runtime.initialized && runtime.scene && !runtime.scene.finished));
@@ -271,7 +296,11 @@ function init() {
       }
     }
   });
-  window.setInterval(syncScene, 180);
+  // The mobile visibility layer owns the hidden cargo surface on phones.
+  // Skip the 180ms DOM/state sampler there to keep landscape startup quiet.
+  if (!isPhoneViewport()) {
+    window.setInterval(syncScene, 180);
+  }
   syncScene();
 }
 
