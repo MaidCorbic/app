@@ -575,15 +575,27 @@ const install = () => {
   };
 
   const resetMovement = () => {
+    const pointerId =
+      movementPointerId;
+
     setJoystickAxis(0);
 
     movementPointerId = null;
 
-    if (joystick) {
-      joystick.releasePointerCapture?.(
-        movementPointerId
+    if (
+      pointerId !== null &&
+      joystick?.hasPointerCapture?.(
+        pointerId
+      )
+    ) {
+      joystick.releasePointerCapture(
+        pointerId
       );
     }
+
+    joystick?.classList.remove(
+      'is-active'
+    );
   };
 
   const axisFromPointer = (event) => {
