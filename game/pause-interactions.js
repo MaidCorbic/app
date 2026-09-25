@@ -328,7 +328,7 @@
          * synchronising the Phaser scene.
          */
 
-        pauseMenu.classList.remove('hidden');
+        pauseMenu.setAttribute('data-pause-open', 'true');
 
         pauseMenu.setAttribute(
           'aria-hidden',
@@ -355,7 +355,7 @@
            * we were waiting, stop trying.
            */
           if (
-            pauseMenu.classList.contains('hidden')
+            pauseMenu.dataset.pauseOpen !== 'true'
           ) {
             if (
               performance.now() < deadline
@@ -439,7 +439,7 @@
         !visible('intro') &&
         !visible('finish') &&
         !visible('gameOver') &&
-        pauseMenu.classList.contains('hidden');
+        pauseMenu.dataset.pauseOpen !== 'true';
 
 
       /*
