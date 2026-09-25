@@ -4770,8 +4770,7 @@ applyRuntimeSettings();
 renderHomeProgress();
 
 const shouldDeferInitialRunnerPreboot =
-  detectTouchDevice() &&
-  matchMedia('(orientation:portrait)').matches;
+  detectTouchDevice();
 
 if (!shouldDeferInitialRunnerPreboot) {
   launch(0, true);
