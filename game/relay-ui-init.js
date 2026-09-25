@@ -204,7 +204,6 @@ import './p1-gameplay-correctness-v1.js';
 
 import './p2-character-presentation-v4.js';
 
-import './p2-character-presentation-v4.js';
 
 import './gameplay-home-hud-safe-v2.js';
 
