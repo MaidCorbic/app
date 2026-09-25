@@ -132,6 +132,6 @@ assert.match(
 
 assert.match(
   mobileOwner,
-  /setJoystickAxis\\(0\\)/,
+  /setJoystickAxis\\(\\s*0\\s*\\)/,
   'Single mobile owner must clear joystick movement on release'
 );
