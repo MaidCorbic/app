@@ -1359,7 +1359,7 @@ const scene =
       hideLegacy(scene);
       typeMission();
     },
-    180
+    400
   );
 }
 
