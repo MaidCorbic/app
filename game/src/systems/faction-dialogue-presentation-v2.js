@@ -56,13 +56,58 @@
 
     observer.observe(text, { childList: true, characterData: true, subtree: true });
     panel.addEventListener('animationend', () => decorate(text), { passive: true });
+
+    // Mobile: tapping the faction card dismisses the encounter immediately.
+    // Desktop keeps the explicit NEXT / keyboard controls.
+    panel.addEventListener('pointerup', event => {
+      if (event.pointerType !== 'touch') return;
+      if (event.target?.closest?.('[data-faction-next]')) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const scene = window.__relayRunnerScene;
+      scene?.skipFactionDialogue?.();
+    }, { passive: false });
   };
 
   const scan = () => {
     document.querySelectorAll('.relay-faction-dialogue').forEach(watchPanel);
   };
 
-  const observer = new MutationObserver(scan);
-  observer.observe(document.body, { childList: true, subtree: true });
+  // Keep the observer cheap: faction panels are mounted directly on <body>,
+  // so only react to newly-added nodes instead of rescanning the entire DOM
+  // on every HUD/style mutation.
+  let scanFrame = 0;
+
+  const observer = new MutationObserver(mutations => {
+    let needsScan = false;
+
+    for (const mutation of mutations) {
+      if (mutation.type !== 'childList' || !mutation.addedNodes.length) continue;
+
+      for (const node of mutation.addedNodes) {
+        if (
+          node.nodeType === Node.ELEMENT_NODE &&
+          (node.matches?.('.relay-faction-dialogue') ||
+            node.querySelector?.('.relay-faction-dialogue'))
+        ) {
+          needsScan = true;
+          break;
+        }
+      }
+
+      if (needsScan) break;
+    }
+
+    if (!needsScan || scanFrame) return;
+
+    scanFrame = requestAnimationFrame(() => {
+      scanFrame = 0;
+      scan();
+    });
+  });
+
+  observer.observe(document.body, { childList: true });
   scan();
 })();
