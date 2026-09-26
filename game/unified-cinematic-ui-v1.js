@@ -1108,6 +1108,13 @@ import {
       return false;
     }
 
+    if (
+      !panel.classList.contains('hidden') &&
+      panel.classList.contains('relay-options-unified')
+    ) {
+      return true;
+    }
+
     renderOptions(panel);
 
     panel.classList.remove('hidden');
