@@ -15,7 +15,6 @@
 // unified-gameplay-ui-v1.js is the single owner.
 // ============================================================
 
-
 // ============================================================
 // CSS BOOTSTRAP
 // ============================================================
@@ -25,6 +24,8 @@
 // './gameplay-core-v1.js' loads before './src/systems/mobile-input-single-owner-v1.js';
 // the mobile owner itself is loaded once by index.html after main.js.
 
+import './map-overlay-v1.js';
+import './map-overlay-v1.css';
 import './mobile-final-polish.css';
 import './mobile-touch-joystick-v1.css';
 import './styles.css';
@@ -54,14 +55,11 @@ import './canonical-ui-v1.css';
 import './release-final-ui-v1.css';
 import './gameplay-entry-modern-v2.css';
 
-
 // ============================================================
 // UI RUNTIME MODULES
 // ============================================================
 
 import './gameplay-ui-visibility-v3.js';
-import './map-aaa-tactical-redesign-v1.js';
-
 
 // ============================================================
 // EXIT / SESSION CLOSED
@@ -70,43 +68,26 @@ import './map-aaa-tactical-redesign-v1.js';
 const exitTitle = document.getElementById('exitTitle');
 
 exitTitle?.addEventListener('click', () => {
-
-  const titleLockup =
-    document.querySelector(
-      '#intro .title-lockup'
-    );
+  const titleLockup = document.querySelector('#intro .title-lockup');
 
   if (!titleLockup) return;
 
   titleLockup.replaceChildren(
+    Object.assign(document.createElement('p'), {
+      className: 'eyebrow',
+      textContent: 'SESSION CLOSED',
+    }),
 
-    Object.assign(
-      document.createElement('p'),
-      {
-        className: 'eyebrow',
-        textContent: 'SESSION CLOSED'
-      }
-    ),
+    Object.assign(document.createElement('h1'), {
+      innerHTML: 'SEE YOU<br><em>SOON</em>',
+    }),
 
-    Object.assign(
-      document.createElement('h1'),
-      {
-        innerHTML: 'SEE YOU<br><em>SOON</em>'
-      }
-    ),
-
-    Object.assign(
-      document.createElement('p'),
-      {
-        className: 'menu-tagline',
-        textContent:
-          'The relay is offline. You can close this browser tab.'
-      }
-    )
-
+    Object.assign(document.createElement('p'), {
+      className: 'menu-tagline',
+      textContent: 'The relay is offline. You can close this browser tab.',
+    }),
   );
 });
-
 
 // ============================================================
 // LEGACY / GAMEPLAY SYSTEMS
@@ -122,7 +103,6 @@ import './city-response-v1.js';
 import './play-deployment-loader-v1.js';
 
 import './mission-transition-loader-v1.js';
-
 
 import './mobile-map-web-parity-all-levels-v1.js';
 
@@ -203,8 +183,7 @@ import './src/systems/mobile-gameplay-stability-v1.js';
 
 import './p1-gameplay-correctness-v1.js';
 
-import './p2-character-presentation-v4.js';
-
+// Vagabond player presentation is installed by feature-runtime.js.
 
 import './gameplay-home-hud-safe-v2.js';
 
@@ -233,38 +212,13 @@ import './src/systems/route-choice-branching-v1.js';
 // adaptive pursuit pressure and differentiated enemy archetypes.
 import './src/systems/full-gameplay-roadmap-v1.js';
 
-
 // ============================================================
 // DOM READY RUNTIME PATCHES
 // ============================================================
 
-window.addEventListener(
-  'DOMContentLoaded',
-  () => {
+// ============================================================
+// GAMEPLAY WORLD PATCHES — LOAD BEFORE GAMEPLAY STARTS
+// ============================================================
 
-    import(
-      './src/systems/mission-objectives-route-goals-v1.js'
-    )
-      .catch(error => {
-        console.error(
-          '[RelayRunner] mission runtime patch failed to load',
-          error
-        );
-      });
-
-
-    import(
-      './chaser-runtime-stability-v1.js'
-    )
-      .catch(error => {
-        console.error(
-          '[RelayRunner] chaser runtime patch failed to load',
-          error
-        );
-      });
-
-  },
-  {
-    once: true
-  }
-);
+import './src/systems/mission-objectives-route-goals-v1.js';
+import './chaser-runtime-stability-v1.js';

@@ -1,4 +1,3 @@
-
 /*
  * Runner Relay — Home V4 presentation owner.
  *
@@ -13,8 +12,7 @@
 
 import { RELAY_FAQ } from './faq.js';
 
-const gameplayMusicUrl =
-  './assets/audio/music.mp3';
+const gameplayMusicUrl = './assets/audio/music.mp3';
 
 (() => {
   'use strict';
@@ -22,7 +20,7 @@ const gameplayMusicUrl =
   if (window.__relayHomeV4) return;
   window.__relayHomeV4 = true;
 
-  const $ = id => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
 
   let homeProfileStateAPI = null;
   let homeDailyChallengesAPI = null;
@@ -43,15 +41,12 @@ const gameplayMusicUrl =
 
     if (infoPanel instanceof HTMLElement) {
       infoPanel.classList.add('hidden');
-      infoPanel.classList.remove(
-        'relay-faq-mode',
-        'relay-update-mode'
-      );
+      infoPanel.classList.remove('relay-faq-mode', 'relay-update-mode');
       infoPanel.setAttribute('aria-hidden', 'true');
     }
   };
 
-  const prepareInfoPanel = mode => {
+  const prepareInfoPanel = (mode) => {
     const panel = $('relayInfoPanel');
 
     if (!(panel instanceof HTMLElement)) {
@@ -60,15 +55,9 @@ const gameplayMusicUrl =
 
     panel.classList.remove('hidden');
 
-    panel.classList.toggle(
-      'relay-faq-mode',
-      mode === 'faq'
-    );
+    panel.classList.toggle('relay-faq-mode', mode === 'faq');
 
-    panel.classList.toggle(
-      'relay-update-mode',
-      mode === 'update'
-    );
+    panel.classList.toggle('relay-update-mode', mode === 'update');
 
     panel.setAttribute('aria-hidden', 'false');
 
@@ -81,98 +70,65 @@ const gameplayMusicUrl =
 
   const syncHomeDailyOperation = async () => {
     try {
-      const {
-        dailyChallenges,
-        loadState
-      } =
-        homeDailyChallengesAPI ||
-        await import('./src/state.js');
+      const { dailyChallenges, loadState } =
+        homeDailyChallengesAPI || (await import('./src/state.js'));
 
       homeDailyChallengesAPI = {
         dailyChallenges,
-        loadState
+        loadState,
       };
 
       const state = loadState();
 
-      const dailyState =
-        state?.daily || {
-          progress: {},
-          claimed: []
-        };
+      window.__relaySyncOperationsTelemetry?.(state);
 
-      const challenges =
-        Array.isArray(dailyChallenges)
-          ? dailyChallenges
-          : [];
+      const dailyState = state?.daily || {
+        progress: {},
+        claimed: [],
+      };
+
+      const challenges = Array.isArray(dailyChallenges) ? dailyChallenges : [];
 
       const challenge =
-        challenges.find(item => {
-          const progress =
-            Number(
-              dailyState.progress?.[item.id]
-            ) || 0;
+        challenges.find((item) => {
+          const progress = Number(dailyState.progress?.[item.id]) || 0;
 
-          const target =
-            Math.max(
-              1,
-              Number(item.target) || 1
-            );
+          const target = Math.max(1, Number(item.target) || 1);
 
-          const claimed =
-            Array.isArray(dailyState.claimed) &&
-            dailyState.claimed.includes(
-              item.id
-            );
+          const claimed = Array.isArray(dailyState.claimed) && dailyState.claimed.includes(item.id);
 
           return !claimed && progress < target;
         }) ||
-        challenges.find(item => {
-          const progress =
-            Number(
-              dailyState.progress?.[item.id]
-            ) || 0;
+        challenges.find((item) => {
+          const progress = Number(dailyState.progress?.[item.id]) || 0;
 
-          const target =
-            Math.max(
-              1,
-              Number(item.target) || 1
-            );
+          const target = Math.max(1, Number(item.target) || 1);
 
           return progress < target;
         }) ||
         challenges[0];
 
-      const titleEl =
-        $('homeV4DailyTitle');
+      const titleEl = $('homeV4DailyTitle');
 
-      const descriptionEl =
-        $('homeV4DailyDescription');
+      const descriptionEl = $('homeV4DailyDescription');
 
-      const progressEl =
-        $('homeV4DailyProgress');
+      const progressEl = $('homeV4DailyProgress');
 
-      const fillEl =
-        $('homeV4DailyProgressFill');
+      const fillEl = $('homeV4DailyProgressFill');
 
-      const rewardEl =
-        $('homeV4DailyReward');
+      const rewardEl = $('homeV4DailyReward');
 
-      const creditsEl =
-        $('homeV4DailyCredits');
+      const creditsEl = $('homeV4DailyCredits');
 
-      const statusEl =
-        $('homeV4DailyStatus');
+      const statusEl = $('homeV4DailyStatus');
 
       if (!challenge) {
         if (titleEl) {
-          titleEl.textContent =
-            'NO DAILY OPERATION';
+          titleEl.textContent = 'NO DAILY OPERATION';
         }
 
         if (descriptionEl) {
-          descriptionEl.textContent =
-            'NO ACTIVE DAILY OBJECTIVE AVAILABLE.';
+          descriptionEl.textContent = 'NO ACTIVE DAILY OBJECTIVE AVAILABLE.';
         }
 
         if (progressEl) {
@@ -198,108 +154,54 @@ const gameplayMusicUrl =
         return;
       }
 
-      const progress =
-        Math.max(
-          0,
-          Number(
-            dailyState.progress?.[challenge.id]
-          ) || 0
-        );
+      const progress = Math.max(0, Number(dailyState.progress?.[challenge.id]) || 0);
 
-      const target =
-        Math.max(
-          1,
-          Number(challenge.target) || 1
-        );
+      const target = Math.max(1, Number(challenge.target) || 1);
 
       const claimed =
-        Array.isArray(dailyState.claimed) &&
-        dailyState.claimed.includes(
-          challenge.id
-        );
+        Array.isArray(dailyState.claimed) && dailyState.claimed.includes(challenge.id);
 
-      const complete =
-        progress >= target;
+      const complete = progress >= target;
 
-      const percent =
-        Math.max(
-          0,
-          Math.min(
-            100,
-            Math.round(
-              (progress / target) * 100
-            )
-          )
-        );
+      const percent = Math.max(0, Math.min(100, Math.round((progress / target) * 100)));
 
       if (titleEl) {
-        titleEl.textContent =
-          String(
-            challenge.label ||
-            'DAILY OPERATION'
-          ).toUpperCase();
+        titleEl.textContent = String(challenge.label || 'DAILY OPERATION').toUpperCase();
       }
 
       if (descriptionEl) {
-        descriptionEl.textContent =
-          'COMPLETE THIS OBJECTIVE DURING NORMAL PLAY.';
+        descriptionEl.textContent = 'COMPLETE THIS OBJECTIVE DURING NORMAL PLAY.';
       }
 
       if (progressEl) {
-        progressEl.textContent =
-          `${progress.toLocaleString()} / ${target.toLocaleString()}`;
+        progressEl.textContent = `${progress.toLocaleString()} / ${target.toLocaleString()}`;
       }
 
       if (fillEl) {
-        fillEl.style.width =
-          `${percent}%`;
+        fillEl.style.width = `${percent}%`;
       }
 
       if (rewardEl) {
-        rewardEl.textContent =
-          `+${(
-            Number(challenge.xp) || 0
-          ).toLocaleString()} XP`;
+        rewardEl.textContent = `+${(Number(challenge.xp) || 0).toLocaleString()} XP`;
       }
 
       if (creditsEl) {
-        creditsEl.textContent =
-          `+${(
-            Number(challenge.credits) || 0
-          ).toLocaleString()} CREDITS`;
+        creditsEl.textContent = `+${(Number(challenge.credits) || 0).toLocaleString()} CREDITS`;
       }
 
       if (statusEl) {
-        statusEl.textContent =
-          claimed
-            ? 'CLAIMED'
-            : complete
-              ? 'READY TO CLAIM'
-              : 'IN PROGRESS';
+        statusEl.textContent = claimed ? 'CLAIMED' : complete ? 'READY TO CLAIM' : 'IN PROGRESS';
       }
 
-      const dailyCard =
-        document.querySelector(
-          '.home-v4-daily'
-        );
+      const dailyCard = document.querySelector('.home-v4-daily');
 
       if (dailyCard instanceof HTMLElement) {
-        dailyCard.classList.toggle(
-          'is-complete',
-          complete
-        );
+        dailyCard.classList.toggle('is-complete', complete);
 
-        dailyCard.classList.toggle(
-          'is-claimed',
-          claimed
-        );
+        dailyCard.classList.toggle('is-claimed', claimed);
       }
-
     } catch (error) {
-      console.error(
-        '[RelayRunner] Daily operation sync failed:',
-        error
-      );
+      console.error('[RelayRunner] Daily operation sync failed:', error);
     }
   };
 
@@ -309,18 +211,13 @@ const gameplayMusicUrl =
 
   const syncHomeProfile = async () => {
     try {
-      const {
-        loadState,
-        getCourierRank,
-        getLevelProgress
-      } =
-        homeProfileStateAPI ||
-        await import('./src/state.js');
+      const { loadState, getCourierRank, getLevelProgress } =
+        homeProfileStateAPI || (await import('./src/state.js'));
 
       homeProfileStateAPI = {
         loadState,
         getCourierRank,
-        getLevelProgress
+        getLevelProgress,
       };
 
       const state = loadState();
@@ -328,8 +225,7 @@ const gameplayMusicUrl =
       window.__relaySyncMissionNetwork?.(state);
 
       if (!homeContractsAPI) {
-        homeContractsAPI =
-          await import('./src/contracts.js');
+        homeContractsAPI = await import('./src/contracts.js');
       }
 
       const xp = Number(state.xp) || 0;
@@ -337,50 +233,27 @@ const gameplayMusicUrl =
       const credits = Number(state.credits) || 0;
       const totalRuns = Number(state.totalRuns) || 0;
       const bestRun = Number(state.bestRun) || 0;
+      const streak = Number(state.streak) || 0;
+      const longestStreak = Number(state.longestStreak) || 0;
 
-      const lastRunTime =
-        state.lastRun?.time ??
-        state.lastRunTime ??
-        state.lastMissionTime ??
-        null;
+      const lastRunTime = state.lastRun?.time ?? state.lastRunTime ?? state.lastMissionTime ?? null;
 
-      const lastRunSignals =
-        state.lastRun?.signals ??
-        state.lastMissionProgress?.signals ??
-        null;
+      const lastRunSignals = state.lastRun?.signals ?? state.lastMissionProgress?.signals ?? null;
 
-      const lastRunScore =
-        state.lastRun?.score ??
-        state.lastScore ??
-        null;
+      const lastRunScore = state.lastRun?.score ?? state.lastScore ?? null;
 
-      const lastRunRating =
-        state.lastRun?.rating ??
-        state.lastRating ??
-        null;
+      const lastRunRating = state.lastRun?.rating ?? state.lastRating ?? null;
 
       const level = getLevelProgress(xp);
       const rank = getCourierRank(xp);
 
-      const xpIntoLevel = Math.max(
-        0,
-        xp - Number(level.current || 0)
-      );
+      const xpIntoLevel = Math.max(0, xp - Number(level.current || 0));
 
-      const xpNeeded = Math.max(
-        1,
-        Number(level.next || 100) -
-        Number(level.current || 0)
-      );
+      const xpNeeded = Math.max(1, Number(level.next || 100) - Number(level.current || 0));
 
       const xpProgress = Math.max(
         0,
-        Math.min(
-          100,
-          Math.round(
-            (Number(level.progress) || 0) * 100
-          )
-        )
+        Math.min(100, Math.round((Number(level.progress) || 0) * 100)),
       );
 
       const rankEl = $('homeV4Rank');
@@ -391,6 +264,11 @@ const gameplayMusicUrl =
       const runsEl = $('homeV4Runs');
       const signalsEl = $('homeV4Signals');
       const creditsEl = $('homeV4Credits');
+
+      const streakEl = $('homeV4Streak');
+      const longestStreakEl = $('homeV4LongestStreak');
+      const intelRatingEl = $('homeV4IntelRating');
+      const intelBestScoreEl = $('homeV4IntelBestScore');
       const missionXpEl = $('homeV4MissionXp');
       const bestRatingEl = $('homeV4BestRating');
       const signalValueEl = $('homeV4SignalValue');
@@ -401,381 +279,248 @@ const gameplayMusicUrl =
       const unlockTextEl = $('homeV4UnlockText');
       const unlockFillEl = $('homeV4UnlockFill');
 
-      const activityOneEl =
-        $('homeV4ActivityOne');
+      const activityOneEl = $('homeV4ActivityOne');
 
-      const activityOneMetaEl =
-        $('homeV4ActivityOneMeta');
+      const activityOneMetaEl = $('homeV4ActivityOneMeta');
 
-      const activityTwoEl =
-        $('homeV4ActivityTwo');
+      const activityTwoEl = $('homeV4ActivityTwo');
 
-      const activityTwoMetaEl =
-        $('homeV4ActivityTwoMeta');
+      const activityTwoMetaEl = $('homeV4ActivityTwoMeta');
 
-      const activityThreeEl =
-        $('homeV4ActivityThree');
+      const activityThreeEl = $('homeV4ActivityThree');
 
-      const activityThreeMetaEl =
-        $('homeV4ActivityThreeMeta');
+      const activityThreeMetaEl = $('homeV4ActivityThreeMeta');
 
-      const lastRunFeedEl =
-        $('homeV5LastRunFeed');
+      const lastRunFeedEl = $('homeV5LastRunFeed');
 
-      const runTimeEl =
-        $('homeV5RunTime');
+      const runTimeEl = $('homeV5RunTime');
 
-      const runSignalsEl =
-        $('homeV5RunSignals');
+      const runSignalsEl = $('homeV5RunSignals');
 
-      const runScoreEl =
-        $('homeV5RunScore');
+      const runScoreEl = $('homeV5RunScore');
 
-      const runRatingEl =
-        $('homeV5RunRating');
+      const runRatingEl = $('homeV5RunRating');
 
       if (lastRunFeedEl) {
-        lastRunFeedEl.textContent =
-          totalRuns > 0
-            ? 'LAST RUN // RECORDED'
-            : 'LAST RUN // READY';
+        lastRunFeedEl.textContent = totalRuns > 0 ? 'LAST RUN // RECORDED' : 'LAST RUN // READY';
       }
 
       if (activityOneEl) {
-        activityOneEl.textContent =
-          totalRuns > 0
-            ? 'RUN RECORDED'
-            : 'NETWORK READY';
+        activityOneEl.textContent = totalRuns > 0 ? 'RUN RECORDED' : 'NETWORK READY';
       }
 
       if (activityOneMetaEl) {
         activityOneMetaEl.textContent =
-          totalRuns > 0
-            ? `RUNS // ${totalRuns.toLocaleString()}`
-            : 'RELAY CHANNEL // 01';
+          totalRuns > 0 ? `RUNS // ${totalRuns.toLocaleString()}` : 'RELAY CHANNEL // 01';
       }
 
       if (activityTwoEl) {
         activityTwoEl.textContent =
-          signals > 0
-            ? `${signals.toLocaleString()} SIGNALS RECOVERED`
-            : 'AWAITING FIRST SIGNAL';
+          signals > 0 ? `${signals.toLocaleString()} SIGNALS RECOVERED` : 'AWAITING FIRST SIGNAL';
       }
 
       if (activityTwoMetaEl) {
         activityTwoMetaEl.textContent =
-          signals > 0
-            ? 'SIGNAL NETWORK // ACTIVE'
-            : 'SIGNAL NETWORK // STANDBY';
+          signals > 0 ? 'SIGNAL NETWORK // ACTIVE' : 'SIGNAL NETWORK // STANDBY';
       }
 
       if (activityThreeEl) {
         activityThreeEl.textContent =
-          xp > 0
-            ? `XP BALANCE // ${xp.toLocaleString()}`
-            : 'CONTRACT NETWORK READY';
+          xp > 0 ? `XP BALANCE // ${xp.toLocaleString()}` : 'CONTRACT NETWORK READY';
       }
 
       if (activityThreeMetaEl) {
-        activityThreeMetaEl.textContent =
-          xp > 0
-            ? 'PROGRESSION // ACTIVE'
-            : 'CONTRACTS // ONLINE';
+        activityThreeMetaEl.textContent = xp > 0 ? 'PROGRESSION // ACTIVE' : 'CONTRACTS // ONLINE';
       }
 
       if (runTimeEl) {
-        runTimeEl.textContent =
-          lastRunTime != null
-            ? String(lastRunTime)
-            : '—';
+        runTimeEl.textContent = lastRunTime != null ? String(lastRunTime) : '—';
       }
 
       if (runSignalsEl) {
-        runSignalsEl.textContent =
-          lastRunSignals != null
-            ? String(lastRunSignals)
-            : '—';
+        runSignalsEl.textContent = lastRunSignals != null ? String(lastRunSignals) : '—';
       }
 
       if (runScoreEl) {
-        runScoreEl.textContent =
-          lastRunScore != null
-            ? Number(lastRunScore).toLocaleString()
-            : '—';
+        runScoreEl.textContent = lastRunScore != null ? Number(lastRunScore).toLocaleString() : '—';
       }
 
       if (runRatingEl) {
         runRatingEl.textContent =
-          lastRunRating != null &&
-          Number(lastRunRating) > 0
-            ? '★'.repeat(
-                Math.min(
-                  3,
-                  Number(lastRunRating)
-                )
-              )
+          lastRunRating != null && Number(lastRunRating) > 0
+            ? '★'.repeat(Math.min(3, Number(lastRunRating)))
             : '—';
       }
 
       if (rankEl) {
-        rankEl.textContent =
-          rank?.name ||
-          state.rank ||
-          'ROOKIE';
+        rankEl.textContent = rank?.name || state.rank || 'ROOKIE';
       }
 
       if (levelEl) {
-        levelEl.textContent =
-          String(
-            level.level ||
-            state.level ||
-            1
-          ).padStart(2, '0');
+        levelEl.textContent = String(level.level || state.level || 1).padStart(2, '0');
       }
 
       if (xpTextEl) {
-        xpTextEl.textContent =
-          `${xpIntoLevel.toLocaleString()} / ${xpNeeded.toLocaleString()}`;
+        xpTextEl.textContent = `${xpIntoLevel.toLocaleString()} / ${xpNeeded.toLocaleString()}`;
       }
 
       if (xpFillEl) {
-        xpFillEl.style.width =
-          `${xpProgress}%`;
+        xpFillEl.style.width = `${xpProgress}%`;
       }
 
       if (bestRunEl) {
-        bestRunEl.textContent =
-          bestRun.toLocaleString();
+        bestRunEl.textContent = bestRun.toLocaleString();
       }
 
       if (runsEl) {
-        runsEl.textContent =
-          totalRuns.toLocaleString();
+        runsEl.textContent = totalRuns.toLocaleString();
       }
 
       if (signalsEl) {
-        signalsEl.textContent =
-          signals.toLocaleString();
+        signalsEl.textContent = signals.toLocaleString();
       }
 
+      if (streakEl) {
+        streakEl.textContent = streak.toLocaleString();
+      }
+
+      if (longestStreakEl) {
+        longestStreakEl.textContent = longestStreak.toLocaleString();
+      }
+
+      if (intelRatingEl) {
+        intelRatingEl.textContent =
+          lastRunRating != null && Number(lastRunRating) > 0
+            ? '★'.repeat(Math.min(3, Number(lastRunRating)))
+            : '—';
+      }
+      if (intelBestScoreEl) {
+        intelBestScoreEl.textContent = bestRun.toLocaleString();
+      }
       if (creditsEl) {
-        creditsEl.textContent =
-          credits.toLocaleString();
+        creditsEl.textContent = credits.toLocaleString();
       }
 
       if (missionXpEl) {
-        const missionXp =
-          Number(
-            state.lastXpBreakdown?.total
-          ) || 0;
+        const missionXp = Number(state.lastXpBreakdown?.total) || 0;
 
-        missionXpEl.textContent =
-          missionXp > 0
-            ? `+${missionXp.toLocaleString()}`
-            : '—';
+        missionXpEl.textContent = missionXp > 0 ? `+${missionXp.toLocaleString()}` : '—';
       }
 
       if (bestRatingEl) {
-        const firstMissionStats =
-          state.missionStats?.[
-            'first-delivery'
-          ];
+        const firstMissionStats = state.missionStats?.['first-delivery'];
 
-        const bestRating =
-          Number(
-            firstMissionStats?.bestRating
-          ) || 0;
+        const bestRating = Number(firstMissionStats?.bestRating) || 0;
 
-        bestRatingEl.textContent =
-          bestRating > 0
-            ? '★'.repeat(
-                Math.min(
-                  3,
-                  bestRating
-                )
-              )
-            : '—';
+        bestRatingEl.textContent = bestRating > 0 ? '★'.repeat(Math.min(3, bestRating)) : '—';
       }
 
-      const activeScene =
-        window.__relayRunnerScene ||
-        null;
+      const activeScene = window.__relayRunnerScene || null;
 
-      const lastProgress =
-        window.__relayLastMissionProgress ||
-        null;
+      const lastProgress = window.__relayLastMissionProgress || null;
 
-      const missionSignals =
-        activeScene
-          ? Math.max(
-              0,
-              Math.min(
-                Array.isArray(
-                  activeScene?.mission?.signals
-                )
-                  ? activeScene.mission.signals.length
-                  : 10,
-                Number(
-                  activeScene?.collected
-                ) || 0
-              )
-            )
-          : Math.max(
-              0,
-              Number(
-                lastProgress?.signals
-              ) || 0
-            );
+      const missionSignals = activeScene
+        ? Math.max(
+            0,
+            Math.min(
+              Array.isArray(activeScene?.mission?.signals)
+                ? activeScene.mission.signals.length
+                : 10,
+              Number(activeScene?.collected) || 0,
+            ),
+          )
+        : Math.max(0, Number(lastProgress?.signals) || 0);
 
       const missionSignalTarget =
-        activeScene &&
-        Array.isArray(
-          activeScene?.mission?.signals
-        )
+        activeScene && Array.isArray(activeScene?.mission?.signals)
           ? activeScene.mission.signals.length
-          : Math.max(
-              1,
-              Number(
-                lastProgress?.totalSignals
-              ) || 10
-            );
+          : Math.max(1, Number(lastProgress?.totalSignals) || 10);
 
       if (signalValueEl) {
-        signalValueEl.textContent =
-          `${String(missionSignals).padStart(2, '0')} / ${String(missionSignalTarget).padStart(2, '0')}`;
+        signalValueEl.textContent = `${String(missionSignals).padStart(2, '0')} / ${String(missionSignalTarget).padStart(2, '0')}`;
       }
 
       if (signalFillEl) {
         const signalProgress =
-          missionSignalTarget > 0
-            ? Math.round(
-                (missionSignals / missionSignalTarget) * 100
-              )
-            : 0;
+          missionSignalTarget > 0 ? Math.round((missionSignals / missionSignalTarget) * 100) : 0;
 
-        signalFillEl.style.width =
-          `${signalProgress}%`;
+        signalFillEl.style.width = `${signalProgress}%`;
       }
 
-      const nextLevel =
-        (level.level || 1) + 1;
+      const nextLevel = (level.level || 1) + 1;
 
-      const unlockProgress =
-        xpProgress;
+      const unlockProgress = xpProgress;
 
       if (unlockLevelEl) {
-        unlockLevelEl.textContent =
-          `LV ${String(nextLevel).padStart(2, '0')}`;
+        unlockLevelEl.textContent = `LV ${String(nextLevel).padStart(2, '0')}`;
       }
 
       if (unlockTitleEl) {
-        unlockTitleEl.textContent =
-          `SECTOR ${String(nextLevel).padStart(2, '0')} // SKYLINE`;
+        unlockTitleEl.textContent = `SECTOR ${String(nextLevel).padStart(2, '0')} // SKYLINE`;
       }
 
       if (unlockTextEl) {
-        unlockTextEl.textContent =
-          `${unlockProgress}%`;
+        unlockTextEl.textContent = `${unlockProgress}%`;
       }
 
       if (unlockFillEl) {
-        unlockFillEl.style.width =
-          `${unlockProgress}%`;
+        unlockFillEl.style.width = `${unlockProgress}%`;
       }
 
       await syncHomeContract();
-
     } catch (error) {
-      console.error(
-        '[RelayRunner] Home profile sync failed:',
-        error
-      );
+      console.error('[RelayRunner] Home profile sync failed:', error);
     }
 
     void syncHomeDailyOperation();
   };
 
-  window.addEventListener(
-    'storage',
-    event => {
-      if (
-        event.key === 'relay-runner-state'
-      ) {
-        void syncHomeProfile();
-      }
-    }
-  );
-
-  window.addEventListener(
-    'relay:mission-complete',
-    () => {
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'relay-runner-state') {
       void syncHomeProfile();
     }
-  );
+  });
+
+  window.addEventListener('relay:mission-complete', () => {
+    void syncHomeProfile();
+  });
 
   const introVisible = () => {
     const intro = $('intro');
 
-    return !!intro &&
-      !intro.classList.contains('hidden');
+    return !!intro && !intro.classList.contains('hidden');
   };
 
-  document.addEventListener(
-    'visibilitychange',
-    () => {
-      if (
-        document.visibilityState === 'visible' &&
-        introVisible()
-      ) {
-        void syncHomeProfile();
-      }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && introVisible()) {
+      void syncHomeProfile();
     }
-  );
+  });
 
   /* =========================================================
      HELPERS
      ========================================================= */
 
-  const forceStartVisible = start => {
+  const forceStartVisible = (start) => {
     if (!(start instanceof HTMLElement)) return;
 
     start.hidden = false;
     start.removeAttribute('hidden');
     start.classList.remove('hidden');
 
-    start.style.setProperty(
-      'display',
-      'flex',
-      'important'
-    );
+    start.style.setProperty('display', 'flex', 'important');
 
-    start.style.setProperty(
-      'visibility',
-      'visible',
-      'important'
-    );
+    start.style.setProperty('visibility', 'visible', 'important');
 
-    start.style.setProperty(
-      'opacity',
-      '1',
-      'important'
-    );
+    start.style.setProperty('opacity', '1', 'important');
 
-    start.style.setProperty(
-      'pointer-events',
-      'auto',
-      'important'
-    );
+    start.style.setProperty('pointer-events', 'auto', 'important');
   };
 
-  const clickExisting = selector => {
-    const target =
-      document.querySelector(selector);
+  const clickExisting = (selector) => {
+    const target = document.querySelector(selector);
 
-    if (
-      !(target instanceof HTMLElement) ||
-      target.disabled
-    ) {
+    if (!(target instanceof HTMLElement) || target.disabled) {
       return false;
     }
 
@@ -793,28 +538,16 @@ const gameplayMusicUrl =
 
   const openOptions = () => {
     try {
-      if (
-        typeof window
-          .relayUnifiedCinematicUI
-          ?.openOptions ===
-        'function'
-      ) {
-        window
-          .relayUnifiedCinematicUI
-          .openOptions();
+      if (typeof window.relayUnifiedCinematicUI?.openOptions === 'function') {
+        window.relayUnifiedCinematicUI.openOptions();
 
         return true;
       }
     } catch (error) {
-      console.error(
-        '[RelayRunner] Unified options open failed:',
-        error
-      );
+      console.error('[RelayRunner] Unified options open failed:', error);
     }
 
-    return clickExisting(
-      '[data-title-panel="controls"]'
-    );
+    return clickExisting('[data-title-panel="controls"]');
   };
 
   /* =========================================================
@@ -822,17 +555,13 @@ const gameplayMusicUrl =
      ========================================================= */
 
   const openFaq = () => {
-    const panel =
-      $('relayInfoPanel');
+    const panel = $('relayInfoPanel');
 
-    const eyebrow =
-      $('relayInfoEyebrow');
+    const eyebrow = $('relayInfoEyebrow');
 
-    const heading =
-      $('relayInfoHeading');
+    const heading = $('relayInfoHeading');
 
-    const content =
-      $('relayInfoContent');
+    const content = $('relayInfoContent');
 
     if (
       !(panel instanceof HTMLElement) ||
@@ -840,9 +569,7 @@ const gameplayMusicUrl =
       !(heading instanceof HTMLElement) ||
       !(content instanceof HTMLElement)
     ) {
-      console.error(
-        '[RelayRunner] FAQ panel elements not found'
-      );
+      console.error('[RelayRunner] FAQ panel elements not found');
 
       return false;
     }
@@ -850,11 +577,9 @@ const gameplayMusicUrl =
     try {
       prepareInfoPanel('faq');
 
-      eyebrow.textContent =
-        'RELAY RUNNER // FIELD GUIDE';
+      eyebrow.textContent = 'RELAY RUNNER // FIELD GUIDE';
 
-      heading.textContent =
-        'FAQ';
+      heading.textContent = 'FAQ';
 
       content.innerHTML = `
         <div
@@ -868,18 +593,14 @@ const gameplayMusicUrl =
           class="relay-faq-list"
           role="list"
         >
-          ${RELAY_FAQ.map(
-            ([question, answer], index) => {
-              const isOpen =
-                index === 0;
+          ${RELAY_FAQ.map(([question, answer], index) => {
+            const isOpen = index === 0;
 
-              const number =
-                String(index + 1)
-                  .padStart(2, '0');
+            const number = String(index + 1).padStart(2, '0');
 
-              return `
+            return `
                 <article
-                  class="relay-faq-item${isOpen ? ' open' : ''}"
+                  class="relay-faq-item${isOpen ? ' is-open' : ''}"
                   role="listitem"
                 >
                   <button
@@ -903,9 +624,7 @@ const gameplayMusicUrl =
                       class="faq-question-state"
                       aria-hidden="true"
                     >
-                      ${isOpen
-                        ? 'ACTIVE'
-                        : 'QUERY'}
+                      ${isOpen ? 'ACTIVE' : 'QUERY'}
                     </span>
                   </button>
 
@@ -917,18 +636,13 @@ const gameplayMusicUrl =
                   </div>
                 </article>
               `;
-            }
-          ).join('')}
+          }).join('')}
         </div>
       `;
 
       return true;
-
     } catch (error) {
-      console.error(
-        '[RelayRunner] FAQ open failed:',
-        error
-      );
+      console.error('[RelayRunner] FAQ open failed:', error);
 
       return false;
     }
@@ -939,17 +653,13 @@ const gameplayMusicUrl =
      ========================================================= */
 
   const openUpdate = () => {
-    const panel =
-      $('relayInfoPanel');
+    const panel = $('relayInfoPanel');
 
-    const eyebrow =
-      $('relayInfoEyebrow');
+    const eyebrow = $('relayInfoEyebrow');
 
-    const heading =
-      $('relayInfoHeading');
+    const heading = $('relayInfoHeading');
 
-    const content =
-      $('relayInfoContent');
+    const content = $('relayInfoContent');
 
     if (
       !(panel instanceof HTMLElement) ||
@@ -957,9 +667,7 @@ const gameplayMusicUrl =
       !(heading instanceof HTMLElement) ||
       !(content instanceof HTMLElement)
     ) {
-      console.error(
-        '[RelayRunner] UPDATE panel elements not found'
-      );
+      console.error('[RelayRunner] UPDATE panel elements not found');
 
       return false;
     }
@@ -967,11 +675,9 @@ const gameplayMusicUrl =
     try {
       prepareInfoPanel('update');
 
-      eyebrow.textContent =
-        'LATEST UPDATE';
+      eyebrow.textContent = 'LATEST UPDATE';
 
-      heading.textContent =
-        'UPDATE';
+      heading.textContent = 'UPDATE';
 
       content.innerHTML = `
         <p class="relay-update-meta">
@@ -1002,12 +708,8 @@ const gameplayMusicUrl =
       `;
 
       return true;
-
     } catch (error) {
-      console.error(
-        '[RelayRunner] UPDATE open failed:',
-        error
-      );
+      console.error('[RelayRunner] UPDATE open failed:', error);
 
       return false;
     }
@@ -1018,17 +720,13 @@ const gameplayMusicUrl =
      ========================================================= */
 
   const openHomeCredits = () => {
-    const panel =
-      $('titlePanel');
+    const panel = $('titlePanel');
 
-    const eyebrow =
-      $('titlePanelEyebrow');
+    const eyebrow = $('titlePanelEyebrow');
 
-    const heading =
-      $('titlePanelHeading');
+    const heading = $('titlePanelHeading');
 
-    const content =
-      $('titlePanelContent');
+    const content = $('titlePanelContent');
 
     if (
       !(panel instanceof HTMLElement) ||
@@ -1041,11 +739,9 @@ const gameplayMusicUrl =
 
     closeHomePanels();
 
-    eyebrow.textContent =
-      'CREDITS';
+    eyebrow.textContent = 'CREDITS';
 
-    heading.textContent =
-      'RELAY RUNNER';
+    heading.textContent = 'RELAY RUNNER';
 
     content.innerHTML = `
       <div class="home-info-panel-content">
@@ -1095,17 +791,13 @@ const gameplayMusicUrl =
      ========================================================= */
 
   const openHomeTutorial = () => {
-    const panel =
-      $('titlePanel');
+    const panel = $('titlePanel');
 
-    const eyebrow =
-      $('titlePanelEyebrow');
+    const eyebrow = $('titlePanelEyebrow');
 
-    const heading =
-      $('titlePanelHeading');
+    const heading = $('titlePanelHeading');
 
-    const content =
-      $('titlePanelContent');
+    const content = $('titlePanelContent');
 
     if (
       !(panel instanceof HTMLElement) ||
@@ -1118,11 +810,9 @@ const gameplayMusicUrl =
 
     closeHomePanels();
 
-    eyebrow.textContent =
-      'FIELD MANUAL';
+    eyebrow.textContent = 'FIELD MANUAL';
 
-    heading.textContent =
-      'HOW TO RUN.';
+    heading.textContent = 'HOW TO RUN.';
 
     content.innerHTML = `
       <div class="home-tutorial-content">
@@ -1298,62 +988,29 @@ const gameplayMusicUrl =
     panel.classList.remove('hidden');
     panel.setAttribute('aria-hidden', 'false');
 
-    content
-      .querySelectorAll(
-        '[data-tutorial-section]'
-      )
-      .forEach(button => {
+    content.querySelectorAll('[data-tutorial-section]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const open = button.getAttribute('aria-expanded') === 'true';
 
-        button.addEventListener(
-          'click',
-          () => {
+        button.setAttribute('aria-expanded', String(!open));
 
-            const open =
-              button.getAttribute(
-                'aria-expanded'
-              ) === 'true';
+        const article = button.closest('.tutorial-accordion');
 
-            button.setAttribute(
-              'aria-expanded',
-              String(!open)
-            );
+        const tutorialPanel = article?.querySelector('.tutorial-panel');
 
-            const article =
-              button.closest(
-                '.tutorial-accordion'
-              );
+        const indicator = button.querySelector('b');
 
-            const tutorialPanel =
-              article?.querySelector(
-                '.tutorial-panel'
-              );
+        if (tutorialPanel instanceof HTMLElement) {
+          tutorialPanel.hidden = open;
+        }
 
-            const indicator =
-              button.querySelector('b');
+        if (indicator instanceof HTMLElement) {
+          indicator.textContent = open ? '+' : '−';
+        }
 
-            if (
-              tutorialPanel instanceof HTMLElement
-            ) {
-              tutorialPanel.hidden = open;
-            }
-
-            if (
-              indicator instanceof HTMLElement
-            ) {
-              indicator.textContent =
-                open
-                  ? '+'
-                  : '−';
-            }
-
-            article?.classList.toggle(
-              'is-open',
-              !open
-            );
-          }
-        );
-
+        article?.classList.toggle('is-open', !open);
       });
+    });
 
     return true;
   };
@@ -1364,72 +1021,51 @@ const gameplayMusicUrl =
 
   const syncHomeContract = async () => {
     try {
-      const {
-        contracts
-      } =
-        homeContractsAPI ||
-        await import('./src/contracts.js');
+      const { contracts } = homeContractsAPI || (await import('./src/contracts.js'));
 
       homeContractsAPI = {
-        contracts
+        contracts,
       };
 
-      const list =
-        Array.isArray(contracts)
-          ? contracts
-          : [];
+      const list = Array.isArray(contracts) ? contracts : [];
 
-      const contract =
-        list[0] || null;
+      const contract = list[0] || null;
 
-      const typeEl =
-        $('homeV4ContractType');
+      const typeEl = $('homeV4ContractType');
 
-      const statusEl =
-        $('homeV4ContractStatus');
+      const statusEl = $('homeV4ContractStatus');
 
-      const codeEl =
-        $('homeV4ContractCode');
+      const codeEl = $('homeV4ContractCode');
 
-      const titleEl =
-        $('homeV4ContractTitle');
+      const titleEl = $('homeV4ContractTitle');
 
-      const descriptionEl =
-        $('homeV4ContractDescription');
+      const descriptionEl = $('homeV4ContractDescription');
 
-      const missionEl =
-        $('homeV4ContractMission');
+      const missionEl = $('homeV4ContractMission');
 
-      const rewardEl =
-        $('homeV4ContractReward');
+      const rewardEl = $('homeV4ContractReward');
 
-      const creditsEl =
-        $('homeV4ContractCredits');
+      const creditsEl = $('homeV4ContractCredits');
 
       if (!contract) {
         if (typeEl) {
-          typeEl.textContent =
-            'CONTRACT // OFFLINE';
+          typeEl.textContent = 'CONTRACT // OFFLINE';
         }
 
         if (statusEl) {
-          statusEl.textContent =
-            'STANDBY';
+          statusEl.textContent = 'STANDBY';
         }
 
         if (codeEl) {
-          codeEl.textContent =
-            'CONTRACT // NONE';
+          codeEl.textContent = 'CONTRACT // NONE';
         }
 
         if (titleEl) {
-          titleEl.textContent =
-            'NO CONTRACT AVAILABLE';
+          titleEl.textContent = 'NO CONTRACT AVAILABLE';
         }
 
         if (descriptionEl) {
-          descriptionEl.textContent =
-            'NO ACTIVE CONTRACT DATA AVAILABLE.';
+          descriptionEl.textContent = 'NO ACTIVE CONTRACT DATA AVAILABLE.';
         }
 
         if (missionEl) {
@@ -1447,81 +1083,51 @@ const gameplayMusicUrl =
         return;
       }
 
-      const type =
-        String(
-          contract.type ||
-          'CONTRACT'
-        ).toUpperCase();
+      const type = String(contract.type || 'CONTRACT').toUpperCase();
 
-      const id =
-        String(
-          contract.id ||
-          'unknown'
-        ).toUpperCase();
+      const id = String(contract.id || 'unknown').toUpperCase();
 
-      const mission =
-        String(
-          contract.missionId ||
-          '—'
-        ).toUpperCase();
+      const mission = String(contract.missionId || '—').toUpperCase();
 
-      const label =
-        String(
-          contract.label ||
-          'CONTRACT OBJECTIVE'
-        ).toUpperCase();
+      const label = String(contract.label || 'CONTRACT OBJECTIVE').toUpperCase();
 
-      const xp =
-        Number(contract.xp) || 0;
+      const xp = Number(contract.xp) || 0;
 
-      const credits =
-        Number(contract.credits) || 0;
+      const credits = Number(contract.credits) || 0;
 
       if (typeEl) {
-        typeEl.textContent =
-          `${type} // CONTRACT`;
+        typeEl.textContent = `${type} // CONTRACT`;
       }
 
       if (statusEl) {
-        statusEl.textContent =
-          'AVAILABLE';
+        statusEl.textContent = 'AVAILABLE';
       }
 
       if (codeEl) {
-        codeEl.textContent =
-          `CONTRACT // ${id}`;
+        codeEl.textContent = `CONTRACT // ${id}`;
       }
 
       if (titleEl) {
-        titleEl.textContent =
-          label;
+        titleEl.textContent = label;
       }
 
       if (descriptionEl) {
-        descriptionEl.textContent =
-          'COMPLETE THIS CONTRACT DURING NORMAL PLAY.';
+        descriptionEl.textContent = 'COMPLETE THIS CONTRACT DURING NORMAL PLAY.';
       }
 
       if (missionEl) {
-        missionEl.textContent =
-          mission;
+        missionEl.textContent = mission;
       }
 
       if (rewardEl) {
-        rewardEl.textContent =
-          `+${xp.toLocaleString()} XP`;
+        rewardEl.textContent = `+${xp.toLocaleString()} XP`;
       }
 
       if (creditsEl) {
-        creditsEl.textContent =
-          `+${credits.toLocaleString()} CREDITS`;
+        creditsEl.textContent = `+${credits.toLocaleString()} CREDITS`;
       }
-
     } catch (error) {
-      console.error(
-        '[RelayRunner] Active contract sync failed:',
-        error
-      );
+      console.error('[RelayRunner] Active contract sync failed:', error);
     }
   };
 
@@ -1533,20 +1139,13 @@ const gameplayMusicUrl =
     const intro = $('intro');
     const visible = introVisible();
 
-    document.body.classList.toggle(
-      'home-v3-active',
-      visible
-    );
+    document.body.classList.toggle('home-v3-active', visible);
 
-    intro?.classList.toggle(
-      'home-v3',
-      visible
-    );
+    intro?.classList.toggle('home-v3', visible);
 
     if (!visible) return;
 
-    const start =
-      intro?.querySelector('#start');
+    const start = intro?.querySelector('#start');
 
     forceStartVisible(start);
     void syncHomeProfile();
@@ -1557,8 +1156,7 @@ const gameplayMusicUrl =
      ========================================================= */
 
   const startHomeTypewriter = () => {
-    const target =
-      $('homeV4Typewriter');
+    const target = $('homeV4Typewriter');
 
     if (!(target instanceof HTMLElement)) {
       return;
@@ -1583,25 +1181,18 @@ const gameplayMusicUrl =
 
       if (!deleting) {
         if (index < text.length) {
-          target.textContent +=
-            text.charAt(index);
+          target.textContent += text.charAt(index);
 
           index += 1;
 
-          window.setTimeout(
-            run,
-            typeSpeed
-          );
+          window.setTimeout(run, typeSpeed);
 
           return;
         }
 
         deleting = true;
 
-        window.setTimeout(
-          run,
-          pauseAfterTyping
-        );
+        window.setTimeout(run, pauseAfterTyping);
 
         return;
       }
@@ -1609,23 +1200,16 @@ const gameplayMusicUrl =
       if (index > 0) {
         index -= 1;
 
-        target.textContent =
-          text.substring(0, index);
+        target.textContent = text.substring(0, index);
 
-        window.setTimeout(
-          run,
-          deleteSpeed
-        );
+        window.setTimeout(run, deleteSpeed);
 
         return;
       }
 
       deleting = false;
 
-      window.setTimeout(
-        run,
-        pauseAfterDeleting
-      );
+      window.setTimeout(run, pauseAfterDeleting);
     };
 
     target.textContent = '';
@@ -1642,30 +1226,21 @@ const gameplayMusicUrl =
   const buildHome = () => {
     const intro = $('intro');
 
-    if (
-      !intro ||
-      intro.dataset.homeV4Built === '1'
-    ) {
+    if (!intro || intro.dataset.homeV4Built === '1') {
       return;
     }
 
-    const sourceContinue =
-      $('continue');
+    const sourceContinue = $('continue');
 
     intro.dataset.homeV4Built = '1';
     intro.classList.add('home-v3');
     intro.replaceChildren();
 
-    const scene =
-      document.createElement('div');
+    const scene = document.createElement('div');
 
-    scene.className =
-      'home-v4-scene';
+    scene.className = 'home-v4-scene';
 
-    scene.setAttribute(
-      'aria-hidden',
-      'true'
-    );
+    scene.setAttribute('aria-hidden', 'true');
 
     scene.innerHTML = `
       <div class="home-v4-art"></div>
@@ -1691,13 +1266,11 @@ const gameplayMusicUrl =
       </div>
     `;
 
-    const shell =
-      document.createElement('div');
+    const shell = document.createElement('div');
 
-    shell.className =
-      'home-v4-shell';
+    shell.className = 'home-v4-shell';
 
-   shell.innerHTML = `
+    shell.innerHTML = `
   <header class="home-v4-topbar">
 
     <div
@@ -2728,19 +2301,91 @@ const gameplayMusicUrl =
         </div>
 
 
-        <div
-          class="home-v4-profile-footer"
-        >
+  <div
+  class="home-v4-run-intel"
+  aria-label="Run performance intelligence"
+>
 
-          <span>
-            RUNNER STATUS
-          </span>
+  <div class="home-v4-run-intel-head">
 
-          <b>
-            FIELD READY
-          </b>
+    <div>
 
-        </div>
+      <span>
+        RUN INTEL
+      </span>
+
+      <strong>
+        PERFORMANCE // LIVE
+      </strong>
+
+    </div>
+
+    <b>
+      LIVE
+    </b>
+
+  </div>
+
+
+  <div class="home-v4-run-intel-grid">
+
+    <div class="home-v4-run-intel-item">
+
+      <small>
+        CURRENT STREAK
+      </small>
+
+      <strong id="homeV4Streak">
+        0
+      </strong>
+
+    </div>
+
+
+    <div class="home-v4-run-intel-item">
+
+      <small>
+        BEST STREAK
+      </small>
+
+      <strong id="homeV4LongestStreak">
+        0
+      </strong>
+
+    </div>
+
+
+    <div class="home-v4-run-intel-item">
+
+      <small>
+        LAST RATING
+      </small>
+
+      <strong
+        id="homeV4IntelRating"
+        class="is-rating"
+      >
+        —
+      </strong>
+
+    </div>
+
+
+    <div class="home-v4-run-intel-item">
+
+      <small>
+        BEST SCORE
+      </small>
+
+    <strong id="homeV4IntelBestScore">
+  0
+</strong>
+
+    </div>
+
+  </div>
+
+</div>
 
       </aside>
 
@@ -2821,10 +2466,7 @@ const gameplayMusicUrl =
   </button>
     `;
 
-    intro.append(
-      scene,
-      shell
-    );
+    intro.append(scene, shell);
 
     // The intro is the actual home screen. It starts hidden in index.html
     // only to prevent the empty shell from blocking interaction before
@@ -2841,57 +2483,35 @@ const gameplayMusicUrl =
        HOME V5 COMMAND ROW
        ========================================================= */
 
-    const homeCopy =
-      shell.querySelector(
-        '.home-v4-copy'
-      );
+    const homeCopy = shell.querySelector('.home-v4-copy');
 
-    const homeActions =
-      shell.querySelector(
-        '.home-v4-actions'
-      );
+    const homeActions = shell.querySelector('.home-v4-actions');
 
-    const homeDaily =
-      shell.querySelector(
-        '.home-v4-daily'
-      );
+    const homeDaily = shell.querySelector('.home-v4-daily');
 
     if (
       homeCopy instanceof HTMLElement &&
       homeActions instanceof HTMLElement &&
       homeDaily instanceof HTMLElement
     ) {
-      const commandRow =
-        document.createElement('div');
+      const commandRow = document.createElement('div');
 
-      commandRow.className =
-        'home-v5-command-row';
+      commandRow.className = 'home-v5-command-row';
 
-      homeCopy.insertBefore(
-        commandRow,
-        homeActions
-      );
+      homeCopy.insertBefore(commandRow, homeActions);
 
-      commandRow.append(
-        homeActions,
-        homeDaily
-      );
+      commandRow.append(homeActions, homeDaily);
     }
 
     /* =========================================================
        HOME V6 MISSION NETWORK
        ========================================================= */
 
-    const missionNetwork =
-      document.createElement('section');
+    const missionNetwork = document.createElement('section');
 
-    missionNetwork.className =
-      'home-v6-mission-network';
+    missionNetwork.className = 'home-v6-mission-network';
 
-    missionNetwork.setAttribute(
-      'aria-label',
-      'Mission network'
-    );
+    missionNetwork.setAttribute('aria-label', 'Mission network');
 
     missionNetwork.innerHTML = `
       <div class="home-v6-mission-head">
@@ -2933,16 +2553,11 @@ const gameplayMusicUrl =
        Uses only persisted runtime state; no placeholder values.
        ========================================================= */
 
-    const operationsPanel =
-      document.createElement('section');
+    const operationsPanel = document.createElement('section');
 
-    operationsPanel.className =
-      'home-v7-operations';
+    operationsPanel.className = 'home-v7-operations';
 
-    operationsPanel.setAttribute(
-      'aria-label',
-      'Operations telemetry'
-    );
+    operationsPanel.setAttribute('aria-label', 'Operations telemetry');
 
     operationsPanel.innerHTML = `
       <div class="home-v7-head">
@@ -2982,123 +2597,696 @@ const gameplayMusicUrl =
 
     homeCopy?.append(operationsPanel);
 
-    const operationsStyle =
-      document.createElement('style');
+    const operationsStyle = document.createElement('style');
 
     operationsStyle.textContent = `
+           /* =========================================================
+         HOME // COMMAND INTERFACE
+         ========================================================= */
+
       #intro.home-v3{
         overflow-x:hidden !important;
         overflow-y:auto !important;
         -webkit-overflow-scrolling:touch;
         overscroll-behavior-y:contain;
         scrollbar-gutter:stable;
+        background:#02070b;
+        color:#eafcff;
       }
+
       #intro.home-v3 .home-v4-scene{
         position:fixed !important;
         inset:0 !important;
         pointer-events:none !important;
         z-index:0 !important;
       }
+
       #intro.home-v3 .home-v4-shell{
+        position:relative !important;
         z-index:1 !important;
         pointer-events:auto !important;
+        min-height:100% !important;
+        height:auto !important;
+        isolation:isolate;
       }
-      #intro.home-v3 .home-v4-shell *,
+
+      #intro.home-v3 .home-v4-shell,
       #intro.home-v3 .home-v4-shell button,
       #intro.home-v3 .home-v4-shell a,
       #intro.home-v3 .home-v4-shell [role="button"]{
         pointer-events:auto !important;
       }
-      #intro.home-v3 .home-v4-shell{
-        position:relative !important;
-        min-height:100% !important;
-        height:auto !important;
-      }
+
       #intro.home-v3 .home-v4-main{
         min-height:calc(100vh - 150px);
         height:auto !important;
       }
+
       #intro.home-v3 .home-v4-copy{
         padding-bottom:clamp(120px,15vh,220px);
       }
+
+
+      /* =========================================================
+         HOME V7 // OPERATIONS TELEMETRY
+         ========================================================= */
+
       .home-v7-operations{
+        position:relative;
         width:100%;
-        margin-top:12px;
-        padding:14px;
+        margin-top:16px;
+        padding:16px;
         box-sizing:border-box;
-        border:1px solid rgba(100,220,235,.14);
-        background:rgba(2,8,13,.82);
+        overflow:hidden;
+
+        border:1px solid rgba(85,223,240,.17);
+        background:
+          linear-gradient(
+            145deg,
+            rgba(4,16,23,.94),
+            rgba(2,8,13,.96)
+          );
+
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,.025),
+          inset 0 0 32px rgba(0,200,255,.035),
+          0 14px 36px rgba(0,0,0,.24);
+
         font-family:Orbitron,sans-serif;
       }
+
+      .home-v7-operations::before{
+        content:"";
+        position:absolute;
+        top:0;
+        left:0;
+        width:72px;
+        height:1px;
+        background:linear-gradient(
+          90deg,
+          rgba(85,223,240,.95),
+          rgba(85,223,240,0)
+        );
+      }
+
+      .home-v7-operations::after{
+        content:"";
+        position:absolute;
+        right:0;
+        bottom:0;
+        width:110px;
+        height:1px;
+        background:linear-gradient(
+          270deg,
+          rgba(120,105,255,.65),
+          rgba(120,105,255,0)
+        );
+      }
+
+
+      /* Header */
+
       .home-v7-head{
         display:flex;
         align-items:center;
         justify-content:space-between;
-        gap:12px;
-        margin-bottom:10px;
+        gap:16px;
+        margin-bottom:13px;
+        padding-bottom:11px;
+        border-bottom:1px solid rgba(100,220,235,.08);
       }
-      .home-v7-head div{display:grid;gap:3px;}
-      .home-v7-head span{font-size:8px;letter-spacing:.18em;color:#7deaff;}
-      .home-v7-head strong{font-size:11px;letter-spacing:.08em;color:#eefcff;}
-      .home-v7-head>b{font-size:7px;letter-spacing:.14em;color:#39ff88;}
+
+      .home-v7-head div{
+        display:grid;
+        gap:4px;
+        min-width:0;
+      }
+
+      .home-v7-head span{
+        color:#63e9ff;
+        font-size:7px;
+        font-weight:800;
+        letter-spacing:.22em;
+        text-transform:uppercase;
+      }
+
+      .home-v7-head strong{
+        color:#effcff;
+        font-size:11px;
+        font-weight:800;
+        letter-spacing:.09em;
+        line-height:1.2;
+        text-transform:uppercase;
+      }
+
+      .home-v7-head>b{
+        flex:none;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+
+        padding:5px 8px;
+
+        border:1px solid rgba(57,255,136,.18);
+        background:rgba(57,255,136,.035);
+
+        color:#55ff9a;
+        font-size:7px;
+        font-weight:800;
+        letter-spacing:.16em;
+        white-space:nowrap;
+      }
+
+      .home-v7-head>b::before{
+        content:"";
+        width:5px;
+        height:5px;
+        border-radius:50%;
+        background:#39ff88;
+        box-shadow:0 0 8px rgba(57,255,136,.7);
+      }
+
+
+      /* Stat grid */
+
       .home-v7-grid{
         display:grid;
         grid-template-columns:repeat(4,minmax(0,1fr));
-        gap:7px;
+        gap:8px;
       }
+
       .home-v7-grid article{
+        position:relative;
         min-width:0;
-        padding:10px;
-        border:1px solid rgba(100,220,235,.08);
-        background:rgba(4,14,20,.72);
+        min-height:68px;
+
+        padding:11px;
+
+        border:1px solid rgba(100,220,235,.09);
+        background:
+          linear-gradient(
+            145deg,
+            rgba(8,22,29,.82),
+            rgba(3,11,16,.84)
+          );
+
         display:grid;
-        gap:5px;
+        align-content:space-between;
+        gap:8px;
+
+        overflow:hidden;
       }
-      .home-v7-grid small,.home-v7-foot span{
+
+      .home-v7-grid article::before{
+        content:"";
+        position:absolute;
+        left:0;
+        top:0;
+        width:22px;
+        height:1px;
+        background:rgba(85,223,240,.42);
+      }
+
+      .home-v7-grid article::after{
+        content:"";
+        position:absolute;
+        right:0;
+        bottom:0;
+        width:28px;
+        height:1px;
+        background:rgba(120,105,255,.28);
+      }
+
+      .home-v7-grid article:hover{
+        border-color:rgba(85,223,240,.21);
+        background:
+          linear-gradient(
+            145deg,
+            rgba(8,26,34,.9),
+            rgba(3,11,16,.94)
+          );
+      }
+
+      .home-v7-grid small,
+      .home-v7-foot span{
+        color:rgba(214,239,244,.52);
         font-size:7px;
-        letter-spacing:.1em;
-        color:rgba(214,239,244,.56);
+        font-weight:700;
+        letter-spacing:.11em;
+        line-height:1.3;
+        text-transform:uppercase;
       }
+
       .home-v7-grid strong{
-        font-size:14px;
-        color:#eafcff;
+        color:#ecfbff;
+        font-size:16px;
+        font-weight:800;
+        letter-spacing:.02em;
+        line-height:1;
         overflow:hidden;
         text-overflow:ellipsis;
+        white-space:nowrap;
+        text-shadow:0 0 14px rgba(85,223,240,.08);
       }
+
+
+      /* Footer telemetry */
+
       .home-v7-foot{
-        display:flex;
+        display:grid;
+        grid-template-columns:auto minmax(28px,auto) auto minmax(28px,auto);
         align-items:center;
-        gap:9px;
-        margin-top:9px;
-        padding-top:9px;
+        gap:8px;
+
+        margin-top:11px;
+        padding-top:11px;
+
         border-top:1px solid rgba(100,220,235,.08);
       }
+
       .home-v7-foot strong{
+        min-width:0;
+        color:#5fe4f3;
+        font-size:9px;
+        font-weight:800;
+        letter-spacing:.05em;
+        text-align:left;
+      }
+
+      .home-v7-foot span:nth-of-type(2){
+        margin-left:10px;
+      }
+
+
+      /* =========================================================
+         HOME V6 // MISSION NETWORK
+         ========================================================= */
+
+      .home-v6-mission-network{
+        position:relative;
+        width:100%;
+        margin-top:18px;
+        padding:16px;
+        box-sizing:border-box;
+        overflow:hidden;
+
+        border:1px solid rgba(100,220,235,.16);
+
+        background:
+          linear-gradient(
+            145deg,
+            rgba(4,15,21,.95),
+            rgba(2,7,11,.97)
+          );
+
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,.02),
+          inset 0 0 30px rgba(0,190,255,.03),
+          0 14px 34px rgba(0,0,0,.24);
+      }
+
+      .home-v6-mission-network::before{
+        content:"";
+        position:absolute;
+        top:0;
+        left:0;
+        width:92px;
+        height:1px;
+        background:linear-gradient(
+          90deg,
+          rgba(85,223,240,.9),
+          rgba(85,223,240,0)
+        );
+      }
+
+      .home-v6-mission-network::after{
+        content:"";
+        position:absolute;
+        inset:0;
+        pointer-events:none;
+
+        background:
+          linear-gradient(
+            90deg,
+            transparent 0,
+            rgba(100,220,235,.018) 50%,
+            transparent 100%
+          );
+      }
+
+
+      /* Mission header */
+
+      .home-v6-mission-head{
+        position:relative;
+        z-index:1;
+
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:14px;
+
+        margin-bottom:12px;
+        padding-bottom:11px;
+
+        border-bottom:1px solid rgba(100,220,235,.08);
+
+        font-family:Orbitron,sans-serif;
+      }
+
+      .home-v6-mission-head div{
+        display:grid;
+        gap:4px;
+        min-width:0;
+      }
+
+      .home-v6-mission-head span{
+        color:#63e9ff;
+        font-size:8px;
+        font-weight:800;
+        letter-spacing:.2em;
+        text-transform:uppercase;
+      }
+
+      .home-v6-mission-head strong{
+        color:#effcff;
+        font-size:12px;
+        font-weight:800;
+        letter-spacing:.08em;
+        line-height:1.2;
+        text-transform:uppercase;
+      }
+
+      .home-v6-mission-head>b{
+        flex:none;
+
+        padding:5px 8px;
+
+        border:1px solid rgba(57,255,136,.17);
+        background:rgba(57,255,136,.03);
+
+        color:#39ff88;
+        font-size:7px;
+        font-weight:800;
+        letter-spacing:.12em;
+        white-space:nowrap;
+      }
+
+
+      /* Mission cards */
+
+      .home-v6-mission-grid{
+        position:relative;
+        z-index:1;
+
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:8px;
+      }
+
+      .home-v6-mission-grid article{
+        position:relative;
+        min-width:0;
+
+        display:grid;
+        grid-template-columns:26px minmax(0,1fr) auto;
+        align-items:center;
+        gap:10px;
+
+        padding:11px;
+
+        border:1px solid rgba(100,220,235,.09);
+
+        background:
+          linear-gradient(
+            145deg,
+            rgba(6,20,27,.84),
+            rgba(3,11,16,.9)
+          );
+
+        font-family:Orbitron,sans-serif;
+        transition:
+          border-color .18s ease,
+          background .18s ease,
+          transform .18s ease;
+      }
+
+      .home-v6-mission-grid article:hover{
+        transform:translateY(-1px);
+        border-color:rgba(85,223,240,.2);
+        background:
+          linear-gradient(
+            145deg,
+            rgba(8,25,33,.9),
+            rgba(3,11,16,.95)
+          );
+      }
+
+      .home-v6-mission-grid article>span{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        width:24px;
+        height:24px;
+
+        border:1px solid rgba(85,223,240,.17);
+        background:rgba(85,223,240,.035);
+
         color:#55dff0;
         font-size:9px;
-        margin-right:auto;
+        font-weight:800;
       }
+
+      .home-v6-mission-grid article div{
+        min-width:0;
+        display:grid;
+        gap:4px;
+      }
+
+      .home-v6-mission-grid article strong{
+        color:#f3fbff;
+        font-size:10px;
+        font-weight:800;
+        letter-spacing:.045em;
+        line-height:1.2;
+
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      }
+
+      .home-v6-mission-grid article small{
+        color:rgba(214,239,244,.54);
+        font-size:7px;
+        font-weight:700;
+        letter-spacing:.08em;
+        line-height:1.2;
+        text-transform:uppercase;
+      }
+
+      .home-v6-mission-grid article>b{
+        padding-left:8px;
+
+        color:#ffd75c;
+        font-size:7px;
+        font-weight:800;
+        letter-spacing:.09em;
+        white-space:nowrap;
+      }
+
+
+      /* Completed state */
+
+      .home-v6-mission-grid article.is-complete{
+        border-color:rgba(57,255,136,.25);
+
+        background:
+          linear-gradient(
+            145deg,
+            rgba(7,25,20,.84),
+            rgba(3,12,13,.92)
+          );
+      }
+
+      .home-v6-mission-grid article.is-complete::before{
+        content:"";
+        position:absolute;
+        left:0;
+        top:0;
+        bottom:0;
+        width:2px;
+        background:rgba(57,255,136,.75);
+        box-shadow:0 0 12px rgba(57,255,136,.2);
+      }
+
+      .home-v6-mission-grid article.is-complete>span{
+        border-color:rgba(57,255,136,.22);
+        background:rgba(57,255,136,.045);
+        color:#39ff88;
+      }
+
+      .home-v6-mission-grid article.is-complete>b{
+        color:#39ff88;
+      }
+
+
+      /* =========================================================
+         MOBILE
+         ========================================================= */
+
       @media(max-width:700px){
-        #intro.home-v3 .home-v4-main{min-height:0;}
-        #intro.home-v3 .home-v4-copy{padding-bottom:150px;}
-        .home-v7-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-        .home-v7-foot{flex-wrap:wrap;}
-        .home-v7-foot strong{margin-right:4px;}
+
+        #intro.home-v3 .home-v4-main{
+          min-height:0;
+        }
+
+        #intro.home-v3 .home-v4-copy{
+          padding-bottom:150px;
+        }
+
+        .home-v7-operations{
+          margin-top:14px;
+          padding:13px;
+        }
+
+        .home-v7-head{
+          gap:10px;
+          margin-bottom:11px;
+        }
+
+        .home-v7-head strong{
+          font-size:10px;
+        }
+
+        .home-v7-grid{
+          grid-template-columns:repeat(2,minmax(0,1fr));
+          gap:7px;
+        }
+
+        .home-v7-grid article{
+          min-height:62px;
+          padding:10px;
+        }
+
+        .home-v7-grid strong{
+          font-size:14px;
+        }
+
+        .home-v7-foot{
+          grid-template-columns:auto minmax(20px,auto);
+          gap:7px 9px;
+        }
+
+        .home-v7-foot span:nth-of-type(2){
+          margin-left:0;
+        }
+
+        .home-v6-mission-network{
+          margin-top:15px;
+          padding:13px;
+        }
+
+        .home-v6-mission-head{
+          align-items:flex-start;
+          gap:10px;
+        }
+
+        .home-v6-mission-head strong{
+          font-size:10px;
+        }
+
+        .home-v6-mission-grid{
+          grid-template-columns:1fr;
+          gap:7px;
+        }
+
+        .home-v6-mission-grid article{
+          grid-template-columns:24px minmax(0,1fr) auto;
+          padding:10px;
+        }
+
+        .home-v6-mission-grid article>span{
+          width:22px;
+          height:22px;
+        }
+      }
+
+
+      /* =========================================================
+         SMALL PHONES
+         ========================================================= */
+
+      @media(max-width:430px){
+
+        .home-v7-head{
+          align-items:flex-start;
+        }
+
+        .home-v7-head>b{
+          padding:4px 6px;
+          font-size:6px;
+        }
+
+        .home-v7-grid{
+          gap:6px;
+        }
+
+        .home-v7-grid article{
+          min-height:58px;
+          padding:9px;
+        }
+
+        .home-v7-grid small,
+        .home-v7-foot span{
+          font-size:6px;
+        }
+
+        .home-v7-grid strong{
+          font-size:13px;
+        }
+
+        .home-v6-mission-head>b{
+          padding:4px 6px;
+          font-size:6px;
+        }
+
+        .home-v6-mission-grid article strong{
+          font-size:9px;
+        }
+
+        .home-v6-mission-grid article small{
+          font-size:6px;
+        }
+
+        .home-v6-mission-grid article>b{
+          font-size:6px;
+        }
+      }
+
+
+      /* =========================================================
+         REDUCED MOTION
+         ========================================================= */
+
+      @media(prefers-reduced-motion:reduce){
+
+        .home-v6-mission-grid article{
+          transition:none;
+        }
+
+        .home-v6-mission-grid article:hover{
+          transform:none;
+        }
       }
     `;
 
     document.head.append(operationsStyle);
 
-    const syncOperationsTelemetry = state => {
-      const completed =
-        Array.isArray(state?.completed)
-          ? state.completed.length
-          : 0;
+    const syncOperationsTelemetry = (state) => {
+      const completed = Array.isArray(state?.completed) ? state.completed.length : 0;
 
-      const unlocked =
-        Array.isArray(state?.unlockedMissions)
-          ? state.unlockedMissions.length
-          : 0;
+      const unlocked = Array.isArray(state?.unlockedMissions) ? state.unlockedMissions.length : 0;
 
       const values = {
         runs: Number(state?.totalRuns) || 0,
@@ -3106,23 +3294,18 @@ const gameplayMusicUrl =
         credits: Number(state?.credits) || 0,
         best: Number(state?.bestRun) || 0,
         completed,
-        unlocked
+        unlocked,
       };
 
-      operationsPanel
-        .querySelectorAll('[data-home-v7]')
-        .forEach(el => {
-          const key = el.dataset.homeV7;
-          el.textContent =
-            Number(values[key] || 0).toLocaleString();
-        });
+      operationsPanel.querySelectorAll('[data-home-v7]').forEach((el) => {
+        const key = el.dataset.homeV7;
+        el.textContent = Number(values[key] || 0).toLocaleString();
+      });
     };
 
-    window.__relaySyncOperationsTelemetry =
-      syncOperationsTelemetry;
+    window.__relaySyncOperationsTelemetry = syncOperationsTelemetry;
 
-    const missionNetworkStyle =
-      document.createElement('style');
+    const missionNetworkStyle = document.createElement('style');
 
     missionNetworkStyle.textContent = `
       .home-v6-mission-network{
@@ -3163,21 +3346,22 @@ const gameplayMusicUrl =
 
     document.head.append(missionNetworkStyle);
 
-    const syncMissionNetwork = state => {
-      const completed =
-        Array.isArray(state?.completed)
-          ? state.completed
-          : [];
+    const syncMissionNetwork = (state) => {
+      const completed = Array.isArray(state?.completed) ? state.completed : [];
 
-      missionNetwork.querySelectorAll('[data-home-mission]').forEach((card,index)=>{
-        const done = completed.includes(index);
-        card.classList.toggle('is-complete',done);
-        const status=card.querySelector('b');
-        if(status) status.textContent=done?'COMPLETE':index===0?'READY':'LOCKED';
+      missionNetwork.querySelectorAll('[data-home-mission]').forEach((card, index) => {
+        const missionIds = ['first-delivery', 'night-run', 'dead-drop', 'black-out'];
+
+        const missionId = missionIds[index];
+
+        const done = missionId ? completed.includes(missionId) : false;
+        card.classList.toggle('is-complete', done);
+        const status = card.querySelector('b');
+        if (status) status.textContent = done ? 'COMPLETE' : index === 0 ? 'READY' : 'LOCKED';
       });
 
-      const progress=missionNetwork.querySelector('[data-home-v6-progress]');
-      if(progress) progress.textContent=`${Math.min(4,completed.length)} / 4 ONLINE`;
+      const progress = missionNetwork.querySelector('[data-home-v6-progress]');
+      if (progress) progress.textContent = `${Math.min(4, completed.length)} / 4 ONLINE`;
     };
 
     window.__relaySyncMissionNetwork = syncMissionNetwork;
@@ -3193,416 +3377,282 @@ const gameplayMusicUrl =
        STABLE HOME BUTTON EVENTS
        ========================================================= */
 
-    shell.addEventListener(
-      'click',
-      event => {
-        const target =
-          event.target instanceof Element
-            ? event.target.closest(
-                '[data-home-v4-action]'
-              )
-            : null;
+    shell.addEventListener('click', (event) => {
+      const target =
+        event.target instanceof Element ? event.target.closest('[data-home-v4-action]') : null;
 
-        if (!(target instanceof HTMLElement)) {
-          return;
-        }
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
 
-        event.preventDefault();
-        event.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
 
-        const action =
-          target.dataset.homeV4Action;
+      const action = target.dataset.homeV4Action;
 
-        switch (action) {
+      switch (action) {
+        case 'faq':
+          openFaq();
+          break;
 
-          case 'faq':
-            openFaq();
-            break;
+        case 'update':
+          openUpdate();
+          break;
 
-          case 'update':
-            openUpdate();
-            break;
+        case 'tutorial':
+          openHomeTutorial();
+          break;
 
-          case 'tutorial':
-            openHomeTutorial();
-            break;
+        case 'options':
+          openOptions();
+          break;
 
-          case 'options':
-            openOptions();
-            break;
+        case 'daily': {
+          const challengeTab = document.querySelector('#pauseMenu [data-tab="challenges"]');
 
-          case 'daily': {
-            const challengeTab =
-              document.querySelector(
-                '#pauseMenu [data-tab="challenges"]'
-              );
-
-            if (
-              challengeTab instanceof HTMLElement
-            ) {
-              HTMLElement.prototype.click.call(
-                challengeTab
-              );
-
-              break;
-            }
-
-            const fallback =
-              document.querySelector(
-                '[data-relay-info="challenges"]'
-              );
-
-            if (
-              fallback instanceof HTMLElement
-            ) {
-              HTMLElement.prototype.click.call(
-                fallback
-              );
-            }
+          if (challengeTab instanceof HTMLElement) {
+            HTMLElement.prototype.click.call(challengeTab);
 
             break;
           }
 
-          case 'contracts':
-            if (
-              typeof window.relayOpenContracts ===
-              'function'
-            ) {
-              window.relayOpenContracts();
-            } else {
-              console.error(
-                '[RelayRunner] Contracts API not ready'
-              );
-            }
-            break;
+          const fallback = document.querySelector('[data-relay-info="challenges"]');
 
-          default:
-            break;
+          if (fallback instanceof HTMLElement) {
+            HTMLElement.prototype.click.call(fallback);
+          }
+
+          break;
         }
-      }
-    );
 
-/* =========================================================
+        case 'contracts':
+          if (typeof window.relayOpenContracts === 'function') {
+            window.relayOpenContracts();
+          } else {
+            console.error('[RelayRunner] Contracts API not ready');
+          }
+          break;
+
+        default:
+          break;
+      }
+    });
+
+    /* =========================================================
    GAMEPLAY MUSIC
    HOME -> PLAY
    ========================================================= */
 
-const gameplayMusicTracks = [
-  new URL('./assets/audio/music.mp3', import.meta.url).href,
-  new URL('./assets/audio/music2.mp3', import.meta.url).href,
-  new URL('./assets/audio/music3.mp3', import.meta.url).href
-];
+    const gameplayMusicTracks = [
+      new URL('./assets/audio/music.mp3', import.meta.url).href,
+      new URL('./assets/audio/music2.mp3', import.meta.url).href,
+      new URL('./assets/audio/music3.mp3', import.meta.url).href,
+    ];
 
-let relayGameplayAudio = null;
-let relayGameplayAudioStarted = false;
-let relayGameplayTrackIndex = 0;
-let relayGameplayFadeFrame = null;
+    let relayGameplayAudio = null;
+    let relayGameplayAudioStarted = false;
+    let relayGameplayTrackIndex = 0;
+    let relayGameplayFadeFrame = null;
 
-const gameplayTargetVolume = 0.58;
+    const gameplayTargetVolume = 0.58;
 
-const clampVolume = value =>
-  Math.max(
-    0,
-    Math.min(
-      1,
-      Number.isFinite(value)
-        ? value
-        : 0
-    )
-  );
+    const clampVolume = (value) => Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
 
-const startGameplayMusic = async () => {
-  try {
-    try {
-      window.relayAdaptiveMusic?.stop?.();
-      window.relayMenuMusic?.stop?.();
-    } catch {}
+    const startGameplayMusic = async () => {
+      try {
+        try {
+          window.relayAdaptiveMusic?.stop?.();
+          window.relayMenuMusic?.stop?.();
+        } catch {}
 
-    if (!relayGameplayAudio) {
-      relayGameplayAudio =
-        new Audio(
-          gameplayMusicTracks[
-            relayGameplayTrackIndex
-          ]
-        );
+        if (!relayGameplayAudio) {
+          relayGameplayAudio = new Audio(gameplayMusicTracks[relayGameplayTrackIndex]);
 
-      relayGameplayAudio.loop = false;
-      relayGameplayAudio.preload = 'auto';
-      relayGameplayAudio.volume = 0;
+          relayGameplayAudio.loop = false;
+          relayGameplayAudio.preload = 'auto';
+          relayGameplayAudio.volume = 0;
 
-      relayGameplayAudio.addEventListener(
-        'ended',
-        () => {
-          void playNextGameplayTrack();
+          relayGameplayAudio.addEventListener('ended', () => {
+            void playNextGameplayTrack();
+          });
         }
-      );
-    }
 
-    if (
-      relayGameplayAudioStarted &&
-      !relayGameplayAudio.paused
-    ) {
-      return;
-    }
+        if (relayGameplayAudioStarted && !relayGameplayAudio.paused) {
+          return;
+        }
 
-    if (!relayGameplayAudioStarted) {
-      relayGameplayAudio.currentTime = 0;
-      relayGameplayAudio.volume = 0;
-    }
+        if (!relayGameplayAudioStarted) {
+          relayGameplayAudio.currentTime = 0;
+          relayGameplayAudio.volume = 0;
+        }
 
-    await relayGameplayAudio.play();
+        await relayGameplayAudio.play();
 
-    relayGameplayAudioStarted = true;
+        relayGameplayAudioStarted = true;
 
-    if (relayGameplayFadeFrame) {
-      cancelAnimationFrame(
-        relayGameplayFadeFrame
-      );
-    }
+        if (relayGameplayFadeFrame) {
+          cancelAnimationFrame(relayGameplayFadeFrame);
+        }
 
-    const duration = 900;
-    const startTime = performance.now();
+        const duration = 900;
+        const startTime = performance.now();
 
-    const fadeIn = now => {
-      if (!relayGameplayAudio) {
-        return;
-      }
+        const fadeIn = (now) => {
+          if (!relayGameplayAudio) {
+            return;
+          }
 
-      const rawProgress =
-        (now - startTime) / duration;
+          const rawProgress = (now - startTime) / duration;
 
-      const progress =
-        Math.max(
-          0,
-          Math.min(
-            1,
-            rawProgress
-          )
-        );
+          const progress = Math.max(0, Math.min(1, rawProgress));
 
-      relayGameplayAudio.volume =
-        clampVolume(
-          gameplayTargetVolume * progress
-        );
+          relayGameplayAudio.volume = clampVolume(gameplayTargetVolume * progress);
 
-      if (progress < 1) {
-        relayGameplayFadeFrame =
-          requestAnimationFrame(
-            fadeIn
-          );
-      } else {
-        relayGameplayFadeFrame = null;
+          if (progress < 1) {
+            relayGameplayFadeFrame = requestAnimationFrame(fadeIn);
+          } else {
+            relayGameplayFadeFrame = null;
+          }
+        };
+
+        relayGameplayFadeFrame = requestAnimationFrame(fadeIn);
+      } catch (error) {
+        console.warn('[RelayRunner] Gameplay MP3 could not start:', error);
       }
     };
 
-    relayGameplayFadeFrame =
-      requestAnimationFrame(
-        fadeIn
-      );
+    const playNextGameplayTrack = async () => {
+      try {
+        if (!relayGameplayAudio) {
+          return;
+        }
 
-  } catch (error) {
-    console.warn(
-      '[RelayRunner] Gameplay MP3 could not start:',
-      error
-    );
-  }
-};
+        relayGameplayTrackIndex = (relayGameplayTrackIndex + 1) % gameplayMusicTracks.length;
 
-const playNextGameplayTrack = async () => {
-  try {
-    if (!relayGameplayAudio) {
-      return;
-    }
+        relayGameplayAudio.src = gameplayMusicTracks[relayGameplayTrackIndex];
 
-    relayGameplayTrackIndex =
-      (
-        relayGameplayTrackIndex + 1
-      ) %
-      gameplayMusicTracks.length;
-
-    relayGameplayAudio.src =
-      gameplayMusicTracks[
-        relayGameplayTrackIndex
-      ];
-
-    relayGameplayAudio.currentTime = 0;
-    relayGameplayAudio.volume = 0;
-
-    await relayGameplayAudio.play();
-
-    relayGameplayAudioStarted = true;
-
-    const duration = 900;
-    const startTime = performance.now();
-
-    const fadeIn = now => {
-      if (!relayGameplayAudio) {
-        return;
-      }
-
-      const progress =
-        Math.max(
-          0,
-          Math.min(
-            1,
-            (now - startTime) / duration
-          )
-        );
-
-      relayGameplayAudio.volume =
-        clampVolume(
-          gameplayTargetVolume * progress
-        );
-
-      if (progress < 1) {
-        relayGameplayFadeFrame =
-          requestAnimationFrame(
-            fadeIn
-          );
-      } else {
-        relayGameplayFadeFrame = null;
-      }
-    };
-
-    if (relayGameplayFadeFrame) {
-      cancelAnimationFrame(
-        relayGameplayFadeFrame
-      );
-    }
-
-    relayGameplayFadeFrame =
-      requestAnimationFrame(
-        fadeIn
-      );
-
-  } catch (error) {
-    console.warn(
-      '[RelayRunner] Next gameplay track could not start:',
-      error
-    );
-
-    setTimeout(
-      () => {
-        void playNextGameplayTrack();
-      },
-      250
-    );
-  }
-};
-
-window.relayGameplayAudio = {
-  play: startGameplayMusic,
-
-  pause() {
-    try {
-      relayGameplayAudio?.pause?.();
-    } catch {}
-  },
-
-  resume() {
-    try {
-      if (
-        relayGameplayAudio &&
-        relayGameplayAudio.paused
-      ) {
-        void relayGameplayAudio.play();
-      }
-    } catch {}
-  },
-
-  stop() {
-    try {
-      if (relayGameplayFadeFrame) {
-        cancelAnimationFrame(
-          relayGameplayFadeFrame
-        );
-
-        relayGameplayFadeFrame = null;
-      }
-
-      relayGameplayAudio?.pause?.();
-
-      if (relayGameplayAudio) {
         relayGameplayAudio.currentTime = 0;
         relayGameplayAudio.volume = 0;
+
+        await relayGameplayAudio.play();
+
+        relayGameplayAudioStarted = true;
+
+        const duration = 900;
+        const startTime = performance.now();
+
+        const fadeIn = (now) => {
+          if (!relayGameplayAudio) {
+            return;
+          }
+
+          const progress = Math.max(0, Math.min(1, (now - startTime) / duration));
+
+          relayGameplayAudio.volume = clampVolume(gameplayTargetVolume * progress);
+
+          if (progress < 1) {
+            relayGameplayFadeFrame = requestAnimationFrame(fadeIn);
+          } else {
+            relayGameplayFadeFrame = null;
+          }
+        };
+
+        if (relayGameplayFadeFrame) {
+          cancelAnimationFrame(relayGameplayFadeFrame);
+        }
+
+        relayGameplayFadeFrame = requestAnimationFrame(fadeIn);
+      } catch (error) {
+        console.warn('[RelayRunner] Next gameplay track could not start:', error);
+
+        setTimeout(() => {
+          void playNextGameplayTrack();
+        }, 250);
       }
+    };
 
-      relayGameplayAudioStarted = false;
-      relayGameplayTrackIndex = 0;
+    window.relayGameplayAudio = {
+      play: startGameplayMusic,
 
-    } catch {}
-  },
+      pause() {
+        try {
+          relayGameplayAudio?.pause?.();
+        } catch {}
+      },
 
-  setVolume(value) {
-    try {
-      if (relayGameplayAudio) {
-        relayGameplayAudio.volume =
-          clampVolume(value);
-      }
-    } catch {}
-  }
-};
+      resume() {
+        try {
+          if (relayGameplayAudio && relayGameplayAudio.paused) {
+            void relayGameplayAudio.play();
+          }
+        } catch {}
+      },
 
-/* =========================================================
+      stop() {
+        try {
+          if (relayGameplayFadeFrame) {
+            cancelAnimationFrame(relayGameplayFadeFrame);
+
+            relayGameplayFadeFrame = null;
+          }
+
+          relayGameplayAudio?.pause?.();
+
+          if (relayGameplayAudio) {
+            relayGameplayAudio.currentTime = 0;
+            relayGameplayAudio.volume = 0;
+          }
+
+          relayGameplayAudioStarted = false;
+          relayGameplayTrackIndex = 0;
+        } catch {}
+      },
+
+      setVolume(value) {
+        try {
+          if (relayGameplayAudio) {
+            relayGameplayAudio.volume = clampVolume(value);
+          }
+        } catch {}
+      },
+    };
+
+    /* =========================================================
    START
    ========================================================= */
 
-const start =
-  shell.querySelector('#start');
+    const start = shell.querySelector('#start');
 
-forceStartVisible(start);
+    forceStartVisible(start);
 
-/*
- * Gameplay Start ownership intentionally lives in main.js.
- * Home only presents the button; it does not install a competing
- * click/launch route here.
- */
+    /*
+     * Gameplay Start ownership intentionally lives in main.js.
+     * Home only presents the button; it does not install a competing
+     * click/launch route here.
+     */
 
     /* =========================================================
        CONTINUE
        ========================================================= */
 
-    const continueButton =
-      shell.querySelector('#continue');
+    const continueButton = shell.querySelector('#continue');
 
     const syncContinue = () => {
-      if (
-        !(continueButton instanceof HTMLElement)
-      ) {
+      if (!(continueButton instanceof HTMLElement)) {
         return;
       }
 
-      continueButton.classList.remove(
-        'hidden'
-      );
+      continueButton.classList.remove('hidden');
 
-      continueButton.removeAttribute(
-        'hidden'
-      );
+      continueButton.removeAttribute('hidden');
 
-      continueButton.style.setProperty(
-        'display',
-        'inline-flex',
-        'important'
-      );
+      continueButton.style.setProperty('display', 'inline-flex', 'important');
 
-      continueButton.style.setProperty(
-        'visibility',
-        'visible',
-        'important'
-      );
+      continueButton.style.setProperty('visibility', 'visible', 'important');
 
-      continueButton.style.setProperty(
-        'opacity',
-        '1',
-        'important'
-      );
+      continueButton.style.setProperty('opacity', '1', 'important');
 
-      continueButton.style.setProperty(
-        'pointer-events',
-        'auto',
-        'important'
-      );
+      continueButton.style.setProperty('pointer-events', 'auto', 'important');
     };
 
     syncContinue();
@@ -3612,46 +3662,27 @@ forceStartVisible(start);
       sourceContinue !== continueButton &&
       !sourceContinue.dataset.homeV4Observed
     ) {
-      sourceContinue.dataset.homeV4Observed =
-        '1';
+      sourceContinue.dataset.homeV4Observed = '1';
 
-      new MutationObserver(
-        syncContinue
-      ).observe(
-        sourceContinue,
-        {
-          attributes: true,
-          attributeFilter: [
-            'class',
-            'style',
-            'hidden'
-          ]
-        }
-      );
+      new MutationObserver(syncContinue).observe(sourceContinue, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'hidden'],
+      });
     }
 
-    if (
-      continueButton instanceof HTMLElement
-    ) {
-      continueButton.addEventListener(
-        'click',
-        event => {
-          event.preventDefault();
-          event.stopPropagation();
+    if (continueButton instanceof HTMLElement) {
+      continueButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
 
-          if (
-            !(sourceContinue instanceof HTMLElement)
-          ) {
-            return;
-          }
-
-          try {
-            HTMLElement.prototype.click.call(
-              sourceContinue
-            );
-          } catch {}
+        if (!(sourceContinue instanceof HTMLElement)) {
+          return;
         }
-      );
+
+        try {
+          HTMLElement.prototype.click.call(sourceContinue);
+        } catch {}
+      });
     }
   };
 
@@ -3660,36 +3691,25 @@ forceStartVisible(start);
      ========================================================= */
 
   const installDesktopCalmMode = () => {
-    const root =
-      document.documentElement;
+    const root = document.documentElement;
 
-    if (
-      root.dataset.homeV4CalmMode === '1'
-    ) {
+    if (root.dataset.homeV4CalmMode === '1') {
       return;
     }
 
     root.dataset.homeV4CalmMode = '1';
 
     const apply = () => {
-      const desktop =
-        window.innerWidth >= 769;
+      const desktop = window.innerWidth >= 769;
 
-      document.body.classList.toggle(
-        'home-v4-desktop-calm',
-        desktop
-      );
+      document.body.classList.toggle('home-v4-desktop-calm', desktop);
     };
 
     apply();
 
-    window.addEventListener(
-      'resize',
-      apply,
-      {
-        passive: true
-      }
-    );
+    window.addEventListener('resize', apply, {
+      passive: true,
+    });
   };
 
   /* =========================================================
@@ -3697,57 +3717,38 @@ forceStartVisible(start);
      ========================================================= */
 
   const installHomeScrollStatus = () => {
-    if (
-      document.documentElement.dataset
-        .homeScrollStatus === '1'
-    ) {
+    if (document.documentElement.dataset.homeScrollStatus === '1') {
       return;
     }
 
-    document.documentElement.dataset
-      .homeScrollStatus = '1';
+    document.documentElement.dataset.homeScrollStatus = '1';
 
-    let lastScrollY =
-      window.scrollY;
+    let lastScrollY = window.scrollY;
 
     window.addEventListener(
       'scroll',
       () => {
-        const intro =
-          $('intro');
+        const intro = $('intro');
 
-        if (
-          !(intro instanceof HTMLElement)
-        ) {
+        if (!(intro instanceof HTMLElement)) {
           return;
         }
 
-        const currentScrollY =
-          window.scrollY;
+        const currentScrollY = window.scrollY;
 
-        if (
-          currentScrollY > lastScrollY &&
-          currentScrollY > 10
-        ) {
-          intro.classList.add(
-            'is-scrolling'
-          );
+        if (currentScrollY > lastScrollY && currentScrollY > 10) {
+          intro.classList.add('is-scrolling');
         }
 
-        if (
-          currentScrollY < lastScrollY
-        ) {
-          intro.classList.remove(
-            'is-scrolling'
-          );
+        if (currentScrollY < lastScrollY) {
+          intro.classList.remove('is-scrolling');
         }
 
-        lastScrollY =
-          currentScrollY;
+        lastScrollY = currentScrollY;
       },
       {
-        passive: true
-      }
+        passive: true,
+      },
     );
   };
 
@@ -3756,51 +3757,33 @@ forceStartVisible(start);
      ========================================================= */
 
   const installKeyboard = () => {
-    if (
-      document.documentElement.dataset
-        .homeV4Keys === '1'
-    ) {
+    if (document.documentElement.dataset.homeV4Keys === '1') {
       return;
     }
 
-    document.documentElement.dataset
-      .homeV4Keys = '1';
+    document.documentElement.dataset.homeV4Keys = '1';
 
-    document.addEventListener(
-      'keydown',
-      event => {
-        if (
-          !introVisible() ||
-          event.repeat
-        ) {
-          return;
-        }
+    document.addEventListener('keydown', (event) => {
+      if (!introVisible() || event.repeat) {
+        return;
+      }
 
-        if (event.key === 'Enter') {
-          const active =
-            document.activeElement;
+      if (event.key === 'Enter') {
+        const active = document.activeElement;
 
-          const tag =
-            active?.tagName;
+        const tag = active?.tagName;
 
-          if (
-            tag !== 'BUTTON' &&
-            tag !== 'INPUT' &&
-            tag !== 'TEXTAREA'
-          ) {
-            event.preventDefault();
+        if (tag !== 'BUTTON' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+          event.preventDefault();
 
-            clickExisting(
-              '#start'
-            );
-          }
-        }
-
-        if (event.key === 'Escape') {
-          closeHomePanels();
+          clickExisting('#start');
         }
       }
-    );
+
+      if (event.key === 'Escape') {
+        closeHomePanels();
+      }
+    });
   };
 
   /* =========================================================
@@ -3814,45 +3797,23 @@ forceStartVisible(start);
     installDesktopCalmMode();
     installHomeScrollStatus();
 
-    const intro =
-      $('intro');
+    const intro = $('intro');
 
-    if (
-      intro &&
-      intro.dataset.homeV4Observed !== '1'
-    ) {
-      intro.dataset.homeV4Observed =
-        '1';
+    if (intro && intro.dataset.homeV4Observed !== '1') {
+      intro.dataset.homeV4Observed = '1';
 
-      new MutationObserver(
-        setHomeState
-      ).observe(
-        intro,
-        {
-          attributes: true,
-          attributeFilter: [
-            'class',
-            'style',
-            'hidden'
-          ]
-        }
-      );
+      new MutationObserver(setHomeState).observe(intro, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'hidden'],
+      });
     }
   };
 
-  if (
-    document.readyState === 'loading'
-  ) {
-    document.addEventListener(
-      'DOMContentLoaded',
-      boot,
-      {
-        once: true
-      }
-    );
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, {
+      once: true,
+    });
   } else {
     boot();
   }
-
 })();
-

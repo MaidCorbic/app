@@ -50,6 +50,7 @@ import '../gameplay-keyboard-hud-v1.js';
  */
 
 import { installCharacterStateReactions } from './systems/character-state-reactions-v1.js';
+import { installVagabondPlayerV1 } from './systems/vagabond-player-v1.js';
 import { installEnemyDiscovery } from './systems/enemy-discovery-v1.js';
 import { installEnemyDialogue } from './systems/enemy-dialogue-v1.js';
 import { installEnemyProgression } from './systems/enemy-progression-v1.js';
@@ -78,7 +79,6 @@ import { installDroneStrikeRecovery } from './systems/drone-strike-recovery-v1.j
 import { installWaterSurvival } from './systems/water-survival-v1.js';
 import { installForwardCollapseZone } from './systems/forward-collapse-zone-v1.js';
 
-
 const RunnerScene = RelayRunnerScene;
 
 if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
@@ -100,10 +100,13 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   installAutonomousCharacter(RunnerScene);
 
   /*
-   * PLAYER VISUAL V2 IS INTENTIONALLY NOT INSTALLED.
+   * PLAYER VISUAL
    *
-   * Cyber V4 is the single visible player presentation.
+   * Vagabond is now the single visible player presentation.
+   * The original player remains the physics/collision body.
    */
+
+  installVagabondPlayerV1(RunnerScene);
 
   installCharacterStateReactions(RunnerScene);
 

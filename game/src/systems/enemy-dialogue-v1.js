@@ -1,9 +1,5 @@
 import { enemyIntel } from '../enemy-intel.js';
-import {
-  getFactionForEnemyType,
-  getFactionIdForEnemyType,
-} from '../factions.js';
-
+import { getFactionForEnemyType, getFactionIdForEnemyType } from '../factions.js';
 
 /* =========================================================
    RELAY RUNNER — FACTION DIALOGUE SYSTEM
@@ -17,18 +13,11 @@ const TYPE_SPEED_MS = 24;
 
 const ROOT_CLASS = 'relay-faction-dialogue';
 
-
 /* =========================================================
    BOSS TYPES
    ========================================================= */
 
-const BOSS_TYPES = new Set([
-  'dino-boss',
-  'sentinel-boss',
-  'storm-boss',
-  'apex-boss',
-]);
-
+const BOSS_TYPES = new Set(['dino-boss', 'sentinel-boss', 'storm-boss', 'apex-boss']);
 
 /* =========================================================
    FACTION EMBLEMS
@@ -41,7 +30,6 @@ const FACTION_EMBLEMS = Object.freeze({
   GRID_GHOSTS: '◈',
 });
 
-
 /* =========================================================
    FACTION ACCENTS
    ========================================================= */
@@ -53,7 +41,6 @@ const FACTION_ACCENTS = Object.freeze({
   GRID_GHOSTS: '#a78bfa',
 });
 
-
 /* =========================================================
    FACTION SIGNALS
    ========================================================= */
@@ -64,7 +51,6 @@ const FACTION_SIGNALS = Object.freeze({
   SKY_RAIDERS: 91,
   GRID_GHOSTS: 43,
 });
-
 
 /* =========================================================
    THREAT CLASSES
@@ -117,29 +103,17 @@ const THREAT_CLASSES = Object.freeze({
   },
 });
 
-
 /* =========================================================
    SIGNAL BAR
    ========================================================= */
 
 function buildSignalBar(value) {
-  const safeValue = Math.max(
-    0,
-    Math.min(
-      100,
-      Number(value) || 0,
-    ),
-  );
+  const safeValue = Math.max(0, Math.min(100, Number(value) || 0));
 
-  const filled =
-    Math.round(safeValue / 10);
+  const filled = Math.round(safeValue / 10);
 
-  return (
-    '█'.repeat(filled) +
-    '░'.repeat(10 - filled)
-  );
+  return '█'.repeat(filled) + '░'.repeat(10 - filled);
 }
-
 
 /* =========================================================
    MISSION DIALOGUE
@@ -231,7 +205,6 @@ const MISSION_DIALOGUE = Object.freeze({
   },
 });
 
-
 /* =========================================================
    FALLBACK DIALOGUE
    ========================================================= */
@@ -259,36 +232,23 @@ const FALLBACK_DIALOGUE = Object.freeze({
   ],
 });
 
-
 /* =========================================================
    ENEMY LOOKUP
    ========================================================= */
 
 function enemyKeyFromObject(object) {
-  const key =
-    object?.getData?.('route')?.type ||
-    object?.texture?.key;
+  const key = object?.getData?.('route')?.type || object?.texture?.key;
 
-  return Object.prototype.hasOwnProperty.call(
-    enemyIntel,
-    key,
-  )
-    ? key
-    : null;
+  return Object.prototype.hasOwnProperty.call(enemyIntel, key) ? key : null;
 }
-
 
 /* =========================================================
    SPEAKER NAME
    ========================================================= */
 
 function speakerName(enemyType) {
-  return (
-    enemyIntel[enemyType]?.name ||
-    String(enemyType || 'UNKNOWN').toUpperCase()
-  );
+  return enemyIntel[enemyType]?.name || String(enemyType || 'UNKNOWN').toUpperCase();
 }
-
 
 /* =========================================================
    NEARBY ENEMIES
@@ -301,8 +261,7 @@ function getNearbyEnemies(scene) {
     return [];
   }
 
-  const objects =
-    scene.children?.list || [];
+  const objects = scene.children?.list || [];
 
   const seen = new Set();
   const nearby = [];
@@ -312,50 +271,29 @@ function getNearbyEnemies(scene) {
       continue;
     }
 
-    const enemyType =
-      enemyKeyFromObject(object);
+    const enemyType = enemyKeyFromObject(object);
 
     if (!enemyType) {
       continue;
     }
 
-    if (
-      BOSS_TYPES.has(enemyType) &&
-      object.getData?.('defeated')
-    ) {
+    if (BOSS_TYPES.has(enemyType) && object.getData?.('defeated')) {
       continue;
     }
 
-    if (
-      !Number.isFinite(object.x) ||
-      !Number.isFinite(object.y)
-    ) {
+    if (!Number.isFinite(object.x) || !Number.isFinite(object.y)) {
       continue;
     }
 
-    const distance =
-      Phaser.Math.Distance.Between(
-        player.x,
-        player.y,
-        object.x,
-        object.y,
-      );
+    const distance = Phaser.Math.Distance.Between(player.x, player.y, object.x, object.y);
 
-    if (
-      distance >
-      DIALOGUE_TRIGGER_DISTANCE
-    ) {
+    if (distance > DIALOGUE_TRIGGER_DISTANCE) {
       continue;
     }
 
-    const id =
-      object.getData?.(
-        'factionDialogueId',
-      );
+    const id = object.getData?.('factionDialogueId');
 
-    const stableId =
-      id ||
-      `${enemyType}:${Math.round(object.x)}:${Math.round(object.y)}`;
+    const stableId = id || `${enemyType}:${Math.round(object.x)}:${Math.round(object.y)}`;
 
     if (seen.has(stableId)) {
       continue;
@@ -366,146 +304,82 @@ function getNearbyEnemies(scene) {
     nearby.push({
       object,
       enemyType,
-      factionId:
-        getFactionIdForEnemyType(
-          enemyType,
-        ),
+      factionId: getFactionIdForEnemyType(enemyType),
       distance,
     });
   }
 
-  nearby.sort(
-    (a, b) =>
-      a.distance - b.distance,
-  );
+  nearby.sort((a, b) => a.distance - b.distance);
 
   return nearby;
 }
-
 
 /* =========================================================
    DIALOGUE RESOLUTION
    ========================================================= */
 
-function getDialogueLines(
-  scene,
-  primary,
-  nearby,
-) {
-  const missionId =
-    scene?.mission?.id;
+function getDialogueLines(scene, primary, nearby) {
+  const missionId = scene?.mission?.id;
 
-  const factionId =
-    primary?.factionId ||
-    getFactionIdForEnemyType(
-      primary?.enemyType,
-    );
+  const factionId = primary?.factionId || getFactionIdForEnemyType(primary?.enemyType);
 
-  const missionLines =
-    MISSION_DIALOGUE[
-      missionId
-    ]?.[factionId];
+  const missionLines = MISSION_DIALOGUE[missionId]?.[factionId];
 
   if (missionLines?.length) {
-    return missionLines.map(
-      ([enemyType, text]) => ({
-        speakerType:
-          enemyType,
+    return missionLines.map(([enemyType, text]) => ({
+      speakerType: enemyType,
 
-        speaker:
-          speakerName(
-            enemyType,
-          ),
+      speaker: speakerName(enemyType),
 
-        text,
-      }),
-    );
+      text,
+    }));
   }
 
-  const fallback =
-    FALLBACK_DIALOGUE[
-      factionId
-    ];
+  const fallback = FALLBACK_DIALOGUE[factionId];
 
   if (fallback?.length) {
     const availableTypes = [
-      ...new Set(
-        [
-          primary?.enemyType,
-          ...nearby.map(
-            (entry) =>
-              entry.enemyType,
-          ),
-        ].filter(Boolean),
-      ),
+      ...new Set([primary?.enemyType, ...nearby.map((entry) => entry.enemyType)].filter(Boolean)),
     ];
 
-    return fallback.map(
-      ([enemyType, text], index) => {
-        const selectedType =
-          availableTypes[
-            index %
-              Math.max(
-                1,
-                availableTypes.length,
-              )
-          ] || enemyType;
+    return fallback.map(([enemyType, text], index) => {
+      const selectedType = availableTypes[index % Math.max(1, availableTypes.length)] || enemyType;
 
-        return {
-          speakerType:
-            selectedType,
+      return {
+        speakerType: selectedType,
 
-          speaker:
-            speakerName(
-              selectedType,
-            ),
+        speaker: speakerName(selectedType),
 
-          text,
-        };
-      },
-    );
+        text,
+      };
+    });
   }
 
-  const faction =
-    getFactionForEnemyType(
-      primary?.enemyType,
-    );
+  const faction = getFactionForEnemyType(primary?.enemyType);
 
   return [
     {
-      speakerType:
-        primary?.enemyType,
+      speakerType: primary?.enemyType,
 
-      speaker:
-        speakerName(
-          primary?.enemyType,
-        ),
+      speaker: speakerName(primary?.enemyType),
 
-      text:
-        `${faction?.name || 'HOSTILE'} contact detected.`,
+      text: `${faction?.name || 'HOSTILE'} contact detected.`,
     },
   ];
 }
-
 
 /* =========================================================
    STYLE INSTALLATION
    ========================================================= */
 
 function installStyles() {
-  if (
-    document.getElementById(
-      'relay-faction-dialogue-styles',
-    )
-  ) {
+  if (document.getElementById('relay-faction-dialogue-styles')) {
     return;
   }
 
-  const style =
-    document.createElement('style');
+  const style = document.createElement('style');
 
-  style.id =
-    'relay-faction-dialogue-styles';
+  style.id = 'relay-faction-dialogue-styles';
 
   style.textContent = `
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&display=swap');
@@ -2108,112 +1982,76 @@ box-shadow:
   document.head.appendChild(style);
 }
 
-
 /* =========================================================
    KEYBOARD
    ========================================================= */
 
 function installKeyboard(scene) {
-  if (
-    scene.__factionDialogueKeyboardInstalled
-  ) {
+  if (scene.__factionDialogueKeyboardInstalled) {
     return;
   }
 
-  scene.__factionDialogueKeyboardInstalled =
-    true;
+  scene.__factionDialogueKeyboardInstalled = true;
 
-  scene.__factionDialogueKeyHandler =
-    (event) => {
+  scene.__factionDialogueKeyHandler = (event) => {
+    if (!scene.__factionDialogueActive) {
+      return;
+    }
 
-      if (
-        !scene.__factionDialogueActive
-      ) {
-        return;
-      }
+    if (event.key === 'Enter' || event.code === 'Enter') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
 
-      if (
-        event.key === 'Enter' ||
-        event.code === 'Enter'
-      ) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
+      scene.advanceFactionDialogue?.();
 
-        scene.advanceFactionDialogue?.();
+      return;
+    }
 
-        return;
-      }
+    if (event.key === 'Escape' || event.code === 'Escape') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
 
-      if (
-        event.key === 'Escape' ||
-        event.code === 'Escape'
-      ) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
+      scene.skipFactionDialogue?.();
+    }
+  };
 
-        scene.skipFactionDialogue?.();
-      }
-    };
-
-  document.addEventListener(
-    'keydown',
-    scene.__factionDialogueKeyHandler,
-    true,
-  );
+  document.addEventListener('keydown', scene.__factionDialogueKeyHandler, true);
 }
-
 
 /* =========================================================
    REMOVE KEYBOARD
    ========================================================= */
 
 function removeKeyboard(scene) {
-  if (
-    !scene.__factionDialogueKeyboardInstalled ||
-    !scene.__factionDialogueKeyHandler
-  ) {
+  if (!scene.__factionDialogueKeyboardInstalled || !scene.__factionDialogueKeyHandler) {
     return;
   }
 
-  document.removeEventListener(
-    'keydown',
-    scene.__factionDialogueKeyHandler,
-    true,
-  );
+  document.removeEventListener('keydown', scene.__factionDialogueKeyHandler, true);
 
-  scene.__factionDialogueKeyboardInstalled =
-    false;
+  scene.__factionDialogueKeyboardInstalled = false;
 
-  scene.__factionDialogueKeyHandler =
-    null;
+  scene.__factionDialogueKeyHandler = null;
 }
-
 
 /* =========================================================
    CLEAR TYPEWRITER
    ========================================================= */
 
 function clearDialogueTimer(scene) {
-  if (
-    scene.__factionDialogueTypeTimer
-  ) {
-    window.clearInterval(
-      scene.__factionDialogueTypeTimer,
-    );
+  if (scene.__factionDialogueTypeTimer) {
+    window.clearInterval(scene.__factionDialogueTypeTimer);
 
-    scene.__factionDialogueTypeTimer =
-      null;
+    scene.__factionDialogueTypeTimer = null;
   }
 }
-
 
 /* =========================================================
    CLEAN PANEL
    ========================================================= */
 
 function cleanupDialoguePanel(scene) {
-  const panel =
-    scene?.__factionDialoguePanel;
+  const panel = scene?.__factionDialoguePanel;
 
   if (!panel) {
     return;
@@ -2221,10 +2059,8 @@ function cleanupDialoguePanel(scene) {
 
   panel.remove();
 
-  scene.__factionDialoguePanel =
-    null;
+  scene.__factionDialoguePanel = null;
 }
-
 
 /* =========================================================
    INSTALL PANEL
@@ -2243,29 +2079,17 @@ function installPanel(scene) {
 
   scene.__factionDialogueBackdrop = backdrop;
 
-  const panel =
-    document.createElement('section');
+  const panel = document.createElement('section');
 
-  panel.className =
-    ROOT_CLASS;
+  panel.className = ROOT_CLASS;
 
-  panel.hidden =
-    true;
+  panel.hidden = true;
 
-  panel.setAttribute(
-    'role',
-    'dialog',
-  );
+  panel.setAttribute('role', 'dialog');
 
-  panel.setAttribute(
-    'aria-modal',
-    'true',
-  );
+  panel.setAttribute('aria-modal', 'true');
 
-  panel.setAttribute(
-    'aria-live',
-    'polite',
-  );
+  panel.setAttribute('aria-live', 'polite');
 
   panel.innerHTML = `
     <div class="relay-faction-header">
@@ -2360,704 +2184,410 @@ function installPanel(scene) {
     </aside>
   `;
 
-  document.body.appendChild(
-    panel,
-  );
+  document.body.appendChild(panel);
 
-  scene.__factionDialoguePanel =
-    panel;
+  scene.__factionDialoguePanel = panel;
 
-  panel
-    .querySelector(
-      '[data-faction-next]',
-    )
-    ?.addEventListener(
-      'click',
-      (event) => {
-        event.preventDefault();
+  panel.querySelector('[data-faction-next]')?.addEventListener('click', (event) => {
+    event.preventDefault();
 
-        scene.advanceFactionDialogue?.();
-      },
-    );
+    scene.advanceFactionDialogue?.();
+  });
 }
-
 
 /* =========================================================
    FACTION VISUALS
    ========================================================= */
 
-function setFactionVisuals(
-  scene,
-  factionId,
-) {
-  const panel =
-    scene.__factionDialoguePanel;
+function setFactionVisuals(scene, factionId) {
+  const panel = scene.__factionDialoguePanel;
 
   if (!panel) {
     return;
   }
 
-  const faction =
-    getFactionForEnemyType(
-      scene.__factionDialogueTriggerType,
-    );
+  const faction = getFactionForEnemyType(scene.__factionDialogueTriggerType);
 
-  const resolvedFactionId =
-    factionId ||
-    faction?.id ||
-    'HELIX_SECURITY';
+  const resolvedFactionId = factionId || faction?.id || 'HELIX_SECURITY';
 
-  const emblem =
-    panel.querySelector(
-      '[data-faction-emblem]',
-    );
+  const emblem = panel.querySelector('[data-faction-emblem]');
 
-  const symbol =
-    FACTION_EMBLEMS[
-      resolvedFactionId
-    ] || '◆';
+  const symbol = FACTION_EMBLEMS[resolvedFactionId] || '◆';
 
-  const accent =
-    FACTION_ACCENTS[
-      resolvedFactionId
-    ] || '#38d9ff';
+  const accent = FACTION_ACCENTS[resolvedFactionId] || '#38d9ff';
 
-  const signal =
-    FACTION_SIGNALS[
-      resolvedFactionId
-    ] ?? 82;
+  const signal = FACTION_SIGNALS[resolvedFactionId] ?? 82;
 
   if (emblem) {
-    emblem.textContent =
-      symbol;
+    emblem.textContent = symbol;
 
-    emblem.style.setProperty(
-      '--faction-accent',
-      accent,
-    );
+    emblem.style.setProperty('--faction-accent', accent);
   }
 
-  panel.style.setProperty(
-    '--faction-accent',
-    accent,
-  );
+  panel.style.setProperty('--faction-accent', accent);
 
-  panel.style.setProperty(
-    '--signal-value',
-    `${signal}`,
-  );
+  panel.style.setProperty('--signal-value', `${signal}`);
 
-  panel.style.setProperty(
-    '--faction-signal',
-    `"${buildSignalBar(signal)} // ${signal}%"`,
-  );
+  panel.style.setProperty('--faction-signal', `"${buildSignalBar(signal)} // ${signal}%"`);
 
-  panel.dataset.faction =
-    resolvedFactionId;
+  panel.dataset.faction = resolvedFactionId;
 }
-
 
 /* =========================================================
    SET LINE
    ========================================================= */
 
-function setPanelLine(
-  scene,
-  line,
-  factionName,
-  instant = false,
-) {
-  const panel =
-    scene.__factionDialoguePanel;
+function setPanelLine(scene, line, factionName, instant = false) {
+  const panel = scene.__factionDialoguePanel;
 
   if (!panel) {
     return;
   }
 
-  const speakerElement =
-    panel.querySelector(
-      '[data-faction-name]',
-    );
+  const speakerElement = panel.querySelector('[data-faction-name]');
 
-  const textElement =
-    panel.querySelector(
-      '[data-faction-text]',
-    );
+  const textElement = panel.querySelector('[data-faction-text]');
 
-  if (
-    !speakerElement ||
-    !textElement
-  ) {
+  if (!speakerElement || !textElement) {
     return;
   }
 
   clearDialogueTimer(scene);
 
-  speakerElement.textContent =
-    `${line.speaker} · ${factionName}`;
+  speakerElement.textContent = `${line.speaker} · ${factionName}`;
 
-  textElement.classList.toggle(
-    'relay-faction-typing',
-    !instant,
-  );
+  textElement.classList.toggle('relay-faction-typing', !instant);
 
-  scene.__factionDialogueTyping =
-    !instant;
+  scene.__factionDialogueTyping = !instant;
 
   if (instant) {
-    textElement.textContent =
-      line.text;
+    textElement.textContent = line.text;
 
-    scene.__factionDialogueTyping =
-      false;
+    scene.__factionDialogueTyping = false;
 
     return;
   }
 
-  textElement.textContent =
-    '';
+  textElement.textContent = '';
 
   let index = 0;
 
-  scene.__factionDialogueTypeTimer =
-    window.setInterval(
-      () => {
+  scene.__factionDialogueTypeTimer = window.setInterval(() => {
+    index += 1;
 
-        index += 1;
+    textElement.textContent = line.text.slice(0, index);
 
-        textElement.textContent =
-          line.text.slice(
-            0,
-            index,
-          );
+    if (index >= line.text.length) {
+      clearDialogueTimer(scene);
 
-        if (
-          index >=
-          line.text.length
-        ) {
-          clearDialogueTimer(scene);
+      scene.__factionDialogueTyping = false;
 
-          scene.__factionDialogueTyping =
-            false;
-
-          textElement.classList.remove(
-            'relay-faction-typing',
-          );
-        }
-      },
-      TYPE_SPEED_MS,
-    );
+      textElement.classList.remove('relay-faction-typing');
+    }
+  }, TYPE_SPEED_MS);
 }
-
 
 /* =========================================================
    SHOW DIALOGUE
    ========================================================= */
 
-function showDialogue(
-  scene,
-  trigger,
-) {
-  if (
-    scene.__factionDialogueActive
-  ) {
+function showDialogue(scene, trigger) {
+  if (scene.__factionDialogueActive) {
     return false;
   }
 
-  const nearby =
-    getNearbyEnemies(scene);
+  const nearby = getNearbyEnemies(scene);
 
   if (!nearby.length) {
     return false;
   }
 
-  const primary =
-    trigger ||
-    nearby[0];
+  const primary = trigger || nearby[0];
 
-  const faction =
-    getFactionForEnemyType(
-      primary.enemyType,
-    );
+  const faction = getFactionForEnemyType(primary.enemyType);
 
   if (!faction) {
     return false;
   }
 
-  const lines =
-    getDialogueLines(
-      scene,
-      primary,
-      nearby.slice(
-        0,
-        MAX_NEARBY_SPEAKERS,
-      ),
-    );
+  const lines = getDialogueLines(scene, primary, nearby.slice(0, MAX_NEARBY_SPEAKERS));
 
   if (!lines.length) {
     return false;
   }
 
-  scene.__factionDialogueActive =
-    true;
+  scene.__factionDialogueActive = true;
 
-  scene.__factionDialogueLines =
-    lines;
+  scene.__factionDialogueLines = lines;
 
-  scene.__factionDialogueIndex =
-    0;
+  scene.__factionDialogueIndex = 0;
 
-  scene.__factionDialogueTriggerType =
-    primary.enemyType;
+  scene.__factionDialogueTriggerType = primary.enemyType;
 
-  scene.__factionDialogueFactionId =
-    faction.id;
+  scene.__factionDialogueFactionId = faction.id;
 
-  scene.__factionDialogueLast =
-    scene.time?.now || 0;
+  scene.__factionDialogueLast = scene.time?.now || 0;
 
-  const seen =
-    scene.__factionDialogueSeen ||
-    new Set();
+  const seen = scene.__factionDialogueSeen || new Set();
 
-  scene.__factionDialogueSeen =
-    seen;
+  scene.__factionDialogueSeen = seen;
 
-  seen.add(
-    `${scene.mission?.id || 'unknown'}:${faction.id}`,
-  );
-
+  seen.add(`${scene.mission?.id || 'unknown'}:${faction.id}`);
 
   /* =======================================================
      PAUSE PHYSICS
      ======================================================= */
 
   if (scene.physics?.world) {
-    scene.__factionDialoguePhysicsPaused =
-      Boolean(
-        scene.physics.world.isPaused,
-      );
+    scene.__factionDialoguePhysicsPaused = Boolean(scene.physics.world.isPaused);
 
-    scene.physics.world.isPaused =
-      true;
+    scene.physics.world.isPaused = true;
   }
-
 
   /* =======================================================
      FACTION VISUALS
      ======================================================= */
 
-  setFactionVisuals(
-    scene,
-    faction.id,
-  );
-
+  setFactionVisuals(scene, faction.id);
 
   /* =======================================================
      ENCOUNTER ID
      ======================================================= */
 
-  const encounterId =
-    scene.__factionDialoguePanel
-      ?.querySelector(
-        '[data-faction-encounter-id]',
-      );
+  const encounterId = scene.__factionDialoguePanel?.querySelector('[data-faction-encounter-id]');
 
   if (encounterId) {
-    const count =
-      Number(
-        scene.__factionDialogueEncounterCount ||
-          0,
-      ) + 1;
+    const count = Number(scene.__factionDialogueEncounterCount || 0) + 1;
 
-    scene.__factionDialogueEncounterCount =
-      count;
+    scene.__factionDialogueEncounterCount = count;
 
-    encounterId.textContent =
-      `ENCOUNTER // ${String(
-        count,
-      ).padStart(2, '0')}`;
+    encounterId.textContent = `ENCOUNTER // ${String(count).padStart(2, '0')}`;
   }
-
 
   /* =======================================================
      SCAN STATUS
      ======================================================= */
 
-  const scanStatus =
-    scene.__factionDialoguePanel
-      ?.querySelector(
-        '[data-faction-scan-status]',
-      );
+  const scanStatus = scene.__factionDialoguePanel?.querySelector('[data-faction-scan-status]');
 
   if (scanStatus) {
-    scanStatus.textContent =
-      'HOSTILE SIGNAL // IDENTIFIED';
+    scanStatus.textContent = 'HOSTILE SIGNAL // IDENTIFIED';
   }
-
 
   /* =======================================================
      THREAT
      ======================================================= */
 
-  const threatClass =
-    scene.__factionDialoguePanel
-      ?.querySelector(
-        '[data-faction-threat-class]',
-      );
+  const threatClass = scene.__factionDialoguePanel?.querySelector('[data-faction-threat-class]');
 
-  const threat =
-    THREAT_CLASSES[
-      primary.enemyType
-    ] || {
-      name: 'UNKNOWN',
-      color: '#8df4ff',
-    };
+  const threat = THREAT_CLASSES[primary.enemyType] || {
+    name: 'UNKNOWN',
+    color: '#8df4ff',
+  };
 
   if (threatClass) {
+    threatClass.textContent = threat.name;
 
-    threatClass.textContent =
-      threat.name;
+    threatClass.style.setProperty('--threat-color', threat.color);
 
-    threatClass.style.setProperty(
-      '--threat-color',
-      threat.color,
-    );
-
-    threatClass.dataset.threatLevel =
-      threat.name;
+    threatClass.dataset.threatLevel = threat.name;
   }
-
 
   /* =======================================================
      FIRST LINE
      ======================================================= */
 
-  const line =
-    scene.__factionDialogueLines[0];
+  const line = scene.__factionDialogueLines[0];
 
-  setPanelLine(
-    scene,
-    line,
-    faction.name,
-  );
-
+  setPanelLine(scene, line, faction.name);
 
   /* =======================================================
      SHOW PANEL
      ======================================================= */
 
- if (
-    scene.__factionDialogueBackdrop
-  ) {
-    scene.__factionDialogueBackdrop.hidden =
-      false;
+  if (scene.__factionDialogueBackdrop) {
+    scene.__factionDialogueBackdrop.hidden = false;
   }
 
-  if (
-    scene.__factionDialoguePanel
-  ) {
-    scene.__factionDialoguePanel.hidden =
-      false;
+  if (scene.__factionDialoguePanel) {
+    scene.__factionDialoguePanel.hidden = false;
   }
 
   return true;
 }
 
-
 /* =========================================================
    DISMISS
    ========================================================= */
 
-function dismissDialogue(
-  scene,
-  skipAll = false,
-) {
-  if (
-    !scene.__factionDialogueActive
-  ) {
+function dismissDialogue(scene, skipAll = false) {
+  if (!scene.__factionDialogueActive) {
     return;
   }
 
   clearDialogueTimer(scene);
 
-  scene.__factionDialogueTyping =
-    false;
+  scene.__factionDialogueTyping = false;
 
-if (
-    scene.__factionDialogueBackdrop
-  ) {
-    scene.__factionDialogueBackdrop.hidden =
-      true;
+  if (scene.__factionDialogueBackdrop) {
+    scene.__factionDialogueBackdrop.hidden = true;
   }
 
-  if (
-    scene.__factionDialoguePanel
-  ) {
-    scene.__factionDialoguePanel.hidden =
-      true;
+  if (scene.__factionDialoguePanel) {
+    scene.__factionDialoguePanel.hidden = true;
   }
 
-  scene.__factionDialogueActive =
-    false;
+  scene.__factionDialogueActive = false;
 
-  scene.__factionDialogueLines =
-    [];
+  scene.__factionDialogueLines = [];
 
-  scene.__factionDialogueIndex =
-    0;
+  scene.__factionDialogueIndex = 0;
 
   if (skipAll) {
-    scene.__factionDialogueSkipped =
-      true;
+    scene.__factionDialogueSkipped = true;
   }
 
   if (scene.physics?.world) {
-    scene.physics.world.isPaused =
-      Boolean(
-        scene.__factionDialoguePhysicsPaused,
-      );
+    scene.physics.world.isPaused = Boolean(scene.__factionDialoguePhysicsPaused);
   }
 
-  scene.__factionDialoguePhysicsPaused =
-    false;
+  scene.__factionDialoguePhysicsPaused = false;
 }
-
 
 /* =========================================================
    INSTALL
    ========================================================= */
 
-export function installEnemyDialogue(
-  RunnerScene,
-) {
-  if (
-    !RunnerScene?.prototype ||
-    RunnerScene.prototype
-      .__factionEnemyDialogueV2
-  ) {
+export function installEnemyDialogue(RunnerScene) {
+  if (!RunnerScene?.prototype || RunnerScene.prototype.__factionEnemyDialogueV2) {
     return;
   }
 
-  RunnerScene.prototype
-    .__factionEnemyDialogueV2 =
-    true;
+  RunnerScene.prototype.__factionEnemyDialogueV2 = true;
 
+  const originalCreate = RunnerScene.prototype.create;
 
-  const originalCreate =
-    RunnerScene.prototype.create;
+  const originalUpdate = RunnerScene.prototype.update;
 
-  const originalUpdate =
-    RunnerScene.prototype.update;
-
-  const originalShutdown =
-    RunnerScene.prototype.shutdown;
-
+  const originalShutdown = RunnerScene.prototype.shutdown;
 
   /* =======================================================
      CREATE
      ======================================================= */
 
-  RunnerScene.prototype.create =
-    function (...args) {
+  RunnerScene.prototype.create = function (...args) {
+    originalCreate.apply(this, args);
 
-      originalCreate.apply(
-        this,
-        args,
-      );
+    this.__factionDialogueLast = 0;
 
-      this.__factionDialogueLast =
-        0;
+    this.__factionDialogueActive = false;
 
-      this.__factionDialogueActive =
-        false;
+    this.__factionDialogueLines = [];
 
-      this.__factionDialogueLines =
-        [];
+    this.__factionDialogueIndex = 0;
 
-      this.__factionDialogueIndex =
-        0;
+    this.__factionDialogueSeen = new Set();
 
-      this.__factionDialogueSeen =
-        new Set();
+    this.__factionDialogueNearbyIds = new Set();
+    this.__factionDialogueEncounterCount = 0;
 
-        this.__factionDialogueNearbyIds =
-  new Set();
-      this.__factionDialogueEncounterCount =
-        0;
+    this.__factionDialogueTyping = false;
 
-      this.__factionDialogueTyping =
-        false;
+    this.__factionDialogueSkipped = false;
 
-      this.__factionDialogueSkipped =
-        false;
+    this.__factionDialogueTriggerType = null;
 
-      this.__factionDialogueTriggerType =
-        null;
+    this.__factionDialogueFactionId = null;
 
-      this.__factionDialogueFactionId =
-        null;
+    this.__factionDialoguePhysicsPaused = false;
 
-      this.__factionDialoguePhysicsPaused =
-        false;
+    this.__factionDialogueTypeTimer = null;
 
-      this.__factionDialogueTypeTimer =
-        null;
+    installPanel(this);
 
-      installPanel(this);
-
-      installKeyboard(this);
-    };
-
+    installKeyboard(this);
+  };
 
   /* =======================================================
      ADVANCE
      ======================================================= */
 
-  RunnerScene.prototype
-    .advanceFactionDialogue =
-    function () {
+  RunnerScene.prototype.advanceFactionDialogue = function () {
+    if (!this.__factionDialogueActive || !this.__factionDialogueLines?.length) {
+      return;
+    }
 
-      if (
-        !this.__factionDialogueActive ||
-        !this.__factionDialogueLines?.length
-      ) {
-        return;
-      }
-
-
-      /* ===================================================
+    /* ===================================================
          COMPLETE TYPEWRITER
          =================================================== */
 
-      if (
-        this.__factionDialogueTyping
-      ) {
-        const line =
-          this.__factionDialogueLines[
-            this.__factionDialogueIndex
-          ];
-
-        setPanelLine(
-          this,
-          line,
-          getFactionForEnemyType(
-            this.__factionDialogueTriggerType,
-          )?.name ||
-            'FACTION',
-          true,
-        );
-
-        return;
-      }
-
-
-      /* ===================================================
-         NEXT
-         =================================================== */
-
-      const nextIndex =
-        this.__factionDialogueIndex +
-        1;
-
-      if (
-        nextIndex >=
-        this.__factionDialogueLines.length
-      ) {
-        dismissDialogue(
-          this,
-          false,
-        );
-
-        return;
-      }
-
-      this.__factionDialogueIndex =
-        nextIndex;
-
-      const line =
-        this.__factionDialogueLines[
-          nextIndex
-        ];
-
-      const lineFaction =
-        getFactionForEnemyType(
-          line.speakerType ||
-            this.__factionDialogueTriggerType,
-        )?.name ||
-        getFactionForEnemyType(
-          this.__factionDialogueTriggerType,
-        )?.name ||
-        'FACTION';
+    if (this.__factionDialogueTyping) {
+      const line = this.__factionDialogueLines[this.__factionDialogueIndex];
 
       setPanelLine(
         this,
         line,
-        lineFaction,
+        getFactionForEnemyType(this.__factionDialogueTriggerType)?.name || 'FACTION',
+        true,
       );
-    };
 
+      return;
+    }
+
+    /* ===================================================
+         NEXT
+         =================================================== */
+
+    const nextIndex = this.__factionDialogueIndex + 1;
+
+    if (nextIndex >= this.__factionDialogueLines.length) {
+      dismissDialogue(this, false);
+
+      return;
+    }
+
+    this.__factionDialogueIndex = nextIndex;
+
+    const line = this.__factionDialogueLines[nextIndex];
+
+    const lineFaction =
+      getFactionForEnemyType(line.speakerType || this.__factionDialogueTriggerType)?.name ||
+      getFactionForEnemyType(this.__factionDialogueTriggerType)?.name ||
+      'FACTION';
+
+    setPanelLine(this, line, lineFaction);
+  };
 
   /* =======================================================
      SKIP
      ======================================================= */
 
-  RunnerScene.prototype
-    .skipFactionDialogue =
-    function () {
-
-      dismissDialogue(
-        this,
-        true,
-      );
-    };
-
+  RunnerScene.prototype.skipFactionDialogue = function () {
+    dismissDialogue(this, true);
+  };
 
   /* =======================================================
      UPDATE
      ======================================================= */
 
- RunnerScene.prototype.update =
-  function (...args) {
-
-    if (
-      this.__factionDialogueActive
-    ) {
+  RunnerScene.prototype.update = function (...args) {
+    if (this.__factionDialogueActive) {
       return;
     }
 
-    const result =
-      originalUpdate.apply(
-        this,
-        args,
-      );
+    const result = originalUpdate.apply(this, args);
 
-    if (
-      !this.player?.active ||
-      this.finished ||
-      this.respawning ||
-      this.cinematicActive
-    ) {
+    if (!this.player?.active || this.finished || this.respawning || this.cinematicActive) {
       return result;
     }
 
-    const now =
-      this.time?.now ||
-      0;
+    const now = this.time?.now || 0;
 
-    if (
-      now -
-        (
-          this.__factionDialogueLast ||
-          0
-        ) <
-      DIALOGUE_COOLDOWN
-    ) {
+    if (now - (this.__factionDialogueLast || 0) < DIALOGUE_COOLDOWN) {
       return result;
     }
 
-    const nearby =
-      getNearbyEnemies(this);
+    const nearby = getNearbyEnemies(this);
 
     /*
       FACTION DIALOGUE TRIGGERS ONLY
@@ -3070,106 +2600,75 @@ export function installEnemyDialogue(
       inside the detection radius.
     */
 
-    const nearbyIds =
-      new Set(
-        nearby.map(
-          enemy =>
-            enemy.id ??
-            enemy.enemyId ??
-            enemy,
-        ),
-      );
+    const nearbyIds = new Set(nearby.map((enemy) => enemy.object));
 
-    const previousNearby =
-      this.__factionDialogueNearbyIds ||
-      new Set();
+    /*
+  First scan only initializes the proximity
+  state. Enemies already present when the
+  game starts do NOT trigger dialogue.
+*/
+    if (!this.__factionDialogueNearbyIds) {
+      this.__factionDialogueNearbyIds = nearbyIds;
 
-    this.__factionDialogueNearbyIds =
-      nearbyIds;
+      return result;
+    }
+
+    const previousNearby = this.__factionDialogueNearbyIds;
+
+    this.__factionDialogueNearbyIds = nearbyIds;
 
     if (!nearby.length) {
       return result;
     }
 
-    const enteredEnemy =
-      nearby.find(
-        enemy => {
-          const id =
-            enemy.id ??
-            enemy.enemyId ??
-            enemy;
-
-          return !previousNearby.has(id);
-        },
-      );
+    const enteredEnemy = nearby.find((enemy) => !previousNearby.has(enemy.object));
 
     if (!enteredEnemy) {
       return result;
     }
 
-    const missionId =
-      this.mission?.id ||
-      'unknown';
+    if (!enteredEnemy) {
+      return result;
+    }
 
-    const factionId =
-      enteredEnemy.factionId;
+    const missionId = this.mission?.id || 'unknown';
+
+    const factionId = enteredEnemy.factionId;
 
     if (!factionId) {
       return result;
     }
 
-    const encounterKey =
-      `${missionId}:${factionId}`;
+    const encounterKey = `${missionId}:${factionId}`;
 
-    if (
-      this.__factionDialogueSeen.has(
-        encounterKey,
-      )
-    ) {
+    if (this.__factionDialogueSeen.has(encounterKey)) {
       return result;
     }
 
-    this.__factionDialogueLast =
-      now;
+    this.__factionDialogueLast = now;
 
-    showDialogue(
-      this,
-      enteredEnemy,
-    );
+    showDialogue(this, enteredEnemy);
 
     return result;
   };
-
 
   /* =======================================================
      SHUTDOWN
      ======================================================= */
 
-  RunnerScene.shutdown =
-    function (...args) {
+  RunnerScene.shutdown = function (...args) {
+    dismissDialogue(this, true);
 
-      dismissDialogue(
-        this,
-        true,
-      );
+    removeKeyboard(this);
 
-      removeKeyboard(this);
+    cleanupDialoguePanel(this);
 
-      cleanupDialoguePanel(this);
-
-      return originalShutdown
-        ? originalShutdown.apply(
-            this,
-            args,
-          )
-        : undefined;
-    };
+    return originalShutdown ? originalShutdown.apply(this, args) : undefined;
+  };
 }
-
 
 /* =========================================================
    ALIAS
    ========================================================= */
 
-export const installFactionDialogue =
-  installEnemyDialogue;
+export const installFactionDialogue = installEnemyDialogue;

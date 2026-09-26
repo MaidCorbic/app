@@ -4,7 +4,7 @@ import {
   getCourierRank,
   getLevelProgress,
   loadState,
-  saveState
+  saveState,
 } from './src/state.js';
 
 (() => {
@@ -13,87 +13,64 @@ import {
   if (window.__relayUnifiedCinematicUiV1) return;
   window.__relayUnifiedCinematicUiV1 = true;
 
-  const PRESENTATION_KEY =
-    'relay.runner.ui.preferences.v1';
+  const PRESENTATION_KEY = 'relay.runner.ui.preferences.v1';
 
   const defaults = Object.freeze({
     intelCards: true,
     allyIntel: true,
     eventPopups: true,
-    tutorialHints: true
+    tutorialHints: true,
   });
 
-  const $ = id =>
-    document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
 
   const readPrefs = () => {
     try {
       return {
         ...defaults,
-        ...JSON.parse(
-          localStorage.getItem(PRESENTATION_KEY) || '{}'
-        )
+        ...JSON.parse(localStorage.getItem(PRESENTATION_KEY) || '{}'),
       };
     } catch {
       return { ...defaults };
     }
   };
 
-  const writePrefs = prefs => {
+  const writePrefs = (prefs) => {
     try {
       localStorage.setItem(
         PRESENTATION_KEY,
         JSON.stringify({
           ...defaults,
-          ...prefs
-        })
+          ...prefs,
+        }),
       );
     } catch {}
   };
 
-  const syncPrefs = prefs => {
+  const syncPrefs = (prefs) => {
     const safe = {
       ...defaults,
-      ...(prefs || {})
+      ...(prefs || {}),
     };
 
-    document.body?.classList.toggle(
-      'relay-hide-intel',
-      !safe.intelCards
-    );
+    document.body?.classList.toggle('relay-hide-intel', !safe.intelCards);
 
-    document.body?.classList.toggle(
-      'relay-hide-ally',
-      !safe.allyIntel
-    );
+    document.body?.classList.toggle('relay-hide-ally', !safe.allyIntel);
 
-    document.body?.classList.toggle(
-      'relay-hide-events',
-      !safe.eventPopups
-    );
+    document.body?.classList.toggle('relay-hide-events', !safe.eventPopups);
 
-    document.body?.classList.toggle(
-      'relay-hide-tutorials',
-      !safe.tutorialHints
-    );
+    document.body?.classList.toggle('relay-hide-tutorials', !safe.tutorialHints);
   };
-
 
   /* =========================================================
      CLOSE OTHER OVERLAYS
      ========================================================= */
 
   const closeAllOverlays = () => {
-    [
-      'titlePanel',
-      'relayInfoPanel',
-      'preflight',
-      'relayUpdateCenter'
-    ].forEach(id => {
+    ['titlePanel', 'relayInfoPanel', 'preflight', 'relayUpdateCenter'].forEach((id) => {
       $(id)?.classList.add('hidden');
     });
   };
-
 
   /* =========================================================
      HIDE / RESUME PAUSE
@@ -112,10 +89,7 @@ import {
      * This also triggers the P1 MutationObserver.
      */
     pause.setAttribute('data-pause-open', 'false');
-    pause.setAttribute(
-      'aria-hidden',
-      'true'
-    );
+    pause.setAttribute('aria-hidden', 'true');
 
     /* Resume must never reveal the Home surface while Runner remains active. */
     const intro = $('intro');
@@ -136,15 +110,11 @@ import {
      * p1-gameplay-correctness-v1.js exposes this
      * function when its pause controller is ready.
      */
-    if (
-      typeof window.__relayResumeGameplay ===
-      'function'
-    ) {
+    if (typeof window.__relayResumeGameplay === 'function') {
       window.__relayResumeGameplay();
 
       return;
     }
-
 
     /*
      * Fallback:
@@ -152,25 +122,16 @@ import {
      * If P1 has not installed its public resume
      * function yet, safely resume the Runner scene.
      */
-    const scene =
-      window.__relayRunnerScene ||
-      window.game?.scene?.getScene?.('runner') ||
-      null;
+    const scene = window.__relayRunnerScene || window.game?.scene?.getScene?.('runner') || null;
 
-    if (
-      scene?.scene?.isPaused?.()
-    ) {
+    if (scene?.scene?.isPaused?.()) {
       try {
         scene.scene.resume();
       } catch (error) {
-        console.error(
-          '[RelayRunner] Pause fallback resume failed:',
-          error
-        );
+        console.error('[RelayRunner] Pause fallback resume failed:', error);
       }
     }
   };
-
 
   /* =========================================================
      FULLSCREEN
@@ -186,64 +147,25 @@ import {
     } catch {}
   };
 
-
   /* =========================================================
      SETTINGS
      ========================================================= */
 
   const settingMeta = [
-    [
-      'screenShake',
-      'SCREEN SHAKE',
-      'Impact and camera feedback.'
-    ],
-    [
-      'reducedMotion',
-      'REDUCED MOTION',
-      'Reduce menu and gameplay motion.'
-    ],
-    [
-      'rain',
-      'ATMOSPHERIC RAIN',
-      'City weather and ambience layer.'
-    ],
-    [
-      'muted',
-      'GAME AUDIO',
-      'Master gameplay and menu audio.'
-    ]
+    ['screenShake', 'SCREEN SHAKE', 'Impact and camera feedback.'],
+    ['reducedMotion', 'REDUCED MOTION', 'Reduce menu and gameplay motion.'],
+    ['rain', 'ATMOSPHERIC RAIN', 'City weather and ambience layer.'],
+    ['muted', 'GAME AUDIO', 'Master gameplay and menu audio.'],
   ];
 
   const presentationMeta = [
-    [
-      'tutorialHints',
-      'TUTORIAL HINTS',
-      'Contextual mission guidance.'
-    ],
-    [
-      'intelCards',
-      'INTEL CARDS',
-      'Mission intelligence panels.'
-    ],
-    [
-      'allyIntel',
-      'ALLY INTEL',
-      'Ally and contact callouts.'
-    ],
-    [
-      'eventPopups',
-      'EVENT POPUPS',
-      'Gameplay event feedback panels.'
-    ]
+    ['tutorialHints', 'TUTORIAL HINTS', 'Contextual mission guidance.'],
+    ['intelCards', 'INTEL CARDS', 'Mission intelligence panels.'],
+    ['allyIntel', 'ALLY INTEL', 'Ally and contact callouts.'],
+    ['eventPopups', 'EVENT POPUPS', 'Gameplay event feedback panels.'],
   ];
 
-
-  const toggleCard = (
-    key,
-    label,
-    detail,
-    enabled
-  ) =>
+  const toggleCard = (key, label, detail, enabled) =>
     `<article class="relay-ui-card">
       <div class="relay-ui-copy">
         <strong>${label}</strong>
@@ -259,13 +181,7 @@ import {
       </button>
     </article>`;
 
-
-  const rangeCard = (
-    key,
-    label,
-    detail,
-    value
-  ) =>
+  const rangeCard = (key, label, detail, value) =>
     `<article class="relay-ui-card">
       <div class="relay-ui-copy">
         <strong>${label}</strong>
@@ -292,99 +208,62 @@ import {
       </div>
     </article>`;
 
+  const updateRuntimeFallback = (key, value) => {
+    const scene = window.__relayRunnerScene;
 
-  const updateRuntimeFallback = (
-    key,
-    value
-  ) => {
-    const scene =
-      window.__relayRunnerScene;
-
-    if (
-      key === 'rain'
-    ) {
-      scene?.rain?.setVisible?.(
-        Boolean(value)
-      );
+    if (key === 'rain') {
+      scene?.rain?.setVisible?.(Boolean(value));
     }
 
-    if (
-      key === 'screenShake' &&
-      scene
-    ) {
-      scene.screenShake =
-        Boolean(value);
+    if (key === 'screenShake' && scene) {
+      scene.screenShake = Boolean(value);
     }
 
-    if (
-      key === 'reducedMotion' &&
-      scene
-    ) {
-      scene.motionReduced =
-        Boolean(value);
+    if (key === 'reducedMotion' && scene) {
+      scene.motionReduced = Boolean(value);
     }
 
-    if (
-      key === 'muted' &&
-      value
-    ) {
+    if (key === 'muted' && value) {
       try {
         window.speechSynthesis?.cancel?.();
       } catch {}
     }
   };
 
-
   const readCoreState = () => ({
-    ...loadState()
+    ...loadState(),
   });
 
-
-  const setCoreSetting = (
-    key,
-    value
-  ) => {
+  const setCoreSetting = (key, value) => {
     const next = {
       ...readCoreState(),
-      [key]: value
+      [key]: value,
     };
 
     saveState(next);
 
-    updateRuntimeFallback(
-      key,
-      value
-    );
+    updateRuntimeFallback(key, value);
 
     window.dispatchEvent(
-      new CustomEvent(
-        'relay-settings-change',
-        {
-          detail: {
-            key,
-            value
-          }
-        }
-      )
+      new CustomEvent('relay-settings-change', {
+        detail: {
+          key,
+          value,
+        },
+      }),
     );
   };
-
 
   /* =========================================================
      OPTIONS
      ========================================================= */
 
   const renderOptionsBody = () => {
-    const state =
-      readCoreState();
+    const state = readCoreState();
 
-    const prefs =
-      readPrefs();
+    const prefs = readPrefs();
 
-    const lang =
-      localStorage.getItem(
-        'relay-runner-language'
-      ) || 'en';
+    const lang = localStorage.getItem('relay-runner-language') || 'en';
 
     return `
       <div class="relay-section-grid">
@@ -395,20 +274,8 @@ import {
           </div>
 
           ${settingMeta
-            .map(
-              ([
-                key,
-                label,
-                detail
-              ]) =>
-                toggleCard(
-                  key,
-                  label,
-                  detail,
-                  key === 'muted'
-                    ? !state.muted
-                    : !!state[key]
-                )
+            .map(([key, label, detail]) =>
+              toggleCard(key, label, detail, key === 'muted' ? !state.muted : !!state[key]),
             )
             .join('')}
         </section>
@@ -423,18 +290,14 @@ import {
             'musicVolume',
             'MUSIC VOLUME',
             'Menu and gameplay music.',
-            Number(
-              state.musicVolume ?? .55
-            )
+            Number(state.musicVolume ?? 0.55),
           )}
 
           ${rangeCard(
             'sfxVolume',
             'SFX VOLUME',
             'Impacts, actions and alerts.',
-            Number(
-              state.sfxVolume ?? .7
-            )
+            Number(state.sfxVolume ?? 0.7),
           )}
         </section>
 
@@ -446,19 +309,7 @@ import {
 
           <div class="relay-section-grid">
             ${presentationMeta
-              .map(
-                ([
-                  key,
-                  label,
-                  detail
-                ]) =>
-                  toggleCard(
-                    key,
-                    label,
-                    detail,
-                    !!prefs[key]
-                  )
-              )
+              .map(([key, label, detail]) => toggleCard(key, label, detail, !!prefs[key]))
               .join('')}
           </div>
         </section>
@@ -478,29 +329,23 @@ import {
             </div>
 
             <div class="relay-ui-choice-row">
-              ${
-                [
-                  ['en', 'EN'],
-                  ['exyu', 'EX-YU'],
-                  ['es', 'ES'],
-                  ['de', 'DE']
-                ]
-                  .map(
-                    ([id, label]) =>
-                      `<button
-                        class="relay-ui-choice ${
-                          lang === id
-                            ? 'is-active'
-                            : ''
-                        }"
+              ${[
+                ['en', 'EN'],
+                ['exyu', 'EX-YU'],
+                ['es', 'ES'],
+                ['de', 'DE'],
+              ]
+                .map(
+                  ([id, label]) =>
+                    `<button
+                        class="relay-ui-choice ${lang === id ? 'is-active' : ''}"
                         type="button"
                         data-unified-language="${id}"
                       >
                         ${label}
-                      </button>`
-                  )
-                  .join('')
-              }
+                      </button>`,
+                )
+                .join('')}
             </div>
           </article>
         </section>
@@ -613,35 +458,18 @@ import {
     `;
   };
 
-
   /* =========================================================
      GENERIC OVERLAY
      ========================================================= */
 
-  const renderOverlay = (
-    host,
-    {
-      kicker,
-      title,
-      subtitle,
-      body,
-      footer = ''
-    }
-  ) => {
+  const renderOverlay = (host, { kicker, title, subtitle, body, footer = '' }) => {
     if (!host) return;
 
-    host.classList.add(
-      'relay-cinematic-overlay'
-    );
+    host.classList.add('relay-cinematic-overlay');
 
-    host.classList.remove(
-      'hidden'
-    );
+    host.classList.remove('hidden');
 
-    host.setAttribute(
-      'aria-hidden',
-      'false'
-    );
+    host.setAttribute('aria-hidden', 'false');
 
     host.innerHTML = `
       <div class="relay-cinematic-panel">
@@ -688,17 +516,12 @@ import {
     `;
   };
 
-
   /* =========================================================
      OPTIONS OVERLAY
      ========================================================= */
 
-  const renderOptions = (
-    host,
-    mode = 'overlay'
-  ) => {
-    const body =
-      renderOptionsBody();
+  const renderOptions = (host, mode = 'overlay') => {
+    const body = renderOptionsBody();
 
     const html = `
       <div class="relay-cinematic-panel">
@@ -742,27 +565,16 @@ import {
 
     if (!host) return;
 
-    host.innerHTML =
-      html;
+    host.innerHTML = html;
 
-    if (
-      mode === 'overlay'
-    ) {
-      host.classList.add(
-        'relay-cinematic-overlay'
-      );
+    if (mode === 'overlay') {
+      host.classList.add('relay-cinematic-overlay');
     }
 
-    host.classList.remove(
-      'hidden'
-    );
+    host.classList.remove('hidden');
 
-    host.setAttribute(
-      'aria-hidden',
-      'false'
-    );
+    host.setAttribute('aria-hidden', 'false');
   };
-
 
   /* =========================================================
      FAQ
@@ -771,124 +583,83 @@ import {
   const faqData = [
     [
       'HOW TO PLAY',
-      'Start a route, follow the objective, collect Signals and reach the delivery beacon. Checkpoints protect your run and unlock progression.'
+      'Start a route, follow the objective, collect Signals and reach the delivery beacon. Checkpoints protect your run and unlock progression.',
     ],
     [
       'MOVEMENT',
-      'Use A/D on keyboard. On touch devices, drag the left joystick. Jump with SPACE or JUMP and use DASH when available.'
+      'Use A/D on keyboard. On touch devices, drag the left joystick. Jump with SPACE or JUMP and use DASH when available.',
     ],
     [
       'COMBAT',
-      'E performs the contextual action when a relay/world target is in range. Q uses the melee blade.'
+      'E performs the contextual action when a relay/world target is in range. Q uses the melee blade.',
     ],
     [
       'ABILITIES',
-      'Abilities unlock through campaign progression. Required abilities are enforced for later routes.'
+      'Abilities unlock through campaign progression. Required abilities are enforced for later routes.',
     ],
     [
       'MISSIONS',
-      'Complete a route to unlock its next mission. Signals, Secrets, performance and clean runs feed progression.'
+      'Complete a route to unlock its next mission. Signals, Secrets, performance and clean runs feed progression.',
     ],
-    [
-      'CHECKPOINTS',
-      'A checkpoint becomes your recovery line after a fall or death.'
-    ],
+    ['CHECKPOINTS', 'A checkpoint becomes your recovery line after a fall or death.'],
     [
       'PROGRESSION',
-      'XP, levels, ranks, mastery and achievements are persisted locally for this browser profile.'
+      'XP, levels, ranks, mastery and achievements are persisted locally for this browser profile.',
     ],
     [
       'MOBILE',
-      'Touch controls are shown during landscape gameplay and use dedicated pointer ownership.'
-    ]
+      'Touch controls are shown during landscape gameplay and use dedicated pointer ownership.',
+    ],
   ];
 
+  const renderFaq = (host) =>
+    renderOverlay(host, {
+      kicker: 'RELAY RUNNER // KNOWLEDGE BASE',
 
-  const renderFaq = host =>
-    renderOverlay(
-      host,
-      {
-        kicker:
-          'RELAY RUNNER // KNOWLEDGE BASE',
+      title: 'FAQ',
 
-        title:
-          'FAQ',
+      subtitle: 'Route intelligence, controls and system guidance.',
 
-        subtitle:
-          'Route intelligence, controls and system guidance.',
-
-        body:
-          `<div class="relay-faq-grid">
+      body: `<div class="relay-faq-grid">
             ${faqData
               .map(
-                (
-                  [q, a],
-                  index
-                ) =>
-                  `<article class="relay-faq-item ${
-                    index === 0
-                      ? 'is-open'
-                      : ''
-                  }">
+                ([q, a], index) =>
+                  `<article class="relay-faq-item ${index === 0 ? 'is-open' : ''}">
 
                     <button
                       class="relay-faq-question"
                       type="button"
                       data-faq-question
-                      aria-expanded="${
-                        index === 0
-                          ? 'true'
-                          : 'false'
-                      }"
+                      aria-expanded="${index === 0 ? 'true' : 'false'}"
                     >
                       <span>${q}</span>
-                      <b>${
-                        index === 0
-                          ? '−'
-                          : '+'
-                      }</b>
+                      <b>${index === 0 ? '−' : '+'}</b>
                     </button>
 
                     <div
                       class="relay-faq-answer"
-                      ${
-                        index === 0
-                          ? ''
-                          : 'hidden'
-                      }
+                      ${index === 0 ? '' : 'hidden'}
                     >
                       ${a}
                     </div>
 
-                  </article>`
+                  </article>`,
               )
               .join('')}
-          </div>`
-      }
-    );
-
+          </div>`,
+    });
 
   /* =========================================================
      MISSIONS
      ========================================================= */
 
-  const missionCard = (
-    mission,
-    index,
-    state
-  ) => {
-    const completed =
-      Array.isArray(state.completed) &&
-      state.completed.includes(
-        mission.id
-      );
+  const missionCard = (mission, index, state) => {
+    const completed = Array.isArray(state.completed) && state.completed.includes(mission.id);
 
     const unlocked =
       !mission.unlockRequirement ||
       completed ||
-      state.completed?.includes?.(
-        mission.unlockRequirement
-      );
+      state.completed?.includes?.(mission.unlockRequirement);
 
     return `
       <article class="relay-ui-card">
@@ -904,67 +675,40 @@ import {
             ${
               unlocked
                 ? `${mission.difficulty} · ${mission.signals.length} SIGNALS · ${mission.objective}`
-                : `LOCKED · COMPLETE ${String(
-                    mission.unlockRequirement ||
-                      ''
-                  )
-                    .replaceAll(
-                      '-',
-                      ' '
-                    )
+                : `LOCKED · COMPLETE ${String(mission.unlockRequirement || '')
+                    .replaceAll('-', ' ')
                     .toUpperCase()}`
             }
           </small>
         </div>
 
         <button
-          class="relay-ui-button ${
-            unlocked
-              ? ''
-              : 'is-locked'
-          }"
+          class="relay-ui-button ${unlocked ? '' : 'is-locked'}"
           type="button"
           data-pause-launch="${index}"
           ${unlocked ? '' : 'disabled'}
         >
-          ${
-            unlocked
-              ? completed
-                ? 'REPLAY'
-                : 'DEPLOY'
-              : 'LOCKED'
-          }
+          ${unlocked ? (completed ? 'REPLAY' : 'DEPLOY') : 'LOCKED'}
         </button>
 
       </article>
     `;
   };
 
-
   /* =========================================================
      PAUSE SHELL
      ========================================================= */
 
   const ensurePauseShell = () => {
-    const pause =
-      $('pauseMenu');
+    const pause = $('pauseMenu');
 
-    if (
-      !pause ||
-      pause.querySelector(
-        '.relay-pause-shell'
-      )
-    ) {
+    if (!pause || pause.querySelector('.relay-pause-shell')) {
       return;
     }
 
-    const shell =
-      document.createElement(
-        'section'
-      );
+    const shell = document.createElement('section');
 
-    shell.className =
-      'relay-pause-shell';
+    shell.className = 'relay-pause-shell';
 
     shell.innerHTML = `
       <header class="relay-pause-head">
@@ -1045,57 +789,31 @@ import {
       </div>
     `;
 
-    pause.appendChild(
-      shell
-    );
+    pause.appendChild(shell);
   };
-
 
   /* =========================================================
      RENDER PAUSE
      ========================================================= */
 
-  const renderPause = tab => {
-    const pause =
-      $('pauseMenu');
+  const renderPause = (tab) => {
+    const pause = $('pauseMenu');
 
-    const shell =
-      pause?.querySelector(
-        '.relay-pause-shell'
-      );
+    const shell = pause?.querySelector('.relay-pause-shell');
 
-    const content =
-      shell?.querySelector(
-        '.relay-pause-content'
-      );
+    const content = shell?.querySelector('.relay-pause-content');
 
-    if (
-      !shell ||
-      !content
-    ) {
+    if (!shell || !content) {
       return;
     }
 
     shell
-      .querySelectorAll(
-        '[data-pause-tab]'
-      )
-      .forEach(
-        button =>
-          button.classList.toggle(
-            'is-active',
-            button.dataset.pauseTab ===
-              tab
-          )
-      );
+      .querySelectorAll('[data-pause-tab]')
+      .forEach((button) => button.classList.toggle('is-active', button.dataset.pauseTab === tab));
 
-    const state =
-      loadState();
+    const state = loadState();
 
-
-    if (
-      tab === 'resume'
-    ) {
+    if (tab === 'resume') {
       content.innerHTML = `
         <div class="relay-cinematic-panel">
           <div class="relay-cinematic-body">
@@ -1133,12 +851,7 @@ import {
           </div>
         </div>
       `;
-    }
-
-
-    else if (
-      tab === 'missions'
-    ) {
+    } else if (tab === 'missions') {
       content.innerHTML = `
         <div class="relay-cinematic-panel">
           <div class="relay-cinematic-body">
@@ -1149,57 +862,22 @@ import {
                 MISSION NETWORK
               </div>
 
-              ${
-                missions
-                  .map(
-                    (
-                      mission,
-                      index
-                    ) =>
-                      missionCard(
-                        mission,
-                        index,
-                        state
-                      )
-                  )
-                  .join('')
-              }
+              ${missions.map((mission, index) => missionCard(mission, index, state)).join('')}
 
             </div>
 
           </div>
         </div>
       `;
-    }
+    } else if (tab === 'progress') {
+      const rank = getCourierRank(state.xp || 0);
 
+      const level = getLevelProgress(state.xp || 0);
 
-    else if (
-      tab === 'progress'
-    ) {
-      const rank =
-        getCourierRank(
-          state.xp || 0
-        );
-
-      const level =
-        getLevelProgress(
-          state.xp || 0
-        );
-
-      const mastery =
-        Object.values(
-          state.mastery || {}
-        ).reduce(
-          (
-            n,
-            b
-          ) =>
-            n +
-            (Array.isArray(b)
-              ? b.length
-              : 0),
-          0
-        );
+      const mastery = Object.values(state.mastery || {}).reduce(
+        (n, b) => n + (Array.isArray(b) ? b.length : 0),
+        0,
+      );
 
       content.innerHTML = `
         <div class="relay-cinematic-panel">
@@ -1224,20 +902,13 @@ import {
                       ${
                         level.level === 100
                           ? 'MAXIMUM LEVEL'
-                          : `${Math.max(
-                              0,
-                              level.next -
-                                state.xp
-                            )} XP TO NEXT LEVEL`
+                          : `${Math.max(0, level.next - state.xp)} XP TO NEXT LEVEL`
                       }
                     </small>
                   </div>
 
                   <b class="relay-cinematic-status">
-                    ${Math.round(
-                      level.progress *
-                        100
-                    )}%
+                    ${Math.round(level.progress * 100)}%
                   </b>
 
                 </article>
@@ -1260,14 +931,11 @@ import {
                     </strong>
 
                     <small>
-                      ${
-                        state.xp || 0
-                      } XP · ${
+                      ${state.xp || 0} XP · ${
                         rank.next
                           ? `${Math.max(
                               0,
-                              rank.next.threshold -
-                                (state.xp || 0)
+                              rank.next.threshold - (state.xp || 0),
                             )} XP TO ${rank.next.name}`
                           : 'MAXIMUM RANK'
                       }
@@ -1296,14 +964,9 @@ import {
                     </strong>
 
                     <small>
-                      ${
-                        state.completed?.length ||
-                        0
-                      }/${missions.length}
+                      ${state.completed?.length || 0}/${missions.length}
                       ROUTES COMPLETE ·
-                      ${
-                        state.signals || 0
-                      }
+                      ${state.signals || 0}
                       SIGNALS
                     </small>
 
@@ -1324,25 +987,15 @@ import {
 
               <div class="relay-section-grid">
 
-                ${
-                  achievementDefinitions
-                    .map(
-                      a =>
-                        `<article class="relay-ui-card">
+                ${achievementDefinitions
+                  .map(
+                    (a) =>
+                      `<article class="relay-ui-card">
 
                           <div class="relay-ui-copy">
 
                             <strong>
-                              ${
-                                (
-                                  state.achievements ||
-                                  []
-                                ).includes(
-                                  a.id
-                                )
-                                  ? '★ '
-                                  : '○ '
-                              }${a.label}
+                              ${(state.achievements || []).includes(a.id) ? '★ ' : '○ '}${a.label}
                             </strong>
 
                             <small>
@@ -1351,10 +1004,9 @@ import {
 
                           </div>
 
-                        </article>`
-                    )
-                    .join('')
-                }
+                        </article>`,
+                  )
+                  .join('')}
 
               </div>
 
@@ -1377,23 +1029,12 @@ import {
                   </strong>
 
                   <small>
-                    ${
-                      missions
-                        .map(
-                          m =>
-                            `${m.title}: ${
-                              (
-                                state.mastery?.[
-                                  m.id
-                                ] || []
-                              ).join(
-                                ' · '
-                              ) ||
-                              'UNCLAIMED'
-                            }`
-                        )
-                        .join(' · ')
-                    }
+                    ${missions
+                      .map(
+                        (m) =>
+                          `${m.title}: ${(state.mastery?.[m.id] || []).join(' · ') || 'UNCLAIMED'}`,
+                      )
+                      .join(' · ')}
                   </small>
 
                 </div>
@@ -1405,46 +1046,27 @@ import {
           </div>
         </div>
       `;
-    }
-
-
-    else if (
-      tab === 'settings'
-    ) {
-      renderOptions(
-        content,
-        'embedded'
-      );
-    }
-
-
-    else if (
-      tab === 'faq'
-    ) {
-      renderFaq(
-        content
-      );
+    } else if (tab === 'settings') {
+      renderOptions(content, 'embedded');
+    } else if (tab === 'faq') {
+      renderFaq(content);
     }
   };
-
 
   /* =========================================================
      OPEN PAUSE
      ========================================================= */
 
-  const openPause = tab => {
+  const openPause = (tab) => {
     try {
       closeAllOverlays();
 
       ensurePauseShell();
 
-      const pause =
-        $('pauseMenu');
+      const pause = $('pauseMenu');
 
       if (!pause) {
-        console.warn(
-          '[RelayRunner] pauseMenu not found'
-        );
+        console.warn('[RelayRunner] pauseMenu not found');
 
         return false;
       }
@@ -1459,27 +1081,17 @@ import {
        * data-pause-open renderer and legacy runtime observers. */
       pause.classList.remove('hidden');
       pause.setAttribute('data-pause-open', 'true');
-      pause.setAttribute(
-        'aria-hidden',
-        'false'
-      );
+      pause.setAttribute('aria-hidden', 'false');
 
-      renderPause(
-        tab || 'resume'
-      );
+      renderPause(tab || 'resume');
 
       return true;
-
     } catch (error) {
-      console.error(
-        '[RelayRunner] openPause failed:',
-        error
-      );
+      console.error('[RelayRunner] openPause failed:', error);
 
       return false;
     }
   };
-
 
   /* =========================================================
      TITLE OPTIONS
@@ -1488,39 +1100,24 @@ import {
   const openTitleOptions = () => {
     closeAllOverlays();
 
-    const panel =
-      $('titlePanel');
+    const panel = $('titlePanel');
 
-    const content =
-      $('titlePanelContent');
+    const content = $('titlePanelContent');
 
-    if (
-      !panel ||
-      !content
-    ) {
+    if (!panel || !content) {
       return false;
     }
 
-    renderOptions(
-      panel
-    );
+    renderOptions(panel);
 
-    panel.classList.remove(
-      'hidden'
-    );
+    panel.classList.remove('hidden');
 
-    panel.removeAttribute(
-      'hidden'
-    );
+    panel.removeAttribute('hidden');
 
-    panel.setAttribute(
-      'aria-hidden',
-      'false'
-    );
+    panel.setAttribute('aria-hidden', 'false');
 
     return true;
   };
-
 
   /* =========================================================
      FAQ
@@ -1529,198 +1126,114 @@ import {
   const openFaq = () => {
     closeAllOverlays();
 
-    renderFaq(
-      $('relayInfoPanel')
-    );
+    renderFaq($('relayInfoPanel'));
 
     return true;
   };
-
 
   /* =========================================================
      MISSION LAUNCH
      ========================================================= */
 
-  const launchMissionViaLegacy =
-    index => {
-      const pause =
-        $('pauseMenu');
+  const launchMissionViaLegacy = (index) => {
+    const pause = $('pauseMenu');
 
-      if (!pause) {
-        return false;
+    if (!pause) {
+      return false;
+    }
+
+    try {
+      const oldTab = pause.querySelector('.menu .tab[data-tab="missions"]');
+
+      if (oldTab) {
+        HTMLElement.prototype.click.call(oldTab);
+
+        const button = pause.querySelector(`.menu #panelContent [data-mission="${index}"]`);
+
+        if (button && !button.disabled) {
+          HTMLElement.prototype.click.call(button);
+
+          return true;
+        }
       }
 
-      try {
-        const oldTab =
-          pause.querySelector(
-            '.menu .tab[data-tab="missions"]'
-          );
+      const newMissionButton = pause.querySelector(`[data-pause-launch="${index}"]`);
 
-        if (oldTab) {
-          HTMLElement.prototype.click.call(
-            oldTab
-          );
+      if (newMissionButton && !newMissionButton.disabled) {
+        const mission = missions[index];
 
-          const button =
-            pause.querySelector(
-              `.menu #panelContent [data-mission="${index}"]`
-            );
+        const scene = window.__relayRunnerScene;
 
-          if (
-            button &&
-            !button.disabled
-          ) {
-            HTMLElement.prototype.click.call(
-              button
-            );
+        if (scene && typeof scene.startMission === 'function' && mission) {
+          scene.startMission(mission);
 
-            return true;
-          }
+          hidePause();
+
+          return true;
         }
-
-
-        const newMissionButton =
-          pause.querySelector(
-            `[data-pause-launch="${index}"]`
-          );
-
-        if (
-          newMissionButton &&
-          !newMissionButton.disabled
-        ) {
-          const mission =
-            missions[index];
-
-          const scene =
-            window.__relayRunnerScene;
-
-          if (
-            scene &&
-            typeof scene.startMission ===
-              'function' &&
-            mission
-          ) {
-            scene.startMission(
-              mission
-            );
-
-            hidePause();
-
-            return true;
-          }
-        }
-
-        return false;
-
-      } catch (error) {
-        console.error(
-          '[RelayRunner] Mission launch failed:',
-          error
-        );
-
-        return false;
       }
-    };
 
+      return false;
+    } catch (error) {
+      console.error('[RelayRunner] Mission launch failed:', error);
+
+      return false;
+    }
+  };
 
   /* =========================================================
      UPDATE TOGGLE
      ========================================================= */
 
-  const updateToggleDom = (
-    button,
-    enabled
-  ) => {
-    button.classList.toggle(
-      'is-on',
-      Boolean(enabled)
-    );
+  const updateToggleDom = (button, enabled) => {
+    button.classList.toggle('is-on', Boolean(enabled));
 
-    button.classList.toggle(
-      'is-off',
-      !Boolean(enabled)
-    );
+    button.classList.toggle('is-off', !Boolean(enabled));
 
-    button.setAttribute(
-      'aria-pressed',
-      String(
-        Boolean(enabled)
-      )
-    );
+    button.setAttribute('aria-pressed', String(Boolean(enabled)));
 
-    button.textContent =
-      enabled
-        ? 'ON'
-        : 'OFF';
+    button.textContent = enabled ? 'ON' : 'OFF';
   };
-
 
   /* =========================================================
      CLICK HANDLER
      ========================================================= */
 
-  const handleClick = event => {
-    const target =
-      event.target instanceof Element
-        ? event.target
-        : null;
+  const handleClick = (event) => {
+    const target = event.target instanceof Element ? event.target : null;
 
     if (!target) {
       return;
     }
 
-
     /* -------------------------------------------------------
        HOME
        ------------------------------------------------------- */
 
-    const homeAction =
-      target.closest(
-        '[data-home-v4-action]'
-      );
+    const homeAction = target.closest('[data-home-v4-action]');
 
     if (homeAction) {
       event.preventDefault();
       event.stopImmediatePropagation();
 
-      const action =
-        homeAction.dataset.homeV4Action;
+      const action = homeAction.dataset.homeV4Action;
 
-      if (
-        action === 'options'
-      ) {
+      if (action === 'options') {
         openTitleOptions();
-      }
-
-      else if (
-        action === 'faq'
-      ) {
-        window.relayHomeInfoV1?.open?.(
-          'faq'
-        ) ||
-          openFaq();
-      }
-
-      else if (
-        action === 'update'
-      ) {
-        window.relayHomeInfoV1?.open?.(
-          'update'
-        );
+      } else if (action === 'faq') {
+        window.relayHomeInfoV1?.open?.('faq') || openFaq();
+      } else if (action === 'update') {
+        window.relayHomeInfoV1?.open?.('update');
       }
 
       return;
     }
 
-
     /* -------------------------------------------------------
        OPTIONS
        ------------------------------------------------------- */
 
-    const option =
-      target.closest(
-        '[data-v3-options]'
-      );
+    const option = target.closest('[data-v3-options]');
 
     if (option) {
       event.preventDefault();
@@ -1731,15 +1244,11 @@ import {
       return;
     }
 
-
     /* -------------------------------------------------------
        FAQ
        ------------------------------------------------------- */
 
-    const faq =
-      target.closest(
-        '[data-v3-faq], [data-relay-info="faq"]'
-      );
+    const faq = target.closest('[data-v3-faq], [data-relay-info="faq"]');
 
     if (faq) {
       event.preventDefault();
@@ -1750,33 +1259,22 @@ import {
       return;
     }
 
-
     /* -------------------------------------------------------
        PAUSE
        ------------------------------------------------------- */
 
-    const pauseButton =
-      target.closest(
-        '#pause'
-      );
+    const pauseButton = target.closest('#pause');
 
     if (pauseButton) {
       event.preventDefault();
       event.stopImmediatePropagation();
 
-      if (
-        document.getElementById(
-          'pauseMenu'
-        )
-      ) {
-        openPause(
-          'resume'
-        );
+      if (document.getElementById('pauseMenu')) {
+        openPause('resume');
       }
 
       return;
     }
-
 
     /* -------------------------------------------------------
        MOBILE SETTINGS
@@ -1788,19 +1286,12 @@ import {
        CLOSE
        ------------------------------------------------------- */
 
-    const close =
-      target.closest(
-        '[data-unified-close]'
-      );
+    const close = target.closest('[data-unified-close]');
 
     if (close) {
       event.preventDefault();
 
-      if (
-        close.closest(
-          '#pauseMenu'
-        )
-      ) {
+      if (close.closest('#pauseMenu')) {
         hidePause();
       } else {
         closeAllOverlays();
@@ -1809,35 +1300,25 @@ import {
       return;
     }
 
-
     /* -------------------------------------------------------
        PAUSE TABS
        ------------------------------------------------------- */
 
-    const pauseTab =
-      target.closest(
-        '[data-pause-tab]'
-      );
+    const pauseTab = target.closest('[data-pause-tab]');
 
     if (pauseTab) {
       event.preventDefault();
 
-      renderPause(
-        pauseTab.dataset.pauseTab
-      );
+      renderPause(pauseTab.dataset.pauseTab);
 
       return;
     }
-
 
     /* -------------------------------------------------------
        RESUME
        ------------------------------------------------------- */
 
-    const resume =
-      target.closest(
-        '[data-unified-resume]'
-      );
+    const resume = target.closest('[data-unified-resume]');
 
     if (resume) {
       event.preventDefault();
@@ -1847,246 +1328,209 @@ import {
       return;
     }
 
-
     /* -------------------------------------------------------
        MISSION LAUNCH
        ------------------------------------------------------- */
 
-    const launch =
-      target.closest(
-        '[data-pause-launch]'
-      );
+    const launch = target.closest('[data-pause-launch]');
 
-    if (
-      launch &&
-      !launch.disabled
-    ) {
+    if (launch && !launch.disabled) {
       event.preventDefault();
 
-      launchMissionViaLegacy(
-        Number(
-          launch.dataset.pauseLaunch
-        )
-      );
+      launchMissionViaLegacy(Number(launch.dataset.pauseLaunch));
 
       return;
     }
 
-
     /* -------------------------------------------------------
-       FAQ QUESTIONS
-       ------------------------------------------------------- */
+   FAQ QUESTIONS
+   ------------------------------------------------------- */
 
-    const faqQuestion =
-      target.closest(
-        '[data-faq-question]'
-      );
+    const faqQuestion = target.closest('[data-faq-question]');
 
     if (faqQuestion) {
       event.preventDefault();
+      event.stopPropagation();
 
-      const item =
-        faqQuestion.closest(
-          '.relay-faq-item'
-        );
+      const item = faqQuestion.closest('.relay-faq-item');
 
-      const answer =
-        item?.querySelector(
-          '.relay-faq-answer'
-        );
+      const list = item?.parentElement;
 
-      const open =
-        !item?.classList.contains(
-          'is-open'
-        );
+      const answer = item?.querySelector('.relay-faq-answer');
 
-      item?.classList.toggle(
-        'is-open',
-        open
-      );
-
-      faqQuestion.setAttribute(
-        'aria-expanded',
-        String(open)
-      );
-
-      const icon =
-        faqQuestion.querySelector(
-          'b'
-        );
-
-      if (icon) {
-        icon.textContent =
-          open
-            ? '−'
-            : '+';
+      if (!item || !list || !answer) {
+        return;
       }
 
-      if (answer) {
-        answer.hidden =
-          !open;
+      const wasOpen = item.classList.contains('is-open') || item.classList.contains('open');
+
+      /*
+       * CLOSE EVERY FAQ ITEM
+       */
+      list.querySelectorAll('.relay-faq-item').forEach((otherItem) => {
+        otherItem.classList.remove('is-open');
+        otherItem.classList.remove('open');
+
+        const otherQuestion = otherItem.querySelector('[data-faq-question]');
+
+        const otherAnswer = otherItem.querySelector('.relay-faq-answer');
+
+        if (otherQuestion) {
+          otherQuestion.setAttribute('aria-expanded', 'false');
+
+          const state = otherQuestion.querySelector('.faq-question-state');
+
+          if (state) {
+            state.textContent = 'QUERY';
+          }
+
+          const icon = otherQuestion.querySelector('.faq-question-icon');
+
+          if (icon) {
+            icon.textContent = '+';
+          }
+
+          /*
+           * Compatibility with current markup
+           * that still uses <b> as the icon.
+           */
+          const oldIcon = otherQuestion.querySelector('b');
+
+          if (oldIcon) {
+            oldIcon.textContent = '+';
+          }
+        }
+
+        if (otherAnswer) {
+          otherAnswer.hidden = true;
+
+          otherAnswer.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      /*
+       * CLICKING THE SAME OPEN QUESTION
+       * = CLOSE IT
+       */
+      if (wasOpen) {
+        return;
+      }
+
+      /*
+       * OPEN ONLY THE CLICKED QUESTION
+       */
+      item.classList.add('is-open');
+
+      faqQuestion.setAttribute('aria-expanded', 'true');
+
+      answer.hidden = false;
+
+      answer.setAttribute('aria-hidden', 'false');
+
+      const state = faqQuestion.querySelector('.faq-question-state');
+
+      if (state) {
+        state.textContent = 'ACTIVE';
+      }
+
+      const icon = faqQuestion.querySelector('.faq-question-icon');
+
+      if (icon) {
+        icon.textContent = '−';
+      }
+
+      /*
+       * Current FAQ markup uses <b>
+       * instead of .faq-question-icon.
+       */
+      const oldIcon = faqQuestion.querySelector('b');
+
+      if (oldIcon) {
+        oldIcon.textContent = '−';
       }
 
       return;
     }
-
 
     /* -------------------------------------------------------
        SETTINGS TOGGLES
        ------------------------------------------------------- */
 
-    const setting =
-      target.closest(
-        '[data-unified-setting]'
-      );
+    const setting = target.closest('[data-unified-setting]');
 
     if (setting) {
       event.preventDefault();
 
-      const key =
-        setting.dataset.unifiedSetting;
+      const key = setting.dataset.unifiedSetting;
+      const prefs = readPrefs();
+      const state = readCoreState();
 
-      const prefs =
-        readPrefs();
-
-      const state =
-        readCoreState();
-
-      if (
-        Object.prototype.hasOwnProperty.call(
-          defaults,
-          key
-        )
-      ) {
-        const next =
-          !Boolean(
-            prefs[key]
-          );
-
-        prefs[key] =
-          next;
-
-        writePrefs(
-          prefs
-        );
-
-        syncPrefs(
-          prefs
-        );
-
-        updateToggleDom(
-          setting,
-          next
-        );
-
+      if (Object.prototype.hasOwnProperty.call(defaults, key)) {
+        const next = !Boolean(prefs[key]);
+        prefs[key] = next;
+        writePrefs(prefs);
+        syncPrefs(prefs);
+        updateToggleDom(setting, next);
       } else {
-        const current =
-          key === 'muted'
-            ? !Boolean(
-                state.muted
-              )
-            : Boolean(
-                state[key]
-              );
-
-        const next =
-          !current;
+        const current = key === 'muted'
+          ? !Boolean(state.muted)
+          : Boolean(state[key]);
+        const next = !current;
 
         setCoreSetting(
-          key === 'muted'
-            ? 'muted'
-            : key,
-          key === 'muted'
-            ? !next
-            : next
+          key === 'muted' ? 'muted' : key,
+          key === 'muted' ? !next : next,
         );
 
-        updateToggleDom(
-          setting,
-          next
-        );
+        updateToggleDom(setting, next);
       }
 
       return;
     }
-
 
     /* -------------------------------------------------------
        LANGUAGE
        ------------------------------------------------------- */
 
-    const language =
-      target.closest(
-        '[data-unified-language]'
-      );
+    const language = target.closest('[data-unified-language]');
 
     if (language) {
       event.preventDefault();
 
-      const code =
-        language.dataset.unifiedLanguage;
+      const code = language.dataset.unifiedLanguage;
 
       try {
-        localStorage.setItem(
-          'relay-runner-language',
-          code
-        );
+        localStorage.setItem('relay-runner-language', code);
       } catch {}
 
-      document.documentElement.lang =
-        code === 'exyu'
-          ? 'bs'
-          : code;
+      document.documentElement.lang = code === 'exyu' ? 'bs' : code;
 
       window.dispatchEvent(
-        new CustomEvent(
-          'relay-language-change',
-          {
-            detail: {
-              code
-            }
-          }
-        )
+        new CustomEvent('relay-language-change', {
+          detail: {
+            code,
+          },
+        }),
       );
 
-      const root =
-        language.closest(
-          '#pauseMenu'
-        ) ||
-        $('titlePanel');
+      const root = language.closest('#pauseMenu') || $('titlePanel');
 
-      const activeTab =
-        root
-          ?.querySelector(
-            '[data-pause-tab].is-active'
-          )
-          ?.dataset.pauseTab;
+      const activeTab = root?.querySelector('[data-pause-tab].is-active')?.dataset.pauseTab;
 
-      if (
-        root?.id === 'pauseMenu'
-      ) {
-        renderPause(
-          activeTab ||
-            'settings'
-        );
+      if (root?.id === 'pauseMenu') {
+        renderPause(activeTab || 'settings');
       } else {
-        renderOptions(
-          root
-        );
+        renderOptions(root);
       }
 
       return;
     }
 
-
     /* -------------------------------------------------------
        FULLSCREEN
        ------------------------------------------------------- */
 
-    const fullscreen =
-      target.closest(
-        '[data-unified-fullscreen]'
-      );
+    const fullscreen = target.closest('[data-unified-fullscreen]');
 
     if (fullscreen) {
       event.preventDefault();
@@ -2096,74 +1540,43 @@ import {
       return;
     }
 
-
     /* -------------------------------------------------------
        RESET UI
        ------------------------------------------------------- */
 
-    const resetPrefs =
-      target.closest(
-        '[data-unified-reset-preferences]'
-      );
+    const resetPrefs = target.closest('[data-unified-reset-preferences]');
 
     if (resetPrefs) {
       event.preventDefault();
 
-      writePrefs(
-        defaults
-      );
+      writePrefs(defaults);
 
-      syncPrefs(
-        defaults
-      );
+      syncPrefs(defaults);
 
-      const root =
-        resetPrefs.closest(
-          '#pauseMenu'
-        ) ||
-        $('titlePanel');
+      const root = resetPrefs.closest('#pauseMenu') || $('titlePanel');
 
-      const activeTab =
-        root
-          ?.querySelector(
-            '[data-pause-tab].is-active'
-          )
-          ?.dataset.pauseTab;
+      const activeTab = root?.querySelector('[data-pause-tab].is-active')?.dataset.pauseTab;
 
-      if (
-        root?.id ===
-        'pauseMenu'
-      ) {
-        renderPause(
-          activeTab ||
-            'settings'
-        );
+      if (root?.id === 'pauseMenu') {
+        renderPause(activeTab || 'settings');
       } else {
-        renderOptions(
-          root
-        );
+        renderOptions(root);
       }
 
       return;
     }
 
-
     /* -------------------------------------------------------
        RESET SAVE
        ------------------------------------------------------- */
 
-    const resetSave =
-      target.closest(
-        '[data-unified-reset-save]'
-      );
+    const resetSave = target.closest('[data-unified-reset-save]');
 
     if (resetSave) {
       event.preventDefault();
 
       try {
-        localStorage.removeItem(
-          'relay-runner-state'
-        );
+        localStorage.removeItem('relay-runner-state');
       } catch {}
 
       window.location.reload();
@@ -2172,62 +1585,31 @@ import {
     }
   };
 
-
   /* =========================================================
      INPUT HANDLER
      ========================================================= */
 
-  const handleInput = event => {
-    const input =
-      event.target instanceof
-      HTMLInputElement
-        ? event.target
-        : null;
+  const handleInput = (event) => {
+    const input = event.target instanceof HTMLInputElement ? event.target : null;
 
-    if (
-      !input?.matches(
-        '[data-unified-range]'
-      )
-    ) {
+    if (!input?.matches('[data-unified-range]')) {
       return;
     }
 
-    const key =
-      input.dataset.unifiedRange;
+    const key = input.dataset.unifiedRange;
 
-    const value =
-      Math.max(
-        0,
-        Math.min(
-          1,
-          Number(
-            input.value
-          ) || 0
-        )
-      );
+    const value = Math.max(0, Math.min(1, Number(input.value) || 0));
 
-    const label =
-      input
-        .closest(
-          '.relay-ui-range'
-        )
-        ?.querySelector(
-          `[data-unified-range-value="${key}"]`
-        );
+    const label = input
+      .closest('.relay-ui-range')
+      ?.querySelector(`[data-unified-range-value="${key}"]`);
 
     if (label) {
-      label.textContent =
-        `${Math.round(
-          value * 100
-        )}%`;
+      label.textContent = `${Math.round(value * 100)}%`;
     }
 
-    setCoreSetting(
-      key,
-      value
-    );
+    setCoreSetting(key, value);
   };
-
 
   /* =========================================================
      START
@@ -2236,66 +1618,36 @@ import {
   const start = () => {
     ensurePauseShell();
 
-    syncPrefs(
-      readPrefs()
-    );
+    syncPrefs(readPrefs());
 
-    document.addEventListener(
-      'click',
-      handleClick,
-      true
-    );
+    document.addEventListener('click', handleClick, true);
 
-    document.addEventListener(
-      'input',
-      handleInput,
-      true
-    );
+    document.addEventListener('input', handleInput, true);
 
-    window.addEventListener(
-      'resize',
-      ensurePauseShell,
-      {
-        passive: true
-      }
-    );
+    window.addEventListener('resize', ensurePauseShell, {
+      passive: true,
+    });
 
+    window.relayUnifiedCinematicUI = Object.freeze({
+      openOptions: openTitleOptions,
 
-    window.relayUnifiedCinematicUI =
-      Object.freeze({
-        openOptions:
-          openTitleOptions,
+      openFAQ: openFaq,
 
-        openFAQ:
-          openFaq,
+      openPause,
 
-        openPause,
-
-        renderPause
-      });
+      renderPause,
+    });
   };
-
 
   /* =========================================================
      DOM READY
      ========================================================= */
 
-  if (
-    document.readyState ===
-    'loading'
-  ) {
-    document.addEventListener(
-      'DOMContentLoaded',
-      start,
-      {
-        once: true
-      }
-    );
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, {
+      once: true,
+    });
   } else {
-    window.setTimeout(
-      start,
-      0
-    );
+    window.setTimeout(start, 0);
   }
-
 })();

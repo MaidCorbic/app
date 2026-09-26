@@ -1,580 +1,537 @@
 /* =========================================================
    RELAY RUNNER
-   GAMEPLAY KEYBOARD HUD V2
-   Tactical Mechanical Interface
-   Presentation-only / no gameplay ownership
+   GAMEPLAY KEYBOARD HUD V7
+   COMPACT 60% MECHANICAL KEYBOARD
    ========================================================= */
 
 #relay-gameplay-keyboard-hud {
+  --kb-width: 316px;
 
-  --kb-cyan: #38bdf8;
-  --kb-cyan-bright: #67e8f9;
-  --kb-gold: #ffd06e;
-  --kb-purple: #a78bfa;
+  --case-top: #20252a;
+  --case-mid: #111519;
+  --case-bottom: #07090c;
 
-  --kb-text: #f4f7fa;
-  --kb-muted: rgba(214,225,233,.68);
+  --key-top: #555d64;
+  --key-mid: #343a40;
+  --key-low: #181d21;
+
+  --key-edge: rgba(255, 255, 255, 0.13);
+
+  --text: #eef2f5;
+  --muted: rgba(220, 228, 235, 0.38);
+
+  --rgb: #38bdf8;
+  --rgb-hot: #67e8f9;
 
   position: fixed;
 
   left: 50%;
-  bottom: max(
-    9px,
-    calc(env(safe-area-inset-bottom, 0px) + 6px)
-  );
+  bottom: 8px;
+
+  width: var(--kb-width);
+  max-width: calc(100vw - 18px);
 
   transform: translateX(-50%);
 
   z-index: 3000;
 
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-
-  gap: 6px;
-
-  width: max-content;
-  max-width: calc(100vw - 20px);
-
-  padding: 8px 10px 9px;
-
-  box-sizing: border-box;
-
-  border: 1px solid rgba(56,189,248,.24);
-
-  border-radius: 13px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(12,19,27,.98) 0%,
-      rgba(5,10,16,.98) 55%,
-      rgba(2,6,11,.99) 100%
-    );
-
-  box-shadow:
-
-    inset 0 1px 0
-      rgba(255,255,255,.075),
-
-    inset 0 -1px 0
-      rgba(0,0,0,.8),
-
-    0 8px 26px
-      rgba(0,0,0,.62),
-
-    0 0 26px
-      rgba(56,189,248,.075);
-
-  backdrop-filter:
-    blur(11px)
-    saturate(1.18);
-
-  -webkit-backdrop-filter:
-    blur(11px)
-    saturate(1.18);
-
   pointer-events: none;
   user-select: none;
-
-  overflow: visible;
 }
 
-
 /* =========================================================
-   TOP TACTICAL LIGHT
-   ========================================================= */
-
-#relay-gameplay-keyboard-hud::before {
-
-  content: "";
-
-  position: absolute;
-
-  left: 12%;
-  right: 12%;
-
-  top: -1px;
-
-  height: 1px;
-
-  border-radius: 999px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(56,189,248,.85),
-      transparent
-    );
-
-  box-shadow:
-    0 0 14px rgba(56,189,248,.35);
-
-  pointer-events: none;
-}
-
-
-/* =========================================================
-   SUBTLE LOWER SHADOW / BASE
-   ========================================================= */
-
-#relay-gameplay-keyboard-hud::after {
-
-  content: "";
-
-  position: absolute;
-
-  left: 8%;
-  right: 8%;
-
-  bottom: -4px;
-
-  height: 4px;
-
-  border-radius: 0 0 999px 999px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(0,0,0,.72),
-      transparent
-    );
-
-  filter: blur(2px);
-
-  pointer-events: none;
-}
-
-
-/* =========================================================
-   HIDDEN STATE
+   HIDDEN
    ========================================================= */
 
 #relay-gameplay-keyboard-hud[hidden] {
-
   display: none !important;
 }
 
-
 /* =========================================================
-   KEY HOLDER
+   KEYBOARD CASE
    ========================================================= */
 
-.relay-keyboard-key {
-
+.relay-mech-keyboard {
   position: relative;
 
-  display: grid;
+  width: 100%;
 
-  justify-items: center;
-
-  gap: 4px;
-
-  min-width: 44px;
-
-  flex: 0 0 auto;
-}
-
-
-/* =========================================================
-   MECHANICAL KEYCAP
-   ========================================================= */
-
-.relay-keycap {
-
-  position: relative;
-
-  display: grid;
-  place-items: center;
-
-  width: 42px;
-  height: 34px;
+  padding: 8px 8px 10px;
 
   box-sizing: border-box;
 
-  border: 1px solid
-    rgba(210,225,235,.46);
+  border-radius: 11px;
+
+  background: linear-gradient(
+    180deg,
+    var(--case-top) 0%,
+    var(--case-mid) 55%,
+    var(--case-bottom) 100%
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.65),
+    0 3px 0 #030405,
+    0 8px 20px rgba(0, 0, 0, 0.52);
+}
+
+/* =========================================================
+   REAL KEYBOARD PLATE
+   ========================================================= */
+
+.relay-mech-keyboard::before {
+  content: '';
+
+  position: absolute;
+
+  left: 7px;
+  right: 7px;
+
+  top: 7px;
+  bottom: 7px;
 
   border-radius: 7px;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(67,77,87,.99) 0%,
-      rgba(43,51,60,.99) 48%,
-      rgba(17,22,28,1) 100%
-    );
+  background: #080b0e;
 
-  color: var(--kb-text);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.035),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.8);
+
+  z-index: 0;
+}
+
+/* =========================================================
+   SUBTLE RGB EDGE
+   ========================================================= */
+
+.relay-mech-keyboard::after {
+  content: '';
+
+  position: absolute;
+
+  left: 22px;
+  right: 22px;
+
+  bottom: 3px;
+
+  height: 1px;
+
+  border-radius: 50%;
+
+  background: var(--rgb);
+
+  box-shadow:
+    0 0 7px rgba(56, 189, 248, 0.7),
+    0 0 16px rgba(56, 189, 248, 0.25);
+
+  opacity: 0.5;
+}
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.relay-mech-topbar {
+  position: relative;
+
+  z-index: 2;
+
+  height: 5px;
+
+  margin: 0 2px 5px;
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  align-items: center;
+}
+
+/* No visible text */
+
+.relay-mech-brand,
+.relay-mech-status {
+  display: none;
+}
+
+/* =========================================================
+   STATUS LED
+   ========================================================= */
+
+.relay-mech-led {
+  width: 3px;
+  height: 3px;
+
+  border-radius: 50%;
+
+  background: var(--rgb-hot);
+
+  box-shadow: 0 0 5px rgba(103, 232, 249, 0.9);
+
+  opacity: 0.7;
+}
+
+/* =========================================================
+   ROW
+   ========================================================= */
+
+.relay-mech-row {
+  position: relative;
+
+  z-index: 2;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 3px;
+
+  margin-bottom: 4px;
+
+  padding: 2px 2px 3px;
+
+  border-radius: 5px;
+}
+
+.relay-mech-bottom-row {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   KEY CONTAINER
+   ========================================================= */
+
+.relay-mech-key {
+  position: relative;
+
+  flex: 1 1 0;
+
+  min-width: 0;
+
+  height: 32px;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: center;
+
+  padding-bottom: 3px;
+}
+
+/* =========================================================
+   KEYCAP
+   ========================================================= */
+
+.relay-mech-keycap {
+  position: relative;
+
+  width: 100%;
+  height: 29px;
+
+  display: grid;
+
+  place-items: center;
+
+  box-sizing: border-box;
+
+  border: 1px solid var(--key-edge);
+
+  border-radius: 4px;
+
+  background: linear-gradient(
+    180deg,
+    var(--key-top) 0%,
+    #40474e 12%,
+    var(--key-mid) 46%,
+    #252b30 72%,
+    var(--key-low) 100%
+  );
+
+  color: var(--text);
 
   font:
-    900 13px/1
-    ui-monospace,
+    900 9px/1 ui-monospace,
     SFMono-Regular,
     Menlo,
     Consolas,
     monospace;
 
-  letter-spacing: .04em;
-
-  text-shadow:
-    0 1px 2px rgba(0,0,0,.95),
-    0 0 7px rgba(255,255,255,.08);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
 
   box-shadow:
-
-    inset 0 1px 0
-      rgba(255,255,255,.19),
-
-    inset 0 -3px 0
-      rgba(0,0,0,.48),
-
-    0 3px 0
-      rgba(0,0,0,.84),
-
-    0 5px 11px
-      rgba(0,0,0,.42);
-
-  transform:
-    translateY(0)
-    scale(1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.19),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.25),
+    0 2px 0 #050608,
+    0 3px 4px rgba(0, 0, 0, 0.45);
 
   transition:
-    transform 80ms ease,
-    border-color 100ms ease,
-    box-shadow 100ms ease,
-    background 100ms ease;
+    transform 55ms ease,
+    box-shadow 55ms ease,
+    border-color 55ms ease;
 }
 
-
 /* =========================================================
-   KEY TOP REFLECTION
+   KEY TOP HIGHLIGHT
    ========================================================= */
 
-.relay-keycap::before {
-
-  content: "";
+.relay-mech-keycap::before {
+  content: '';
 
   position: absolute;
 
-  left: 5px;
-  right: 5px;
+  left: 3px;
+  right: 3px;
 
-  top: 4px;
+  top: 2px;
 
-  height: 1px;
+  height: 5px;
 
-  border-radius: 999px;
+  border-radius: 3px;
 
-  background:
-    rgba(255,255,255,.15);
-
-  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), transparent);
 }
 
-
 /* =========================================================
-   INNER KEY RIM
+   INNER KEY BORDER
    ========================================================= */
 
-.relay-keycap::after {
-
-  content: "";
+.relay-mech-keycap::after {
+  content: '';
 
   position: absolute;
 
-  inset: 4px;
+  inset: 3px;
 
-  border:
-    1px solid
-    rgba(255,255,255,.045);
+  border: 1px solid rgba(255, 255, 255, 0.025);
 
-  border-radius: 4px;
-
-  pointer-events: none;
+  border-radius: 2px;
 }
-
-
-/* =========================================================
-   ACTIVE / PRESSED
-   ========================================================= */
-
-.relay-keyboard-key.is-active .relay-keycap {
-
-  transform:
-    translateY(3px)
-    scale(.975);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(38,47,55,.99),
-      rgba(11,16,21,1)
-    );
-
-  border-color:
-    rgba(103,232,249,.95);
-
-  box-shadow:
-
-    inset 0 2px 5px
-      rgba(0,0,0,.58),
-
-    0 1px 0
-      rgba(0,0,0,.95),
-
-    0 0 17px
-      rgba(56,189,248,.38),
-
-    0 0 31px
-      rgba(56,189,248,.10);
-}
-
-
-/* =========================================================
-   E — INTERACTION
-   ========================================================= */
-
-.relay-keyboard-key[data-key="E"] .relay-keycap {
-
-  border-color:
-    rgba(255,208,110,.70);
-
-  box-shadow:
-
-    inset 0 1px 0
-      rgba(255,255,255,.12),
-
-    inset 0 -3px 0
-      rgba(0,0,0,.42),
-
-    0 3px 0
-      rgba(74,54,22,.64),
-
-    0 0 14px
-      rgba(255,208,110,.11);
-}
-
-.relay-keyboard-key[data-key="E"]
-.relay-key-label {
-
-  color:
-    rgba(255,208,110,.82);
-}
-
-.relay-keyboard-key[data-key="E"].is-active
-.relay-keycap {
-
-  border-color:
-    rgba(255,224,150,1);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(77,59,24,.99),
-      rgba(20,15,8,1)
-    );
-
-  box-shadow:
-
-    inset 0 2px 5px
-      rgba(0,0,0,.50),
-
-    0 1px 0
-      rgba(0,0,0,.95),
-
-    0 0 20px
-      rgba(255,208,110,.40),
-
-    0 0 34px
-      rgba(255,208,110,.12);
-}
-
-
-/* =========================================================
-   F — SPECIAL
-   ========================================================= */
-
-.relay-keyboard-key[data-key="F"] .relay-keycap {
-
-  border-color:
-    rgba(167,139,250,.70);
-
-  box-shadow:
-
-    inset 0 1px 0
-      rgba(255,255,255,.12),
-
-    inset 0 -3px 0
-      rgba(0,0,0,.42),
-
-    0 3px 0
-      rgba(47,33,78,.64),
-
-    0 0 14px
-      rgba(167,139,250,.11);
-}
-
-.relay-keyboard-key[data-key="F"]
-.relay-key-label {
-
-  color:
-    rgba(196,181,253,.82);
-}
-
-.relay-keyboard-key[data-key="F"].is-active
-.relay-keycap {
-
-  border-color:
-    rgba(196,181,253,1);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(55,39,79,.99),
-      rgba(17,11,27,1)
-    );
-
-  box-shadow:
-
-    inset 0 2px 5px
-      rgba(0,0,0,.50),
-
-    0 1px 0
-      rgba(0,0,0,.95),
-
-    0 0 20px
-      rgba(167,139,250,.40),
-
-    0 0 34px
-      rgba(167,139,250,.12);
-}
-
 
 /* =========================================================
    LABEL
    ========================================================= */
 
-.relay-key-label {
+.relay-mech-key-label {
+  position: absolute;
 
-  width: 58px;
+  bottom: -1px;
 
-  color:
-    var(--kb-muted);
+  color: var(--muted);
 
   font:
-    700 7px/1.1
-    ui-monospace,
+    700 3.5px/1 ui-monospace,
     SFMono-Regular,
     Menlo,
     Consolas,
     monospace;
 
-  letter-spacing: .075em;
-
-  text-align: center;
-
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
 
   white-space: nowrap;
 
-  text-shadow:
-    0 1px 2px rgba(0,0,0,.8);
+  opacity: 0.45;
 }
 
-
 /* =========================================================
-   HOME — HIDE GAMEPLAY KEYBOARD
+   RGB UNDER EACH KEY
    ========================================================= */
 
-body:has(#intro.home-v3:not(.hidden))
-#relay-gameplay-keyboard-hud,
+.relay-mech-key::after {
+  content: '';
 
-body:has(#intro.home-v3:not(.hidden))
-.relay-faction-dialogue {
+  position: absolute;
 
-  display: none !important;
+  left: 27%;
+  right: 27%;
 
-  visibility: hidden !important;
+  bottom: 1px;
 
-  opacity: 0 !important;
+  height: 1px;
 
-  pointer-events: none !important;
+  border-radius: 999px;
+
+  background: rgba(56, 189, 248, 0.22);
+
+  box-shadow: 0 0 4px rgba(56, 189, 248, 0.15);
 }
 
+/* =========================================================
+   PRESSED KEY
+   ========================================================= */
+
+.relay-mech-key.is-active .relay-mech-keycap {
+  transform: translateY(2px);
+
+  border-color: var(--rgb-hot);
+
+  background: linear-gradient(180deg, #46535c, #2c363d 48%, #12171b 100%);
+
+  box-shadow:
+    inset 0 4px 6px rgba(0, 0, 0, 0.58),
+    0 1px 0 #000,
+    0 0 7px rgba(56, 189, 248, 0.85),
+    0 0 16px rgba(56, 189, 248, 0.27);
+}
 
 /* =========================================================
-   TABLET / SMALL DESKTOP
+   PRESSED RGB
+   ========================================================= */
+
+.relay-mech-key.is-active::after {
+  background: var(--rgb-hot);
+
+  box-shadow:
+    0 0 6px rgba(103, 232, 249, 0.95),
+    0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+/* =========================================================
+   W — PRIMARY
+   ========================================================= */
+
+.relay-mech-key[data-key='W'] .relay-mech-keycap {
+  border-color: rgba(103, 232, 249, 0.3);
+}
+
+/* =========================================================
+   E — ACTION
+   ========================================================= */
+
+.relay-mech-key[data-key='E'] .relay-mech-keycap {
+  border-color: rgba(250, 204, 21, 0.3);
+}
+
+.relay-mech-key[data-key='E'].is-active .relay-mech-keycap {
+  border-color: #fde047;
+
+  box-shadow:
+    inset 0 4px 6px rgba(0, 0, 0, 0.58),
+    0 0 8px rgba(250, 204, 21, 0.8),
+    0 0 17px rgba(250, 204, 21, 0.28);
+}
+
+/* =========================================================
+   F — FLIGHT
+   ========================================================= */
+
+.relay-mech-key[data-key='F'] .relay-mech-keycap {
+  border-color: rgba(167, 139, 250, 0.32);
+}
+
+.relay-mech-key[data-key='F'].is-active .relay-mech-keycap {
+  border-color: #c4b5fd;
+
+  box-shadow:
+    inset 0 4px 6px rgba(0, 0, 0, 0.58),
+    0 0 8px rgba(167, 139, 250, 0.8),
+    0 0 17px rgba(167, 139, 250, 0.28);
+}
+
+/* =========================================================
+   SPACE
+   ========================================================= */
+
+.relay-mech-key[data-key='SPACE'] {
+  flex: 3.2 1 0;
+}
+
+.relay-mech-key[data-key='SPACE'] .relay-mech-keycap {
+  font-size: 6px;
+
+  letter-spacing: 0.14em;
+}
+
+/* =========================================================
+   SHIFT
+   ========================================================= */
+
+.relay-mech-key[data-key='SHIFT'] {
+  flex: 1.5 1 0;
+}
+
+/* =========================================================
+   CTRL
+   ========================================================= */
+
+.relay-mech-key[data-key='CTRL'] {
+  flex: 1.15 1 0;
+}
+
+/* =========================================================
+   ESC
+   ========================================================= */
+
+.relay-mech-key[data-key='ESC'] {
+  flex: 1.1 1 0;
+}
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media (min-width: 1100px) {
+  #relay-gameplay-keyboard-hud {
+    --kb-width: 326px;
+
+    bottom: 9px;
+  }
+}
+
+/* =========================================================
+   SMALL DESKTOP / TABLET
    ========================================================= */
 
 @media (max-width: 900px) and (min-width: 701px) {
-
   #relay-gameplay-keyboard-hud {
+    --kb-width: 292px;
 
-    gap: 4px;
-
-    padding:
-      7px 8px 8px;
-
-    border-radius: 11px;
+    bottom: 7px;
   }
 
-  .relay-keyboard-key {
+  .relay-mech-keycap {
+    height: 27px;
 
-    min-width: 40px;
-
-    gap: 3px;
+    font-size: 8px;
   }
 
-  .relay-keycap {
-
-    width: 37px;
-    height: 31px;
-
-    border-radius: 6px;
-
-    font-size: 11px;
+  .relay-mech-key {
+    height: 30px;
   }
 
-  .relay-key-label {
-
-    width: 52px;
-
-    font-size: 6.5px;
+  .relay-mech-key-label {
+    display: none;
   }
 }
-
 
 /* =========================================================
-   MOBILE — COMPLETELY HIDDEN
+   MOBILE
    ========================================================= */
 
-@media (max-width: 700px),
-       (hover: none) and (pointer: coarse) {
-
+@media (max-width: 700px), (hover: none) and (pointer: coarse) {
   #relay-gameplay-keyboard-hud {
-
     display: none !important;
-
-    visibility: hidden !important;
-
-    opacity: 0 !important;
-
-    pointer-events: none !important;
   }
 }
 
+/* =========================================================
+   HOME
+   ========================================================= */
+
+body:has(#intro.home-v3:not(.hidden)) #relay-gameplay-keyboard-hud {
+  display: none !important;
+}
 
 /* =========================================================
    REDUCED MOTION
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-
-  .relay-keycap {
-
+  .relay-mech-keycap {
     transition: none !important;
   }
 }
