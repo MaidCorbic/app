@@ -4885,6 +4885,95 @@
 }
 
 /* =========================================================
+   HOME V5 // TUTORIAL MECHANICS POLISH
+   ========================================================= */
+
+#titlePanel .tutorial-status-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:34px;
+  padding:7px 11px;
+  border:1px solid rgba(56,189,248,.22);
+  background:linear-gradient(90deg,rgba(3,14,23,.96),rgba(7,31,45,.82));
+  box-shadow:inset 0 0 18px rgba(56,189,248,.035);
+}
+
+#titlePanel .tutorial-status-bar span{
+  color:rgba(175,224,239,.62);
+  font:800 7px/1 'Orbitron',Arial,sans-serif;
+  letter-spacing:.16em;
+}
+
+#titlePanel .tutorial-status-bar strong{
+  padding:5px 8px;
+  border:1px solid rgba(57,255,136,.32);
+  background:rgba(57,255,136,.055);
+  color:#39ff88;
+  font:900 7px/1 'Orbitron',Arial,sans-serif;
+  letter-spacing:.14em;
+  box-shadow:0 0 12px rgba(57,255,136,.08);
+}
+
+#titlePanel .tutorial-quick-card{
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease;
+}
+
+#titlePanel .tutorial-quick-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(103,232,249,.46)!important;
+  background:linear-gradient(145deg,rgba(10,37,55,.98),rgba(3,11,19,.9))!important;
+  box-shadow:inset 0 0 22px rgba(56,189,248,.035),0 14px 30px rgba(0,0,0,.28),0 0 20px rgba(56,189,248,.08)!important;
+}
+
+#titlePanel .tutorial-quick-card:nth-child(n+4)::after{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:max-content;
+  margin-bottom:2px;
+  padding:7px 10px;
+  border:1px solid rgba(56,189,248,.28);
+  border-radius:6px;
+  background:rgba(56,189,248,.06);
+  color:#e9fdff;
+  font:900 10px/1 'Orbitron',Arial,sans-serif;
+  letter-spacing:.08em;
+}
+
+#titlePanel .tutorial-quick-card:nth-child(4)::after{content:'[ E ]';}
+#titlePanel .tutorial-quick-card:nth-child(5)::after{content:'[ Q ]';border-color:rgba(139,92,246,.4);background:rgba(139,92,246,.08);}
+#titlePanel .tutorial-quick-card:nth-child(6)::after{content:'[ ESC ]';}
+
+#titlePanel .tutorial-quick-card span{
+  max-width:32ch;
+}
+
+@media(max-width:700px){
+  #titlePanel .tutorial-status-bar{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:7px;
+  }
+
+  #titlePanel .tutorial-quick-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  #titlePanel .tutorial-quick-card{
+    min-height:132px!important;
+    padding:12px!important;
+  }
+}
+
+@media(max-width:430px){
+  #titlePanel .tutorial-quick-grid{
+    grid-template-columns:1fr!important;
+  }
+}
+
+/* =========================================================
    HOME V5 // TUTORIAL COMMAND UI V3
    ORBITRON / KEYBOARD PROTOCOL / HIGH VISIBILITY
    ========================================================= */
