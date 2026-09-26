@@ -3355,11 +3355,12 @@ $('closeAbilityUnlock').onclick = () => $('abilityUnlock').classList.add('hidden
 applyRuntimeSettings();
 renderHomeProgress();
 
-const shouldDeferInitialRunnerPreboot = detectTouchDevice();
-
-if (!shouldDeferInitialRunnerPreboot) {
-  launch(0, true);
-}
+/*
+ * Do not preboot RunnerScene behind Home on initial load.
+ * Starting the scene before the user enters gameplay can expose gameplay-only
+ * overlays (including faction dialogue) over the Home screen and wastes work.
+ * The canonical #start handoff starts the scene when gameplay is actually entered.
+ */
 
 function openWorldMapSafe() {
   game.scene.stop('runner');
