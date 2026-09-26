@@ -128,6 +128,14 @@ const ANIMATIONS = {
 // ------------------------------------------------------------
 
 function frameKey(folder, index) {
+  // Keep Phaser texture keys independent from the source filename.
+  // Source files are named like:
+  //   vagabond-idle_000.png
+  //   vagabond-run_000.png
+  //
+  // The previous implementation incorrectly searched for:
+  //   vagabond-vagabond-idle-000.png
+  // which does not exist.
   return `vagabond-${folder}-${String(index).padStart(3, '0')}`;
 }
 
@@ -135,20 +143,25 @@ function frameKey(folder, index) {
 // Asset URL
 // ------------------------------------------------------------
 
+function folderAssets(folder) {
+  return Object.entries(VAGABOND_ASSETS)
+    .filter(([path]) => path.includes(`/vagabond-final/${folder}/`))
+    .sort(([a], [b]) =>
+      a.localeCompare(b, undefined, { numeric: true }),
+    );
+}
+
 function frameUrl(folder, index) {
-  const key = frameKey(folder, index);
+  const assets = folderAssets(folder);
+  const entry = assets[index];
 
-  const match = Object.entries(VAGABOND_ASSETS).find(([path]) =>
-    path.endsWith(`/${folder}/${key}.png`),
-  );
-
-  if (!match) {
-    console.error('[Vagabond] PNG not found:', folder, key);
+  if (!entry) {
+    console.error('[Vagabond] PNG not found:', folder, index);
 
     return null;
   }
 
-  return match[1];
+  return entry[1];
 }
 
 // ============================================================
