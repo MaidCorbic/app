@@ -1453,6 +1453,42 @@ import {
     }
 
     /* -------------------------------------------------------
+       SETTINGS TOGGLES
+       ------------------------------------------------------- */
+
+    const setting = target.closest('[data-unified-setting]');
+
+    if (setting) {
+      event.preventDefault();
+
+      const key = setting.dataset.unifiedSetting;
+      const prefs = readPrefs();
+      const state = readCoreState();
+
+      if (Object.prototype.hasOwnProperty.call(defaults, key)) {
+        const next = !Boolean(prefs[key]);
+        prefs[key] = next;
+        writePrefs(prefs);
+        syncPrefs(prefs);
+        updateToggleDom(setting, next);
+      } else {
+        const current = key === 'muted'
+          ? !Boolean(state.muted)
+          : Boolean(state[key]);
+        const next = !current;
+
+        setCoreSetting(
+          key === 'muted' ? 'muted' : key,
+          key === 'muted' ? !next : next,
+        );
+
+        updateToggleDom(setting, next);
+      }
+
+      return;
+    }
+
+    /* -------------------------------------------------------
        LANGUAGE
        ------------------------------------------------------- */
 
