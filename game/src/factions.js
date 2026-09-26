@@ -7,13 +7,7 @@ export const factions = Object.freeze({
     id: 'HELIX_SECURITY',
     name: 'HELIX SECURITY',
     role: 'Corporate security and relay enforcement.',
-    enemyTypes: Object.freeze([
-      'enemy-runner',
-      'security',
-      'guard',
-      'sentinel-boss',
-      'apex-boss',
-    ]),
+    enemyTypes: Object.freeze(['enemy-runner', 'security', 'guard', 'sentinel-boss', 'apex-boss']),
     radioStyle: 'controlled',
   }),
 
@@ -21,11 +15,7 @@ export const factions = Object.freeze({
     id: 'FERAL_THREATS',
     name: 'FERAL THREATS',
     role: 'Uncontrolled hostile fauna occupying live routes.',
-    enemyTypes: Object.freeze([
-      'chicken',
-      'dino',
-      'dino-boss',
-    ]),
+    enemyTypes: Object.freeze(['chicken', 'dino', 'dino-boss']),
     radioStyle: 'instinctive',
   }),
 
@@ -33,9 +23,7 @@ export const factions = Object.freeze({
     id: 'SKY_RAIDERS',
     name: 'SKY RAIDERS',
     role: 'Aerial hostile units controlling exposed air lanes.',
-    enemyTypes: Object.freeze([
-      'invader',
-    ]),
+    enemyTypes: Object.freeze(['invader']),
     radioStyle: 'tactical',
   }),
 
@@ -43,10 +31,7 @@ export const factions = Object.freeze({
     id: 'GRID_GHOSTS',
     name: 'GRID GHOSTS',
     role: 'Unknown relay-born entities operating through the network.',
-    enemyTypes: Object.freeze([
-      'alien-ground',
-      'storm-boss',
-    ]),
+    enemyTypes: Object.freeze(['alien-ground', 'storm-boss']),
     radioStyle: 'distorted',
   }),
 
@@ -60,14 +45,11 @@ export const factions = Object.freeze({
   }),
 });
 
-const enemyFactionPairs = Object.entries(factions)
-  .flatMap(([factionId, faction]) =>
-    faction.enemyTypes.map((enemyType) => [enemyType, factionId]),
-  );
-
-export const enemyFactionByType = Object.freeze(
-  Object.fromEntries(enemyFactionPairs),
+const enemyFactionPairs = Object.entries(factions).flatMap(([factionId, faction]) =>
+  faction.enemyTypes.map((enemyType) => [enemyType, factionId]),
 );
+
+export const enemyFactionByType = Object.freeze(Object.fromEntries(enemyFactionPairs));
 
 export function getFactionForEnemyType(enemyType) {
   return factions[enemyFactionByType[enemyType]] || null;

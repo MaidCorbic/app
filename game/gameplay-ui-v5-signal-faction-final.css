@@ -1,233 +1,764 @@
-/* RUNNER RELAY — SIGNAL / FACTION FINAL PRESENTATION TUNE
- * Presentation-only. No gameplay, progression, save, audio or input ownership.
+/* RUNNER RELAY — SIGNAL / FACTION FINAL PRESENTATION
+ * Gameplay presentation only.
+ * No gameplay, progression, save, audio or input ownership.
  */
 
 /* =========================================================
-   SIGNALS HUD — COMPACT / FUNCTIONAL / MOBILE FRIENDLY
-   Number first, collect label underneath, progress below.
+   SIGNAL HUD
    ========================================================= */
 
 #play .hud-progress.hud-run {
-  box-sizing:border-box !important;
-  width:clamp(126px,14vw,158px) !important;
-  min-width:0 !important;
-  min-height:0 !important;
-  padding:9px 11px 10px !important;
-  display:grid !important;
-  grid-template-columns:1fr !important;
-  grid-template-rows:auto auto 5px !important;
-  row-gap:4px !important;
-  align-items:center !important;
-  justify-items:stretch !important;
-  text-align:center !important;
-  border-radius:10px !important;
+  box-sizing: border-box !important;
+
+  width: clamp(126px, 14vw, 158px) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  padding: 9px 11px 10px !important;
+
+  display: grid !important;
+
+  grid-template-columns: 1fr !important;
+  grid-template-rows: auto auto 5px !important;
+
+  row-gap: 4px !important;
+
+  align-items: center !important;
+  justify-items: stretch !important;
+
+  text-align: center !important;
+
+  border-radius: 7px !important;
+
+  border: 1px solid rgba(91, 215, 245, 0.16) !important;
+
+  background: linear-gradient(145deg, rgba(9, 26, 38, 0.94), rgba(3, 11, 18, 0.97)) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 10px 28px rgba(0, 0, 0, 0.28),
+    0 0 20px rgba(56, 189, 248, 0.025) !important;
 }
+
+/* signal number */
 
 #play .hud-progress.hud-run > span#signalCount {
-  grid-column:1 !important;
-  grid-row:1 !important;
-  display:block !important;
-  width:100% !important;
-  margin:0 !important;
-  text-align:center !important;
-  font-size:20px !important;
-  line-height:1 !important;
-  font-weight:950 !important;
-  letter-spacing:.08em !important;
-  font-variant-numeric:tabular-nums !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+
+  display: block !important;
+
+  width: 100% !important;
+
+  margin: 0 !important;
+
+  text-align: center !important;
+
+  font-size: 20px !important;
+  line-height: 1 !important;
+
+  font-weight: 950 !important;
+
+  letter-spacing: 0.08em !important;
+
+  font-variant-numeric: tabular-nums !important;
+
+  color: #e9fbff !important;
+
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.24) !important;
 }
+
+/* SIGNALS label */
 
 #play .hud-progress.hud-run > small {
-  grid-column:1 !important;
-  grid-row:2 !important;
-  display:block !important;
-  width:100% !important;
-  margin:0 !important;
-  text-align:center !important;
-  font-size:8px !important;
-  line-height:1 !important;
-  font-weight:900 !important;
-  letter-spacing:.18em !important;
-  white-space:nowrap !important;
-  opacity:.78 !important;
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+
+  display: block !important;
+
+  width: 100% !important;
+
+  margin: 0 !important;
+
+  text-align: center !important;
+
+  font-size: 8px !important;
+  line-height: 1 !important;
+
+  font-weight: 900 !important;
+
+  letter-spacing: 0.18em !important;
+
+  white-space: nowrap !important;
+
+  opacity: 0.82 !important;
+
+  color: #8bb8c7 !important;
 }
 
+/* progress */
+
 #play .hud-progress.hud-run > div:not(.hud-vital) {
-  grid-column:1 !important;
-  grid-row:3 !important;
-  width:100% !important;
-  height:5px !important;
-  margin:1px 0 0 !important;
-  overflow:hidden !important;
-  border-radius:999px !important;
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+
+  width: 100% !important;
+  height: 5px !important;
+
+  margin: 1px 0 0 !important;
+
+  overflow: hidden !important;
+
+  border-radius: 2px !important;
+
+  background: rgba(255, 255, 255, 0.045) !important;
+
+  border: 1px solid rgba(125, 211, 252, 0.08) !important;
 }
 
 #play .hud-progress.hud-run > div:not(.hud-vital) > i#progress {
-  display:block !important;
-  max-width:100% !important;
-  height:100% !important;
-  margin:0 !important;
-  border-radius:inherit !important;
-  transform:none !important;
-  transition:width 220ms cubic-bezier(.22,.61,.36,1) !important;
+  display: block !important;
+
+  max-width: 100% !important;
+
+  height: 100% !important;
+
+  margin: 0 !important;
+
+  border-radius: inherit !important;
+
+  transform: none !important;
+
+  transition: width 220ms cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+
+  background: linear-gradient(90deg, #22c7ef, #61e7ff) !important;
+
+  box-shadow: 0 0 9px rgba(56, 189, 248, 0.55) !important;
 }
 
-/* Energy may be hidden by the gameplay runtime; when enabled it gets its own
-   compact row without affecting Signals layout. */
+/* energy */
+
 #play .hud-progress.hud-run > .hud-vital.energy {
-  grid-column:1 !important;
-  grid-row:4 !important;
-  width:100% !important;
-  margin:3px 0 0 !important;
+  grid-column: 1 !important;
+  grid-row: 4 !important;
+
+  width: 100% !important;
+
+  margin: 3px 0 0 !important;
 }
 
 #play .hud-progress.hud-run > .hud-vital.energy[hidden] {
-  display:none !important;
+  display: none !important;
 }
 
 #play .hud-progress.hud-run .hud-vital.energy > span {
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  gap:8px !important;
-  margin:0 0 3px !important;
-  text-align:left !important;
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  gap: 8px !important;
+
+  margin: 0 0 3px !important;
+
+  text-align: left !important;
 }
 
 #play .hud-progress.hud-run .hud-vital.energy small {
-  font-size:7px !important;
-  line-height:1 !important;
-  letter-spacing:.14em !important;
+  font-size: 7px !important;
+  line-height: 1 !important;
+
+  letter-spacing: 0.14em !important;
 }
 
 #play .hud-progress.hud-run .hud-vital.energy b {
-  font-size:8px !important;
-  line-height:1 !important;
-  font-variant-numeric:tabular-nums !important;
+  font-size: 8px !important;
+  line-height: 1 !important;
+
+  font-variant-numeric: tabular-nums !important;
 }
 
 #play .hud-progress.hud-run .hud-vital.energy > div {
-  width:100% !important;
-  height:4px !important;
-  margin:0 !important;
-  overflow:hidden !important;
-  border-radius:999px !important;
+  width: 100% !important;
+  height: 4px !important;
+
+  margin: 0 !important;
+
+  overflow: hidden !important;
+
+  border-radius: 2px !important;
 }
 
 #play .hud-progress.hud-run .hud-vital.energy #energyBar {
-  display:block !important;
-  width:100% !important;
-  height:100% !important;
-  border-radius:inherit !important;
-  transform:none !important;
-  transition:width 180ms ease !important;
-}
+  display: block !important;
 
-@media (max-width:760px){
-  #play .hud-progress.hud-run {
-    width:126px !important;
-    padding:8px 10px 9px !important;
-    grid-template-rows:auto auto 4px !important;
-    row-gap:3px !important;
-    border-radius:9px !important;
-  }
+  width: 100% !important;
+  height: 100% !important;
 
-  #play .hud-progress.hud-run > span#signalCount { font-size:18px !important; }
-  #play .hud-progress.hud-run > small { font-size:7px !important; letter-spacing:.15em !important; }
-  #play .hud-progress.hud-run > div:not(.hud-vital) { height:4px !important; }
-  #play .hud-progress.hud-run .hud-vital.energy b { font-size:7px !important; }
-}
+  border-radius: inherit !important;
 
-@media (max-width:390px){
-  #play .hud-progress.hud-run {
-    width:118px !important;
-    padding:7px 9px 8px !important;
-  }
+  transform: none !important;
 
-  #play .hud-progress.hud-run > span#signalCount { font-size:17px !important; }
-  #play .hud-progress.hud-run > small { font-size:6px !important; }
+  transition: width 180ms ease !important;
 }
 
 /* =========================================================
-   FACTION — SMALLER / CLEANER / NO BOTTOM SCROLL SLIDER
+   FACTION TRANSMISSION
    ========================================================= */
 
 #play .relay-faction-dialogue {
-  scrollbar-width:none !important;
-  -ms-overflow-style:none !important;
-  max-width:calc(100vw - 24px) !important;
-  box-sizing:border-box !important;
+  position: relative !important;
+
+  box-sizing: border-box !important;
+
+  width: min(560px, calc(100vw - 28px)) !important;
+
+  max-width: calc(100vw - 28px) !important;
+
+  padding: 16px 18px 14px !important;
+
+  overflow: hidden !important;
+
+  scrollbar-width: none !important;
+
+  -ms-overflow-style: none !important;
+
+  border: 1px solid rgba(86, 218, 248, 0.28) !important;
+
+  border-radius: 6px !important;
+
+  background: linear-gradient(
+    145deg,
+    rgba(10, 29, 42, 0.975) 0%,
+    rgba(5, 16, 25, 0.985) 48%,
+    rgba(2, 9, 15, 0.99) 100%
+  ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    inset 0 0 35px rgba(56, 189, 248, 0.035),
+    0 18px 45px rgba(0, 0, 0, 0.48),
+    0 0 25px rgba(56, 189, 248, 0.045) !important;
+
+  color: #e9faff !important;
 }
 
 #play .relay-faction-dialogue::-webkit-scrollbar {
-  width:0 !important;
-  height:0 !important;
-  display:none !important;
+  width: 0 !important;
+  height: 0 !important;
+
+  display: none !important;
 }
 
-#play .relay-faction-dialogue::after { display:none !important; }
+/* =========================================================
+   TACTICAL CORNERS
+   ========================================================= */
 
-#play .relay-faction-dialogue .relay-faction-footer {
-  border-top:0 !important;
-  margin-top:6px !important;
-  padding-top:3px !important;
+#play .relay-faction-dialogue::before {
+  content: '' !important;
+
+  position: absolute !important;
+
+  left: 0 !important;
+  top: 0 !important;
+
+  width: 95px !important;
+  height: 2px !important;
+
+  background: linear-gradient(90deg, #52e3ff, rgba(82, 227, 255, 0.25), transparent) !important;
+
+  box-shadow: 0 0 10px rgba(82, 227, 255, 0.5) !important;
+
+  pointer-events: none !important;
+}
+
+#play .relay-faction-dialogue::after {
+  content: '' !important;
+
+  position: absolute !important;
+
+  right: 0 !important;
+  bottom: 0 !important;
+
+  width: 55px !important;
+  height: 1px !important;
+
+  background: linear-gradient(90deg, transparent, rgba(82, 227, 255, 0.55)) !important;
+
+  box-shadow: 0 0 8px rgba(82, 227, 255, 0.25) !important;
+
+  pointer-events: none !important;
+}
+
+/* =========================================================
+   FACTION KICKER
+   ========================================================= */
+
+#play .relay-faction-dialogue .relay-faction-kicker {
+  display: flex !important;
+
+  align-items: center !important;
+
+  gap: 8px !important;
+
+  margin: 0 0 7px !important;
+
+  color: #65defb !important;
+
+  font-family: 'Orbitron', 'Rajdhani', sans-serif !important;
+
+  font-size: 7px !important;
+
+  font-weight: 900 !important;
+
+  line-height: 1.2 !important;
+
+  letter-spacing: 0.2em !important;
+
+  text-transform: uppercase !important;
 }
 
 #play .relay-faction-dialogue .relay-faction-kicker::before {
-  content:"◈" !important;
-  width:auto !important;
-  height:auto !important;
-  flex:0 0 auto !important;
-  border:0 !important;
-  border-radius:0 !important;
-  box-shadow:none !important;
-  font:900 11px/1 system-ui,sans-serif !important;
-  color:#8df4ff !important;
-  animation:none !important;
+  content: '◈' !important;
+
+  width: auto !important;
+  height: auto !important;
+
+  flex: 0 0 auto !important;
+
+  border: 0 !important;
+
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+
+  font:
+    900 10px/1 system-ui,
+    sans-serif !important;
+
+  color: #8df4ff !important;
+
+  animation: none !important;
+
+  text-shadow: 0 0 8px rgba(141, 244, 255, 0.65) !important;
 }
 
-@media (min-width:761px){
+/* =========================================================
+   FACTION NAME
+   ========================================================= */
+
+#play .relay-faction-dialogue .relay-faction-name {
+  display: block !important;
+
+  width: 100% !important;
+
+  margin: 0 0 9px !important;
+
+  color: #f1fbff !important;
+
+  font-family: 'Orbitron', 'Rajdhani', sans-serif !important;
+
+  font-size: 15px !important;
+
+  font-weight: 950 !important;
+
+  line-height: 1.15 !important;
+
+  letter-spacing: 0.055em !important;
+
+  text-transform: uppercase !important;
+
+  text-shadow:
+    0 0 14px rgba(56, 189, 248, 0.13),
+    0 4px 15px rgba(0, 0, 0, 0.35) !important;
+
+  white-space: normal !important;
+
+  overflow: visible !important;
+}
+
+/* =========================================================
+   FACTION DESCRIPTION
+   ========================================================= */
+
+#play .relay-faction-dialogue .relay-faction-text {
+  display: block !important;
+
+  width: 100% !important;
+
+  max-width: 58ch !important;
+
+  min-height: 0 !important;
+
+  margin: 0 !important;
+
+  color: #b8cdd5 !important;
+
+  font-family: 'Rajdhani', Arial, sans-serif !important;
+
+  font-size: 14px !important;
+
+  font-weight: 600 !important;
+
+  line-height: 1.48 !important;
+
+  letter-spacing: 0.025em !important;
+
+  white-space: normal !important;
+
+  overflow: visible !important;
+
+  overflow-wrap: anywhere !important;
+
+  text-wrap: pretty !important;
+}
+
+/* highlighted keywords */
+
+#play .relay-faction-dialogue .relay-faction-keyword {
+  color: #7deaff !important;
+
+  font-weight: 800 !important;
+
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.28) !important;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+#play .relay-faction-dialogue .relay-faction-footer {
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: space-between !important;
+
+  gap: 10px !important;
+
+  margin-top: 13px !important;
+
+  padding-top: 10px !important;
+
+  border-top: 1px solid rgba(111, 190, 210, 0.09) !important;
+}
+
+/* =========================================================
+   FACTION ACTION BUTTONS
+   ========================================================= */
+
+#play .relay-faction-dialogue button {
+  position: relative !important;
+
+  min-width: 105px !important;
+
+  min-height: 34px !important;
+
+  padding: 7px 13px !important;
+
+  box-sizing: border-box !important;
+
+  border: 1px solid rgba(78, 211, 244, 0.27) !important;
+
+  border-radius: 3px !important;
+
+  background: linear-gradient(135deg, rgba(15, 44, 59, 0.94), rgba(6, 20, 29, 0.98)) !important;
+
+  color: #c9f5ff !important;
+
+  font-family: 'Orbitron', 'Rajdhani', sans-serif !important;
+
+  font-size: 7px !important;
+
+  font-weight: 900 !important;
+
+  line-height: 1.2 !important;
+
+  letter-spacing: 0.11em !important;
+
+  text-transform: uppercase !important;
+
+  cursor: pointer !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 6px 16px rgba(0, 0, 0, 0.22) !important;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease !important;
+}
+
+#play .relay-faction-dialogue button::before {
+  content: '' !important;
+
+  position: absolute !important;
+
+  left: 0 !important;
+  top: 7px !important;
+
+  width: 2px !important;
+  height: calc(100% - 14px) !important;
+
+  background: #4ddfff !important;
+
+  box-shadow: 0 0 7px rgba(77, 223, 255, 0.65) !important;
+
+  pointer-events: none !important;
+}
+
+#play .relay-faction-dialogue button:hover {
+  transform: translateY(-1px) !important;
+
+  border-color: rgba(101, 231, 255, 0.65) !important;
+
+  background: linear-gradient(135deg, rgba(20, 59, 77, 0.98), rgba(7, 25, 36, 0.99)) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    0 9px 20px rgba(0, 0, 0, 0.32),
+    0 0 16px rgba(56, 189, 248, 0.08) !important;
+}
+
+#play .relay-faction-dialogue button:active {
+  transform: translateY(0) scale(0.985) !important;
+}
+
+#play .relay-faction-dialogue button:focus-visible {
+  outline: 1px solid rgba(125, 234, 255, 0.8) !important;
+
+  outline-offset: 2px !important;
+}
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media (min-width: 761px) {
   #play .relay-faction-dialogue {
-    width:min(520px,40vw) !important;
-    max-height:160px !important;
-    bottom:14px !important;
-    padding:10px 12px 8px !important;
-    border-radius:6px !important;
+    width: min(560px, 42vw) !important;
+
+    max-height: min(230px, 30vh) !important;
+
+    bottom: 18px !important;
+
+    padding: 16px 18px 14px !important;
   }
 
-  #play .relay-faction-dialogue .relay-faction-kicker { margin-bottom:3px !important; font-size:8px !important; }
-  #play .relay-faction-dialogue .relay-faction-name { margin-bottom:5px !important; font-size:9px !important; }
-  #play .relay-faction-dialogue .relay-faction-text { max-width:50ch !important; min-height:0 !important; font-size:13px !important; line-height:1.3 !important; }
-  #play .relay-faction-dialogue .relay-faction-footer { gap:7px !important; }
-  #play .relay-faction-dialogue button { min-width:92px !important; min-height:32px !important; padding:6px 10px !important; font-size:8px !important; }
-}
+  #play .relay-faction-dialogue .relay-faction-kicker {
+    font-size: 7px !important;
 
-@media (max-width:760px){
-  #play .relay-faction-dialogue {
-    width:calc(100vw - 30px) !important;
-    max-height:28dvh !important;
-    bottom:calc(132px + env(safe-area-inset-bottom)) !important;
-    padding:9px 10px 7px !important;
-    border-radius:6px !important;
+    margin-bottom: 7px !important;
   }
 
-  #play .relay-faction-dialogue .relay-faction-kicker { margin-bottom:3px !important; font-size:8px !important; letter-spacing:.12em !important; }
-  #play .relay-faction-dialogue .relay-faction-name { margin-bottom:4px !important; font-size:8px !important; }
-  #play .relay-faction-dialogue .relay-faction-text { min-height:0 !important; max-width:none !important; font-size:12px !important; line-height:1.3 !important; }
-  #play .relay-faction-dialogue .relay-faction-footer { gap:5px !important; margin-top:4px !important; padding-top:1px !important; }
-  #play .relay-faction-dialogue button { min-height:32px !important; padding:6px 9px !important; font-size:8px !important; }
-}
+  #play .relay-faction-dialogue .relay-faction-name {
+    font-size: 15px !important;
 
-@media (max-width:390px){
-  #play .relay-faction-dialogue {
-    width:calc(100vw - 20px) !important;
-    max-height:26dvh !important;
-    bottom:calc(122px + env(safe-area-inset-bottom)) !important;
-    padding:8px 9px 6px !important;
+    margin-bottom: 9px !important;
   }
 
   #play .relay-faction-dialogue .relay-faction-text {
-    font-size:11px !important;
-    line-height:1.28 !important;
+    font-size: 14px !important;
+
+    line-height: 1.48 !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-footer {
+    gap: 9px !important;
+
+    margin-top: 13px !important;
+
+    padding-top: 10px !important;
+  }
+
+  #play .relay-faction-dialogue button {
+    min-width: 105px !important;
+
+    min-height: 34px !important;
+
+    padding: 7px 13px !important;
+
+    font-size: 7px !important;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 760px) {
+  #play .hud-progress.hud-run {
+    width: 126px !important;
+
+    padding: 8px 10px 9px !important;
+
+    grid-template-rows: auto auto 4px !important;
+
+    row-gap: 3px !important;
+
+    border-radius: 6px !important;
+  }
+
+  #play .hud-progress.hud-run > span#signalCount {
+    font-size: 18px !important;
+  }
+
+  #play .hud-progress.hud-run > small {
+    font-size: 7px !important;
+
+    letter-spacing: 0.15em !important;
+  }
+
+  #play .hud-progress.hud-run > div:not(.hud-vital) {
+    height: 4px !important;
+  }
+
+  #play .hud-progress.hud-run .hud-vital.energy b {
+    font-size: 7px !important;
+  }
+
+  #play .relay-faction-dialogue {
+    width: calc(100vw - 20px) !important;
+
+    max-width: calc(100vw - 20px) !important;
+
+    max-height: min(34dvh, 255px) !important;
+
+    bottom: calc(128px + env(safe-area-inset-bottom)) !important;
+
+    padding: 13px 13px 11px !important;
+
+    border-radius: 5px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-kicker {
+    margin-bottom: 6px !important;
+
+    font-size: 7px !important;
+
+    letter-spacing: 0.14em !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-name {
+    margin-bottom: 7px !important;
+
+    font-size: 12px !important;
+
+    line-height: 1.2 !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-text {
+    max-width: none !important;
+
+    font-size: 12px !important;
+
+    line-height: 1.42 !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-footer {
+    gap: 6px !important;
+
+    margin-top: 10px !important;
+
+    padding-top: 8px !important;
+  }
+
+  #play .relay-faction-dialogue button {
+    min-width: 0 !important;
+
+    min-height: 34px !important;
+
+    flex: 1 1 0 !important;
+
+    padding: 7px 8px !important;
+
+    font-size: 7px !important;
+
+    letter-spacing: 0.08em !important;
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 390px) {
+  #play .hud-progress.hud-run {
+    width: 118px !important;
+
+    padding: 7px 9px 8px !important;
+  }
+
+  #play .hud-progress.hud-run > span#signalCount {
+    font-size: 17px !important;
+  }
+
+  #play .hud-progress.hud-run > small {
+    font-size: 6px !important;
+  }
+
+  #play .relay-faction-dialogue {
+    width: calc(100vw - 14px) !important;
+
+    max-width: calc(100vw - 14px) !important;
+
+    max-height: min(36dvh, 245px) !important;
+
+    bottom: calc(118px + env(safe-area-inset-bottom)) !important;
+
+    padding: 11px 11px 9px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-kicker {
+    font-size: 6px !important;
+
+    margin-bottom: 5px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-name {
+    font-size: 11px !important;
+
+    margin-bottom: 6px !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-text {
+    font-size: 11px !important;
+
+    line-height: 1.38 !important;
+  }
+
+  #play .relay-faction-dialogue .relay-faction-footer {
+    margin-top: 8px !important;
+
+    padding-top: 7px !important;
+
+    gap: 5px !important;
+  }
+
+  #play .relay-faction-dialogue button {
+    min-height: 31px !important;
+
+    padding: 6px 7px !important;
+
+    font-size: 6px !important;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  #play .relay-faction-dialogue,
+  #play .relay-faction-dialogue *,
+  #play .hud-progress.hud-run,
+  #play .hud-progress.hud-run * {
+    transition: none !important;
+
+    animation-duration: 0.01ms !important;
+
+    animation-iteration-count: 1 !important;
   }
 }

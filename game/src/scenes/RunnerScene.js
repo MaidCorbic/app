@@ -41506,16 +41506,13 @@ const landmarkRingA =
     }
   );
 
-  if (this.cinematicActive) {
-    this.createOpeningCinematic();
-  } else {
-  this.createMissionTransmission();
-  this.createObjectiveHUD();
-  this.createDetectionHUD();
-  this.createPlayerStatusHUD();
-  this.createCombatHUD();
-  this.createMobilityHUD();
-  }
+this.cinematicActive = false;
+
+this.createObjectiveHUD();
+this.createDetectionHUD();
+this.createPlayerStatusHUD();
+this.createCombatHUD();
+this.createMobilityHUD();
 
   }
 

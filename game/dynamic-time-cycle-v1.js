@@ -10,20 +10,27 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   const CYCLE_MS = 300_000;
   const START_HOUR = 6;
   const MINUTES_PER_DAY = 24 * 60;
-  const LEGACY_DOM_IDS = ['relayTimeShade', 'relayTimeIndicator', 'relaySkyAtmosphere', 'relaySkyCelestial', 'relaySkyStars', 'relaySkyClouds'];
-  LEGACY_DOM_IDS.forEach(id => document.getElementById(id)?.remove());
+  const LEGACY_DOM_IDS = [
+    'relayTimeShade',
+    'relayTimeIndicator',
+    'relaySkyAtmosphere',
+    'relaySkyCelestial',
+    'relaySkyStars',
+    'relaySkyClouds',
+  ];
+  LEGACY_DOM_IDS.forEach((id) => document.getElementById(id)?.remove());
   document.getElementById('relayTimeIndicator')?.remove();
 
-  const originalCreateEnvironment = RunnerScene.prototype.createEnvironment;
+  const originalCreateEnvironment = null;
   const originalCreate = RunnerScene.prototype.create;
   const originalUpdate = RunnerScene.prototype.update;
 
   // Realistic 24h palette. The full in-game clock runs from 06:00 through 05:59 over one 90s cycle.
   const PALETTES = [
-    { h: 0,  top: 0x020713, mid: 0x061426, horizon: 0x0d2942, ground: 0x07101a, glow: 0x4b8fc7 },
-    { h: 5,  top: 0x11182b, mid: 0x43546d, horizon: 0xcf826d, ground: 0x1b1720, glow: 0xff9067 },
-    { h: 6,  top: 0x2f5270, mid: 0x7f7883, horizon: 0xe8a279, ground: 0x24212a, glow: 0xffad6b },
-    { h: 7,  top: 0x486f8c, mid: 0xa49599, horizon: 0xefc19b, ground: 0x2e353c, glow: 0xffc584 },
+    { h: 0, top: 0x020713, mid: 0x061426, horizon: 0x0d2942, ground: 0x07101a, glow: 0x4b8fc7 },
+    { h: 5, top: 0x11182b, mid: 0x43546d, horizon: 0xcf826d, ground: 0x1b1720, glow: 0xff9067 },
+    { h: 6, top: 0x2f5270, mid: 0x7f7883, horizon: 0xe8a279, ground: 0x24212a, glow: 0xffad6b },
+    { h: 7, top: 0x486f8c, mid: 0xa49599, horizon: 0xefc19b, ground: 0x2e353c, glow: 0xffc584 },
     { h: 10, top: 0x67a3c2, mid: 0xb5d1d7, horizon: 0xe7e2d6, ground: 0x3a474c, glow: 0xffe7b7 },
     { h: 12, top: 0x79b4d3, mid: 0xc3dde3, horizon: 0xf0ecd9, ground: 0x42565c, glow: 0xfff3ca },
     { h: 15, top: 0x6fa8c9, mid: 0xbdd0d3, horizon: 0xead9c1, ground: 0x45535a, glow: 0xffdcad },
@@ -34,18 +41,27 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   ];
 
   const PHASES = [
-    [5, 'DAWN'], [8, 'MORNING'], [11, 'MIDDAY'], [15, 'AFTERNOON'], [18, 'SUNSET'], [20, 'NIGHT']
+    [5, 'DAWN'],
+    [8, 'MORNING'],
+    [11, 'MIDDAY'],
+    [15, 'AFTERNOON'],
+    [18, 'SUNSET'],
+    [20, 'NIGHT'],
   ];
 
-  const weatherAt = hour => {
-    if (hour >= 5 && hour < 8) return { name: 'DAWN MIST', tint: 0xffa477, alpha: 0.045, rain: false };
-    if (hour >= 8 && hour < 12) return { name: 'DAY CLEAR', tint: 0x9edcff, alpha: 0.018, rain: false };
-    if (hour >= 12 && hour < 17) return { name: 'MIDDAY CLEAR', tint: 0xfff0be, alpha: 0.012, rain: false };
-    if (hour >= 17 && hour < 20) return { name: 'SUNSET BREEZE', tint: 0xff9d6d, alpha: 0.038, rain: false };
+  const weatherAt = (hour) => {
+    if (hour >= 5 && hour < 8)
+      return { name: 'DAWN MIST', tint: 0xffa477, alpha: 0.045, rain: false };
+    if (hour >= 8 && hour < 12)
+      return { name: 'DAY CLEAR', tint: 0x9edcff, alpha: 0.018, rain: false };
+    if (hour >= 12 && hour < 17)
+      return { name: 'MIDDAY CLEAR', tint: 0xfff0be, alpha: 0.012, rain: false };
+    if (hour >= 17 && hour < 20)
+      return { name: 'SUNSET BREEZE', tint: 0xff9d6d, alpha: 0.038, rain: false };
     return { name: 'NIGHT RAIN', tint: 0x6d8faa, alpha: 0.06, rain: true };
   };
 
-  const phaseAt = hour => {
+  const phaseAt = (hour) => {
     for (let i = PHASES.length - 1; i >= 0; i -= 1) if (hour >= PHASES[i][0]) return PHASES[i][1];
     return 'NIGHT';
   };
@@ -58,7 +74,7 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     return (r << 16) | (g << 8) | bl;
   };
 
-  const paletteAt = hour => {
+  const paletteAt = (hour) => {
     const h = ((hour % 24) + 24) % 24;
     for (let i = 0; i < PALETTES.length - 1; i += 1) {
       const a = PALETTES[i];
@@ -77,9 +93,9 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     return PALETTES[0];
   };
 
-  const hideLegacyCreateEnvironmentGraphics = scene => {
+  const hideLegacyCreateEnvironmentGraphics = (scene) => {
     const before = new Set(scene.__relayChildrenBeforeEnvironment || []);
-    scene.children.list.forEach(child => {
+    scene.children.list.forEach((child) => {
       if (before.has(child)) return;
       if (child?.type !== 'Graphics') return;
       // createEnvironment's first Graphics is the fixed 1500x720 sky, while authored parallax
@@ -90,42 +106,43 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
   };
 
   RunnerScene.prototype.createEnvironment = function relayCreateEnvironment(...args) {
+    // FUTURISTIC_NEON_WORLD is the only gameplay environment.
+    // Do not render the legacy environment here.
     this.__relayChildrenBeforeEnvironment = this.children.list.slice();
-    const result = originalCreateEnvironment.apply(this, args);
-    hideLegacyCreateEnvironmentGraphics(this);
-    return result;
+
+    return undefined;
+  };
+  const makeHud = () => {
+    /*
+     * The dynamic time/weather simulation remains active.
+     *
+     * The DOM HUD that displays:
+     * - DAWN / MORNING / MIDDAY...
+     * - clock
+     * - CYCLE
+     * - weather name
+     *
+     * is intentionally disabled.
+     *
+     * Gameplay keeps:
+     * - dynamic sky
+     * - sun
+     * - moon
+     * - clouds
+     * - weather
+     * - time progression
+     *
+     * Only the visible time/weather HUD is removed.
+     */
+
+    return null;
   };
 
-  const makeHud = () => {
-  /*
-   * The dynamic time/weather simulation remains active.
-   *
-   * The DOM HUD that displays:
-   * - DAWN / MORNING / MIDDAY...
-   * - clock
-   * - CYCLE
-   * - weather name
-   *
-   * is intentionally disabled.
-   *
-   * Gameplay keeps:
-   * - dynamic sky
-   * - sun
-   * - moon
-   * - clouds
-   * - weather
-   * - time progression
-   *
-   * Only the visible time/weather HUD is removed.
-   */
-
-  return null;
-};
-
-  const hideLegacyLabels = scene => {
+  const hideLegacyLabels = (scene) => {
     scene.weatherLabel?.setVisible(false);
-    scene.children.list.forEach(child => {
-      if (typeof child?.text === 'string' && child.text.includes('NIGHT RELAY')) child.setVisible(false);
+    scene.children.list.forEach((child) => {
+      if (typeof child?.text === 'string' && child.text.includes('NIGHT RELAY'))
+        child.setVisible(false);
     });
   };
 
@@ -140,30 +157,45 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     const width = Math.max(320, this.scale.width || this.cameras.main.width || 1280);
     const height = Math.max(240, this.scale.height || this.cameras.main.height || 720);
 
-    this.__relaySky = this.add.graphics().setScrollFactor(0).setDepth(-50);
-    this.__relayStars = this.add.graphics().setScrollFactor(0).setDepth(-49);
-    this.__relayClouds = this.add.graphics().setScrollFactor(0).setDepth(-48);
-    this.__relaySun = this.add.circle(width * 0.5, height * 0.2, 42, 0xffe7a6, 1).setScrollFactor(0).setDepth(-47);
-    this.__relayMoon = this.add.circle(width * 0.82, height * 0.2, 36, 0xe8ddc2, 1).setScrollFactor(0).setDepth(-47);
-    this.__relayMoonGlow = this.add.circle(width * 0.82, height * 0.2, 62, 0xb8d2e8, 0.08).setScrollFactor(0).setDepth(-48);
+    this.__relaySky = null;
+    this.__relayStars = null;
+    this.__relayClouds = null;
+    this.__relaySun = null;
+    this.__relayMoon = null;
+    this.__relayMoonGlow = null;
 
     this.__relayTimeCleanup = () => {
-      [this.__relaySky, this.__relayStars, this.__relayClouds, this.__relaySun, this.__relayMoon, this.__relayMoonGlow].forEach(item => item?.destroy());
-      this.__relaySky = this.__relayStars = this.__relayClouds = this.__relaySun = this.__relayMoon = this.__relayMoonGlow = null;
+      [
+        this.__relaySky,
+        this.__relayStars,
+        this.__relayClouds,
+        this.__relaySun,
+        this.__relayMoon,
+        this.__relayMoonGlow,
+      ].forEach((item) => item?.destroy());
+      this.__relaySky =
+        this.__relayStars =
+        this.__relayClouds =
+        this.__relaySun =
+        this.__relayMoon =
+        this.__relayMoonGlow =
+          null;
       this.__relayTimeHud?.remove();
       this.__relayTimeHud = null;
       this.__relayTimeReady = false;
     };
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.__relayTimeCleanup);
 
-    this.__renderRelayTime(0);
+    // FUTURISTIC_NEON_WORLD controls the gameplay background.
     return result;
   };
 
   RunnerScene.prototype.__renderRelayTime = function renderRelayTime(progress) {
     if (!this.__relayTimeReady || !this.__relaySky?.active) return;
 
-    const localMinutes = ((START_HOUR * 60 + progress * MINUTES_PER_DAY) % MINUTES_PER_DAY + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+    const localMinutes =
+      (((START_HOUR * 60 + progress * MINUTES_PER_DAY) % MINUTES_PER_DAY) + MINUTES_PER_DAY) %
+      MINUTES_PER_DAY;
     const hour = localMinutes / 60;
     const palette = paletteAt(hour);
     const phase = phaseAt(hour);
@@ -173,10 +205,14 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
 
     // Full-screen dynamic sky inside the Phaser canvas.
     this.__relaySky.clear();
-    this.__relaySky.fillGradientStyle(palette.top, palette.top, palette.horizon, palette.horizon, 1).fillRect(0, 0, width, height);
+    this.__relaySky
+      .fillGradientStyle(palette.top, palette.top, palette.horizon, palette.horizon, 1)
+      .fillRect(0, 0, width, height);
     this.__relaySky.fillStyle(palette.mid, 0.82).fillRect(0, height * 0.32, width, height * 0.42);
-    this.__relaySky.fillStyle(palette.ground, 0.98).fillRect(0, height * 0.70, width, height * 0.30);
-    this.__relaySky.fillStyle(palette.glow, 0.15).fillCircle(width * 0.5, height * 0.60, Math.min(width, height) * 0.34);
+    this.__relaySky.fillStyle(palette.ground, 0.98).fillRect(0, height * 0.7, width, height * 0.3);
+    this.__relaySky
+      .fillStyle(palette.glow, 0.15)
+      .fillCircle(width * 0.5, height * 0.6, Math.min(width, height) * 0.34);
 
     // Stars only at night.
     const isNight = hour >= 20 || hour < 5;
@@ -185,32 +221,43 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
       for (let i = 0; i < 56; i += 1) {
         const x = (i * 137) % width;
         const y = 24 + ((i * 67) % Math.max(100, Math.floor(height * 0.44)));
-        this.__relayStars.fillStyle(0xdff4ff, 0.24 + ((i * 17) % 45) / 100).fillCircle(x, y, i % 9 === 0 ? 1.6 : 1);
+        this.__relayStars
+          .fillStyle(0xdff4ff, 0.24 + ((i * 17) % 45) / 100)
+          .fillCircle(x, y, i % 9 === 0 ? 1.6 : 1);
       }
     }
 
     // Moving clouds make the sky feel alive without adding DOM animation.
     this.__relayClouds.clear();
-    const cloudAlpha = isNight ? 0.10 : phase === 'MIDDAY' ? 0.24 : 0.32;
-    [0, 1, 2].forEach(i => {
-      const x = ((this.__relayTimeMs / (68 + i * 11)) + i * width * 0.44) % (width * 1.35) - width * 0.17;
+    const cloudAlpha = isNight ? 0.1 : phase === 'MIDDAY' ? 0.24 : 0.32;
+    [0, 1, 2].forEach((i) => {
+      const x =
+        ((this.__relayTimeMs / (68 + i * 11) + i * width * 0.44) % (width * 1.35)) - width * 0.17;
       const y = height * (0.16 + i * 0.075);
-      this.__relayClouds.fillStyle(0xf3f7f5, cloudAlpha).fillEllipse(x, y, width * (0.24 - i * 0.02), 22 + i * 6);
+      this.__relayClouds
+        .fillStyle(0xf3f7f5, cloudAlpha)
+        .fillEllipse(x, y, width * (0.24 - i * 0.02), 22 + i * 6);
     });
 
     // One sun: 06:00 low-left, 12:00 high-center, 18:00 low-right.
     const sunVisible = hour >= 5.5 && hour < 19.7;
     const sunProgress = Phaser.Math.Clamp((hour - 6) / 12, 0, 1);
     const sunX = width * (0.08 + sunProgress * 0.84);
-    const sunY = height * (0.70 - Math.sin(sunProgress * Math.PI) * 0.60);
+    const sunY = height * (0.7 - Math.sin(sunProgress * Math.PI) * 0.6);
     this.__relaySun.setPosition(sunX, sunY).setVisible(sunVisible);
-    this.__relaySun.setRadius(Math.max(22, Math.min(width, height) * (hour >= 11 && hour < 15 ? 0.062 : 0.050)));
+    this.__relaySun.setRadius(
+      Math.max(22, Math.min(width, height) * (hour >= 11 && hour < 15 ? 0.062 : 0.05)),
+    );
     const warmSun = hour < 8 || hour >= 17;
     this.__relaySun.setFillStyle(warmSun ? 0xffad62 : 0xffedab, 1).setAlpha(warmSun ? 0.94 : 1);
 
     // One moon: only visible after sunset and before dawn. No crescent layers or duplicate moon.
     const moonVisible = hour >= 19.7 || hour < 5.5;
-    const moonProgress = Phaser.Math.Clamp(hour >= 19.7 ? (hour - 19.7) / 9.8 : (hour + 4.3) / 9.8, 0, 1);
+    const moonProgress = Phaser.Math.Clamp(
+      hour >= 19.7 ? (hour - 19.7) / 9.8 : (hour + 4.3) / 9.8,
+      0,
+      1,
+    );
     const moonX = width * (0.86 - moonProgress * 0.72);
     const moonY = height * (0.68 - Math.sin(moonProgress * Math.PI) * 0.48);
     this.__relayMoon.setPosition(moonX, moonY).setVisible(moonVisible);
@@ -226,11 +273,24 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     if (this.__relayTimeHud) {
       const hh = String(Math.floor(localMinutes / 60)).padStart(2, '0');
       const mm = String(Math.floor(localMinutes % 60)).padStart(2, '0');
-      const icon = phase === 'NIGHT' ? '☾' : phase === 'MIDDAY' ? '☀' : phase === 'SUNSET' ? '◒' : '◐';
-      this.__relayTimeHud.querySelector('[data-time-icon]')?.replaceChildren(document.createTextNode(icon));
-      this.__relayTimeHud.querySelector('[data-time-name]')?.replaceChildren(document.createTextNode(phase));
-      this.__relayTimeHud.querySelector('[data-time-clock]')?.replaceChildren(document.createTextNode(`${hh}:${mm} · CYCLE ${String(this.__relayTimeCycle).padStart(2, '0')}`));
-      this.__relayTimeHud.querySelector('[data-time-weather]')?.replaceChildren(document.createTextNode(weather.name));
+      const icon =
+        phase === 'NIGHT' ? '☾' : phase === 'MIDDAY' ? '☀' : phase === 'SUNSET' ? '◒' : '◐';
+      this.__relayTimeHud
+        .querySelector('[data-time-icon]')
+        ?.replaceChildren(document.createTextNode(icon));
+      this.__relayTimeHud
+        .querySelector('[data-time-name]')
+        ?.replaceChildren(document.createTextNode(phase));
+      this.__relayTimeHud
+        .querySelector('[data-time-clock]')
+        ?.replaceChildren(
+          document.createTextNode(
+            `${hh}:${mm} · CYCLE ${String(this.__relayTimeCycle).padStart(2, '0')}`,
+          ),
+        );
+      this.__relayTimeHud
+        .querySelector('[data-time-weather]')
+        ?.replaceChildren(document.createTextNode(weather.name));
     }
   };
 

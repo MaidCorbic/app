@@ -1,1423 +1,2216 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&display=swap');
 
+/* =========================================================
+   RUNNER RELAY
+   FACTION TRANSMISSION // OVERDRIVE
+   ========================================================= */
+
 :root {
   --relay-faction-cyan: #8df4ff;
   --relay-faction-blue: #39b9ff;
   --relay-faction-magenta: #ff00aa;
-  --relay-faction-amber: #7dd3fc;
-  --relay-faction-white: #f5fbff;
-  --relay-faction-muted: rgba(220, 238, 248, .68);
-  --relay-faction-panel: rgba(4, 10, 20, .975);
+  --relay-faction-green: #39ff88;
+  --relay-faction-amber: #ffd166;
+  --relay-faction-white: #effcff;
+
+  --relay-faction-bg: #02060c;
+  --relay-faction-panel: rgba(4, 9, 16, 0.985);
+
+  --relay-faction-muted: rgba(190, 217, 230, 0.6);
+  --relay-faction-dim: rgba(141, 244, 255, 0.24);
 }
 
 /* =========================================================
-   RELAY RUNNER — FACTION DIALOGUE
-   CYBERPUNK TACTICAL PRESENTATION
+   BACKDROP
    ========================================================= */
 
-.relay-faction-dialogue {
+html body .relay-faction-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+
+  z-index: 1180 !important;
+
+  pointer-events: none !important;
+
+  background:
+    radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.045), transparent 30%),
+    radial-gradient(circle at 20% 90%, rgba(255, 0, 170, 0.025), transparent 28%),
+    radial-gradient(circle at 90% 15%, rgba(57, 255, 136, 0.018), transparent 22%),
+    rgba(0, 0, 0, 0.12) !important;
+
+  opacity: 0 !important;
+
+  transition: opacity 180ms ease !important;
+}
+
+html body .relay-faction-backdrop:not([hidden]) {
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   MAIN PANEL
+   ========================================================= */
+
+html body .relay-faction-dialogue {
+  --faction-accent: var(--relay-faction-cyan);
+  --threat-color: var(--relay-faction-cyan);
+  --panel-magenta: var(--relay-faction-magenta);
+  --faction-glow: rgba(56, 189, 248, 0.14);
+
   position: fixed !important;
 
   left: 50% !important;
   right: auto !important;
   top: auto !important;
 
-  bottom:
-    max(
-      22px,
-      env(safe-area-inset-bottom) + 12px
-    ) !important;
+  bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px)) !important;
 
-  transform:
-    translateX(-50%)
-    translateY(10px) !important;
+  width: min(940px, calc(100vw - 36px)) !important;
 
-  width:
-    min(660px, calc(100vw - 28px)) !important;
+  min-width: 0 !important;
+  min-height: 252px !important;
 
-  min-height: 0 !important;
+  max-height: min(320px, calc(100vh - 38px)) !important;
 
   box-sizing: border-box !important;
 
-  padding:
-    21px 22px 18px !important;
+  display: grid !important;
+
+  grid-template-columns:
+    192px
+    minmax(0, 1fr)
+    188px !important;
 
   overflow: hidden !important;
 
-  isolation: isolate;
+  isolation: isolate !important;
 
-  border:
-    1px solid
-    rgba(56, 189, 248, .42) !important;
+  z-index: 1190 !important;
 
-  border-right:
-    2px solid
-    #38d9ff !important;
+  transform: translateX(-50%) translateY(16px) scale(0.975) !important;
 
-  border-radius:
-    7px !important;
+  opacity: 0 !important;
+
+  border: 1px solid rgba(141, 244, 255, 0.18) !important;
+
+  border-top: 1px solid color-mix(in srgb, var(--faction-accent) 78%, transparent) !important;
+
+  border-right: 2px solid color-mix(in srgb, var(--faction-accent) 82%, transparent) !important;
+
+  border-radius: 10px !important;
 
   background:
     radial-gradient(
-      circle at 12% 18%,
-      rgba(255, 0, 170, .13),
-      transparent 30%
+      circle at 0% 0%,
+      color-mix(in srgb, var(--panel-magenta) 12%, transparent),
+      transparent 27%
     ),
     radial-gradient(
-      circle at 88% 78%,
-      rgba(0, 234, 255, .17),
-      transparent 34%
+      circle at 100% 100%,
+      color-mix(in srgb, var(--faction-accent) 13%, transparent),
+      transparent 33%
     ),
+    radial-gradient(circle at 55% 50%, rgba(255, 255, 255, 0.012), transparent 44%),
     linear-gradient(
       135deg,
-      rgba(4, 2, 12, .998),
-      rgba(13, 4, 23, .995) 42%,
-      rgba(3, 13, 24, .998) 72%,
-      rgba(1, 4, 10, 1)
+      rgba(8, 15, 24, 0.998),
+      rgba(2, 7, 13, 0.995) 52%,
+      rgba(6, 10, 17, 0.998)
     ) !important;
 
+  color: var(--relay-faction-white) !important;
+
+  font-family: 'Orbitron', 'Segoe UI', system-ui, sans-serif !important;
+
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, .065),
-
-    inset 0 0 38px
-      rgba(0, 234, 255, .025),
-
-    inset 20px 0 45px
-      rgba(255, 0, 170, .025),
-
-    inset -20px 0 45px
-      rgba(0, 234, 255, .035),
-
-    0 22px 70px
-      rgba(0, 0, 0, .68),
-
-    0 0 34px
-      rgba(0, 234, 255, .10),
-
-    0 0 60px
-      rgba(255, 0, 170, .035) !important;
-
-  color:
-    var(--relay-faction-white) !important;
-
-  font:
-    500 14px/1.45
-    "Orbitron",
-    sans-serif !important;
-
-  opacity: 0;
-
-  pointer-events: auto;
+    0 30px 90px rgba(0, 0, 0, 0.72),
+    0 0 26px var(--faction-glow),
+    0 0 70px color-mix(in srgb, var(--panel-magenta) 5%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    inset 0 -28px 70px rgba(0, 0, 0, 0.28) !important;
 
   transition:
     opacity 180ms ease,
-    transform 180ms ease,
-    box-shadow 180ms ease !important;
-}
+    transform 230ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 220ms ease !important;
 
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
+
+  will-change: opacity, transform, box-shadow !important;
+}
 
 /* =========================================================
    ACTIVE
    ========================================================= */
 
-.relay-faction-dialogue:not([hidden]) {
-  opacity: 1;
-
-  transform:
-    translateX(-50%)
-    translateY(0) !important;
+html body .relay-faction-dialogue[hidden] {
+  display: none !important;
 }
 
+html body .relay-faction-dialogue:not([hidden]),
+html body .relay-faction-dialogue.visible {
+  opacity: 1 !important;
+
+  transform: translateX(-50%) translateY(0) scale(1) !important;
+
+  animation: factionPowerPulse 3.8s ease-in-out infinite;
+}
 
 /* =========================================================
-   CYBERPUNK SCANLINES
+   PANEL SCANLINES
    ========================================================= */
 
-.relay-faction-dialogue::before {
-  content: "";
+html body .relay-faction-dialogue::before {
+  content: '';
 
   position: absolute;
-
   inset: 0;
 
-  z-index: -2;
+  z-index: 1 !important;
+
+  pointer-events: none;
 
   background:
     repeating-linear-gradient(
       0deg,
-      rgba(255, 0, 170, .022) 0,
-      rgba(255, 0, 170, .022) 1px,
+      rgba(255, 255, 255, 0.012) 0,
+      rgba(255, 255, 255, 0.012) 1px,
       transparent 1px,
-      transparent 4px
+      transparent 5px
+    ),
+    linear-gradient(
+      110deg,
+      rgba(255, 0, 170, 0.025),
+      transparent 24%,
+      transparent 70%,
+      rgba(56, 189, 248, 0.025)
     ),
     linear-gradient(
       90deg,
-      rgba(255, 0, 170, .018),
-      transparent 35%,
-      rgba(0, 234, 255, .022)
+      transparent 0%,
+      transparent 45%,
+      rgba(255, 255, 255, 0.035) 50%,
+      transparent 55%,
+      transparent 100%
     );
 
-  opacity: .42;
+  background-size:
+    auto,
+    auto,
+    260% 100%;
 
-  pointer-events: none;
+  background-position:
+    0 0,
+    0 0,
+    140% 0;
+
+  opacity: 0.52 !important;
+
+  animation: relayFactionSweep 6s linear infinite;
 }
 
-
 /* =========================================================
-   TOP ENERGY LINE
+   TOP POWER BAR
    ========================================================= */
 
-.relay-faction-dialogue::after {
-  content: "";
+html body .relay-faction-dialogue::after {
+  content: '';
 
   position: absolute;
 
-  left: 0;
-  right: 0;
+  left: 12px;
+  right: 12px;
   top: 0;
 
   height: 2px;
 
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      var(--relay-faction-magenta),
-      var(--relay-faction-cyan),
-      var(--relay-faction-blue),
-      var(--relay-faction-cyan),
-      transparent
-    );
+  z-index: 30 !important;
+
+  pointer-events: none;
+
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--panel-magenta) 12%,
+    var(--faction-accent) 30%,
+    #ffffff 50%,
+    var(--faction-accent) 70%,
+    var(--panel-magenta) 88%,
+    transparent 100%
+  );
 
   box-shadow:
-    0 0 8px
-      rgba(255, 0, 170, .30),
+    0 0 8px color-mix(in srgb, var(--faction-accent) 55%, transparent),
+    0 0 20px color-mix(in srgb, var(--panel-magenta) 18%, transparent);
 
-    0 0 18px
-      rgba(56, 189, 248, .55);
+  animation: factionTopLine 2.6s ease-in-out infinite;
+}
 
-  opacity: .95;
+/* =========================================================
+   TECH CORNER MARKERS
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-header::after {
+  content: '';
+
+  position: absolute;
+
+  left: 14px;
+  bottom: 12px;
+
+  width: 62px;
+  height: 10px;
+
+  border-left: 1px solid color-mix(in srgb, var(--faction-accent) 55%, transparent);
+
+  border-bottom: 1px solid color-mix(in srgb, var(--faction-accent) 30%, transparent);
+
+  opacity: 0.72;
 
   pointer-events: none;
 }
 
-
 /* =========================================================
-   FACTION KICKER
+   LEFT HEADER
    ========================================================= */
 
-.relay-faction-dialogue .relay-faction-kicker {
-  position: relative;
+html body .relay-faction-dialogue .relay-faction-header {
+  position: relative !important;
 
-  display: flex;
+  min-width: 0 !important;
 
-  align-items: center;
+  display: flex !important;
 
-  justify-content: center;
+  flex-direction: column !important;
 
-  gap: 9px;
+  align-items: flex-start !important;
 
-  margin:
-    0 0 18px !important;
+  justify-content: center !important;
 
-  color:
-    var(--relay-faction-cyan) !important;
+  padding: 30px 20px 24px !important;
 
-  font:
-    800 10px/1
-    "Orbitron",
-    sans-serif !important;
+  border-right: 1px solid rgba(141, 244, 255, 0.09) !important;
 
-  letter-spacing:
-    .20em !important;
-
-  text-transform:
-    uppercase !important;
-
-  text-shadow:
-    0 0 8px
-      rgba(56, 189, 248, .35),
-
-    0 0 18px
-      rgba(255, 0, 170, .10);
+  background: linear-gradient(
+    145deg,
+    rgba(141, 244, 255, 0.055),
+    rgba(5, 11, 19, 0.12) 55%,
+    rgba(255, 0, 170, 0.025)
+  ) !important;
 }
 
-
 /* =========================================================
-   GLOWING CYAN CIRCLE
+   HEADER TECH LABEL
    ========================================================= */
 
-.relay-faction-dialogue
-.relay-faction-kicker::before {
-
-  content: "";
-
-  display: block;
-
-  width: 8px;
-  height: 8px;
-
-  flex:
-    0 0 8px;
-
-  border:
-    1px solid
-    #7dd3fc;
-
-  border-radius:
-    50%;
-
-  background:
-    #38d9ff;
-
-  box-shadow:
-    0 0 5px
-      #38d9ff,
-
-    0 0 11px
-      #38d9ff,
-
-    0 0 20px
-      rgba(56, 189, 248, .75);
-
-  animation:
-    factionEncounterPulse
-    1.25s
-    ease-in-out
-    infinite;
-}
-
-
-/* =========================================================
-   INNER CORE OF CIRCLE
-   ========================================================= */
-
-.relay-faction-dialogue
-.relay-faction-kicker::after {
-
-  content: "";
+html body .relay-faction-dialogue .relay-faction-header::before {
+  content: 'FACTION IDENTIFICATION // LIVE';
 
   position: absolute;
 
-  left:
-    calc(50% - 57px);
+  left: 20px;
+  top: 15px;
 
-  top:
-    50%;
-
-  width: 4px;
-  height: 4px;
-
-  border-radius:
-    50%;
-
-  background:
-    #e8fbff;
-
-  box-shadow:
-    0 0 6px
-      #ffffff;
-
-  transform:
-    translateY(-50%);
-
-  pointer-events:
-    none;
-}
-
-
-/* =========================================================
-   FACTION NAME
-   ========================================================= */
-
-.relay-faction-dialogue .relay-faction-name {
-
-  display: block;
-
-  position: relative;
-
-  margin:
-    0 0 20px !important;
-
-  padding:
-    0 0 11px !important;
-
-  max-width:
-    100%;
-
-  overflow:
-    hidden;
-
-  text-overflow:
-    ellipsis;
-
-  white-space:
-    nowrap;
-
-  color:
-    #e8f7ff !important;
+  color: rgba(141, 244, 255, 0.29);
 
   font:
-    800 14px/1.25
-    "Orbitron",
-    sans-serif !important;
-
-  letter-spacing:
-    .14em !important;
-
-  text-transform:
-    uppercase;
-
-  text-align:
-    center !important;
-
-   text-shadow:
-    0 0 8px
-      rgba(56, 189, 248, .24),
-
-    0 0 18px
-      rgba(255, 0, 170, .10);
-}
-
-.relay-faction-dialogue .relay-faction-name::before {
-  content: "FACTION // ENCOUNTER DETECTED";
-
-  display: block;
-
-  margin-bottom: 7px;
-
-  color:
-    rgba(125, 211, 252, .48);
-
-  font:
-    600 7px/1
-    "Orbitron",
+    800 6px/1 'Orbitron',
     sans-serif;
 
-  letter-spacing:
-    .16em;
+  letter-spacing: 0.15em;
 
-  text-align:
-    center;
-
-  text-shadow:
-    0 0 8px
-      rgba(56, 189, 248, .16);
+  text-transform: uppercase;
 }
 
-
 /* =========================================================
-   CYBER LINE UNDER FACTION NAME
+   KICKER
    ========================================================= */
 
-.relay-faction-dialogue
-.relay-faction-name::after {
+html body .relay-faction-dialogue .relay-faction-kicker {
+  position: relative !important;
 
-  content: "";
+  display: flex !important;
+
+  align-items: center !important;
+
+  gap: 8px !important;
+
+  margin: 0 0 15px !important;
+
+  color: color-mix(in srgb, var(--faction-accent) 84%, white 8%) !important;
+
+  font:
+    800 8px/1 'Orbitron',
+    sans-serif !important;
+
+  letter-spacing: 0.17em !important;
+
+  text-transform: uppercase !important;
+
+  text-shadow: 0 0 8px color-mix(in srgb, var(--faction-accent) 30%, transparent);
+}
+
+/* =========================================================
+   LIVE STATUS DOT
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-kicker::before {
+  content: '';
 
   display: block;
 
-  width:
-    100%;
+  width: 6px;
+  height: 6px;
 
-  height:
-    1px;
+  flex: 0 0 6px;
 
-  margin-top:
-    11px;
+  border-radius: 50%;
 
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 0, 170, .55),
-      rgba(56, 189, 248, .85),
-      rgba(255, 0, 170, .35),
-      transparent
-    );
+  background: var(--relay-faction-green);
 
   box-shadow:
-    0 0 8px
-      rgba(56, 189, 248, .25);
+    0 0 4px var(--relay-faction-green),
+    0 0 11px rgba(57, 255, 136, 0.75),
+    0 0 21px rgba(57, 255, 136, 0.3);
+
+  animation: factionLiveDot 1.25s ease-in-out infinite;
 }
 
-
 /* =========================================================
-   DIALOGUE TEXT — TACTICAL DISPLAY
+   EMBLEM CONTAINER
    ========================================================= */
 
-.relay-faction-dialogue .relay-faction-text {
+html body .relay-faction-dialogue .relay-faction-emblem {
+  position: relative !important;
 
-  position: relative;
+  width: 82px !important;
 
-  min-height:
-    47px !important;
+  height: 82px !important;
 
-  margin:
-    0 auto !important;
+  flex: 0 0 82px !important;
 
-  padding:
-    14px 18px 12px !important;
+  display: flex !important;
 
-  max-width:
-    58ch;
+  align-items: center !important;
 
-  box-sizing:
-    border-box;
+  justify-content: center !important;
 
-  color:
-    #e9faff !important;
+  margin: 0 0 15px !important;
 
-  font:
-    600 clamp(15px, 2vw, 17px)/1.52
-    "Orbitron",
-    sans-serif !important;
+  border: 1px solid color-mix(in srgb, var(--faction-accent) 72%, transparent) !important;
 
-  letter-spacing:
-    .025em !important;
-
-  text-align:
-    center !important;
-
-  text-wrap:
-    pretty;
-
-  overflow-wrap:
-    anywhere;
-
-  text-shadow:
-    0 0 12px
-      rgba(56, 189, 248, .07);
-
-  border-left:
-    1px solid
-    rgba(56, 189, 248, .16);
-
-  border-right:
-    1px solid
-    rgba(255, 0, 170, .10);
+  border-radius: 10px !important;
 
   background:
-    linear-gradient(
-      90deg,
-      rgba(56, 189, 248, .025),
-      rgba(0, 0, 0, .08),
-      rgba(255, 0, 170, .025)
-    );
-}
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--faction-accent) 18%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.025), transparent) !important;
 
+  color: var(--faction-accent) !important;
+
+  font:
+    900 34px/1 'Orbitron',
+    sans-serif !important;
+
+  text-shadow:
+    0 0 7px var(--faction-accent),
+    0 0 22px color-mix(in srgb, var(--faction-accent) 42%, transparent) !important;
+
+  box-shadow:
+    inset 0 0 22px color-mix(in srgb, var(--faction-accent) 10%, transparent),
+    inset 0 0 5px rgba(255, 255, 255, 0.045),
+    0 0 22px color-mix(in srgb, var(--faction-accent) 10%, transparent) !important;
+
+  overflow: hidden !important;
+
+  animation: factionEmblemPower 3s ease-in-out infinite;
+}
 
 /* =========================================================
-   TYPEWRITER STATE
+   EMBLEM ENERGY GRID
    ========================================================= */
 
-.relay-faction-dialogue
-.relay-faction-text.relay-faction-typing {
+html body .relay-faction-dialogue .relay-faction-emblem::before {
+  content: '';
 
-  text-shadow:
-    0 0 10px
-      rgba(56, 189, 248, .10);
+  position: absolute;
+
+  inset: 6px;
+
+  border: 1px solid color-mix(in srgb, var(--faction-accent) 23%, transparent);
+
+  border-radius: 6px;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 5px,
+      color-mix(in srgb, var(--faction-accent) 7%, transparent) 5px 6px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 5px,
+      color-mix(in srgb, var(--faction-accent) 6%, transparent) 5px 6px
+    );
+
+  opacity: 0.75;
+
+  pointer-events: none;
 }
 
+/* =========================================================
+   EMBLEM CROSSHAIR + SCAN
+   ========================================================= */
 
-.relay-faction-dialogue
-.relay-faction-cursor {
+html body .relay-faction-dialogue .relay-faction-emblem::after {
+  content: '';
 
-  display:
-    inline-block;
+  position: absolute;
 
-  margin-left:
-    2px;
+  top: -10px;
+  bottom: -10px;
 
-  color:
-    #7dd3fc !important;
+  left: 50%;
 
-  text-shadow:
-    0 0 8px
-      rgba(56, 189, 248, .65);
+  width: 1px;
 
-  animation:
-    relay-faction-cursor
-    .7s
-    steps(1)
-    infinite;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--faction-accent) 72%, transparent) 42%,
+    #ffffff 50%,
+    color-mix(in srgb, var(--faction-accent) 72%, transparent) 58%,
+    transparent
+  );
+
+  box-shadow: 0 0 8px color-mix(in srgb, var(--faction-accent) 55%, transparent);
+
+  animation: emblemCrossScan 2.1s linear infinite;
+
+  pointer-events: none;
 }
 
+/* =========================================================
+   IDENTITY STATUS
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-identity-status {
+  display: flex !important;
+
+  flex-direction: column !important;
+
+  gap: 5px !important;
+
+  padding-left: 1px !important;
+}
+
+html body .relay-faction-dialogue .relay-faction-identity-status span {
+  color: rgba(190, 217, 230, 0.36) !important;
+
+  font:
+    700 6px/1 'Orbitron',
+    sans-serif !important;
+
+  letter-spacing: 0.15em !important;
+
+  text-transform: uppercase !important;
+}
+
+html body .relay-faction-dialogue .relay-faction-identity-status b {
+  display: flex !important;
+
+  align-items: center !important;
+
+  gap: 6px !important;
+
+  color: var(--relay-faction-green) !important;
+
+  font:
+    800 8px/1 'Orbitron',
+    sans-serif !important;
+
+  letter-spacing: 0.1em !important;
+
+  text-transform: uppercase !important;
+
+  text-shadow: 0 0 7px rgba(57, 255, 136, 0.2) !important;
+}
+
+html body .relay-faction-dialogue .relay-faction-identity-status b::before {
+  content: '';
+
+  width: 5px;
+
+  height: 5px;
+
+  flex: 0 0 5px;
+
+  border-radius: 50%;
+
+  background: var(--relay-faction-green);
+
+  box-shadow: 0 0 7px var(--relay-faction-green);
+}
+
+/* =========================================================
+   ENCOUNTER ID
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-encounter-id {
+  position: absolute !important;
+
+  left: 20px !important;
+
+  bottom: 9px !important;
+
+  color: rgba(141, 244, 255, 0.24) !important;
+
+  font:
+    700 6px/1 'Orbitron',
+    sans-serif !important;
+
+  letter-spacing: 0.13em !important;
+
+  text-transform: uppercase !important;
+}
+
+/* =========================================================
+   CENTER CORE
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-dialogue-core {
+  position: relative !important;
+
+  min-width: 0 !important;
+
+  display: flex !important;
+
+  flex-direction: column !important;
+
+  justify-content: center !important;
+
+  padding: 29px 31px 23px !important;
+
+  overflow: hidden !important;
+
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.018),
+    transparent 22%,
+    transparent 78%,
+    rgba(255, 0, 170, 0.018)
+  ) !important;
+}
+
+/* =========================================================
+   MOVING CORE BEAM
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-dialogue-core::after {
+  content: '';
+
+  position: absolute;
+
+  top: 0;
+  bottom: 0;
+
+  left: -20%;
+
+  width: 1px;
+
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--faction-accent) 55%, transparent) 35%,
+    #ffffff 50%,
+    color-mix(in srgb, var(--panel-magenta) 40%, transparent) 65%,
+    transparent
+  );
+
+  box-shadow: 0 0 10px color-mix(in srgb, var(--faction-accent) 60%, transparent);
+
+  opacity: 0.48;
+
+  animation: coreBeam 4.4s linear infinite;
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   CORE MICRO LABEL
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-dialogue-core::before {
+  content: '';
+
+  position: absolute;
+
+  left: 21px;
+
+  top: 16px;
+
+  color: rgba(141, 244, 255, 0.24);
+
+  font:
+    22800 6px/1 'Orbitron',
+    sans-serif;
+
+  letter-spacing: 0.14em;
+}
+
+/* =========================================================
+   SPEAKER
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-name {
+  position: relative !important;
+
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  margin: 0 0 18px !important;
+
+  padding: 0 0 13px !important;
+
+  overflow: hidden !important;
+
+  text-overflow: ellipsis !important;
+
+  white-space: nowrap !important;
+
+  border-bottom: 1px solid rgba(141, 244, 255, 0.11) !important;
+
+  color: #f3fcff !important;
+
+  font:
+    900 16px/1.18 'Orbitron',
+    sans-serif !important;
+
+  letter-spacing: 0.1em !important;
+
+  text-transform: uppercase !important;
+
+  text-align: left !important;
+
+  text-shadow:
+    0 0 8px color-mix(in srgb, var(--faction-accent) 34%, transparent),
+    0 0 22px color-mix(in srgb, var(--panel-magenta) 9%, transparent);
+}
+
+/* =========================================================
+   TRANSMISSION LABEL
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-name::before {
+  content: 'INCOMING TRANSMISSION';
+
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: color-mix(in srgb, var(--faction-accent) 70%, white 4%);
+
+  font:
+    800 7px/1 'Orbitron',
+    sans-serif;
+
+  letter-spacing: 0.18em;
+
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   SPEAKER STATUS
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-name::after {
+  content: '';
+
+  position: absolute;
+
+  right: 2px;
+
+  bottom: 15px;
+
+  width: 6px;
+
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--relay-faction-green);
+
+  box-shadow:
+    0 0 5px var(--relay-faction-green),
+    0 0 13px rgba(57, 255, 136, 0.65);
+
+  animation: factionLiveDot 1.45s ease-in-out infinite;
+}
+
+/* =========================================================
+   DIALOGUE TEXT
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-text {
+  position: relative !important;
+
+  z-index: 2 !important;
+
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  min-height: 59px !important;
+
+  margin: 0 !important;
+
+  padding: 12px 16px 12px 17px !important;
+
+  box-sizing: border-box !important;
+
+  color: #eafafe !important;
+
+  font:
+    600 clamp(15px, 1.35vw, 18px)/1.5 'Segoe UI',
+    'Trebuchet MS',
+    system-ui,
+    sans-serif !important;
+
+  letter-spacing: 0.012em !important;
+
+  text-align: left !important;
+
+  text-wrap: pretty !important;
+
+  overflow-wrap: anywhere !important;
+
+  border-left: 2px solid color-mix(in srgb, var(--faction-accent) 72%, transparent) !important;
+
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--faction-accent) 5%, transparent),
+    rgba(0, 0, 0, 0.06) 45%,
+    color-mix(in srgb, var(--panel-magenta) 3%, transparent)
+  ) !important;
+
+  text-shadow: 0 0 13px rgba(56, 189, 248, 0.09) !important;
+}
+
+/* =========================================================
+   SECURE CHANNEL STRIP
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-text::before {
+  content: 'SECURE CHANNEL // ENCOUNTER LINKED';
+
+  display: block;
+
+  width: fit-content;
+
+  max-width: 100%;
+
+  margin: 0 0 11px !important;
+
+  padding: 4px 7px !important;
+
+  border: 1px solid rgba(141, 244, 255, 0.13);
+
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.07), rgba(5, 12, 20, 0.48));
+
+  color: rgba(141, 244, 255, 0.48);
+
+  font:
+    800 6px/1 'Orbitron',
+    sans-serif;
+
+  letter-spacing: 0.13em;
+
+  text-align: left;
+
+  white-space: nowrap;
+
+  box-shadow:
+    inset 0 0 12px rgba(56, 189, 248, 0.03),
+    0 0 9px rgba(56, 189, 248, 0.025);
+}
+
+/* =========================================================
+   CURSOR
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-text::after {
+  content: '';
+
+  display: inline-block;
+
+  width: 6px;
+
+  height: 15px;
+
+  margin-left: 6px;
+
+  vertical-align: -2px;
+
+  background: var(--faction-accent);
+
+  box-shadow: 0 0 9px color-mix(in srgb, var(--faction-accent) 64%, transparent);
+
+  animation: relayFactionCursor 0.72s steps(1) infinite;
+}
 
 /* =========================================================
    KEYWORD HIGHLIGHT
    ========================================================= */
 
-.relay-faction-dialogue
-.relay-faction-keyword {
+html body .relay-faction-dialogue .relay-faction-keyword {
+  color: var(--faction-accent) !important;
 
-  color:
-    #7dd3fc !important;
+  font-weight: 900 !important;
 
-  font-weight:
-    800 !important;
-
-  text-shadow:
-    0 0 8px
-      rgba(56, 189, 248, .30),
-
-    0 0 16px
-      rgba(56, 189, 248, .12);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--faction-accent) 40%, transparent) !important;
 }
 
+/* =========================================================
+   RIGHT TACTICAL PANEL
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-tactical {
+  position: relative !important;
+
+  min-width: 0 !important;
+
+  display: flex !important;
+
+  flex-direction: column !important;
+
+  justify-content: center !important;
+
+  padding: 23px 18px 19px !important;
+
+  border-left: 1px solid rgba(141, 244, 255, 0.085) !important;
+
+  background: linear-gradient(
+    180deg,
+    rgba(141, 244, 255, 0.025),
+    rgba(255, 0, 170, 0.012),
+    transparent
+  ) !important;
+}
+
+/* =========================================================
+   TACTICAL CORNER
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-tactical::after {
+  content: '';
+
+  position: absolute;
+
+  right: 10px;
+
+  bottom: 10px;
+
+  width: 44px;
+
+  height: 44px;
+
+  border-right: 1px solid color-mix(in srgb, var(--faction-accent) 33%, transparent);
+
+  border-bottom: 1px solid color-mix(in srgb, var(--faction-accent) 20%, transparent);
+
+  opacity: 0.55;
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   SYSTEM LABEL
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-tactical::before {
+  content: '';
+
+  display: block;
+
+  margin-bottom: 15px;
+
+  color: rgba(141, 244, 255, 0.27);
+
+  font:
+    800 6px/1 'Orbitron',
+    sans-serif;
+
+  letter-spacing: 0.15em;
+}
+
+/* =========================================================
+   TACTICAL LABEL
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-tactical-label {
+  color: rgba(209, 231, 241, 0.45) !important;
+
+  font:
+    800 7px/1 'Orbitron',
+    sans-serif !important;
+
+  letter-spacing: 0.15em !important;
+
+  text-transform: uppercase !important;
+}
+
+/* =========================================================
+   SCAN STATUS
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-scan-status {
+  margin: 9px 0 12px !important;
+
+  color: var(--relay-faction-green) !important;
+
+  font:
+    800 7px/1.35 'Orbitron',
+    sans-serif !important;
+
+  letter-spacing: 0.07em !important;
+
+  text-transform: uppercase !important;
+
+  text-shadow: 0 0 8px rgba(57, 255, 136, 0.24) !important;
+
+  animation: scanStatusPulse 2.2s ease-in-out infinite;
+}
+
+/* =========================================================
+   THREAT CLASS
+   ========================================================= */
+
+html body .relay-faction-dialogue .relay-faction-threat-class {
+  position: relative !important;
+
+  margin: 0 !important;
+
+  padding-left: 10px !important;
+
+  color: var(--threat-color) !important;
+
+  font:
+    900 14px/1 'Orbitron',
+    sans-serif !important;
+
+  letter-spacing: 0.1em !important;
+
+  text-transform: uppercase !important;
+
+  text-shadow: 0 0 11px color-mix(in srgb, var(--threat-color) 38%, transparent) !important;
+}
+
+/* Threat marker */
+
+html body .relay-faction-dialogue .relay-faction-threat-class::before {
+  content: '';
+
+  position: absolute;
+
+  left: 0;
+
+  top: 50%;
+
+  width: 3px;
+
+  height: 18px;
+
+  transform: translateY(-50%);
+
+  background: var(--threat-color);
+
+  box-shadow: 0 0 8px var(--threat-color);
+}
 
 /* =========================================================
    FOOTER
    ========================================================= */
 
-.relay-faction-dialogue .relay-faction-footer {
-
-  position: relative;
+html body .relay-faction-dialogue .relay-faction-footer {
+  position: relative !important;
 
   display: grid !important;
 
   grid-template-columns:
-    1fr auto;
+    minmax(0, 1fr)
+    auto !important;
 
-  align-items:
-    center;
+  align-items: center !important;
 
-  gap:
-    14px;
+  gap: 9px !important;
 
-  margin-top:
-    18px !important;
+  margin: 22px 0 0 !important;
 
-  padding-top:
-    13px;
+  padding: 11px 0 0 !important;
 
-  border-top:
-    1px solid
-    rgba(56, 189, 248, .14);
+  border-top: 1px solid rgba(141, 244, 255, 0.1) !important;
 }
-
 
 /* =========================================================
-   SIGNAL STATUS
+   SIGNAL BAR
    ========================================================= */
 
-.relay-faction-dialogue
-.relay-faction-footer::before {
+html body .relay-faction-dialogue .relay-faction-footer::before {
+  content: var(--faction-signal, 'SIGNAL // ████████░░ // 82%');
 
-  content:
-    "SIGNAL // ████████░░ // 82%";
+  grid-column: 1 / -1 !important;
 
-  display:
-    block;
+  display: block !important;
 
-  margin-right:
-    auto;
-
-  color:
-    rgba(125, 211, 252, .62);
+  color: rgba(141, 244, 255, 0.6);
 
   font:
-    700 7px/1
-    "Orbitron",
+    800 6px/1 'Orbitron',
     sans-serif;
 
-  letter-spacing:
-    .12em;
+  letter-spacing: 0.1em;
 
-  white-space:
-    nowrap;
+  white-space: nowrap;
 
-  text-shadow:
-    0 0 8px
-      rgba(56, 189, 248, .18);
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.18);
+
+  animation: signalFlicker 2.8s ease-in-out infinite;
 }
-
 
 /* =========================================================
    HINT
    ========================================================= */
 
-/* =========================================================
-   FACTION — ENTER INPUT HUD
-   ========================================================= */
+html body .relay-faction-dialogue .relay-faction-hint {
+  position: relative !important;
 
-.relay-faction-dialogue .relay-faction-hint {
+  display: inline-flex !important;
 
-  display:
-    inline-flex !important;
+  align-items: center !important;
 
-  align-items:
-    center;
+  justify-content: center !important;
 
-  justify-content:
-    center;
+  width: fit-content !important;
 
-  margin:
-    0 !important;
+  min-width: 124px !important;
 
-  padding:
-    6px 11px !important;
+  min-height: 31px !important;
 
-  min-width:
-    92px;
+  margin: 0 !important;
 
-  border:
-    1px solid
-    rgba(56, 189, 248, .26);
+  padding: 6px 9px !important;
 
-  border-radius:
-    3px;
+  box-sizing: border-box !important;
 
-  background:
-    linear-gradient(
-      135deg,
-      rgba(56, 189, 248, .07),
-      rgba(3, 12, 22, .72)
-    );
+  border: 1px solid color-mix(in srgb, var(--faction-accent) 30%, transparent) !important;
 
-  color:
-    rgba(220, 245, 255, .78) !important;
+  border-radius: 4px !important;
+
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--faction-accent) 8%, transparent),
+    rgba(3, 9, 15, 0.92)
+  ) !important;
+
+  color: rgba(225, 247, 252, 0.76) !important;
 
   font:
-    700 7px/1.25
-    "Orbitron",
+    800 6px/1.25 'Orbitron',
     sans-serif !important;
 
-  letter-spacing:
-    .13em !important;
+  letter-spacing: 0.09em !important;
 
-  text-transform:
-    uppercase;
+  text-transform: uppercase !important;
 
-  text-align:
-    center !important;
+  text-align: center !important;
 
-  white-space:
-    nowrap;
+  white-space: nowrap !important;
 
   box-shadow:
-    inset 0 0 12px
-      rgba(56, 189, 248, .025),
-
-    0 0 10px
-      rgba(56, 189, 248, .045);
-
-  text-shadow:
-    0 0 7px
-      rgba(56, 189, 248, .18);
-
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease;
+    inset 0 0 12px rgba(56, 189, 248, 0.025),
+    0 0 14px color-mix(in srgb, var(--faction-accent) 7%, transparent) !important;
 }
 
-.relay-faction-dialogue .relay-faction-hint::before {
-  content:
-    "ENTER";
+/* =========================================================
+   ENTER KEY
+   ========================================================= */
 
-  display:
-    inline-flex;
+html body .relay-faction-dialogue .relay-faction-hint::before {
+  content: 'ENTER';
 
-  align-items:
-    center;
+  display: inline-flex;
 
-  justify-content:
-    center;
+  align-items: center;
 
-  margin-right:
-    7px;
+  justify-content: center;
 
-  min-width:
-    38px;
+  min-width: 40px;
 
-  height:
-    17px;
+  height: 17px;
 
-  padding:
-    0 5px;
+  margin-right: 7px;
 
-  border:
-    1px solid
-    rgba(125, 211, 252, .42);
+  padding: 0 5px;
 
-  border-radius:
-    2px;
+  box-sizing: border-box;
 
-  background:
-    rgba(56, 189, 248, .10);
+  border: 1px solid color-mix(in srgb, var(--faction-accent) 55%, transparent);
 
-  color:
-    #dffbff;
+  border-radius: 2px;
+
+  background: color-mix(in srgb, var(--faction-accent) 10%, transparent);
+
+  color: #effcff;
 
   font:
-    800 7px/1
-    "Orbitron",
+    900 7px/1 'Orbitron',
     sans-serif;
 
-  letter-spacing:
-    .08em;
+  letter-spacing: 0.08em;
 
-  box-shadow:
-    0 0 8px
-      rgba(56, 189, 248, .10);
-
-  text-shadow:
-    0 0 6px
-      rgba(56, 189, 248, .35);
+  text-shadow: 0 0 7px color-mix(in srgb, var(--faction-accent) 34%, transparent);
 }
 
 /* =========================================================
-   CONTINUE BUTTON
+   REAL NEXT BUTTON
    ========================================================= */
 
-.relay-faction-dialogue button {
-  position: relative;
+html body .relay-faction-dialogue .relay-faction-footer button {
+  min-width: 92px !important;
 
-  min-width:
-    92px !important;
+  width: 92px !important;
 
-  width:
-    auto !important;
+  max-width: 92px !important;
 
-  min-height:
-    34px !important;
+  height: 32px !important;
 
-  height:
-    34px !important;
+  min-height: 32px !important;
 
-  padding:
-    7px 12px !important;
+  max-height: 32px !important;
 
-  border:
-    1px solid
-    rgba(56, 189, 248, .52) !important;
+  padding: 7px 10px !important;
 
-  border-radius:
-    3px !important;
+  box-sizing: border-box !important;
 
-  background:
-    linear-gradient(
-      135deg,
-      rgba(56, 189, 248, .13),
-      rgba(7, 22, 35, .98)
-    ) !important;
+  border: 1px solid color-mix(in srgb, var(--faction-accent) 62%, transparent) !important;
 
-  color:
-    #eaffff !important;
+  border-radius: 4px !important;
+
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--faction-accent) 16%, transparent),
+    rgba(2, 10, 17, 0.98)
+  ) !important;
+
+  color: #effcff !important;
 
   font:
-    700 8px/1
-    "Orbitron",
+    900 7px/1 'Orbitron',
     sans-serif !important;
 
-  letter-spacing:
-    .14em !important;
+  letter-spacing: 0.13em !important;
 
-  text-transform:
-    uppercase;
+  cursor: pointer !important;
 
-  cursor:
-    pointer;
+  touch-action: manipulation !important;
 
   box-shadow:
-    inset 0 0 12px
-      rgba(56, 189, 248, .025),
-
-    0 0 14px
-      rgba(56, 189, 248, .055) !important;
+    inset 0 0 14px rgba(56, 189, 248, 0.035),
+    0 0 16px color-mix(in srgb, var(--faction-accent) 8%, transparent) !important;
 
   transition:
-    transform 120ms ease,
-    border-color 120ms ease,
-    box-shadow 120ms ease,
-    background 120ms ease !important;
+    transform 100ms ease,
+    border-color 100ms ease,
+    background 100ms ease,
+    box-shadow 100ms ease !important;
 }
 
+html body .relay-faction-dialogue .relay-faction-footer button:hover,
+html body .relay-faction-dialogue .relay-faction-footer button:focus-visible {
+  transform: translateY(-1px) !important;
 
-.relay-faction-dialogue button::before {
+  border-color: #dfffff !important;
 
-  content: "";
-
-  position: absolute;
-
-  inset:
-    1px;
-
-  border-radius:
-    2px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, .08),
-      transparent
-    );
-
-  opacity:
-    0;
-
-  transform:
-    translateX(-35%);
-
-  pointer-events:
-    none;
-}
-
-
-.relay-faction-dialogue button:hover,
-.relay-faction-dialogue button:focus-visible {
-
-  border-color:
-    rgba(125, 211, 252, .90) !important;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(56, 189, 248, .20),
-      rgba(8, 28, 45, .98)
-    ) !important;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--faction-accent) 26%, transparent),
+    rgba(5, 20, 31, 0.98)
+  ) !important;
 
   box-shadow:
-    0 0 24px
-      rgba(56, 189, 248, .14),
+    0 0 22px color-mix(in srgb, var(--faction-accent) 20%, transparent),
+    inset 0 0 18px rgba(56, 189, 248, 0.05) !important;
 
-    inset 0 0 18px
-      rgba(56, 189, 248, .04) !important;
-
-  outline:
-    none;
-
-  transform:
-    translateY(-1px);
+  outline: none !important;
 }
 
-
-.relay-faction-dialogue button:hover::before,
-.relay-faction-dialogue button:focus-visible::before {
-
-  opacity:
-    1;
-
-  animation:
-    relay-faction-sweep
-    700ms
-    ease-out
-    forwards;
+html body .relay-faction-dialogue .relay-faction-footer button:active {
+  transform: translateY(1px) !important;
 }
-
-
-.relay-faction-dialogue button:active {
-
-  transform:
-    translateY(0)
-    scale(.985);
-}
-
-
-.relay-faction-dialogue button:disabled {
-
-  opacity:
-    .65;
-
-  cursor:
-    default;
-
-  transform:
-    none;
-}
-
 
 /* =========================================================
-   ANIMATIONS
+   FACTION THEMES
    ========================================================= */
 
-@keyframes factionEncounterPulse {
+/* ---------------------------------------------------------
+   HELIX SECURITY
+   --------------------------------------------------------- */
 
-  0% {
-
-    transform:
-      scale(.82);
-
-    opacity:
-      .65;
-
-    box-shadow:
-      0 0 4px
-        #38d9ff,
-
-      0 0 9px
-        #38d9ff,
-
-      0 0 15px
-        rgba(56,189,248,.45);
-  }
-
-  50% {
-
-    transform:
-      scale(1.12);
-
-    opacity:
-      1;
-
-    box-shadow:
-      0 0 6px
-        #38d9ff,
-
-      0 0 14px
-        #38d9ff,
-
-      0 0 26px
-        rgba(56,189,248,.85);
-  }
-
-  100% {
-
-    transform:
-      scale(.82);
-
-    opacity:
-      .65;
-
-    box-shadow:
-      0 0 4px
-        #38d9ff,
-
-      0 0 9px
-        #38d9ff,
-
-      0 0 15px
-        rgba(56,189,248,.45);
-  }
+html body .relay-faction-dialogue[data-faction='HELIX_SECURITY'] {
+  --faction-accent: #38d9ff;
+  --panel-magenta: #ff00aa;
+  --threat-color: #38d9ff;
+  --faction-glow: rgba(56, 189, 248, 0.16);
 }
 
+/* ---------------------------------------------------------
+   FERAL THREATS
+   --------------------------------------------------------- */
 
-@keyframes relay-faction-sweep {
-
-  from {
-    transform:
-      translateX(-35%);
-  }
-
-  to {
-    transform:
-      translateX(140%);
-  }
+html body .relay-faction-dialogue[data-faction='FERAL_THREATS'] {
+  --faction-accent: #ff3b81;
+  --panel-magenta: #ff0068;
+  --threat-color: #ff688f;
+  --faction-glow: rgba(255, 59, 129, 0.18);
 }
 
+html body .relay-faction-dialogue[data-faction='FERAL_THREATS']::before {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 59, 129, 0.025) 0,
+      rgba(255, 59, 129, 0.025) 1px,
+      transparent 1px,
+      transparent 8px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.01) 0,
+      rgba(255, 255, 255, 0.01) 1px,
+      transparent 1px,
+      transparent 5px
+    ),
+    linear-gradient(90deg, transparent, rgba(255, 59, 129, 0.06), transparent) !important;
 
-@keyframes relay-faction-cursor {
+  background-size:
+    auto,
+    auto,
+    220% 100% !important;
 
-  0%,
-  49% {
-    opacity:
-      1;
-  }
-
-  50%,
-  100% {
-    opacity:
-      0;
-  }
+  animation: relayFactionSweep 4.4s linear infinite !important;
 }
 
+/* ---------------------------------------------------------
+   SKY RAIDERS
+   --------------------------------------------------------- */
+
+html body .relay-faction-dialogue[data-faction='SKY_RAIDERS'] {
+  --faction-accent: #ffd166;
+  --panel-magenta: #ff9d00;
+  --threat-color: #ffd166;
+  --faction-glow: rgba(255, 209, 102, 0.17);
+}
+
+html body .relay-faction-dialogue[data-faction='SKY_RAIDERS']::before {
+  background:
+    repeating-linear-gradient(
+      -35deg,
+      rgba(255, 209, 102, 0.025) 0,
+      rgba(255, 209, 102, 0.025) 1px,
+      transparent 1px,
+      transparent 9px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.01) 0,
+      rgba(255, 255, 255, 0.01) 1px,
+      transparent 1px,
+      transparent 5px
+    ),
+    linear-gradient(90deg, transparent, rgba(255, 209, 102, 0.06), transparent) !important;
+
+  background-size:
+    auto,
+    auto,
+    220% 100% !important;
+}
+
+/* ---------------------------------------------------------
+   GRID GHOSTS
+   --------------------------------------------------------- */
+
+html body .relay-faction-dialogue[data-faction='GRID_GHOSTS'] {
+  --faction-accent: #a78bfa;
+  --panel-magenta: #7c3aed;
+  --threat-color: #c4b5fd;
+  --faction-glow: rgba(167, 139, 250, 0.18);
+}
+
+html body .relay-faction-dialogue[data-faction='GRID_GHOSTS']::before {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(167, 139, 250, 0.025) 0,
+      rgba(167, 139, 250, 0.025) 1px,
+      transparent 1px,
+      transparent 9px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(167, 139, 250, 0.018) 0,
+      rgba(167, 139, 250, 0.018) 1px,
+      transparent 1px,
+      transparent 5px
+    ),
+    linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.06), transparent) !important;
+
+  background-size:
+    auto,
+    auto,
+    220% 100% !important;
+}
 
 /* =========================================================
-   HIDE SCROLLBARS
+   DESKTOP ANGULAR FRAME
    ========================================================= */
 
-.relay-faction-dialogue {
-  scrollbar-width:
-    none !important;
+@media (min-width: 901px) {
+  html body .relay-faction-dialogue {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 17px) 0,
+      100% 17px,
+      100% calc(100% - 13px),
+      calc(100% - 13px) 100%,
+      13px 100%,
+      0 calc(100% - 13px)
+    ) !important;
+  }
 
-  -ms-overflow-style:
-    none !important;
+  html body .relay-faction-dialogue .relay-faction-header {
+    padding-top: 31px !important;
+  }
 }
 
-.relay-faction-dialogue::-webkit-scrollbar {
-  width:
-    0 !important;
+/* =========================================================
+   TABLET
+   ========================================================= */
 
-  height:
-    0 !important;
+@media (max-width: 900px) and (min-width: 701px) {
+  html body .relay-faction-dialogue {
+    width: min(820px, calc(100vw - 26px)) !important;
 
-  display:
-    none !important;
+    grid-template-columns:
+      165px
+      minmax(0, 1fr)
+      154px !important;
+
+    min-height: 230px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-header {
+    padding: 27px 15px 21px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-emblem {
+    width: 66px !important;
+
+    height: 66px !important;
+
+    flex-basis: 66px !important;
+
+    font-size: 28px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-dialogue-core {
+    padding: 26px 20px 21px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-tactical {
+    padding: 21px 13px 18px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-name {
+    font-size: 14px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-text {
+    font-size: 15px !important;
+  }
 }
-
-.relay-faction-dialogue .relay-faction-text {
-  scrollbar-width:
-    none !important;
-
-  -ms-overflow-style:
-    none !important;
-}
-
-.relay-faction-dialogue
-.relay-faction-text::-webkit-scrollbar {
-  width:
-    0 !important;
-
-  height:
-    0 !important;
-
-  display:
-    none !important;
-}
-
 
 /* =========================================================
    MOBILE
    ========================================================= */
 
 @media (max-width: 700px) {
+  html body .relay-faction-dialogue {
+    left: 50% !important;
 
-  .relay-faction-dialogue {
+    right: auto !important;
 
-    width:
-      min(
-        640px,
-        calc(100vw - 20px)
-      ) !important;
+    top: auto !important;
 
-    bottom:
-      max(
-        10px,
-        env(safe-area-inset-bottom) + 7px
-      ) !important;
+    bottom: calc(112px + env(safe-area-inset-bottom)) !important;
 
-    padding:
-      18px 15px 15px !important;
+    width: calc(100vw - 16px) !important;
 
-    border-radius:
-      7px !important;
+    min-height: 0 !important;
+
+    max-height: min(360px, calc(100dvh - 128px - env(safe-area-inset-bottom))) !important;
+
+    display: grid !important;
+
+    grid-template-columns: 1fr !important;
+
+    grid-template-rows: auto auto auto !important;
+
+    border-radius: 9px !important;
+
+    clip-path: none !important;
+
+    transform: translateX(-50%) translateY(13px) scale(0.975) !important;
   }
 
-
-  .relay-faction-dialogue
-  .relay-faction-kicker {
-
-    margin-bottom:
-      15px !important;
-
-    font-size:
-      8px !important;
+  html body .relay-faction-dialogue:not([hidden]),
+  html body .relay-faction-dialogue.visible {
+    transform: translateX(-50%) translateY(0) scale(1) !important;
   }
 
+  /* -------------------------------------------------------
+     MOBILE HEADER
+     ------------------------------------------------------- */
 
-  .relay-faction-dialogue
-  .relay-faction-name {
+  html body .relay-faction-dialogue .relay-faction-header {
+    min-height: 74px !important;
 
-    margin-bottom:
-      16px !important;
+    padding: 10px 12px 9px !important;
 
-    font-size:
-      11px !important;
-
-    letter-spacing:
-      .10em !important;
-  }
-
-
-  .relay-faction-dialogue
-  .relay-faction-text {
-
-    min-height:
-      56px !important;
-
-    padding:
-      0 7px !important;
-
-    font-size:
-      14px !important;
-
-    line-height:
-      1.55 !important;
-  }
-
-
-  .relay-faction-dialogue
-  .relay-faction-footer {
+    display: grid !important;
 
     grid-template-columns:
-      1fr !important;
+      47px
+      minmax(0, 1fr)
+      auto !important;
 
-    gap:
-      9px !important;
+    grid-template-rows: auto auto !important;
 
-    margin-top:
-      15px !important;
+    column-gap: 10px !important;
 
-    padding-top:
-      11px;
+    align-items: center !important;
+
+    border-right: 0 !important;
+
+    border-bottom: 1px solid rgba(141, 244, 255, 0.09) !important;
   }
 
-
-  .relay-faction-dialogue
-  .relay-faction-footer::before {
-
-    margin:
-      0 auto;
-
-    font-size:
-      6px;
+  html body .relay-faction-dialogue .relay-faction-header::before,
+  html body .relay-faction-dialogue .relay-faction-header::after {
+    display: none !important;
   }
 
+  /* -------------------------------------------------------
+     MOBILE KICKER
+     ------------------------------------------------------- */
 
-  .relay-faction-dialogue
-  .relay-faction-hint {
+  html body .relay-faction-dialogue .relay-faction-kicker {
+    grid-column: 2 !important;
 
-    order:
-      2;
+    grid-row: 1 !important;
 
-    text-align:
-      center !important;
+    align-self: end !important;
 
-    font-size:
-      8px !important;
+    margin: 0 0 4px !important;
+
+    font-size: 6px !important;
+
+    letter-spacing: 0.12em !important;
   }
 
+  /* -------------------------------------------------------
+     MOBILE EMBLEM
+     ------------------------------------------------------- */
 
-  .relay-faction-dialogue button {
+  html body .relay-faction-dialogue .relay-faction-emblem {
+    grid-column: 1 !important;
 
-    width:
-      100% !important;
+    grid-row: 1 / span 2 !important;
 
-    min-height:
-      44px !important;
+    width: 47px !important;
+
+    height: 47px !important;
+
+    flex-basis: 47px !important;
+
+    margin: 0 !important;
+
+    border-radius: 7px !important;
+
+    font-size: 20px !important;
+  }
+
+  /* -------------------------------------------------------
+     MOBILE IDENTITY
+     ------------------------------------------------------- */
+
+  html body .relay-faction-dialogue .relay-faction-identity-status {
+    grid-column: 2 !important;
+
+    grid-row: 2 !important;
+
+    padding: 0 !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-identity-status span {
+    font-size: 5px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-identity-status b {
+    font-size: 6px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-encounter-id {
+    right: 12px !important;
+
+    left: auto !important;
+
+    bottom: 8px !important;
+
+    font-size: 5px !important;
+  }
+
+  /* -------------------------------------------------------
+     MOBILE CORE
+     ------------------------------------------------------- */
+
+  html body .relay-faction-dialogue .relay-faction-dialogue-core {
+    padding: 14px 13px 12px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-dialogue-core::before {
+    position: static !important;
+
+    display: block !important;
+
+    margin: 0 0 8px !important;
+
+    font-size: 5px !important;
+
+    letter-spacing: 0.1em !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-dialogue-core::after {
+    display: none !important;
+  }
+
+  /* -------------------------------------------------------
+     MOBILE NAME
+     ------------------------------------------------------- */
+
+  html body .relay-faction-dialogue .relay-faction-name {
+    margin: 0 0 10px !important;
+
+    padding: 0 0 9px !important;
+
+    font-size: 10px !important;
+
+    letter-spacing: 0.055em !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-name::before {
+    margin-bottom: 5px !important;
+
+    font-size: 5px !important;
+
+    letter-spacing: 0.1em !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-name::after {
+    right: 1px !important;
+
+    bottom: 10px !important;
+
+    width: 5px !important;
+
+    height: 5px !important;
+  }
+
+  /* -------------------------------------------------------
+     MOBILE TEXT
+     ------------------------------------------------------- */
+
+  html body .relay-faction-dialogue .relay-faction-text {
+    min-height: 43px !important;
+
+    padding: 9px 10px 9px 11px !important;
+
+    font-size: clamp(13px, 3.7vw, 15px) !important;
+
+    line-height: 1.45 !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-text::before {
+    margin: 0 0 8px !important;
+
+    padding: 3px 5px !important;
+
+    font-size: 4px !important;
+
+    letter-spacing: 0.08em !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-text::after {
+    width: 5px !important;
+
+    height: 12px !important;
+  }
+
+  /* -------------------------------------------------------
+     MOBILE TACTICAL
+     ------------------------------------------------------- */
+
+  html body .relay-faction-dialogue .relay-faction-tactical {
+    display: grid !important;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto !important;
+
+    grid-template-rows: auto auto auto !important;
+
+    column-gap: 10px !important;
+
+    padding: 10px 13px 10px !important;
+
+    border-left: 0 !important;
+
+    border-top: 1px solid rgba(141, 244, 255, 0.09) !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-tactical::before {
+    grid-column: 1 / -1 !important;
+
+    margin: 0 0 7px !important;
+
+    font-size: 4px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-tactical-label {
+    grid-column: 1 !important;
+
+    font-size: 5px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-threat-class {
+    grid-column: 2 !important;
+
+    grid-row: 2 !important;
+
+    font-size: 9px !important;
+
+    text-align: right !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-scan-status {
+    grid-column: 1 / -1 !important;
+
+    margin: 5px 0 0 !important;
+
+    font-size: 5px !important;
+  }
+
+  /* -------------------------------------------------------
+     MOBILE FOOTER
+     ------------------------------------------------------- */
+
+  html body .relay-faction-dialogue .relay-faction-footer {
+    grid-column: 1 / -1 !important;
+
+    margin: 8px 0 0 !important;
+
+    padding: 8px 0 0 !important;
+
+    gap: 7px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-footer::before {
+    font-size: 4px !important;
+
+    letter-spacing: 0.07em !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-hint {
+    min-width: 108px !important;
+
+    min-height: 28px !important;
+
+    padding: 5px 7px !important;
+
+    font-size: 5px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-hint::before {
+    min-width: 35px !important;
+
+    height: 16px !important;
+
+    margin-right: 6px !important;
+
+    font-size: 6px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-footer button {
+    min-width: 72px !important;
+
+    width: 72px !important;
+
+    max-width: 72px !important;
+
+    height: 28px !important;
+
+    min-height: 28px !important;
+
+    max-height: 28px !important;
+
+    font-size: 6px !important;
   }
 }
 
-
 /* =========================================================
-   SMALL MOBILE
+   SMALL PHONES
    ========================================================= */
 
 @media (max-width: 390px) {
+  html body .relay-faction-dialogue {
+    bottom: calc(101px + env(safe-area-inset-bottom)) !important;
 
-  .relay-faction-dialogue {
+    width: calc(100vw - 10px) !important;
 
-    width:
-      calc(100vw - 14px) !important;
-
-    padding:
-      16px 12px 13px !important;
+    max-height: min(310px, calc(100dvh - 117px - env(safe-area-inset-bottom))) !important;
   }
 
+  html body .relay-faction-dialogue .relay-faction-header {
+    min-height: 66px !important;
 
-  .relay-faction-dialogue
-  .relay-faction-kicker {
+    padding: 8px 9px !important;
 
-    font-size:
-      7px !important;
+    grid-template-columns:
+      40px
+      minmax(0, 1fr)
+      auto !important;
 
-    letter-spacing:
-      .13em !important;
+    column-gap: 8px !important;
   }
 
+  html body .relay-faction-dialogue .relay-faction-emblem {
+    width: 40px !important;
 
-  .relay-faction-dialogue
-  .relay-faction-name {
+    height: 40px !important;
 
-    font-size:
-      10px !important;
+    flex-basis: 40px !important;
 
-    letter-spacing:
-      .07em !important;
+    font-size: 17px !important;
   }
 
+  html body .relay-faction-dialogue .relay-faction-dialogue-core {
+    padding: 10px 10px 9px !important;
+  }
 
-  .relay-faction-dialogue
-  .relay-faction-text {
+  html body .relay-faction-dialogue .relay-faction-name {
+    font-size: 9px !important;
+  }
 
-    font-size:
-      13px !important;
+  html body .relay-faction-dialogue .relay-faction-text {
+    font-size: 12px !important;
 
-    min-height:
-      61px !important;
+    line-height: 1.43 !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-tactical {
+    padding: 8px 10px 9px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-hint {
+    min-width: 102px !important;
   }
 }
 
+/* =========================================================
+   SHORT MOBILE SCREENS
+   ========================================================= */
+
+@media (max-height: 620px) and (max-width: 700px) {
+  html body .relay-faction-dialogue {
+    bottom: calc(92px + env(safe-area-inset-bottom)) !important;
+
+    max-height: calc(100dvh - 102px - env(safe-area-inset-bottom)) !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-header {
+    min-height: 60px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-emblem {
+    width: 37px !important;
+
+    height: 37px !important;
+
+    flex-basis: 37px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-text {
+    min-height: 31px !important;
+
+    padding: 7px 8px 7px 9px !important;
+  }
+
+  html body .relay-faction-dialogue .relay-faction-footer {
+    margin-top: 5px !important;
+
+    padding-top: 5px !important;
+  }
+}
+
+/* =========================================================
+   NO SELECTION / NO DRAG
+   ========================================================= */
+
+html body .relay-faction-dialogue,
+html body .relay-faction-dialogue * {
+  -webkit-user-select: none !important;
+
+  user-select: none !important;
+
+  -webkit-touch-callout: none !important;
+}
+
+html body .relay-faction-dialogue {
+  -webkit-user-drag: none !important;
+
+  scrollbar-width: none !important;
+
+  -ms-overflow-style: none !important;
+}
+
+html body .relay-faction-dialogue::-webkit-scrollbar {
+  width: 0 !important;
+
+  height: 0 !important;
+
+  display: none !important;
+}
+
+/* =========================================================
+   POWER PULSE
+   ========================================================= */
+
+@keyframes factionPowerPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 30px 90px rgba(0, 0, 0, 0.72),
+      0 0 26px var(--faction-glow),
+      0 0 70px color-mix(in srgb, var(--panel-magenta) 5%, transparent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.075),
+      inset 0 -28px 70px rgba(0, 0, 0, 0.28);
+  }
+
+  50% {
+    box-shadow:
+      0 30px 90px rgba(0, 0, 0, 0.72),
+      0 0 34px var(--faction-glow),
+      0 0 86px color-mix(in srgb, var(--panel-magenta) 7%, transparent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09),
+      inset 0 -28px 70px rgba(0, 0, 0, 0.28);
+  }
+}
+
+/* =========================================================
+   TOP LINE ANIMATION
+   ========================================================= */
+
+@keyframes factionTopLine {
+  0%,
+  100% {
+    opacity: 0.7;
+
+    filter: brightness(0.9);
+  }
+
+  50% {
+    opacity: 1;
+
+    filter: brightness(1.3);
+  }
+}
+
+/* =========================================================
+   PANEL SWEEP
+   ========================================================= */
+
+@keyframes relayFactionSweep {
+  0% {
+    background-position:
+      0 0,
+      0 0,
+      -140% 0;
+  }
+
+  100% {
+    background-position:
+      0 0,
+      0 0,
+      140% 0;
+  }
+}
+
+/* =========================================================
+   LIVE DOT
+   ========================================================= */
+
+@keyframes factionLiveDot {
+  0%,
+  100% {
+    opacity: 0.58;
+
+    transform: scale(0.86);
+
+    box-shadow:
+      0 0 4px var(--relay-faction-green),
+      0 0 9px rgba(57, 255, 136, 0.46);
+  }
+
+  50% {
+    opacity: 1;
+
+    transform: scale(1.12);
+
+    box-shadow:
+      0 0 6px var(--relay-faction-green),
+      0 0 15px rgba(57, 255, 136, 0.8),
+      0 0 25px rgba(57, 255, 136, 0.26);
+  }
+}
+
+/* =========================================================
+   EMBLEM POWER
+   ========================================================= */
+
+@keyframes factionEmblemPower {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+
+    filter: brightness(0.96);
+  }
+
+  50% {
+    transform: rotate(0deg) scale(1.025);
+
+    filter: brightness(1.12);
+  }
+}
+
+/* =========================================================
+   EMBLEM CROSS SCAN
+   ========================================================= */
+
+@keyframes emblemCrossScan {
+  0% {
+    transform: translateX(-24px);
+
+    opacity: 0;
+  }
+
+  16% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 0.75;
+  }
+
+  84% {
+    opacity: 0.2;
+  }
+
+  100% {
+    transform: translateX(24px);
+
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   CORE BEAM
+   ========================================================= */
+
+@keyframes coreBeam {
+  0% {
+    left: -10%;
+
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 0.48;
+  }
+
+  58% {
+    opacity: 0.26;
+  }
+
+  100% {
+    left: 115%;
+
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   SIGNAL FLICKER
+   ========================================================= */
+
+@keyframes signalFlicker {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  45% {
+    opacity: 0.75;
+  }
+
+  48% {
+    opacity: 0.42;
+  }
+
+  52% {
+    opacity: 0.72;
+  }
+}
+
+/* =========================================================
+   STATUS PULSE
+   ========================================================= */
+
+@keyframes scanStatusPulse {
+  0%,
+  100% {
+    opacity: 0.68;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   CURSOR
+   ========================================================= */
+
+@keyframes relayFactionCursor {
+  0%,
+  48% {
+    opacity: 1;
+  }
+
+  49%,
+  100% {
+    opacity: 0.08;
+  }
+}
 
 /* =========================================================
    REDUCED MOTION
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
+  html body .relay-faction-dialogue,
+  html body .relay-faction-dialogue *,
+  html body .relay-faction-dialogue::before,
+  html body .relay-faction-dialogue::after,
+  html body .relay-faction-dialogue .relay-faction-emblem,
+  html body .relay-faction-dialogue .relay-faction-kicker::before,
+  html body .relay-faction-dialogue .relay-faction-name::after,
+  html body .relay-faction-dialogue .relay-faction-text::after,
+  html body .relay-faction-dialogue .relay-faction-dialogue-core::after {
+    animation: none !important;
 
-  .relay-faction-dialogue,
-  .relay-faction-dialogue button {
-
-    transition:
-      none !important;
-  }
-
-  .relay-faction-dialogue
-  .relay-faction-kicker::before,
-
-  .relay-faction-dialogue
-  button::before,
-
-  .relay-faction-dialogue
-  .relay-faction-cursor {
-
-    animation:
-      none !important;
+    transition: none !important;
   }
 }
+
 /* =========================================================
-   FINAL NEXT BUTTON SIZE OVERRIDE
+   FINAL CASCADE PROTECTION
    ========================================================= */
 
-.relay-faction-dialogue .relay-faction-footer button,
-.relay-faction-dialogue button {
-  width: 92px !important;
-  min-width: 92px !important;
-  max-width: 92px !important;
+html body .relay-faction-dialogue {
+  top: auto !important;
 
-  height: 34px !important;
-  min-height: 34px !important;
-  max-height: 34px !important;
+  right: auto !important;
 
-  padding: 7px 10px !important;
+  left: 50% !important;
 
-  flex: 0 0 92px !important;
+  height: auto !important;
+
+  max-width: none !important;
+
+  margin: 0 !important;
 
   box-sizing: border-box !important;
 }
-/* =========================================================
-   FACTION DIALOGUE — NO TEXT SELECTION
-   ========================================================= */
 
-.relay-faction-dialogue,
-.relay-faction-dialogue * {
-  -webkit-user-select: none !important;
-  user-select: none !important;
-  -webkit-touch-callout: none !important;
-}
-.relay-faction-dialogue {
-  -webkit-user-drag: none !important;
-  user-select: none !important;
+html body .relay-faction-dialogue > * {
+  box-sizing: border-box !important;
+
+  min-width: 0 !important;
 }
 /* =========================================================
-   HIDE NEXT BUTTON — ENTER ONLY
+   FACTION DIALOGUE — TRUE CENTER
    ========================================================= */
 
-.relay-faction-dialogue .relay-faction-footer button {
-  display: none !important;
+html body .relay-faction-dialogue {
+  left: 50% !important;
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  transform: translate(-50%, -50%) scale(0.975) !important;
 }
 
-/* =========================================================
-   FACTION — HOLOGRAPHIC PANEL SCAN
-   ========================================================= */
+html body .relay-faction-dialogue:not([hidden]),
+html body .relay-faction-dialogue.visible {
+  left: 50% !important;
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
 
-.relay-faction-dialogue {
-  animation:
-    factionPanelScan
-    4.5s
-    ease-in-out
-    infinite;
+  transform: translate(-50%, -50%) scale(1) !important;
 }
 
-@keyframes factionPanelScan {
-  0%, 100% {
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.065),
-      inset 0 0 38px rgba(0,234,255,.025),
-      0 22px 70px rgba(0,0,0,.68),
-      0 0 34px rgba(0,234,255,.10);
+/* Mobile također ostaje točno u centru */
+@media (max-width: 700px) {
+  html body .relay-faction-dialogue {
+    left: 50% !important;
+    top: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    transform: translate(-50%, -50%) scale(0.975) !important;
   }
 
-  50% {
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.08),
-      inset 0 0 42px rgba(0,234,255,.055),
-      0 22px 70px rgba(0,0,0,.68),
-      0 0 42px rgba(0,234,255,.16),
-      0 0 60px rgba(255,0,170,.045);
+  html body .relay-faction-dialogue:not([hidden]),
+  html body .relay-faction-dialogue.visible {
+    transform: translate(-50%, -50%) scale(1) !important;
   }
 }
-/* =========================================================
-   FACTION — NEON IDENTITY
-   ========================================================= */
-
-.relay-faction-dialogue .relay-faction-name {
-  text-shadow:
-    0 0 6px rgba(56, 189, 248, .35),
-    0 0 14px rgba(56, 189, 248, .18),
-    0 0 22px rgba(255, 0, 170, .10) !important;
-}
-
-.relay-faction-dialogue .relay-faction-name::after {
-  height: 1px !important;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(255, 0, 170, .15) 18%,
-      rgba(255, 0, 170, .75) 38%,
-      rgba(56, 217, 255, .95) 50%,
-      rgba(255, 0, 170, .75) 62%,
-      rgba(255, 0, 170, .15) 82%,
-      transparent 100%
-    ) !important;
-
-  box-shadow:
-    0 0 7px rgba(56, 217, 255, .35),
-    0 0 14px rgba(255, 0, 170, .16) !important;
-}
-/* =========================================================
-   FACTION — TACTICAL STATUS STRIP
-   ========================================================= */
-
-.relay-faction-dialogue .relay-faction-text::before {
-  content: "SECURE CHANNEL // ENCOUNTER LINKED";
-
-  display: block;
-
-  margin:
-    0 auto 11px;
-
-  padding:
-    4px 8px;
-
-  width:
-    fit-content;
-
-  border:
-    1px solid
-    rgba(56, 189, 248, .16);
-
-  background:
-    rgba(0, 18, 30, .34);
-
-  color:
-    rgba(125, 211, 252, .48);
-
-  font:
-    600 6px/1
-    "Orbitron",
-    sans-serif;
-
-  letter-spacing:
-    .15em;
-
-  text-align:
-    center;
-
-  white-space:
-    nowrap;
-
-  box-shadow:
-    inset 0 0 10px
-      rgba(56, 189, 248, .025);
-
-  text-shadow:
-    0 0 7px
-      rgba(56, 189, 248, .16);
-}
-
