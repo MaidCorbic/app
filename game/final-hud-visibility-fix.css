@@ -497,3 +497,45 @@ html, body { min-height:100%; }
     overscroll-behavior:none !important;
   }
 }
+
+
+/* ============================================================
+   PAUSE V4 — MODERN SHELL IS THE ONLY RENDERED MENU
+   ============================================================ */
+#pauseMenu.relay-cinematic-overlay > .menu{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+  position:absolute !important;
+  inset:0 !important;
+  overflow:hidden !important;
+}
+
+#pauseMenu.relay-cinematic-overlay > .relay-pause-shell{
+  position:absolute !important;
+  inset:clamp(8px,1.25vw,18px) !important;
+  display:grid !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  width:auto !important;
+  height:auto !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+  z-index:9100 !important;
+}
+
+#pauseMenu.relay-cinematic-overlay[data-pause-open="false"] > .relay-pause-shell{
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
+@media (max-width:900px){
+  #pauseMenu.relay-cinematic-overlay > .relay-pause-shell{
+    inset:0 !important;
+    width:100% !important;
+    height:100% !important;
+  }
+}
