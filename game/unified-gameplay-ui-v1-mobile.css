@@ -867,3 +867,135 @@
     padding: 10px 11px !important;
   }
     }
+
+
+/* ============================================================
+   FINAL MOBILE HUD
+   LEFT: MISSIONS + SIGNALS
+   RIGHT: PAUSE
+   XP is deliberately removed from touch gameplay.
+   ============================================================ */
+
+@media (max-width:760px) and (pointer:coarse){
+  #game #play .hud{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:7px!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:48px!important;
+    padding:
+      6px
+      max(10px,env(safe-area-inset-left))
+      6px
+      max(10px,env(safe-area-inset-right))!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+
+  #game #play .hud-route{
+    order:1!important;
+    flex:0 1 auto!important;
+    width:auto!important;
+    min-width:104px!important;
+    max-width:38vw!important;
+    min-height:44px!important;
+    padding:6px 9px!important;
+    border-radius:8px!important;
+  }
+
+  #game #play .hud-route #district{
+    display:none!important;
+  }
+
+  #game #play .hud-route .mobile-mission-label{
+    display:block!important;
+    margin:0 0 4px!important;
+    color:#62eaff!important;
+    font:900 6px/1 'Orbitron',Arial,sans-serif!important;
+    letter-spacing:.16em!important;
+  }
+
+  #game #play .hud-route b{
+    margin:0!important;
+    font-size:9px!important;
+    line-height:1.1!important;
+    max-width:100%!important;
+  }
+
+  #game #play .hud-progress{
+    order:2!important;
+    flex:0 1 118px!important;
+    width:118px!important;
+    min-width:104px!important;
+    max-width:130px!important;
+    min-height:44px!important;
+    height:44px!important;
+    padding:6px 8px!important;
+    border-radius:8px!important;
+  }
+
+  #game #play .hud-progress #signalCount{
+    font-size:13px!important;
+  }
+
+  #game #play .hud-progress > small{
+    font-size:6px!important;
+  }
+
+  #game #play .hud-progress > div{
+    height:3px!important;
+    margin-top:4px!important;
+  }
+
+  #game #play .hud-actions{
+    order:3!important;
+    position:relative!important;
+    top:auto!important;
+    right:auto!important;
+    margin-left:auto!important;
+    display:flex!important;
+    gap:6px!important;
+    flex:0 0 auto!important;
+  }
+
+  html body.is-touch #game #play .hud .hud-actions .hud-xp{
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+
+  html body.is-touch #game #play .hud .hud-actions > #pause{
+    display:grid!important;
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+    flex:0 0 44px!important;
+    border-radius:12px!important;
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+  }
+}
+
+@media (max-width:430px) and (pointer:coarse){
+  #game #play .hud{gap:5px!important;padding-left:7px!important;padding-right:7px!important}
+  #game #play .hud-route{min-width:92px!important;max-width:36vw!important}
+  #game #play .hud-progress{min-width:96px!important;width:102px!important}
+  #game #play .hud-actions > #pause{width:42px!important;height:42px!important;min-width:42px!important}
+}
+
+@media (max-width:760px) and (orientation:landscape) and (pointer:coarse){
+  #game #play .hud{
+    min-height:46px!important;
+    padding-top:4px!important;
+    padding-bottom:4px!important;
+  }
+  #game #play .hud-route,
+  #game #play .hud-progress{min-height:40px!important;height:40px!important}
+  #game #play .hud-route{min-width:112px!important}
+  #game #play .hud-progress{min-width:112px!important;width:122px!important}
+  #game #play .hud-actions > #pause{width:40px!important;height:40px!important;min-width:40px!important}
+}
