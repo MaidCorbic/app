@@ -369,7 +369,7 @@ export function installPlayerVisualV2(RunnerScene) {
     // The visible player is built from vector primitives, so its native
     // height is smaller than the 128px enemy sprites. Match the live
     // enemy presentation instead of relying on a fixed visual multiplier.
-    const CHARACTER_BASE_HEIGHT = 60;
+    const CHARACTER_BASE_HEIGHT = 50;
     let CHARACTER_SCALE = 2.0;
 
     const syncCharacterScaleToEnemy = () => {
