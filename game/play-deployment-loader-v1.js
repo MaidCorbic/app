@@ -4116,31 +4116,56 @@
 
 
         if (image) {
-  const map = image.closest('.relay-deployment-map');
-  const fallbackSrc = isCoarseDevice()
-    ? (map?.dataset?.missionArtMobile || DEFAULT_ASSETS.mobile)
-    : (map?.dataset?.missionArtDesktop || DEFAULT_ASSETS.desktop);
+          const map = image.closest('.relay-deployment-map');
+          const missionDesktop =
+            config.desktop || DEFAULT_ASSETS.desktop;
+          const missionMobile =
+            config.mobile || DEFAULT_ASSETS.mobile;
+          const selectedArt =
+            isCoarseDevice()
+              ? missionMobile
+              : missionDesktop;
 
-  if (map) {
-    map.style.setProperty(
-      '--relay-deployment-art',
-      'url("' + (isCoarseDevice() ? (map.dataset?.missionArtMobile || mobile) : (map.dataset?.missionArtDesktop || desktop)) + '")',
-    );
-  }
+          const fallbackSrc =
+            selectedArt ||
+            DEFAULT_ASSETS.desktop;
 
-  const useFallback = () => {
-    if (image.dataset.fallbackApplied === '1') return;
-    image.dataset.fallbackApplied = '1';
-    map?.querySelectorAll('source').forEach(source => source.removeAttribute('srcset'));
-    image.src = fallbackSrc;
-  };
+          if (map) {
+            map.style.setProperty(
+              '--relay-deployment-art',
+              'url("' + fallbackSrc.replaceAll('"', '\\\"') + '")',
+            );
+          }
 
-  image.addEventListener('error', useFallback, { once: true });
+          const useFallback = () => {
+            if (image.dataset.fallbackApplied === '1') return;
 
-  window.setTimeout(() => {
-    if (image.isConnected && image.naturalWidth === 0) useFallback();
-  }, 220);
-}
+            image.dataset.fallbackApplied = '1';
+
+            map
+              ?.querySelectorAll('source')
+              .forEach(source =>
+                source.removeAttribute('srcset'),
+              );
+
+            image.src = fallbackSrc;
+          };
+
+          image.addEventListener(
+            'error',
+            useFallback,
+            { once: true },
+          );
+
+          window.setTimeout(() => {
+            if (
+              image.isConnected &&
+              image.naturalWidth === 0
+            ) {
+              useFallback();
+            }
+          }, 220);
+        }
 
 
         startGlitchLoop(
