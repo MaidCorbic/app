@@ -144,3 +144,110 @@ body.is-touch #play .mobile-actions > button small{display:none !important;}
 @media (prefers-reduced-motion:reduce){
   body.is-touch #play .mobile-joystick{transition:none !important;}
 }
+
+
+/* =========================================================
+   MOBILE GAMEPLAY CONTROLS // SIMPLE + TOUCH SAFE
+   Final override: one movement pad + four core actions.
+   ========================================================= */
+
+@media (hover:none) and (pointer:coarse) {
+  body.is-touch #play .mobile-controls{
+    position:absolute!important;
+    inset:0!important;
+    padding:
+      0
+      max(12px,env(safe-area-inset-right))
+      max(12px,env(safe-area-inset-bottom))
+      max(12px,env(safe-area-inset-left))!important;
+    align-items:flex-end!important;
+    justify-content:space-between!important;
+    pointer-events:none!important;
+  }
+
+  body.is-touch #play .mobile-joystick{
+    position:relative!important;
+    flex:0 0 126px!important;
+    width:126px!important;
+    height:126px!important;
+    margin:0 0 10px 0!important;
+    border-width:2px!important;
+    pointer-events:auto!important;
+  }
+
+  body.is-touch #play .mobile-joystick-thumb{
+    width:58px!important;
+    height:58px!important;
+    margin:-29px 0 0 -29px!important;
+  }
+
+  body.is-touch #play .mobile-actions{
+    display:grid!important;
+    grid-template-columns:repeat(2,68px)!important;
+    grid-template-rows:repeat(2,68px)!important;
+    gap:9px!important;
+    margin:0 0 10px 0!important;
+    pointer-events:none!important;
+  }
+
+  body.is-touch #play .mobile-actions > button{
+    width:68px!important;
+    height:68px!important;
+    min-width:68px!important;
+    min-height:68px!important;
+    border-radius:18px!important;
+    font-size:10px!important;
+    font-weight:900!important;
+    letter-spacing:.08em!important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.045),
+      0 7px 18px rgba(0,0,0,.38),
+      0 0 16px rgba(98,234,255,.12)!important;
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+  }
+
+  body.is-touch #play .mobile-actions > [data-mobile-action="jump"]{grid-column:1!important;grid-row:1!important}
+  body.is-touch #play .mobile-actions > [data-mobile-action="fire"]{grid-column:2!important;grid-row:1!important}
+  body.is-touch #play .mobile-actions > [data-mobile-action="sword"]{grid-column:1!important;grid-row:2!important}
+  body.is-touch #play .mobile-actions > [data-mobile-action="dash"]{grid-column:2!important;grid-row:2!important}
+
+  body.is-touch #play .mobile-actions > [data-mobile-action="build1"],
+  body.is-touch #play .mobile-actions > [data-mobile-action="gadget1"]{
+    display:none!important;
+  }
+}
+
+@media (max-width:520px) and (orientation:portrait) and (hover:none) and (pointer:coarse){
+  body.is-touch #play .mobile-joystick{
+    width:112px!important;height:112px!important;flex-basis:112px!important;margin-bottom:8px!important;
+  }
+  body.is-touch #play .mobile-joystick-thumb{
+    width:52px!important;height:52px!important;margin:-26px 0 0 -26px!important;
+  }
+  body.is-touch #play .mobile-actions{
+    grid-template-columns:repeat(2,60px)!important;
+    grid-template-rows:repeat(2,60px)!important;
+    gap:7px!important;margin-bottom:8px!important;
+  }
+  body.is-touch #play .mobile-actions > button{
+    width:60px!important;height:60px!important;min-width:60px!important;min-height:60px!important;
+  }
+}
+
+@media (max-width:760px) and (orientation:landscape) and (max-height:560px) and (hover:none) and (pointer:coarse){
+  body.is-touch #play .mobile-joystick{
+    width:108px!important;height:108px!important;flex-basis:108px!important;margin-bottom:7px!important;
+  }
+  body.is-touch #play .mobile-joystick-thumb{
+    width:50px!important;height:50px!important;margin:-25px 0 0 -25px!important;
+  }
+  body.is-touch #play .mobile-actions{
+    grid-template-columns:repeat(2,58px)!important;
+    grid-template-rows:repeat(2,58px)!important;
+    gap:7px!important;margin-bottom:7px!important;
+  }
+  body.is-touch #play .mobile-actions > button{
+    width:58px!important;height:58px!important;min-width:58px!important;min-height:58px!important;
+  }
+}
