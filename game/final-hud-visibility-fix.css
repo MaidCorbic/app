@@ -497,3 +497,101 @@ html, body { min-height:100%; }
     overscroll-behavior:none !important;
   }
 }
+
+
+/* ============================================================
+   PAUSE V4 — MODERN SHELL IS THE ONLY RENDERED MENU
+   ============================================================ */
+#pauseMenu.relay-cinematic-overlay > .menu{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+  position:absolute !important;
+  inset:0 !important;
+  overflow:hidden !important;
+}
+
+#pauseMenu.relay-cinematic-overlay > .relay-pause-shell{
+  position:absolute !important;
+  inset:clamp(8px,1.25vw,18px) !important;
+  display:grid !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  width:auto !important;
+  height:auto !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+  z-index:9100 !important;
+}
+
+#pauseMenu.relay-cinematic-overlay[data-pause-open="false"] > .relay-pause-shell{
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
+@media (max-width:900px){
+  #pauseMenu.relay-cinematic-overlay > .relay-pause-shell{
+    inset:0 !important;
+    width:100% !important;
+    height:100% !important;
+  }
+}
+
+
+/* ============================================================
+   MOBILE MENU BUTTONS // CLEAR HIT ZONES
+   Keep them away from joystick/action controls.
+   ============================================================ */
+
+@media (max-width:760px) and (pointer:coarse){
+  body.is-touch #mobileBottomHud{
+    position:fixed!important;
+    top:58px!important;
+    right:max(10px,env(safe-area-inset-right))!important;
+    bottom:auto!important;
+    left:auto!important;
+    width:auto!important;
+    height:auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:7px!important;
+    align-items:flex-end!important;
+    z-index:900!important;
+    pointer-events:none!important;
+  }
+
+  body.is-touch #mobileBottomHud .mobile-menu-pause,
+  body.is-touch #mobileBottomHud .mobile-menu-settings{
+    position:relative!important;
+    inset:auto!important;
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+    margin:0!important;
+    border-radius:12px!important;
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+  }
+
+  body.is-touch #mobileBottomHud .mobile-hud-label{
+    display:none!important;
+  }
+}
+
+@media (max-width:430px) and (pointer:coarse){
+  body.is-touch #mobileBottomHud{
+    top:55px!important;
+    right:7px!important;
+  }
+  body.is-touch #mobileBottomHud .mobile-menu-pause,
+  body.is-touch #mobileBottomHud .mobile-menu-settings{
+    width:40px!important;
+    height:40px!important;
+    min-width:40px!important;
+    min-height:40px!important;
+  }
+}

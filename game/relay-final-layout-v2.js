@@ -202,7 +202,16 @@
       'OPTIONS',
       'SETTINGS · AUDIO · DISPLAY',
       () => {
-        /* Options belongs exclusively to unified-options-ui-v1. */
+        /* Options belongs exclusively to the unified cinematic UI. */
+        try {
+          if (typeof window.relayUnifiedCinematicUI?.openOptions === 'function') {
+            window.relayUnifiedCinematicUI.openOptions();
+            return;
+          }
+        } catch (error) {
+          console.error('[relay-final-layout-v2] unified options open failed', error);
+        }
+
         nativeClick('[data-title-panel="controls"]');
       }
     );

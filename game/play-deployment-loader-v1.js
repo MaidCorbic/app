@@ -937,27 +937,22 @@
            MAP
            ======================================================== */
 
-        .relay-deployment-map {
+         .relay-deployment-map {
 
-          position:
-            absolute;
+   position:absolute;
+   inset:0;
+   z-index:0;
+   display:block;
+   overflow:hidden;
+   background-color:#07101e;
+   background-image:var(--relay-deployment-art);
+   background-position:center;
+   background-size:cover;
+   background-repeat:no-repeat;
 
-          inset:
-            0;
+ }
 
-          z-index:
-            0;
-
-          display:
-            block;
-
-          overflow:
-            hidden;
-
-        }
-
-
-        .relay-deployment-map-image {
+.relay-deployment-map-image {
 
           position:
             absolute;
@@ -4121,34 +4116,55 @@
 
 
         if (image) {
+          const map = image.closest('.relay-deployment-map');
+          const missionDesktop =
+            config.desktop || DEFAULT_ASSETS.desktop;
+          const missionMobile =
+            config.mobile || DEFAULT_ASSETS.mobile;
+          const selectedArt =
+            isCoarseDevice()
+              ? missionMobile
+              : missionDesktop;
+
+          const fallbackSrc =
+            selectedArt ||
+            DEFAULT_ASSETS.desktop;
+
+          if (map) {
+            map.style.setProperty(
+              '--relay-deployment-art',
+              'url("' + fallbackSrc.replaceAll('"', '\\\"') + '")',
+            );
+          }
+
+          const useFallback = () => {
+            if (image.dataset.fallbackApplied === '1') return;
+
+            image.dataset.fallbackApplied = '1';
+
+            map
+              ?.querySelectorAll('source')
+              .forEach(source =>
+                source.removeAttribute('srcset'),
+              );
+
+            image.src = fallbackSrc;
+          };
 
           image.addEventListener(
             'error',
-            () => {
-
-              if (
-                image.dataset.fallbackApplied === '1'
-              ) {
-                return;
-              }
-
-
-              image.dataset.fallbackApplied =
-                '1';
-
-
-              image.src =
-                isCoarseDevice()
-                  ? DEFAULT_ASSETS.mobile
-                  : DEFAULT_ASSETS.desktop;
-
-            },
-            {
-              once:
-                true
-            }
+            useFallback,
+            { once: true },
           );
 
+          window.setTimeout(() => {
+            if (
+              image.isConnected &&
+              image.naturalWidth === 0
+            ) {
+              useFallback();
+            }
+          }, 220);
         }
 
 

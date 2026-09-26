@@ -1012,3 +1012,9 @@
 @media(max-width:760px){#play .hud{width:calc(100vw - 18px)!important;max-width:none!important}}
 @media(max-width:520px){#play .hud{width:calc(100vw - 18px)!important}}
 @media(orientation:landscape) and (max-height:560px){#play .hud{width:calc(100vw - 18px)!important}}
+
+
+.mobile-mission-label{display:none!important}
+@media (max-width:760px) and (pointer:coarse){
+  #play .mobile-mission-label{display:block!important}
+}

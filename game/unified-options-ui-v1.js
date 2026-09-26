@@ -380,14 +380,14 @@ import { loadState, saveState } from './src/state.js';
     } catch {}
 
     let quality =
-      'HIGH';
+      'LOW';
 
     try {
       quality =
         localStorage.getItem(
           'runner_graphics_quality'
         ) ||
-        'HIGH';
+        'LOW';
     } catch {}
 
     quality =
@@ -408,7 +408,7 @@ import { loadState, saveState } from './src/state.js';
         quality
       )
     ) {
-      quality = 'HIGH';
+      quality = 'LOW';
     }
 
     const level =
@@ -432,8 +432,7 @@ import { loadState, saveState } from './src/state.js';
 
     const quality =
       String(
-        settings.quality ||
-          'HIGH'
+        settings.quality || 'LOW'
       ).toUpperCase();
 
     host

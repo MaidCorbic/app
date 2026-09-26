@@ -2292,6 +2292,13 @@ function setPanelLine(scene, line, factionName, instant = false) {
    ========================================================= */
 
 function showDialogue(scene, trigger) {
+  const intro = document.getElementById('intro');
+
+  // Faction dialogue is gameplay-only. Never render it while Home is visible.
+  if (intro && !intro.classList.contains('hidden')) {
+    return false;
+  }
+
   if (scene.__factionDialogueActive) {
     return false;
   }
@@ -2571,6 +2578,20 @@ export function installEnemyDialogue(RunnerScene) {
      ======================================================= */
 
   RunnerScene.prototype.update = function (...args) {
+    const intro = document.getElementById('intro');
+    const homeVisible = !!intro && !intro.classList.contains('hidden');
+
+    if (homeVisible) {
+      if (this.__factionDialogueActive) {
+        dismissDialogue(this, true);
+      } else {
+        this.__factionDialoguePanel && (this.__factionDialoguePanel.hidden = true);
+        this.__factionDialogueBackdrop && (this.__factionDialogueBackdrop.hidden = true);
+      }
+
+      return originalUpdate.apply(this, args);
+    }
+
     if (this.__factionDialogueActive) {
       return;
     }

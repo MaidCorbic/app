@@ -35,6 +35,7 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
     const infoPanel = $('relayInfoPanel');
 
     if (titlePanel instanceof HTMLElement) {
+      delete titlePanel.dataset.homeTutorialOpen;
       titlePanel.classList.add('hidden');
       titlePanel.setAttribute('aria-hidden', 'true');
     }
@@ -536,6 +537,62 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
      OPTIONS
      ========================================================= */
 
+  /* =========================================================
+     REAL HOME ROUTES
+     GitHub Pages-safe: use hash routes instead of fake buttons
+     or unsupported deep URLs. Existing panels remain the owners.
+     ========================================================= */
+
+  const HOME_ROUTES = Object.freeze({
+    home: '#home',
+    play: '#play',
+    faq: '#faq',
+    update: '#update',
+    tutorial: '#tutorial',
+    options: '#options',
+    daily: '#daily',
+    contracts: '#contracts',
+  });
+
+  const setHomeRoute = (route) => {
+    const hash = HOME_ROUTES[route] || HOME_ROUTES.home;
+
+    if (window.location.hash !== hash) {
+      history.pushState({ relayHomeRoute: route }, '', hash);
+    }
+  };
+
+  const syncHomeRoute = () => {
+    const route = window.location.hash.replace(/^#/, '') || 'home';
+
+    switch (route) {
+      case 'faq':
+        openFaq();
+        break;
+      case 'update':
+        openUpdate();
+        break;
+      case 'tutorial':
+        openHomeTutorial();
+        break;
+      case 'options':
+        openOptions();
+        break;
+      case 'daily':
+        document.querySelector('#pauseMenu [data-tab="challenges"]')?.click?.();
+        break;
+      case 'contracts':
+        window.relayOpenContracts?.();
+        break;
+      case 'play':
+        clickExisting('#start');
+        break;
+      default:
+        closeHomePanels();
+        break;
+    }
+  };
+
   const openOptions = () => {
     try {
       if (typeof window.relayUnifiedCinematicUI?.openOptions === 'function') {
@@ -808,7 +865,12 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
       return false;
     }
 
+    if (panel.dataset.homeTutorialOpen === '1') {
+      return true;
+    }
+
     closeHomePanels();
+    panel.dataset.homeTutorialOpen = '1';
 
     eyebrow.textContent = 'FIELD MANUAL';
 
@@ -816,6 +878,11 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
 
     content.innerHTML = `
       <div class="home-tutorial-content">
+
+        <div class="tutorial-status-bar">
+          <span>TRAINING // INPUT MATRIX</span>
+          <strong>READY</strong>
+        </div>
 
         <div class="tutorial-intro">
           <span>TUTORIAL // RUNNER RELAY</span>
@@ -868,19 +935,37 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
           <article class="tutorial-quick-card">
             <small>01 // MOVE</small>
             <strong>A / D</strong>
-            <span>RUN ACROSS THE ROOFTOPS</span>
+            <span>MOVE LEFT OR RIGHT. HOLD THE KEY TO KEEP RUNNING.</span>
           </article>
 
           <article class="tutorial-quick-card">
             <small>02 // JUMP</small>
             <strong>SPACE</strong>
-            <span>JUMP AND USE DOUBLE JUMP</span>
+            <span>JUMP OVER GAPS AND OBSTACLES. USE IT AGAIN IN AIR WHEN AVAILABLE.</span>
           </article>
 
           <article class="tutorial-quick-card">
             <small>03 // DASH</small>
             <strong>SHIFT</strong>
-            <span>BURST FORWARD THROUGH THE ROUTE</span>
+            <span>BURST FORWARD. USE IT TO CLEAR DANGER OR CLOSE DISTANCE FAST.</span>
+          </article>
+
+          <article class="tutorial-quick-card">
+            <small>04 // FIRE</small>
+            <strong>E</strong>
+            <span>FIRE YOUR RANGED WEAPON. KEEP MOVING WHILE PRESSING E.</span>
+          </article>
+
+          <article class="tutorial-quick-card">
+            <small>05 // BLADE</small>
+            <strong>Q</strong>
+            <span>TRIGGER THE CLOSE-RANGE BLADE ATTACK WHEN AN ENEMY GETS TOO CLOSE.</span>
+          </article>
+
+          <article class="tutorial-quick-card">
+            <small>06 // PAUSE</small>
+            <strong>ESC</strong>
+            <span>OPEN THE PAUSE SYSTEM. FROM THERE YOU CAN ACCESS OPTIONS AND OTHER MENUS.</span>
           </article>
 
         </div>
@@ -3372,6 +3457,8 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
 
     startHomeTypewriter();
     syncHomeProfile();
+    window.addEventListener('hashchange', syncHomeRoute, { passive: true });
+    syncHomeRoute();
 
     /* =========================================================
        STABLE HOME BUTTON EVENTS
@@ -3389,52 +3476,14 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
       event.stopPropagation();
 
       const action = target.dataset.homeV4Action;
+      const previousHash = window.location.hash;
+      setHomeRoute(action);
 
-      switch (action) {
-        case 'faq':
-          openFaq();
-          break;
-
-        case 'update':
-          openUpdate();
-          break;
-
-        case 'tutorial':
-          openHomeTutorial();
-          break;
-
-        case 'options':
-          openOptions();
-          break;
-
-        case 'daily': {
-          const challengeTab = document.querySelector('#pauseMenu [data-tab="challenges"]');
-
-          if (challengeTab instanceof HTMLElement) {
-            HTMLElement.prototype.click.call(challengeTab);
-
-            break;
-          }
-
-          const fallback = document.querySelector('[data-relay-info="challenges"]');
-
-          if (fallback instanceof HTMLElement) {
-            HTMLElement.prototype.click.call(fallback);
-          }
-
-          break;
-        }
-
-        case 'contracts':
-          if (typeof window.relayOpenContracts === 'function') {
-            window.relayOpenContracts();
-          } else {
-            console.error('[RelayRunner] Contracts API not ready');
-          }
-          break;
-
-        default:
-          break;
+      // The hash router is the single owner of Home panel opening.
+      // If the hash was already correct, sync immediately; otherwise
+      // hashchange will perform exactly one open.
+      if (window.location.hash === previousHash) {
+        syncHomeRoute();
       }
     });
 
@@ -3625,6 +3674,8 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
 
     forceStartVisible(start);
 
+    start?.addEventListener('click', () => setHomeRoute('play'), { passive: true });
+
     /*
      * Gameplay Start ownership intentionally lives in main.js.
      * Home only presents the button; it does not install a competing
@@ -3680,6 +3731,7 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
         }
 
         try {
+          setHomeRoute('play');
           HTMLElement.prototype.click.call(sourceContinue);
         } catch {}
       });

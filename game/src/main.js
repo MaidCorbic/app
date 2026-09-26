@@ -1299,14 +1299,27 @@ function launch(index = missionIndex, paused = false, runConfig = {}) {
   const deploymentLoader = window.relayPlayDeploymentV4;
 
   if (!paused && deploymentLoader && typeof deploymentLoader.show === 'function') {
-    void deploymentLoader.show({
-      missionNumber: index + 1,
-      skipRoute: true,
+    void deploymentLoader
+      .show({
+        missionNumber: index + 1,
+        skipRoute: true,
 
-      beforeRoute: async () => {
+        beforeRoute: async () => {
+          startRunnerScene();
+        },
+      })
+      .then((shown) => {
+        /*
+         * A loader failure must never strand the player on a blank Phaser
+         * surface. Start the scene directly as a last-resort recovery.
+         */
+        if (shown === false) {
+          startRunnerScene();
+        }
+      })
+      .catch(() => {
         startRunnerScene();
-      },
-    });
+      });
 
     return;
   }
@@ -3156,34 +3169,14 @@ const startGameplayFromHome = () => {
    * potentially heavier loader/gameplay work.
    */
   window.setTimeout(() => {
-    const loader = window.relayPlayDeploymentV1;
-
-    if (loader && typeof loader.show === 'function') {
-      void loader.show({
-        missionNumber: 1,
-
-        desktop: './assets/loadplay.jpg',
-
-        mobile: './assets/loadplaymobile.jpg',
-
-        skipRoute: true,
-
-        beforeRoute: async () => {
-          if (typeof window.relayLaunchGameplay === 'function') {
-            window.relayLaunchGameplay();
-            return;
-          }
-
-          game.scene.isPaused('runner') ? game.scene.resume('runner') : launch(0);
-        },
-      });
-
-      return;
-    }
-
-    leaveHome(game.scene.isPaused('runner') ? () => game.scene.resume('runner') : () => launch(0));
-  }, 0);
-};
+    /*
+     * launch() owns the single deployment-loader -> RunnerScene handoff.
+     * Even when a prebooted scene is paused, keep this path unified so
+     * START RUN always shows the deployment artwork and then starts/restarts
+     * the real RunnerScene with the current mission data.
+     */
+    launch(0, false);
+  }, 0);};
 
 /*
  * The Home module creates #start after main.js has loaded.
@@ -3355,6 +3348,14 @@ $('closeAbilityUnlock').onclick = () => $('abilityUnlock').classList.add('hidden
 applyRuntimeSettings();
 renderHomeProgress();
 
+/*
+ * Desktop preboot: preserve the proven RunnerScene initialization path while
+ * Home remains the visible presentation. Faction/runtime guards keep gameplay
+ * overlays hidden until the user actually enters gameplay.
+ *
+ * Touch devices intentionally defer this work to the real START RUN action
+ * to avoid extra startup cost on constrained devices.
+ */
 const shouldDeferInitialRunnerPreboot = detectTouchDevice();
 
 if (!shouldDeferInitialRunnerPreboot) {

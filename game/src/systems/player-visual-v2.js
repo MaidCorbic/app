@@ -366,12 +366,41 @@ export function installPlayerVisualV2(RunnerScene) {
     let wasAirborne = false;
     let landingPulse = 0;
 
+    // The visible player is built from vector primitives, so its native
+    // height is smaller than the 128px enemy sprites. Match the live
+    // enemy presentation instead of relying on a fixed visual multiplier.
+    const CHARACTER_BASE_HEIGHT = 50;
+    let CHARACTER_SCALE = 2.0;
+
+    const syncCharacterScaleToEnemy = () => {
+      const enemies = this.enemies?.getChildren?.() || [];
+      const reference = enemies.find(enemy =>
+        enemy?.active &&
+        enemy?.texture?.key &&
+        Number(enemy.displayHeight || enemy.height) > 0
+      );
+
+      if (!reference) return;
+
+      const enemyHeight = Number(reference.displayHeight || reference.height) || 0;
+      if (enemyHeight <= 0) return;
+
+      // Keep the result stable while matching the actual enemy render size.
+      CHARACTER_SCALE = Phaser.Math.Clamp(
+        enemyHeight / CHARACTER_BASE_HEIGHT,
+        1.8,
+        3.2
+      );
+    };
+
     const updateVisual = (delta = 16.67) => {
       if (!this.playerVisualV2?.root) return;
 
       const currentPlayer = this.player;
 
       if (!currentPlayer) return;
+
+      syncCharacterScaleToEnemy();
 
       const key =
         currentPlayer.anims?.currentAnim?.key ||
@@ -524,8 +553,8 @@ export function installPlayerVisualV2(RunnerScene) {
           : scaleX;
 
       root.setScale(
-        facingScaleX,
-        scaleY
+        facingScaleX * CHARACTER_SCALE,
+        scaleY * CHARACTER_SCALE
       );
 
       // ----------------------------------------------------------

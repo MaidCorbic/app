@@ -66,6 +66,14 @@
   }
   
 </style>
+<link rel="preload" as="image" href="./assets/loading.jpg" fetchpriority="high">
+<link rel="preload" as="image" href="./assets/loading-landscape.jpg" media="(orientation: landscape)" fetchpriority="high">
+<style id="relay-splash-first-paint">
+  #relaySplash{background:#03070d url("./assets/loading.jpg") center/cover no-repeat}
+  #relaySplashArt{opacity:0;transition:opacity .16s ease}
+  @media (orientation:landscape){#relaySplash{background-image:url("./assets/loading-landscape.jpg")}}
+  #relaySplash.is-image-ready #relaySplashArt{opacity:1}
+</style>
 </head>
 
 <body>
@@ -157,6 +165,7 @@
       <header class="hud">
 
         <div class="hud-route">
+          <span class="mobile-mission-label" aria-hidden="true">MISSION</span>
 
           <span class="route-dot"></span>
 
@@ -312,9 +321,11 @@
             type="button"
             data-mobile-action="gadget1"
           >
-            GEAR
+            GADGET
             <small>3</small>
           </button>
+
+
 
         </div>
 

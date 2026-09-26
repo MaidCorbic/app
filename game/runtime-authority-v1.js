@@ -1,4 +1,5 @@
 import { RunnerScene } from './src/scenes/RunnerScene.js';
+import { applyHorizontalMovementFeel, MOVEMENT_FEEL } from './src/movement/MovementFeel.js';
 
 /*
  * GAMEPLAY RUNTIME AUTHORITY V3
@@ -382,6 +383,125 @@ import { RunnerScene } from './src/scenes/RunnerScene.js';
     installInputDeduper(
       scene.game
     );
+  }
+
+  /*
+   * FINAL MOVEMENT RESTORE BRIDGE
+   *
+   * Keep the existing RunnerScene movement implementation authoritative,
+   * but apply the same horizontal target after all runtime wrappers have run.
+   * This prevents a presentation/safety layer from accidentally zeroing the
+   * player's horizontal velocity after the normal input handler.
+   */
+  const originalUpdate =
+    RunnerScene
+      ?.prototype
+      ?.update;
+
+  if (
+    typeof originalUpdate === 'function' &&
+    !RunnerScene.prototype.__relayRuntimeAuthorityV3MovementWrapped
+  ) {
+    RunnerScene.prototype.update =
+      function runtimeAuthorityMovementUpdate(
+        time,
+        delta,
+        ...args
+      ) {
+        const result =
+          originalUpdate.apply(
+            this,
+            [time, delta, ...args]
+          );
+
+        try {
+          const player = this.player;
+          const body = player?.body;
+
+          if (
+            !player ||
+            !body ||
+            !this.scene?.isActive?.() ||
+            this.scene?.isPaused?.() ||
+            this.finished ||
+            this.respawning ||
+            this.cinematicActive ||
+            this.inputEnabled === false ||
+            this.relayPuzzleActive ||
+            this.__relayIntentionalBlock === true
+          ) {
+            return result;
+          }
+
+          const keys = this.keys || {};
+          const cursors = this.cursors || {};
+          const bridge =
+            window.__relayDesktopKeyboardBridge?.down;
+
+          const down = (key, ...codes) =>
+            Boolean(key?.isDown) ||
+            Boolean(
+              bridge &&
+              codes.some(code =>
+                bridge.has(code)
+              )
+            );
+
+          const forward =
+            down(keys.D, 'keyd') ||
+            down(cursors.right, 'arrowright') ||
+            Number(this.mobileAxis) > 0.18;
+
+          const backward =
+            down(keys.A, 'keya') ||
+            down(cursors.left, 'arrowleft') ||
+            Number(this.mobileAxis) < -0.18;
+
+          const axis =
+            (forward ? 1 : 0) -
+            (backward ? 1 : 0);
+
+          if (axis !== 0) {
+            const dt =
+              Number.isFinite(Number(delta)) &&
+              Number(delta) > 0
+                ? Math.min(Number(delta), 50)
+                : 16.67;
+
+            applyHorizontalMovementFeel({
+              player,
+              axis,
+              delta: dt,
+              maxSpeed:
+                MOVEMENT_FEEL.maxRunSpeed,
+            });
+
+            /*
+             * Never let a competing layer leave an active movement input
+             * visually/physically at zero speed.
+             */
+            const velocityX =
+              Number(body.velocity?.x) || 0;
+
+            if (
+              Math.abs(velocityX) < 90
+            ) {
+              body.setVelocityX(
+                axis * 145
+              );
+            }
+          }
+        } catch (error) {
+          console.warn(
+            '[Relay Runtime Authority] movement restore skipped:',
+            error
+          );
+        }
+
+        return result;
+      };
+
+    RunnerScene.prototype.__relayRuntimeAuthorityV3MovementWrapped = true;
   }
 
   const originalCreate =
