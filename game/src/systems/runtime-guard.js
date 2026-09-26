@@ -54,6 +54,12 @@ window.addEventListener('unhandledrejection', event => report(event.reason));
 const start = document.getElementById('start');
 let bootWatchdog = null;
 
+/* RunnerScene readiness is reported by the canonical runtime bridge. */
+window.addEventListener('relay:runner-scene-ready', () => {
+  window.strideReady = true;
+});
+
+
 start?.addEventListener('click', () => {
   if (bootWatchdog) {
     clearInterval(bootWatchdog);
@@ -63,7 +69,7 @@ start?.addEventListener('click', () => {
   const started = Date.now();
 
   bootWatchdog = setInterval(() => {
-    if (window.strideReady || !document.getElementById('start')) {
+    if (window.strideReady || window.__relayRunnerScene || !document.getElementById('start')) {
       clearInterval(bootWatchdog);
       bootWatchdog = null;
       return;
