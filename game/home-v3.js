@@ -536,6 +536,62 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
      OPTIONS
      ========================================================= */
 
+  /* =========================================================
+     REAL HOME ROUTES
+     GitHub Pages-safe: use hash routes instead of fake buttons
+     or unsupported deep URLs. Existing panels remain the owners.
+     ========================================================= */
+
+  const HOME_ROUTES = Object.freeze({
+    home: '#home',
+    play: '#play',
+    faq: '#faq',
+    update: '#update',
+    tutorial: '#tutorial',
+    options: '#options',
+    daily: '#daily',
+    contracts: '#contracts',
+  });
+
+  const setHomeRoute = (route) => {
+    const hash = HOME_ROUTES[route] || HOME_ROUTES.home;
+
+    if (window.location.hash !== hash) {
+      history.pushState({ relayHomeRoute: route }, '', hash);
+    }
+  };
+
+  const syncHomeRoute = () => {
+    const route = window.location.hash.replace(/^#/, '') || 'home';
+
+    switch (route) {
+      case 'faq':
+        openFaq();
+        break;
+      case 'update':
+        openUpdate();
+        break;
+      case 'tutorial':
+        openHomeTutorial();
+        break;
+      case 'options':
+        openOptions();
+        break;
+      case 'daily':
+        document.querySelector('#pauseMenu [data-tab="challenges"]')?.click?.();
+        break;
+      case 'contracts':
+        window.relayOpenContracts?.();
+        break;
+      case 'play':
+        clickExisting('#start');
+        break;
+      default:
+        closeHomePanels();
+        break;
+    }
+  };
+
   const openOptions = () => {
     try {
       if (typeof window.relayUnifiedCinematicUI?.openOptions === 'function') {
@@ -3372,6 +3428,8 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
 
     startHomeTypewriter();
     syncHomeProfile();
+    window.addEventListener('hashchange', syncHomeRoute, { passive: true });
+    syncHomeRoute();
 
     /* =========================================================
        STABLE HOME BUTTON EVENTS
@@ -3389,6 +3447,7 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
       event.stopPropagation();
 
       const action = target.dataset.homeV4Action;
+      setHomeRoute(action);
 
       switch (action) {
         case 'faq':
@@ -3625,6 +3684,8 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
 
     forceStartVisible(start);
 
+    start?.addEventListener('click', () => setHomeRoute('play'), { passive: true });
+
     /*
      * Gameplay Start ownership intentionally lives in main.js.
      * Home only presents the button; it does not install a competing
@@ -3680,6 +3741,7 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
         }
 
         try {
+          setHomeRoute('play');
           HTMLElement.prototype.click.call(sourceContinue);
         } catch {}
       });
