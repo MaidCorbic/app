@@ -352,6 +352,12 @@
           splash
         );
 
+      if (image) {
+        const revealImage = () => splash.classList.add('is-image-ready');
+        if (image.complete && image.naturalWidth) revealImage();
+        else image.addEventListener('load', revealImage, { once: true });
+      }
+
 
       splash.style.setProperty(
         '--relay-image-brightness',
