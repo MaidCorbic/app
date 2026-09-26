@@ -3156,34 +3156,14 @@ const startGameplayFromHome = () => {
    * potentially heavier loader/gameplay work.
    */
   window.setTimeout(() => {
-    const loader = window.relayPlayDeploymentV1;
-
-    if (loader && typeof loader.show === 'function') {
-      void loader.show({
-        missionNumber: 1,
-
-        desktop: './assets/loadplay.jpg',
-
-        mobile: './assets/loadplaymobile.jpg',
-
-        skipRoute: true,
-
-        beforeRoute: async () => {
-          if (typeof window.relayLaunchGameplay === 'function') {
-            window.relayLaunchGameplay();
-            return;
-          }
-
-          game.scene.isPaused('runner') ? game.scene.resume('runner') : launch(0);
-        },
-      });
-
+    /* launch() owns the single deployment-loader -> RunnerScene handoff. */
+    if (game.scene.isPaused('runner')) {
+      game.scene.resume('runner');
       return;
     }
 
-    leaveHome(game.scene.isPaused('runner') ? () => game.scene.resume('runner') : () => launch(0));
-  }, 0);
-};
+    launch(0, false);
+  }, 0);};
 
 /*
  * The Home module creates #start after main.js has loaded.
