@@ -1299,14 +1299,27 @@ function launch(index = missionIndex, paused = false, runConfig = {}) {
   const deploymentLoader = window.relayPlayDeploymentV4;
 
   if (!paused && deploymentLoader && typeof deploymentLoader.show === 'function') {
-    void deploymentLoader.show({
-      missionNumber: index + 1,
-      skipRoute: true,
+    void deploymentLoader
+      .show({
+        missionNumber: index + 1,
+        skipRoute: true,
 
-      beforeRoute: async () => {
+        beforeRoute: async () => {
+          startRunnerScene();
+        },
+      })
+      .then((shown) => {
+        /*
+         * A loader failure must never strand the player on a blank Phaser
+         * surface. Start the scene directly as a last-resort recovery.
+         */
+        if (shown === false) {
+          startRunnerScene();
+        }
+      })
+      .catch(() => {
         startRunnerScene();
-      },
-    });
+      });
 
     return;
   }
@@ -3156,12 +3169,12 @@ const startGameplayFromHome = () => {
    * potentially heavier loader/gameplay work.
    */
   window.setTimeout(() => {
-    /* launch() owns the single deployment-loader -> RunnerScene handoff. */
-    if (game.scene.isPaused('runner')) {
-      game.scene.resume('runner');
-      return;
-    }
-
+    /*
+     * launch() owns the single deployment-loader -> RunnerScene handoff.
+     * Even when a prebooted scene is paused, keep this path unified so
+     * START RUN always shows the deployment artwork and then starts/restarts
+     * the real RunnerScene with the current mission data.
+     */
     launch(0, false);
   }, 0);};
 
@@ -3336,11 +3349,18 @@ applyRuntimeSettings();
 renderHomeProgress();
 
 /*
- * Do not preboot RunnerScene behind Home on initial load.
- * Starting the scene before the user enters gameplay can expose gameplay-only
- * overlays (including faction dialogue) over the Home screen and wastes work.
- * The canonical #start handoff starts the scene when gameplay is actually entered.
+ * Desktop preboot: preserve the proven RunnerScene initialization path while
+ * Home remains the visible presentation. Faction/runtime guards keep gameplay
+ * overlays hidden until the user actually enters gameplay.
+ *
+ * Touch devices intentionally defer this work to the real START RUN action
+ * to avoid extra startup cost on constrained devices.
  */
+const shouldDeferInitialRunnerPreboot = detectTouchDevice();
+
+if (!shouldDeferInitialRunnerPreboot) {
+  launch(0, true);
+}
 
 function openWorldMapSafe() {
   game.scene.stop('runner');
