@@ -366,6 +366,8 @@ export function installPlayerVisualV2(RunnerScene) {
     let wasAirborne = false;
     let landingPulse = 0;
 
+    const CHARACTER_SCALE = 1.35;
+
     const updateVisual = (delta = 16.67) => {
       if (!this.playerVisualV2?.root) return;
 
@@ -524,8 +526,8 @@ export function installPlayerVisualV2(RunnerScene) {
           : scaleX;
 
       root.setScale(
-        facingScaleX,
-        scaleY
+        facingScaleX * CHARACTER_SCALE,
+        scaleY * CHARACTER_SCALE
       );
 
       // ----------------------------------------------------------
