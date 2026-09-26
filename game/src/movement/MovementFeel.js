@@ -7,10 +7,10 @@ import Phaser from 'phaser';
  */
 export const MOVEMENT_FEEL = {
   maxRunSpeed: 475,
-  groundAcceleration: 4500,
-  airAcceleration: 6400,
-  turnAcceleration: 7000,
-  groundDeceleration: 3200,
+  groundAcceleration: 4200,
+  airAcceleration: 6000,
+  turnAcceleration: 6500,
+  groundDeceleration: 2800,
   airDeceleration: 700,
   coyoteMs: 150,
   jumpBufferMs: 145,
