@@ -438,7 +438,7 @@ export function installVagabondPlayerV1(RunnerScene) {
     // Character scale
     // --------------------------------------------------------
 
-    const baseScale = 0.72;
+    const baseScale = 0.90;
 
     sprite.setScale(baseScale);
 
