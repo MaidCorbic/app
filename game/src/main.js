@@ -1295,35 +1295,54 @@ function launch(index = missionIndex, paused = false, runConfig = {}) {
     }
   };
 
-  const deploymentLoader = window.relayPlayDeploymentV4;
+  /*
+   * DEPLOYMENT LOADER OWNER
+   *
+   * PLAY and CONTINUE must both use the exact same cinematic deployment
+   * loader. relay-ui-init.js is a separate module script and can finish
+   * loading a fraction later than main.js, so do not fall back immediately
+   * when the API is not present yet.
+   */
+  const runWithDeploymentLoader = (attempt = 0) => {
+    const deploymentLoader = window.relayPlayDeploymentV4;
 
-  if (!paused && deploymentLoader && typeof deploymentLoader.show === 'function') {
-    void deploymentLoader
-      .show({
-        missionNumber: index + 1,
-        skipRoute: true,
+    if (!paused && deploymentLoader && typeof deploymentLoader.show === 'function') {
+      void deploymentLoader
+        .show({
+          missionNumber: index + 1,
+          skipRoute: true,
 
-        beforeRoute: async () => {
+          beforeRoute: async () => {
+            startRunnerScene();
+          },
+        })
+        .then((shown) => {
+          if (shown === false) {
+            startRunnerScene();
+          }
+        })
+        .catch(() => {
           startRunnerScene();
-        },
-      })
-      .then((shown) => {
-        /*
-         * A loader failure must never strand the player on a blank Phaser
-         * surface. Start the scene directly as a last-resort recovery.
-         */
-        if (shown === false) {
-          startRunnerScene();
-        }
-      })
-      .catch(() => {
-        startRunnerScene();
-      });
+        });
 
-    return;
-  }
+      return true;
+    }
 
-  startRunnerScene();
+    /*
+     * Give the UI bootstrap a short window to register the loader before
+     * falling back to direct gameplay. This keeps the loader visible on both
+     * PLAY and CONTINUE without ever trapping the player.
+     */
+    if (!paused && attempt < 30) {
+      window.setTimeout(() => runWithDeploymentLoader(attempt + 1), 50);
+      return true;
+    }
+
+    startRunnerScene();
+    return false;
+  };
+
+  runWithDeploymentLoader();
 }
 
 function complete(signals, elapsedMs, runStats) {
