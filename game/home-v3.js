@@ -3674,7 +3674,19 @@ const gameplayMusicUrl = './assets/audio/music.mp3';
 
     forceStartVisible(start);
 
-    start?.addEventListener('click', () => setHomeRoute('play'), { passive: true });
+    start?.addEventListener('click', (event) => {
+      // Main gameplay must start from the real RunnerScene handoff.
+      // Do not rely on history.pushState/hashchange to launch gameplay:
+      // pushState does not emit a hashchange event.
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      setHomeRoute('play');
+
+      if (typeof window.relayLaunchGameplay === 'function') {
+        window.relayLaunchGameplay();
+      }
+    });
 
     /*
      * Gameplay Start ownership intentionally lives in main.js.
