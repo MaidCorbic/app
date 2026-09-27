@@ -101,7 +101,6 @@ let runScore = 0;
 let toastTimer;
 let activeRunId = 0;
 let runSettled = false;
-let nextMissionTimer = 0;
 
 // RunnerScene must never auto-start.
 // Phaser automatically starts the first scene in the initial scene config.
@@ -1371,34 +1370,6 @@ function complete(signals, elapsedMs, runStats) {
   $('nextMission').classList.toggle('hidden', !hasNext);
 
   $('finish').classList.remove('hidden');
-
-  /*
-   * Campaign progression:
-   * after a successful mission, automatically move to the next
-   * unlocked mission instead of leaving the player on the result
-   * screen. The result panel remains visible briefly so the run
-   * completion feedback is still readable.
-   */
-  if (hasNext) {
-    const completedIndex = missionIndex;
-    nextMissionTimer = window.setTimeout(() => {
-      nextMissionTimer = 0;
-
-      if (
-        missionIndex !== completedIndex ||
-        !$('finish') ||
-        $('finish').classList.contains('hidden')
-      ) {
-        return;
-      }
-
-      $('finish').classList.add('hidden');
-      $('levelUp')?.classList.add('hidden');
-      $('abilityUnlock')?.classList.add('hidden');
-
-      launch(completedIndex + 1);
-    }, 1400);
-  }
 
   if (state.lastRankUp) {
     $('levelUpRank').textContent = state.lastRankUp.name;
@@ -3226,13 +3197,23 @@ $('returnTitle').onclick = () => {
   launch(0, true);
 };
 
-$('again').onclick = () => {
+const returnToMissionMap = (overlayId) => {
   stopAudioBed();
   window.relayGameplayAudio?.play?.();
 
-  $('finish').classList.add('hidden');
+  $(overlayId)?.classList.add('hidden');
+  $('finish')?.classList.add('hidden');
+  $('levelUp')?.classList.add('hidden');
+  $('abilityUnlock')?.classList.add('hidden');
 
-  launch(missionIndex);
+  // Retry/replay always returns to the canonical World Map first.
+  // The player then selects the same mission again, which restores
+  // the normal deployment artwork + tactical route briefing.
+  openWorldMapSafe();
+};
+
+$('again').onclick = () => {
+  returnToMissionMap('finish');
 };
 
 $('nextMission').onclick = () => {
@@ -3240,7 +3221,6 @@ $('nextMission').onclick = () => {
   window.relayGameplayAudio?.play?.();
 
   $('finish').classList.add('hidden');
-
   launch(missionIndex + 1);
 };
 
@@ -3253,12 +3233,7 @@ $('finishTitle').onclick = () => {
 };
 
 $('retry').onclick = () => {
-  stopAudioBed();
-  window.relayGameplayAudio?.play?.();
-
-  $('gameOver').classList.add('hidden');
-
-  launch(missionIndex);
+  returnToMissionMap('gameOver');
 };
 
 $('failTitle').onclick = () => {
