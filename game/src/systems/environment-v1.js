@@ -39,8 +39,10 @@ export function installEnvironment(RunnerScene) {
       previousCreate.apply(this, args);
     }
 
-    const width = 1280;
-    const height = 720;
+    const viewportWidth = 1280;
+    const viewportHeight = 720;
+    const worldWidth = Math.max(viewportWidth, Number(this.worldWidth) || viewportWidth);
+    const backgroundWidth = worldWidth + viewportWidth;
 
     this.environmentLayers = [];
 
@@ -68,12 +70,12 @@ export function installEnvironment(RunnerScene) {
       }
 
       const image = this.add
-        .image(width / 2, height / 2, config.key)
+        .image(worldWidth / 2, viewportHeight / 2, config.key)
         .setDepth(config.depth)
         .setScrollFactor(config.scrollFactor);
 
-      const scaleX = width / image.width;
-      const scaleY = height / image.height;
+      const scaleX = backgroundWidth / image.width;
+      const scaleY = viewportHeight / image.height;
       const scale = Math.max(scaleX, scaleY);
 
       image.setScale(scale);
