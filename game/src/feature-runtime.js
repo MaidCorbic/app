@@ -15,7 +15,8 @@ import './systems/gameplay-ui-v7-legacy-feedback-hide.js';
 import { RunnerScene as RelayRunnerScene } from './scenes/RunnerScene.js';
 
 import { installMissionFeatureGating } from './systems/mission-feature-gating-v1.js';
-import { installEnemyRuntime } from './systems/enemy-runtime-v2.js';
+
+import { installStrikerEnemyVisual } from './systems/striker-enemy-visual-v1.js';
 import { installEnemyLayout } from './systems/enemy-layout-v2.js';
 import { installEnemyAIAwareness } from './systems/enemy-ai-awareness-v1.js';
 import { installGhostRun } from './systems/ghost-run-v1.js';
@@ -88,6 +89,7 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
 
   installEnemyLayout(RunnerScene);
   installEnemyRuntime(RunnerScene);
+  installStrikerEnemyVisual(RunnerScene);
   installEnemyAIAwareness(RunnerScene);
 
   installGhostRun(RunnerScene);

@@ -146,9 +146,7 @@ function frameKey(folder, index) {
 function folderAssets(folder) {
   return Object.entries(VAGABOND_ASSETS)
     .filter(([path]) => path.includes(`/vagabond-final/${folder}/`))
-    .sort(([a], [b]) =>
-      a.localeCompare(b, undefined, { numeric: true }),
-    );
+    .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }));
 }
 
 function frameUrl(folder, index) {
@@ -438,7 +436,7 @@ export function installVagabondPlayerV1(RunnerScene) {
     // Character scale
     // --------------------------------------------------------
 
-    const baseScale = 0.90;
+    const baseScale = 1.2;
 
     sprite.setScale(baseScale);
 
