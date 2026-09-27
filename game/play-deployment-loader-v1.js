@@ -265,6 +265,38 @@
         gameAsset('loadplay4mobile.jpg'),
     },
 
+    5: {
+      title:
+        'GHOST',
+
+      titleAccent:
+        'LINE',
+
+      subtitle:
+        'FINAL RELAY',
+
+      location:
+        'GHOST DISTRICT 05',
+
+      objective:
+        'REACH EXTRACTION',
+
+      threat:
+        'EXTREME',
+
+      route:
+        'GHOSTLINE NETWORK',
+
+      scanLabel:
+        'FINAL ROUTE IDENTIFIED',
+
+      desktop:
+        gameAsset('loadmobile5.jpg'),
+
+      mobile:
+        gameAsset('loadplay5mobile.jpg'),
+    },
+
   });
 
 
