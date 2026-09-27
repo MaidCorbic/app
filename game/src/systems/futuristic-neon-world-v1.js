@@ -1504,18 +1504,7 @@ function createFuturisticEnvironment() {
      CITY
      ---------------------------------------------------------- */
 
-  createFarCity(this, width, skin);
-
-  createOrbitalStructure(this, width, skin);
-
-  createMegaTowers(this, width, skin);
-
-  createSkyRails(this, width, skin);
-
-  createSkyBridges(this, width, skin);
-
-  createHolographicSigns(this, width, skin);
-
+  // Warped City owns the background/environment visuals.
   /* ----------------------------------------------------------
      GROUND
      ---------------------------------------------------------- */

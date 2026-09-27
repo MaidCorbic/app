@@ -123,11 +123,11 @@ import './audio-feedback-v2.js';
 
 import './adaptive-music-v1.js';
 
-import './src/systems/world-variation-game-feel-v1.js';
+// Warped City environment owns the world presentation.
 
 import './src/systems/barrier-gameplay-visual-cleanup-v1.js';
 
-import './src/systems/city-backdrop-replacement-v1.js';
+// Warped City environment owns the background.
 
 import './src/systems/dynamic-world-mechanics-v2.js';
 
