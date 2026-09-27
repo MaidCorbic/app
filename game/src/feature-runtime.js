@@ -52,7 +52,6 @@ import '../gameplay-keyboard-hud-v1.js';
  */
 
 import { installCharacterStateReactions } from './systems/character-state-reactions-v1.js';
-import { installEnvironment } from './systems/environment-v1.js';
 import { installVagabondPlayerV1 } from './systems/vagabond-player-v1.js';
 import { installEnemyDiscovery } from './systems/enemy-discovery-v1.js';
 import { installEnemyDialogue } from './systems/enemy-dialogue-v1.js';
@@ -91,7 +90,6 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
 
   installEnemyLayout(RunnerScene);
   installEnemyRuntime(RunnerScene);
-  installEnvironment(RunnerScene);
   installStrikerEnemyVisual(RunnerScene);
   installEnemyAIAwareness(RunnerScene);
 
