@@ -3051,11 +3051,4 @@ if (
 
   window.addEventListener('beforeunload', clearCompletionSequence, { once: true });
 
-  window.addEventListener(
-    'relay:mission-performance-complete',
-    () =>
-      window.requestAnimationFrame(
-        buildMissionResults
-      )
-  );
 }
