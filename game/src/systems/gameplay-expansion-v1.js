@@ -3,7 +3,19 @@ import Phaser from 'phaser';
 // Gameplay Expansion V1
 // Additive world/traversal pack. Existing RunnerScene systems remain authoritative.
 const NS = '__relayGameplayExpansionV1';
-const FEATURE_LAYOUT = {'first-delivery':['zipline','throwable'],'dead-drop':['crane','throwable','handoff'],blackout:['laserSweep','soundPressure','movingRelay'],pursuit:['train','traffic','zipline'],'signal-storm':['movingRelay','laserSweep','soundPressure'],'corporate-lockdown':['train','traffic','elevator','handoff'],'final-relay':['train','crane','elevator','movingRelay','soundPressure']};
+const FEATURE_LAYOUT = Object.freeze({
+  // PR 1055 keeps RunnerScene on the clean core route.
+  // The old expansion spawned trains, traffic, cranes, ziplines and other
+  // floating route props above the playable segment, so no V1 world props
+  // are activated here. Core RunnerScene gameplay remains authoritative.
+  'first-delivery': [],
+  'dead-drop': [],
+  blackout: [],
+  pursuit: [],
+  'signal-storm': [],
+  'corporate-lockdown': [],
+  'final-relay': [],
+});
 const FEATURE_KEYS=['train','crane','traffic','zipline','throwable','laserSweep','movingRelay','handoff','elevator','soundPressure'];
 const DEFAULT_FEATURES=Object.fromEntries(FEATURE_KEYS.map(key=>[key,false]));
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v)); const lerp=(a,b,t)=>a+(b-a)*t;
