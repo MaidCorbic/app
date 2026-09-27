@@ -1873,7 +1873,82 @@ export class RunnerScene extends Phaser.Scene {
   }
 
   createEnvironment() {
-    // Warped City owns the visual environment. Keep this hook for gameplay compatibility.
+    // CORE BACKGROUND V2
+    // RunnerScene owns one clean, authored background. No trains, cars, NPCs,
+    // route props, legacy city systems, or secondary map layers are spawned here.
+    const width = Number(this.worldWidth) || 5200;
+    const centerX = width / 2;
+
+    const sky = this.add
+      .rectangle(centerX, 390, width + 900, 780, 0x050b14, 1)
+      .setDepth(-30)
+      .setScrollFactor(1);
+
+    const upperGlow = this.add
+      .rectangle(centerX, 245, width + 900, 330, 0x081827, 1)
+      .setDepth(-29)
+      .setScrollFactor(1);
+
+    const horizonGlow = this.add
+      .rectangle(centerX, 475, width + 900, 190, 0x0b2430, 0.72)
+      .setDepth(-28)
+      .setScrollFactor(1);
+
+    const stars = this.add.graphics().setDepth(-27).setScrollFactor(1);
+    stars.fillStyle(0x8defff, 0.55);
+    for (let x = 60; x < width; x += 145) {
+      const y = 90 + ((x * 37) % 210);
+      const r = 1 + ((x / 145) % 2) * 0.5;
+      stars.fillCircle(x, y, r);
+    }
+
+    const skyline = this.add.graphics().setDepth(-26).setScrollFactor(1);
+    const buildings = [
+      [0, 515, 210, 185], [235, 455, 150, 245], [420, 500, 260, 200],
+      [720, 425, 175, 275], [940, 485, 240, 215], [1230, 400, 190, 300],
+      [1460, 470, 280, 230], [1780, 420, 155, 280], [1980, 485, 230, 215],
+      [2250, 440, 210, 260], [2510, 390, 170, 310], [2725, 470, 300, 230],
+      [3080, 415, 190, 285], [3310, 480, 250, 220], [3610, 395, 175, 305],
+      [3830, 455, 300, 245], [4170, 410, 190, 290], [4410, 475, 260, 225],
+      [4710, 385, 175, 315], [4930, 450, 270, 250],
+    ];
+
+    buildings.forEach(([x, y, w, h], index) => {
+      skyline.fillStyle(index % 3 === 0 ? 0x101f31 : 0x0c1827, 1);
+      skyline.fillRect(x, y, w, h);
+      skyline.lineStyle(2, 0x31566b, 0.48);
+      skyline.strokeRect(x, y, w, h);
+
+      skyline.fillStyle(0x63dcf2, 0.22);
+      for (let wx = x + 18; wx < x + w - 12; wx += 30) {
+        for (let wy = y + 28; wy < y + h - 18; wy += 38) {
+          if (((Math.floor(wx) + Math.floor(wy) + index) % 5) < 2) {
+            skyline.fillRect(wx, wy, 8, 3);
+          }
+        }
+      }
+    });
+
+    const horizon = this.add.graphics().setDepth(-25).setScrollFactor(1);
+    horizon.lineStyle(3, 0x59d9ef, 0.24);
+    horizon.lineBetween(0, 515, width, 515);
+    horizon.lineStyle(1, 0x8defff, 0.16);
+    horizon.lineBetween(0, 535, width, 535);
+
+    const atmospheric = this.add
+      .rectangle(centerX, 360, width + 900, 420, 0x0b1b2a, 0.08)
+      .setDepth(-24)
+      .setScrollFactor(0.65);
+
+    this.coreBackgroundObjects = [
+      sky,
+      upperGlow,
+      horizonGlow,
+      stars,
+      skyline,
+      horizon,
+      atmospheric,
+    ];
   }
   findNextSafePlatform(e) {
     if (!e?.active || !this.platforms) return null;
