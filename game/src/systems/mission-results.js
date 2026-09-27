@@ -18,7 +18,6 @@ const style = `
   overflow:auto !important;
   animation:missionResultsIn .34s ease-out both !important;
 }
-`;
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
