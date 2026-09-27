@@ -68,6 +68,8 @@ const txt = (
     .setOrigin(0.5);
 
 
+const ENABLE_V10_PERCEPTION_WORLD = false;
+
 export function installGameplayExpansionV10(RunnerScene) {
 
   if (
@@ -78,6 +80,13 @@ export function installGameplayExpansionV10(RunnerScene) {
   }
 
   RunnerScene.prototype.__v10Installed = true;
+
+  // Keep the V10 module available for compatibility/tests, but do not spawn
+  // its mirror/symbol/memory/photo world props in the clean RunnerScene.
+  // PR 1055 uses the core gameplay segment only.
+  if (!ENABLE_V10_PERCEPTION_WORLD) {
+    return;
+  }
 
   const originalCreate =
     RunnerScene.prototype.create;
