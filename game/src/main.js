@@ -3169,6 +3169,39 @@ const bindCanonicalStartButton = () => {
 
 bindCanonicalStartButton();
 
+/*
+ * HOME ACTION FALLBACK
+ *
+ * Some Home UI modules render/rebind #start and #continue after main.js
+ * has loaded. Keep one delegated capture handler as the final authority so
+ * PLAY and CONTINUE cannot be swallowed by a later Home overlay handler.
+ */
+document.addEventListener(
+  'click',
+  (event) => {
+    const startButton = event.target.closest?.('#start');
+    const continueButton = event.target.closest?.('#continue');
+
+    if (startButton instanceof HTMLElement) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      void startGameplayFromHome();
+      return;
+    }
+
+    if (continueButton instanceof HTMLElement) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      stopAudioBed();
+      window.relayGameplayAudio?.play?.();
+
+      leaveHome(() => launch(nextMissionIndex()));
+    }
+  },
+  true,
+);
+
 const introStartObserver = new MutationObserver(bindCanonicalStartButton);
 
 const introForStartObserver = $('intro');
