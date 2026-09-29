@@ -143,6 +143,17 @@ const game = new Phaser.Game({
 
 game.scene.add('runner', RunnerScene, false);
 
+game.events.on('create', (scene) => {
+  if (scene?.scene?.key !== 'runner') return;
+
+  window.__relayRunnerScene = scene;
+  window.dispatchEvent(
+    new CustomEvent('relay:runner-scene-ready', {
+      detail: { scene, runId: scene.runId ?? null },
+    }),
+  );
+});
+
 /*
  * The route briefing reads the runner through window scope.
  * Keep one authoritative Phaser instance and one scene reference;
