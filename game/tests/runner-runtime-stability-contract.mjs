@@ -8,17 +8,23 @@ const runner = read('src/scenes/RunnerScene.js');
 const featureDock = read('gameplay-feature-dock-v1.js');
 const vite = read('vite.config.mjs');
 
-const landingDecls = [...runner.matchAll(/\b(?:const|let|var)\s+hardLanding\b/g)];
-assert.ok(landingDecls.length >= 2, 'RunnerScene hardLanding contract fixture is missing');
-
-const outerLandingTdz = /const hardLanding\s*=\s*this\.landingTimer\s*>\s*0\s*&&\s*this\.fallSpeed\s*>\s*260\s*;/.test(runner);
-assert.equal(outerLandingTdz, true, 'RunnerScene source should expose the regression signature so the build guard can normalize it');
-
-assert.match(vite, /relayRunnerRuntimeStability\(\)/);
+// RunnerScene owns its runtime source directly. No Vite source mutation is allowed
+// to manufacture/fix hardLanding declarations after the fact.
+assert.doesNotMatch(
+  runner,
+  /const hardLanding\s*=\s*this\.landingTimer\s*>\s*0\s*&&\s*this\.fallSpeed\s*>\s*260\s*;/,
+  'RunnerScene must not contain the obsolete hardLanding TDZ fixture',
+);
+assert.doesNotMatch(
+  vite,
+  /relayRunnerRuntimeStability/,
+  'Vite must not rewrite RunnerScene hardLanding state',
+);
 assert.match(vite, /relayExplicitRunnerSceneBinding\(\)/);
-assert.match(vite, /let hardLanding = false;/);
-assert.match(vite, /hardLanding = this\.fallSpeed > 260;/);
-assert.match(vite, /duplicate hardLanding declaration remains/);
+
+// The canonical scene keeps landing state explicit for lifecycle reset.
+assert.match(runner, /\(this\.landingTimer = 0\)/);
+assert.match(runner, /\(this\.lastHardLanding = !1\)/);
 
 assert.match(featureDock, /import \{ RunnerScene as RelayFeatureDockScene \}/);
 assert.match(featureDock, /const RunnerScene = RelayFeatureDockScene;/);
