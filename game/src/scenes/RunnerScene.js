@@ -12655,18 +12655,23 @@ export class RunnerScene extends Phaser.Scene {
                       n && (p = l < 0 ? 32 : 72),
                       d && (p = 112));
                     let cinematicTargetZoom = 1;
-                    (this.firstPersonCamera &&
-                      ((y = a >= 0 ? -12 : 12),
-                      (p = 8),
-                      (cinematicTargetZoom = 1.16),
-                      this.player?.active && this.player.setAlpha(0)),
-                      this.motionReduced ||
-                        (e > 520
-                          ? (cinematicTargetZoom = 1.035)
-                          : e > 420
-                            ? (cinematicTargetZoom = 1.026)
-                            : e > 330 && (cinematicTargetZoom = 1.014)),
-                      n && !this.motionReduced && (cinematicTargetZoom = 1.045));
+                    if (this.firstPersonCamera) {
+                      y = a >= 0 ? -12 : 12;
+                      p = 8;
+                      cinematicTargetZoom = 1.16;
+                      this.player?.active && this.player.setAlpha(0);
+                    } else if (!this.motionReduced) {
+                      if (e > 520) {
+                        cinematicTargetZoom = 1.035;
+                      } else if (e > 420) {
+                        cinematicTargetZoom = 1.026;
+                      } else if (e > 330) {
+                        cinematicTargetZoom = 1.014;
+                      }
+                      if (n) {
+                        cinematicTargetZoom = 1.045;
+                      }
+                    }
                     const u = Math.abs(a - this.cameraVelocityX),
                       m = Math.min(1, t * (n ? 0.009 : u > 180 ? 0.008 : 0.0055));
                     this.cameraVelocityX = a;
