@@ -3177,31 +3177,11 @@ const startGameplayFromHome = () => {
   }, 0);};
 
 /*
- * The Home module creates #start after main.js has loaded.
- * Bind the canonical owner directly to that button once it exists.
- * This avoids document-level capture ordering between legacy modules.
- */
-const bindCanonicalStartButton = () => {
-  const startButton = $('start');
-
-  if (!(startButton instanceof HTMLElement) || startButton.dataset.relayMainStartBound === '1') {
-    return;
-  }
-
-  startButton.dataset.relayMainStartBound = '1';
-  startButton.onclick = () => {
-    void startGameplayFromHome();
-  };
-};
-
-bindCanonicalStartButton();
-
-/*
- * HOME ACTION FALLBACK
+ * HOME ACTION OWNER
  *
- * Some Home UI modules render/rebind #start and #continue after main.js
- * has loaded. Keep one delegated capture handler as the final authority so
- * PLAY and CONTINUE cannot be swallowed by a later Home overlay handler.
+ * One delegated handler owns START and CONTINUE. There is deliberately no
+ * direct onclick + delegated fallback pair and no MutationObserver rebinding.
+ * This prevents duplicate launches when Home modules rerender the buttons.
  */
 document.addEventListener(
   'click',
@@ -3228,24 +3208,6 @@ document.addEventListener(
   },
   true,
 );
-
-const introStartObserver = new MutationObserver(bindCanonicalStartButton);
-
-const introForStartObserver = $('intro');
-
-if (introForStartObserver) {
-  introStartObserver.observe(introForStartObserver, {
-    childList: true,
-    subtree: true,
-  });
-}
-
-$('continue').onclick = () => {
-  stopAudioBed();
-  window.relayGameplayAudio?.play?.();
-
-  leaveHome(() => launch(nextMissionIndex()));
-};
 
 $('pause').onclick = () => openMenu();
 
@@ -3682,5 +3644,3 @@ const hideLegacyToast = () => {
 };
 
 hideLegacyToast();
-
-window.setInterval(hideLegacyToast, 250);
