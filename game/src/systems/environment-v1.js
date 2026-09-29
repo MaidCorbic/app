@@ -68,5 +68,10 @@ export function installEnvironment(RunnerScene) {
     // Hide the synthetic fallback skyline when the authored environment artwork exists.
     this.coreBackgroundObjects?.forEach((object) => object?.destroy?.());
     this.coreBackgroundObjects = [];
+
+    this.events.once('shutdown', () => {
+      this.environmentLayers?.forEach((layer) => layer?.destroy?.());
+      this.environmentLayers = [];
+    });
   };
 }
