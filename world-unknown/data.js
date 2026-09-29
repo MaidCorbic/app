@@ -1,0 +1,11 @@
+window.WU={case:{id:"001",title:"The Hidden Capital",solution:"ba",clues:["Država se nalazi u Evropi.","Reljef je pretežno planinski.","Glavni grad leži u dolini i kroz njega protiče rijeka.","Država ima malu obalu na Jadranskom moru.","Glavni grad se zove Sarajevo."]},countries:[
+{id:"ba",name:"Bosna i Hercegovina",flag:"🇧🇦",continent:"Evropa",capital:"Sarajevo",terrain:"Planine i riječne doline",river:"Miljacka",coast:"Jadransko more",evidence:["europe","mountains","river","capital-valley","adriatic"]},
+{id:"si",name:"Slovenija",flag:"🇸🇮",continent:"Evropa",capital:"Ljubljana",terrain:"Alpe i krški predjeli",river:"Ljubljanica",coast:"Jadransko more",evidence:["europe","mountains","river","capital-valley","adriatic"]},
+{id:"at",name:"Austrija",flag:"🇦🇹",continent:"Evropa",capital:"Beč",terrain:"Alpe i nizije",river:"Dunav",coast:"Nema morsku obalu",evidence:["europe","mountains","river","capital-valley"]},
+{id:"hr",name:"Hrvatska",flag:"🇭🇷",continent:"Evropa",capital:"Zagreb",terrain:"Panonska nizija i Dinaridi",river:"Sava",coast:"Jadransko more",evidence:["europe","river","adriatic"]},
+{id:"ch",name:"Švicarska",flag:"🇨🇭",continent:"Evropa",capital:"Bern",terrain:"Alpe i visoravni",river:"Aare",coast:"Nema morsku obalu",evidence:["europe","mountains","river"]},
+{id:"me",name:"Crna Gora",flag:"🇲🇪",continent:"Evropa",capital:"Podgorica",terrain:"Dinaridi",river:"Morača",coast:"Jadransko more",evidence:["europe","mountains","river","adriatic"]},
+{id:"jp",name:"Japan",flag:"🇯🇵",continent:"Azija",capital:"Tokyo",terrain:"Planinski otoci",river:"Tone",coast:"Tihi okean",evidence:["mountains","river"]},
+{id:"eg",name:"Egipat",flag:"🇪🇬",continent:"Afrika",capital:"Kairo",terrain:"Pustinja i dolina Nila",river:"Nil",coast:"Sredozemno i Crveno more",evidence:["river"]},
+{id:"br",name:"Brazil",flag:"🇧🇷",continent:"Južna Amerika",capital:"Brasília",terrain:"Amazonski bazen i visoravni",river:"Amazon",coast:"Atlantski okean",evidence:["river"]},
+{id:"ca",name:"Kanada",flag:"🇨🇦",continent:"Sjeverna Amerika",capital:"Ottawa",terrain:"Planine, šume i tundra",river:"Ottawa",coast:"Atlantski, Tihi i Arktički okean",evidence:["mountains","river"]}]};
