@@ -1333,7 +1333,7 @@ function launch(index = missionIndex, paused = false, runConfig = {}) {
      * falling back to direct gameplay. This keeps the loader visible on both
      * PLAY and CONTINUE without ever trapping the player.
      */
-    if (!paused && attempt < 30) {
+    if (!paused && attempt < 10) {
       window.setTimeout(() => runWithDeploymentLoader(attempt + 1), 50);
       return true;
     }
