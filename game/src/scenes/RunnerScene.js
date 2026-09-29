@@ -12654,25 +12654,29 @@ export class RunnerScene extends Phaser.Scene {
                       c && ((y += a > 0 ? -18 : 18), (p = 42)),
                       n && (p = l < 0 ? 32 : 72),
                       d && (p = 112));
-                    let f = 1;
+                    let cinematicTargetZoom = 1;
                     (this.firstPersonCamera &&
                       ((y = a >= 0 ? -12 : 12),
                       (p = 8),
-                      (f = 1.16),
+                      (cinematicTargetZoom = 1.16),
                       this.player?.active && this.player.setAlpha(0)),
                       this.motionReduced ||
-                        (e > 520 ? (f = 1.035) : e > 420 ? (f = 1.026) : e > 330 && (f = 1.014)),
-                      n && !this.motionReduced && (f = 1.045));
+                        (e > 520
+                          ? (cinematicTargetZoom = 1.035)
+                          : e > 420
+                            ? (cinematicTargetZoom = 1.026)
+                            : e > 330 && (cinematicTargetZoom = 1.014)),
+                      n && !this.motionReduced && (cinematicTargetZoom = 1.045));
                     const u = Math.abs(a - this.cameraVelocityX),
                       m = Math.min(1, t * (n ? 0.009 : u > 180 ? 0.008 : 0.0055));
                     this.cameraVelocityX = a;
                     const g = Math.min(1, t * (d ? 0.012 : 0.008)),
-                      S =
-                        1 +
-                        (this.motionReduced
+                      speedZoom =
+                        this.motionReduced
                           ? 0
-                          : 0.045 * Phaser.Math.Clamp(e / RUNNER_TUNING.maxRunSpeed, 0, 1)),
-                      w = Math.max(f, S),
+                          : 0.045 * Phaser.Math.Clamp(e / RUNNER_TUNING.maxRunSpeed, 0, 1),
+                      speedZoomTarget = 1 + speedZoom,
+                      w = Math.max(cinematicTargetZoom, speedZoomTarget),
                       x = Math.min(1, t * (n ? 0.012 : 0.0055));
                     ((this.cameraOffsetX = Phaser.Math.Linear(this.cameraOffsetX, y, m)),
                       (this.cameraOffsetY = Phaser.Math.Linear(this.cameraOffsetY, p, g)),
