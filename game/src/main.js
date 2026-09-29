@@ -1214,9 +1214,6 @@ function launch(index = missionIndex, paused = false, runConfig = {}) {
     return;
   }
 
-  window.clearTimeout(nextMissionTimer);
-  nextMissionTimer = 0;
-
   missionIndex = index;
 
   const mission = missions[index];
