@@ -11869,9 +11869,14 @@ export class RunnerScene extends Phaser.Scene {
                 h && this.wetSurfaceActive
                   ? 0.16 * RUNNER_TUNING.groundDeceleration
                   : RUNNER_TUNING.groundDeceleration,
-              C = (l ? 1 : 0) - (a ? 1 : 0),
+              mobileAxis = Phaser.Math.Clamp(Number(this.mobileAxis) || 0, -1, 1),
+              keyboardAxis = (l ? 1 : 0) - (a ? 1 : 0),
+              C =
+                Math.abs(mobileAxis) > 0.18
+                  ? mobileAxis
+                  : keyboardAxis,
               R = (r ? -1 : 0) + (o ? 1 : 0),
-              k = r || o;
+              k = r || o || Math.abs(mobileAxis) > 0.18;
             if (0 !== C)
               (i.setAccelerationX(C * S),
                 i.setDragX(this.wetSurfaceActive ? m : 0),
