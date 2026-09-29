@@ -1,71 +1,66 @@
-// Mobile controls bridge V2.
-// The existing joystick DOM/design stays untouched. This module only owns
-// the movement signal on touch devices and writes directly to RunnerScene.
+// Mobile controls bridge V3.
+// Lifecycle bridge only. The single-owner module owns the joystick DOM/input.
+// This module releases the RunnerScene when a new scene instance is created.
+// No polling, synthetic movement, or secondary input ownership.
 (() => {
   'use strict';
 
-  if (window.__relayMobileControlsBridgeV2) return;
-  window.__relayMobileControlsBridgeV2 = true;
+  if (window.__relayMobileControlsBridgeV3) return;
+  window.__relayMobileControlsBridgeV3 = true;
 
-  const isTouch = () => navigator.maxTouchPoints > 0
+  const isTouch = () =>
+    navigator.maxTouchPoints > 0
     || 'ontouchstart' in window
     || window.matchMedia?.('(pointer: coarse)').matches
     || window.matchMedia?.('(hover: none)').matches;
 
   if (!isTouch()) return;
 
-  const getRunner = () => window.__relayRunnerScene || null;
+  let lastRunId = null;
 
+  const releaseMobileGameplay = (scene) => {
+    if (!scene) return;
 
-  const releaseMobileGameplay = scene => {
-    if (!scene || scene.__relayMobileGameplayReleased) return;
+    const runId = scene.runId ?? null;
+    if (runId === lastRunId && scene.__relayMobileGameplayReleased) return;
+
+    lastRunId = runId;
     scene.__relayMobileGameplayReleased = true;
 
-    // Mobile must enter real gameplay, not remain in a presentation-only
-    // state. Desktop/web is never touched by this path.
     if (scene.cinematicActive) scene.cinematicActive = false;
     scene.finished = false;
     scene.respawning = false;
+    scene.mobileAxis = 0;
+    scene.mobileDirection = null;
 
-    try { scene.physics?.world?.resume?.(); } catch { /* Phaser may already be running */ }
-
-    const body = scene.player?.body;
-    if (body) {
-      body.enable = true;
-      body.moves = true;
-      body.allowGravity = true;
-      body.checkCollision.none = false;
-      body.setAcceleration?.(0, 0);
-      body.setVelocityX?.(0);
+    try {
+      scene.physics?.world?.resume?.();
+    } catch {
+      // Phaser may already be running.
     }
 
-    scene.mobileDirection = null;
+    const body = scene.player?.body;
+    if (!body) return;
+
+    body.enable = true;
+    body.moves = true;
+    body.allowGravity = true;
+    body.checkCollision.none = false;
+    body.setAcceleration?.(0, 0);
+    body.setVelocityX?.(0);
   };
 
-  const boot = () => {
-    let lastRunId = null;
-
-    const tick = () => {
-      const scene = getRunner();
-
-      if (scene?.player?.body && scene.runId !== lastRunId) {
-        lastRunId = scene.runId;
-        releaseMobileGameplay(scene);
-        scene.mobileDirection = null;
-      }
-
-      window.setTimeout(tick, 250);
-    };
-
-    tick();
+  const attach = (scene) => {
+    if (!scene) return;
+    window.__relayRunnerScene = scene;
+    releaseMobileGameplay(scene);
   };
-  // main.js and core-stability.js are loaded before this module.
-  // The single-owner mobile input module owns the joystick DOM/input.
-  // This bridge waits one task before starting its gameplay-state lifecycle
-  // check so the RunnerScene is fully initialized first.
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => window.setTimeout(boot, 0), { once: true });
-  } else {
-    window.setTimeout(boot, 0);
+
+  window.addEventListener('relay:runner-scene-ready', (event) => {
+    attach(event.detail?.scene || window.__relayRunnerScene);
+  });
+
+  if (window.__relayRunnerScene) {
+    attach(window.__relayRunnerScene);
   }
 })();

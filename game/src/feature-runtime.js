@@ -14,6 +14,7 @@ import './systems/gameplay-ui-v7-legacy-feedback-hide.js';
 
 import { RunnerScene as RelayRunnerScene } from './scenes/RunnerScene.js';
 
+import { installEnvironment } from './systems/environment-v1.js';
 import { installMissionFeatureGating } from './systems/mission-feature-gating-v1.js';
 import { installEnemyRuntime } from './systems/enemy-runtime-v2.js';
 
@@ -87,6 +88,7 @@ if (!RunnerScene.prototype.__relayFeatureRuntimeInstalled) {
   RunnerScene.prototype.__relayFeatureRuntimeInstalled = true;
 
   installMissionFeatureGating(RunnerScene);
+  installEnvironment(RunnerScene);
 
   installEnemyLayout(RunnerScene);
   installEnemyRuntime(RunnerScene);

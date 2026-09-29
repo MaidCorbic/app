@@ -61,52 +61,6 @@ function relayLegacyAssetAliases() {
   };
 }
 
-function relayRunnerRuntimeStability() {
-  return {
-    name: 'relay-runner-runtime-stability',
-    enforce: 'post',
-    transform(code, id) {
-      if (!id.endsWith('/src/scenes/RunnerScene.js')) return null;
-
-      const hasHardLandingTdzSignature =
-        /const hardLanding\s*=\s*this\.fallSpeed\s*>\s*260\s*;/.test(code) &&
-        /this\.game\.events\.emit\(\s*['"]feedback['"]\s*,\s*hardLanding/.test(code) &&
-        /const hardLanding\s*=\s*this\.landingTimer\s*>\s*0\s*&&\s*this\.fallSpeed\s*>\s*260\s*;/.test(
-          code,
-        );
-
-      if (!hasHardLandingTdzSignature) return null;
-
-      let transformed = code;
-      transformed = transformed.replace(
-        /\n\s*const hardLanding\s*=\s*this\.landingTimer\s*>\s*0\s*&&\s*this\.fallSpeed\s*>\s*260\s*;/,
-        '',
-      );
-      transformed = transformed.replace(
-        /(if\s*\(\s*onGround\s*&&\s*!this\.wasGrounded\s*&&\s*this\.fallSpeed\s*>\s*80\s*\)\s*\{)/,
-        'let hardLanding = false;\n\n$1',
-      );
-      transformed = transformed.replace(
-        /\bconst hardLanding\s*=\s*this\.fallSpeed\s*>\s*260\s*;/,
-        'hardLanding = this.fallSpeed > 260;',
-      );
-
-      if (!/let hardLanding\s*=\s*false;/.test(transformed)) {
-        throw new Error(
-          `relay-runner-runtime-stability: hardLanding declaration was not normalized in ${id}`,
-        );
-      }
-      if (/const hardLanding\s*=\s*this\.landingTimer\s*>\s*0/.test(transformed)) {
-        throw new Error(
-          `relay-runner-runtime-stability: duplicate hardLanding declaration remains in ${id}`,
-        );
-      }
-
-      return { code: transformed, map: null };
-    },
-  };
-}
-
 function relayExplicitRunnerSceneBinding() {
   let projectRoot = process.cwd();
   return {
@@ -148,7 +102,6 @@ export default defineConfig({
   },
   plugins: [
     relayLegacyAssetAliases(),
-    relayRunnerRuntimeStability(),
     relayExplicitRunnerSceneBinding(),
   ],
   build: {

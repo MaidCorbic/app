@@ -3,6 +3,22 @@ import { loadState } from '../state.js';
 const RESULT_CLASS = 'mission-results-panel';
 
 const style = `
+/* Completion sequence: results card first, then the full Mission Complete panel. */
+#finish.mission-results-stage .outcome > *:not(.mission-results-panel){
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+#finish.mission-results-stage .mission-results-panel{
+  position:relative !important;
+  z-index:90 !important;
+  width:min(680px,calc(100vw - 24px)) !important;
+  max-height:calc(100dvh - 36px) !important;
+  margin:auto !important;
+  overflow:auto !important;
+  animation:missionResultsIn .34s ease-out both !important;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
 /* ============================================================
@@ -2934,6 +2950,43 @@ export function buildMissionResults() {
 }
 
 /* ============================================================
+   COMPLETION SEQUENCE
+   ============================================================ */
+
+let completionSequenceTimer = null;
+const COMPLETION_CARD_MS = 2300;
+
+function clearCompletionSequence() {
+  if (completionSequenceTimer !== null) {
+    window.clearTimeout(completionSequenceTimer);
+    completionSequenceTimer = null;
+  }
+
+  document
+    .getElementById('finish')
+    ?.classList.remove('mission-results-stage');
+}
+
+function startCompletionSequence() {
+  const finish = document.getElementById('finish');
+  if (!finish || finish.classList.contains('hidden')) return;
+
+  const panel = finish.querySelector('.mission-results-panel');
+  if (!panel) return;
+
+  clearCompletionSequence();
+  finish.classList.add('mission-results-stage');
+
+  completionSequenceTimer = window.setTimeout(() => {
+    completionSequenceTimer = null;
+
+    if (!finish.classList.contains('hidden')) {
+      finish.classList.remove('mission-results-stage');
+    }
+  }, COMPLETION_CARD_MS);
+}
+
+/* ============================================================
    REFRESH
    ============================================================ */
 
@@ -2979,16 +3032,23 @@ if (
   window.addEventListener(
     'relay:mission-complete',
     () =>
-      window.requestAnimationFrame(
-        buildMissionResults
-      )
+      window.requestAnimationFrame(() => {
+        buildMissionResults();
+        startCompletionSequence();
+      })
   );
 
   window.addEventListener(
     'relay:mission-performance-complete',
-    () =>
-      window.requestAnimationFrame(
-        buildMissionResults
-      )
+    () => {
+      if (document.getElementById('finish')?.classList.contains('hidden')) return;
+      window.requestAnimationFrame(() => {
+        buildMissionResults();
+        startCompletionSequence();
+      });
+    }
   );
+
+  window.addEventListener('beforeunload', clearCompletionSequence, { once: true });
+
 }

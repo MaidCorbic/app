@@ -4817,3 +4817,134 @@ justify-content:center;
     gap:12px;
   }
 }
+
+/* ============================================================
+   FINAL MOBILE GAMEPLAY HUD CONTRACT
+   One HUD state, same DOM as desktop.
+   Landscape touch keeps MISSION + SIGNALS on the left.
+   XP + pause remain on the right.
+   ============================================================ */
+@media (max-width: 880px) and (orientation: landscape) and (pointer: coarse) {
+  #game #play .hud {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto !important;
+    align-items: stretch !important;
+    gap: 6px 8px !important;
+    margin: max(7px, env(safe-area-inset-top)) 8px 0 !important;
+    padding: 0 !important;
+    width: calc(100% - 16px) !important;
+  }
+
+  #game #play .hud-route,
+  #game #play .hud-progress {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+  }
+
+  #game #play .hud-route {
+    grid-column: 1;
+    grid-row: 1;
+    align-items: center !important;
+  }
+
+  #game #play .hud-progress {
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center !important;
+  }
+
+  #game #play .hud-actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: stretch !important;
+    display: flex !important;
+    align-items: center !important;
+    margin-left: 0 !important;
+    pointer-events: auto !important;
+  }
+
+  #game #play .hud-xp {
+    display: none !important;
+  }
+
+  #game #play .hud-actions > #pause {
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    pointer-events: auto !important;
+  }
+
+  #game #play .mobile-mission-label {
+    display: inline !important;
+  }
+
+  #game #play .hud-route #district,
+  #game #play .hud-route #objective,
+  #game #play .hud-progress #signalCount,
+  #game #play .hud-progress small {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  #game #play .hud-route #objective {
+    max-width: 42vw !important;
+  }
+
+  #game #play .hud-progress > div {
+    flex: 1 1 auto !important;
+    min-width: 70px !important;
+  }
+}
+
+@media (max-width: 430px) and (orientation: portrait) and (pointer: coarse) {
+  #game #play .hud {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 5px 7px !important;
+    margin: max(6px, env(safe-area-inset-top)) 7px 0 !important;
+    padding: 0 !important;
+    width: calc(100% - 14px) !important;
+  }
+
+  #game #play .hud-route,
+  #game #play .hud-progress {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  #game #play .hud-route { grid-column: 1; grid-row: 1; }
+  #game #play .hud-progress { grid-column: 1; grid-row: 2; }
+
+  #game #play .hud-actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: flex !important;
+    align-items: center !important;
+    margin-left: 0 !important;
+  }
+
+  #game #play .hud-xp { display: none !important; }
+
+  #game #play .hud-actions > #pause {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+  }
+}

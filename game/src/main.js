@@ -101,7 +101,6 @@ let runScore = 0;
 let toastTimer;
 let activeRunId = 0;
 let runSettled = false;
-let nextMissionTimer = 0;
 
 // RunnerScene must never auto-start.
 // Phaser automatically starts the first scene in the initial scene config.
@@ -143,6 +142,17 @@ const game = new Phaser.Game({
 });
 
 game.scene.add('runner', RunnerScene, false);
+
+game.events.on('create', (scene) => {
+  if (scene?.scene?.key !== 'runner') return;
+
+  window.__relayRunnerScene = scene;
+  window.dispatchEvent(
+    new CustomEvent('relay:runner-scene-ready', {
+      detail: { scene, runId: scene.runId ?? null },
+    }),
+  );
+});
 
 /*
  * The route briefing reads the runner through window scope.
@@ -1215,9 +1225,6 @@ function launch(index = missionIndex, paused = false, runConfig = {}) {
     return;
   }
 
-  window.clearTimeout(nextMissionTimer);
-  nextMissionTimer = 0;
-
   missionIndex = index;
 
   const mission = missions[index];
@@ -1296,35 +1303,54 @@ function launch(index = missionIndex, paused = false, runConfig = {}) {
     }
   };
 
-  const deploymentLoader = window.relayPlayDeploymentV4;
+  /*
+   * DEPLOYMENT LOADER OWNER
+   *
+   * PLAY and CONTINUE must both use the exact same cinematic deployment
+   * loader. relay-ui-init.js is a separate module script and can finish
+   * loading a fraction later than main.js, so do not fall back immediately
+   * when the API is not present yet.
+   */
+  const runWithDeploymentLoader = (attempt = 0) => {
+    const deploymentLoader = window.relayPlayDeploymentV4;
 
-  if (!paused && deploymentLoader && typeof deploymentLoader.show === 'function') {
-    void deploymentLoader
-      .show({
-        missionNumber: index + 1,
-        skipRoute: true,
+    if (!paused && deploymentLoader && typeof deploymentLoader.show === 'function') {
+      void deploymentLoader
+        .show({
+          missionNumber: index + 1,
+          skipRoute: true,
 
-        beforeRoute: async () => {
+          beforeRoute: async () => {
+            startRunnerScene();
+          },
+        })
+        .then((shown) => {
+          if (shown === false) {
+            startRunnerScene();
+          }
+        })
+        .catch(() => {
           startRunnerScene();
-        },
-      })
-      .then((shown) => {
-        /*
-         * A loader failure must never strand the player on a blank Phaser
-         * surface. Start the scene directly as a last-resort recovery.
-         */
-        if (shown === false) {
-          startRunnerScene();
-        }
-      })
-      .catch(() => {
-        startRunnerScene();
-      });
+        });
 
-    return;
-  }
+      return true;
+    }
 
-  startRunnerScene();
+    /*
+     * Give the UI bootstrap a short window to register the loader before
+     * falling back to direct gameplay. This keeps the loader visible on both
+     * PLAY and CONTINUE without ever trapping the player.
+     */
+    if (!paused && attempt < 10) {
+      window.setTimeout(() => runWithDeploymentLoader(attempt + 1), 50);
+      return true;
+    }
+
+    startRunnerScene();
+    return false;
+  };
+
+  runWithDeploymentLoader();
 }
 
 function complete(signals, elapsedMs, runStats) {
@@ -1371,34 +1397,6 @@ function complete(signals, elapsedMs, runStats) {
   $('nextMission').classList.toggle('hidden', !hasNext);
 
   $('finish').classList.remove('hidden');
-
-  /*
-   * Campaign progression:
-   * after a successful mission, automatically move to the next
-   * unlocked mission instead of leaving the player on the result
-   * screen. The result panel remains visible briefly so the run
-   * completion feedback is still readable.
-   */
-  if (hasNext) {
-    const completedIndex = missionIndex;
-    nextMissionTimer = window.setTimeout(() => {
-      nextMissionTimer = 0;
-
-      if (
-        missionIndex !== completedIndex ||
-        !$('finish') ||
-        $('finish').classList.contains('hidden')
-      ) {
-        return;
-      }
-
-      $('finish').classList.add('hidden');
-      $('levelUp')?.classList.add('hidden');
-      $('abilityUnlock')?.classList.add('hidden');
-
-      launch(completedIndex + 1);
-    }, 1400);
-  }
 
   if (state.lastRankUp) {
     $('levelUpRank').textContent = state.lastRankUp.name;
@@ -3179,42 +3177,37 @@ const startGameplayFromHome = () => {
   }, 0);};
 
 /*
- * The Home module creates #start after main.js has loaded.
- * Bind the canonical owner directly to that button once it exists.
- * This avoids document-level capture ordering between legacy modules.
+ * HOME ACTION OWNER
+ *
+ * One delegated handler owns START and CONTINUE. There is deliberately no
+ * direct onclick + delegated fallback pair and no MutationObserver rebinding.
+ * This prevents duplicate launches when Home modules rerender the buttons.
  */
-const bindCanonicalStartButton = () => {
-  const startButton = $('start');
+document.addEventListener(
+  'click',
+  (event) => {
+    const startButton = event.target.closest?.('#start');
+    const continueButton = event.target.closest?.('#continue');
 
-  if (!(startButton instanceof HTMLElement) || startButton.dataset.relayMainStartBound === '1') {
-    return;
-  }
+    if (startButton instanceof HTMLElement) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      void startGameplayFromHome();
+      return;
+    }
 
-  startButton.dataset.relayMainStartBound = '1';
-  startButton.onclick = () => {
-    void startGameplayFromHome();
-  };
-};
+    if (continueButton instanceof HTMLElement) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
 
-bindCanonicalStartButton();
+      stopAudioBed();
+      window.relayGameplayAudio?.play?.();
 
-const introStartObserver = new MutationObserver(bindCanonicalStartButton);
-
-const introForStartObserver = $('intro');
-
-if (introForStartObserver) {
-  introStartObserver.observe(introForStartObserver, {
-    childList: true,
-    subtree: true,
-  });
-}
-
-$('continue').onclick = () => {
-  stopAudioBed();
-  window.relayGameplayAudio?.play?.();
-
-  leaveHome(() => launch(nextMissionIndex()));
-};
+      leaveHome(() => launch(nextMissionIndex()));
+    }
+  },
+  true,
+);
 
 $('pause').onclick = () => openMenu();
 
@@ -3226,13 +3219,23 @@ $('returnTitle').onclick = () => {
   launch(0, true);
 };
 
-$('again').onclick = () => {
+const returnToMissionMap = (overlayId) => {
   stopAudioBed();
   window.relayGameplayAudio?.play?.();
 
-  $('finish').classList.add('hidden');
+  $(overlayId)?.classList.add('hidden');
+  $('finish')?.classList.add('hidden');
+  $('levelUp')?.classList.add('hidden');
+  $('abilityUnlock')?.classList.add('hidden');
 
-  launch(missionIndex);
+  // Retry/replay always returns to the canonical World Map first.
+  // The player then selects the same mission again, which restores
+  // the normal deployment artwork + tactical route briefing.
+  openWorldMapSafe();
+};
+
+$('again').onclick = () => {
+  returnToMissionMap('finish');
 };
 
 $('nextMission').onclick = () => {
@@ -3240,7 +3243,6 @@ $('nextMission').onclick = () => {
   window.relayGameplayAudio?.play?.();
 
   $('finish').classList.add('hidden');
-
   launch(missionIndex + 1);
 };
 
@@ -3253,12 +3255,7 @@ $('finishTitle').onclick = () => {
 };
 
 $('retry').onclick = () => {
-  stopAudioBed();
-  window.relayGameplayAudio?.play?.();
-
-  $('gameOver').classList.add('hidden');
-
-  launch(missionIndex);
+  returnToMissionMap('gameOver');
 };
 
 $('failTitle').onclick = () => {
@@ -3647,5 +3644,3 @@ const hideLegacyToast = () => {
 };
 
 hideLegacyToast();
-
-window.setInterval(hideLegacyToast, 250);
