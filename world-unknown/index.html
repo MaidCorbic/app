@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="World Unknown — mystery investigation game">
+<title>World Unknown</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <div><span class="kicker">FIELD INVESTIGATION SYSTEM</span><h1>WORLD UNKNOWN</h1></div>
+  <div class="stats"><span>CASE</span><b id="caseNo">001</b><span>•</span><span>SOLVED</span><b id="solved">0/1</b></div>
+</header>
+
+<section class="hero">
+  <div><span class="case-label">CASE #001</span><h2>The Hidden Capital</h2>
+  <p>Jedna država odgovara svim tragovima. Istražuj, skupljaj dokaze i predaj konačnu istragu.</p></div>
+  <div class="attempts"><small>ATTEMPTS</small><strong id="attempts">3</strong></div>
+</section>
+
+<main class="layout">
+<section class="panel">
+  <div class="panel-title"><div><span class="kicker">WORLD MAP</span><h3>Izaberi teritoriju</h3></div><span id="status" class="pill">ACTIVE CASE</span></div>
+  <div id="countries" class="countries"></div>
+</section>
+
+<aside class="right">
+<section class="panel clues"><span class="kicker">ACTIVE CLUES</span><div id="clues"></div></section>
+<section class="panel evidence"><div class="panel-title"><div><span class="kicker">EVIDENCE BOARD</span><h3>Dokazi</h3></div><b id="evidenceCount">0/5</b></div><div id="evidenceList"></div></section>
+<section class="panel file" id="file"><span class="kicker">COUNTRY FILE</span><h3>Odaberi državu</h3><p>Klikni na teritoriju da otvoriš dosje.</p></section>
+</aside>
+</main>
+
+<div id="result" class="result hidden"></div>
+</div>
+<script src="./data.js"></script><script src="./game.js"></script>
+</body>
+</html>
