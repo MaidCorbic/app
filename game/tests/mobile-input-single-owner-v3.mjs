@@ -7,6 +7,8 @@ const read = path => readFile(fileURLToPath(new URL(path, root)), 'utf8');
 const main = await read('src/main.js');
 const index = await read('index.html');
 const owner = await read('src/systems/mobile-input-single-owner-v1.js');
+const bridge = await read('src/systems/mobile-controls-bridge-v2.js');
+const runner = await read('src/scenes/RunnerScene.js');
 
 assert.equal((index.match(/src\/systems\/mobile-input-single-owner-v1\.js/g) || []).length, 1, 'single-owner module must be loaded exactly once');
 assert.ok(
@@ -35,4 +37,7 @@ assert.match(owner, /single-owner-v9/);
 assert.match(owner, /if \(pointerId !== null\) return;/, 'joystick must reject a second pointer while one is active');
 assert.match(owner, /const end = event => \{/);
 assert.match(owner, /if \(event && event\.pointerId !== pointerId\) return;/, 'joystick release must only clear its owning pointer');
+assert.doesNotMatch(bridge, /setTimeout\(tick, 250\)/, 'mobile lifecycle bridge must not poll RunnerScene');
+assert.match(bridge, /relay:runner-scene-ready/);
+assert.match(runner, /Number\(this\.mobileAxis\)/, 'RunnerScene must consume the analog mobile axis');
 console.log('Mobile input single-owner V9 contract: PASS');
