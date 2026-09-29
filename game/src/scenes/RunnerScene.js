@@ -12681,8 +12681,9 @@ export class RunnerScene extends Phaser.Scene {
                           ? 0
                           : 0.045 * Phaser.Math.Clamp(e / RUNNER_TUNING.maxRunSpeed, 0, 1);
                     const speedZoomTarget = 1 + speedZoom;
-                    const w = Math.max(cinematicTargetZoom, speedZoomTarget);
-                      x = Math.min(1, t * (n ? 0.012 : 0.0055));
+                    const targetZoom = Math.max(cinematicTargetZoom, speedZoomTarget);
+                    const w = targetZoom;
+                    const x = Math.min(1, t * (n ? 0.012 : 0.0055));
                     ((this.cameraOffsetX = Phaser.Math.Linear(this.cameraOffsetX, y, m)),
                       (this.cameraOffsetY = Phaser.Math.Linear(this.cameraOffsetY, p, g)),
                       (this.cameraZoom = Phaser.Math.Linear(this.cameraZoom, w, x)),
